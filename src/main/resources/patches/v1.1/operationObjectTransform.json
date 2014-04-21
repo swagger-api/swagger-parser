@@ -1,0 +1,4 @@
+[
+    { "op": "move", "from": "/errorResponses", "path": "/responseMessages" },
+    { "op": "move", "from": "/httpMethod", "path": "/method"}
+]

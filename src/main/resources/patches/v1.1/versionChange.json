@@ -1,0 +1,3 @@
+[
+    { "op": "replace", "path": "/swaggerVersion", "value": "1.2" }
+]
