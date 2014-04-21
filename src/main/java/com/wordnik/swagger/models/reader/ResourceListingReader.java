@@ -3,6 +3,7 @@ package com.wordnik.swagger.models.reader;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.models.apideclaration.ApiDeclaration;
+import com.wordnik.swagger.models.resourcelisting.ApiListingReference;
 import com.wordnik.swagger.models.resourcelisting.ResourceListing;
 
 import java.io.IOException;
