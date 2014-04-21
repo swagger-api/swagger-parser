@@ -1,0 +1,12 @@
+[
+    {
+        "original": {
+            "foo": [],
+            "baz": {}
+        },
+        "migrated": {
+            "bar": [],
+            "baz": {}
+        }
+    }
+]

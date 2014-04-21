@@ -96,12 +96,14 @@ public final class SwaggerMigrators
             @Nonnull
             @Override
             public JsonNode migrate(@Nonnull final JsonNode input)
+                throws SwaggerTransformException
             {
                 Objects.requireNonNull(input);
                 if (!input.has(from))
                     return input;
                 if (input.has(to))
-                    throw new UncheckedSwaggerTransformException();
+                    throw new SwaggerTransformException("object already has a "
+                        + "member named \"" + to + '"');
                 final ObjectNode ret = input.deepCopy();
                 ret.put(to, ret.get(from));
                 ret.remove(from);

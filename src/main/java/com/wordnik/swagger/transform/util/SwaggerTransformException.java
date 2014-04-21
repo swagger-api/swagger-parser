@@ -7,6 +7,11 @@ public final class SwaggerTransformException
     {
     }
 
+    public SwaggerTransformException(final String message)
+    {
+        super(message);
+    }
+
     public SwaggerTransformException(final Throwable cause)
     {
         super(cause);
