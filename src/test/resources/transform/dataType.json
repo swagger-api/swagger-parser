@@ -7,5 +7,26 @@
             "type": "integer",
             "format": "int32"
         }
+    },
+    {
+        "original": {
+            "dataType": "SomeModel",
+            "other": [ "field", "here" ]
+        },
+        "migrated": {
+            "$ref": "SomeModel",
+            "other": [ "field", "here" ]
+        }
+    },
+    {
+        "original": {
+            "dataType": "Set",
+            "foo": null
+        },
+        "migrated": {
+            "type": "array",
+            "uniqueItems": true,
+            "foo": null
+        }
     }
 ]
