@@ -1,0 +1,11 @@
+[
+    {
+        "original": {
+            "dataType": "int"
+        },
+        "migrated": {
+            "type": "integer",
+            "format": "int32"
+        }
+    }
+]
