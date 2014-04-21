@@ -27,7 +27,21 @@ public final class ApiObjectMigrator
         final MutableJsonTree tree = new MutableJsonTree(input);
 
         tree.applyMigrator(renameMember("httpMethod", "method"));
+        tree.applyMigrator(renameMember("errorResponses", "responseMessages"));
 
+        /*
+         * Migrate response messages, if any
+         */
+        JsonPointer ptr = JsonPointer.of("responseMessages");
+
+        if (!ptr.path(tree.getBaseNode()).isMissingNode()) {
+            tree.setPointer(ptr);
+            tree.applyMigratorToElements(renameMember("reason", "message"));
+        }
+
+        /*
+         * Migrate parameters
+         */
         tree.setPointer(PARAMETERS);
         tree.applyMigratorToElements(parametersMigrator);
 
