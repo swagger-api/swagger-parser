@@ -10,6 +10,33 @@
     },
     {
         "original": {
+            "dataType": "long"
+        },
+        "migrated": {
+            "type": "integer",
+            "format": "int64"
+        }
+    },
+    {
+        "original": {
+            "dataType": "float"
+        },
+        "migrated": {
+            "type": "number",
+            "format": "float"
+        }
+    },
+    {
+        "original": {
+            "dataType": "double"
+        },
+        "migrated": {
+            "type": "number",
+            "format": "double"
+        }
+    },
+    {
+        "original": {
             "dataType": "SomeModel",
             "other": [ "field", "here" ]
         },
@@ -27,6 +54,48 @@
             "type": "array",
             "uniqueItems": true,
             "foo": null
+        }
+    },
+    {
+        "original": {
+            "dataType": "Array"
+        },
+        "migrated": {
+            "type": "array"
+        }
+    },
+    {
+        "original": {
+            "dataType": "List"
+        },
+        "migrated": {
+            "type": "array"
+        }
+    },
+    {
+        "original": {
+            "dataType": "string"
+        },
+        "migrated": {
+            "type": "string"
+        }
+    },
+    {
+        "original": {
+            "dataType": "byte"
+        },
+        "migrated": {
+            "type": "string",
+            "format": "byte"
+        }
+    },
+    {
+        "original": {
+            "dataType": "Date"
+        },
+        "migrated": {
+            "type": "string",
+            "format": "date-time"
         }
     }
 ]
