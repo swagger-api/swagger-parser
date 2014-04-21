@@ -9,7 +9,7 @@
   <name>swagger-parser</name>
 
   <build>
-    <sourceDirectory>src/main/java</sourceDirectory>
+    <!--sourceDirectory>src/main/java</sourceDirectory-->
     <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
