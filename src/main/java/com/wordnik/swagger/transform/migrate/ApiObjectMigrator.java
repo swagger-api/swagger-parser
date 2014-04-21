@@ -9,7 +9,10 @@ import javax.annotation.Nonnull;
 
 import static com.wordnik.swagger.transform.util.SwaggerMigrators.*;
 
-public final class OperationMigrator
+/**
+ * Migrator for one element of an {@code apis} array
+ */
+public final class ApiObjectMigrator
     implements SwaggerMigrator
 {
     private static final JsonPointer PARAMETERS = JsonPointer.of("parameters");

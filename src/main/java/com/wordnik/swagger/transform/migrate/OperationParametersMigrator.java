@@ -5,6 +5,9 @@ import com.wordnik.swagger.transform.util.SwaggerTransformException;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Migrator for one parameter object or an operation object
+ */
 public final class OperationParametersMigrator
     implements SwaggerMigrator
 {

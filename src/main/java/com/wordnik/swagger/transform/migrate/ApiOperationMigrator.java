@@ -8,12 +8,12 @@ import com.wordnik.swagger.transform.util.SwaggerTransformException;
 import javax.annotation.Nonnull;
 
 /**
- * API declaration, JSON Path: "/apis", all elements
+ * Migrator for the {@code operations} arrau of an API object
  */
 public final class ApiOperationMigrator
     implements SwaggerMigrator
 {
-    private final SwaggerMigrator migrator = new OperationMigrator();
+    private final SwaggerMigrator migrator = new ApiObjectMigrator();
 
     @Nonnull
     @Override

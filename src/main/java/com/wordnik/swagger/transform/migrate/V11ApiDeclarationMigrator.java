@@ -14,7 +14,7 @@ import java.io.IOException;
 import static com.wordnik.swagger.transform.util.SwaggerMigrators.*;
 
 /**
- * API declaration, JSON Pointer: ""
+ * Migrator for a complete 1.1 API declaration
  */
 public final class V11ApiDeclarationMigrator
     implements SwaggerMigrator

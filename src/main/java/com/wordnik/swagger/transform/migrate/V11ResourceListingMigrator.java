@@ -9,6 +9,9 @@ import java.util.Objects;
 
 import static com.wordnik.swagger.transform.util.SwaggerMigrators.*;
 
+/**
+ * Migrator for a complete 1.1 resource listing
+ */
 public final class V11ResourceListingMigrator
     implements SwaggerMigrator
 {
