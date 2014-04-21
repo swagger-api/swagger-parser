@@ -15,7 +15,6 @@ import static com.wordnik.swagger.transform.util.SwaggerMigrators.*;
 public final class ApiObjectMigrator
     implements SwaggerMigrator
 {
-    private static final JsonPointer PARAMETERS = JsonPointer.of("parameters");
     private final SwaggerMigrator parametersMigrator
         = new OperationParametersMigrator();
 
@@ -42,7 +41,8 @@ public final class ApiObjectMigrator
         /*
          * Migrate parameters
          */
-        tree.setPointer(PARAMETERS);
+        ptr = JsonPointer.of("parameters");
+        tree.setPointer(ptr);
         tree.applyMigratorToElements(parametersMigrator);
 
         return tree.getBaseNode();
