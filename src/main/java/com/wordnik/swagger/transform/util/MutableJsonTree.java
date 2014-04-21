@@ -24,6 +24,10 @@ import static com.wordnik.swagger.transform.util.SwaggerMigrators.*;
  * JsonNode#deepCopy()}, but after that all nodes returned by {@link
  * #getCurrentNode()} are mutable. Changes you make to the returned node
  * therefore <strong>will</strong> be reflected in the result.</p>
+ *
+ * <p>While you can do that, it is advised that you use {@link SwaggerMigrator}s
+ * instead and make use of the {@link #applyMigrator(SwaggerMigrator)} and
+ * {@link #applyMigratorToElements(SwaggerMigrator)} methods.</p>
  */
 @ParametersAreNonnullByDefault
 public final class MutableJsonTree
@@ -83,6 +87,14 @@ public final class MutableJsonTree
             "base node has no element at pointer " + currentPointer);
     }
 
+    /**
+     * Return the base node
+     *
+     * <p>The "base node" here means the (potentially) altered copy of the node
+     * supplied as the constructor argument.</p>
+     *
+     * @return the base node
+     */
     public JsonNode getBaseNode()
     {
         return baseNode;
@@ -98,12 +110,32 @@ public final class MutableJsonTree
         return currentNode;
     }
 
+    /**
+     * Apply a JSON Patch to the current node
+     *
+     * <p>This will turn the patch into a {@link SwaggerMigrator} using {@link
+     * SwaggerMigrators#fromPatch(JsonPatch)} and call {@link
+     * #applyMigrator(SwaggerMigrator)}.</p>
+     *
+     * @param patch the JSON Patch to apply
+     * @throws SwaggerTransformException same as {@link
+     * #applyMigrator(SwaggerMigrator)}
+     */
     public void applyPatch(final JsonPatch patch)
         throws SwaggerTransformException
     {
         applyMigrator(fromPatch(patch));
     }
 
+    /**
+     * Apply a migrator to the node at the current pointer
+     *
+     * <p>It is assumed here that the current node is a JSON Object.</p>
+     *
+     * @param migrator the migrator to apply
+     * @throws SwaggerTransformException current node is not an object, or the
+     * migrator failed to apply
+     */
     public void applyMigrator(final SwaggerMigrator migrator)
         throws SwaggerTransformException
     {
@@ -125,6 +157,18 @@ public final class MutableJsonTree
 
     }
 
+    /**
+     * Apply a migrator to all elements of the array at the current pointer
+     *
+     * <p>Note that if the migrator fails to apply to at least one element, the
+     * original array is left untouched; its elements are replaced if and only
+     * if the migrator applies successfully to <strong>all</strong> elements.
+     * </p>
+     *
+     * @param migrator the migrator to apply
+     * @throws SwaggerTransformException current node is not a JSON Array, or
+     * migrator failed to apply to at least one array element
+     */
     public void applyMigratorToElements(final SwaggerMigrator migrator)
         throws SwaggerTransformException
     {
@@ -139,6 +183,17 @@ public final class MutableJsonTree
         array.removeAll().addAll(transformed);
     }
 
+    /**
+     * Apply a JSON Patch to all elements of a JSON Array
+     *
+     * <p>This will wrap the patch into a {@link SwaggerMigrator} using {@link
+     * SwaggerMigrators#fromPatch(JsonPatch)} and call {@link
+     * #applyMigratorToElements(SwaggerMigrator)}.</p>
+     *
+     * @param patch the JSON Patch to apply
+     * @throws SwaggerTransformException same as {@link
+     * #applyMigratorToElements(SwaggerMigrator)}
+     */
     public void applyPatchToElements(final JsonPatch patch)
         throws SwaggerTransformException
     {
