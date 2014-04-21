@@ -1,4 +1,4 @@
-package com.github.fge.swagger.util;
+package com.wordnik.swagger.transform.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

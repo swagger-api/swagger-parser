@@ -1,4 +1,4 @@
-package com.github.fge.swagger.util;
+package com.wordnik.swagger.transform.util;
 
 public final class UncheckedSwaggerTransformException
     extends RuntimeException

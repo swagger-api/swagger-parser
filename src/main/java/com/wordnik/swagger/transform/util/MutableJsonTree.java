@@ -1,18 +1,18 @@
-package com.github.fge.swagger.util;
+package com.wordnik.swagger.transform.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.swagger.migrate.SwaggerMigrator;
+import com.wordnik.swagger.transform.migrate.SwaggerMigrator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 
-import static com.github.fge.swagger.util.SwaggerMigrators.*;
+import static com.wordnik.swagger.transform.util.SwaggerMigrators.*;
 
 /**
  * A mutable JSON tree with traversal capabilities

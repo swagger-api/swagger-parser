@@ -1,13 +1,13 @@
-package com.github.fge.swagger.migrate;
+package com.wordnik.swagger.transform.migrate;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.swagger.util.MutableJsonTree;
-import com.github.fge.swagger.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.MutableJsonTree;
+import com.wordnik.swagger.transform.util.SwaggerTransformException;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import static com.github.fge.swagger.util.SwaggerMigrators.*;
+import static com.wordnik.swagger.transform.util.SwaggerMigrators.*;
 
 public final class V11ResourceListingMigrator
     implements SwaggerMigrator

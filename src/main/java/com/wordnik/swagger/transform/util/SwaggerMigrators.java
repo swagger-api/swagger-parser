@@ -1,4 +1,4 @@
-package com.github.fge.swagger.util;
+package com.wordnik.swagger.transform.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,7 +7,7 @@ import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import com.github.fge.swagger.migrate.SwaggerMigrator;
+import com.wordnik.swagger.transform.migrate.SwaggerMigrator;
 import com.google.common.collect.ImmutableSet;
 
 import javax.annotation.Nonnull;

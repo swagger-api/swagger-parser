@@ -1,12 +1,12 @@
-package com.github.fge.swagger.migrate;
+package com.wordnik.swagger.transform.migrate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.swagger.util.SwaggerMigrators;
-import com.github.fge.swagger.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrators;
+import com.wordnik.swagger.transform.util.SwaggerTransformException;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

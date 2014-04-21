@@ -1,4 +1,4 @@
-package com.github.fge.swagger.util;
+package com.wordnik.swagger.transform.util;
 
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
 import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
