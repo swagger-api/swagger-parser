@@ -174,8 +174,8 @@ public final class SwaggerMigrators
                 if (node.isMissingNode())
                     continue;
                 if (node.isContainerNode())
-                    throw new UncheckedSwaggerTransformException(
-                        "operation does not apply to container nodes");
+                    throw new SwaggerTransformException("operation does not "
+                        + "apply to JSON arrays or objects");
                 if (!node.isTextual())
                     ret.put(memberName, node.asText());
             }
