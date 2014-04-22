@@ -118,11 +118,11 @@ public final class MutableJsonTree
      * #applyMigrator(SwaggerMigrator)}.</p>
      *
      * @param patch the JSON Patch to apply
-     * @throws SwaggerTransformException same as {@link
+     * @throws SwaggerMigrationException same as {@link
      * #applyMigrator(SwaggerMigrator)}
      */
     public void applyPatch(final JsonPatch patch)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         applyMigrator(fromPatch(patch));
     }
@@ -133,15 +133,15 @@ public final class MutableJsonTree
      * <p>It is assumed here that the current node is a JSON Object.</p>
      *
      * @param migrator the migrator to apply
-     * @throws SwaggerTransformException current node is not an object, or the
+     * @throws SwaggerMigrationException current node is not an object, or the
      * migrator failed to apply
      */
     public void applyMigrator(final SwaggerMigrator migrator)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         final JsonPointer parent = currentPointer.parent();
         if (!parent.get(baseNode).isObject())
-            throw new SwaggerTransformException();
+            throw new SwaggerMigrationException();
         final ObjectNode parentNode = (ObjectNode) parent.get(baseNode);
 
         final JsonNode patched = migrator.migrate(currentNode);
@@ -166,14 +166,14 @@ public final class MutableJsonTree
      * </p>
      *
      * @param migrator the migrator to apply
-     * @throws SwaggerTransformException current node is not a JSON Array, or
+     * @throws SwaggerMigrationException current node is not a JSON Array, or
      * migrator failed to apply to at least one array element
      */
     public void applyMigratorToElements(final SwaggerMigrator migrator)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         if (!currentNode.isArray())
-            throw new SwaggerTransformException();
+            throw new SwaggerMigrationException();
 
         final ArrayNode array = (ArrayNode) currentNode;
         final ArrayNode transformed = array.arrayNode();
@@ -191,11 +191,11 @@ public final class MutableJsonTree
      * #applyMigratorToElements(SwaggerMigrator)}.</p>
      *
      * @param patch the JSON Patch to apply
-     * @throws SwaggerTransformException same as {@link
+     * @throws SwaggerMigrationException same as {@link
      * #applyMigratorToElements(SwaggerMigrator)}
      */
     public void applyPatchToElements(final JsonPatch patch)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         applyMigratorToElements(fromPatch(patch));
     }

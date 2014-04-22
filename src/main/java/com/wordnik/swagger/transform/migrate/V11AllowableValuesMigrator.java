@@ -6,7 +6,7 @@ import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.wordnik.swagger.transform.util.SwaggerMigrators;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public final class V11AllowableValuesMigrator
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         Objects.requireNonNull(input);
         if (!input.has("allowableValues"))
@@ -73,7 +73,7 @@ public final class V11AllowableValuesMigrator
         final String valueType = JsonPointer.of("allowableValues", "valueType")
             .get(input).textValue();
         if (!"LIST".equals(valueType))
-            throw new SwaggerTransformException();
+            throw new SwaggerMigrationException();
         return SwaggerMigrators.fromPatch(PATCH).migrate(input);
     }
 }

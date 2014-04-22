@@ -62,13 +62,13 @@ public final class SwaggerMigrators
             @Nonnull
             @Override
             public JsonNode migrate(@Nonnull final JsonNode input)
-                throws SwaggerTransformException
+                throws SwaggerMigrationException
             {
                 Objects.requireNonNull(input);
                 try {
                     return patch.apply(input);
                 } catch (JsonPatchException e) {
-                    throw new SwaggerTransformException(e);
+                    throw new SwaggerMigrationException(e);
                 }
             }
         };
@@ -96,13 +96,13 @@ public final class SwaggerMigrators
             @Nonnull
             @Override
             public JsonNode migrate(@Nonnull final JsonNode input)
-                throws SwaggerTransformException
+                throws SwaggerMigrationException
             {
                 Objects.requireNonNull(input);
                 if (!input.has(from))
                     return input;
                 if (input.has(to))
-                    throw new SwaggerTransformException("object already has a "
+                    throw new SwaggerMigrationException("object already has a "
                         + "member named \"" + to + '"');
                 final ObjectNode ret = input.deepCopy();
                 ret.put(to, ret.get(from));
@@ -163,7 +163,7 @@ public final class SwaggerMigrators
         @Nonnull
         @Override
         public JsonNode migrate(@Nonnull final JsonNode input)
-            throws SwaggerTransformException
+            throws SwaggerMigrationException
         {
             Objects.requireNonNull(input, "input cannot be null");
             final ObjectNode ret = input.deepCopy();
@@ -174,7 +174,7 @@ public final class SwaggerMigrators
                 if (node.isMissingNode())
                     continue;
                 if (node.isContainerNode())
-                    throw new SwaggerTransformException("operation does not "
+                    throw new SwaggerMigrationException("operation does not "
                         + "apply to JSON arrays or objects");
                 if (!node.isTextual())
                     ret.put(memberName, node.asText());

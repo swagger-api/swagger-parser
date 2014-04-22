@@ -2,7 +2,7 @@ package com.wordnik.swagger.transform.migrate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.transform.util.MutableJsonTree;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -18,7 +18,7 @@ public final class V11ResourceListingMigrator
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         Objects.requireNonNull(input);
         final MutableJsonTree tree = new MutableJsonTree(input);

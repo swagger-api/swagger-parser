@@ -3,7 +3,7 @@ package com.wordnik.swagger.transform.migrate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.transform.util.MutableJsonTree;
 import com.wordnik.swagger.transform.util.SwaggerMigrators;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 
 import javax.annotation.Nonnull;
 
@@ -32,9 +32,9 @@ public interface SwaggerMigrator
      *
      * @param input the input node
      * @return the migrated node
-     * @throws SwaggerTransformException migration failed
+     * @throws SwaggerMigrationException migration failed
      */
     @Nonnull
     JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerTransformException;
+        throws SwaggerMigrationException;
 }

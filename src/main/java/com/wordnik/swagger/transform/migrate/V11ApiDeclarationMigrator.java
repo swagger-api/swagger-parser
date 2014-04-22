@@ -6,7 +6,7 @@ import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jackson.JsonNumEquals;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.wordnik.swagger.transform.util.MutableJsonTree;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public final class V11ApiDeclarationMigrator
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         final MutableJsonTree tree = new MutableJsonTree(input);
 
@@ -39,7 +39,7 @@ public final class V11ApiDeclarationMigrator
     }
 
     public static void main(final String... args)
-        throws IOException, SwaggerTransformException
+        throws IOException, SwaggerMigrationException
     {
         final JsonNode orig
             = JsonLoader.fromResource("/samples/v1.1/callfire-broadcast.json");

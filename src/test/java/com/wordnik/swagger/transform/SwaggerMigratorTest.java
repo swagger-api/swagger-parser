@@ -8,7 +8,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.wordnik.swagger.transform.migrate.SwaggerMigrator;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -62,7 +62,7 @@ public abstract class SwaggerMigratorTest
 
     @Test(dataProvider = "getTestData")
     public void migratorWorksAsExpected(final MigrationTestData data)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         /*
          * Unfortunately we cannot use assertEquals() directly :/ JsonNode
@@ -93,7 +93,7 @@ public abstract class SwaggerMigratorTest
         try {
             migrator.migrate(node);
             fail("No exception thrown!!");
-        } catch (SwaggerTransformException e) {
+        } catch (SwaggerMigrationException e) {
             assertEquals(e.getMessage(), errmsg,
                 "error message differs from expectations");
         }

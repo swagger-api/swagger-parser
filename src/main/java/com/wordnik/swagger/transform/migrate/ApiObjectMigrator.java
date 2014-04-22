@@ -3,7 +3,7 @@ package com.wordnik.swagger.transform.migrate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.wordnik.swagger.transform.util.MutableJsonTree;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 
 import javax.annotation.Nonnull;
 
@@ -21,7 +21,7 @@ public final class ApiObjectMigrator
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         final MutableJsonTree tree = new MutableJsonTree(input);
 

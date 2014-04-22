@@ -1,7 +1,7 @@
 package com.wordnik.swagger.transform.migrate;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 
 import javax.annotation.Nonnull;
 
@@ -18,7 +18,7 @@ public final class OperationParametersMigrator
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         return typeMigrator.migrate(allowableValuesMigrator.migrate(input));
     }

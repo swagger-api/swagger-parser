@@ -6,10 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonpatch.JsonPatch;
-import com.wordnik.swagger.transform.util.SwaggerMigrators;
-import com.wordnik.swagger.transform.util.SwaggerTransformException;
-import com.wordnik.swagger.transform.util.UncheckedSwaggerTransformException;
 import com.google.common.base.Optional;
+import com.wordnik.swagger.transform.util.SwaggerMigrators;
+import com.wordnik.swagger.transform.util.SwaggerMigrationException;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -61,19 +60,19 @@ public final class V11TypeMigrator
                 = JsonLoader.fromResource("/patches/v1.1/dataType.json");
             patches = MAPPER.readValue(node.traverse(), TYPE_REF);
         } catch (IOException e) {
-            throw new UncheckedSwaggerTransformException(e);
+            throw new RuntimeException("failed to load the necessary file", e);
         }
     }
 
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerTransformException
+        throws SwaggerMigrationException
     {
         Objects.requireNonNull(input);
         final JsonNode node = input.path("dataType");
         if (!node.isTextual())
-            throw new SwaggerTransformException();
+            throw new SwaggerMigrationException();
         final String dataType = node.textValue();
         final JsonPatch patch = Optional.fromNullable(patches.get(dataType))
             .or(DEFAULT_PATCH);
