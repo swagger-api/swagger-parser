@@ -2,7 +2,7 @@ package com.wordnik.swagger.reader;
 
 import javax.annotation.Nonnull;
 
-public final class SwaggerReaderFactory
+public final class  SwaggerReaderFactory
 {
     private final String proxy;
 

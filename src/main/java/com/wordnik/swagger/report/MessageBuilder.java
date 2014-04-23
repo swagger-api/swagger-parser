@@ -8,7 +8,11 @@ public class MessageBuilder {
     List<Message> messages = new ArrayList<>();
     Severity highestSeverity = Severity.OPTIONAL;
 
-    void append(Message message) {
+    public Severity getHighestSeverity() {
+        return highestSeverity;
+    }
+
+    public void append(Message message) {
         messages.add(message);
 
         if (message.getSeverity().isMoreSevere(highestSeverity)) {
