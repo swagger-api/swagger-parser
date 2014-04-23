@@ -2,6 +2,7 @@ package com.wordnik.swagger.models.reader;
 
 import com.wordnik.swagger.models.resourcelisting.*;
 import com.wordnik.swagger.models.resourcelisting.Authorization;
+import com.wordnik.swagger.report.MessageBuilder;
 
 
 import java.util.*;

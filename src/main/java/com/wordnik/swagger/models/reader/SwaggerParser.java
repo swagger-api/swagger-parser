@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.wordnik.swagger.models.AuthorizationScope;
+import com.wordnik.swagger.report.Message;
+import com.wordnik.swagger.report.MessageBuilder;
+import com.wordnik.swagger.report.Severity;
 
 import java.util.ArrayList;
 import java.util.List;

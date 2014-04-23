@@ -1,4 +1,4 @@
-package com.wordnik.swagger.models.reader;
+package com.wordnik.swagger.report;
 
 public class Message {
   String path;
@@ -11,7 +11,19 @@ public class Message {
     this.severity = severity;
   }
 
-  public String toString() {
+    public String getPath() {
+        return path;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    public String toString() {
     StringBuilder b = new StringBuilder();
     b.append(path).append("\t").append(message).append("\t").append(severity);
 

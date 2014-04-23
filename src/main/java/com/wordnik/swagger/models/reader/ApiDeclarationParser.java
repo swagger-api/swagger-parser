@@ -3,7 +3,9 @@ package com.wordnik.swagger.models.reader;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.annotation.JsonInclude.*;
 import com.wordnik.swagger.models.apideclaration.*;
-import com.wordnik.swagger.models.AuthorizationScope;
+import com.wordnik.swagger.report.Message;
+import com.wordnik.swagger.report.MessageBuilder;
+import com.wordnik.swagger.report.Severity;
 
 import java.util.*;
 
