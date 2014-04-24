@@ -71,8 +71,10 @@ public final class V11TypeMigrator
     {
         Objects.requireNonNull(input);
         final JsonNode node = input.path("dataType");
+        if (node.isMissingNode()) // FIXME...
+            return input;
         if (!node.isTextual())
-            throw new SwaggerMigrationException();
+            throw new SwaggerMigrationException("dataType is not a text field");
         final String dataType = node.textValue();
         final JsonPatch patch = Optional.fromNullable(patches.get(dataType))
             .or(DEFAULT_PATCH);
