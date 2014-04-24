@@ -15,6 +15,22 @@
                 "required": { "type": "boolean" },
                 "allowMultiple": { "type": "boolean" }
             }
+        },
+        {
+            "description": "type File requires special paramType and consumes",
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": { "not": { "enum": [ "File" ] } }
+                    }
+                },
+                {
+                    "properties": {
+                        "paramType": { "enum": [ "form" ] },
+                        "consumes": { "enum": [ "multipart/form-data" ] }
+                    }
+                }
+            ]
         }
     ]
 }
