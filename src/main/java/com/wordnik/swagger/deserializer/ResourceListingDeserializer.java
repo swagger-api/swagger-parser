@@ -1,4 +1,7 @@
 package com.wordnik.swagger.deserializer;
 
-public class ResourceListingDeserializer {
+import com.wordnik.swagger.models.resourcelisting.ResourceListing;
+
+public class ResourceListingDeserializer extends AbstractSwaggerDeserializer<ResourceListing> {
+
 }
