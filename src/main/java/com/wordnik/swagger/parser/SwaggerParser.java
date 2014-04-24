@@ -13,6 +13,10 @@ import com.wordnik.swagger.reader.SwaggerReaderFactory;
 import com.wordnik.swagger.report.Message;
 import com.wordnik.swagger.report.MessageBuilder;
 import com.wordnik.swagger.report.Severity;
+import com.wordnik.swagger.transform.migrate.ApiDeclarationMigrator;
+import com.wordnik.swagger.transform.migrate.ResourceListingMigrator;
+import com.wordnik.swagger.validate.ApiDeclarationJsonValidator;
+import com.wordnik.swagger.validate.ResourceListingJsonValidator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,6 +32,16 @@ public class SwaggerParser {
         SwaggerReader swaggerReader = new SwaggerReaderFactory(new SwaggerReaderConfiguration()).newReader();
 
         JsonNode jsonNode = swaggerReader.read(url, authentication, messageBuilder);
+
+        validateMessageReport(messageBuilder);
+
+        ResourceListingMigrator resourceListingMigrator = new ResourceListingMigrator();
+        jsonNode = resourceListingMigrator.migrate(messageBuilder, jsonNode);
+
+        validateMessageReport(messageBuilder);
+
+        ResourceListingJsonValidator resourceListingJsonValidator = new ResourceListingJsonValidator();
+        resourceListingJsonValidator.validate(messageBuilder, jsonNode);
 
         validateMessageReport(messageBuilder);
 
@@ -60,6 +74,16 @@ public class SwaggerParser {
 
         validateMessageReport(messageBuilder);
 
+        ApiDeclarationMigrator apiDeclarationMigrator = new ApiDeclarationMigrator();
+        jsonNode = apiDeclarationMigrator.migrate(messageBuilder, jsonNode);
+
+        validateMessageReport(messageBuilder);
+
+        ApiDeclarationJsonValidator apiDeclarationJsonValidator = new ApiDeclarationJsonValidator();
+        apiDeclarationJsonValidator.validate(messageBuilder, jsonNode);
+
+        validateMessageReport(messageBuilder);
+
         ApiDeclarationDeserializer apiDeclarationDeserializer = new ApiDeclarationDeserializer();
         ApiDeclaration apiDeclaration = apiDeclarationDeserializer.deserialize(jsonNode, messageBuilder);
 
@@ -82,6 +106,7 @@ public class SwaggerParser {
     }
 
     private void validateMessageReport(MessageBuilder messageBuilder) {
+        System.out.println(messageBuilder.getHighestSeverity());
         if (messageBuilder.getHighestSeverity() == Severity.ERROR) {
             throw new SwaggerException(messageBuilder.toString());
         }
