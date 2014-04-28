@@ -26,6 +26,7 @@
                 },
                 {
                     "properties": {
+                        "type": { "enum": [ "File" ] },
                         "paramType": { "enum": [ "form" ] },
                         "consumes": { "enum": [ "multipart/form-data" ] }
                     }
