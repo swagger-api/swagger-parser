@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.transform.util.SwaggerMigrators;
 import com.wordnik.swagger.transform.util.SwaggerMigrationException;
@@ -52,13 +53,18 @@ public final class V11TypeMigrator
     }
 
     private final Map<String, JsonPatch> patches;
+    private final JsonPatch fileTypePatch;
 
     public V11TypeMigrator()
     {
         try {
-            final JsonNode node
-                = JsonLoader.fromResource("/patches/v1.1/dataType.json");
+            JsonNode node;
+
+            node = JsonLoader.fromResource("/patches/v1.1/dataType.json");
             patches = MAPPER.readValue(node.traverse(), TYPE_REF);
+
+            node = JsonLoader.fromResource("/patches/other/fileTypePatch.json");
+            fileTypePatch = MAPPER.readValue(node.traverse(), JsonPatch.class);
         } catch (IOException e) {
             throw new RuntimeException("failed to load the necessary file", e);
         }
@@ -72,12 +78,29 @@ public final class V11TypeMigrator
         Objects.requireNonNull(input);
         final JsonNode node = input.path("dataType");
         if (node.isMissingNode()) // FIXME...
-            return input;
+            return postMigrate(input);
         if (!node.isTextual())
             throw new SwaggerMigrationException("dataType is not a text field");
         final String dataType = node.textValue();
         final JsonPatch patch = Optional.fromNullable(patches.get(dataType))
             .or(DEFAULT_PATCH);
-        return SwaggerMigrators.fromPatch(patch).migrate(input);
+        final JsonNode migrated = SwaggerMigrators.fromPatch(patch)
+            .migrate(input);
+        return postMigrate(migrated);
+    }
+
+    private JsonNode postMigrate(final JsonNode input)
+        throws SwaggerMigrationException
+    {
+        final JsonNode typeNode = input.path("type");
+        if (!typeNode.isTextual())
+            return input;
+        if (!"File".equals(typeNode.textValue()))
+            return input;
+        try {
+            return fileTypePatch.apply(input);
+        } catch (JsonPatchException e) {
+            throw new SwaggerMigrationException(e);
+        }
     }
 }

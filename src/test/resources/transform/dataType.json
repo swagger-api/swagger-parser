@@ -97,5 +97,27 @@
             "type": "string",
             "format": "date-time"
         }
+    },
+    {
+        "original": {
+            "dataType": "File",
+            "paramType": "query"
+        },
+        "migrated": {
+            "type": "File",
+            "paramType": "form",
+            "consumes": "multipart/form-data"
+        }
+    },
+    {
+        "original": {
+            "type": "File",
+            "paramType": "query"
+        },
+        "migrated": {
+            "type": "File",
+            "paramType": "form",
+            "consumes": "multipart/form-data"
+        }
     }
 ]

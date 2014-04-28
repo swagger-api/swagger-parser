@@ -41,5 +41,8 @@
         { "op": "remove", "path": "/dataType" },
         { "op": "add", "path": "/type", "value": "array" },
         { "op": "add", "path": "/uniqueItems", "value": true}
+    ],
+    "File": [
+        { "op": "move", "from": "/dataType", "path": "/type"}
     ]
 }
