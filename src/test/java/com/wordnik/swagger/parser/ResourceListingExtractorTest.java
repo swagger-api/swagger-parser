@@ -1,6 +1,6 @@
 package com.wordnik.swagger.parser;
 
-import com.wordnik.swagger.models.resourcelisting.ResourceListing;
+import com.wordnik.swagger.models.resourcelisting.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jackson.JacksonUtils;
@@ -8,6 +8,7 @@ import com.github.fge.jackson.JacksonUtils;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.util.List;
 
 import static org.testng.Assert.*;
 
