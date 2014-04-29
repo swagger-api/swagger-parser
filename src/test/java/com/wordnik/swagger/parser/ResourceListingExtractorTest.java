@@ -15,7 +15,7 @@ import static org.testng.Assert.*;
 public class ResourceListingExtractorTest {
   @Test
   public void readResourceListing() throws Exception {
-    String resourceListingUri = "https://api.helloreverb.com/v2/api-docs";
+    String resourceListingUri = "http://petstore.swagger.wordnik.com/api/api-docs";
     ObjectMapper mapper = JacksonUtils.newMapper();
 
     File resourceListingFile = new File("src/test/resources/specs/v1_2/petstore/api-docs");
