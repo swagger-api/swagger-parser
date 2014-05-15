@@ -85,6 +85,7 @@ public final class V11ResourceListingMigrator
      * </ul>
      *
      * @param input the input (never null)
+     * @return the input, as a normalized URI (as defined by RFC 3986)
      * @throws IllegalArgumentException invalid base path, see description
      */
     private static String checkLegalBasePath(@Nonnull final String input)
