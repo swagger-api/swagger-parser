@@ -10,6 +10,6 @@ public final class PathAppenderMigratorTest
     public PathAppenderMigratorTest()
         throws IOException
     {
-        super("pathAppender", new PathAppenderMigrator("http://foo.bar/"));
+        super("pathAppender", new PathAppenderMigrator("http://foo.bar"));
     }
 }
