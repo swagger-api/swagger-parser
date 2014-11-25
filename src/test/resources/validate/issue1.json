@@ -1,8 +1,0 @@
-{
-    "name": "file",
-    "description": "file to upload",
-    "required": false,
-    "type": "File",
-    "paramType": "body",
-    "allowMultiple": false
-}
