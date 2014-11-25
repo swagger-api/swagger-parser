@@ -1,0 +1,6 @@
+[
+    {
+        "original": { "foo": {} },
+        "errorMessage": "operation does not apply to JSON arrays or objects"
+    }
+]

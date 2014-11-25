@@ -1,0 +1,337 @@
+{
+  "apiVersion" : "2.0",
+  "swaggerVersion" : "1.1",
+  "basePath" : "",
+  "resourcePath" : "/albums",
+  "models" : {
+    "Albums" : {
+      "id" : "Albums",
+      "type" : "array",
+      "description" : "A list of album elements",
+      "items" : {
+        "$ref" : "Album"
+      }
+    },
+    "AlbumPost" : {
+      "id" : "AlbumPost",
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "The title of the album",
+          "required" : true
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "The description of the album"
+        },
+        "coverImageId" : {
+          "type" : "string",
+          "description" : "imageId of the cover photo",
+          "format" : "object-id"
+        },
+        "userId" : {
+          "type" : "string",
+          "description" : "The user identifier that created/owns the album",
+          "format" : "object-id",
+          "required" : true
+        },
+        "count" : {
+          "type" : "integer",
+          "description" : "The number of pics in the album",
+          "default" : 0
+        }
+      },
+      "required" : [ "name", "userId" ],
+      "additionalProperties" : false
+    },
+    "Album" : {
+      "id" : "Album",
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "format" : "object-id",
+          "required" : true
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "The title of the album",
+          "required" : true
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "The description of the album"
+        },
+        "coverImageId" : {
+          "type" : "string",
+          "description" : "imageId of the cover photo",
+          "format" : "object-id"
+        },
+        "userId" : {
+          "type" : "string",
+          "description" : "The user identifier that created/owns the album",
+          "format" : "object-id",
+          "required" : true
+        },
+        "count" : {
+          "type" : "integer",
+          "description" : "The number of pics in the album",
+          "default" : 0
+        },
+        "createdAt" : {
+          "type" : "integer",
+          "description" : "Milliseconds since 01 January, 1970 UTC",
+          "format" : "utc-millisec",
+          "required" : true
+        },
+        "updatedAt" : {
+          "type" : "integer",
+          "description" : "Milliseconds since 01 January, 1970 UTC",
+          "format" : "utc-millisec"
+        }
+      },
+      "required" : [ "id", "name", "userId", "createdAt", "updateAt" ],
+      "additionalProperties" : false
+    },
+    "AlbumPatch" : {
+      "id" : "AlbumPatch",
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "The title of the album"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "The description of the album"
+        },
+        "coverImageId" : {
+          "type" : "string",
+          "description" : "imageId of the cover photo",
+          "format" : "object-id"
+        },
+        "count" : {
+          "type" : "integer",
+          "description" : "The number of pics in the album"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "apis" : [ {
+    "path" : "/albums",
+    "operations" : [ {
+      "path" : "/albums",
+      "notes" : "Get albums",
+      "summary" : "Get albums",
+      "method" : "GET",
+      "params" : [ {
+        "name" : "offset",
+        "description" : "Index at which to start returning data from the search results (defaults to 0)",
+        "dataType" : "int",
+        "paramType" : "query"
+      }, {
+        "name" : "limit",
+        "description" : "Number of results to return (defaults to 20, max 100)",
+        "dataType" : "int",
+        "paramType" : "query"
+      } ],
+      "responseClass" : "Albums",
+      "errorResponses" : [ {
+        "code" : 429,
+        "reason" : "Too Many Requests"
+      } ],
+      "nickname" : "getAlbums",
+      "parameters" : [ {
+        "name" : "offset",
+        "description" : "Index at which to start returning data from the search results (defaults to 0)",
+        "dataType" : "int",
+        "paramType" : "query"
+      }, {
+        "name" : "limit",
+        "description" : "Number of results to return (defaults to 20, max 100)",
+        "dataType" : "int",
+        "paramType" : "query"
+      } ],
+      "httpMethod" : "GET"
+    } ]
+  }, {
+    "path" : "/albums",
+    "operations" : [ {
+      "path" : "/albums",
+      "notes" : "Add an album",
+      "summary" : "Add an album",
+      "method" : "POST",
+      "params" : [ {
+        "name" : "body",
+        "description" : "Album",
+        "dataType" : "AlbumPost",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "body"
+      } ],
+      "responseClass" : "Albums",
+      "errorResponses" : [ {
+        "code" : 400,
+        "reason" : "Bad Request"
+      }, {
+        "code" : 401,
+        "reason" : "Unauthorized"
+      }, {
+        "code" : 415,
+        "reason" : "Unsupported Media Type"
+      }, {
+        "code" : 429,
+        "reason" : "Too Many Requests"
+      } ],
+      "nickname" : "postAlbum",
+      "parameters" : [ {
+        "name" : "body",
+        "description" : "Album",
+        "dataType" : "AlbumPost",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "body"
+      } ],
+      "httpMethod" : "POST"
+    } ]
+  }, {
+    "path" : "/albums/{albumId}",
+    "operations" : [ {
+      "path" : "/albums/{albumId}",
+      "notes" : "Get an album",
+      "summary" : "Get an album",
+      "method" : "GET",
+      "params" : [ {
+        "name" : "albumId",
+        "description" : "Album identifier",
+        "dataType" : "string",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "path"
+      } ],
+      "responseClass" : "Album",
+      "errorResponses" : [ {
+        "code" : 400,
+        "reason" : "Bad Request"
+      }, {
+        "code" : 404,
+        "reason" : "Not Found"
+      }, {
+        "code" : 429,
+        "reason" : "Too Many Requests"
+      } ],
+      "nickname" : "getAlbum",
+      "parameters" : [ {
+        "name" : "albumId",
+        "description" : "Album identifier",
+        "dataType" : "string",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "path"
+      } ],
+      "httpMethod" : "GET"
+    } ]
+  }, {
+    "path" : "/albums/{albumId}",
+    "operations" : [ {
+      "path" : "/albums/{albumId}",
+      "notes" : "Update an album",
+      "summary" : "Update an album",
+      "method" : "PATCH",
+      "params" : [ {
+        "name" : "albumId",
+        "description" : "Album identifier",
+        "dataType" : "string",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "path"
+      }, {
+        "name" : "body",
+        "description" : "Album",
+        "dataType" : "AlbumPatch",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "body"
+      } ],
+      "responseClass" : "Album",
+      "errorResponses" : [ {
+        "code" : 400,
+        "reason" : "Bad Request"
+      }, {
+        "code" : 401,
+        "reason" : "Unauthorized"
+      }, {
+        "code" : 403,
+        "reason" : "Forbidden"
+      }, {
+        "code" : 404,
+        "reason" : "Not Found"
+      }, {
+        "code" : 415,
+        "reason" : "Unsupported Media Type"
+      }, {
+        "code" : 429,
+        "reason" : "Too Many Requests"
+      } ],
+      "nickname" : "patchAlbum",
+      "parameters" : [ {
+        "name" : "albumId",
+        "description" : "Album identifier",
+        "dataType" : "string",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "path"
+      }, {
+        "name" : "body",
+        "description" : "Album",
+        "dataType" : "AlbumPatch",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "body"
+      } ],
+      "httpMethod" : "PATCH"
+    } ]
+  }, {
+    "path" : "/albums/{albumId}",
+    "operations" : [ {
+      "path" : "/albums/{albumId}",
+      "notes" : "Delete an album",
+      "summary" : "Delete an album",
+      "method" : "DELETE",
+      "params" : [ {
+        "name" : "albumId",
+        "description" : "Album identifier",
+        "dataType" : "string",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "path"
+      } ],
+      "errorResponses" : [ {
+        "code" : 401,
+        "reason" : "Unauthorized"
+      }, {
+        "code" : 403,
+        "reason" : "Forbidden"
+      }, {
+        "code" : 404,
+        "reason" : "Not Found"
+      }, {
+        "code" : 429,
+        "reason" : "Too Many Requests"
+      } ],
+      "nickname" : "deleteAlbum",
+      "parameters" : [ {
+        "name" : "albumId",
+        "description" : "Album identifier",
+        "dataType" : "string",
+        "required" : true,
+        "allowMultiple" : false,
+        "paramType" : "path"
+      } ],
+      "httpMethod" : "DELETE",
+      "responseClass" : "void"
+    } ]
+  } ]
+}

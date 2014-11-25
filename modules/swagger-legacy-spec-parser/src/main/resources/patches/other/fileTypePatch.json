@@ -1,0 +1,4 @@
+[
+    { "op": "add", "path": "/paramType", "value": "form" },
+    { "op": "add", "path": "/consumes", "value": "multipart/form-data" }
+]

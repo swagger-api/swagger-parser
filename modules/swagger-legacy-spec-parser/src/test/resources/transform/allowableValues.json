@@ -1,0 +1,15 @@
+[
+    {
+        "original": {
+            "meh": null,
+            "allowableValues": {
+                "valueType": "LIST",
+                "values": [ "foo", "bar" ]
+            }
+        },
+        "migrated": {
+            "meh": null,
+            "enum": [ "foo", "bar" ]
+        }
+    }
+]

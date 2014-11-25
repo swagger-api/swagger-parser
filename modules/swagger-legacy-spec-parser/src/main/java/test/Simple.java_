@@ -1,0 +1,43 @@
+package test;
+
+import com.wordnik.swagger.models.apideclaration.*;
+import com.wordnik.swagger.transform.migrate.*;
+import com.github.fge.jackson.JacksonUtils;
+import com.wordnik.swagger.report.MessageBuilder;
+
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.deser.*; 
+import com.fasterxml.jackson.databind.node.*;
+
+import java.io.File;
+
+public class Simple {
+  static ObjectMapper mapper = JacksonUtils.newMapper();
+
+  public static void main(String[] args) {
+    try {
+      ApiDeclarationMigrator migrator = new ApiDeclarationMigrator();
+
+      MessageBuilder messageBuilder = new MessageBuilder();
+
+      JsonNode jsonNode = mapper.readTree(new File("src/main/resources/samples/v1.2/bitdango-exchanges.json"));
+
+      JsonNode transformed = migrator.migrate(messageBuilder, jsonNode);
+      System.out.println(transformed);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  static ApiDeclaration readDeclaration(String content, MessageBuilder messageBuilder) {
+      ApiDeclarationMigrator migrator = new ApiDeclarationMigrator();
+
+      JsonNode jsonNode = mapper.readTree(new File("src/main/resources/samples/v1.2/bitdango-exchanges.json"));
+
+      JsonNode transformed = migrator.migrate(messageBuilder, jsonNode);
+
+      return mapper.readValue(transformed, ApiDeclaration.class);
+  }
+}
