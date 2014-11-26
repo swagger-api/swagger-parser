@@ -236,7 +236,18 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       output = am;
     }
     else {
-      Property i = PropertyBuilder.build(type, format, null);
+      Map<String, Object> args = new HashMap<String, Object>();
+      if(obj.getEnumValues() != null && obj.getEnumValues().size() > 0) {
+        args.put("enum", obj.getEnumValues());
+      }
+      if(obj.getMinimum() != null) {
+        args.put("minimum", Double.parseDouble(obj.getMinimum()));
+      }
+      if(obj.getMaximum() != null) {
+        args.put("maximum", Double.parseDouble(obj.getMaximum()));
+      }
+
+      Property i = PropertyBuilder.build(type, format, args);
       if(i != null)
         output = i;
       else if(obj.getRef() != null)
