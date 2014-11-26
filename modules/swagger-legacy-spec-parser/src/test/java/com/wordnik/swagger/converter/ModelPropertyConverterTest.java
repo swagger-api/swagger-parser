@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class ModelConverterTest {
+public class ModelPropertyConverterTest {
   SwaggerLegacyConverter converter = new SwaggerLegacyConverter();
 
   @Test
