@@ -37,7 +37,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 
 ```xml
 <dependency>
-  <groupId>com.wordnik</groupId>
+  <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <scope>compile</scope>
@@ -61,7 +61,7 @@ And add a repository reference to sonatype snapshots:
 To add legacy swagger parsing support, add the legacy module.  Since it depends on `swagger-parser`, you don't need to include both:
 ```xml
 <dependency>
-  <groupId>com.wordnik</groupId>
+  <groupId>io.swagger</groupId>
   <artifactId>swagger-legacy-spec-parser</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <scope>compile</scope>

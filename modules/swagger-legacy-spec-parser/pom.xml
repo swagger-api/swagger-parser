@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <groupId>com.wordnik</groupId>
+    <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.wordnik</groupId>
+  <groupId>io.swagger</groupId>
   <artifactId>swagger-legacy-spec-parser</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -20,7 +20,7 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.wordnik</groupId>
+      <groupId>io.swagger</groupId>
       <artifactId>swagger-parser</artifactId>
       <version>${project.parent.version}</version>
       <scope>compile</scope>
