@@ -1,11 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>5</version>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.wordnik</groupId>
-  <artifactId>swagger-parser</artifactId>
+  <groupId>io.swagger</groupId>
+  <artifactId>swagger-parser-project</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  <name>swagger-parser</name>
+  <packaging>pom</packaging>
+  <name>swagger-parser-project</name>
+  <developers>
+    <developer>
+      <id>fehguy</id>
+      <name>Tony Tam</name>
+      <email>fehguy@gmail.com</email>
+    </developer>
+    <developer>
+      <id>webron</id>
+      <name>Ron Ratovsky</name>
+      <email>webron@gmail.com</email>
+    </developer>
+    <developer>
+      <id>fge</id>
+      <name>Francis Galiegue</name>
+      <email>fgaliegue@gmail.com</email>
+    </developer>
+  </developers>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/wordnik/swagger-parser/issues</url>
+  </issueManagement>
+  <mailingLists>
+    <mailingList>
+      <name>swagger-swaggersocket</name>
+      <archive>https://groups.google.com/forum/#!forum/swagger-swaggersocket</archive>
+    </mailingList>
+  </mailingLists>
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -30,58 +69,91 @@
           <target>1.7</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <configuration>
+            <recompileMode>incremental</recompileMode>
+          </configuration>
+          <jvmArgs>
+            <jvmArg>-Xmx384m</jvmArg>
+          </jvmArgs>
+          <args>
+            <arg>-target:jvm-1.6</arg>
+            <arg>-deprecation</arg>
+          </args>
+          <launchers>
+            <launcher>
+              <id>run-scalatest</id>
+              <mainClass>org.scalatest.tools.Runner</mainClass>
+              <args>
+                <arg>-p</arg>
+                <arg>${project.build.testOutputDirectory}</arg>
+              </args>
+              <jvmArgs>
+                <jvmArg>-Xmx512m</jvmArg>
+              </jvmArgs>
+            </launcher>
+          </launchers>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson-version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-jsonSchema</artifactId>
-      <version>${jackson-version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.fge</groupId>
-      <artifactId>json-schema-validator</artifactId>
-      <version>2.2.3</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.fge</groupId>
-      <artifactId>json-patch</artifactId>
-      <version>1.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>6.8.7</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>junit</artifactId>
-          <groupId>junit</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>snakeyaml</artifactId>
-          <groupId>org.yaml</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>bsh</artifactId>
-          <groupId>org.beanshell</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.3.3</version>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.wordnik</groupId>
+        <artifactId>swagger-core</artifactId>
+        <version>${swagger-core-version}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala-version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest_2.10</artifactId>
+        <version>${scala-test-version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit-version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <modules>
+    <module>modules/swagger-parser</module>
+    <module>modules/swagger-legacy-spec-parser</module>
+  </modules>
   <properties>
-    <jackson-version>2.3.2</jackson-version>
+    <scala-version>2.10.0</scala-version>
+    <swagger-core-version>1.5.0-SNAPSHOT</swagger-core-version>
+    <junit-version>4.8.1</junit-version>
+    <scala-test-version>2.1.3</scala-test-version>
   </properties>
+  <repositories>
+    <repository>
+      <id>sonatype-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>

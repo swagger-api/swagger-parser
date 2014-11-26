@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/swagger-api/swagger-parser.png)](https://travis-ci.org/swagger-api/swagger-parser)
 
 ## Overview
-This is the swagger parser project, which reads and converts legacy swagger specifications into valid 2.0 versions.
+This is the swagger parser project, which reads swagger specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
 ## What's Swagger?
 
@@ -11,7 +11,6 @@ The goal of Swagger™ is to define a standard, language-agnostic interface to R
 
 
 Check out [Swagger-Spec](https://github.com/swagger-api/swagger-spec) for additional information about the Swagger project, including additional libraries with support for other languages and more. 
-
 
 ### Prerequisites
 You need the following installed and available in your $PATH:
@@ -28,12 +27,17 @@ After cloning the project, you can build it from source with this command:
 mvn package
 ```
 
+### Extensions
+This project has a core artifact--`swagger-parser`, which uses Java Service Provider Inteface (SPI) so additional extensions can be added.  To read Swagger 1.0, 1.1, and 1.2 specifications, a module is included called `swagger-legacy-spec-parser`.  This reads those older versions of the spec and produces 2.0 objects.
+
+To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.parser.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.parser.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
+
 ### Usage in your project
 You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central for releases.  In your dependencies:
 
 ```xml
 <dependency>
-  <groupId>com.wordnik</groupId>
+  <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <scope>compile</scope>
@@ -53,6 +57,18 @@ And add a repository reference to sonatype snapshots:
   </repository>
 </repositories>
 ```
+
+To add legacy swagger parsing support, add the legacy module.  Since it depends on `swagger-parser`, you don't need to include both:
+```xml
+<dependency>
+  <groupId>io.swagger</groupId>
+  <artifactId>swagger-legacy-spec-parser</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <scope>compile</scope>
+</dependency>
+
+```
+
 
 License
 -------
