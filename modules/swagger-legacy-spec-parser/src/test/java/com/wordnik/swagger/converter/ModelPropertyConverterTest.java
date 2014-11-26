@@ -4,6 +4,7 @@ import com.wordnik.swagger.parser.SwaggerLegacyConverter;
 import com.wordnik.swagger.util.Json;
 import com.wordnik.swagger.models.Format;
 import com.wordnik.swagger.models.apideclaration.ModelProperty;
+import com.wordnik.swagger.models.apideclaration.Items;
 import com.wordnik.swagger.models.properties.*;
 
 import java.util.*;
@@ -146,5 +147,23 @@ public class ModelPropertyConverterTest {
 
     RefProperty ref = (RefProperty) converted;
     assertEquals(ref.get$ref(), "Pet");
+  }
+
+
+  @Test
+  public void convertStringArrayModelProperty() throws Exception {
+    ModelProperty property = new ModelProperty();
+    property.setType("array");
+
+    Items items = new Items();
+    items.setType("string");
+    property.setItems(items);
+
+    Property converted = converter.convertProperty(property);
+    assertEquals(converted.getClass(), ArrayProperty.class);
+
+    ArrayProperty prop = (ArrayProperty) converted;
+    Property innerType = prop.getItems();
+    assertEquals(innerType.getType(), "string");
   }
 }
