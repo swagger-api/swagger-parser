@@ -149,7 +149,6 @@ public class ModelPropertyConverterTest {
     assertEquals(ref.get$ref(), "Pet");
   }
 
-
   @Test
   public void convertStringArrayModelProperty() throws Exception {
     ModelProperty property = new ModelProperty();
@@ -165,5 +164,23 @@ public class ModelPropertyConverterTest {
     ArrayProperty prop = (ArrayProperty) converted;
     Property innerType = prop.getItems();
     assertEquals(innerType.getType(), "string");
+  }
+
+  @Test
+  public void convertRefArrayModelProperty() throws Exception {
+    ModelProperty property = new ModelProperty();
+    property.setType("array");
+
+    Items items = new Items();
+    items.setRef("Pet");
+    property.setItems(items);
+
+    Property converted = converter.convertProperty(property);
+    assertEquals(converted.getClass(), ArrayProperty.class);
+
+    ArrayProperty prop = (ArrayProperty) converted;
+    Property innerType = prop.getItems();
+    RefProperty ref = (RefProperty) innerType;
+    assertEquals(ref.get$ref(), "Pet");
   }
 }
