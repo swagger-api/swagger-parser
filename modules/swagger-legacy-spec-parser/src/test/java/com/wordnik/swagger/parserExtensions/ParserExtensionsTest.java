@@ -1,10 +1,9 @@
 package com.wordnik.swagger.parserExtensions;
 
-import com.wordnik.swagger.parser.*;
-
+import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.SwaggerParserExtension;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.util.List;
 
 import static org.testng.Assert.*;

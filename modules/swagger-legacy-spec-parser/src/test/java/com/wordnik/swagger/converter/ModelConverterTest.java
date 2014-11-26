@@ -1,10 +1,8 @@
 package com.wordnik.swagger.converter;
 
-import com.wordnik.swagger.parser.SwaggerLegacyConverter;
-import com.wordnik.swagger.util.Json;
-import com.wordnik.swagger.models.Format;
-import com.wordnik.swagger.models.apideclaration.ModelProperty;
-import com.wordnik.swagger.models.apideclaration.Items;
+import io.swagger.parser.SwaggerLegacyConverter;
+import io.swagger.models.Format;
+import io.swagger.models.apideclaration.ModelProperty;
 import com.wordnik.swagger.models.properties.*;
 import com.wordnik.swagger.models.Model;
 
@@ -19,7 +17,7 @@ public class ModelConverterTest {
 
   @Test
   public void convertModelWithPrimitives() throws Exception {
-    com.wordnik.swagger.models.apideclaration.Model model = new com.wordnik.swagger.models.apideclaration.Model();
+    io.swagger.models.apideclaration.Model model = new io.swagger.models.apideclaration.Model();
     Map<String, ModelProperty> properties = new LinkedHashMap<String, ModelProperty>();
 
     ModelProperty id = new ModelProperty();

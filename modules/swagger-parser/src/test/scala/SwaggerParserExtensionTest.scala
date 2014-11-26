@@ -1,5 +1,6 @@
 import com.wordnik.swagger.util.Json
-import com.wordnik.swagger.parser._
+import io.swagger.parser._
+import io.swagger.parser.{Swagger20Parser, SwaggerParser}
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
