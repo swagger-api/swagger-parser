@@ -58,7 +58,7 @@ And add a repository reference to sonatype snapshots:
 </repositories>
 ```
 
-To add legacy swagger parsing support, add the legacy module:
+To add legacy swagger parsing support, add the legacy module.  Since it depends on `swagger-parser`, you don't need to include both:
 ```xml
 <dependency>
   <groupId>com.wordnik</groupId>
