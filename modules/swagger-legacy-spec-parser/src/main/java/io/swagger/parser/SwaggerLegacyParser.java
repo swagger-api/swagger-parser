@@ -24,7 +24,7 @@ import java.net.URISyntaxException;
 public class SwaggerLegacyParser {
 
     public ResourceListing read(String url) {
-        return read(url, new NoAuthentication());
+      return read(url, new NoAuthentication());
     }
 
     public ResourceListing read(String url, Authentication authentication) {

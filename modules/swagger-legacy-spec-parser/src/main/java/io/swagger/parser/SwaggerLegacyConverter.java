@@ -93,6 +93,9 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       JsonNode transformed = migrator.migrate(messages, jsonNode);
       output = Json.mapper().convertValue(transformed, ResourceListing.class);
     }
+    catch (java.lang.IllegalArgumentException e) {
+      return null;
+    }
     catch (Exception e) {
       e.printStackTrace();
     }
@@ -321,6 +324,9 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       ApiDeclarationMigrator migrator = new ApiDeclarationMigrator();
       JsonNode transformed = migrator.migrate(messages, jsonNode);
       output = Json.mapper().convertValue(transformed, ApiDeclaration.class);
+    }
+    catch (java.lang.IllegalArgumentException e) {
+      return null;
     }
     catch (Exception e) {
       e.printStackTrace();
