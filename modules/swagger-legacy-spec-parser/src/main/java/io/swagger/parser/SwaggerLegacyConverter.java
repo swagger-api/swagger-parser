@@ -43,32 +43,45 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
 
     if(resourceListing != null) {
       List<ApiListingReference> refs = resourceListing.getApis();
+      boolean readAsSingleFile = false;
       if(refs != null) {
         for(ApiListingReference ref : refs) {
-          String location = null;
-          if(input.startsWith("http")) {
-            // look up as url
-            String pathLocation = ref.getPath();
-            if(pathLocation.startsWith("http")) {
-              // use as absolute url
-              location = pathLocation;
-            }
-            else {
-              if(pathLocation.startsWith("/"))
-                location = input + pathLocation;
-              else
-                location = input + "/" + pathLocation;
+          ApiDeclaration apiDeclaration = null;
+          JsonNode node = ref.getExtraFields();
+          JsonNode operations = node.get("operations");
+          if(operations != null) {
+            if(!readAsSingleFile) {
+              // this is a single-file swagger definition
+              apiDeclaration = readDeclaration(input, migrationMessages);
+              readAsSingleFile = true; // avoid doing this again
             }
           }
           else {
-            // file system
-            File fileLocation = new File(input);
-            if(ref.getPath().startsWith("/"))
-              location = fileLocation.getParent() + ref.getPath();
-            else
-              location = fileLocation.getParent() + File.separator + ref.getPath();
+            String location = null;
+            if(input.startsWith("http")) {
+              // look up as url
+              String pathLocation = ref.getPath();
+              if(pathLocation.startsWith("http")) {
+                // use as absolute url
+                location = pathLocation;
+              }
+              else {
+                if(pathLocation.startsWith("/"))
+                  location = input + pathLocation;
+                else
+                  location = input + "/" + pathLocation;
+              }
+            }
+            else {
+              // file system
+              File fileLocation = new File(input);
+              if(ref.getPath().startsWith("/"))
+                location = fileLocation.getParent() + ref.getPath();
+              else
+                location = fileLocation.getParent() + File.separator + ref.getPath();
+            }
+            apiDeclaration = readDeclaration(location, migrationMessages);
           }
-          ApiDeclaration apiDeclaration = readDeclaration(location, migrationMessages);
           if(apiDeclaration != null) {
             apis.add(apiDeclaration);
           }
@@ -106,6 +119,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
     ModelImpl output = new ModelImpl();
     output.setName(model.getId());
     output.setDescription(model.getDescription());
+    output.setDiscriminator(model.getDiscriminator());
     if(model.getRequired() != null) {
       output.setRequired(model.getRequired());
     }
@@ -169,12 +183,17 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       if(p instanceof ArrayProperty) {
         ArrayProperty ap = (ArrayProperty) p;
         sp.setType("array");
+        sp.setCollectionFormat("csv");
         sp.setItems(ap.getItems());
       }
       else {
         sp.setType(p.getType());
         sp.setFormat(p.getFormat());
       }
+    }
+    // all path parameters are required
+    if(output instanceof PathParameter) {
+      ((PathParameter)output).setRequired(true);
     }
     return output;
   }
@@ -282,10 +301,6 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
         output.produces(produces);
       }
     }
-    // default response type
-    String type = operation.getType() == null ? null : operation.getType().toString();
-    String format = operation.getFormat() == null ? null : operation.getFormat().toString();
-
     for(ResponseMessage message: operation.getResponseMessages()) {
       Response response = new Response().description(message.getMessage());
 
@@ -296,12 +311,16 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       output.response(message.getCode(), response);
     }
 
-    Model responseModel = modelFromExtendedTypedObject(operation);
-    if(responseModel != null) {
+    // default response type
+    Property responseProperty = propertyFromTypedObject(operation);
+    if(responseProperty != null) {
       Response response = new Response()
-        .description("success");
+        .description("success")
+        .schema(responseProperty);
       if(output.getResponses() == null)
         output.defaultResponse(response);
+      else
+        output.response(200, response);
     }
 
   // protected List<Map<String, List<String>>> security;
@@ -357,6 +376,10 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
         .contact(contact)
         .license(license);
     }
+    else if(resourceListing.getApiVersion() != null) {
+      info = new Info()
+        .version(resourceListing.getApiVersion());
+    }
     Map<String, Path> paths = new HashMap<String, Path>();
     Map<String, Model> definitions = new HashMap<String, Model>();
     String basePath = null;
@@ -400,7 +423,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
     }
 
     String host = null;
-    String scheme = null;
+    String scheme = "http";
 
     if(basePath != null) {
       String[] parts = basePath.split("://");
@@ -408,8 +431,12 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
         scheme = parts[0];
         int pos = parts[1].indexOf("/");
         if(pos != -1) {
-          host = parts[1].substring(0, 1);
-          basePath = parts[1].substring(1);
+          host = parts[1].substring(0, pos);
+          basePath = parts[1].substring(pos);
+        }
+        else {
+          host = parts[1];
+          basePath = "/";
         }
       }
       if(!basePath.startsWith("/"))
