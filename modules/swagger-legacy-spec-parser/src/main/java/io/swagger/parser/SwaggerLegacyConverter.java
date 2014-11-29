@@ -12,6 +12,7 @@ import com.wordnik.swagger.util.*;
 
 // legacy models
 import io.swagger.models.ParamType;
+import io.swagger.models.PassAs;
 import io.swagger.models.apideclaration.ApiDeclaration;
 import io.swagger.models.apideclaration.Api;
 import io.swagger.models.apideclaration.ExtendedTypedObject;
@@ -19,6 +20,7 @@ import io.swagger.models.AuthorizationScope;
 
 import io.swagger.models.resourcelisting.Authorization;
 import io.swagger.models.resourcelisting.AuthorizationCodeGrant;
+import io.swagger.models.resourcelisting.ApiKeyAuthorization;
 import io.swagger.models.resourcelisting.ImplicitGrant;
 import io.swagger.models.resourcelisting.OAuth2Authorization;
 import io.swagger.report.MessageBuilder;
@@ -477,7 +479,6 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
           OAuth2Authorization o2 = (OAuth2Authorization) auth;
           List<AuthorizationScope> scopes = o2.getScopes();
 
-
           if(o2.getGrantTypes().getImplicit() != null) {
             ImplicitGrant ig = o2.getGrantTypes().getImplicit();
             OAuth2Definition oauth2 = new OAuth2Definition()
@@ -502,6 +503,22 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
               oauth2.scope(scope.getScope(), scope.getDescription());
             }
           }
+        }
+        else if (auth instanceof ApiKeyAuthorization) {
+          ApiKeyAuthorization o2 = (ApiKeyAuthorization) auth;
+          ApiKeyAuthDefinition def = new ApiKeyAuthDefinition();
+
+          PassAs passAs = o2.getPassAs();
+          if(PassAs.HEADER.equals(passAs)) {
+            def.in(In.HEADER);
+          }
+          else {
+            def.in(In.QUERY);
+          }
+
+          def.setName(o2.getKeyname());
+
+          swagger.securityDefinition(authNickname, def);
         }
       }
     }

@@ -1,5 +1,10 @@
 {
   "authorizations": {
+    "apiKey": {
+      "type": "apiKey",
+      "passAs": "header",
+      "keyname": "api_key"
+    },
     "oauth2": {
       "type": "oauth2",
       "scopes": [
