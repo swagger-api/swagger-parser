@@ -453,7 +453,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       // .securityDefinitions(name, securityScheme)
       .basePath(basePath);
     swagger.setDefinitions(definitions);
-    // host is read from the api declarations
+
     return swagger;
   }
 }
