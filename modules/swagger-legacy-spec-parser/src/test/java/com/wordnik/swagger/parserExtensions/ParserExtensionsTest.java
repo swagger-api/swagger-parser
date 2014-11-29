@@ -17,7 +17,7 @@ public class ParserExtensionsTest {
 
     assertTrue(extensions.size() == 2, "Didn't find 2 extensions as expected");
     for(SwaggerParserExtension extension : extensions) {
-      System.out.println(extension);
+      // System.out.println(extension);
     }
   }
 }

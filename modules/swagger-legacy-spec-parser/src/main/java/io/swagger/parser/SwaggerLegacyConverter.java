@@ -1,6 +1,7 @@
 package io.swagger.parser;
 
 import com.wordnik.swagger.models.*;
+import com.wordnik.swagger.models.auth.*;
 import com.wordnik.swagger.models.Model;
 import com.wordnik.swagger.models.Operation;
 import com.wordnik.swagger.models.parameters.*;
@@ -14,8 +15,14 @@ import io.swagger.models.ParamType;
 import io.swagger.models.apideclaration.ApiDeclaration;
 import io.swagger.models.apideclaration.Api;
 import io.swagger.models.apideclaration.ExtendedTypedObject;
-import io.swagger.transform.migrate.*;
+import io.swagger.models.AuthorizationScope;
+
+import io.swagger.models.resourcelisting.Authorization;
+import io.swagger.models.resourcelisting.AuthorizationCodeGrant;
+import io.swagger.models.resourcelisting.ImplicitGrant;
+import io.swagger.models.resourcelisting.OAuth2Authorization;
 import io.swagger.report.MessageBuilder;
+import io.swagger.transform.migrate.*;
 
 import io.swagger.models.apideclaration.*;
 import io.swagger.models.resourcelisting.ApiInfo;
@@ -23,6 +30,7 @@ import io.swagger.models.resourcelisting.ApiListingReference;
 import io.swagger.models.resourcelisting.ResourceListing;
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.*;
 
 import java.util.*;
 import java.net.URL;
@@ -204,7 +212,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
 
     Model output = null;
     if(obj.getRef() != null) {
-      output = new RefModel(obj.getRef());
+      output = new RefModel().asDefault(obj.getRef());
     }
     else {
       if("array".equals(type)) {
@@ -227,7 +235,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
         Property input = PropertyBuilder.build(type, format, null);
         if(input == null && !"void".equals(type)) {
           //use ref model
-          output = new RefModel(type);
+          output = new RefModel().asDefault(type);
         }
       }
     }
@@ -340,6 +348,10 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
         jsonNode = Json.mapper().readTree(new java.io.File(input));
       }
 
+      // this should be moved to a json patch
+      if(jsonNode.isObject())
+        ((ObjectNode)jsonNode).remove("authorizations");
+
       ApiDeclarationMigrator migrator = new ApiDeclarationMigrator();
       JsonNode transformed = migrator.migrate(messages, jsonNode);
       output = Json.mapper().convertValue(transformed, ApiDeclaration.class);
@@ -380,6 +392,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       info = new Info()
         .version(resourceListing.getApiVersion());
     }
+
     Map<String, Path> paths = new HashMap<String, Path>();
     Map<String, Model> definitions = new HashMap<String, Model>();
     String basePath = null;
@@ -453,7 +466,45 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
       // .securityDefinitions(name, securityScheme)
       .basePath(basePath);
     swagger.setDefinitions(definitions);
+    // host is read from the api declarations
 
+
+    Map<String, Authorization> authorizations = resourceListing.getAuthorizations();
+    if(authorizations != null) {
+      for(String authNickname : authorizations.keySet()) {
+        Authorization auth = authorizations.get(authNickname);
+        if(auth instanceof OAuth2Authorization) {
+          OAuth2Authorization o2 = (OAuth2Authorization) auth;
+          List<AuthorizationScope> scopes = o2.getScopes();
+
+
+          if(o2.getGrantTypes().getImplicit() != null) {
+            ImplicitGrant ig = o2.getGrantTypes().getImplicit();
+            OAuth2Definition oauth2 = new OAuth2Definition()
+              .implicit(ig.getLoginEndpoint().getUrl());
+            if(swagger.getSecurityDefinitions() != null && swagger.getSecurityDefinitions().keySet().contains(authNickname))
+              System.err.println("Warning!  Authorization nickname already in use!");
+            else
+              swagger.securityDefinition(authNickname, oauth2);
+            for(AuthorizationScope scope : scopes) {
+              oauth2.scope(scope.getScope(), scope.getDescription());
+            }
+          }
+          else if(o2.getGrantTypes().getAuthorization_code() != null) {
+            AuthorizationCodeGrant ac = (AuthorizationCodeGrant) o2.getGrantTypes().getAuthorization_code();
+            OAuth2Definition oauth2 = new OAuth2Definition()
+              .accessCode(ac.getTokenRequestEndpoint().getUrl(), ac.getTokenEndpoint().getUrl());
+            if(swagger.getSecurityDefinitions() != null && swagger.getSecurityDefinitions().keySet().contains(authNickname))
+              System.err.println("Warning!  Authorization nickname already in use!");
+            else
+              swagger.securityDefinition(authNickname, oauth2);
+            for(AuthorizationScope scope : scopes) {
+              oauth2.scope(scope.getScope(), scope.getDescription());
+            }
+          }
+        }
+      }
+    }
     return swagger;
   }
 }

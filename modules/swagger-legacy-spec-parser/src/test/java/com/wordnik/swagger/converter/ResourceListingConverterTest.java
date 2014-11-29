@@ -6,8 +6,9 @@ import io.swagger.models.Format;
 import io.swagger.models.resourcelisting.ResourceListing;
 import io.swagger.models.apideclaration.ApiDeclaration;
 
-import com.wordnik.swagger.models.Swagger;
 import com.wordnik.swagger.models.Info;
+import com.wordnik.swagger.models.Scheme;
+import com.wordnik.swagger.models.Swagger;
 import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.properties.*;
 import com.wordnik.swagger.util.Json;
@@ -55,10 +56,9 @@ public class ResourceListingConverterTest {
 
     Swagger swagger = converter.convert(rl, apis);
 
-    Json.prettyPrint(swagger);
-
     assertTrue(swagger.getSchemes().size() == 1);
-    assertTrue(swagger.getSchemes().get(0).equals("https"));
+
+    assertTrue(swagger.getSchemes().get(0).equals(Scheme.HTTPS));
     assertTrue(swagger.getSwagger().equals("2.0"));
 
     Info info = swagger.getInfo();

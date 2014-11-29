@@ -8,7 +8,6 @@ import com.wordnik.swagger.util.Json;
 import java.util.*;
 import java.io.*;
 
-import org.apache.commons.io.FileUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -22,6 +21,7 @@ public class LegacyConverterTest {
   @Test
   public void convertSingleFile() throws Exception {
     Swagger swagger = converter.read("src/test/resources/specs/v1_2/singleFile.json");
+
     assertEquals(swagger.getSwagger(), "2.0");
     assertEquals(swagger.getHost(), "petstore.swagger.wordnik.com");
     assertEquals(swagger.getBasePath(), "/api");
