@@ -65,4 +65,12 @@ public class LegacyConverterTest {
     assertTrue(swagger.getDefinitions().size() == 3);
     assertTrue(swagger.getPaths().size() == 5);
   }
+
+  /**
+   * reads a single-file swagger definition
+   **/
+  @Test
+  public void convertMultipleFiles() throws Exception {
+    Swagger swagger = converter.read("http://petstore.swagger.wordnik.com/api/api-docs");
+  }
 }
