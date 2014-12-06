@@ -12,15 +12,29 @@ public class SwaggerParser {
       return null;
 
     List<SwaggerParserExtension> parserExtensions = getExtensions();
+    Swagger output = null;
 
+    System.out.println("reading.....");
+
+    try{
+      output = new Swagger20Parser().read(location);
+      if(output != null)
+        return output;
+    }
+    catch (IOException e) {
+      // continue;
+    }
     for(SwaggerParserExtension extension : parserExtensions) {
       try{
-        Swagger output = extension.read(location);
+        output = extension.read(location);
         if(output != null) {
           return output;
         }
       }
       catch (IOException e) {
+        if(System.getProperty("debugParser") != null) {
+          e.printStackTrace();
+        }
         // continue to next parser
       }
     }
