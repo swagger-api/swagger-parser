@@ -14,8 +14,6 @@ public class SwaggerParser {
     List<SwaggerParserExtension> parserExtensions = getExtensions();
     Swagger output = null;
 
-    System.out.println("reading.....");
-
     try{
       output = new Swagger20Parser().read(location);
       if(output != null)
