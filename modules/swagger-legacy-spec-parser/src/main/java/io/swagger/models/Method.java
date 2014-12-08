@@ -9,7 +9,7 @@ import java.util.HashMap;
  * Created by ron on 11/04/14.
  */
 public enum Method {
-    GET, POST, PUT, PATCH, DELETE, OPTIONS;
+    GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD;
 
     private static Map<String, Method> names = new HashMap<String, Method>();
 
@@ -20,6 +20,7 @@ public enum Method {
       names.put("delete", DELETE);
       names.put("patch", PATCH);
       names.put("options", OPTIONS);
+      names.put("head", HEAD);
     }
 
     @JsonCreator
