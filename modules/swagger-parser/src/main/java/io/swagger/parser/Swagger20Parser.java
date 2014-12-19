@@ -33,6 +33,9 @@ public class Swagger20Parser implements SwaggerParserExtension {
     }
     catch (Exception e) {
       System.out.println(e.getMessage());
+      if(System.getProperty("debugParser") != null) {
+        e.printStackTrace();
+      }
       return null;
     }
   }
