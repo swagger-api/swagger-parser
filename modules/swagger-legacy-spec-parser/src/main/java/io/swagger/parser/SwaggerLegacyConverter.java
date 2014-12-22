@@ -40,7 +40,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class SwaggerLegacyConverter implements SwaggerParserExtension {
-  public Swagger read(String input) throws IOException {
+  @Override
+public Swagger read(String input) throws IOException {
     Swagger output = null;
 
     MessageBuilder migrationMessages = new MessageBuilder();
@@ -93,6 +94,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
             apiDeclaration = readDeclaration(location, migrationMessages);
           }
           if(apiDeclaration != null) {
+            apiDeclaration.setApiListingRef(ref);
             apis.add(apiDeclaration);
           }
         }
@@ -400,7 +402,13 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
     String basePath = null;
 
     for(ApiDeclaration apiDeclaration : apiDeclarations) {
-      String tag = apiDeclaration.getResourcePath();
+      String tag;
+      if (apiDeclaration.getApiListingRef() != null) {
+        String refPath = apiDeclaration.getApiListingRef().getPath();
+        tag = refPath.substring(refPath.lastIndexOf("/") + 1);
+      } else {
+        tag = apiDeclaration.getResourcePath();
+      }
       if(tag != null) {
         tag = tag.replaceAll("/", "");
       }
@@ -492,7 +500,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
             }
           }
           else if(o2.getGrantTypes().getAuthorization_code() != null) {
-            AuthorizationCodeGrant ac = (AuthorizationCodeGrant) o2.getGrantTypes().getAuthorization_code();
+            AuthorizationCodeGrant ac = o2.getGrantTypes().getAuthorization_code();
             OAuth2Definition oauth2 = new OAuth2Definition()
               .accessCode(ac.getTokenRequestEndpoint().getUrl(), ac.getTokenEndpoint().getUrl());
             if(swagger.getSecurityDefinitions() != null && swagger.getSecurityDefinitions().keySet().contains(authNickname))
