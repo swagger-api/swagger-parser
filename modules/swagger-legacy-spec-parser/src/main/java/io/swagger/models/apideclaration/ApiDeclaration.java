@@ -2,8 +2,11 @@ package io.swagger.models.apideclaration;
 
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.models.AuthorizationScope;
 import io.swagger.models.SwaggerBaseModel;
+import io.swagger.models.resourcelisting.ApiListingReference;
 
 public class ApiDeclaration extends SwaggerBaseModel {
     private String swaggerVersion = null;
@@ -15,6 +18,8 @@ public class ApiDeclaration extends SwaggerBaseModel {
     private List<String> produces = new ArrayList<>();
     private List<String> consumes = new ArrayList<>();
     private Map<String, List<AuthorizationScope>> authorizations = new HashMap<>();
+    @JsonIgnore
+    private ApiListingReference apiListingRef;
 
     public String getSwaggerVersion() {
         return swaggerVersion;
@@ -86,6 +91,14 @@ public class ApiDeclaration extends SwaggerBaseModel {
 
     public void setAuthorizations(Map<String, List<AuthorizationScope>> authorizations) {
         this.authorizations = authorizations;
+    }
+
+    public void setApiListingRef(ApiListingReference ref) {
+        this.apiListingRef = ref;
+    }
+
+    public ApiListingReference getApiListingRef() {
+        return this.apiListingRef;
     }
 
     @Override

@@ -72,5 +72,9 @@ public class LegacyConverterTest {
   @Test
   public void convertMultipleFiles() throws Exception {
     Swagger swagger = converter.read("http://petstore.swagger.wordnik.com/api/api-docs");
+
+    //test that the resource defs url is converted to a tag
+    assertTrue(swagger.getPath("/pet").getPut().getTags().contains("pet"));
+    assertTrue(swagger.getPath("/pet/findByTags").getGet().getTags().contains("pet"));
   }
 }
