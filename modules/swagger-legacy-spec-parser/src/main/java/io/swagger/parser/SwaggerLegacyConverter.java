@@ -91,6 +91,7 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
                 location = fileLocation.getParent() + File.separator + ref.getPath();
             }
             apiDeclaration = readDeclaration(location, migrationMessages);
+            Json.prettyPrint(apiDeclaration);
           }
           if(apiDeclaration != null) {
             apis.add(apiDeclaration);

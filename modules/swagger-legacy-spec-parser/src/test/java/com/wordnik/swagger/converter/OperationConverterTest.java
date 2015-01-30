@@ -76,6 +76,6 @@ public class OperationConverterTest {
     assertNotNull(property);
     assertTrue(property.getClass().equals(RefProperty.class));
     RefProperty ref = (RefProperty) property;
-    assertEquals(ref.get$ref(), "Cat");
+    assertEquals(ref.getSimpleRef(), "Cat");
   }
 }

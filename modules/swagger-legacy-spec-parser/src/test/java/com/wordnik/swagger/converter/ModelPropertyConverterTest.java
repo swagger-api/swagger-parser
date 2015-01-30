@@ -145,7 +145,7 @@ public class ModelPropertyConverterTest {
     assertEquals(converted.getClass(), RefProperty.class);
 
     RefProperty ref = (RefProperty) converted;
-    assertEquals(ref.get$ref(), "Pet");
+    assertEquals(ref.getSimpleRef(), "Pet");
   }
 
   @Test
@@ -180,6 +180,6 @@ public class ModelPropertyConverterTest {
     ArrayProperty prop = (ArrayProperty) converted;
     Property innerType = prop.getItems();
     RefProperty ref = (RefProperty) innerType;
-    assertEquals(ref.get$ref(), "Pet");
+    assertEquals(ref.getSimpleRef(), "Pet");
   }
 }
