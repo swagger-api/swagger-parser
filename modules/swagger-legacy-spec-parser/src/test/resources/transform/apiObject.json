@@ -6,6 +6,7 @@
         },
         "migrated": {
             "method": "GET",
+            "type": "void",
             "parameters": []
         }
     },
@@ -17,6 +18,7 @@
         },
         "migrated": {
             "method": "PUT",
+            "type": "void",
             "parameters": [],
             "responseMessages": []
         }
@@ -37,6 +39,7 @@
         },
         "migrated": {
             "parameters": [],
+            "type": "void",
             "responseMessages": [
                 {
                     "code": 400,

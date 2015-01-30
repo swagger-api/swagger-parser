@@ -40,8 +40,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class SwaggerLegacyConverter implements SwaggerParserExtension {
-  @Override
-public Swagger read(String input) throws IOException {
+  public Swagger read(String input) throws IOException {
     Swagger output = null;
 
     MessageBuilder migrationMessages = new MessageBuilder();
@@ -92,10 +91,8 @@ public Swagger read(String input) throws IOException {
                 location = fileLocation.getParent() + File.separator + ref.getPath();
             }
             apiDeclaration = readDeclaration(location, migrationMessages);
-            Json.prettyPrint(apiDeclaration);
           }
           if(apiDeclaration != null) {
-            apiDeclaration.setApiListingRef(ref);
             apis.add(apiDeclaration);
           }
         }
@@ -403,13 +400,7 @@ public Swagger read(String input) throws IOException {
     String basePath = null;
 
     for(ApiDeclaration apiDeclaration : apiDeclarations) {
-      String tag;
-      if (apiDeclaration.getApiListingRef() != null) {
-        String refPath = apiDeclaration.getApiListingRef().getPath();
-        tag = refPath.substring(refPath.lastIndexOf("/") + 1);
-      } else {
-        tag = apiDeclaration.getResourcePath();
-      }
+      String tag = apiDeclaration.getResourcePath();
       if(tag != null) {
         tag = tag.replaceAll("/", "");
       }
@@ -501,7 +492,7 @@ public Swagger read(String input) throws IOException {
             }
           }
           else if(o2.getGrantTypes().getAuthorization_code() != null) {
-            AuthorizationCodeGrant ac = o2.getGrantTypes().getAuthorization_code();
+            AuthorizationCodeGrant ac = (AuthorizationCodeGrant) o2.getGrantTypes().getAuthorization_code();
             OAuth2Definition oauth2 = new OAuth2Definition()
               .accessCode(ac.getTokenRequestEndpoint().getUrl(), ac.getTokenEndpoint().getUrl());
             if(swagger.getSecurityDefinitions() != null && swagger.getSecurityDefinitions().keySet().contains(authNickname))

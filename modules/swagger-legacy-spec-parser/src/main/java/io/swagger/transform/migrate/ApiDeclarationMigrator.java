@@ -1,5 +1,9 @@
 package io.swagger.transform.migrate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.report.Message;
+import io.swagger.report.MessageBuilder;
+
 public final class ApiDeclarationMigrator
     extends SwaggerJsonMigrator
 {
@@ -7,4 +11,5 @@ public final class ApiDeclarationMigrator
     {
         super(new V11ApiDeclarationMigrator());
     }
+
 }
