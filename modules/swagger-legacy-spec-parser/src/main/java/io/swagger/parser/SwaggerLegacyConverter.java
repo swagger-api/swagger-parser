@@ -46,7 +46,6 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
     MessageBuilder migrationMessages = new MessageBuilder();
     SwaggerLegacyParser swaggerParser = new SwaggerLegacyParser();
     ResourceListing resourceListing = null;
-
     resourceListing = readResourceListing(input, migrationMessages);
 
     List<ApiDeclaration> apis = new ArrayList<ApiDeclaration>();
@@ -89,6 +88,9 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
                 location = fileLocation.getParent() + ref.getPath();
               else
                 location = fileLocation.getParent() + File.separator + ref.getPath();
+            }
+            if(location.indexOf(".{format}") != -1) {
+              location = location.replaceAll("\\.\\{format\\}", ".json");
             }
             apiDeclaration = readDeclaration(location, migrationMessages);
           }
