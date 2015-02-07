@@ -39,4 +39,11 @@ public class Swagger20Parser implements SwaggerParserExtension {
       return null;
     }
   }
+
+  public Swagger read(JsonNode node) throws IOException {
+    if(node == null)
+      return null;
+
+    return Json.mapper().convertValue(node, Swagger.class);
+  }
 }

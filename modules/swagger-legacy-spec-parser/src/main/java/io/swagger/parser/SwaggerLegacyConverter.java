@@ -40,6 +40,11 @@ import java.io.File;
 import java.io.IOException;
 
 public class SwaggerLegacyConverter implements SwaggerParserExtension {
+  public Swagger read(JsonNode node) throws IOException {
+    // TODO
+    return null;
+  }
+
   public Swagger read(String input) throws IOException {
     Swagger output = null;
 
