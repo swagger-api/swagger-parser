@@ -15,8 +15,8 @@ public enum AuthorizationType {
 
     static {
       names.put("basicAuth", BASIC_AUTH);
-      names.put("apiKey", OAUTH2);
-      names.put("oauth2", APIKEY);
+      names.put("apiKey", APIKEY);
+      names.put("oauth2", OAUTH2);
     }
 
     @JsonCreator
