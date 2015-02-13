@@ -30,7 +30,7 @@ public class LegacyConverterTest {
     OAuth2Definition oauth2 = (OAuth2Definition) auth;
 
     assertEquals(oauth2.getFlow(), "implicit");
-    assertEquals(oauth2.getAuthorizationUrl(), "http://petstore.swagger.wordnik.com/oauth/dialog");
+    assertEquals(oauth2.getAuthorizationUrl(), "http://petstore.swagger.io/oauth/dialog");
     assertTrue(oauth2.getScopes().size() == 2);
     Map<String, String> scopes = oauth2.getScopes();
     assertEquals(scopes.get("email"), "Access to your email address");
@@ -46,7 +46,7 @@ public class LegacyConverterTest {
 
 
     assertEquals(swagger.getSwagger(), "2.0");
-    assertEquals(swagger.getHost(), "petstore.swagger.wordnik.com");
+    assertEquals(swagger.getHost(), "petstore.swagger.io");
     assertEquals(swagger.getBasePath(), "/api");
     assertNotNull(swagger.getInfo());
 
@@ -56,7 +56,7 @@ public class LegacyConverterTest {
     assertEquals(info.getTermsOfService(), "http://helloreverb.com/terms/");
 
     Contact contact = info.getContact();
-    assertEquals(contact.getUrl(), "apiteam@wordnik.com");
+    assertEquals(contact.getUrl(), "apiteam@swagger.io");
 
     License license = info.getLicense();
     assertEquals(license.getName(), "Apache 2.0");
@@ -71,7 +71,7 @@ public class LegacyConverterTest {
    **/
   @Test
   public void convertMultipleFiles() throws Exception {
-    Swagger swagger = converter.read("http://petstore.swagger.wordnik.com/api/api-docs");
+    Swagger swagger = converter.read("http://petstore.swagger.io/api/api-docs");
 
     //test that the resource defs url is converted to a tag
     assertTrue(swagger.getPath("/pet").getPut().getTags().contains("pet"));
