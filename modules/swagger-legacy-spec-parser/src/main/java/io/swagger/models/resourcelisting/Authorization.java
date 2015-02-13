@@ -2,6 +2,7 @@ package io.swagger.models.resourcelisting;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.models.AuthorizationType;
 import io.swagger.models.SwaggerBaseModel;
 
@@ -15,6 +16,7 @@ import io.swagger.models.SwaggerBaseModel;
 public abstract class Authorization extends SwaggerBaseModel {
     private AuthorizationType type = null;
 
+    @JsonIgnore
     public AuthorizationType getType() {
         return type;
     }
