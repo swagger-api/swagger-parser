@@ -17,7 +17,6 @@
       <groupId>com.wordnik</groupId>
       <artifactId>swagger-core</artifactId>
       <version>${swagger-core-version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>

@@ -115,7 +115,6 @@
         <groupId>com.wordnik</groupId>
         <artifactId>swagger-core</artifactId>
         <version>${swagger-core-version}</version>
-        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.scala-lang</groupId>
@@ -139,14 +138,8 @@
   </dependencyManagement>
   <modules>
     <module>modules/swagger-parser</module>
-    <module>modules/swagger-legacy-spec-parser</module>
+    <module>modules/swagger-compat-spec-parser</module>
   </modules>
-  <properties>
-    <scala-version>2.10.0</scala-version>
-    <swagger-core-version>1.5.0-M1</swagger-core-version>
-    <junit-version>4.8.1</junit-version>
-    <scala-test-version>2.1.3</scala-test-version>
-  </properties>
   <repositories>
     <repository>
       <id>sonatype-snapshots</id>
@@ -156,4 +149,10 @@
       </snapshots>
     </repository>
   </repositories>
+  <properties>
+    <scala-version>2.10.0</scala-version>
+    <swagger-core-version>1.5.1-SNAPSHOT</swagger-core-version>
+    <junit-version>4.8.1</junit-version>
+    <scala-test-version>2.1.3</scala-test-version>
+  </properties>
 </project>

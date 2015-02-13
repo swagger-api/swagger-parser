@@ -1,6 +1,6 @@
 package com.wordnik.swagger.converter;
 
-import io.swagger.parser.SwaggerLegacyConverter;
+import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.models.ParamType;
 import io.swagger.models.Format;
 import io.swagger.models.resourcelisting.ResourceListing;
@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class ResourceListingConverterTest {
-  SwaggerLegacyConverter converter = new SwaggerLegacyConverter();
+  SwaggerCompatConverter converter = new SwaggerCompatConverter();
 
   @Test
   public void convertResourceListingWithRootPath() throws Exception {

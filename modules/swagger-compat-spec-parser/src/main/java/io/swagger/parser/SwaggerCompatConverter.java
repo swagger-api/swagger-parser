@@ -39,7 +39,7 @@ import java.net.URL;
 import java.io.File;
 import java.io.IOException;
 
-public class SwaggerLegacyConverter implements SwaggerParserExtension {
+public class SwaggerCompatConverter implements SwaggerParserExtension {
   public Swagger read(JsonNode node) throws IOException {
     // TODO
     return null;
@@ -340,9 +340,17 @@ public class SwaggerLegacyConverter implements SwaggerParserExtension {
         output.response(200, response);
     }
 
-  // protected List<Map<String, List<String>>> security;
-  // protected String example;
-  // protected ExternalDocs externalDocs;
+    Map<String, List<AuthorizationScope>> auths = operation.getAuthorizations();
+    
+    for(String securityName: auths.keySet()) {
+      List<AuthorizationScope> scopes = auths.get(securityName);
+      List<String> updatedScopes = new ArrayList<String>();
+      for(AuthorizationScope s : scopes) {
+        updatedScopes.add(s.getScope());
+      }
+      output.addSecurity(securityName, updatedScopes);
+    }
+
     return output;
   }
 

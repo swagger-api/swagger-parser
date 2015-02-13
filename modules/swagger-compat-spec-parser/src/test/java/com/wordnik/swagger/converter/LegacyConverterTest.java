@@ -1,6 +1,6 @@
 package com.wordnik.swagger.converter;
 
-import io.swagger.parser.SwaggerLegacyConverter;
+import io.swagger.parser.SwaggerCompatConverter;
 
 import com.wordnik.swagger.models.*;
 import com.wordnik.swagger.models.auth.*;
@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class LegacyConverterTest {
-  SwaggerLegacyConverter converter = new SwaggerLegacyConverter();
+  SwaggerCompatConverter converter = new SwaggerCompatConverter();
 
   /**
    * reads a single-file swagger definition
@@ -64,17 +64,16 @@ public class LegacyConverterTest {
 
     assertTrue(swagger.getDefinitions().size() == 3);
     assertTrue(swagger.getPaths().size() == 5);
-  }
 
-  /**
-   * reads a single-file swagger definition
-   **/
-  @Test
-  public void convertMultipleFiles() throws Exception {
-    Swagger swagger = converter.read("http://petstore.swagger.io/api/api-docs");
+    Operation patchOperation = swagger.getPaths().get("/pet/{petId}").getPatch();
+    List<Map<String, List<String>>> security = patchOperation.getSecurity();
+    assertTrue(security.size() == 1);
+    Map<String, List<String>> securityDetail = security.get(0);
+    String key = securityDetail.keySet().iterator().next();
+    assertEquals(key, "oauth2");
+    List<String> oauth2Scopes = securityDetail.get(key);
 
-    //test that the resource defs url is converted to a tag
-    assertTrue(swagger.getPath("/pet").getPut().getTags().contains("pet"));
-    assertTrue(swagger.getPath("/pet/findByTags").getGet().getTags().contains("pet"));
+    assertEquals(oauth2Scopes.size(), 1);
+    assertEquals(oauth2Scopes.get(0), "test:anything");
   }
 }

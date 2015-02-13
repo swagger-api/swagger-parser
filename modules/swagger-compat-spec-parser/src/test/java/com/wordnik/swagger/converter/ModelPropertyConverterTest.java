@@ -1,6 +1,6 @@
 package com.wordnik.swagger.converter;
 
-import io.swagger.parser.SwaggerLegacyConverter;
+import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.models.Format;
 import io.swagger.models.apideclaration.ModelProperty;
 import io.swagger.models.apideclaration.Items;
@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class ModelPropertyConverterTest {
-  SwaggerLegacyConverter converter = new SwaggerLegacyConverter();
+  SwaggerCompatConverter converter = new SwaggerCompatConverter();
 
   @Test
   public void convertStringModelProperty() throws Exception {

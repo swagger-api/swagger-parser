@@ -1,6 +1,6 @@
 package com.wordnik.swagger.converter;
 
-import io.swagger.parser.SwaggerLegacyConverter;
+import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.models.ParamType;
 import io.swagger.models.Format;
 
@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class QueryParameterConverterTest {
-  SwaggerLegacyConverter converter = new SwaggerLegacyConverter();
+  SwaggerCompatConverter converter = new SwaggerCompatConverter();
 
   @Test
   public void convertStringQueryParameter() throws Exception {
