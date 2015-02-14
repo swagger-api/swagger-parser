@@ -39,23 +39,9 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <scope>compile</scope>
+  <version>1.0.0</version>
 </dependency>
 
-```
-And add a repository reference to sonatype snapshots:
-
-```xml
-<repositories>
-  <repository>
-    <id>sonatype-snapshots</id>
-    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-  </repository>
-</repositories>
 ```
 
 To add legacy swagger parsing support, add the legacy module.  Since it depends on `swagger-parser`, you don't need to include both:
@@ -63,8 +49,7 @@ To add legacy swagger parsing support, add the legacy module.  Since it depends 
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-legacy-spec-parser</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <scope>compile</scope>
+  <version>1.0.0</version>
 </dependency>
 
 ```
@@ -73,7 +58,7 @@ To add legacy swagger parsing support, add the legacy module.  Since it depends 
 License
 -------
 
-Copyright 2014 Reverb Technologies, Inc.
+Copyright 2015 Reverb Technologies, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
