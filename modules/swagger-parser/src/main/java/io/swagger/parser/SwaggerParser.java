@@ -1,6 +1,7 @@
 package io.swagger.parser;
 
 import com.wordnik.swagger.models.Swagger;
+import com.wordnik.swagger.models.auth.AuthorizationValue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -10,6 +11,10 @@ import java.io.IOException;
 
 public class SwaggerParser {
   public Swagger read(String location) {
+    return read(location, null);
+  }
+
+  public Swagger read(String location, List<AuthorizationValue> auths) {
     if(location == null)
       return null;
 
@@ -17,7 +22,7 @@ public class SwaggerParser {
     Swagger output = null;
 
     try{
-      output = new Swagger20Parser().read(location);
+      output = new Swagger20Parser().read(location, auths);
       if(output != null)
         return output;
     }
@@ -26,7 +31,7 @@ public class SwaggerParser {
     }
     for(SwaggerParserExtension extension : parserExtensions) {
       try{
-        output = extension.read(location);
+        output = extension.read(location, auths);
         if(output != null) {
           return output;
         }

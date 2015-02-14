@@ -12,6 +12,51 @@ The goal of Swagger™ is to define a standard, language-agnostic interface to R
 
 Check out [Swagger-Spec](https://github.com/swagger-api/swagger-spec) for additional information about the Swagger project, including additional libraries with support for other languages and more. 
 
+
+### Usage
+Using the swagger-parser is simple.  Once included in your project, you can read a swagger specification from any location:
+
+```java
+import io.swagger.parser.SwaggerParser;
+import com.wordnik.swagger.models.Swagger;
+
+// ... your code
+
+  // read a swagger description from the petstore
+  Swagger swagger = new SwaggerParser().read("http://petstore.swagger.io/v2/swagger.json");
+```
+
+You can read from a file location as well:
+```java
+  Swagger swagger = new SwaggerParser().read("./path/to/swagger.json");
+
+```
+
+And with the swagger-compat-spec-parser module, you can read older formats, and convert them into swagger 2.0:
+```java
+  Swagger swagger = new SwaggerParser().read("http://petstore.swagger.io/api/api-docs");
+```
+
+If your swagger resource is protected, you can pass headers in the request:
+```java
+import com.wordnik.swagger.models.auth.AuthorizationValue;
+
+// ... your code
+
+  // build a authorization value
+  AuthorizationValue mySpecialHeader = new AuthorizationValue()
+    .keyName("x-special-access")  //  the name of the authorization to pass
+    .value("i-am-special")        //  the value of the authorization
+    .type("header");              //  the location, as either `header` or `query`
+
+  // or in a single constructor
+  AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
+  Swagger swagger = new SwaggerParser().read(
+    "http://petstore.swagger.io/v2/swagger.json",
+    Arrays.asList(mySpecialHeader, apiKey)
+  );
+```
+
 ### Prerequisites
 You need the following installed and available in your $PATH:
 
@@ -28,43 +73,28 @@ mvn package
 ```
 
 ### Extensions
-This project has a core artifact--`swagger-parser`, which uses Java Service Provider Inteface (SPI) so additional extensions can be added.  To read Swagger 1.0, 1.1, and 1.2 specifications, a module is included called `swagger-legacy-spec-parser`.  This reads those older versions of the spec and produces 2.0 objects.
+This project has a core artifact--`swagger-parser`, which uses Java Service Provider Inteface (SPI) so additional extensions can be added.  To read Swagger 1.0, 1.1, and 1.2 specifications, a module is included called `swagger-compat-spec-parser`.  This reads those older versions of the spec and produces 2.0 objects.
 
 To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.parser.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.parser.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
 
-### Usage in your project
+### Adding to your project
 You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central for releases.  In your dependencies:
 
 ```xml
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <scope>compile</scope>
+  <version>1.0.0</version>
 </dependency>
 
 ```
-And add a repository reference to sonatype snapshots:
 
-```xml
-<repositories>
-  <repository>
-    <id>sonatype-snapshots</id>
-    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-  </repository>
-</repositories>
-```
-
-To add legacy swagger parsing support, add the legacy module.  Since it depends on `swagger-parser`, you don't need to include both:
+To add swagger parsing support for older versions of swagger, add the `compat` module.  Since it depends on `swagger-parser`, you don't need to include both:
 ```xml
 <dependency>
   <groupId>io.swagger</groupId>
-  <artifactId>swagger-legacy-spec-parser</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <scope>compile</scope>
+  <artifactId>swagger-compat-spec-parser</artifactId>
+  <version>1.0.0</version>
 </dependency>
 
 ```
@@ -73,7 +103,7 @@ To add legacy swagger parsing support, add the legacy module.  Since it depends 
 License
 -------
 
-Copyright 2014 Reverb Technologies, Inc.
+Copyright 2015 Reverb Technologies, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

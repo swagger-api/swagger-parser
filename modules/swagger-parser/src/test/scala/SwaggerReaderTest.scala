@@ -14,6 +14,5 @@ class SwaggerReaderTestTest extends FlatSpec with Matchers {
   it should "read the uber api" in {
     val parser = new SwaggerParser()
     val swagger = parser.read("./src/test/resources/uber.json")
-    Json.prettyPrint(swagger)
   }
 }
