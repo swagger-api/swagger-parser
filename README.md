@@ -12,6 +12,51 @@ The goal of Swagger™ is to define a standard, language-agnostic interface to R
 
 Check out [Swagger-Spec](https://github.com/swagger-api/swagger-spec) for additional information about the Swagger project, including additional libraries with support for other languages and more. 
 
+
+### Usage
+Using the swagger-parser is simple.  Once included in your project, you can read a swagger specification from any location:
+
+```java
+import io.swagger.parser.SwaggerParser;
+import com.wordnik.swagger.models.Swagger;
+
+// ... your code
+
+  // read a swagger description from the petstore
+  Swagger swagger = new SwaggerParser().read("http://petstore.swagger.io/v2/swagger.json");
+```
+
+You can read from a file location as well:
+```java
+  Swagger swagger = new SwaggerParser().read("./path/to/swagger.json");
+
+```
+
+And with the swagger-compat-spec-parser module, you can read older formats, and convert them into swagger 2.0:
+```java
+  Swagger swagger = new SwaggerParser().read("http://petstore.swagger.io/api/api-docs");
+```
+
+If your swagger resource is protected, you can pass headers in the request:
+```java
+import com.wordnik.swagger.models.auth.AuthorizationValue;
+
+// ... your code
+
+  // build a authorization value
+  AuthorizationValue mySpecialHeader = new AuthorizationValue()
+    .keyName("x-special-access")  //  the name of the authorization to pass
+    .value("i-am-special")        //  the value of the authorization
+    .type("header");              //  the location, as either `header` or `query`
+
+  // or in a single constructor
+  AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
+  Swagger swagger = new SwaggerParser().read(
+    "http://petstore.swagger.io/v2/swagger.json",
+    Arrays.asList(mySpecialHeader, apiKey)
+  );
+```
+
 ### Prerequisites
 You need the following installed and available in your $PATH:
 
@@ -32,7 +77,7 @@ This project has a core artifact--`swagger-parser`, which uses Java Service Prov
 
 To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.parser.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.parser.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
 
-### Usage in your project
+### Adding to your project
 You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central for releases.  In your dependencies:
 
 ```xml
