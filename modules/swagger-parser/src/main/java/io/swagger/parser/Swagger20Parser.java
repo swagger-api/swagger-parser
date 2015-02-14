@@ -3,6 +3,7 @@ package io.swagger.parser;
 import com.wordnik.swagger.models.Swagger;
 import com.wordnik.swagger.util.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -19,13 +20,30 @@ public class Swagger20Parser implements SwaggerParserExtension {
         Yaml.mapper() :
         Json.mapper();
 
-      return location.toLowerCase().startsWith("http") ?
-        mapper.readValue(new URL(location), Swagger.class) :
-        mapper.readValue(new File(location), Swagger.class);
+      JsonNode rootNode = location.toLowerCase().startsWith("http") ?
+        mapper.readTree(new URL(location)) :
+        mapper.readTree(new File(location));
+
+      // must have swagger node set
+      JsonNode swaggerNode = rootNode.get("swagger");
+      if(swaggerNode == null)
+        return null;
+
+      return mapper.convertValue(rootNode, Swagger.class);
     }
     catch (Exception e) {
       System.out.println(e.getMessage());
+      if(System.getProperty("debugParser") != null) {
+        e.printStackTrace();
+      }
       return null;
     }
+  }
+
+  public Swagger read(JsonNode node) throws IOException {
+    if(node == null)
+      return null;
+
+    return Json.mapper().convertValue(node, Swagger.class);
   }
 }

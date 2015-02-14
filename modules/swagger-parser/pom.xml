@@ -3,13 +3,13 @@
   <parent>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
   <name>swagger-parser</name>
   <dependencies>
@@ -17,7 +17,6 @@
       <groupId>com.wordnik</groupId>
       <artifactId>swagger-core</artifactId>
       <version>${swagger-core-version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>
