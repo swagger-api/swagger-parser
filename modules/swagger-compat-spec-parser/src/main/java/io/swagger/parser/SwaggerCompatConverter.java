@@ -1,5 +1,7 @@
 package io.swagger.parser;
 
+import io.swagger.parser.util.RemoteUrl;
+
 import com.wordnik.swagger.models.*;
 import com.wordnik.swagger.models.auth.*;
 import com.wordnik.swagger.models.Model;
@@ -7,7 +9,6 @@ import com.wordnik.swagger.models.Operation;
 import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.parameters.Parameter;
 import com.wordnik.swagger.models.properties.*;
-
 import com.wordnik.swagger.util.*;
 
 // legacy models
@@ -46,12 +47,16 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
   }
 
   public Swagger read(String input) throws IOException {
+    return read(input, null);
+  }
+
+  public Swagger read(String input, List<AuthorizationValue> auths) throws IOException {
     Swagger output = null;
 
     MessageBuilder migrationMessages = new MessageBuilder();
     SwaggerLegacyParser swaggerParser = new SwaggerLegacyParser();
     ResourceListing resourceListing = null;
-    resourceListing = readResourceListing(input, migrationMessages);
+    resourceListing = readResourceListing(input, migrationMessages, auths);
 
     List<ApiDeclaration> apis = new ArrayList<ApiDeclaration>();
 
@@ -66,7 +71,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
           if(operations != null) {
             if(!readAsSingleFile) {
               // this is a single-file swagger definition
-              apiDeclaration = readDeclaration(input, migrationMessages);
+              apiDeclaration = readDeclaration(input, migrationMessages, auths);
               readAsSingleFile = true; // avoid doing this again
             }
           }
@@ -97,7 +102,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             if(location.indexOf(".{format}") != -1) {
               location = location.replaceAll("\\.\\{format\\}", ".json");
             }
-            apiDeclaration = readDeclaration(location, migrationMessages);
+            apiDeclaration = readDeclaration(location, migrationMessages, auths);
           }
           if(apiDeclaration != null) {
             apis.add(apiDeclaration);
@@ -109,12 +114,13 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     return output;
   }
 
-  public ResourceListing readResourceListing(String input, MessageBuilder messages) {
+  public ResourceListing readResourceListing(String input, MessageBuilder messages, List<AuthorizationValue> auths) {
     ResourceListing output = null;
     JsonNode jsonNode = null;
     try {
       if(input.startsWith("http")) {
-        jsonNode = Json.mapper().readTree(new URL(input));
+        String json = RemoteUrl.urlToString(input, auths);
+        jsonNode = Json.mapper().readTree(json);
       }
       else {
         jsonNode = Json.mapper().readTree(new File(input));
@@ -354,12 +360,13 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     return output;
   }
 
-  public ApiDeclaration readDeclaration(String input, MessageBuilder messages) {
+  public ApiDeclaration readDeclaration(String input, MessageBuilder messages, List<AuthorizationValue> auths) {
     ApiDeclaration output = null;
     try {
       JsonNode jsonNode = null;
       if(input.startsWith("http")) {
-        jsonNode = Json.mapper().readTree(new URL(input));
+        String json = RemoteUrl.urlToString(input, auths);
+        jsonNode = Json.mapper().readTree(json);
       }
       else {
         jsonNode = Json.mapper().readTree(new java.io.File(input));
