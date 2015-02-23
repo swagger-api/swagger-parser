@@ -180,7 +180,8 @@
   </modules>
   <properties>
     <scala-version>2.10.0</scala-version>
-    <swagger-core-version>1.5.1-M1</swagger-core-version>
+    <slf4j-version>1.6.3</slf4j-version>
+    <swagger-core-version>1.5.2-M1-SNAPSHOT</swagger-core-version>
     <junit-version>4.8.1</junit-version>
     <scala-test-version>2.1.3</scala-test-version>
   </properties>
