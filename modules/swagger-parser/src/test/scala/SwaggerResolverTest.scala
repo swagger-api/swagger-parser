@@ -44,4 +44,18 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     ref.get$ref() should equal("#/definitions/Tag")
     swagger.getDefinitions().get("Tag") should not be (null)
   }
+
+  it should "resolve an map remote model property definition" in {
+    val swagger = new Swagger()
+    swagger.addDefinition(
+      "Sample", new ModelImpl()
+        .property("remoteRef", new MapProperty(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag"))))
+    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
+    prop.isInstanceOf[MapProperty] should be (true)
+    val ap = prop.asInstanceOf[MapProperty]
+    val ref = ap.getAdditionalProperties().asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
 }

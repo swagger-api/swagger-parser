@@ -144,6 +144,16 @@ public class SwaggerResolver {
                 }
               }
             }
+            else if(property instanceof MapProperty) {
+              MapProperty mp = (MapProperty) property;
+              if(mp.getAdditionalProperties() != null && mp.getAdditionalProperties() instanceof RefProperty) {
+                RefProperty ref = (RefProperty)mp.getAdditionalProperties();
+                if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
+                  LOGGER.debug("added reference to " + ref.get$ref());
+                  toResolve.put(ref.get$ref(), ref);
+                }                
+              }
+            }
           }
         }
       }
