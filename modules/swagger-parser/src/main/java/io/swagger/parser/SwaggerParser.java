@@ -11,10 +11,10 @@ import java.io.IOException;
 
 public class SwaggerParser {
   public Swagger read(String location) {
-    return read(location, null);
+    return read(location, null, true);
   }
 
-  public Swagger read(String location, List<AuthorizationValue> auths) {
+  public Swagger read(String location, List<AuthorizationValue> auths, boolean resolve) {
     if(location == null)
       return null;
 
@@ -24,7 +24,7 @@ public class SwaggerParser {
     try{
       output = new Swagger20Parser().read(location, auths);
       if(output != null)
-        return output;
+        return new SwaggerResolver().resolve(output, auths);
     }
     catch (IOException e) {
       // continue;
