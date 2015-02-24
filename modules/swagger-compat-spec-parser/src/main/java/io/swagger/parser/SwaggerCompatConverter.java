@@ -52,7 +52,6 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
   public Swagger read(String input, List<AuthorizationValue> auths) throws IOException {
     Swagger output = null;
-
     MessageBuilder migrationMessages = new MessageBuilder();
     SwaggerLegacyParser swaggerParser = new SwaggerLegacyParser();
     ResourceListing resourceListing = null;
@@ -422,7 +421,13 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     String basePath = null;
 
     for(ApiDeclaration apiDeclaration : apiDeclarations) {
-      String tag = apiDeclaration.getResourcePath();
+      String tag;
+      if (apiDeclaration.getApiListingRef() != null) {
+        String refPath = apiDeclaration.getApiListingRef().getPath();
+        tag = refPath.substring(refPath.lastIndexOf("/") + 1);
+      } else {
+        tag = apiDeclaration.getResourcePath();
+      }
       if(tag != null) {
         tag = tag.replaceAll("/", "");
       }
