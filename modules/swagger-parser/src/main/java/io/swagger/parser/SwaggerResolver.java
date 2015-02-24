@@ -4,6 +4,7 @@ import io.swagger.parser.util.RemoteUrl;
 
 import com.wordnik.swagger.util.Json;
 import com.wordnik.swagger.models.*;
+import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.properties.*;
 import com.wordnik.swagger.models.auth.AuthorizationValue;
 
@@ -18,6 +19,8 @@ import java.io.IOException;
 
 public class SwaggerResolver {
   Logger LOGGER = LoggerFactory.getLogger(SwaggerResolver.class);
+  protected Swagger swagger;
+  protected Map<String, ResolutionContext> resolutionMap = new HashMap<String, ResolutionContext>();
 
   protected ResolverOptions opts;
   public SwaggerResolver(){}
@@ -28,30 +31,23 @@ public class SwaggerResolver {
     if(swagger == null)
       return null;
 
-    Map<String, Object> toResolve = new HashMap<String, Object>();
+    this.swagger = swagger;
 
-    detectModelRefs(swagger, toResolve);
-
-    applyResolutions(swagger, toResolve, auths);
-    // JsonNode node = Json.mapper().convertValue(swagger, JsonNode.class);
-
-    // // models
-    // JsonNode definitions = node.get("definitions");
-    // if(definitions != null && definitions instanceof ObjectNode) {
-    //   ObjectNode on = (ObjectNode)definitions;
-
-    // }
+    // models
+    detectModelRefs();
 
     // operations
+    detectOperationRefs();
 
-    return swagger;
+    applyResolutions(auths);
+    return this.swagger;
   }
 
-  public void applyResolutions(Swagger swagger, Map<String, Object> toResolve, List<AuthorizationValue> auths) {
+  public void applyResolutions(List<AuthorizationValue> auths) {
     // hosts to call
     Map<String, List<Object>> hostToObjectMap = new HashMap<String, List<Object>>();
 
-    for(String path : toResolve.keySet()) {
+    for(String path : resolutionMap.keySet()) {
       String[] parts = path.split("#");
       if(parts.length == 2) {
         String host = parts[0];
@@ -61,8 +57,10 @@ public class SwaggerResolver {
           objectList = new ArrayList<Object>();
           hostToObjectMap.put(host, objectList);
         }
-        Object mapping = toResolve.get(path);
-        
+        ResolutionContext ctx = resolutionMap.get(path);
+
+        Object mapping = ctx.object;
+        Object target = ctx.parent;
         try {
           String contents = new RemoteUrl().urlToString(host, auths);
           JsonNode location = null;
@@ -88,6 +86,14 @@ public class SwaggerResolver {
                 swagger.addDefinition(locationName, model);
               }
             }
+            else if(target instanceof Parameter) {
+              if(mapping instanceof RefModel) {
+                Model model = Json.mapper().convertValue(location, Model.class);
+                RefModel ref = (RefModel) mapping;
+                ref.set$ref(locationName);
+                swagger.addDefinition(locationName, model);
+              }
+            }
           }
         }
         catch(Exception e) {
@@ -96,10 +102,34 @@ public class SwaggerResolver {
         }
       }
     }
-    // Json.prettyPrint(toResolve);
+    // Json.prettyPrint(resolutionMap);
   }
 
-  public void detectModelRefs(Swagger swagger, Map<String, Object> toResolve) {
+  public void detectOperationRefs() {
+    Map<String, Path> paths = swagger.getPaths();
+    if(paths == null) return;
+
+    for(String pathName : paths.keySet()) {
+      Path path = paths.get(pathName);
+      List<Operation> operations = path.getOperations();
+      for(Operation operation : operations) {
+        for(Parameter parameter : operation.getParameters()) {
+          if(parameter instanceof BodyParameter) {
+            BodyParameter bp = (BodyParameter) parameter;
+            if(bp.getSchema() != null && bp.getSchema() instanceof RefModel) {
+              RefModel ref = (RefModel)bp.getSchema();
+              if(ref.get$ref().startsWith("http")) {
+                LOGGER.debug("added reference to " + ref.get$ref());
+                resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, bp, "ref"));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public void detectModelRefs() {
     Map<String, Model> models = swagger.getDefinitions();
     if(models != null) {
       for(String modelName : models.keySet()) {
@@ -109,7 +139,7 @@ public class SwaggerResolver {
           RefModel ref = (RefModel) model;
           if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
             LOGGER.debug("added reference to " + ref.get$ref());
-            toResolve.put(ref.get$ref(), ref);
+            resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, swagger.getDefinitions(), "ref"));
           }
         }
         else if(model instanceof ArrayModel) {
@@ -118,7 +148,7 @@ public class SwaggerResolver {
             RefProperty ref = (RefProperty)arrayModel.getItems();
             if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
               LOGGER.debug("added reference to " + ref.get$ref());
-              toResolve.put(ref.get$ref(), ref);
+              resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, swagger.getDefinitions(), "ref"));
             }
           }
         }
@@ -131,7 +161,7 @@ public class SwaggerResolver {
               RefProperty ref = (RefProperty)property;
               if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
                 LOGGER.debug("added reference to " + ref.get$ref());
-                toResolve.put(ref.get$ref(), ref);
+                resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, impl, "ref"));
               }
             }
             else if(property instanceof ArrayProperty) {
@@ -140,7 +170,7 @@ public class SwaggerResolver {
                 RefProperty ref = (RefProperty)arrayProperty.getItems();
                 if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
                   LOGGER.debug("added reference to " + ref.get$ref());
-                  toResolve.put(ref.get$ref(), ref);
+                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, arrayProperty, "ref"));
                 }
               }
             }
@@ -150,13 +180,24 @@ public class SwaggerResolver {
                 RefProperty ref = (RefProperty)mp.getAdditionalProperties();
                 if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
                   LOGGER.debug("added reference to " + ref.get$ref());
-                  toResolve.put(ref.get$ref(), ref);
+                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, mp, "ref"));
                 }                
               }
             }
           }
         }
       }
+    }
+  }
+
+  static class ResolutionContext {
+    private Object object, parent;
+    private String scope;
+
+    public ResolutionContext(Object object, Object parent, String scope) {
+      this.object = object;
+      this.parent = parent;
+      this.scope = scope;
     }
   }
 }
