@@ -62,7 +62,11 @@ public class SwaggerResolver {
         Object mapping = ctx.object;
         Object target = ctx.parent;
         try {
-          String contents = new RemoteUrl().urlToString(host, auths);
+          String contents = null;
+          if(host.startsWith("http"))
+            contents = new RemoteUrl().urlToString(host, auths);
+          else
+            contents = Json.mapper().writeValueAsString(swagger);
           JsonNode location = null;
           String locationName = null;
           if(contents != null) {
@@ -94,6 +98,24 @@ public class SwaggerResolver {
                 swagger.addDefinition(locationName, model);
               }
             }
+            else if(target instanceof Operation) {
+
+              // get the operation position
+              Operation operation = (Operation) target;
+              int position = 0;
+              for(Parameter param : operation.getParameters()) {
+
+                if(param instanceof RefParameter) {
+                  RefParameter ref = (RefParameter) param;
+                  if(ref.getSimpleRef().equals(locationName)) {
+                    // found a match!
+                    Parameter remoteParam = Json.mapper().convertValue(location, Parameter.class);
+                    operation.getParameters().set(position, remoteParam);
+                  }
+                }
+                position += 1;
+              }
+            }
           }
         }
         catch(Exception e) {
@@ -102,7 +124,6 @@ public class SwaggerResolver {
         }
       }
     }
-    // Json.prettyPrint(resolutionMap);
   }
 
   public void detectOperationRefs() {
@@ -113,14 +134,35 @@ public class SwaggerResolver {
       Path path = paths.get(pathName);
       List<Operation> operations = path.getOperations();
       for(Operation operation : operations) {
-        for(Parameter parameter : operation.getParameters()) {
-          if(parameter instanceof BodyParameter) {
-            BodyParameter bp = (BodyParameter) parameter;
-            if(bp.getSchema() != null && bp.getSchema() instanceof RefModel) {
-              RefModel ref = (RefModel)bp.getSchema();
-              if(ref.get$ref().startsWith("http")) {
-                LOGGER.debug("added reference to " + ref.get$ref());
-                resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, bp, "ref"));
+        if(operation.getParameters() != null) {
+          for(Parameter parameter : operation.getParameters()) {
+            if(parameter instanceof BodyParameter) {
+              BodyParameter bp = (BodyParameter) parameter;
+              if(bp.getSchema() != null && bp.getSchema() instanceof RefModel) {
+                RefModel ref = (RefModel)bp.getSchema();
+                if(ref.get$ref().startsWith("http")) {
+                  LOGGER.debug("added reference to " + ref.get$ref());
+                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, bp, "ref"));
+                }
+              }
+            }
+            else if(parameter instanceof RefParameter) {
+              RefParameter ref = (RefParameter) parameter;
+              LOGGER.debug("added reference to " + ref.get$ref());
+              resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, operation, "inline"));
+            }
+          }
+        }
+        if(operation.getResponses() != null) {
+          for(String responseCode : operation.getResponses().keySet()) {
+            Response response = operation.getResponses().get(responseCode);
+            if(response.getSchema() != null) {
+              Property schema = response.getSchema();
+              if(schema instanceof RefProperty) {
+                RefProperty ref = (RefProperty) schema;
+                if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
+                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, response, "ref"));
+                }
               }
             }
           }

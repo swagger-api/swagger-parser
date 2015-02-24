@@ -16,7 +16,6 @@ import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class SwaggerResolverTest extends FlatSpec with Matchers {
-
   it should "resolve a simple remote model property definition" in {
     val swagger = new Swagger()
     swagger.addDefinition(
@@ -60,7 +59,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     swagger.getDefinitions().get("Tag") should not be (null)
   }
 
-  it should "resolve operation remote refs" in {
+  it should "resolve operation bodyparam remote refs" in {
     val swagger = new Swagger()
     swagger.path("/fun", new Path()
       .get(new Operation()
@@ -68,6 +67,39 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
           .schema(new RefModel("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
 
     val resolved = new SwaggerResolver().resolve(swagger, null)
-    Json.prettyPrint(swagger)
+    val param = swagger.getPaths().get("/fun").getGet().getParameters().get(0).asInstanceOf[BodyParameter]
+    val ref = param.getSchema().asInstanceOf[RefModel]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
+
+  it should "resolve response remote refs" in {
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+        .response(200, new Response()
+          .schema(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
+    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
+    val ref = response.getSchema.asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
+
+  it should "resolve operation parameter remote refs" in {
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+        .parameter(new RefParameter("#/parameters/SampleParameter"))))
+
+    swagger.parameter("SampleParameter", new QueryParameter()
+      .name("skip")
+      .property(new IntegerProperty()))
+
+    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val params = swagger.getPaths().get("/fun").getGet().getParameters()
+    params.size() should be (1)
+    val param = params.get(0).asInstanceOf[QueryParameter]
+    param.getName() should be ("skip")
   }
 }
