@@ -180,7 +180,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
     output.setName(param.getName());
     output.setDescription(param.getDescription());
-    output.setRequired(param.getRequired());
+    if(param.getRequired() != null)
+      output.setRequired(param.getRequired());
 
     Property property = null;
     String type = param.getType() == null ? null : param.getType().toString();
