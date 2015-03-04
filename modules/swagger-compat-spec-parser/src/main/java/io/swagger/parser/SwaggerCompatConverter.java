@@ -180,7 +180,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
     output.setName(param.getName());
     output.setDescription(param.getDescription());
-    output.setRequired(param.getRequired());
+    if(param.getRequired() != null)
+      output.setRequired(param.getRequired());
 
     Property property = null;
     String type = param.getType() == null ? null : param.getType().toString();
@@ -264,6 +265,12 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     if("array".equals(type)) {
       ArrayProperty am = new ArrayProperty();
       Items items = obj.getItems();
+      if(items == null) {
+        System.out.println("Error! Missing array type for property!  Assuming `object` -- please fix your spec");
+        Json.prettyPrint(obj);
+        items = new Items();
+        items.setType("object");
+      }
       type = items.getType() == null ? null : items.getType().toString();
       format = items.getFormat() == null ? null : items.getFormat().toString();
 
