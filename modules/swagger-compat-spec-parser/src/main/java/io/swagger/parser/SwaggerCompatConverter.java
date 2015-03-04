@@ -265,6 +265,12 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     if("array".equals(type)) {
       ArrayProperty am = new ArrayProperty();
       Items items = obj.getItems();
+      if(items == null) {
+        System.out.println("Error! Missing array type for property!  Assuming `object` -- please fix your spec");
+        Json.prettyPrint(obj);
+        items = new Items();
+        items.setType("object");
+      }
       type = items.getType() == null ? null : items.getType().toString();
       format = items.getFormat() == null ? null : items.getFormat().toString();
 
