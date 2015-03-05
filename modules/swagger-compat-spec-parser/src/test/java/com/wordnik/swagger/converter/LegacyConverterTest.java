@@ -3,6 +3,7 @@ package com.wordnik.swagger.converter;
 import io.swagger.parser.SwaggerCompatConverter;
 
 import com.wordnik.swagger.models.*;
+import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.auth.*;
 import com.wordnik.swagger.util.Json;
 
@@ -75,5 +76,14 @@ public class LegacyConverterTest {
 
     assertEquals(oauth2Scopes.size(), 1);
     assertEquals(oauth2Scopes.get(0), "test:anything");
+
+    Operation fetchOperation = swagger.getPaths().get("/pet/findByStatus").getGet();
+    QueryParameter param = (QueryParameter)fetchOperation.getParameters().get(0);
+    assertEquals(param.getDefaultValue(), "available");
+
+    List<String> _enum = param.getEnum();
+    assertEquals(_enum.get(0), "available");
+    assertEquals(_enum.get(1), "pending");
+    assertEquals(_enum.get(2), "sold");
   }
 }
