@@ -162,20 +162,35 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
   public Parameter convertParameter(io.swagger.models.apideclaration.Parameter param) {
     Parameter output = null;
+    List<String> _enum = param.getEnumValues();
+
     if(ParamType.PATH.equals(param.getParamType())) {
-      output = new PathParameter();
+      PathParameter p = new PathParameter();
+      p.setDefaultValue(param.getDefaultValue());
+      p.setEnum(_enum);
+      output = p;
     }
     else if(ParamType.QUERY.equals(param.getParamType())) {
-      output = new QueryParameter();
+      QueryParameter p = new QueryParameter();
+      p.setDefaultValue(param.getDefaultValue());
+      p.setEnum(_enum);
+      output = p;      
     }
     else if(ParamType.HEADER.equals(param.getParamType())) {
-      output = new HeaderParameter();
+      HeaderParameter p = new HeaderParameter();
+      p.setDefaultValue(param.getDefaultValue());
+      p.setEnum(_enum);
+      output = p;
     }
     else if(ParamType.BODY.equals(param.getParamType())) {
-      output = new BodyParameter();
+      BodyParameter p = new BodyParameter();
+      output = p;
     }
     else if(ParamType.FORM.equals(param.getParamType())) {
-      output = new FormParameter();
+      FormParameter p = new FormParameter();
+      p.setDefaultValue(param.getDefaultValue());
+      p.setEnum(_enum);
+      output = p;
     }
 
     output.setName(param.getName());
