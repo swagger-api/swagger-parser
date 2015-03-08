@@ -63,6 +63,24 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <excludes>
+            <exclude>**/logback.xml</exclude>
+          </excludes>
+          <archive>
+            <manifestEntries>
+              <mode>development</mode>
+              <url>${project.url}</url>
+              <implementation-version>${project.version}</implementation-version>
+              <package>com.wordnik</package>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>1.7</source>
