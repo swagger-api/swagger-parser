@@ -8,7 +8,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 
 @RunWith(classOf[JUnitRunner])
-class SwaggerReaderTestTest extends FlatSpec with Matchers {
+class SwaggerReaderTest extends FlatSpec with Matchers {
   val m = Json.mapper()
 
   it should "read the uber api" in {
