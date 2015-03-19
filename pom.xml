@@ -197,6 +197,7 @@
     <module>modules/swagger-compat-spec-parser</module>
   </modules>
   <properties>
+    <commons-io-version>2.4</commons-io-version>
     <scala-version>2.10.0</scala-version>
     <slf4j-version>1.6.3</slf4j-version>
     <swagger-core-version>1.5.3-M1-SNAPSHOT</swagger-core-version>
