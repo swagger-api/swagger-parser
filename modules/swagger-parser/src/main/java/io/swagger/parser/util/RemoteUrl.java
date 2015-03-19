@@ -5,8 +5,49 @@ import com.wordnik.swagger.models.auth.AuthorizationValue;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.security.*;
+import javax.net.ssl.*;
+import java.security.cert.X509Certificate;
 
 public class RemoteUrl {
+  static {
+    disableSslVerification();
+  }
+
+  private static void disableSslVerification() {
+    try {
+      // Create a trust manager that does not validate certificate chains
+      TrustManager[] trustAllCerts = new TrustManager[] {
+        new X509TrustManager() {
+          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            return null;
+          }
+          public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+          public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+        }
+      };
+
+      // Install the all-trusting trust manager
+      SSLContext sc = SSLContext.getInstance("SSL");
+      sc.init(null, trustAllCerts, new java.security.SecureRandom());
+      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+      // Create all-trusting host name verifier
+      HostnameVerifier allHostsValid = new HostnameVerifier() {
+          public boolean verify(String hostname, SSLSession session) {
+              return true;
+          }
+      };
+
+      // Install the all-trusting host verifier
+      HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    } catch (KeyManagementException e) {
+      e.printStackTrace();
+    }
+  }
+
   public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {
     InputStream is = null;
     URLConnection conn = null;
@@ -44,9 +85,9 @@ public class RemoteUrl {
    
       String line;
       is = conn.getInputStream();
-      br = new BufferedReader(new InputStreamReader(is));
+      br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
       while ((line = br.readLine()) != null) {
-        sb.append(line);
+        sb.append(line).append("\n");
       }
       return sb.toString();
     }

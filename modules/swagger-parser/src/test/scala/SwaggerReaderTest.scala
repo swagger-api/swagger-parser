@@ -8,11 +8,23 @@ import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 
 @RunWith(classOf[JUnitRunner])
-class SwaggerReaderTestTest extends FlatSpec with Matchers {
+class SwaggerReaderTest extends FlatSpec with Matchers {
   val m = Json.mapper()
 
   it should "read the uber api" in {
     val parser = new SwaggerParser()
     val swagger = parser.read("./src/test/resources/uber.json")
+  }
+
+  it should "detect yaml" in {
+    val parser = new SwaggerParser()
+    val swagger = parser.read("./src/test/resources/minimal_y")
+    swagger.getSwagger() should be ("2.0")
+  }
+
+  it should "detect json" in {
+    val parser = new SwaggerParser()
+    val swagger = parser.read("./src/test/resources/minimal_y")
+    swagger.getSwagger() should be ("2.0")
   }
 }

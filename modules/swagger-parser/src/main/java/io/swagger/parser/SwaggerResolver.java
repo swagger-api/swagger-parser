@@ -197,33 +197,35 @@ public class SwaggerResolver {
         else if(model instanceof ModelImpl) {
           ModelImpl impl = (ModelImpl) model;
           Map<String, Property> properties = impl.getProperties();
-          for(String propertyName : properties.keySet()) {
-            Property property = properties.get(propertyName);
-            if(property instanceof RefProperty) {
-              RefProperty ref = (RefProperty)property;
-              if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-                LOGGER.debug("added reference to " + ref.get$ref());
-                resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, impl, "ref"));
-              }
-            }
-            else if(property instanceof ArrayProperty) {
-              ArrayProperty arrayProperty = (ArrayProperty) property;
-              if(arrayProperty.getItems() != null && arrayProperty.getItems() instanceof RefProperty) {
-                RefProperty ref = (RefProperty)arrayProperty.getItems();
+          if(properties != null) {
+            for(String propertyName : properties.keySet()) {
+              Property property = properties.get(propertyName);
+              if(property instanceof RefProperty) {
+                RefProperty ref = (RefProperty)property;
                 if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
                   LOGGER.debug("added reference to " + ref.get$ref());
-                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, arrayProperty, "ref"));
+                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, impl, "ref"));
                 }
               }
-            }
-            else if(property instanceof MapProperty) {
-              MapProperty mp = (MapProperty) property;
-              if(mp.getAdditionalProperties() != null && mp.getAdditionalProperties() instanceof RefProperty) {
-                RefProperty ref = (RefProperty)mp.getAdditionalProperties();
-                if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-                  LOGGER.debug("added reference to " + ref.get$ref());
-                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, mp, "ref"));
-                }                
+              else if(property instanceof ArrayProperty) {
+                ArrayProperty arrayProperty = (ArrayProperty) property;
+                if(arrayProperty.getItems() != null && arrayProperty.getItems() instanceof RefProperty) {
+                  RefProperty ref = (RefProperty)arrayProperty.getItems();
+                  if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
+                    LOGGER.debug("added reference to " + ref.get$ref());
+                    resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, arrayProperty, "ref"));
+                  }
+                }
+              }
+              else if(property instanceof MapProperty) {
+                MapProperty mp = (MapProperty) property;
+                if(mp.getAdditionalProperties() != null && mp.getAdditionalProperties() instanceof RefProperty) {
+                  RefProperty ref = (RefProperty)mp.getAdditionalProperties();
+                  if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
+                    LOGGER.debug("added reference to " + ref.get$ref());
+                    resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, mp, "ref"));
+                  }                
+                }
               }
             }
           }
