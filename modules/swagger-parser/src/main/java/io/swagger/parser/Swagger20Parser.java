@@ -9,6 +9,8 @@ import io.swagger.parser.util.RemoteUrl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -19,20 +21,25 @@ public class Swagger20Parser implements SwaggerParserExtension {
     System.out.println("reading from " + location);
 
     try {
-      // TODO make smarter
-      ObjectMapper mapper = location.toLowerCase().endsWith(".yaml") ?
-        Yaml.mapper() :
-        Json.mapper();
-
+      ObjectMapper mapper = null;
       JsonNode rootNode = null;
+      String data = null;
 
-      if(location.toLowerCase().startsWith("http")) {
-        String json = RemoteUrl.urlToString(location, auths);
-        rootNode = mapper.readTree(json);
+      if(location.toLowerCase().startsWith("http"))
+        data = RemoteUrl.urlToString(location, auths);
+      else
+        data = FileUtils.readFileToString(new File(location), "UTF-8");
+
+      if(data != null) {
+        if(data.trim().startsWith("{"))
+          mapper = Json.mapper();
+        else
+          mapper = Yaml.mapper();
       }
-      else {
-        rootNode = mapper.readTree(new File(location));
-      }
+      else
+        return null;
+
+      rootNode = mapper.readTree(data);
 
       // must have swagger node set
       JsonNode swaggerNode = rootNode.get("swagger");

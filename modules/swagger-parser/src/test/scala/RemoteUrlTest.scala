@@ -25,6 +25,6 @@ class RemoteUrlTest extends FlatSpec with Matchers {
 
   it should "read yaml" in {
     val output = RemoteUrl.urlToString("http://petstore.swagger.io/v2/swagger.yaml", null)
-    println(output)
+    output.indexOf("swagger: \"2.0\"") should be > (0)
   }
 }
