@@ -44,7 +44,7 @@ public class RemoteUrl {
    
       String line;
       is = conn.getInputStream();
-      br = new BufferedReader(new InputStreamReader(is));
+      br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
       while ((line = br.readLine()) != null) {
         sb.append(line).append("\n");
       }
