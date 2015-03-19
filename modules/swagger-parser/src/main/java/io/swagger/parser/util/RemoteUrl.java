@@ -46,7 +46,7 @@ public class RemoteUrl {
       is = conn.getInputStream();
       br = new BufferedReader(new InputStreamReader(is));
       while ((line = br.readLine()) != null) {
-        sb.append(line);
+        sb.append(line).append("\n");
       }
       return sb.toString();
     }

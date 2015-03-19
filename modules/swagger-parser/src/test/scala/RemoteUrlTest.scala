@@ -14,11 +14,17 @@ import scala.collection.JavaConverters._
 class RemoteUrlTest extends FlatSpec with Matchers {
   it should "read a remote URL" in {
     val output = RemoteUrl.urlToString("http://petstore.swagger.io/v2/pet/3", null)
-    println(output)
+    output should not be (null)
   }
+
   it should "set a header" in {
     val av = new AuthorizationValue("accept", "application/xml", "header")
     val output = RemoteUrl.urlToString("http://petstore.swagger.io/v2/pet/3", List(av).asJava)
+    output.trim.charAt(0) should be ('<')
+  }
+
+  it should "read yaml" in {
+    val output = RemoteUrl.urlToString("http://petstore.swagger.io/v2/swagger.yaml", null)
     println(output)
   }
 }
