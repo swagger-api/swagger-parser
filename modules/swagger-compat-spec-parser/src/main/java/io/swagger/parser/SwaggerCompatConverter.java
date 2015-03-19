@@ -124,6 +124,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
       else {
         jsonNode = Json.mapper().readTree(new File(input));
       }
+      if(jsonNode.get("swaggerVersion") == null)
+        return null;
       ResourceListingMigrator migrator = new ResourceListingMigrator();
       JsonNode transformed = migrator.migrate(messages, jsonNode);
       output = Json.mapper().convertValue(transformed, ResourceListing.class);
@@ -314,10 +316,14 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
       Property i = PropertyBuilder.build(type, format, args);
       if(i != null)
         output = i;
-      else if(obj.getRef() != null)
-        output = new RefProperty(obj.getRef());
-      else
-        output = new RefProperty(type);
+      else {
+        if(obj.getRef() != null)
+          output = new RefProperty(obj.getRef());
+        else if(type != null)
+          output = new RefProperty(type);
+        else
+          output = new RefProperty("void");
+      }
     }
 
     return output;

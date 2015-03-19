@@ -1,0 +1,19 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Pets Store"
+  },
+  "paths": {
+    "/pets": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all the pets"
+          }
+        }
+      }
+    }
+  }
+}

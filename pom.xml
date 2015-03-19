@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser-project</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <packaging>pom</packaging>
   <name>swagger-parser-project</name>
   <developers>
@@ -61,6 +61,24 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <excludes>
+            <exclude>**/logback.xml</exclude>
+          </excludes>
+          <archive>
+            <manifestEntries>
+              <mode>development</mode>
+              <url>${project.url}</url>
+              <implementation-version>${project.version}</implementation-version>
+              <package>com.wordnik</package>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -179,6 +197,7 @@
     <module>modules/swagger-compat-spec-parser</module>
   </modules>
   <properties>
+    <commons-io-version>2.4</commons-io-version>
     <scala-version>2.10.0</scala-version>
     <slf4j-version>1.6.3</slf4j-version>
     <swagger-core-version>1.5.3-M1-SNAPSHOT</swagger-core-version>

@@ -188,7 +188,7 @@
           "method": "DELETE",
           "summary": "Deletes a pet",
           "notes": "",
-          "type": "void",
+          "type": null,
           "nickname": "deletePet",
           "authorizations": {
             "oauth2": [
@@ -205,12 +205,6 @@
               "required": true,
               "type": "string",
               "paramType": "path"
-            }
-          ],
-          "responseMessages": [
-            {
-              "code": 400,
-              "message": "Invalid pet value"
             }
           ]
         }

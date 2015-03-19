@@ -86,4 +86,11 @@ public class LegacyConverterTest {
     assertEquals(_enum.get(1), "pending");
     assertEquals(_enum.get(2), "sold");
   }
+
+  @Test
+  public void failConversionTest() throws Exception {
+    Swagger swagger = converter.read("src/test/resources/specs/v1_2/empty.json");
+
+    assertNull(swagger);
+  }
 }

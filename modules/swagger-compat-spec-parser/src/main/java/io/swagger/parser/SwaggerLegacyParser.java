@@ -1,6 +1,7 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.wordnik.swagger.util.Json;
+
 import io.swagger.deserializer.ApiDeclarationDeserializer;
 import io.swagger.deserializer.ResourceListingDeserializer;
 import io.swagger.io.Authentication;
@@ -17,6 +18,8 @@ import io.swagger.transform.migrate.ApiDeclarationMigrator;
 import io.swagger.transform.migrate.ResourceListingMigrator;
 import io.swagger.validate.ApiDeclarationJsonValidator;
 import io.swagger.validate.ResourceListingJsonValidator;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
