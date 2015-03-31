@@ -78,7 +78,7 @@ public class RemoteUrl {
         }
       }
       else {
-        conn = new URL(url).openConnection();
+        conn = new URL(URLEncoder.encode(url, "UTF-8")).openConnection();
       }
 
       StringBuilder sb = new StringBuilder();
