@@ -27,4 +27,10 @@ class SwaggerReaderTest extends FlatSpec with Matchers {
     val swagger = parser.read("./src/test/resources/minimal_y")
     swagger.getSwagger() should be ("2.0")
   }
+
+  it should "read the issue 16 resource" in {
+    val parser = new SwaggerParser()
+    val swagger = parser.read("./src/test/resources/issue_16.yaml")
+    Json.prettyPrint(swagger)
+  }
 }
