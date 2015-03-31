@@ -78,7 +78,17 @@ public class RemoteUrl {
         }
       }
       else {
-        conn = new URL(URLEncoder.encode(url, "UTF-8")).openConnection();
+        URL urltouse = new URL(url);
+        //This step properly escapes the path of the URL
+        URI uri = new URI(
+            urltouse.getProtocol(),
+            urltouse.getAuthority(),
+            urltouse.getHost(),
+            urltouse.getPort(),
+            urltouse.getPath(),
+            urltouse.getQuery(),
+            null);
+        conn = uri.toURL().openConnection();
       }
 
       StringBuilder sb = new StringBuilder();
