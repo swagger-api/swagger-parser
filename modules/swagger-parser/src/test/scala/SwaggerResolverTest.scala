@@ -73,18 +73,6 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     swagger.getDefinitions().get("Tag") should not be (null)
   }
 
-  it should "resolve response remote refs" in {
-    val swagger = new Swagger()
-    swagger.path("/fun", new Path()
-      .get(new Operation()
-        .response(200, new Response()
-          .schema(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
-    val resolved = new SwaggerResolver().resolve(swagger, null)
-    val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
-    val ref = response.getSchema.asInstanceOf[RefProperty]
-    ref.get$ref() should equal("#/definitions/Tag")
-    swagger.getDefinitions().get("Tag") should not be (null)
-  }
 
   it should "resolve operation parameter remote refs" in {
     val swagger = new Swagger()
@@ -102,4 +90,42 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     val param = params.get(0).asInstanceOf[QueryParameter]
     param.getName() should be ("skip")
   }
+
+  it should "resolve operation body parameter remote refs" in {
+    val schema = new ModelImpl()
+
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+        .parameter(new RefParameter("#/parameters/SampleParameter"))))
+
+    swagger.path("/times", new Path()
+      .get(new Operation()
+        .parameter(new RefParameter("#/parameters/SampleParameter"))))
+
+    swagger.parameter("SampleParameter", new BodyParameter()
+      .name("skip")
+      .schema(schema))
+
+
+    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val params = swagger.getPaths().get("/fun").getGet().getParameters()
+    params.size() should be (1)
+    val param = params.get(0).asInstanceOf[BodyParameter]
+    param.getName() should be ("skip")
+  }
+
+  it should "resolve response remote refs" in {
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+        .response(200, new Response()
+          .schema(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
+    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
+    val ref = response.getSchema.asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
 }
+
