@@ -319,10 +319,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
       else {
         if(obj.getRef() != null)
           output = new RefProperty(obj.getRef());
-        else if(type != null)
+        else if(type != null && !type.equals("void"))
           output = new RefProperty(type);
-        else
-          output = new RefProperty("void");
       }
     }
 

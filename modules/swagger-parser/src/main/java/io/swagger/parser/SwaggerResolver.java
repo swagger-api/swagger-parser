@@ -20,7 +20,7 @@ import java.io.IOException;
 public class SwaggerResolver {
   Logger LOGGER = LoggerFactory.getLogger(SwaggerResolver.class);
   protected Swagger swagger;
-  protected Map<String, ResolutionContext> resolutionMap = new HashMap<String, ResolutionContext>();
+  protected Map<String, List<ResolutionContext>> resolutionMap = new HashMap<String, List<ResolutionContext>>();
 
   protected ResolverOptions opts;
   public SwaggerResolver(){}
@@ -57,70 +57,71 @@ public class SwaggerResolver {
           objectList = new ArrayList<Object>();
           hostToObjectMap.put(host, objectList);
         }
-        ResolutionContext ctx = resolutionMap.get(path);
-
-        Object mapping = ctx.object;
-        Object target = ctx.parent;
-        try {
-          String contents = null;
-          if(host.startsWith("http"))
-            contents = new RemoteUrl().urlToString(host, auths);
-          else
-            contents = Json.mapper().writeValueAsString(swagger);
-          JsonNode location = null;
-          String locationName = null;
-          if(contents != null) {
-            location = Json.mapper().readTree(contents);
-            String[] objectPath = definitionPath.split("/");
-            for(String objectPathPart : objectPath) {
-              LOGGER.debug("getting part " + objectPathPart);
-              if(objectPathPart.length() > 0 && location != null) {
-                location = location.get(objectPathPart);
-                locationName = objectPathPart;
-              }
-            }
-          }
-          if(location != null) {
-            // convert the node to the proper type
-            if(mapping instanceof Property) {
-              Model model = Json.mapper().convertValue(location, Model.class);
-              if(mapping instanceof RefProperty) {
-                RefProperty ref = (RefProperty) mapping;
-                ref.set$ref(locationName);
-                swagger.addDefinition(locationName, model);
-              }
-            }
-            else if(target instanceof Parameter) {
-              if(mapping instanceof RefModel) {
-                Model model = Json.mapper().convertValue(location, Model.class);
-                RefModel ref = (RefModel) mapping;
-                ref.set$ref(locationName);
-                swagger.addDefinition(locationName, model);
-              }
-            }
-            else if(target instanceof Operation) {
-
-              // get the operation position
-              Operation operation = (Operation) target;
-              int position = 0;
-              for(Parameter param : operation.getParameters()) {
-
-                if(param instanceof RefParameter) {
-                  RefParameter ref = (RefParameter) param;
-                  if(ref.getSimpleRef().equals(locationName)) {
-                    // found a match!
-                    Parameter remoteParam = Json.mapper().convertValue(location, Parameter.class);
-                    operation.getParameters().set(position, remoteParam);
-                  }
+        List<ResolutionContext> contexts = resolutionMap.get(path);
+        for(ResolutionContext ctx : contexts) {
+          Object mapping = ctx.object;
+          Object target = ctx.parent;
+          try {
+            String contents = null;
+            if(host.startsWith("http"))
+              contents = new RemoteUrl().urlToString(host, auths);
+            else
+              contents = Json.mapper().writeValueAsString(swagger);
+            JsonNode location = null;
+            String locationName = null;
+            if(contents != null) {
+              location = Json.mapper().readTree(contents);
+              String[] objectPath = definitionPath.split("/");
+              for(String objectPathPart : objectPath) {
+                LOGGER.debug("getting part " + objectPathPart);
+                if(objectPathPart.length() > 0 && location != null) {
+                  location = location.get(objectPathPart);
+                  locationName = objectPathPart;
                 }
-                position += 1;
+              }
+            }
+            if(location != null) {
+              // convert the node to the proper type
+              if(mapping instanceof Property) {
+                Model model = Json.mapper().convertValue(location, Model.class);
+                if(mapping instanceof RefProperty) {
+                  RefProperty ref = (RefProperty) mapping;
+                  ref.set$ref(locationName);
+                  swagger.addDefinition(locationName, model);
+                }
+              }
+              else if(target instanceof Parameter) {
+                if(mapping instanceof RefModel) {
+                  Model model = Json.mapper().convertValue(location, Model.class);
+                  RefModel ref = (RefModel) mapping;
+                  ref.set$ref(locationName);
+                  swagger.addDefinition(locationName, model);
+                }
+              }
+              else if(target instanceof Operation) {
+
+                // get the operation position
+                Operation operation = (Operation) target;
+                int position = 0;
+                for(Parameter param : operation.getParameters()) {
+
+                  if(param instanceof RefParameter) {
+                    RefParameter ref = (RefParameter) param;
+                    if(ref.getSimpleRef().equals(locationName)) {
+                      // found a match!
+                      Parameter remoteParam = Json.mapper().convertValue(location, Parameter.class);
+                      operation.getParameters().set(position, remoteParam);
+                    }
+                  }
+                  position += 1;
+                }
               }
             }
           }
-        }
-        catch(Exception e) {
-          // failed to get it
-          e.printStackTrace();
+          catch(Exception e) {
+            // failed to get it
+            e.printStackTrace();
+          }
         }
       }
     }
@@ -140,16 +141,29 @@ public class SwaggerResolver {
               BodyParameter bp = (BodyParameter) parameter;
               if(bp.getSchema() != null && bp.getSchema() instanceof RefModel) {
                 RefModel ref = (RefModel)bp.getSchema();
-                if(ref.get$ref().startsWith("http")) {
-                  LOGGER.debug("added reference to " + ref.get$ref());
-                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, bp, "ref"));
+                String key = ref.get$ref();
+                if(key.startsWith("http")) {
+                  LOGGER.debug("added reference to " + key);
+                  List<ResolutionContext> m = resolutionMap.get(key);
+                  if(m == null) {
+                    m = new ArrayList<ResolutionContext>();
+                  }
+                  m.add(new ResolutionContext(ref, bp, "ref"));
+                  resolutionMap.put(key, m);
                 }
               }
             }
             else if(parameter instanceof RefParameter) {
               RefParameter ref = (RefParameter) parameter;
-              LOGGER.debug("added reference to " + ref.get$ref());
-              resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, operation, "inline"));
+              String key = ref.get$ref();
+              LOGGER.debug("added reference to " + ref);
+
+              List<ResolutionContext> m = resolutionMap.get(key);
+              if(m == null) {
+                m = new ArrayList<ResolutionContext>();
+              }
+              m.add(new ResolutionContext(ref, operation, "inline"));
+              resolutionMap.put(key, m);
             }
           }
         }
@@ -160,8 +174,15 @@ public class SwaggerResolver {
               Property schema = response.getSchema();
               if(schema instanceof RefProperty) {
                 RefProperty ref = (RefProperty) schema;
-                if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, response, "ref"));
+                String key = ref.get$ref();
+
+                if(key != null && key.startsWith("http")) {
+                  List<ResolutionContext> m = resolutionMap.get(key);
+                  if(m == null) {
+                    m = new ArrayList<ResolutionContext>();
+                  }
+                  m.add(new ResolutionContext(ref, response, "ref"));
+                  resolutionMap.put(key, m);
                 }
               }
             }
@@ -179,18 +200,30 @@ public class SwaggerResolver {
         Model model = models.get(modelName);
         if(model instanceof RefModel) {
           RefModel ref = (RefModel) model;
-          if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-            LOGGER.debug("added reference to " + ref.get$ref());
-            resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, swagger.getDefinitions(), "ref"));
+          String key = ref.get$ref();
+          if(key != null && key.startsWith("http")) {
+            LOGGER.debug("added reference to " + key);
+            List<ResolutionContext> m = resolutionMap.get(key);
+            if(m == null) {
+              m = new ArrayList<ResolutionContext>();
+            }
+            m.add(new ResolutionContext(ref, swagger.getDefinitions(), "ref"));
+            resolutionMap.put(key, m);
           }
         }
         else if(model instanceof ArrayModel) {
           ArrayModel arrayModel = (ArrayModel) model;
           if(arrayModel.getItems() != null && arrayModel.getItems() instanceof RefProperty) {
             RefProperty ref = (RefProperty)arrayModel.getItems();
-            if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-              LOGGER.debug("added reference to " + ref.get$ref());
-              resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, swagger.getDefinitions(), "ref"));
+            String key = ref.get$ref();
+            if(key != null && key.startsWith("http")) {
+              LOGGER.debug("added reference to " + key);
+              List<ResolutionContext> m = resolutionMap.get(key);
+              if(m == null) {
+                m = new ArrayList<ResolutionContext>();
+              }
+              m.add(new ResolutionContext(ref, swagger.getDefinitions(), "ref"));
+              resolutionMap.put(key, m);
             }
           }
         }
@@ -202,18 +235,30 @@ public class SwaggerResolver {
               Property property = properties.get(propertyName);
               if(property instanceof RefProperty) {
                 RefProperty ref = (RefProperty)property;
-                if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-                  LOGGER.debug("added reference to " + ref.get$ref());
-                  resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, impl, "ref"));
+                String key = ref.get$ref();
+                if(key != null && key.startsWith("http")) {
+                  LOGGER.debug("added reference to " + key);
+                  List<ResolutionContext> m = resolutionMap.get(key);
+                  if(m == null) {
+                    m = new ArrayList<ResolutionContext>();
+                  }
+                  m.add(new ResolutionContext(ref, impl, "ref"));
+                  resolutionMap.put(key, m);
                 }
               }
               else if(property instanceof ArrayProperty) {
                 ArrayProperty arrayProperty = (ArrayProperty) property;
                 if(arrayProperty.getItems() != null && arrayProperty.getItems() instanceof RefProperty) {
                   RefProperty ref = (RefProperty)arrayProperty.getItems();
-                  if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-                    LOGGER.debug("added reference to " + ref.get$ref());
-                    resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, arrayProperty, "ref"));
+                  String key = ref.get$ref();
+                  if(key != null && key.startsWith("http")) {
+                    LOGGER.debug("added reference to " + key);
+                    List<ResolutionContext> m = resolutionMap.get(key);
+                    if(m == null) {
+                      m = new ArrayList<ResolutionContext>();
+                    }
+                    m.add(new ResolutionContext(ref, arrayProperty, "ref"));
+                    resolutionMap.put(key, m);
                   }
                 }
               }
@@ -221,9 +266,15 @@ public class SwaggerResolver {
                 MapProperty mp = (MapProperty) property;
                 if(mp.getAdditionalProperties() != null && mp.getAdditionalProperties() instanceof RefProperty) {
                   RefProperty ref = (RefProperty)mp.getAdditionalProperties();
-                  if(ref.get$ref() != null && ref.get$ref().startsWith("http")) {
-                    LOGGER.debug("added reference to " + ref.get$ref());
-                    resolutionMap.put(ref.get$ref(), new ResolutionContext(ref, mp, "ref"));
+                  String key = ref.get$ref();
+                  if(key != null && key.startsWith("http")) {
+                    LOGGER.debug("added reference to " + key);
+                    List<ResolutionContext> m = resolutionMap.get(key);
+                    if(m == null) {
+                      m = new ArrayList<ResolutionContext>();
+                    }
+                    m.add(new ResolutionContext(ref, mp, "ref"));
+                    resolutionMap.put(key, m);
                   }                
                 }
               }
