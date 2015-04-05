@@ -3,13 +3,13 @@
   <parent>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
     <relativePath>../..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.5-SNAPSHOT</version>
+  <version>1.0.5</version>
   <packaging>jar</packaging>
   <name>swagger-parser</name>
   <dependencies>
