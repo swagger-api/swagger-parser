@@ -71,6 +71,8 @@ public class RemoteUrl {
         if(queryString.toString().length() != 0)
           url = url + queryString.toString();
         conn = new URL(url).openConnection();
+        conn.setRequestProperty("Accept", "application/json, *.*");
+
         for(AuthorizationValue auth: auths) {
           if("header".equals(auth.getType())) {
             conn.setRequestProperty(auth.getKeyName(), auth.getValue());
@@ -79,17 +81,24 @@ public class RemoteUrl {
       }
       else {
         conn = new URL(url).openConnection();
+        conn.setRequestProperty("Accept", "application/json, application/yaml, *.*");
       }
 
-      StringBuilder sb = new StringBuilder();
-   
-      String line;
-      is = conn.getInputStream();
-      br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-      while ((line = br.readLine()) != null) {
-        sb.append(line).append("\n");
+      conn.connect();
+      InputStream in = conn.getInputStream();
+
+      String inputLine;
+      StringBuilder contents = new StringBuilder();
+
+      for(int i = 0; i != -1; i = in.read()) {
+        char c = (char)i;
+        if(!Character.isISOControl(c))
+          contents.append((char)i);
       }
-      return sb.toString();
+
+      in.close();
+
+      return contents.toString();
     }
     catch (javax.net.ssl.SSLProtocolException e){
       System.out.println("there is a problem with the target SSL certificate");
