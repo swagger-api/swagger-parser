@@ -9,6 +9,6 @@ import java.io.IOException;
 import java.util.List;
 
 public interface SwaggerParserExtension {
-  Swagger read(String location, List<AuthorizationValue> auths) throws IOException;
-  Swagger read(JsonNode node) throws IOException;
+    Swagger read(String location, List<AuthorizationValue> auths) throws IOException;
+    Swagger read(JsonNode node) throws IOException;
 }
