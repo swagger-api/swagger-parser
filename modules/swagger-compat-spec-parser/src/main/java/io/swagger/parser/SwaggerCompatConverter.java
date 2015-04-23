@@ -327,7 +327,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     return output;
   }
 
-  public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation) {
+  public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation,
+                                    ApiDeclaration apiDeclaration) {
     Operation output = new Operation()
       .summary(operation.getSummary())
       .description(operation.getNotes())
@@ -339,13 +340,21 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     for(io.swagger.models.apideclaration.Parameter parameter : operation.getParameters())
       output.parameter(convertParameter(parameter));
 
-    if(operation.getConsumes() != null) {
+    if(operation.getConsumes() != null && !operation.getConsumes().isEmpty()) {
       for(String consumes: operation.getConsumes()) {
         output.consumes(consumes);
       }
+    } else if (apiDeclaration.getConsumes() != null) {
+      for(String consumes: apiDeclaration.getConsumes()) {
+        output.consumes(consumes);
+      }
     }
-    if(operation.getProduces() != null) {
+    if(operation.getProduces() != null && !operation.getProduces().isEmpty()) {
       for(String produces: operation.getProduces()) {
+        output.produces(produces);
+      }
+    } else if (apiDeclaration.getProduces() != null) {
+      for(String produces: apiDeclaration.getProduces()) {
         output.produces(produces);
       }
     }
@@ -477,7 +486,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
           paths.put(apiPath, path);
         }
         for(io.swagger.models.apideclaration.Operation op : ops) {
-          Operation operation = convertOperation(tag, op);
+          Operation operation = convertOperation(tag, op, apiDeclaration);
+
           if(op.getMethod() != null) {
             path.set(op.getMethod().toString().toLowerCase(), operation);
           }
