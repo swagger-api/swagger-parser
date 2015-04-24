@@ -1,44 +1,39 @@
 package io.swagger.parser;
 
-import io.swagger.parser.util.RemoteUrl;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.models.*;
-import com.wordnik.swagger.models.auth.*;
 import com.wordnik.swagger.models.Model;
 import com.wordnik.swagger.models.Operation;
+import com.wordnik.swagger.models.auth.ApiKeyAuthDefinition;
+import com.wordnik.swagger.models.auth.AuthorizationValue;
+import com.wordnik.swagger.models.auth.In;
+import com.wordnik.swagger.models.auth.OAuth2Definition;
 import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.parameters.Parameter;
-import com.wordnik.swagger.models.properties.*;
-import com.wordnik.swagger.util.*;
-
-// legacy models
+import com.wordnik.swagger.models.properties.ArrayProperty;
+import com.wordnik.swagger.models.properties.Property;
+import com.wordnik.swagger.models.properties.PropertyBuilder;
+import com.wordnik.swagger.models.properties.RefProperty;
+import com.wordnik.swagger.util.Json;
+import io.swagger.models.AuthorizationScope;
 import io.swagger.models.ParamType;
 import io.swagger.models.PassAs;
-import io.swagger.models.apideclaration.ApiDeclaration;
-import io.swagger.models.apideclaration.Api;
-import io.swagger.models.apideclaration.ExtendedTypedObject;
-import io.swagger.models.AuthorizationScope;
-
-import io.swagger.models.resourcelisting.Authorization;
-import io.swagger.models.resourcelisting.AuthorizationCodeGrant;
-import io.swagger.models.resourcelisting.ApiKeyAuthorization;
-import io.swagger.models.resourcelisting.ImplicitGrant;
-import io.swagger.models.resourcelisting.OAuth2Authorization;
-import io.swagger.report.MessageBuilder;
-import io.swagger.transform.migrate.*;
-
 import io.swagger.models.apideclaration.*;
-import io.swagger.models.resourcelisting.ApiInfo;
-import io.swagger.models.resourcelisting.ApiListingReference;
-import io.swagger.models.resourcelisting.ResourceListing;
+import io.swagger.models.resourcelisting.*;
+import io.swagger.parser.util.RemoteUrl;
+import io.swagger.report.MessageBuilder;
+import io.swagger.transform.migrate.ApiDeclarationMigrator;
+import io.swagger.transform.migrate.ResourceListingMigrator;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.node.*;
-
-import java.util.*;
-import java.net.URL;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+// legacy models
 
 public class SwaggerCompatConverter implements SwaggerParserExtension {
   public Swagger read(JsonNode node) throws IOException {
