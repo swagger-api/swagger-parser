@@ -478,7 +478,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         }
         for(io.swagger.models.apideclaration.Operation op : ops) {
           Operation operation = convertOperation(tag, op);
-          path.set(op.getMethod().toString().toLowerCase(), operation);
+          String method = (op.getMethod() != null ?
+              op.getMethod().toString().toLowerCase() : "*");
+          path.set(method, operation);
         }
       }
 
