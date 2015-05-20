@@ -1,4 +1,4 @@
-package com.wordnik.swagger.parserExtensions;
+package io.swagger.parserExtensions;
 
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerParserExtension;

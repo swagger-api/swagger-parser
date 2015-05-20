@@ -16,7 +16,9 @@ import com.wordnik.swagger.models.properties.Property;
 import com.wordnik.swagger.models.properties.PropertyBuilder;
 import com.wordnik.swagger.models.properties.RefProperty;
 import com.wordnik.swagger.util.Json;
+
 import io.swagger.models.AuthorizationScope;
+import io.swagger.models.Method;
 import io.swagger.models.ParamType;
 import io.swagger.models.PassAs;
 import io.swagger.models.apideclaration.*;
@@ -297,15 +299,15 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
       output = am;
     }
     else {
-      Map<String, Object> args = new HashMap<String, Object>();
+      Map<PropertyBuilder.PropertyId, Object> args = new HashMap<PropertyBuilder.PropertyId, Object>();
       if(obj.getEnumValues() != null && obj.getEnumValues().size() > 0) {
-        args.put("enum", obj.getEnumValues());
+        args.put(PropertyBuilder.PropertyId.ENUM, obj.getEnumValues());
       }
       if(obj.getMinimum() != null) {
-        args.put("minimum", Double.parseDouble(obj.getMinimum()));
+        args.put(PropertyBuilder.PropertyId.MINIMUM, Double.parseDouble(obj.getMinimum()));
       }
       if(obj.getMaximum() != null) {
-        args.put("maximum", Double.parseDouble(obj.getMaximum()));
+        args.put(PropertyBuilder.PropertyId.MAXIMUM, Double.parseDouble(obj.getMaximum()));
       }
 
       Property i = PropertyBuilder.build(type, format, args);
@@ -319,10 +321,23 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
       }
     }
 
+    if(output == null) {
+      System.out.println("WARNING!  No property detected!  Falling back to string!");
+      output = PropertyBuilder.build("string", null, null);
+    }
+
     return output;
   }
 
   public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation) {
+    Method method;
+
+    if(operation.getMethod() == null) {
+      JsonNode node = (JsonNode)operation.getExtraFields().get("httpMethod");
+      method = Method.forValue(node.asText());
+      operation.setMethod(method);
+    }
+
     Operation output = new Operation()
       .summary(operation.getSummary())
       .description(operation.getNotes())
@@ -331,8 +346,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     if(tag != null)
       output.tag(tag);
 
-    for(io.swagger.models.apideclaration.Parameter parameter : operation.getParameters())
+    for(io.swagger.models.apideclaration.Parameter parameter : operation.getParameters()) {
       output.parameter(convertParameter(parameter));
+    }
 
     if(operation.getConsumes() != null) {
       for(String consumes: operation.getConsumes()) {
@@ -473,11 +489,12 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         }
         for(io.swagger.models.apideclaration.Operation op : ops) {
           Operation operation = convertOperation(tag, op);
+
           if(op.getMethod() != null) {
             path.set(op.getMethod().toString().toLowerCase(), operation);
           }
           else {
-            System.out.println("skipping operation with missing method:\n" + Json.pretty(operation));
+            System.out.println("skipping operation with missing method:\n" + Json.pretty(op));
           }
         }
       }

@@ -1,4 +1,4 @@
-package com.wordnik.swagger.converter;
+package io.swagger.converter;
 
 import io.swagger.parser.SwaggerCompatConverter;
 
