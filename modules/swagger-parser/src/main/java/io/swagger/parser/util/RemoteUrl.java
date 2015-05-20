@@ -94,6 +94,9 @@ public class RemoteUrl {
         char c = (char)i;
         if(!Character.isISOControl(c))
           contents.append((char)i);
+        if(c == '\n') {
+          contents.append('\n');
+        }
       }
 
       in.close();
