@@ -1,44 +1,41 @@
 package io.swagger.parser;
 
-import io.swagger.parser.util.RemoteUrl;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.models.*;
-import com.wordnik.swagger.models.auth.*;
 import com.wordnik.swagger.models.Model;
 import com.wordnik.swagger.models.Operation;
+import com.wordnik.swagger.models.auth.ApiKeyAuthDefinition;
+import com.wordnik.swagger.models.auth.AuthorizationValue;
+import com.wordnik.swagger.models.auth.In;
+import com.wordnik.swagger.models.auth.OAuth2Definition;
 import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.parameters.Parameter;
-import com.wordnik.swagger.models.properties.*;
-import com.wordnik.swagger.util.*;
+import com.wordnik.swagger.models.properties.ArrayProperty;
+import com.wordnik.swagger.models.properties.Property;
+import com.wordnik.swagger.models.properties.PropertyBuilder;
+import com.wordnik.swagger.models.properties.RefProperty;
+import com.wordnik.swagger.util.Json;
 
-// legacy models
+import io.swagger.models.AuthorizationScope;
+import io.swagger.models.Method;
 import io.swagger.models.ParamType;
 import io.swagger.models.PassAs;
-import io.swagger.models.apideclaration.ApiDeclaration;
-import io.swagger.models.apideclaration.Api;
-import io.swagger.models.apideclaration.ExtendedTypedObject;
-import io.swagger.models.AuthorizationScope;
-
-import io.swagger.models.resourcelisting.Authorization;
-import io.swagger.models.resourcelisting.AuthorizationCodeGrant;
-import io.swagger.models.resourcelisting.ApiKeyAuthorization;
-import io.swagger.models.resourcelisting.ImplicitGrant;
-import io.swagger.models.resourcelisting.OAuth2Authorization;
-import io.swagger.report.MessageBuilder;
-import io.swagger.transform.migrate.*;
-
 import io.swagger.models.apideclaration.*;
-import io.swagger.models.resourcelisting.ApiInfo;
-import io.swagger.models.resourcelisting.ApiListingReference;
-import io.swagger.models.resourcelisting.ResourceListing;
+import io.swagger.models.resourcelisting.*;
+import io.swagger.parser.util.RemoteUrl;
+import io.swagger.report.MessageBuilder;
+import io.swagger.transform.migrate.ApiDeclarationMigrator;
+import io.swagger.transform.migrate.ResourceListingMigrator;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.node.*;
-
-import java.util.*;
-import java.net.URL;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+// legacy models
 
 public class SwaggerCompatConverter implements SwaggerParserExtension {
   public Swagger read(JsonNode node) throws IOException {
@@ -302,15 +299,15 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
       output = am;
     }
     else {
-      Map<String, Object> args = new HashMap<String, Object>();
+      Map<PropertyBuilder.PropertyId, Object> args = new HashMap<PropertyBuilder.PropertyId, Object>();
       if(obj.getEnumValues() != null && obj.getEnumValues().size() > 0) {
-        args.put("enum", obj.getEnumValues());
+        args.put(PropertyBuilder.PropertyId.ENUM, obj.getEnumValues());
       }
       if(obj.getMinimum() != null) {
-        args.put("minimum", Double.parseDouble(obj.getMinimum()));
+        args.put(PropertyBuilder.PropertyId.MINIMUM, Double.parseDouble(obj.getMinimum()));
       }
       if(obj.getMaximum() != null) {
-        args.put("maximum", Double.parseDouble(obj.getMaximum()));
+        args.put(PropertyBuilder.PropertyId.MAXIMUM, Double.parseDouble(obj.getMaximum()));
       }
 
       Property i = PropertyBuilder.build(type, format, args);
@@ -324,10 +321,23 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
       }
     }
 
+    if(output == null) {
+      System.out.println("WARNING!  No property detected!  Falling back to string!");
+      output = PropertyBuilder.build("string", null, null);
+    }
+
     return output;
   }
 
   public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation) {
+    Method method;
+
+    if(operation.getMethod() == null) {
+      JsonNode node = (JsonNode)operation.getExtraFields().get("httpMethod");
+      method = Method.forValue(node.asText());
+      operation.setMethod(method);
+    }
+
     Operation output = new Operation()
       .summary(operation.getSummary())
       .description(operation.getNotes())
@@ -336,8 +346,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     if(tag != null)
       output.tag(tag);
 
-    for(io.swagger.models.apideclaration.Parameter parameter : operation.getParameters())
+    for(io.swagger.models.apideclaration.Parameter parameter : operation.getParameters()) {
       output.parameter(convertParameter(parameter));
+    }
 
     if(operation.getConsumes() != null) {
       for(String consumes: operation.getConsumes()) {
@@ -478,7 +489,13 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         }
         for(io.swagger.models.apideclaration.Operation op : ops) {
           Operation operation = convertOperation(tag, op);
-          path.set(op.getMethod().toString().toLowerCase(), operation);
+
+          if(op.getMethod() != null) {
+            path.set(op.getMethod().toString().toLowerCase(), operation);
+          }
+          else {
+            System.out.println("skipping operation with missing method:\n" + Json.pretty(op));
+          }
         }
       }
 

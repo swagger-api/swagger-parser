@@ -37,18 +37,4 @@ public final class V11ApiDeclarationMigrator
 
         return tree.getBaseNode();
     }
-
-    public static void main(final String... args)
-        throws IOException, SwaggerMigrationException
-    {
-        final JsonNode orig
-            = JsonLoader.fromResource("/samples/v1.1/callfire-broadcast.json");
-        final JsonNode orig2
-            = JsonLoader.fromResource("/samples/v1.1/callfire-broadcast.json");
-
-        final SwaggerMigrator migrator = new V11ApiDeclarationMigrator();
-
-        System.out.println(JacksonUtils.prettyPrint(migrator.migrate(orig)));
-        System.out.println(JsonNumEquals.getInstance().equivalent(orig, orig2));
-    }
 }

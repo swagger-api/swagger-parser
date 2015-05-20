@@ -33,4 +33,15 @@ class SwaggerReaderTest extends FlatSpec with Matchers {
     val swagger = parser.read("./src/test/resources/issue_16.yaml")
     // Json.prettyPrint(swagger)
   }
+
+  it should "test https://github.com/swagger-api/swagger-codegen/issues/469" in {
+    val parser = new SwaggerParser()
+    val swagger = parser.read("./src/test/resources/issue_469.json")
+    Json.pretty(swagger.getDefinitions().get("Pet").getExample()) should be (
+"""{
+  "id" : 12345,
+  "name" : "Gorilla"
+}"""
+    )
+  }
 }
