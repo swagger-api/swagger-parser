@@ -57,6 +57,12 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     List<ApiDeclaration> apis = new ArrayList<ApiDeclaration>();
 
     if(resourceListing != null) {
+      String basePath = input;
+      JsonNode basePathNode = resourceListing.getExtraFields().get("basePath");
+      if (basePathNode != null)
+      {
+        basePath = basePathNode.textValue();
+      }
       List<ApiListingReference> refs = resourceListing.getApis();
       boolean readAsSingleFile = false;
       if(refs != null) {
@@ -82,9 +88,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
               }
               else {
                 if(pathLocation.startsWith("/"))
-                  location = input + pathLocation;
+                  location = basePath + pathLocation;
                 else
-                  location = input + "/" + pathLocation;
+                  location = basePath + "/" + pathLocation;
               }
             }
             else {
