@@ -7,7 +7,7 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 public final class SwaggerJsonSchemaFactory
 {
     private static final String BASE_URI
-        = "http://wordnik.github.io/schemas/";
+        = "http://swagger-api.github.io/schemas/";
     private static final String ROOT_CONTEXT = "resource:/schemas/";
 
     private static final SwaggerJsonSchemaFactory INSTANCE
