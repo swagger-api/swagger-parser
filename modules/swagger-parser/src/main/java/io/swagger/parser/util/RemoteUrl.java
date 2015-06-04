@@ -1,13 +1,13 @@
 package io.swagger.parser.util;
 
-import com.wordnik.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.auth.AuthorizationValue;
 
 import java.net.*;
 import java.io.*;
-import java.util.*;
 import java.security.*;
 import javax.net.ssl.*;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 public class RemoteUrl {
   static {
@@ -71,7 +71,7 @@ public class RemoteUrl {
         if(queryString.toString().length() != 0)
           url = url + queryString.toString();
         conn = new URL(url).openConnection();
-        conn.setRequestProperty("Accept", "application/json, *.*");
+        conn.setRequestProperty("Accept", "application/json, */*");
 
         for(AuthorizationValue auth: auths) {
           if("header".equals(auth.getType())) {
@@ -81,7 +81,7 @@ public class RemoteUrl {
       }
       else {
         conn = new URL(url).openConnection();
-        conn.setRequestProperty("Accept", "application/json, application/yaml, *.*");
+        conn.setRequestProperty("Accept", "application/json, application/yaml, */*");
       }
 
       conn.connect();

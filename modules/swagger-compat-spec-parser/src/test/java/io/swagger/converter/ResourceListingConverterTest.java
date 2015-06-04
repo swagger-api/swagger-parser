@@ -1,17 +1,11 @@
 package io.swagger.converter;
 
+import io.swagger.models.Info;
+import io.swagger.models.Scheme;
+import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerCompatConverter;
-import io.swagger.models.ParamType;
-import io.swagger.models.Format;
 import io.swagger.models.resourcelisting.ResourceListing;
 import io.swagger.models.apideclaration.ApiDeclaration;
-
-import com.wordnik.swagger.models.Info;
-import com.wordnik.swagger.models.Scheme;
-import com.wordnik.swagger.models.Swagger;
-import com.wordnik.swagger.models.parameters.*;
-import com.wordnik.swagger.models.properties.*;
-import com.wordnik.swagger.util.Json;
 
 import java.util.*;
 

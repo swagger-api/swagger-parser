@@ -2,10 +2,10 @@ package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wordnik.swagger.models.Swagger;
-import com.wordnik.swagger.models.auth.AuthorizationValue;
-import com.wordnik.swagger.util.Json;
-import com.wordnik.swagger.util.Yaml;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import io.swagger.parser.util.RemoteUrl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;

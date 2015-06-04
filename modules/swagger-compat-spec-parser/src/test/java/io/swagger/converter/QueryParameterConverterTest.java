@@ -1,14 +1,11 @@
 package io.swagger.converter;
 
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.Property;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.models.ParamType;
 import io.swagger.models.Format;
-
-import com.wordnik.swagger.models.parameters.*;
-import com.wordnik.swagger.models.properties.*;
-import com.wordnik.swagger.util.Json;
-
-import java.util.*;
 
 import org.testng.annotations.Test;
 

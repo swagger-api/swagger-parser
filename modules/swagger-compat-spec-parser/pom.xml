@@ -3,18 +3,18 @@
   <parent>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-compat-spec-parser</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>swagger-compat-spec-parser</name>
   <dependencies>
     <dependency>
-      <groupId>com.wordnik</groupId>
+      <groupId>io.swagger</groupId>
       <artifactId>swagger-core</artifactId>
       <version>${swagger-core-version}</version>
     </dependency>

@@ -1,14 +1,18 @@
 package io.swagger.converter;
 
+import io.swagger.models.Contact;
+import io.swagger.models.Info;
+import io.swagger.models.License;
+import io.swagger.models.Operation;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.In;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerCompatConverter;
 
-import com.wordnik.swagger.models.*;
-import com.wordnik.swagger.models.parameters.*;
-import com.wordnik.swagger.models.auth.*;
-import com.wordnik.swagger.util.Json;
-
 import java.util.*;
-import java.io.*;
 
 import org.testng.annotations.Test;
 
