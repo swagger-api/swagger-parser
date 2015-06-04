@@ -2,10 +2,7 @@ package io.swagger.transform.migrate;
 
 import io.swagger.transform.util.MutableJsonTree;
 import io.swagger.transform.util.SwaggerMigrationException;
-import io.swagger.report.Message;
-import io.swagger.report.MessageBuilder;
-
-import com.wordnik.swagger.util.Json;
+import io.swagger.util.Json;
 
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 

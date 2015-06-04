@@ -1,7 +1,7 @@
 package io.swagger.parser;
 
-import com.wordnik.swagger.models.Swagger;
-import com.wordnik.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.AuthorizationValue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

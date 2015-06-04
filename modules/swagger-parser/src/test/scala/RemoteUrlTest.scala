@@ -1,5 +1,4 @@
-import com.wordnik.swagger.util.Json
-import com.wordnik.swagger.models.auth.AuthorizationValue
+import io.swagger.models.auth.AuthorizationValue
 import io.swagger.parser.util.RemoteUrl
 import io.swagger.parser.{Swagger20Parser, SwaggerParser}
 

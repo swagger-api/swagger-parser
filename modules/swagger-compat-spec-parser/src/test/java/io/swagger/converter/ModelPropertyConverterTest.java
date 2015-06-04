@@ -4,7 +4,7 @@ import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.models.Format;
 import io.swagger.models.apideclaration.ModelProperty;
 import io.swagger.models.apideclaration.Items;
-import com.wordnik.swagger.models.properties.*;
+import io.swagger.models.properties.*;
 
 import java.util.*;
 

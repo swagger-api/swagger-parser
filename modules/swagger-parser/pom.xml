@@ -14,7 +14,7 @@
   <name>swagger-parser</name>
   <dependencies>
     <dependency>
-      <groupId>com.wordnik</groupId>
+      <groupId>io.swagger</groupId>
       <artifactId>swagger-core</artifactId>
       <version>${swagger-core-version}</version>
     </dependency>

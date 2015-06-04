@@ -1,7 +1,5 @@
 package io.swagger.parser;
 
-import com.wordnik.swagger.util.Json;
-
 import io.swagger.deserializer.ApiDeclarationDeserializer;
 import io.swagger.deserializer.ResourceListingDeserializer;
 import io.swagger.io.Authentication;

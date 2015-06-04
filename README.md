@@ -13,7 +13,7 @@ Using the swagger-parser is simple.  Once included in your project, you can read
 
 ```java
 import io.swagger.parser.SwaggerParser;
-import com.wordnik.swagger.models.Swagger;
+import io.swagger.models.Swagger;
 
 // ... your code
 
@@ -34,7 +34,7 @@ And with the swagger-compat-spec-parser module, you can read older formats, and 
 
 If your swagger resource is protected, you can pass headers in the request:
 ```java
-import com.wordnik.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.auth.AuthorizationValue;
 
 // ... your code
 
