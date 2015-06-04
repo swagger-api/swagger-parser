@@ -14,7 +14,7 @@ import java.util.List;
 public class ResourceListingExtractorTest {
   @Test
   public void readResourceListing() throws Exception {
-    String resourceListingUri = "http://petstore.swagger.wordnik.com/api/api-docs";
+    String resourceListingUri = "http://petstore.swagger.io/api/api-docs";
     ObjectMapper mapper = JacksonUtils.newMapper();
     mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 
