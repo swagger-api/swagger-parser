@@ -1,13 +1,13 @@
 package io.swagger.parser.util;
 
-import com.wordnik.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.auth.AuthorizationValue;
 
 import java.net.*;
 import java.io.*;
-import java.util.*;
 import java.security.*;
 import javax.net.ssl.*;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 public class RemoteUrl {
   static {

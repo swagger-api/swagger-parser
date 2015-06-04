@@ -3,9 +3,8 @@ package io.swagger.converter;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.models.Format;
 import io.swagger.models.apideclaration.ModelProperty;
-import com.wordnik.swagger.models.properties.*;
-import com.wordnik.swagger.models.Model;
-import com.wordnik.swagger.util.Json;
+import io.swagger.models.properties.*;
+import io.swagger.models.Model;
 
 import java.util.*;
 

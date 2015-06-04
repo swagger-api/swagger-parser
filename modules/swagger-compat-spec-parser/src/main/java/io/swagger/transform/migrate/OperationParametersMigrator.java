@@ -1,7 +1,5 @@
 package io.swagger.transform.migrate;
 
-import com.wordnik.swagger.util.Json;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.transform.util.SwaggerMigrationException;
 
