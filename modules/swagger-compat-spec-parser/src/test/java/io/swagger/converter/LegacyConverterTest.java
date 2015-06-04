@@ -58,7 +58,7 @@ public class LegacyConverterTest {
     Info info = swagger.getInfo();
     assertEquals(info.getVersion(), "1.0.0");
     assertEquals(info.getTitle(), "Swagger Sample App");
-    assertEquals(info.getTermsOfService(), "http://helloreverb.com/terms/");
+    assertEquals(info.getTermsOfService(), "http://swagger.io/terms/");
 
     Contact contact = info.getContact();
     assertEquals(contact.getUrl(), "apiteam@swagger.io");
