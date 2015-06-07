@@ -5,11 +5,9 @@ import io.swagger.transform.util.SwaggerMigrators;
 import java.io.IOException;
 
 public final class RenameMemberTest
-    extends SwaggerMigratorTest
-{
+        extends SwaggerMigratorTest {
     public RenameMemberTest()
-        throws IOException
-    {
+            throws IOException {
         super("renameMember", SwaggerMigrators.renameMember("foo", "bar"));
     }
 }

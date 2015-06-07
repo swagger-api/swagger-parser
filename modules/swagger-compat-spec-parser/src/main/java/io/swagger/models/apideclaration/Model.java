@@ -2,7 +2,8 @@ package io.swagger.models.apideclaration;
 
 import io.swagger.models.SwaggerBaseModel;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class Model extends SwaggerBaseModel {
     private String id = null;

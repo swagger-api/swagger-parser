@@ -18,16 +18,19 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 @Test
-public abstract class SwaggerMigratorTest
-{
+public abstract class SwaggerMigratorTest {
     private static final ObjectMapper MAPPER = JacksonUtils.newMapper();
     private static final TypeReference<List<MigrationTestData>> TESTDATA_TYPEREF
-        = new TypeReference<List<MigrationTestData>>() {};
+            = new TypeReference<List<MigrationTestData>>() {
+    };
     private static final TypeReference<List<MigrationErrorData>> ERRDATA_TYPEREF
-        = new TypeReference<List<MigrationErrorData>>() {};
+            = new TypeReference<List<MigrationErrorData>>() {
+    };
 
     private final List<MigrationTestData> testData;
     private final List<MigrationErrorData> errorData;
@@ -35,35 +38,52 @@ public abstract class SwaggerMigratorTest
     private final SwaggerMigrator migrator;
 
     protected SwaggerMigratorTest(final String resource,
-        final SwaggerMigrator migrator)
-        throws IOException
-    {
+                                  final SwaggerMigrator migrator)
+            throws IOException {
         this.migrator = migrator;
 
         try (
-            final InputStream in = SwaggerMigratorTest.class
-                .getResourceAsStream("/transform/" + resource + ".json");
-            final InputStream in2 = SwaggerMigratorTest.class
-                .getResourceAsStream("/transform/" + resource + "-errs.json");
+                final InputStream in = SwaggerMigratorTest.class
+                        .getResourceAsStream("/transform/" + resource + ".json");
+                final InputStream in2 = SwaggerMigratorTest.class
+                        .getResourceAsStream("/transform/" + resource + "-errs.json");
         ) {
             testData = MAPPER.readValue(in, TESTDATA_TYPEREF);
-            if (in2 == null)
+            if (in2 == null) {
                 errorData = ImmutableList.of();
-            else
+            } else {
                 errorData = MAPPER.readValue(in2, ERRDATA_TYPEREF);
+            }
         }
     }
 
+    private static String errmsg(final JsonNode actual, final JsonNode expected) {
+        return new StringBuilder("migrator did not produce expected results!")
+                .append("\nproduced:\n")
+                .append(JacksonUtils.prettyPrint(actual))
+                .append("\nexpected:\n")
+                .append(JacksonUtils.prettyPrint(expected))
+                .toString();
+    }
+
+    private static <T> Function<T, Object[]> toObject() {
+        return new Function<T, Object[]>() {
+            @Nullable
+            @Override
+            public Object[] apply(@Nullable final T input) {
+                return new Object[]{input};
+            }
+        };
+    }
+
     @DataProvider
-    protected Iterator<Object[]> getTestData()
-    {
+    protected Iterator<Object[]> getTestData() {
         return Lists.transform(testData, toObject()).iterator();
     }
 
     @Test(dataProvider = "getTestData")
     public void migratorWorksAsExpected(final MigrationTestData data)
-        throws SwaggerMigrationException
-    {
+            throws SwaggerMigrationException {
         /*
          * Unfortunately we cannot use assertEquals() directly :/ JsonNode
          * implements Iterable, as a result the default assertEquals() will
@@ -78,15 +98,13 @@ public abstract class SwaggerMigratorTest
     }
 
     @DataProvider
-    protected Iterator<Object[]> getErrorData()
-    {
+    protected Iterator<Object[]> getErrorData() {
         return Lists.transform(errorData, toObject()).iterator();
     }
 
     @Test(dataProvider = "getErrorData")
     public void errorsAreCorrectlyIdentifiedAndReported(
-        final MigrationErrorData data)
-    {
+            final MigrationErrorData data) {
         final JsonNode node = data.getOriginal();
         final String errmsg = data.getErrorMessage();
 
@@ -95,30 +113,7 @@ public abstract class SwaggerMigratorTest
             fail("No exception thrown!!");
         } catch (SwaggerMigrationException e) {
             assertEquals(e.getMessage(), errmsg,
-                "error message differs from expectations");
+                    "error message differs from expectations");
         }
-    }
-
-    private static String errmsg(final JsonNode actual, final JsonNode expected)
-    {
-        return new StringBuilder("migrator did not produce expected results!")
-            .append("\nproduced:\n")
-            .append(JacksonUtils.prettyPrint(actual))
-            .append("\nexpected:\n")
-            .append(JacksonUtils.prettyPrint(expected))
-            .toString();
-    }
-
-    private static <T> Function<T, Object[]> toObject()
-    {
-        return new Function<T, Object[]>()
-        {
-            @Nullable
-            @Override
-            public Object[] apply(@Nullable final T input)
-            {
-                return new Object[] { input };
-            }
-        };
     }
 }

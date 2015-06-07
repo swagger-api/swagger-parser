@@ -1,18 +1,23 @@
 package io.swagger.models.reader;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.annotation.JsonInclude.*;
-import io.swagger.report.Message;
-import io.swagger.report.MessageBuilder;
-import io.swagger.report.Severity;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.models.apideclaration.Api;
 import io.swagger.models.apideclaration.ApiDeclaration;
 import io.swagger.models.apideclaration.Model;
 import io.swagger.models.apideclaration.ModelProperty;
 import io.swagger.models.apideclaration.Operation;
 import io.swagger.models.apideclaration.Parameter;
+import io.swagger.report.Message;
+import io.swagger.report.MessageBuilder;
+import io.swagger.report.Severity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ApiDeclarationParser extends SwaggerParser {
 
@@ -27,35 +32,40 @@ public class ApiDeclarationParser extends SwaggerParser {
             ApiDeclaration api = new ApiDeclaration();
 
             String apiVersion = readString(m.get("apiVersion"));
-            if (apiVersion != null)
+            if (apiVersion != null) {
                 api.setApiVersion(apiVersion);
-            else
+            } else {
                 messages.append(new Message("ApiDeclaration.apiVersion", "apiVersion is missing", Severity.RECOMMENDED));
+            }
 
             String swaggerVersion = readString(m.get("swaggerVersion"));
-            if (swaggerVersion != null)
+            if (swaggerVersion != null) {
                 api.setSwaggerVersion(swaggerVersion);
-            else
+            } else {
                 messages.append(new Message("ApiDeclaration.swaggerVersion", "swaggerVersion is missing", Severity.ERROR));
+            }
 
             String basePath = readString(m.get("basePath"));
-            if (basePath != null)
+            if (basePath != null) {
                 api.setBasePath(basePath);
-            else
+            } else {
                 messages.append(new Message("ApiDeclaration.basePath", "basePath is missing", Severity.ERROR));
+            }
 
             String resourcePath = readString(m.get("resourcePath"));
-            if (resourcePath != null)
+            if (resourcePath != null) {
                 api.setResourcePath(resourcePath);
-            else
+            } else {
                 messages.append(new Message("ApiDeclaration.resourcePath", "resourcePath is missing", Severity.ERROR));
+            }
 
             String produces = readString(m.get("produces"));
             Object apis = m.get("apis");
             if (apis != null) {
                 List<Api> o = readApis((List<Map<String, Object>>) apis, messages);
-                if (o.size() > 0)
+                if (o.size() > 0) {
                     api.setApis(o);
+                }
             }
 
             Object models = m.get("models");
@@ -138,10 +148,11 @@ public class ApiDeclarationParser extends SwaggerParser {
         for (Map<String, Object> o : om) {
             Api op = new Api();
             String path = readString(o.get("path"));
-            if (path != null)
+            if (path != null) {
                 op.setPath(path);
-            else
+            } else {
                 messages.append(new Message("ApiDeclaration.apis", "path is missing", Severity.ERROR));
+            }
 
             Object operations = o.get("operations");
 
@@ -204,8 +215,9 @@ public class ApiDeclarationParser extends SwaggerParser {
         List<Parameter> output = new ArrayList<Parameter>();
         for (Map<String, Object> p : o) {
             Parameter param = readParameter(p, messages);
-            if (param != null)
+            if (param != null) {
                 output.add(param);
+            }
         }
         return output;
     }
@@ -214,10 +226,11 @@ public class ApiDeclarationParser extends SwaggerParser {
         Parameter param = new Parameter();
 
         String name = readString(o.get("name"));
-        if (name != null)
+        if (name != null) {
             param.setName(name);
-        else
+        } else {
             messages.append(new Message("ApiDeclaration.apis.operations.parameters.name", "missing name", Severity.ERROR));
+        }
         String description = readString(o.get("description"));
         param.setDescription(description);
 

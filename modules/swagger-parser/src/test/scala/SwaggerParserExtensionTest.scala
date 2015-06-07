@@ -1,11 +1,8 @@
-import io.swagger.util.Json
-import io.swagger.parser._
 import io.swagger.parser.{Swagger20Parser, SwaggerParser}
-
+import io.swagger.util.Json
 import org.junit.runner.RunWith
+import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
 
 @RunWith(classOf[JUnitRunner])
 class SwaggerParserExtensionTest extends FlatSpec with Matchers {
@@ -15,6 +12,6 @@ class SwaggerParserExtensionTest extends FlatSpec with Matchers {
     val parser = new SwaggerParser()
     val extensions = parser.getExtensions()
     extensions.size should be > (0)
-    extensions.get(0).getClass should be (classOf[Swagger20Parser])
+    extensions.get(0).getClass should be(classOf[Swagger20Parser])
   }
 }

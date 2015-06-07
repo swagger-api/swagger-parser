@@ -10,15 +10,13 @@ import javax.annotation.Nonnull;
  * API declaration, JSON Pointer: "/apis"
  */
 public final class ApiArrayMigrator
-    implements SwaggerMigrator
-{
+        implements SwaggerMigrator {
     private final SwaggerMigrator migrator = new ApiOperationMigrator();
 
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerMigrationException
-    {
+            throws SwaggerMigrationException {
         final MutableJsonTree tree = new MutableJsonTree(input);
 
         tree.applyMigratorToElements(migrator);

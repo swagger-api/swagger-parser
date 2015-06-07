@@ -15,25 +15,68 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import static io.swagger.transform.util.SwaggerMigrators.*;
+import static io.swagger.transform.util.SwaggerMigrators.membersToString;
+import static io.swagger.transform.util.SwaggerMigrators.patchFromResource;
 
 /**
  * Migrator for a complete 1.1 resource listing
  */
 public final class V11ResourceListingMigrator
-    implements SwaggerMigrator
-{
+        implements SwaggerMigrator {
     /*
      * Schemes are case insensitive
      */
     private static final Pattern LEGAL_SCHEMES
-        = Pattern.compile("https?", Pattern.CASE_INSENSITIVE);
+            = Pattern.compile("https?", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Check the validity of a "basePath" argument at the root of a resource
+     * listing
+     * <p/>
+     * <p>A {@code basePath} is valid if it obeys the following conditions:</p>
+     * <p/>
+     * <ul>
+     * <li>it is an absolute URI;</li>
+     * <li>its scheme is {@code http} or {@code https};</li>
+     * <li>it has a hostname (meh);</li>
+     * <li>its path component must not end with a {@code /}</li>
+     * </ul>
+     *
+     * @param input the input (never null)
+     * @return the input, as a normalized URI (as defined by RFC 3986)
+     * @throws IllegalArgumentException invalid base path, see description
+     */
+    private static String checkLegalBasePath(@Nonnull final String input) {
+        // Fails with IllegalArgumentException if URI is not valid...
+        final URI uri = URI.create(input).normalize();
+
+        // And so does Preconditions.checkArgument()
+        Preconditions.checkArgument(uri.isAbsolute(), "basePath has no scheme");
+
+        String tmp;
+        // scheme cannot be null since URI is absolute
+        tmp = uri.getScheme();
+        Preconditions.checkArgument(LEGAL_SCHEMES.matcher(tmp).matches(),
+                "basePath has scheme " + tmp + ", expected either http or https");
+
+        // hostname, however, may be...
+        tmp = Strings.nullToEmpty(uri.getHost());
+        Preconditions.checkArgument(InternetDomainName.isValid(tmp),
+                "basePath has an invalid hostname " + tmp);
+
+        // ... Same for path...
+        tmp = Strings.nullToEmpty(uri.getPath());
+        // ... Which must not end with a /
+        Preconditions.checkArgument(!tmp.endsWith("/"),
+                "basePath's path component " + tmp + " must not end with a /");
+
+        return uri.toString();
+    }
 
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerMigrationException
-    {
+            throws SwaggerMigrationException {
         Objects.requireNonNull(input);
         final MutableJsonTree tree = new MutableJsonTree(input);
 
@@ -69,50 +112,5 @@ public final class V11ResourceListingMigrator
         }
 
         return tree.getBaseNode();
-    }
-
-    /**
-     * Check the validity of a "basePath" argument at the root of a resource
-     * listing
-     *
-     * <p>A {@code basePath} is valid if it obeys the following conditions:</p>
-     *
-     * <ul>
-     *     <li>it is an absolute URI;</li>
-     *     <li>its scheme is {@code http} or {@code https};</li>
-     *     <li>it has a hostname (meh);</li>
-     *     <li>its path component must not end with a {@code /}</li>
-     * </ul>
-     *
-     * @param input the input (never null)
-     * @return the input, as a normalized URI (as defined by RFC 3986)
-     * @throws IllegalArgumentException invalid base path, see description
-     */
-    private static String checkLegalBasePath(@Nonnull final String input)
-    {
-        // Fails with IllegalArgumentException if URI is not valid...
-        final URI uri = URI.create(input).normalize();
-
-        // And so does Preconditions.checkArgument()
-        Preconditions.checkArgument(uri.isAbsolute(), "basePath has no scheme");
-
-        String tmp;
-        // scheme cannot be null since URI is absolute
-        tmp = uri.getScheme();
-        Preconditions.checkArgument(LEGAL_SCHEMES.matcher(tmp).matches(),
-            "basePath has scheme " + tmp + ", expected either http or https");
-
-        // hostname, however, may be...
-        tmp = Strings.nullToEmpty(uri.getHost());
-        Preconditions.checkArgument(InternetDomainName.isValid(tmp),
-            "basePath has an invalid hostname " + tmp);
-
-        // ... Same for path...
-        tmp = Strings.nullToEmpty(uri.getPath());
-        // ... Which must not end with a /
-        Preconditions.checkArgument(!tmp.endsWith("/"),
-            "basePath's path component " + tmp + " must not end with a /");
-
-        return uri.toString();
     }
 }

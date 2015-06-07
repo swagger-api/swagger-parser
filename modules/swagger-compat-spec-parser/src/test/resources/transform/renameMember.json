@@ -1,12 +1,12 @@
 [
-    {
-        "original": {
-            "foo": [],
-            "baz": {}
-        },
-        "migrated": {
-            "bar": [],
-            "baz": {}
-        }
+  {
+    "original": {
+      "foo": [],
+      "baz": {}
+    },
+    "migrated": {
+      "bar": [],
+      "baz": {}
     }
+  }
 ]

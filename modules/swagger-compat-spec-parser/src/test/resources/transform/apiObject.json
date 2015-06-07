@@ -1,56 +1,55 @@
 [
-    {
-        "original": {
-            "httpMethod": "GET",
-            "parameters": []
-        },
-        "migrated": {
-            "method": "GET",
-            "type": "void",
-            "parameters": []
-        }
+  {
+    "original": {
+      "httpMethod": "GET",
+      "parameters": []
     },
-    {
-        "original": {
-            "httpMethod": "PUT",
-            "parameters": [],
-            "errorResponses": []
-        },
-        "migrated": {
-            "method": "PUT",
-            "type": "void",
-            "parameters": [],
-            "responseMessages": []
-        }
-    },
-    {
-        "original": {
-            "parameters": [],
-            "errorResponses": [
-                {
-                    "code": 400,
-                    "reason": "meh"
-                },
-                {
-                    "code": 500,
-                    "reason": "oops..."
-                }
-            ]
-        },
-        "migrated": {
-            "parameters": [],
-            "type": "void",
-            "responseMessages": [
-                {
-                    "code": 400,
-                    "message": "meh"
-                },
-                {
-                    "code": 500,
-                    "message": "oops..."
-                }
-            ]
-
-        }
+    "migrated": {
+      "method": "GET",
+      "type": "void",
+      "parameters": []
     }
+  },
+  {
+    "original": {
+      "httpMethod": "PUT",
+      "parameters": [],
+      "errorResponses": []
+    },
+    "migrated": {
+      "method": "PUT",
+      "type": "void",
+      "parameters": [],
+      "responseMessages": []
+    }
+  },
+  {
+    "original": {
+      "parameters": [],
+      "errorResponses": [
+        {
+          "code": 400,
+          "reason": "meh"
+        },
+        {
+          "code": 500,
+          "reason": "oops..."
+        }
+      ]
+    },
+    "migrated": {
+      "parameters": [],
+      "type": "void",
+      "responseMessages": [
+        {
+          "code": 400,
+          "message": "meh"
+        },
+        {
+          "code": 500,
+          "message": "oops..."
+        }
+      ]
+    }
+  }
 ]
