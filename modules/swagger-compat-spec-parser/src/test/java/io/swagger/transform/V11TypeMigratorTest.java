@@ -5,11 +5,9 @@ import io.swagger.transform.migrate.V11TypeMigrator;
 import java.io.IOException;
 
 public final class V11TypeMigratorTest
-    extends SwaggerMigratorTest
-{
+        extends SwaggerMigratorTest {
     public V11TypeMigratorTest()
-        throws IOException
-    {
+            throws IOException {
         super("dataType", new V11TypeMigrator());
     }
 }

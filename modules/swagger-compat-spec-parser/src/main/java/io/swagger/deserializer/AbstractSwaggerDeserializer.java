@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 
 public abstract class AbstractSwaggerDeserializer<T> implements SwaggerDeserializer<T> {
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     protected final Class<T> clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     protected final ObjectMapper objectMapper;
 

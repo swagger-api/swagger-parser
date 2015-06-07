@@ -5,11 +5,9 @@ import io.swagger.transform.migrate.V11AllowableValuesMigrator;
 import java.io.IOException;
 
 public final class V11AllowableValuesMigratorTest
-    extends SwaggerMigratorTest
-{
+        extends SwaggerMigratorTest {
     public V11AllowableValuesMigratorTest()
-        throws IOException
-    {
+            throws IOException {
         super("allowableValues", new V11AllowableValuesMigrator());
     }
 }

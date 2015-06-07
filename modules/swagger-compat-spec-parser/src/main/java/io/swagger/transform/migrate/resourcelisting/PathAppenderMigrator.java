@@ -11,30 +11,27 @@ import javax.annotation.Untainted;
 
 /**
  * Append a base path to individual API objects
- *
- * <p>See <a href="https://github.com/wordnik/swagger-parser/issues/4"
+ * <p/>
+ * <p>See <a href="https://github.com/swagger-api/swagger-parser/issues/4"
  * target="_blank">issue #4 on GitHub</a>.</p>
  */
 public final class PathAppenderMigrator
-    implements SwaggerMigrator
-{
+        implements SwaggerMigrator {
     private final String basePath;
 
-    public PathAppenderMigrator(@Untainted @Nonnull final String basePath)
-    {
+    public PathAppenderMigrator(@Untainted @Nonnull final String basePath) {
         this.basePath = basePath;
     }
 
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerMigrationException
-    {
+            throws SwaggerMigrationException {
         try {
             Preconditions.checkArgument(input.isObject(),
-                "expected JSON to be a JSON object but it isn't");
+                    "expected JSON to be a JSON object but it isn't");
             Preconditions.checkArgument(input.path("path").isTextual(),
-                "\"path\" member of API object is not a JSON string");
+                    "\"path\" member of API object is not a JSON string");
         } catch (IllegalArgumentException e) {
             throw new SwaggerMigrationException(e.getMessage());
         }

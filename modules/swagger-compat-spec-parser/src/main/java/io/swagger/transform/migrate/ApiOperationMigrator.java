@@ -11,15 +11,13 @@ import javax.annotation.Nonnull;
  * Migrator for the {@code operations} arrau of an API object
  */
 public final class ApiOperationMigrator
-    implements SwaggerMigrator
-{
+        implements SwaggerMigrator {
     private final SwaggerMigrator migrator = new ApiObjectMigrator();
 
     @Nonnull
     @Override
     public JsonNode migrate(@Nonnull final JsonNode input)
-        throws SwaggerMigrationException
-    {
+            throws SwaggerMigrationException {
         final MutableJsonTree tree = new MutableJsonTree(input);
         tree.setPointer(JsonPointer.of("operations"));
         tree.applyMigratorToElements(migrator);

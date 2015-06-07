@@ -1,3 +1,7 @@
 [
-    { "op": "move", "from": "/reason", "path": "/message" }
+  {
+    "op": "move",
+    "from": "/reason",
+    "path": "/message"
+  }
 ]

@@ -5,11 +5,9 @@ import io.swagger.transform.migrate.ApiObjectMigrator;
 import java.io.IOException;
 
 public final class ApiObjectMigratorTest
-    extends SwaggerMigratorTest
-{
+        extends SwaggerMigratorTest {
     public ApiObjectMigratorTest()
-        throws IOException
-    {
+            throws IOException {
         super("apiObject", new ApiObjectMigrator());
     }
 }

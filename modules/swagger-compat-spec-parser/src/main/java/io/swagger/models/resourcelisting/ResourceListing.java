@@ -1,9 +1,12 @@
 package io.swagger.models.resourcelisting;
 
-import java.util.*;
-
 import io.swagger.models.SwaggerBaseModel;
 import io.swagger.models.SwaggerVersion;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ResourceListing extends SwaggerBaseModel {
     private SwaggerVersion swaggerVersion = null;

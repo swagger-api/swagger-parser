@@ -7,26 +7,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-public final class MigrationErrorData
-{
+public final class MigrationErrorData {
     private final JsonNode original;
     private final String errorMessage;
 
     @JsonCreator
     public MigrationErrorData(@JsonProperty("original") final JsonNode original,
-        @JsonProperty("errorMessage") final String errorMessage)
-    {
+                              @JsonProperty("errorMessage") final String errorMessage) {
         this.original = original;
         this.errorMessage = errorMessage;
     }
 
-    public JsonNode getOriginal()
-    {
+    public JsonNode getOriginal() {
         return original;
     }
 
-    public String getErrorMessage()
-    {
+    public String getErrorMessage() {
         return errorMessage;
     }
 }

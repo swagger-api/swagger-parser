@@ -5,11 +5,9 @@ import io.swagger.transform.migrate.V11ResourceListingMigrator;
 import java.io.IOException;
 
 public final class ResourceListingBasePathPushDownTest
-    extends SwaggerMigratorTest
-{
+        extends SwaggerMigratorTest {
     public ResourceListingBasePathPushDownTest()
-        throws IOException
-    {
+            throws IOException {
         super("basePathPushDown", new V11ResourceListingMigrator());
     }
 }

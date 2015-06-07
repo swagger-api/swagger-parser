@@ -7,15 +7,13 @@ import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import io.swagger.transform.util.SwaggerJsonSchemaFactory;
 
-public abstract class SwaggerSchemaValidator
-{
+public abstract class SwaggerSchemaValidator {
     protected static final JsonSchemaFactory FACTORY
-        = SwaggerJsonSchemaFactory.getInstance().getFactory();
+            = SwaggerJsonSchemaFactory.getInstance().getFactory();
 
     private final JsonSchema schema;
 
-    protected SwaggerSchemaValidator(final String schemaPath)
-    {
+    protected SwaggerSchemaValidator(final String schemaPath) {
         try {
             schema = FACTORY.getJsonSchema(schemaPath);
         } catch (ProcessingException e) {
@@ -24,8 +22,7 @@ public abstract class SwaggerSchemaValidator
     }
 
     public final ProcessingReport validate(final JsonNode input)
-        throws ProcessingException
-    {
+            throws ProcessingException {
         return schema.validate(input, true);
     }
 }

@@ -1,8 +1,8 @@
 package io.swagger.models.resourcelisting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.models.AuthorizationType;
 import io.swagger.models.SwaggerBaseModel;
 

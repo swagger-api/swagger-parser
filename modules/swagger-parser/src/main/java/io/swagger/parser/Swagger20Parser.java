@@ -2,11 +2,11 @@ package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wordnik.swagger.models.Swagger;
-import com.wordnik.swagger.models.auth.AuthorizationValue;
-import com.wordnik.swagger.util.Json;
-import com.wordnik.swagger.util.Yaml;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.RemoteUrl;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -23,16 +23,16 @@ public class Swagger20Parser implements SwaggerParserExtension {
         try {
             String data;
 
-            if(location.toLowerCase().startsWith("http"))
+            if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths);
-            else
+            } else {
                 data = FileUtils.readFileToString(new File(location), "UTF-8");
+            }
 
             return convertToSwagger(data);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
-            if(System.getProperty("debugParser") != null) {
+            if (System.getProperty("debugParser") != null) {
                 e.printStackTrace();
             }
             return null;
@@ -40,24 +40,22 @@ public class Swagger20Parser implements SwaggerParserExtension {
     }
 
     private Swagger convertToSwagger(String data) throws IOException {
-        if(data != null) {
+        if (data != null) {
             ObjectMapper mapper;
-            if(data.trim().startsWith("{")){
+            if (data.trim().startsWith("{")) {
                 mapper = Json.mapper();
-            }
-            else {
+            } else {
                 mapper = Yaml.mapper();
             }
             JsonNode rootNode = mapper.readTree(data);
             // must have swagger node set
             JsonNode swaggerNode = rootNode.get("swagger");
-            if(swaggerNode == null){
+            if (swaggerNode == null) {
                 return null;
-            }else{
+            } else {
                 return mapper.convertValue(rootNode, Swagger.class);
             }
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -69,8 +67,9 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     @Override
     public Swagger read(JsonNode node) throws IOException {
-        if(node == null)
+        if (node == null) {
             return null;
+        }
 
         return Json.mapper().convertValue(node, Swagger.class);
     }
