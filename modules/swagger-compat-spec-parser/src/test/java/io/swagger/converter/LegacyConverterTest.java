@@ -4,15 +4,24 @@ import io.swagger.models.Contact;
 import io.swagger.models.Info;
 import io.swagger.models.License;
 import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerCompatConverter;
+
 import org.testng.annotations.Test;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -99,5 +108,27 @@ public class LegacyConverterTest {
         Swagger swagger = converter.read("src/test/resources/specs/v1_2/empty.json");
 
         assertNull(swagger);
+    }
+
+    @Test
+    public void testFixedProperties() throws IOException {
+        final Swagger swagger = converter.read("src/test/resources/specs/v1_2/singleFile.json");
+        final Path path = swagger.getPath("/pet/{petId}");
+        assertEquals(path.getPost().getResponses().size(), 1);
+        for (Response item : path.getPost().getResponses().values()) {
+            assertNull(item.getSchema());
+        }
+        assertNull(path.getDelete().getResponses());
+        final PathParameter id = (PathParameter) Iterables.find(path.getPatch().getParameters(),
+                new Predicate<Parameter>() {
+
+                    @Override
+                    public boolean apply(Parameter input) {
+                        return "petId".equals(input.getName());
+                    }
+                });
+
+        assertEquals(id.getType(), "string");
+        assertNull(id.getFormat());
     }
 }

@@ -2,6 +2,7 @@ package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.swagger.models.ArrayModel;
 import io.swagger.models.AuthorizationScope;
 import io.swagger.models.Contact;
@@ -39,6 +40,7 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.models.resourcelisting.ApiInfo;
 import io.swagger.models.resourcelisting.ApiKeyAuthorization;
 import io.swagger.models.resourcelisting.ApiListingReference;
@@ -234,6 +236,12 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 p = arrayProperty;
             } else {
                 p = propertyFromTypedObject(param);
+                if (p == null) {
+                    System.out.println(String.format(
+                            "WARNING! No property detected for parameter '%s' (%s)! Falling back to string!",
+                            param.getName(), param.getParamType()));
+                    p = new StringProperty();
+                }
             }
             if (p instanceof ArrayProperty) {
                 ArrayProperty ap = (ArrayProperty) p;
@@ -334,11 +342,6 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                     output = new RefProperty(type);
                 }
             }
-        }
-
-        if (output == null) {
-            System.out.println("WARNING!  No property detected!  Falling back to string!");
-            output = PropertyBuilder.build("string", null, null);
         }
 
         return output;
