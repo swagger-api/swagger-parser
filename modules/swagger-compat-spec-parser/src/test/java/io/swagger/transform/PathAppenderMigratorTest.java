@@ -5,11 +5,9 @@ import io.swagger.transform.migrate.resourcelisting.PathAppenderMigrator;
 import java.io.IOException;
 
 public final class PathAppenderMigratorTest
-    extends SwaggerMigratorTest
-{
+        extends SwaggerMigratorTest {
     public PathAppenderMigratorTest()
-        throws IOException
-    {
+            throws IOException {
         super("pathAppender", new PathAppenderMigrator("http://foo.bar"));
     }
 }

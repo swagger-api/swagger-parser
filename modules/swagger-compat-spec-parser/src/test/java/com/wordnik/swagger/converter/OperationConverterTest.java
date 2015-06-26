@@ -1,14 +1,14 @@
 package com.wordnik.swagger.converter;
 
+import io.swagger.models.Operation;
+import io.swagger.models.Response;
 import io.swagger.models.apideclaration.ApiDeclaration;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.models.ParamType;
 import io.swagger.models.Method;
 import io.swagger.models.apideclaration.ResponseMessage;
-
-import com.wordnik.swagger.models.Operation;
-import com.wordnik.swagger.models.Response;
-import com.wordnik.swagger.models.properties.*;
 
 import java.util.*;
 

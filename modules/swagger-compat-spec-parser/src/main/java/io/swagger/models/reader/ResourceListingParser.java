@@ -1,13 +1,15 @@
 package io.swagger.models.reader;
 
-import io.swagger.models.resourcelisting.Authorization;
-import io.swagger.report.MessageBuilder;
 import io.swagger.models.resourcelisting.ApiListingReference;
+import io.swagger.models.resourcelisting.Authorization;
 import io.swagger.models.resourcelisting.GrantTypes;
 import io.swagger.models.resourcelisting.ResourceListing;
+import io.swagger.report.MessageBuilder;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ResourceListingParser extends SwaggerParser {
 

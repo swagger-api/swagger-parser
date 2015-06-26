@@ -9,18 +9,15 @@ import io.swagger.transform.util.SwaggerJsonSchemaFactory;
 
 import java.io.IOException;
 
-public abstract class SwaggerSchemaValidatorTest
-{
-    private final JsonSchemaFactory FACTORY
-        = SwaggerJsonSchemaFactory.getInstance().getFactory();
-
+public abstract class SwaggerSchemaValidatorTest {
     protected final JsonSchema schema;
     protected final JsonNode instance;
+    private final JsonSchemaFactory FACTORY
+            = SwaggerJsonSchemaFactory.getInstance().getFactory();
 
     protected SwaggerSchemaValidatorTest(final String schemaURI,
-        final String instancePath)
-        throws IOException, ProcessingException
-    {
+                                         final String instancePath)
+            throws IOException, ProcessingException {
         schema = FACTORY.getJsonSchema(schemaURI);
         instance = JsonLoader.fromResource("/validate/" + instancePath);
     }

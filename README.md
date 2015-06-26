@@ -18,7 +18,7 @@ Using the swagger-parser is simple.  Once included in your project, you can read
 
 ```java
 import io.swagger.parser.SwaggerParser;
-import com.wordnik.swagger.models.Swagger;
+import io.swagger.models.Swagger;
 
 // ... your code
 
@@ -39,7 +39,7 @@ And with the swagger-compat-spec-parser module, you can read older formats, and 
 
 If your swagger resource is protected, you can pass headers in the request:
 ```java
-import com.wordnik.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.auth.AuthorizationValue;
 
 // ... your code
 
@@ -103,7 +103,7 @@ To add swagger parsing support for older versions of swagger, add the `compat` m
 License
 -------
 
-Copyright 2015 Reverb Technologies, Inc.
+Copyright 2015 SmartBear Software
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

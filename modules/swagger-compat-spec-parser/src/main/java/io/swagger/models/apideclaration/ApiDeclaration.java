@@ -1,12 +1,14 @@
 package io.swagger.models.apideclaration;
 
-import java.util.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import io.swagger.models.AuthorizationScope;
 import io.swagger.models.SwaggerBaseModel;
 import io.swagger.models.resourcelisting.ApiListingReference;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ApiDeclaration extends SwaggerBaseModel {
     private String swaggerVersion = null;
@@ -93,12 +95,12 @@ public class ApiDeclaration extends SwaggerBaseModel {
         this.authorizations = authorizations;
     }
 
-    public void setApiListingRef(ApiListingReference ref) {
-        this.apiListingRef = ref;
-    }
-
     public ApiListingReference getApiListingRef() {
         return this.apiListingRef;
+    }
+
+    public void setApiListingRef(ApiListingReference ref) {
+        this.apiListingRef = ref;
     }
 
     @Override

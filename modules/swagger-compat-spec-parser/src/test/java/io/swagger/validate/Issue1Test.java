@@ -9,18 +9,15 @@ import java.io.IOException;
 import static org.testng.Assert.assertFalse;
 
 public final class Issue1Test
-    extends SwaggerSchemaValidatorTest
-{
+        extends SwaggerSchemaValidatorTest {
     public Issue1Test()
-        throws IOException, ProcessingException
-    {
+            throws IOException, ProcessingException {
         super("v1.2/parameterObject.json#", "issue1.json");
     }
 
     @Test
     public void parameterWithTypeFileMustHaveCorrectConsumesAndParamType()
-        throws ProcessingException
-    {
+            throws ProcessingException {
         final ProcessingReport report = schema.validate(instance);
         assertFalse(report.isSuccess());
     }
