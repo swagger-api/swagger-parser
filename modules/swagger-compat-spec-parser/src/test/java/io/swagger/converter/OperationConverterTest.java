@@ -11,8 +11,7 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerCompatConverter;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -78,5 +77,29 @@ public class OperationConverterTest {
         assertTrue(property.getClass().equals(RefProperty.class));
         RefProperty ref = (RefProperty) property;
         assertEquals(ref.getSimpleRef(), "Cat");
+    }
+
+    @Test
+    public void testConvertOperation_ConsumesAndProducesInheritedFromApiDeclaration() throws Exception {
+        Set<String> expectedConsumes = new HashSet<>(Arrays.asList("application/json", "application/xml"));
+        Set<String> expectedProduces = new HashSet<>(Arrays.asList("text/plain"));
+
+        final ApiDeclaration apiDeclaration = new ApiDeclaration();
+        apiDeclaration.setConsumes(new ArrayList<>(expectedConsumes));
+        apiDeclaration.setProduces(new ArrayList<>(expectedProduces));
+
+        io.swagger.models.apideclaration.Operation operation = new io.swagger.models.apideclaration.Operation();
+
+        Operation converted = converter.convertOperation("tag", operation, apiDeclaration);
+
+        assertSetsAreEqual(expectedConsumes, converted.getConsumes());
+        assertSetsAreEqual(expectedProduces, converted.getProduces());
+    }
+
+    private void assertSetsAreEqual(Set<String> expectedConsumes, List<String> actualConsumes) {
+        Set<String> actualConsumesSet = new HashSet<>();
+        actualConsumesSet.addAll(actualConsumes);
+        assertEquals(expectedConsumes.size(), actualConsumes.size());
+        assertTrue(actualConsumesSet.containsAll(expectedConsumes));
     }
 }
