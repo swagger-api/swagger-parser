@@ -13,9 +13,7 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class OperationConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
@@ -89,8 +87,10 @@ public class OperationConverterTest {
         apiDeclaration.setProduces(new ArrayList<>(expectedProduces));
 
         io.swagger.models.apideclaration.Operation operation = new io.swagger.models.apideclaration.Operation();
+        operation.setMethod(Method.GET);
 
-        Operation converted = converter.convertOperation("tag", operation, apiDeclaration);
+        final SwaggerCompatConverter swaggerCompatConverter = new SwaggerCompatConverter();
+        Operation converted = swaggerCompatConverter.convertOperation("tag", operation, apiDeclaration);
 
         assertSetsAreEqual(expectedConsumes, converted.getConsumes());
         assertSetsAreEqual(expectedProduces, converted.getProduces());
