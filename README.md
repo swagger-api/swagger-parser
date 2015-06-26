@@ -34,7 +34,7 @@ You can read from a file location as well:
 
 And with the swagger-compat-spec-parser module, you can read older formats, and convert them into swagger 2.0:
 ```java
-  Swagger swagger = new SwaggerParser().read("http://petstore.swagger.io/api/api-docs");
+  Swagger swagger = new SwaggerCompatConverter().read("http://petstore.swagger.io/api/api-docs");
 ```
 
 If your swagger resource is protected, you can pass headers in the request:
@@ -55,6 +55,12 @@ import io.swagger.models.auth.AuthorizationValue;
     "http://petstore.swagger.io/v2/swagger.json",
     Arrays.asList(mySpecialHeader, apiKey)
   );
+```
+
+And, if your intent is to read in a Swagger 1.2 spec so that you can then output a Swagger 2 spec to string/file
+then you are in luck - you have the spec in pojo form, now pass it to pretty() and you're good to go.
+```
+    String swaggerString = Json.pretty(swagger);
 ```
 
 ### Prerequisites
