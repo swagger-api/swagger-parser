@@ -47,19 +47,30 @@ public class SwaggerParser {
         return null;
     }
 
+    private static Swagger getSwagger(String swaggerAsString) {
+        try {
+            return new Swagger20Parser().parse(swaggerAsString);
+        } catch(IOException e) {
+            // continue;
+        }
+        return null;
+    }
+
     public Swagger parse(String swaggerAsString) {
-        return parse(swaggerAsString, null);
+        Swagger output = SwaggerParser.getSwagger(swaggerAsString);
+        if (output != null) {
+            return new SwaggerResolver().resolve(output, null);
+        }
+        return null;
     }
 
     public Swagger parse(String swaggerAsString, List<AuthorizationValue> auths) {
-        Swagger output;
-        try {
-            output = new Swagger20Parser().parse(swaggerAsString);
-            if (output != null && auths != null && auths.size() > 0) {
+        if (auths != null && auths.size() > 0) {
+            Swagger output = SwaggerParser.getSwagger(swaggerAsString);
+
+            if (output != null) {
                 return new SwaggerResolver().resolve(output, auths);
             }
-        } catch (IOException e) {
-            // continue;
         }
         return null;
     }
