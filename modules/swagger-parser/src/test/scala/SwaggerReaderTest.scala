@@ -1,8 +1,13 @@
+import io.swagger.models.Swagger
 import io.swagger.parser.SwaggerParser
 import io.swagger.util.Json
+import org.apache.commons.io.FileUtils
 import org.junit.runner.RunWith
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
+
+import java.io.File
+import java.nio.charset.StandardCharsets
 
 @RunWith(classOf[JUnitRunner])
 class SwaggerReaderTest extends FlatSpec with Matchers {
@@ -40,5 +45,17 @@ class SwaggerReaderTest extends FlatSpec with Matchers {
   "name" : "Gorilla"
 }"""
     )
+  }
+
+  it should "read the issue 59 resource" in {
+    val parser = new SwaggerParser()
+    val sampleFilePath = "./src/test/resources/uber.json"
+
+    val swaggerFromFile = parser.parse(FileUtils.readFileToString(new File(sampleFilePath), StandardCharsets.UTF_8))
+    val swaggerFromString = parser.read(sampleFilePath)
+
+    swaggerFromFile.isInstanceOf[Swagger] should be(true)
+    swaggerFromString.isInstanceOf[Swagger] should be(true)
+    swaggerFromFile should equal(swaggerFromString)
   }
 }

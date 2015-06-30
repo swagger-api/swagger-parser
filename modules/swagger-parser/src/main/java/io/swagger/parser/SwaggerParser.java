@@ -55,7 +55,7 @@ public class SwaggerParser {
         Swagger output;
         try {
             output = new Swagger20Parser().parse(swaggerAsString);
-            if (output != null && auths != null && auths.size() > 0) {
+            if (output != null) {
                 return new SwaggerResolver().resolve(output, auths);
             }
         } catch (IOException e) {
