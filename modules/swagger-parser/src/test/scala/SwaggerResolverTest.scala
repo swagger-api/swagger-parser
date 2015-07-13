@@ -53,7 +53,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
 
   it should "resolve operation bodyparam remote refs" in {
     val swagger = new Swagger()
-    swagger.path("/fun", new Path()
+    swagger.path("/fun", new PathImpl()
       .get(new Operation()
       .parameter(new BodyParameter()
       .schema(new RefModel("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
@@ -68,7 +68,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
 
   it should "resolve operation parameter remote refs" in {
     val swagger = new Swagger()
-    swagger.path("/fun", new Path()
+    swagger.path("/fun", new PathImpl()
       .get(new Operation()
       .parameter(new RefParameter("#/parameters/SampleParameter"))))
 
@@ -87,11 +87,11 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     val schema = new ModelImpl()
 
     val swagger = new Swagger()
-    swagger.path("/fun", new Path()
+    swagger.path("/fun", new PathImpl()
       .get(new Operation()
       .parameter(new RefParameter("#/parameters/SampleParameter"))))
 
-    swagger.path("/times", new Path()
+    swagger.path("/times", new PathImpl()
       .get(new Operation()
       .parameter(new RefParameter("#/parameters/SampleParameter"))))
 
@@ -109,9 +109,9 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
 
   it should "resolve response remote refs" in {
     val swagger = new Swagger()
-    swagger.path("/fun", new Path()
+    swagger.path("/fun", new PathImpl()
       .get(new Operation()
-      .response(200, new Response()
+      .response(200, new ResponseImpl()
       .schema(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
     val resolved = new SwaggerResolver().resolve(swagger, null)
     val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
