@@ -25,7 +25,7 @@ public class RefUtils {
 
         String plausibleName;
 
-        if(definitionPath != null) { //the name will come from the definition path
+        if(definitionPath != null) { //the name will come from the last element of the definition path
             final String[] jsonPathElements = definitionPath.split("/");
             plausibleName = jsonPathElements[jsonPathElements.length-1];
         } else { //no definition path, so we must come up with a name from the file

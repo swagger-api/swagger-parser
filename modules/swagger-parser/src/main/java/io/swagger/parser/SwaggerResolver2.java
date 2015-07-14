@@ -5,6 +5,8 @@ import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
@@ -16,7 +18,7 @@ import java.util.Map;
 import static io.swagger.parser.util.RefUtils.*;
 
 /**
- * Created by russellb337 on 7/9/15.
+ *
  */
 public class SwaggerResolver2 {
 
@@ -33,7 +35,22 @@ public class SwaggerResolver2 {
         this.swagger = swagger;
 
         processPaths();
+        processDefinitions();
+
         return swagger;
+    }
+
+    private void processDefinitions() {
+        final Map<String, Model> definitions = swagger.getDefinitions();
+
+        if (definitions == null) {
+            return;
+        }
+
+        for (Map.Entry<String, Model> definitionEntry : definitions.entrySet()) {
+            final Model model = definitionEntry.getValue();
+            processModel(model);
+        }
     }
 
     private void processPaths() {
@@ -85,23 +102,34 @@ public class SwaggerResolver2 {
         for (String responseCode : responses.keySet()) {
             Response response = responses.get(responseCode);
 
-            if(response instanceof RefResponse) {
+            if (response instanceof RefResponse) {
                 RefResponse refResponse = (RefResponse) response;
                 ResponseImpl resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), ResponseImpl.class);
 
-                if(resolvedResponse != null) {
+                if (resolvedResponse != null) {
                     responses.put(responseCode, resolvedResponse);
                 }
             }
             processResponse(response);
         }
-
-
     }
 
     private void processResponse(Response response) {
+        //process the response body
+        final Property schema = response.getSchema();
 
+        if (schema != null) {
+            processProperty(schema);
+        }
+
+        //process the response headers
+        final Map<String, Property> headers = response.getHeaders();
+        for (Map.Entry<String, Property> responseHdrEntry : headers.entrySet()) {
+            final Property responseHeader = responseHdrEntry.getValue();
+            processProperty(responseHeader);
+        }
     }
+
 
     private List<Parameter> processParameters(List<Parameter> parameters) {
         final List<Parameter> incomingParameterList = parameters;
@@ -117,53 +145,77 @@ public class SwaggerResolver2 {
                     processedPathLevelParameters.add(referencedParameter);
                 }
 
-            } else if (parameter instanceof BodyParameter) {
-                //body parameters can have referenced schema's
-                BodyParameter bodyParameter = (BodyParameter) parameter;
-                final Model schema = bodyParameter.getSchema();
-
-                if (schema instanceof RefModel) {
-                    RefModel refModel = (RefModel) schema;
-                    processRefModel(refModel);
-                } else if (schema instanceof ArrayModel) {
-                    //could be an array of referenced types
-                    ArrayModel arrayModel = (ArrayModel) schema;
-
-                    final Property items = arrayModel.getItems();
-
-                    if(items instanceof RefProperty) {
-                        RefProperty refProperty = (RefProperty) items;
-
-                        if(isAnExternalRefFormat(refProperty.getRefFormat())) {
-                            final String newRef = loadExternalModelRef(refProperty.get$ref(), refProperty.getRefFormat());
-
-                            if(newRef != null) {
-                                refProperty.set$ref(newRef);
-                            }
-                        }
-                    }
-
-
-                } else if (schema instanceof ComposedModel) {
-                    //the composition could be referenced
-
-                    ComposedModel composedModel = (ComposedModel) schema;
-
-                    final List<Model> allOf = composedModel.getAllOf();
-                    for (Model model : allOf) {
-                        if(model instanceof RefModel) {
-                            RefModel refModel = (RefModel) model;
-                            processRefModel(refModel);
-                        }
-                    }
-                }
-                processedPathLevelParameters.add(parameter);
             } else {
+                if (parameter instanceof BodyParameter) {
+                    BodyParameter bodyParameter = (BodyParameter) parameter;
+                    final Model schema = bodyParameter.getSchema();
+                    processModel(schema);
+                }
                 processedPathLevelParameters.add(parameter);
             }
         }
         return processedPathLevelParameters;
     }
+
+    /*
+        Model Processing Methods
+     */
+
+    private void processModel(Model model) {
+        if (model == null) {
+            return;
+        }
+
+        if (model instanceof RefModel) {
+            processRefModel((RefModel) model);
+        } else if (model instanceof ArrayModel) {
+            processArrayModel((ArrayModel) model);
+        } else if (model instanceof ComposedModel) {
+            processComposedModel((ComposedModel) model);
+        } else if (model instanceof ModelImpl) {
+            processModelImpl((ModelImpl) model);
+        }
+    }
+
+    private void processModelImpl(ModelImpl modelImpl) {
+
+        final Map<String, Property> properties = modelImpl.getProperties();
+
+        if (properties == null) {
+            return;
+        }
+
+        for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+            final Property property = propertyEntry.getValue();
+            processProperty(property);
+        }
+
+    }
+
+    private void processComposedModel(ComposedModel composedModel) {
+
+        /*
+        we only need to process the "allOf" list, because ComposedModel.parent, ComposedModel.child, and ComposedModel.interfaces
+        all get populated from values in in "allOf"
+         */
+        final List<Model> allOf = composedModel.getAllOf();
+
+        for (Model model : allOf) {
+            processModel(model);
+        }
+    }
+
+    private void processArrayModel(ArrayModel arrayModel) {
+
+        final Property items = arrayModel.getItems();
+
+        //TODO ArrayModel has a properties map, but my reading of the swagger spec makes me think it should be ignored
+
+        if (items != null) {
+            processProperty(items);
+        }
+    }
+
 
     private void processRefModel(RefModel refModel) {
     /* if this is a URL or relative ref:
@@ -172,15 +224,57 @@ public class SwaggerResolver2 {
         3) update the RefModel to point to its location in #/definitions
      */
         if (isAnExternalRefFormat(refModel.getRefFormat())) {
-            final String newRef = loadExternalModelRef(refModel.get$ref(), refModel.getRefFormat());
+            final String newRef = processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat());
 
-            if(newRef != null) {
+            if (newRef != null) {
                 refModel.set$ref(newRef);
             }
         }
     }
 
-    private String loadExternalModelRef(String $ref, RefFormat refFormat) {
+    /*
+        Property Processing Methods
+     */
+
+    private void processProperty(Property property) {
+        if (property instanceof RefProperty) {
+            processRefProperty((RefProperty) property);
+        } else if (property instanceof ArrayProperty) {
+            processArrayProperty((ArrayProperty) property);
+        } else if (property instanceof MapProperty) {
+            processMapProperty((MapProperty) property);
+        }
+    }
+
+    private void processRefProperty(RefProperty refProperty) {
+        if (isAnExternalRefFormat(refProperty.getRefFormat())) {
+            final String newRef = processRefToExternalDefinition(refProperty.get$ref(), refProperty.getRefFormat());
+
+            if (newRef != null) {
+                refProperty.set$ref(newRef);
+            }
+        }
+    }
+
+    private void processMapProperty(MapProperty property) {
+        final Property additionalProperties = property.getAdditionalProperties();
+        if (additionalProperties != null) {
+            processProperty(additionalProperties);
+        }
+    }
+
+    private void processArrayProperty(ArrayProperty property) {
+        final Property items = property.getItems();
+        if (items != null) {
+            processProperty(items);
+        }
+    }
+
+    /*
+        Generic Definition Processing
+     */
+
+    private String processRefToExternalDefinition(String $ref, RefFormat refFormat) {
         final Model model = cache.loadRef($ref, refFormat, Model.class);
 
         String newRef = null;
@@ -209,4 +303,5 @@ public class SwaggerResolver2 {
 
         return newRef;
     }
+
 }

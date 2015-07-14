@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 /**
  * A class that caches values that have been resolved so we don't have to repeat
  * expensive operations like:
- * 1) reading a remote URL with authorization
+ * 1) reading a remote URL with authorization (using RemoteURL.java)
  * 2) reading the contents of a file into memory
  * 3) extracting a sub object from a json/yaml tree
  * 4) de-serializing json strings into objects
@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public class ResolverCache {
 
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefConstants.INTERNAL_PARAMETER_PREFIX + "(?<name>\\S+)");
-    private static final Pattern DEFINTION_PATTERN = Pattern.compile("^" + RefConstants.INTERNAL_DEFINITION_PREFIX + "(?<name>\\S+)");
+    private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefConstants.INTERNAL_DEFINITION_PREFIX + "(?<name>\\S+)");
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
@@ -160,7 +160,7 @@ public class ResolverCache {
         Object result = checkMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
 
         if (result == null) {
-            result = checkMap(ref, swagger.getDefinitions(), DEFINTION_PATTERN);
+            result = checkMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
         }
 
         if (result != null) {
