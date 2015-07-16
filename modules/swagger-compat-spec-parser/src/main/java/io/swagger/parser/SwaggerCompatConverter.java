@@ -2,51 +2,21 @@ package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.swagger.models.ArrayModel;
-import io.swagger.models.AuthorizationScope;
-import io.swagger.models.Contact;
-import io.swagger.models.Info;
-import io.swagger.models.License;
-import io.swagger.models.Method;
+import io.swagger.models.*;
 import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
-import io.swagger.models.ParamType;
-import io.swagger.models.PassAs;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.Response;
-import io.swagger.models.Scheme;
-import io.swagger.models.Swagger;
-import io.swagger.models.apideclaration.Api;
-import io.swagger.models.apideclaration.ApiDeclaration;
-import io.swagger.models.apideclaration.ExtendedTypedObject;
-import io.swagger.models.apideclaration.Items;
-import io.swagger.models.apideclaration.ModelProperty;
-import io.swagger.models.apideclaration.ResponseMessage;
+import io.swagger.models.apideclaration.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.FormParameter;
-import io.swagger.models.parameters.HeaderParameter;
+import io.swagger.models.parameters.*;
 import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.PathParameter;
-import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.models.resourcelisting.ApiInfo;
-import io.swagger.models.resourcelisting.ApiKeyAuthorization;
-import io.swagger.models.resourcelisting.ApiListingReference;
-import io.swagger.models.resourcelisting.Authorization;
-import io.swagger.models.resourcelisting.AuthorizationCodeGrant;
-import io.swagger.models.resourcelisting.ImplicitGrant;
-import io.swagger.models.resourcelisting.OAuth2Authorization;
-import io.swagger.models.resourcelisting.ResourceListing;
+import io.swagger.models.resourcelisting.*;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.report.MessageBuilder;
 import io.swagger.transform.migrate.ApiDeclarationMigrator;
@@ -344,7 +314,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         return output;
     }
 
-    public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation) {
+    public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation,
+                                      ApiDeclaration apiDeclaration) {
         Method method;
 
         if (operation.getMethod() == null) {
@@ -366,16 +337,25 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             output.parameter(convertParameter(parameter));
         }
 
-        if (operation.getConsumes() != null) {
+        if (operation.getConsumes() != null && !operation.getConsumes().isEmpty()) {
             for (String consumes : operation.getConsumes()) {
                 output.consumes(consumes);
             }
+        } else if (apiDeclaration.getConsumes() != null) {
+            for (String consumes : apiDeclaration.getConsumes()) {
+                output.consumes(consumes);
+            }
         }
-        if (operation.getProduces() != null) {
+        if (operation.getProduces() != null && !operation.getProduces().isEmpty()) {
             for (String produces : operation.getProduces()) {
                 output.produces(produces);
             }
+        } else if (apiDeclaration.getProduces() != null) {
+            for (String produces : apiDeclaration.getProduces()) {
+                output.produces(produces);
+            }
         }
+
         for (ResponseMessage message : operation.getResponseMessages()) {
             Response response = new Response().description(message.getMessage());
 
@@ -502,7 +482,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                     paths.put(apiPath, path);
                 }
                 for (io.swagger.models.apideclaration.Operation op : ops) {
-                    Operation operation = convertOperation(tag, op);
+                    Operation operation = convertOperation(tag, op, apiDeclaration);
 
                     if (op.getMethod() != null) {
                         path.set(op.getMethod().toString().toLowerCase(), operation);
@@ -540,6 +520,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 basePath = "/" + basePath;
             }
         }
+
 
         Swagger swagger = new Swagger()
                 .host(host)
