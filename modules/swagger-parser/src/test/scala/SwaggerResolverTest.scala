@@ -14,7 +14,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
       "Sample", new ModelImpl()
         .property("remoteRef", new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))
 
-    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val resolved = new SwaggerResolver(swagger, null).resolve()
     val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
     prop.isInstanceOf[RefProperty] should be(true)
     val ref = prop.asInstanceOf[RefProperty]
@@ -28,7 +28,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
       "Sample", new ModelImpl()
         .property("remoteRef", new ArrayProperty(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag"))))
 
-    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val resolved = new SwaggerResolver(swagger, null).resolve()
     val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
     prop.isInstanceOf[ArrayProperty] should be(true)
     val ap = prop.asInstanceOf[ArrayProperty]
@@ -42,7 +42,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     swagger.addDefinition(
       "Sample", new ModelImpl()
         .property("remoteRef", new MapProperty(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag"))))
-    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val resolved = new SwaggerResolver(swagger, null).resolve()
     val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
     prop.isInstanceOf[MapProperty] should be(true)
     val ap = prop.asInstanceOf[MapProperty]
@@ -58,7 +58,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
       .parameter(new BodyParameter()
       .schema(new RefModel("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
 
-    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val resolved = new SwaggerResolver(swagger, null).resolve()
     val param = swagger.getPaths().get("/fun").getGet().getParameters().get(0).asInstanceOf[BodyParameter]
     val ref = param.getSchema().asInstanceOf[RefModel]
     ref.get$ref() should equal("#/definitions/Tag")
@@ -76,7 +76,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
       .name("skip")
       .property(new IntegerProperty()))
 
-    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val resolved = new SwaggerResolver(swagger, null).resolve()
     val params = swagger.getPaths().get("/fun").getGet().getParameters()
     params.size() should be(1)
     val param = params.get(0).asInstanceOf[QueryParameter]
@@ -100,7 +100,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
       .schema(schema))
 
 
-    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val resolved = new SwaggerResolver(swagger, null).resolve()
     val params = swagger.getPaths().get("/fun").getGet().getParameters()
     params.size() should be(1)
     val param = params.get(0).asInstanceOf[BodyParameter]
@@ -113,7 +113,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
       .get(new Operation()
       .response(200, new ResponseImpl()
       .schema(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag")))))
-    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val resolved = new SwaggerResolver(swagger, null).resolve()
     val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
     val ref = response.getSchema.asInstanceOf[RefProperty]
     ref.get$ref() should equal("#/definitions/Tag")

@@ -182,6 +182,18 @@
                 <version>${swagger-core-version}</version>
             </dependency>
             <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${testng-version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jmockit</groupId>
+                <artifactId>jmockit</artifactId>
+                <version>${jmockit-version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-library</artifactId>
                 <version>${scala-version}</version>
@@ -211,6 +223,8 @@
         <slf4j-version>1.6.3</slf4j-version>
         <swagger-core-version>1.5.1-SNAPSHOT</swagger-core-version>
         <junit-version>4.8.1</junit-version>
+        <testng-version>6.9.4</testng-version>
         <scala-test-version>2.1.3</scala-test-version>
+        <jmockit-version>1.17</jmockit-version>
     </properties>
 </project>

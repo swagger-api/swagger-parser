@@ -5,13 +5,10 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefConstants;
 import io.swagger.models.refs.RefFormat;
-import io.swagger.parser.util.RemoteUrl;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
-import org.apache.commons.io.IOUtils;
+import io.swagger.parser.util.DeserializationUtils;
+import io.swagger.parser.util.RefUtils;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A class that caches values that have been resolved so we don't have to repeat
+ * A class that caches values that have been loaded so we don't have to repeat
  * expensive operations like:
  * 1) reading a remote URL with authorization (using RemoteURL.java)
  * 2) reading the contents of a file into memory
@@ -44,36 +41,6 @@ public class ResolverCache {
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths) {
         this.swagger = swagger;
         this.auths = auths;
-    }
-
-
-    private JsonNode deserializeIntoTree(String contents, String fileOrHost) {
-        JsonNode result = null;
-
-        try {
-            if (fileOrHost.endsWith(".yaml")) {
-                result = Yaml.mapper().readTree(contents);
-            } else {
-                result = Json.mapper().readTree(contents);
-            }
-        } catch (IOException e) {
-            System.err.println("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into a JsonNode tree");
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-
-    private <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType) {
-        T result;
-
-        if (fileOrHost.endsWith(".yaml")) {
-            result = Yaml.mapper().convertValue(contents, expectedType);
-        } else {
-            result = Json.mapper().convertValue(contents, expectedType);
-        }
-
-        return result;
     }
 
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
@@ -104,53 +71,30 @@ public class ResolverCache {
         String contents = externalFileCache.get(file);
 
         if (contents == null) {
-            if (refFormat == RefFormat.URL) {
-                try {
-                    contents = new RemoteUrl().urlToString(file, auths);
-                } catch (Exception e) {
-                    System.err.println("An exception was thrown while resolving URL ref: " + file + ", continuing on");
-                    e.printStackTrace();
-                    return null;
-                }
-            } else if (refFormat == RefFormat.RELATIVE) {
-                try {
-                    contents = IOUtils.toString(new FileInputStream(file));
-                } catch (IOException e) {
-                    System.err.println("An exception was thrown while resolving relative file ref: " + file + ", continuing on");
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
+            contents = RefUtils.readExternalRef(file, refFormat, auths);
             externalFileCache.put(file, contents);
         }
 
         if (definitionPath == null) {
-            T result = deserialize(contents, file, expectedType);
+            T result = DeserializationUtils.deserialize(contents, file, expectedType);
             resolutionCache.put(ref, result);
             return result;
         }
 
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
-        JsonNode tree = deserializeIntoTree(contents, file);
-        if (tree == null) {
-            return null;
-        }
+        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
 
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
             tree = tree.get(jsonPathElement);
             //if at any point we do find an element we expect, print and error and return null
             if (tree == null) {
-                System.err.println("Could not find " + definitionPath + " in contents of" + file);
-                return null;
+                throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
             }
         }
 
-        T result = deserialize(tree, file, expectedType);
-        if (result != null) {
-            resolutionCache.put(ref, result);
-        }
+        T result = DeserializationUtils.deserialize(tree, file, expectedType);
+        resolutionCache.put(ref, result);
 
         return result;
     }
@@ -161,10 +105,6 @@ public class ResolverCache {
 
         if (result == null) {
             result = checkMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
-        }
-
-        if (result != null) {
-            resolutionCache.put(ref, result);
         }
 
         return result;
@@ -190,5 +130,17 @@ public class ResolverCache {
 
     public void putRenamedRef(String originalRef, String newRef) {
         renameCache.put(originalRef, newRef);
+    }
+
+    public Map<String, Object> getResolutionCache() {
+        return Collections.unmodifiableMap(resolutionCache);
+    }
+
+    public Map<String, String> getExternalFileCache() {
+        return Collections.unmodifiableMap(externalFileCache);
+    }
+
+    public Map<String, String> getRenameCache() {
+        return Collections.unmodifiableMap(renameCache);
     }
 }

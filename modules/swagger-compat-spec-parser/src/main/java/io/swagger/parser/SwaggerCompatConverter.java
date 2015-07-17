@@ -2,22 +2,7 @@ package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.swagger.models.ArrayModel;
-import io.swagger.models.AuthorizationScope;
-import io.swagger.models.Contact;
-import io.swagger.models.Info;
-import io.swagger.models.License;
-import io.swagger.models.Method;
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Operation;
-import io.swagger.models.ParamType;
-import io.swagger.models.PassAs;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.Response;
-import io.swagger.models.Scheme;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.apideclaration.Api;
 import io.swagger.models.apideclaration.ApiDeclaration;
 import io.swagger.models.apideclaration.ExtendedTypedObject;
@@ -377,7 +362,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
         }
         for (ResponseMessage message : operation.getResponseMessages()) {
-            Response response = new Response().description(message.getMessage());
+            Response response = new ResponseImpl().description(message.getMessage());
 
             Model responseModel = null;
             if (message.getResponseModel() != null) {
@@ -389,7 +374,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         // default response type
         Property responseProperty = propertyFromTypedObject(operation);
         if (responseProperty != null) {
-            Response response = new Response()
+            Response response = new ResponseImpl()
                     .description("success")
                     .schema(responseProperty);
             if (output.getResponses() == null) {
@@ -498,7 +483,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
                 Path path = paths.get(apiPath);
                 if (path == null) {
-                    path = new Path();
+                    path = new PathImpl();
                     paths.put(apiPath, path);
                 }
                 for (io.swagger.models.apideclaration.Operation op : ops) {

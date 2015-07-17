@@ -1,9 +1,13 @@
 package io.swagger.parser.util;
 
 import io.swagger.models.Model;
+import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
+import org.apache.commons.io.IOUtils;
 
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,12 +29,12 @@ public class RefUtils {
 
         String plausibleName;
 
-        if(definitionPath != null) { //the name will come from the last element of the definition path
+        if (definitionPath != null) { //the name will come from the last element of the definition path
             final String[] jsonPathElements = definitionPath.split("/");
-            plausibleName = jsonPathElements[jsonPathElements.length-1];
+            plausibleName = jsonPathElements[jsonPathElements.length - 1];
         } else { //no definition path, so we must come up with a name from the file
             final String[] filePathElements = file.split("/");
-            plausibleName = filePathElements[filePathElements.length-1];
+            plausibleName = filePathElements[filePathElements.length - 1];
 
             final String[] split = plausibleName.split("\\.");
             plausibleName = split[0];
@@ -44,8 +48,8 @@ public class RefUtils {
         String result = possiblyConflictingDefinitionName;
         int count = 1;
 
-        while(definitions.containsKey(result)) {
-            result += "-" + count;
+        while (definitions.containsKey(result)) {
+            result = possiblyConflictingDefinitionName + count;
             count++;
         }
 
@@ -54,6 +58,29 @@ public class RefUtils {
 
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
         return refFormat == RefFormat.URL || refFormat == RefFormat.RELATIVE;
+    }
+
+    public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths) {
+
+        if (!RefUtils.isAnExternalRefFormat(refFormat)) {
+            throw new RuntimeException("Ref is not external");
+        }
+
+        String result;
+
+        try {
+            if (refFormat == RefFormat.URL) {
+                result = RemoteUrl.urlToString(file, auths);
+            } else {
+                //its assumed to be a relative file ref
+                result = IOUtils.toString(new FileInputStream(file));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+        }
+
+        return result;
+
     }
 
 
