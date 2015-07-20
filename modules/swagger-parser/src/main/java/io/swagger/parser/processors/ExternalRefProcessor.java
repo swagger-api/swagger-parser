@@ -1,7 +1,6 @@
 package io.swagger.parser.processors;
 
 import io.swagger.models.Model;
-import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
@@ -40,26 +39,22 @@ public final class ExternalRefProcessor {
 
         if (existingModel != null) {
 
-            if (existingModel instanceof RefModel && ((RefModel) existingModel).get$ref().equals($ref)) {
-                swagger.addDefinition(possiblyConflictingDefinitionName, model);
-                newRef = null;
+            //so this is either a conflict, or another reference to something we have previously renamed
+            final String previouslyRenamedRef = cache.getRenamedRef($ref);
+            if (previouslyRenamedRef != null) {
+                //this is an additional reference to something we have renamed once
+                newRef = previouslyRenamedRef;
             } else {
-                //so this is either a conflict, or another reference to something we have previously renamed
-                final String previouslyRenamedRef = cache.getRenamedRef($ref);
-                if (previouslyRenamedRef != null) {
-                    //this is an additional reference to something we have renamed once
-                    newRef = previouslyRenamedRef;
-                } else {
-                    //this is a conflict
-                    String deconflictedName = deconflictName(possiblyConflictingDefinitionName, definitions);
-                    cache.putRenamedRef($ref, deconflictedName);
-                    newRef = deconflictedName;
-                    swagger.addDefinition(deconflictedName, model);
-                }
+                //this is a conflict
+                String deconflictedName = deconflictName(possiblyConflictingDefinitionName, definitions);
+                cache.putRenamedRef($ref, deconflictedName);
+                newRef = deconflictedName;
+                swagger.addDefinition(deconflictedName, model);
             }
 
         } else {
             newRef = possiblyConflictingDefinitionName;
+            cache.putRenamedRef($ref, newRef);
             swagger.addDefinition(newRef, model);
         }
 

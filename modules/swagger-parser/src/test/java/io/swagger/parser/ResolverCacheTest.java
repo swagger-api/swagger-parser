@@ -35,6 +35,7 @@ public class ResolverCacheTest {
     @Injectable
     List<AuthorizationValue> auths;
 
+
     @Test
     public void testLoadExternalRef_NoDefinitionPath(@Injectable final Model expectedResult) throws Exception {
 
@@ -43,7 +44,7 @@ public class ResolverCacheTest {
         final String contentsOfExternalFile = "really good json";
 
         new StrictExpectations() {{
-            RefUtils.readExternalRef(ref, format, auths);
+            RefUtils.readExternalRef(ref, format, auths, null);
             times = 1;
             result = contentsOfExternalFile;
 
@@ -52,7 +53,7 @@ public class ResolverCacheTest {
             result = expectedResult;
         }};
 
-        ResolverCache cache = new ResolverCache(swagger, auths);
+        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
 
         Model firstActualResult = cache.loadRef(ref, RefFormat.URL, Model.class);
 
@@ -85,7 +86,7 @@ public class ResolverCacheTest {
 
 
         new StrictExpectations() {{
-            RefUtils.readExternalRef(file, format, auths);
+            RefUtils.readExternalRef(file, format, auths, null);
             times = 1;
             result = contentsOfExternalFile;
 
@@ -106,7 +107,7 @@ public class ResolverCacheTest {
             result = expectedResult2;
         }};
 
-        ResolverCache cache = new ResolverCache(swagger, auths);
+        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
 
         Model firstRefResult = cache.loadRef(fullRef1, format, Model.class);
         assertEquals(expectedResult1, cache.getResolutionCache().get(fullRef1));
@@ -130,7 +131,7 @@ public class ResolverCacheTest {
         final Pair<JsonNode, JsonNode> nodePair = constructJsonTree("hello", "world", "foo", "bar");
 
         new StrictExpectations() {{
-            RefUtils.readExternalRef(file, format, auths);
+            RefUtils.readExternalRef(file, format, auths, null);
             times = 1;
             result = contentsOfExternalFile;
 
@@ -143,7 +144,7 @@ public class ResolverCacheTest {
             result = expectedResult;
         }};
 
-        ResolverCache cache = new ResolverCache(swagger, auths);
+        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
         Model firstActualResult = cache.loadRef(fullRef, format, Model.class);
 
         assertEquals(contentsOfExternalFile, cache.getExternalFileCache().get(file));
@@ -166,7 +167,7 @@ public class ResolverCacheTest {
         final Pair<JsonNode, JsonNode> nodePair = constructJsonTree("hello", "world", "foo", "bar");
 
         new StrictExpectations() {{
-            RefUtils.readExternalRef(file, format, auths);
+            RefUtils.readExternalRef(file, format, auths, null);
             times = 1;
             result = contentsOfExternalFile;
 
@@ -176,7 +177,7 @@ public class ResolverCacheTest {
 
         }};
 
-        ResolverCache cache = new ResolverCache(swagger, auths);
+        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
 
         try {
             cache.loadRef(fullRef, format, Model.class);
@@ -191,7 +192,7 @@ public class ResolverCacheTest {
         Swagger swagger = new Swagger();
         swagger.parameter("foo", mockedParameter);
 
-        ResolverCache cache = new ResolverCache(swagger, auths);
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
         Parameter actualResult = cache.loadRef("#/parameters/foo", RefFormat.INTERNAL, Parameter.class);
         assertEquals(actualResult, mockedParameter);
 
@@ -204,7 +205,7 @@ public class ResolverCacheTest {
         Swagger swagger = new Swagger();
         swagger.addDefinition("foo", mockedModel);
 
-        ResolverCache cache = new ResolverCache(swagger, auths);
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
         Model actualResult = cache.loadRef("#/definitions/foo", RefFormat.INTERNAL, Model.class);
         assertEquals(actualResult, mockedModel);
 
@@ -214,7 +215,7 @@ public class ResolverCacheTest {
 
     @Test
     public void testRenameCache() throws Exception {
-        ResolverCache cache = new ResolverCache(swagger, auths);
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
 
         assertNull(cache.getRenamedRef("foo"));
         cache.putRenamedRef("foo", "bar");

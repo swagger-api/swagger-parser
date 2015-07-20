@@ -31,8 +31,6 @@ public class ResponseProcessorTest {
             new PropertyProcessor(cache, swagger); times=1; result = propertyProcessor;
 
             propertyProcessor.processProperty(responseSchema); times=1;
-
-            propertyProcessor.processProperty(responseHeader); times=1;
         }};
 
         Response response = new ResponseImpl();

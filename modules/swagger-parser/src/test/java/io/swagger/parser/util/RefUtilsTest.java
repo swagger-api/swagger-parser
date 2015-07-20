@@ -12,15 +12,15 @@ import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.*;
 
-/**
- * Created by russellb337 on 7/15/15.
- */
+
 public class RefUtilsTest {
 
     @Test
@@ -120,7 +120,7 @@ public class RefUtilsTest {
             result = expectedResult;
         }};
 
-        String actualResult = RefUtils.readExternalRef(url, RefFormat.URL, auths);
+        String actualResult = RefUtils.readExternalRef(url, RefFormat.URL, auths, null);
         assertEquals(expectedResult, actualResult);
     }
 
@@ -139,7 +139,7 @@ public class RefUtilsTest {
         }};
 
         try {
-            RefUtils.readExternalRef(url, RefFormat.URL, auths);
+            RefUtils.readExternalRef(url, RefFormat.URL, auths, null);
             fail("Should have thrown an exception");
         } catch (RuntimeException e) {
             assertEquals(mockedException, e.getCause());
@@ -153,11 +153,12 @@ public class RefUtilsTest {
                                                        @Mocked final FileInputStream fileInputStream
     ) throws Exception {
 
+        final Path parentDirectory = Paths.get("src/test/resources");
         final String file = "./path/to/file.json";
         final String expectedResult = "really good json";
 
         new StrictExpectations() {{
-            new FileInputStream(file);
+            new FileInputStream("src/test/resources/path/to/file.json");
             times = 1;
             result = fileInputStream;
 
@@ -166,7 +167,7 @@ public class RefUtilsTest {
             result = expectedResult;
         }};
 
-        String actualResult = RefUtils.readExternalRef(file, RefFormat.RELATIVE, auths);
+        String actualResult = RefUtils.readExternalRef(file, RefFormat.RELATIVE, auths, parentDirectory);
         assertEquals(expectedResult, actualResult);
     }
 
@@ -176,11 +177,11 @@ public class RefUtilsTest {
                                                                        @Mocked final FileInputStream fileInputStream,
                                                                        @Injectable final IOException mockedException
                                                                        ) throws Exception {
-
         final String file = "./path/to/file.json";
+        final Path parentDirectory = Paths.get("src/test/resources");
 
         new StrictExpectations() {{
-            new FileInputStream(file);
+            new FileInputStream("src/test/resources/path/to/file.json");
             times = 1;
             result = fileInputStream;
 
@@ -190,7 +191,7 @@ public class RefUtilsTest {
         }};
 
         try {
-            RefUtils.readExternalRef(file, RefFormat.RELATIVE, auths);
+            RefUtils.readExternalRef(file, RefFormat.RELATIVE, auths, parentDirectory);
             fail("Should have thrown an exception");
         } catch(RuntimeException e) {
             assertEquals(mockedException, e.getCause());
@@ -203,7 +204,7 @@ public class RefUtilsTest {
         final String file = "#/defintiions/foo";
 
         try {
-            RefUtils.readExternalRef(file, RefFormat.INTERNAL, auths);
+            RefUtils.readExternalRef(file, RefFormat.INTERNAL, auths, null);
             fail("Should have thrown an exception");
         } catch(RuntimeException e) {
 

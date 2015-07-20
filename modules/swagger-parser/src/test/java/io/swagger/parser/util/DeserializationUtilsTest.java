@@ -8,6 +8,7 @@ import io.swagger.util.Yaml;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
+import mockit.StrictExpectations;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -33,7 +34,7 @@ public class DeserializationUtilsTest {
             Yaml.mapper();
             result = objectMapper;
             times = 1;
-            objectMapper.convertValue(anyString, withAny(Object.class));
+            objectMapper.readValue(anyString, withAny(Object.class));
             times = 1;
             result = model;
         }};
@@ -54,7 +55,7 @@ public class DeserializationUtilsTest {
             Json.mapper();
             result = objectMapper;
             times = 2;
-            objectMapper.convertValue(anyString, withAny(Object.class));
+            objectMapper.readValue(anyString, withAny(Object.class));
             times = 2;
             result = model;
         }};
@@ -63,6 +64,49 @@ public class DeserializationUtilsTest {
         assertEquals(model, result);
 
         result = DeserializationUtils.deserialize(jsonStr, "foo", Model.class);
+        assertEquals(model, result);
+    }
+
+    @Test
+    public void testDeserializeJsonTreeIntoObject(@Mocked Json json,
+                                                  @Injectable final ObjectMapper objectMapper,
+                                                  @Injectable final Model model,
+                                                  @Injectable final JsonNode node) throws Exception {
+
+        new Expectations() {{
+            Json.mapper();
+            result = objectMapper;
+            times = 2;
+            objectMapper.convertValue(node, Model.class);
+            times = 2;
+            result = model;
+        }};
+
+        Model result = DeserializationUtils.deserialize(node, "foo.json", Model.class);
+        assertEquals(model, result);
+
+        result = DeserializationUtils.deserialize(node, "foo", Model.class);
+        assertEquals(model, result);
+
+
+    }
+
+    @Test
+    public void testDeserializeYamlTreeIntoObject(@Mocked Yaml yaml,
+                                                  @Injectable final ObjectMapper objectMapper,
+                                                  @Injectable final Model model,
+                                                  @Injectable final JsonNode node) throws Exception {
+
+        new StrictExpectations() {{
+            Yaml.mapper();
+            result = objectMapper;
+            times = 1;
+            objectMapper.convertValue(node, Model.class);
+            times = 1;
+            result = model;
+        }};
+
+        Model result = DeserializationUtils.deserialize(node, "foo.yaml", Model.class);
         assertEquals(model, result);
     }
 

@@ -7,6 +7,8 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +62,8 @@ public class RefUtils {
         return refFormat == RefFormat.URL || refFormat == RefFormat.RELATIVE;
     }
 
-    public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths) {
+    public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
+                                         Path parentDirectory) {
 
         if (!RefUtils.isAnExternalRefFormat(refFormat)) {
             throw new RuntimeException("Ref is not external");
@@ -73,7 +76,8 @@ public class RefUtils {
                 result = RemoteUrl.urlToString(file, auths);
             } else {
                 //its assumed to be a relative file ref
-                result = IOUtils.toString(new FileInputStream(file));
+                final Path pathToUse = parentDirectory.resolve(file).normalize();
+                result = IOUtils.toString(new FileInputStream(pathToUse.toString()));
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
@@ -81,6 +85,14 @@ public class RefUtils {
 
         return result;
 
+    }
+
+    public static void main(String[] args) {
+        Path parentDir = Paths.get("src/test/resources/relative-file-references/json");
+
+        final Path resolve = parentDir.resolve("./paths/healthPath.json").normalize();
+        System.out.println(resolve);
+        System.out.println(resolve.toFile().exists());
     }
 
 

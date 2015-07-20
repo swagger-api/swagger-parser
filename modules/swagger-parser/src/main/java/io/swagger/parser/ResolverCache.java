@@ -8,6 +8,9 @@ import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.RefUtils;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +33,7 @@ public class ResolverCache {
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
+    private final Path parentDirectory;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
 
@@ -38,9 +42,22 @@ public class ResolverCache {
      */
     private Map<String, String> renameCache = new HashMap<>();
 
-    public ResolverCache(Swagger swagger, List<AuthorizationValue> auths) {
+    public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
         this.auths = auths;
+
+        if(parentFileLocation != null) {
+            if(parentFileLocation.startsWith("http")) {
+                parentDirectory = null;
+            } else {
+                final Path path = Paths.get(parentFileLocation);
+                parentDirectory = path.getParent();
+            }
+        } else {
+            File file = new File(".");
+            parentDirectory = file.toPath();
+        }
+
     }
 
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
@@ -71,7 +88,7 @@ public class ResolverCache {
         String contents = externalFileCache.get(file);
 
         if (contents == null) {
-            contents = RefUtils.readExternalRef(file, refFormat, auths);
+            contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
             externalFileCache.put(file, contents);
         }
 

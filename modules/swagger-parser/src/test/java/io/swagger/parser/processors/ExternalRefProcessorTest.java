@@ -40,38 +40,14 @@ public class ExternalRefProcessorTest {
             times = 1;
             result = null;
 
-            swagger.addDefinition("bar", mockedModel);
+            cache.putRenamedRef(ref, "bar");
+            swagger.addDefinition("bar", mockedModel); times=1;
         }};
 
         String newRef = new ExternalRefProcessor(cache, swagger).processRefToExternalDefinition(ref, refFormat);
         assertEquals(newRef, "bar");
     }
 
-    @Test
-    public void testProcessRefToExternalDefinition_NameConflict_ButConflictIsRefModelWithSameRef(
-            @Injectable final Model mockedModel) throws Exception {
-
-        final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
-        final RefFormat refFormat = RefFormat.URL;
-
-        final Map<String, Model> definitionsMap = new HashMap<>();
-        definitionsMap.put("bar", new RefModel(ref));
-
-        new StrictExpectations() {{
-            cache.loadRef(ref, refFormat, Model.class);
-            times = 1;
-            result = mockedModel;
-
-            swagger.getDefinitions();
-            times = 1;
-            result = definitionsMap;
-
-            swagger.addDefinition("bar", mockedModel);
-        }};
-
-        String newRef = new ExternalRefProcessor(cache, swagger).processRefToExternalDefinition(ref, refFormat);
-        assertEquals(newRef, null);
-    }
 
     @Test
     public void testProcessRefToExternalDefinition_NameConflict_FirstAppearance(
@@ -84,7 +60,6 @@ public class ExternalRefProcessorTest {
         definitionsMap.put("bar", new ModelImpl());
 
         final String expectedNewRef = "bar1";
-
 
         new StrictExpectations() {{
             cache.loadRef(ref, refFormat, Model.class);

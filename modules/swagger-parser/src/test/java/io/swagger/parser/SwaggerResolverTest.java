@@ -27,7 +27,7 @@ public class SwaggerResolverTest {
                                     @Mocked final PathsProcessor pathsProcessor) throws Exception {
 
         new StrictExpectations() {{
-            new ResolverCache(swagger, auths);
+            new ResolverCache(swagger, auths, null);
             result = cache;
             times = 1;
 
@@ -47,11 +47,11 @@ public class SwaggerResolverTest {
 
         }};
 
-        assertEquals(new SwaggerResolver(swagger, auths).resolve(), swagger);
+        assertEquals(new SwaggerResolver(swagger, auths, null).resolve(), swagger);
     }
 
     @Test
     public void testSwaggerResolver_NullSwagger() throws Exception {
-        assertNull(new SwaggerResolver(null, null).resolve());
+        assertNull(new SwaggerResolver(null, null, null).resolve());
     }
 }
