@@ -1,15 +1,9 @@
 package io.swagger.parser.util;
 
 import io.swagger.models.auth.AuthorizationValue;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -17,23 +11,30 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class RemoteUrl {
+
     private static void disableSslVerification() {
         try {
             // Create a trust manager that does not validate certificate chains
             TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
                     }
+
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
+                }
             };
 
             // Install the all-trusting trust manager
@@ -97,10 +98,12 @@ public class RemoteUrl {
             conn.connect();
             InputStream in = conn.getInputStream();
 
-            String inputLine;
             StringBuilder contents = new StringBuilder();
 
-            for (int i = 0; i != -1; i = in.read()) {
+            BufferedReader input = new BufferedReader(
+                    new InputStreamReader(in, "UTF-8"));
+
+            for (int i = 0; i != -1; i = input.read()) {
                 char c = (char) i;
                 if (!Character.isISOControl(c)) {
                     contents.append((char) i);
