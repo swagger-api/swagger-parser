@@ -1,8 +1,5 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.swagger.models.ArrayModel;
 import io.swagger.models.AuthorizationScope;
 import io.swagger.models.Contact;
@@ -10,14 +7,32 @@ import io.swagger.models.Info;
 import io.swagger.models.License;
 import io.swagger.models.Method;
 import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
-import io.swagger.models.apideclaration.*;
+import io.swagger.models.ParamType;
+import io.swagger.models.PassAs;
+import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.Response;
+import io.swagger.models.Scheme;
+import io.swagger.models.Swagger;
+import io.swagger.models.apideclaration.Api;
+import io.swagger.models.apideclaration.ApiDeclaration;
+import io.swagger.models.apideclaration.ExtendedTypedObject;
+import io.swagger.models.apideclaration.Items;
+import io.swagger.models.apideclaration.ModelProperty;
+import io.swagger.models.apideclaration.ResponseMessage;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.models.parameters.*;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.FormParameter;
+import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
@@ -43,6 +58,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 // legacy models
 
