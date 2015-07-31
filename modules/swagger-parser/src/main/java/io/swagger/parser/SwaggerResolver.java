@@ -207,6 +207,22 @@ public class SwaggerResolver {
                                     resolutionMap.put(key, m);
                                 }
                             }
+                            else if (schema instanceof ArrayProperty) {
+                              Property item = ((ArrayProperty)schema).getItems();
+                              if (item instanceof RefProperty) {
+                                RefProperty ref = (RefProperty) item;
+                                String key = ref.get$ref();
+
+                                if (key != null && key.startsWith("http")) {
+                                    List<ResolutionContext> m = resolutionMap.get(key);
+                                    if (m == null) {
+                                        m = new ArrayList<ResolutionContext>();
+                                    }
+                                    m.add(new ResolutionContext(ref, schema, "ref"));
+                                    resolutionMap.put(key, m);
+                                }
+                              }
+                            }
                         }
                     }
                 }

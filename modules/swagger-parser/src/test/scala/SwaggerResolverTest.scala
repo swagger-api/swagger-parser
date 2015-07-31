@@ -188,5 +188,23 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     ref.get$ref() should equal("#/definitions/Tag")
     swagger.getDefinitions().get("Tag") should not be (null)
   }
+
+  it should "resolve array response remote refs in yaml" in {
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+      .response(200, new Response()
+      .schema(
+        new ArrayProperty(
+          new RefProperty("http://petstore.swagger.io/v2/swagger.yaml#/definitions/Tag"))))))
+    val resolved = new SwaggerResolver().resolve(swagger, null)
+    val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
+    val array = response.getSchema.asInstanceOf[ArrayProperty]
+    array.getItems() should not be (null)
+
+    val ref = array.getItems().asInstanceOf[RefProperty];
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
 }
 
