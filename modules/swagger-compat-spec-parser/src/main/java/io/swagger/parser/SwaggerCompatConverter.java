@@ -1,7 +1,5 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.AuthorizationScope;
 import io.swagger.models.Contact;
@@ -39,6 +37,7 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.models.resourcelisting.ApiInfo;
 import io.swagger.models.resourcelisting.ApiKeyAuthorization;
 import io.swagger.models.resourcelisting.ApiListingReference;
@@ -59,6 +58,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 // legacy models
 
@@ -234,6 +236,12 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 p = arrayProperty;
             } else {
                 p = propertyFromTypedObject(param);
+                if (p == null) {
+                    System.out.println(String.format(
+                            "WARNING! No property detected for parameter '%s' (%s)! Falling back to string!",
+                            param.getName(), param.getParamType()));
+                    p = new StringProperty();
+                }
             }
             if (p instanceof ArrayProperty) {
                 ArrayProperty ap = (ArrayProperty) p;
@@ -336,15 +344,11 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
         }
 
-        if (output == null) {
-            System.out.println("WARNING!  No property detected!  Falling back to string!");
-            output = PropertyBuilder.build("string", null, null);
-        }
-
         return output;
     }
 
-    public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation) {
+    public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation,
+                                      ApiDeclaration apiDeclaration) {
         Method method;
 
         if (operation.getMethod() == null) {
@@ -366,16 +370,25 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             output.parameter(convertParameter(parameter));
         }
 
-        if (operation.getConsumes() != null) {
+        if (operation.getConsumes() != null && !operation.getConsumes().isEmpty()) {
             for (String consumes : operation.getConsumes()) {
                 output.consumes(consumes);
             }
+        } else if (apiDeclaration.getConsumes() != null) {
+            for (String consumes : apiDeclaration.getConsumes()) {
+                output.consumes(consumes);
+            }
         }
-        if (operation.getProduces() != null) {
+        if (operation.getProduces() != null && !operation.getProduces().isEmpty()) {
             for (String produces : operation.getProduces()) {
                 output.produces(produces);
             }
+        } else if (apiDeclaration.getProduces() != null) {
+            for (String produces : apiDeclaration.getProduces()) {
+                output.produces(produces);
+            }
         }
+
         for (ResponseMessage message : operation.getResponseMessages()) {
             Response response = new Response().description(message.getMessage());
 
@@ -502,7 +515,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                     paths.put(apiPath, path);
                 }
                 for (io.swagger.models.apideclaration.Operation op : ops) {
-                    Operation operation = convertOperation(tag, op);
+                    Operation operation = convertOperation(tag, op, apiDeclaration);
 
                     if (op.getMethod() != null) {
                         path.set(op.getMethod().toString().toLowerCase(), operation);
@@ -540,6 +553,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 basePath = "/" + basePath;
             }
         }
+
 
         Swagger swagger = new Swagger()
                 .host(host)

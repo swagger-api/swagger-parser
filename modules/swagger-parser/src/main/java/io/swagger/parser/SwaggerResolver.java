@@ -1,6 +1,8 @@
 package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
@@ -19,6 +21,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +88,13 @@ public class SwaggerResolver {
                         JsonNode location = null;
                         String locationName = null;
                         if (contents != null) {
-                            location = Json.mapper().readTree(contents);
+                            ObjectMapper mapper;
+                            if (contents.trim().startsWith("{")) {
+                                mapper = Json.mapper();
+                            } else {
+                                mapper = Yaml.mapper();
+                            }
+                            location = mapper.readTree(contents);
                             String[] objectPath = definitionPath.split("/");
                             for (String objectPathPart : objectPath) {
                                 LOGGER.debug("getting part " + objectPathPart);
@@ -197,6 +206,22 @@ public class SwaggerResolver {
                                     m.add(new ResolutionContext(ref, response, "ref"));
                                     resolutionMap.put(key, m);
                                 }
+                            }
+                            else if (schema instanceof ArrayProperty) {
+                              Property item = ((ArrayProperty)schema).getItems();
+                              if (item instanceof RefProperty) {
+                                RefProperty ref = (RefProperty) item;
+                                String key = ref.get$ref();
+
+                                if (key != null && key.startsWith("http")) {
+                                    List<ResolutionContext> m = resolutionMap.get(key);
+                                    if (m == null) {
+                                        m = new ArrayList<ResolutionContext>();
+                                    }
+                                    m.add(new ResolutionContext(ref, schema, "ref"));
+                                    resolutionMap.put(key, m);
+                                }
+                              }
                             }
                         }
                     }
