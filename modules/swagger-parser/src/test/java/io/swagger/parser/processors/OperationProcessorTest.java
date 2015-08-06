@@ -3,7 +3,7 @@ package io.swagger.parser.processors;
 
 import io.swagger.models.Operation;
 import io.swagger.models.RefResponse;
-import io.swagger.models.ResponseImpl;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.refs.RefFormat;
@@ -35,8 +35,8 @@ public class OperationProcessorTest {
     @Test
     public void testProcessOperation(@Injectable final List<Parameter> inputParameterList,
                                      @Injectable final List<Parameter> outputParameterList,
-                                     @Injectable final ResponseImpl incomingResponseImpl,
-                                     @Injectable final ResponseImpl resolvedResponseImpl) throws Exception {
+                                     @Injectable final Response incomingResponse,
+                                     @Injectable final Response resolvedResponse) throws Exception {
 
         Operation operation = new Operation();
         operation.setParameters(inputParameterList);
@@ -45,7 +45,7 @@ public class OperationProcessorTest {
         RefResponse refResponse = new RefResponse(ref);
 
         operation.response(200, refResponse);
-        operation.response(400, incomingResponseImpl);
+        operation.response(400, incomingResponse);
 
         new Expectations() {{
             new ParameterProcessor(cache, swagger);
@@ -59,13 +59,13 @@ public class OperationProcessorTest {
             times = 1;
             result = outputParameterList;
 
-            cache.loadRef(ref, RefFormat.URL, ResponseImpl.class);
+            cache.loadRef(ref, RefFormat.URL, Response.class);
             times = 1;
-            result = resolvedResponseImpl;
+            result = resolvedResponse;
 
-            responseProcessor.processResponse(incomingResponseImpl);
+            responseProcessor.processResponse(incomingResponse);
             times = 1;
-            responseProcessor.processResponse(resolvedResponseImpl);
+            responseProcessor.processResponse(resolvedResponse);
             times = 1;
         }};
 
@@ -73,7 +73,7 @@ public class OperationProcessorTest {
 
         new FullVerifications() {{}};
 
-        assertEquals(operation.getResponses().get("200"), resolvedResponseImpl);
+        assertEquals(operation.getResponses().get("200"), resolvedResponse);
         assertEquals(operation.getParameters(), outputParameterList);
     }
 }

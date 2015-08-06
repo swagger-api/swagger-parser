@@ -2,7 +2,7 @@ package io.swagger.parser.processors;
 
 
 import io.swagger.models.Response;
-import io.swagger.models.ResponseImpl;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
@@ -33,7 +33,7 @@ public class ResponseProcessorTest {
             propertyProcessor.processProperty(responseSchema); times=1;
         }};
 
-        Response response = new ResponseImpl();
+        Response response = new Response();
         response.setSchema(responseSchema);
         response.addHeader("foo", responseHeader);
 

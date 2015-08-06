@@ -35,7 +35,7 @@ public class OperationProcessor {
 
                 if (response instanceof RefResponse) {
                     RefResponse refResponse = (RefResponse) response;
-                    ResponseImpl resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), ResponseImpl.class);
+                    Response resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), Response.class);
 
                     if (resolvedResponse != null) {
                         response = resolvedResponse;

@@ -5,6 +5,7 @@ import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.util.Yaml;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -18,22 +19,27 @@ public class SwaggerParserTest {
 
     @Test
     public void testLoadRelativeFileTree_Json() throws Exception {
-        doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
+        final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
+        //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
     }
 
     @Test
     public void testLoadRelativeFileTree_Yaml() throws Exception {
         JsonToYamlFileDuplicator.duplicateFilesInYamlFormat("src/test/resources/relative-file-references/json",
                 "src/test/resources/relative-file-references/yaml");
-        doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
+        final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
+        //Yaml.pretty().writeValue(new File("resolved.yaml"), swagger);
+        System.out.println(Yaml.mapper().writeValueAsString(swagger));
     }
 
-    private void doRelativeFileTest(String location) {
+    private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read(location);
 
+
+
         final Path path = swagger.getPath("/health");
-        assertEquals(path.getClass(), PathImpl.class); //we successfully converted the RefPath to a PathImpl
+        assertEquals(path.getClass(), Path.class); //we successfully converted the RefPath to a Path
 
         final List<Parameter> parameters = path.getParameters();
         assertParamDetails(parameters, 0, QueryParameter.class, "param1", "query");
@@ -84,6 +90,8 @@ public class SwaggerParserTest {
 
         assertEquals(composedCat.getInterfaces().size(), 1);
         assertEquals(composedCat.getInterfaces().get(0).get$ref(), "#/definitions/foo1");
+
+        return swagger;
     }
 
     private void expectedPropertiesInModel(ModelImpl model, String... expectedProperties) {

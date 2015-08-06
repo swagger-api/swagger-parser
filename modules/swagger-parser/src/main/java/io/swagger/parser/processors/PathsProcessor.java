@@ -34,7 +34,7 @@ public class PathsProcessor {
 
             if (path instanceof RefPath) {
                 RefPath refPath = (RefPath) path;
-                PathImpl resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), PathImpl.class);
+                Path resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), Path.class);
 
                 if (resolvedPath != null) {
                     //we need to put the resolved path into swagger object

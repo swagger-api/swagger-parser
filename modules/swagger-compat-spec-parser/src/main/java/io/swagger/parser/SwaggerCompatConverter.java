@@ -362,7 +362,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
         }
         for (ResponseMessage message : operation.getResponseMessages()) {
-            Response response = new ResponseImpl().description(message.getMessage());
+            Response response = new Response().description(message.getMessage());
 
             Model responseModel = null;
             if (message.getResponseModel() != null) {
@@ -374,7 +374,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         // default response type
         Property responseProperty = propertyFromTypedObject(operation);
         if (responseProperty != null) {
-            Response response = new ResponseImpl()
+            Response response = new Response()
                     .description("success")
                     .schema(responseProperty);
             if (output.getResponses() == null) {
@@ -483,7 +483,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
                 Path path = paths.get(apiPath);
                 if (path == null) {
-                    path = new PathImpl();
+                    path = new Path();
                     paths.put(apiPath, path);
                 }
                 for (io.swagger.models.apideclaration.Operation op : ops) {

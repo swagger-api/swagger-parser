@@ -2,7 +2,7 @@ package io.swagger.parser.processors;
 
 
 import io.swagger.models.Operation;
-import io.swagger.models.PathImpl;
+import io.swagger.models.Path;
 import io.swagger.models.RefPath;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
@@ -42,12 +42,12 @@ public class PathsProcessorTest {
         final String ref = "http://my.company.com/path/to/file.json#/foo";
         swagger.path("/foo", new RefPath(ref));
 
-        final PathImpl nonRefPath = new PathImpl();
+        final Path nonRefPath = new Path();
         swagger.path("/bar", nonRefPath);
         nonRefPath.setParameters(nonRefPathParameters);
         nonRefPath.get(nonRefPathOperation);
 
-        final PathImpl resolvedPath = new PathImpl();
+        final Path resolvedPath = new Path();
         resolvedPath.setParameters(resolvedPathParamters);
         resolvedPath.get(resolvedPathOperation);
 
@@ -59,7 +59,7 @@ public class PathsProcessorTest {
             times = 1;
             result = operationProcessor;
 
-            cache.loadRef(ref, RefFormat.URL, PathImpl.class);
+            cache.loadRef(ref, RefFormat.URL, Path.class);
             times = 1;
             result = resolvedPath;
 
