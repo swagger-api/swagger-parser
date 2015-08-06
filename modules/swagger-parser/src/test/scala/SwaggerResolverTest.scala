@@ -22,11 +22,40 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     swagger.getDefinitions().get("Tag") should not be (null)
   }
 
+  it should "resolve a simple remote model property definition in yaml" in {
+    val swagger = new Swagger()
+    swagger.addDefinition(
+      "Sample", new ModelImpl()
+        .property("remoteRef", new RefProperty("http://petstore.swagger.io/v2/swagger.yaml#/definitions/Tag")))
+
+    val resolved = new SwaggerResolver(swagger, null).resolve()
+    val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
+    prop.isInstanceOf[RefProperty] should be(true)
+    val ref = prop.asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
+
   it should "resolve an array remote model property definition" in {
     val swagger = new Swagger()
     swagger.addDefinition(
       "Sample", new ModelImpl()
         .property("remoteRef", new ArrayProperty(new RefProperty("http://petstore.swagger.io/v2/swagger.json#/definitions/Tag"))))
+
+    val resolved = new SwaggerResolver(swagger, null).resolve()
+    val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
+    prop.isInstanceOf[ArrayProperty] should be(true)
+    val ap = prop.asInstanceOf[ArrayProperty]
+    val ref = ap.getItems().asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
+
+  it should "resolve an array remote model property definition in yaml" in {
+    val swagger = new Swagger()
+    swagger.addDefinition(
+      "Sample", new ModelImpl()
+        .property("remoteRef", new ArrayProperty(new RefProperty("http://petstore.swagger.io/v2/swagger.yaml#/definitions/Tag"))))
 
     val resolved = new SwaggerResolver(swagger, null).resolve()
     val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
@@ -51,6 +80,20 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     swagger.getDefinitions().get("Tag") should not be (null)
   }
 
+  it should "resolve an map remote model property definition in yaml" in {
+    val swagger = new Swagger()
+    swagger.addDefinition(
+      "Sample", new ModelImpl()
+        .property("remoteRef", new MapProperty(new RefProperty("http://petstore.swagger.io/v2/swagger.yaml#/definitions/Tag"))))
+    val resolved = new SwaggerResolver(swagger, null).resolve()
+    val prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef")
+    prop.isInstanceOf[MapProperty] should be(true)
+    val ap = prop.asInstanceOf[MapProperty]
+    val ref = ap.getAdditionalProperties().asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
+
   it should "resolve operation bodyparam remote refs" in {
     val swagger = new Swagger()
     swagger.path("/fun", new Path()
@@ -65,6 +108,19 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     swagger.getDefinitions().get("Tag") should not be (null)
   }
 
+  it should "resolve operation bodyparam remote refs in yaml" in {
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+      .parameter(new BodyParameter()
+      .schema(new RefModel("http://petstore.swagger.io/v2/swagger.yaml#/definitions/Tag")))))
+
+    val resolved = new SwaggerResolver(swagger, null).resolve()
+    val param = swagger.getPaths().get("/fun").getGet().getParameters().get(0).asInstanceOf[BodyParameter]
+    val ref = param.getSchema().asInstanceOf[RefModel]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
 
   it should "resolve operation parameter remote refs" in {
     val swagger = new Swagger()
@@ -116,6 +172,37 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     val resolved = new SwaggerResolver(swagger, null).resolve()
     val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
     val ref = response.getSchema.asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
+
+  it should "resolve response remote refs in yaml" in {
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+      .response(200, new Response()
+      .schema(new RefProperty("http://petstore.swagger.io/v2/swagger.yaml#/definitions/Tag")))))
+    val resolved = new SwaggerResolver(swagger, null).resolve()
+    val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
+    val ref = response.getSchema.asInstanceOf[RefProperty]
+    ref.get$ref() should equal("#/definitions/Tag")
+    swagger.getDefinitions().get("Tag") should not be (null)
+  }
+
+  it should "resolve array response remote refs in yaml" in {
+    val swagger = new Swagger()
+    swagger.path("/fun", new Path()
+      .get(new Operation()
+      .response(200, new Response()
+      .schema(
+        new ArrayProperty(
+          new RefProperty("http://petstore.swagger.io/v2/swagger.yaml#/definitions/Tag"))))))
+    val resolved = new SwaggerResolver(swagger, null).resolve()
+    val response = swagger.getPaths().get("/fun").getGet().getResponses().get("200")
+    val array = response.getSchema.asInstanceOf[ArrayProperty]
+    array.getItems() should not be (null)
+
+    val ref = array.getItems().asInstanceOf[RefProperty];
     ref.get$ref() should equal("#/definitions/Tag")
     swagger.getDefinitions().get("Tag") should not be (null)
   }

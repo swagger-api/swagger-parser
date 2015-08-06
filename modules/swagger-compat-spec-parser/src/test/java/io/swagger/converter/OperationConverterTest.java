@@ -4,18 +4,16 @@ import io.swagger.models.Method;
 import io.swagger.models.Operation;
 import io.swagger.models.ParamType;
 import io.swagger.models.Response;
+import io.swagger.models.apideclaration.ApiDeclaration;
 import io.swagger.models.apideclaration.ResponseMessage;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerCompatConverter;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class OperationConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
@@ -56,7 +54,7 @@ public class OperationConverterTest {
         parameters.add(param);
         operation.setParameters(parameters);
 
-        Operation converted = converter.convertOperation("tag", operation);
+        Operation converted = converter.convertOperation("tag", operation, new ApiDeclaration());
 
         assertTrue(converted.getTags().size() == 1);
         assertEquals(converted.getTags().get(0), "tag");
@@ -77,5 +75,31 @@ public class OperationConverterTest {
         assertTrue(property.getClass().equals(RefProperty.class));
         RefProperty ref = (RefProperty) property;
         assertEquals(ref.getSimpleRef(), "Cat");
+    }
+
+    @Test
+    public void testConvertOperation_ConsumesAndProducesInheritedFromApiDeclaration() throws Exception {
+        Set<String> expectedConsumes = new HashSet<>(Arrays.asList("application/json", "application/xml"));
+        Set<String> expectedProduces = new HashSet<>(Arrays.asList("text/plain"));
+
+        final ApiDeclaration apiDeclaration = new ApiDeclaration();
+        apiDeclaration.setConsumes(new ArrayList<>(expectedConsumes));
+        apiDeclaration.setProduces(new ArrayList<>(expectedProduces));
+
+        io.swagger.models.apideclaration.Operation operation = new io.swagger.models.apideclaration.Operation();
+        operation.setMethod(Method.GET);
+
+        final SwaggerCompatConverter swaggerCompatConverter = new SwaggerCompatConverter();
+        Operation converted = swaggerCompatConverter.convertOperation("tag", operation, apiDeclaration);
+
+        assertSetsAreEqual(expectedConsumes, converted.getConsumes());
+        assertSetsAreEqual(expectedProduces, converted.getProduces());
+    }
+
+    private void assertSetsAreEqual(Set<String> expectedConsumes, List<String> actualConsumes) {
+        Set<String> actualConsumesSet = new HashSet<>();
+        actualConsumesSet.addAll(actualConsumes);
+        assertEquals(expectedConsumes.size(), actualConsumes.size());
+        assertTrue(actualConsumesSet.containsAll(expectedConsumes));
     }
 }

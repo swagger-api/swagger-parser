@@ -65,6 +65,10 @@ public class SwaggerParser {
     }
 
     public Swagger read(JsonNode node) {
+        return read(node, false);
+    }
+
+    public Swagger read(JsonNode node, boolean resolve) {
         if (node == null) {
             return null;
         }
@@ -75,7 +79,12 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().read(node);
             if (output != null) {
-                return output;
+                if(resolve) {
+                    return new SwaggerResolver(output, new ArrayList<AuthorizationValue>()).resolve();
+                }
+                else {
+                    return output;
+                }
             }
         } catch (IOException e) {
             // continue;
