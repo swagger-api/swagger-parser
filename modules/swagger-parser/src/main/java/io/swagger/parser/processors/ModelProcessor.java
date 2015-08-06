@@ -1,6 +1,11 @@
 package io.swagger.parser.processors;
 
-import io.swagger.models.*;
+import io.swagger.models.ArrayModel;
+import io.swagger.models.ComposedModel;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.RefModel;
+import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
 

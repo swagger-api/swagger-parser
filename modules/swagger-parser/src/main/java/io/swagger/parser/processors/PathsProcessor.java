@@ -1,6 +1,10 @@
 package io.swagger.parser.processors;
 
-import io.swagger.models.*;
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.RefPath;
+import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.ResolverCache;
 
