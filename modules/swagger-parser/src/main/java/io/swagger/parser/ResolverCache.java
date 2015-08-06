@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 /**
  * A class that caches values that have been loaded so we don't have to repeat
  * expensive operations like:
- * 1) reading a remote URL with authorization (using RemoteURL.java)
+ * 1) reading a remote URL with authorization (e.g. using RemoteURL.java)
  * 2) reading the contents of a file into memory
  * 3) extracting a sub object from a json/yaml tree
  * 4) de-serializing json strings into objects
@@ -75,7 +75,7 @@ public class ResolverCache {
         final String file = refParts[0];
         final String definitionPath = refParts.length == 2 ? refParts[1] : null;
 
-        //we might have already resolved this ref, so check the resolutionCachce
+        //we might have already resolved this ref, so check the resolutionCache
         Object previouslyResolvedEntity = resolutionCache.get(ref);
 
         if (previouslyResolvedEntity != null) {
@@ -104,7 +104,7 @@ public class ResolverCache {
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
             tree = tree.get(jsonPathElement);
-            //if at any point we do find an element we expect, print and error and return null
+            //if at any point we do find an element we expect, print and error and abort
             if (tree == null) {
                 throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
             }
@@ -118,17 +118,17 @@ public class ResolverCache {
 
     private Object loadInternalRef(String ref) {
 
-        Object result = checkMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
+        Object result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
 
         if (result == null) {
-            result = checkMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
+            result = getFromMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
         }
 
         return result;
 
     }
 
-    private Object checkMap(String ref, Map map, Pattern pattern) {
+    private Object getFromMap(String ref, Map map, Pattern pattern) {
         final Matcher parameterMatcher = pattern.matcher(ref);
 
         if (parameterMatcher.matches()) {

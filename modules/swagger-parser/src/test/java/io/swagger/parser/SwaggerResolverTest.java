@@ -14,9 +14,7 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-/**
- * Created by russellb337 on 7/15/15.
- */
+
 public class SwaggerResolverTest {
 
     @Test

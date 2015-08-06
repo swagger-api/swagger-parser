@@ -1,15 +1,16 @@
 package io.swagger.parser.processors;
 
-import io.swagger.models.*;
+import io.swagger.models.Operation;
+import io.swagger.models.RefResponse;
+import io.swagger.models.Response;
+import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.ResolverCache;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by russellb337 on 7/15/15.
- */
+
 public class OperationProcessor {
 
 

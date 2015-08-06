@@ -86,14 +86,4 @@ public class RefUtils {
         return result;
 
     }
-
-    public static void main(String[] args) {
-        Path parentDir = Paths.get("src/test/resources/relative-file-references/json");
-
-        final Path resolve = parentDir.resolve("./paths/healthPath.json").normalize();
-        System.out.println(resolve);
-        System.out.println(resolve.toFile().exists());
-    }
-
-
 }

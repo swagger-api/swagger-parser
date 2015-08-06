@@ -9,15 +9,15 @@ import javax.annotation.Nonnull;
 
 /**
  * Core interface for JSON migration
- * <p/>
+ *
  * <p>This takes a {@link JsonNode} as an input and outputs the transformed
  * {@link JsonNode}.</p>
- * <p/>
+ *
  * <p>Note that this interface makes <strong>no guarantee</strong> as to whether
  * a <em>new</em> {@code JsonNode} is returned, or the input argument is
  * returned (altered or not). If this distinction is important, please document
  * it in your implementation(s).</p>
- * <p/>
+ *
  * <p>You can either implement this interface directly or use one of the
  * predefined migrators in {@link SwaggerMigrators}.</p>
  *

@@ -10,9 +10,7 @@ import io.swagger.parser.ResolverCache;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by russellb337 on 7/15/15.
- */
+
 public class ParameterProcessor {
 
     private final ResolverCache cache;
