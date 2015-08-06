@@ -13,7 +13,6 @@ import static org.testng.Assert.assertEquals;
 
 public class DefinitionsProcessorTest {
 
-    ;
 
     @Mocked
     ModelProcessor modelProcessor;
