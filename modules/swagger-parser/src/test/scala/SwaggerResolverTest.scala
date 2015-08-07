@@ -2,11 +2,10 @@ import io.swagger.models._
 import io.swagger.models.parameters._
 import io.swagger.models.properties._
 import io.swagger.parser.SwaggerResolver
-import org.junit.runner.RunWith
+
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class SwaggerResolverTest extends FlatSpec with Matchers {
   it should "resolve a simple remote model property definition" in {
     val swagger = new Swagger()
@@ -136,6 +135,7 @@ class SwaggerResolverTest extends FlatSpec with Matchers {
     val params = swagger.getPaths().get("/fun").getGet().getParameters()
     params.size() should be(1)
     val param = params.get(0).asInstanceOf[QueryParameter]
+    io.swagger.util.Json.prettyPrint(swagger)
     param.getName() should be("skip")
   }
 
