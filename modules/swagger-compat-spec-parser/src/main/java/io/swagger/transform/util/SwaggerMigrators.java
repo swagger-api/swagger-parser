@@ -25,7 +25,7 @@ public final class SwaggerMigrators {
 
     /**
      * Return a migrator converting object member values to JSON Strings
-     * <p/>
+     *
      * <p>Note that this will only work if member values are
      * <strong>not</strong> containers (ie, JSON Arrays or Objects).</p>
      *
@@ -42,7 +42,7 @@ public final class SwaggerMigrators {
     /**
      * Return a migrator applying a <a
      * href="tools.ietf.org/html/rfc6902">JSON Patch</a>
-     * <p/>
+     *
      * <p>The JSON Patch must be deserialized at this point. You can also load
      * one from the classpath using {@link #patchFromResource(String)}.</p>
      *
@@ -69,7 +69,7 @@ public final class SwaggerMigrators {
 
     /**
      * Return a migrator renaming object members
-     * <p/>
+     *
      * <p>Note that this migrator will not fail if the member to rename does not
      * exists; however it <strong>will</strong> fail if the <em>target</em>
      * member already exists in the target JSON Object.</p>
@@ -129,9 +129,9 @@ public final class SwaggerMigrators {
 
     /**
      * Migrator converting object member values to JSON Strings
-     * <p/>
+     *
      * <p>Important notes:</p>
-     * <p/>
+     *
      * <ul>
      * <li>this migrator will fail if at least one specified member has a
      * "container" value (ie, the value is a JSON Array or an Objet);</li>

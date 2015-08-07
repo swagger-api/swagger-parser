@@ -11,7 +11,7 @@ import javax.annotation.Untainted;
 
 /**
  * Append a base path to individual API objects
- * <p/>
+ *
  * <p>See <a href="https://github.com/swagger-api/swagger-parser/issues/4"
  * target="_blank">issue #4 on GitHub</a>.</p>
  */

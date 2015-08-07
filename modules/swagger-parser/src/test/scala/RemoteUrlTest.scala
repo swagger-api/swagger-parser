@@ -1,12 +1,10 @@
 import io.swagger.models.auth.AuthorizationValue
 import io.swagger.parser.util.RemoteUrl
-import org.junit.runner.RunWith
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
 
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class RemoteUrlTest extends FlatSpec with Matchers {
   it should "read a remote URL" in {
     val output = RemoteUrl.urlToString("http://petstore.swagger.io/v2/pet/1", null)

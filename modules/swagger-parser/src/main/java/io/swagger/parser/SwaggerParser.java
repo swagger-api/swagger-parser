@@ -26,7 +26,7 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().read(location, auths);
             if (output != null) {
-                return new SwaggerResolver().resolve(output, auths);
+                return new SwaggerResolver(output, auths, location).resolve();
             }
         } catch (IOException e) {
             // continue;
@@ -56,7 +56,7 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().parse(swaggerAsString);
             if (output != null) {
-                return new SwaggerResolver().resolve(output, auths);
+                return new SwaggerResolver(output, auths, null).resolve();
             }
         } catch (IOException e) {
             // continue;
@@ -80,7 +80,7 @@ public class SwaggerParser {
             output = new Swagger20Parser().read(node);
             if (output != null) {
                 if(resolve) {
-                    return new SwaggerResolver().resolve(output, new ArrayList<AuthorizationValue>());
+                    return new SwaggerResolver(output, new ArrayList<AuthorizationValue>()).resolve();
                 }
                 else {
                     return output;

@@ -18,15 +18,15 @@ import java.util.Objects;
 
 /**
  * Patch a 1.1 dataType into a 1.2 type
- * <p/>
+ *
  * <p>Several Swagger objects have the possibility of a data type; as such, JSON
  * Schema validation currently cannot really limit the object members present,
  * not without the "strictProperties" and "merge" proposals of draft v5.</p>
- * <p/>
+ *
  * <p>The schema validation performed is therefore extremely simple: we only
  * check that a {@code dataType} field is present, check that its value is one
  * of the allowed values, and patch the node.</p>
- * <p/>
+ *
  * <p>If {@code dataType} is not a known primitive, it is considered to be a
  * v1.2 {@code $ref}.</p>
  */

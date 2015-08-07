@@ -16,15 +16,15 @@ import static io.swagger.transform.util.SwaggerMigrators.fromPatch;
 
 /**
  * A mutable JSON tree with traversal capabilities
- * <p/>
+ *
  * <p>Navigation through the tree is done using {@link JsonPointer}s.</p>
- * <p/>
+ *
  * <p>Note that {@link JsonNode} is <em>mutable</em>. This means that at init
  * time we make a copy of the node given as argument (using {@link
  * JsonNode#deepCopy()}, but after that all nodes returned by {@link
  * #getCurrentNode()} are mutable. Changes you make to the returned node
  * therefore <strong>will</strong> be reflected in the result.</p>
- * <p/>
+ *
  * <p>While you can do that, it is advised that you use {@link SwaggerMigrator}s
  * instead and make use of the {@link #applyMigrator(SwaggerMigrator)} and
  * {@link #applyMigratorToElements(SwaggerMigrator)} methods.</p>
@@ -48,7 +48,7 @@ public final class MutableJsonTree {
 
     /**
      * Absolute pointer change
-     * <p/>
+     *
      * <p>The new current node will be the node at this pointer starting from
      * the base node.</p>
      *
@@ -62,7 +62,7 @@ public final class MutableJsonTree {
 
     /**
      * Relative pointer change
-     * <p/>
+     *
      * <p>The pointer in argument is appended to the current pointer (using
      * {@link JsonPointer#append(JsonPointer)}) and the current node is set
      * accordingly.</p>
@@ -84,7 +84,7 @@ public final class MutableJsonTree {
 
     /**
      * Return the base node
-     * <p/>
+     *
      * <p>The "base node" here means the (potentially) altered copy of the node
      * supplied as the constructor argument.</p>
      *
@@ -105,7 +105,7 @@ public final class MutableJsonTree {
 
     /**
      * Apply a JSON Patch to the current node
-     * <p/>
+     *
      * <p>This will turn the patch into a {@link SwaggerMigrator} using {@link
      * SwaggerMigrators#fromPatch(JsonPatch)} and call {@link
      * #applyMigrator(SwaggerMigrator)}.</p>
@@ -121,7 +121,7 @@ public final class MutableJsonTree {
 
     /**
      * Apply a migrator to the node at the current pointer
-     * <p/>
+     *
      * <p>It is assumed here that the current node is a JSON Object.</p>
      *
      * @param migrator the migrator to apply
@@ -151,7 +151,7 @@ public final class MutableJsonTree {
 
     /**
      * Apply a migrator to all elements of the array at the current pointer
-     * <p/>
+     *
      * <p>Note that if the migrator fails to apply to at least one element, the
      * original array is left untouched; its elements are replaced if and only
      * if the migrator applies successfully to <strong>all</strong> elements.
@@ -178,7 +178,7 @@ public final class MutableJsonTree {
 
     /**
      * Apply a JSON Patch to all elements of a JSON Array
-     * <p/>
+     *
      * <p>This will wrap the patch into a {@link SwaggerMigrator} using {@link
      * SwaggerMigrators#fromPatch(JsonPatch)} and call {@link
      * #applyMigratorToElements(SwaggerMigrator)}.</p>

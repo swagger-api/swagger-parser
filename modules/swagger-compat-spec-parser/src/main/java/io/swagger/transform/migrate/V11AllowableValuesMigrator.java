@@ -14,11 +14,11 @@ import java.util.Objects;
 
 /**
  * Patch a 1.1 {@code allowableValues} into a 1.2 {@code enum}
- * <p/>
+ *
  * <p>{@code allowableValues} is an object which has at least one {@code
  * valueType} member, whose value is a JSON String. If this string is {@code
  * "LIST"}, then it is replaced by an {@code enum}, as in:</p>
- * <p/>
+ *
  * <pre>
  *     {
  *         "allowableValues": {
@@ -27,15 +27,15 @@ import java.util.Objects;
  *         }
  *     }
  * </pre>
- * <p/>
+ *
  * <p>which will become:</p>
- * <p/>
+ *
  * <pre>
  *     {
  *         "enum": [ "a", "b", "c" ]
  *     }
  * </pre>
- * <p/>
+ *
  * <p>Another possible value is {@code "range[]"}, however this migrator does
  * not handle this case (yet?).</p>
  */
