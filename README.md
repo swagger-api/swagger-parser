@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/swagger-api/swagger-parser.png)](https://travis-ci.org/swagger-api/swagger-parser)
 
-## Overview
+## Overview 
 This is the swagger parser project, which reads swagger specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
 ## What's Swagger?
