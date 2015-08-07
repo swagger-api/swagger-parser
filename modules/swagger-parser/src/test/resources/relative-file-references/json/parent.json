@@ -1,0 +1,64 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/health": {
+      "$ref": "./paths/healthPath.json"
+    }
+  },
+  "definitions": {
+    "refInDefinitions" : {
+      "$ref": "./models/example.json"
+    },
+    "arrayModel" : {
+      "type": "array",
+      "items": {
+        "$ref": "./models/foo.json"
+      }
+    },
+    "composedCat": {
+      "allOf": [
+        {
+          "$ref": "./models/pet.json"
+        },
+        {
+          "$ref": "./models/conflict.json#/foo"
+        },
+        {
+          "properties": {
+            "huntingSkill": {
+              "type": "string",
+              "description": "The measured skill for hunting",
+              "default": "lazy",
+              "enum": [
+                "clueless",
+                "lazy",
+                "adventurous",
+                "aggressive"
+              ]
+            },
+            "prop2": {
+              "$ref": "./models/foo.json"
+            },
+            "reflexes": {
+              "type": "array",
+              "items": {
+                "$ref": "./models/reflex.json"
+              }
+            },
+            "reflexMap": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "./models/reflex.json"
+              }
+            }
+
+          },
+          "required": [
+            "huntingSkill"
+          ]
+        }
+      ]
+    }
+  }
+
+}

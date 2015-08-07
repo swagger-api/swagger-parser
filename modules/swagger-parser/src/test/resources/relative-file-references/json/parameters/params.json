@@ -1,0 +1,26 @@
+{
+  "param1" : {
+    "name": "param1",
+    "in": "query",
+    "required": false,
+    "type": "string"
+  },
+  "param2": {
+    "name": "param2",
+    "in": "header",
+    "required": false,
+    "type": "string"
+  },
+  "param3": {
+    "name": "param3",
+    "in": "path",
+    "required": false,
+    "type": "string"
+  },
+  "param4": {
+    "name": "param4",
+    "in": "header",
+    "required": false,
+    "type": "string"
+  }
+}

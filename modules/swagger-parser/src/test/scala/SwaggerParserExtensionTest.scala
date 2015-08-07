@@ -1,10 +1,7 @@
 import io.swagger.parser.{Swagger20Parser, SwaggerParser}
 import io.swagger.util.Json
-import org.junit.runner.RunWith
 import org.scalatest.{FlatSpec, Matchers}
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class SwaggerParserExtensionTest extends FlatSpec with Matchers {
   val m = Json.mapper()
 

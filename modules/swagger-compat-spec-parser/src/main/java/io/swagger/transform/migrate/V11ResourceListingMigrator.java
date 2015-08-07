@@ -32,9 +32,9 @@ public final class V11ResourceListingMigrator
     /**
      * Check the validity of a "basePath" argument at the root of a resource
      * listing
-     * <p/>
+     *
      * <p>A {@code basePath} is valid if it obeys the following conditions:</p>
-     * <p/>
+     *
      * <ul>
      * <li>it is an absolute URI;</li>
      * <li>its scheme is {@code http} or {@code https};</li>

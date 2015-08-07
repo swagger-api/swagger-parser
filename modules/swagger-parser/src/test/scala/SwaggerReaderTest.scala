@@ -2,14 +2,13 @@ import io.swagger.models.Swagger
 import io.swagger.parser.SwaggerParser
 import io.swagger.util.Json
 import org.apache.commons.io.FileUtils
-import org.junit.runner.RunWith
+
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
 
 import java.io.File
 import java.nio.charset.StandardCharsets
 
-@RunWith(classOf[JUnitRunner])
 class SwaggerReaderTest extends FlatSpec with Matchers {
   val m = Json.mapper()
 

@@ -1,0 +1,15 @@
+{
+  "discriminator": "petType",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "petType": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "petType"
+  ]
+}
