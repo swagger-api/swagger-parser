@@ -22,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 
 public class RemoteUrlTest {
 
-    private static final int WIRE_MOCK_PORT = 8089;
+    private static final int WIRE_MOCK_PORT = 9999;
     private static final String EXPECTED_ACCEPTS_HEADER = "application/json, application/yaml, */*";
     private static WireMockServer wireMockServer;
 
@@ -48,12 +48,16 @@ public class RemoteUrlTest {
 
         final String expectedBody = setupStub();
 
-        final String actualBody = RemoteUrl.urlToString("http://localhost:8089/v2/pet/1", null);
+        final String actualBody = RemoteUrl.urlToString(getUrl(), null);
         assertEquals(actualBody, expectedBody);
 
         verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
                 .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER)));
 
+    }
+
+    private String getUrl() {
+        return "http://localhost:" + WIRE_MOCK_PORT + "/v2/pet/1";
     }
 
     @Test
@@ -64,7 +68,7 @@ public class RemoteUrlTest {
         final String headerName = "Authorization";
         final String headerValue = "foobar";
         final AuthorizationValue authorizationValue = new AuthorizationValue(headerName, headerValue, "header");
-        final String actualBody = RemoteUrl.urlToString("http://localhost:8089/v2/pet/1", Arrays.asList(authorizationValue));
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
 
         assertEquals(actualBody, expectedBody);
 
@@ -80,17 +84,16 @@ public class RemoteUrlTest {
         final String queryParamValue = "foobar";
         final String expectedBody = "a really good body";
 
-
         stubFor(get(urlPathEqualTo("/v2/pet/1"))
-                .withQueryParam(queryParamName, equalTo(queryParamValue))
-                .willReturn(aResponse()
-                        .withBody(expectedBody)
-                        .withHeader("Content-Type", "application/json"))
+                        .withQueryParam(queryParamName, equalTo(queryParamValue))
+                        .willReturn(aResponse()
+                                .withBody(expectedBody)
+                                .withHeader("Content-Type", "application/json"))
 
         );
 
         final AuthorizationValue authorizationValue = new AuthorizationValue(queryParamName, queryParamValue, "query");
-        final String actualBody = RemoteUrl.urlToString("http://localhost:8089/v2/pet/1", Arrays.asList(authorizationValue));
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
 
         assertEquals(actualBody, expectedBody);
 
@@ -104,9 +107,9 @@ public class RemoteUrlTest {
         final String expectedBody = "a really good body";
         stubFor(get(urlEqualTo("/v2/pet/1"))
                 .willReturn(aResponse()
-                        .withBody(expectedBody)
-                        .withHeader("Content-Type", "application/json")
-                        ));
+                                .withBody(expectedBody)
+                                .withHeader("Content-Type", "application/json")
+                ));
         return expectedBody;
     }
 }
