@@ -5,16 +5,12 @@ import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by russellb337 on 7/10/15.
- */
 public class RefUtils {
 
     public static String computeDefinitionName(String ref) {
@@ -77,7 +73,13 @@ public class RefUtils {
             } else {
                 //its assumed to be a relative file ref
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
-                result = IOUtils.toString(new FileInputStream(pathToUse.toString()));
+
+                if(Files.exists(pathToUse)) {
+                    result = IOUtils.toString(new FileInputStream(pathToUse.toFile()));
+                } else {
+                    result = ClasspathHelper.loadFileFromClasspath(file);
+                }
+
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
