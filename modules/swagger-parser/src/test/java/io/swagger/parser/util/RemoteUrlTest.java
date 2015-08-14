@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.swagger.models.auth.AuthorizationValue;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -24,23 +25,19 @@ public class RemoteUrlTest {
 
     private static final int WIRE_MOCK_PORT = 9999;
     private static final String EXPECTED_ACCEPTS_HEADER = "application/json, application/yaml, */*";
-    private static WireMockServer wireMockServer;
+    private WireMockServer wireMockServer;
 
-    @BeforeClass
-    public void setUpClass() throws Exception {
-        wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
-        wireMockServer.start();
-        WireMock.configureFor(WIRE_MOCK_PORT);
-    }
 
-    @AfterClass
-    public void tearDownClass() throws Exception {
+    @AfterMethod
+    public void tearDown() throws Exception {
         wireMockServer.stop();
     }
 
     @BeforeMethod
     public void setUp() throws Exception {
-        WireMock.reset();
+        wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
+        wireMockServer.start();
+        WireMock.configureFor(WIRE_MOCK_PORT);
     }
 
     @Test
