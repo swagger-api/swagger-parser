@@ -20,6 +20,8 @@ import javax.net.ssl.X509TrustManager;
 
 public class RemoteUrl {
 
+    private static final String ACCEPT_HEADER_VALUE = "application/json, application/yaml, */*";
+
     private static void disableSslVerification() {
         try {
             // Create a trust manager that does not validate certificate chains
@@ -83,7 +85,6 @@ public class RemoteUrl {
                     url = url + queryString.toString();
                 }
                 conn = new URL(url).openConnection();
-                conn.setRequestProperty("Accept", "application/json, */*");
 
                 for (AuthorizationValue auth : auths) {
                     if ("header".equals(auth.getType())) {
@@ -92,9 +93,9 @@ public class RemoteUrl {
                 }
             } else {
                 conn = new URL(url).openConnection();
-                conn.setRequestProperty("Accept", "application/json, application/yaml, */*");
             }
 
+            conn.setRequestProperty("Accept", ACCEPT_HEADER_VALUE);
             conn.connect();
             InputStream in = conn.getInputStream();
 

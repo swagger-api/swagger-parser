@@ -10,16 +10,19 @@ import mockit.StrictExpectations;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.*;
-
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class RefUtilsTest {
 
@@ -56,7 +59,6 @@ public class RefUtilsTest {
         doComputeDefinitionNameTestCase("./path/to/file#/foo", "foo");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar", "bar");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar/hello", "hello");
-
 
     }
 
@@ -150,50 +152,73 @@ public class RefUtilsTest {
     @Test
     public void testReadExternalRef_RelativeFileFormat(@Injectable final List<AuthorizationValue> auths,
                                                        @Mocked IOUtils ioUtils,
-                                                       @Mocked final FileInputStream fileInputStream
+                                                       @Mocked final FileInputStream fileInputStream,
+                                                       @Mocked Files files,
+                                                       @Injectable final Path parentDirectory,
+                                                       @Injectable final Path pathToUse,
+                                                       @Injectable final File file
     ) throws Exception {
 
-        final Path parentDirectory = Paths.get("src/test/resources");
-        final String file = "./path/to/file.json";
+        final String filePath = "./path/to/file.json";
         final String expectedResult = "really good json";
 
-        new StrictExpectations() {{
-            new FileInputStream("src/test/resources/path/to/file.json");
-            times = 1;
-            result = fileInputStream;
+        setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
 
+        new StrictExpectations() {{
             IOUtils.toString(fileInputStream);
             times = 1;
             result = expectedResult;
         }};
 
-        String actualResult = RefUtils.readExternalRef(file, RefFormat.RELATIVE, auths, parentDirectory);
+        String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
         assertEquals(expectedResult, actualResult);
+    }
+
+    private void setupRelativeFileExpectations(@Mocked final FileInputStream fileInputStream, @Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
+        new StrictExpectations() {{
+
+            parentDirectory.resolve(filePath).normalize();
+            times = 1;
+            result = pathToUse;
+
+            Files.exists(pathToUse);
+            times = 1;
+            result = true;
+
+            pathToUse.toFile();
+            times = 1;
+            result = file;
+
+            new FileInputStream(file);
+            times = 1;
+            result = fileInputStream;
+        }};
     }
 
     @Test
     public void testReadExternalRef_RelativeFileFormat_ExceptionThrown(@Injectable final List<AuthorizationValue> auths,
                                                                        @Mocked IOUtils ioUtils,
                                                                        @Mocked final FileInputStream fileInputStream,
-                                                                       @Injectable final IOException mockedException
-                                                                       ) throws Exception {
-        final String file = "./path/to/file.json";
-        final Path parentDirectory = Paths.get("src/test/resources");
+                                                                       @Mocked Files files,
+                                                                       @Injectable final IOException mockedException,
+                                                                       @Injectable final Path parentDirectory,
+                                                                       @Injectable final Path pathToUse,
+                                                                       @Injectable final File file
+    ) throws Exception {
+        final String filePath = "./path/to/file.json";
+
+        setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            new FileInputStream("src/test/resources/path/to/file.json");
-            times = 1;
-            result = fileInputStream;
-
             IOUtils.toString(fileInputStream);
             times = 1;
             result = mockedException;
         }};
 
         try {
-            RefUtils.readExternalRef(file, RefFormat.RELATIVE, auths, parentDirectory);
+            RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
             fail("Should have thrown an exception");
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             assertEquals(mockedException, e.getCause());
         }
     }
@@ -206,9 +231,36 @@ public class RefUtilsTest {
         try {
             RefUtils.readExternalRef(file, RefFormat.INTERNAL, auths, null);
             fail("Should have thrown an exception");
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
 
         }
     }
 
+    @Test
+    public void testReadExternalRef_OnClasspath(@Mocked Files files,
+                                                @Mocked ClasspathHelper classpathHelper,
+                                                @Injectable final Path parentDirectory,
+                                                @Injectable final Path pathToUse) throws Exception {
+        final String filePath = "./path/to/file.json";
+        final String expectedResult = "really good json";
+
+        new StrictExpectations() {{
+
+            parentDirectory.resolve(filePath).normalize();
+            times = 1;
+            result = pathToUse;
+
+            Files.exists(pathToUse);
+            times = 1;
+            result = false;
+
+            ClasspathHelper.loadFileFromClasspath(filePath); times=1; result=expectedResult;
+
+        }};
+
+        final String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, null, parentDirectory);
+
+        assertEquals(actualResult, expectedResult);
+
+    }
 }

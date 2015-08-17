@@ -4,14 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class Swagger20Parser implements SwaggerParserExtension {
@@ -26,7 +29,12 @@ public class Swagger20Parser implements SwaggerParserExtension {
             if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths);
             } else {
-                data = FileUtils.readFileToString(new File(location), "UTF-8");
+                final Path path = Paths.get(location);
+                if(Files.exists(path)) {
+                    data = FileUtils.readFileToString(path.toFile(), "UTF-8");
+                } else {
+                    data = ClasspathHelper.loadFileFromClasspath(location);
+                }
             }
 
             return convertToSwagger(data);
