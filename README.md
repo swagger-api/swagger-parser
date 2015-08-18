@@ -68,9 +68,6 @@ then you are in luck - you have the spec in pojo form, now pass it to pretty() a
 You need the following installed and available in your $PATH:
 
 * [Java 1.7](http://java.oracle.com)
-
-Note!  Some folks have had issues with OOM errors with java version "1.6.0_51".  It's strongly suggested that you upgrade to 1.7!
-
 * [Apache maven 3.0.3 or greater](http://maven.apache.org/)
 
 After cloning the project, you can build it from source with this command:
