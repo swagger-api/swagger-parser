@@ -17,7 +17,6 @@ Check out [Swagger-Spec](https://github.com/swagger-api/swagger-spec) for additi
 Using the swagger-parser is simple.  Once included in your project, you can read a swagger specification from any location:
 
 ```java
-```java
 import io.swagger.parser.SwaggerParser;
 import io.swagger.models.Swagger;
 
