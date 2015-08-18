@@ -10,7 +10,11 @@ public class ClasspathHelper {
 
     public static String loadFileFromClasspath(String location) {
 
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream(location);
+        InputStream inputStream = ClasspathHelper.class.getResourceAsStream(location);
+
+        if(inputStream == null) {
+            inputStream = ClassLoader.getSystemResourceAsStream(location);
+        }
 
         if(inputStream != null) {
             try {
