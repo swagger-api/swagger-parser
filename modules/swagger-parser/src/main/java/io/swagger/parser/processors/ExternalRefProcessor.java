@@ -2,8 +2,11 @@ package io.swagger.parser.processors;
 
 import io.swagger.models.Model;
 import io.swagger.models.Swagger;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
+import io.swagger.util.Json;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +41,6 @@ public final class ExternalRefProcessor {
         final Model existingModel = definitions.get(possiblyConflictingDefinitionName);
 
         if (existingModel != null) {
-
             //so this is either a conflict, or another reference to something we have previously renamed
             final String previouslyRenamedRef = cache.getRenamedRef($ref);
             if (previouslyRenamedRef != null) {
@@ -55,7 +57,20 @@ public final class ExternalRefProcessor {
         } else {
             newRef = possiblyConflictingDefinitionName;
             cache.putRenamedRef($ref, newRef);
+
+            
+            //If this is a new model, then we surely have to check it for other sub references?
+            //Loop the properties and recursively call this method;
+            Map<String, Property> subProps = model.getProperties();
+            for(Map.Entry<String,Property> prop: subProps.entrySet()){
+            	if(prop.getValue() instanceof RefProperty){
+          			RefProperty subRef = (RefProperty)prop.getValue();
+            		String xRef = processRefToExternalDefinition(subRef.get$ref(),subRef.getRefFormat());
+            		subRef.set$ref(xRef);
+            	}            	
+            }
             swagger.addDefinition(newRef, model);
+
         }
 
         return newRef;
