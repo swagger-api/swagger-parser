@@ -6,8 +6,6 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
-import io.swagger.util.Json;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +62,7 @@ public final class ExternalRefProcessor {
             Map<String, Property> subProps = model.getProperties();
             for(Map.Entry<String,Property> prop: subProps.entrySet()){
             	if(prop.getValue() instanceof RefProperty){
-          			RefProperty subRef = (RefProperty)prop.getValue();
+            		RefProperty subRef = (RefProperty)prop.getValue();
             		String xRef = processRefToExternalDefinition(subRef.get$ref(),subRef.getRefFormat());
             		subRef.set$ref(xRef);
             	}            	
