@@ -57,14 +57,13 @@ public final class ExternalRefProcessor {
             cache.putRenamedRef($ref, newRef);
 
             
-            //If this is a new model, then we surely have to check it for other sub references?
+            //If this is a new model, then check it for other sub references
             //Loop the properties and recursively call this method;
             Map<String, Property> subProps = model.getProperties();
             for(Map.Entry<String,Property> prop: subProps.entrySet()){
             	if(prop.getValue() instanceof RefProperty){
             		RefProperty subRef = (RefProperty)prop.getValue();
-            		String xRef = processRefToExternalDefinition(subRef.get$ref(),subRef.getRefFormat());
-            		subRef.set$ref(xRef);
+            		subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(),subRef.getRefFormat()));
             	}            	
             }
             swagger.addDefinition(newRef, model);
