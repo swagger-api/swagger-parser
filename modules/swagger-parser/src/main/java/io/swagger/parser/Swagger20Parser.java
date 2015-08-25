@@ -10,6 +10,10 @@ import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +22,8 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Swagger20Parser implements SwaggerParserExtension {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Swagger20Parser.class);
 
     @Override
     public Swagger read(String location, List<AuthorizationValue> auths) throws IOException {
@@ -56,12 +62,21 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 mapper = Yaml.mapper();
             }
             JsonNode rootNode = mapper.readTree(data);
+            if (System.getProperty("debugParser") != null) {
+                LOGGER.info("\n\nSwagger Tree: \n"
+                    + ReflectionToStringBuilder.toString(rootNode, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");
+            }
             // must have swagger node set
             JsonNode swaggerNode = rootNode.get("swagger");
             if (swaggerNode == null) {
                 return null;
             } else {
-                return mapper.convertValue(rootNode, Swagger.class);
+                Swagger convertValue = mapper.convertValue(rootNode, Swagger.class);
+                if (System.getProperty("debugParser") != null) {
+                    LOGGER.info("\n\nSwagger Tree convertValue : \n"
+                        + ReflectionToStringBuilder.toString(convertValue, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");
+                }
+                return convertValue;
             }
         } else {
             return null;
