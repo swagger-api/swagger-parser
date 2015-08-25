@@ -59,12 +59,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 // legacy models
 
 public class SwaggerCompatConverter implements SwaggerParserExtension {
+    static Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
+
+    @Override
     public Swagger read(JsonNode node) throws IOException {
         // TODO
         return null;
@@ -74,6 +79,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         return read(input, null);
     }
 
+    @Override
     public Swagger read(String input, List<AuthorizationValue> auths) throws IOException {
         Swagger output = null;
         MessageBuilder migrationMessages = new MessageBuilder();
@@ -222,6 +228,15 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         Property property = null;
         String type = param.getType() == null ? null : param.getType().toString();
         String format = param.getFormat() == null ? null : param.getFormat().toString();
+
+        if (null == type) {
+            new Throwable("").printStackTrace();
+            LOGGER.warn("Empty type in Param: " + param);
+        }
+        if (null == format) {
+            new Throwable("").printStackTrace();
+            LOGGER.warn("Empty format in Param: " + param);
+        }
 
         if (output instanceof BodyParameter) {
             BodyParameter bp = (BodyParameter) output;
