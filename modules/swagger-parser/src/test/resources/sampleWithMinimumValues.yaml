@@ -1,0 +1,24 @@
+---
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Very simple
+paths:
+  /pets:
+    get:
+      parameters:
+        - in: query
+          name: limit
+          minimum: 0.0
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: Returns all the pets
+definitions:
+  Cat:
+    x-extension-here: yes
+    properties:
+      id:
+        type: integer
+        format: int64
