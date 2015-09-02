@@ -6,6 +6,7 @@ import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefConstants;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.util.DeserializationUtils;
+import io.swagger.parser.util.PathUtils;
 import io.swagger.parser.util.RefUtils;
 
 import java.io.File;
@@ -50,8 +51,7 @@ public class ResolverCache {
             if(parentFileLocation.startsWith("http")) {
                 parentDirectory = null;
             } else {
-                final Path path = Paths.get(parentFileLocation);
-                parentDirectory = path.getParent();
+                parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
             }
         } else {
             File file = new File(".");
