@@ -1,4 +1,5 @@
 import io.swagger.models.Swagger
+import io.swagger.models.parameters.QueryParameter
 import io.swagger.parser.SwaggerParser
 import io.swagger.util.Json
 import org.apache.commons.io.FileUtils
@@ -15,6 +16,20 @@ class SwaggerReaderTest extends FlatSpec with Matchers {
   it should "read the uber api" in {
     val parser = new SwaggerParser()
     val swagger = parser.read("./src/test/resources/uber.json")
+  }
+
+  it should "read the simple example with minimum values" in {
+    val parser = new SwaggerParser()
+    val swagger = parser.read("./src/test/resources/sampleWithMinimumValues.yaml")
+    val qp = swagger.getPaths().get("/pets").getGet().getParameters().get(0).asInstanceOf[QueryParameter]
+    qp.getMinimum() should be (0.0)
+  }
+
+  it should "read the simple example with model extensions" in {
+    val parser = new SwaggerParser()
+    val swagger = parser.read("./src/test/resources/sampleWithMinimumValues.yaml")
+    val model = swagger.getDefinitions().get("Cat")
+    model.getVendorExtensions().get("x-extension-here") should not be (null)
   }
 
   it should "detect yaml" in {
