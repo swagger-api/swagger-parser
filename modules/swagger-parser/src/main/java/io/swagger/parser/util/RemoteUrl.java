@@ -1,6 +1,8 @@
 package io.swagger.parser.util;
 
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.parser.SwaggerParser;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -66,6 +68,30 @@ public class RemoteUrl {
         BufferedReader br = null;
 
         try {
+            final String[] protocolAndPath = url.split("://");
+            final StringBuilder urlEncodedUrl = new StringBuilder(protocolAndPath[0])
+                    .append("://");
+
+            final String[] pathSegments = protocolAndPath[1].split("/");
+
+            for (int i = 0; i < pathSegments.length; i++) {
+
+                String pathSegment = pathSegments[i];
+
+                //skip the hostname + port
+                if(i > 0) {
+                    pathSegment = URLEncoder.encode(pathSegment, "UTF-8");
+                }
+
+                urlEncodedUrl.append(pathSegment);
+
+                if(i < pathSegments.length - 1) {
+                    urlEncodedUrl.append("/");
+                }
+            }
+
+            //= split[0] + "://" + URLEncoder.encode(split[1], "UTF-8");
+
             if (auths != null) {
                 StringBuilder queryString = new StringBuilder();
                 // build a new url if needed
@@ -82,9 +108,9 @@ public class RemoteUrl {
                     }
                 }
                 if (queryString.toString().length() != 0) {
-                    url = url + queryString.toString();
+                    urlEncodedUrl.append(queryString.toString());
                 }
-                conn = new URL(url).openConnection();
+                conn = new URL(urlEncodedUrl.toString()).openConnection();
 
                 for (AuthorizationValue auth : auths) {
                     if ("header".equals(auth.getType())) {
@@ -92,7 +118,7 @@ public class RemoteUrl {
                     }
                 }
             } else {
-                conn = new URL(url).openConnection();
+                conn = new URL(urlEncodedUrl.toString()).openConnection();
             }
 
             conn.setRequestProperty("Accept", ACCEPT_HEADER_VALUE);
@@ -137,5 +163,14 @@ public class RemoteUrl {
 
     static {
         disableSslVerification();
+    }
+
+    public static void main(String[] args) {
+        try {
+            final String s = RemoteUrl.urlToString("https://tfsappqa.corp.intuit.net/creation/api-docs/v1/filingdata/{filingDataId}/taxitemtotals", null);
+            System.out.println(s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
