@@ -164,13 +164,4 @@ public class RemoteUrl {
     static {
         disableSslVerification();
     }
-
-    public static void main(String[] args) {
-        try {
-            final String s = RemoteUrl.urlToString("https://tfsappqa.corp.intuit.net/creation/api-docs/v1/filingdata/{filingDataId}/taxitemtotals", null);
-            System.out.println(s);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
