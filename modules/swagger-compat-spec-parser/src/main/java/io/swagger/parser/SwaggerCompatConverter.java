@@ -1,5 +1,4 @@
 package io.swagger.parser;
-
 import io.swagger.models.ArrayModel;
 import io.swagger.models.AuthorizationScope;
 import io.swagger.models.Contact;
@@ -467,7 +466,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         try {
             JsonNode jsonNode = null;
             if (input.startsWith("http")) {
-                String json = RemoteUrl.urlToString(input, auths);
+                String json = RemoteUrl.urlToString( RemoteUrl.encodePathParameters(input), auths);
                 jsonNode = Json.mapper().readTree(json);
             } else {
                 jsonNode = Json.mapper().readTree(new java.io.File(input));
