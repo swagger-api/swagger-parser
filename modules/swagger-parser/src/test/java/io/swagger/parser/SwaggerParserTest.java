@@ -5,12 +5,14 @@ import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -30,6 +32,15 @@ public class SwaggerParserTest {
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
         //Yaml.pretty().writeValue(new File("resolved.yaml"), swagger);
         System.out.println(Yaml.mapper().writeValueAsString(swagger));
+    }
+
+    @Test
+    public void testIssue62() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("https://raw.githubusercontent.com/swagger-api/swagger-spec/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
+
+        Json.prettyPrint(swagger);
+        assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
     }
 
     private Swagger doRelativeFileTest(String location) {
