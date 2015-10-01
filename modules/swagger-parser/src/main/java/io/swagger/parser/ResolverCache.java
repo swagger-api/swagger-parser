@@ -1,10 +1,15 @@
 package io.swagger.parser;
 
+import com.google.common.collect.ImmutableList;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import io.swagger.models.Model;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
-import io.swagger.models.refs.RefConstants;
+import io.swagger.models.parameters.Parameter;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.PathUtils;
 import io.swagger.parser.util.RefUtils;
@@ -16,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,9 +34,6 @@ import java.util.regex.Pattern;
  * 4) de-serializing json strings into objects
  */
 public class ResolverCache {
-
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefConstants.INTERNAL_PARAMETER_PREFIX + "(?<name>\\S+)");
-    private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefConstants.INTERNAL_DEFINITION_PREFIX + "(?<name>\\S+)");
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
@@ -63,7 +66,7 @@ public class ResolverCache {
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
         if (refFormat == RefFormat.INTERNAL) {
             //we don't need to go get anything for internal refs
-            return expectedType.cast(loadInternalRef(ref));
+            return expectedType.cast(loadInternalRef(ref, expectedType));
         }
 
         final String[] refParts = ref.split("#/");
@@ -116,28 +119,70 @@ public class ResolverCache {
         return result;
     }
 
-    private Object loadInternalRef(String ref) {
+    private abstract static class InternalRefAccessor<T> {
+        private final Class<T> resultType;
+        private final Pattern pattern;
 
-        Object result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
-
-        if (result == null) {
-            result = getFromMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
+        private InternalRefAccessor(final Class<T> resultType, final RefType refType) {
+            this.resultType = resultType;
+            this.pattern = Pattern.compile("^" + refType.getInternalPrefix() + "(?<name>\\S+)");
         }
 
-        return result;
+        abstract Map<String, T> getMap(Swagger s);
 
+        static final List<InternalRefAccessor<?>> INSTANCES = ImmutableList.of(new InternalRefAccessor<Model>(
+                    Model.class, RefType.DEFINITION) {
+                    @Override
+                    Map<String, Model> getMap(final Swagger swagger) {
+                        return swagger.getDefinitions();
+                    }
+                }, new InternalRefAccessor<Parameter>(Parameter.class, RefType.PARAMETER) {
+                    @Override
+                    Map<String, Parameter> getMap(final Swagger swagger) {
+                        return swagger.getParameters();
+                    }
+                }, new InternalRefAccessor<io.swagger.models.Path>(io.swagger.models.Path.class, RefType.PATH) {
+                    @Override
+                    Map<String, io.swagger.models.Path> getMap(final Swagger swagger) {
+                        return swagger.getPaths();
+                    }
+                }, new InternalRefAccessor<Response>(Response.class, RefType.RESPONSE) {
+                    @Override
+                    Map<String, Response> getMap(final Swagger swagger) {
+
+                        // TODO implement this
+                        throw new UnsupportedOperationException("swagger.getResponses() is missing!");
+                    }
+                });
+
+        @SuppressWarnings("unchecked")
+        static <T> InternalRefAccessor<T> getByClass(final Class<T> clazz) {
+            for (final InternalRefAccessor<?> internalRefAccessor : INSTANCES) {
+                if (internalRefAccessor.resultType == clazz) {
+                    return (InternalRefAccessor<T>) internalRefAccessor;
+                }
+            }
+
+            throw new NoSuchElementException("no accessor for " + clazz);
+        }
     }
 
-    private Object getFromMap(String ref, Map map, Pattern pattern) {
-        final Matcher parameterMatcher = pattern.matcher(ref);
+    private <T> T loadInternalRef(final String ref, final Class<T> expectedType) {
+        final InternalRefAccessor<T> accessor = InternalRefAccessor.getByClass(expectedType);
+        return getFromMap(ref, accessor.getMap(swagger), accessor.pattern);
+    }
 
-        if (parameterMatcher.matches()) {
-            final String paramName = parameterMatcher.group("name");
+    private <T> T getFromMap(final String ref, final Map<String, T> map, final Pattern pattern) {
+        final Matcher refMatcher = pattern.matcher(ref);
+
+        if (refMatcher.matches()) {
+            final String paramName = refMatcher.group("name");
 
             if (map != null) {
                 return map.get(paramName);
             }
         }
+
         return null;
     }
 
