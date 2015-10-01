@@ -40,7 +40,7 @@ class SwaggerReaderTest extends FlatSpec with Matchers {
 
   it should "detect json" in {
     val parser = new SwaggerParser()
-    val swagger = parser.read("./src/test/resources/minimal_y")
+    val swagger = parser.read("./src/test/resources/minimal_j")
     swagger.getSwagger() should be("2.0")
   }
 
