@@ -3,8 +3,8 @@ package io.swagger.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
-import io.swagger.models.refs.RefConstants;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.PathUtils;
 import io.swagger.parser.util.RefUtils;
@@ -29,8 +29,8 @@ import java.util.regex.Pattern;
  */
 public class ResolverCache {
 
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefConstants.INTERNAL_PARAMETER_PREFIX + "(?<name>\\S+)");
-    private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefConstants.INTERNAL_DEFINITION_PREFIX + "(?<name>\\S+)");
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefType.PARAMETER.getInternalPrefix() + "(?<name>\\S+)");
+    private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefType.DEFINITION.getInternalPrefix() + "(?<name>\\S+)");
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
