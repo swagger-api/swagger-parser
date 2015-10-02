@@ -6,6 +6,8 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.parser.util.RemoteUrl;
+import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.util.SwaggerDeserializer;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.apache.commons.io.FileUtils;
@@ -46,9 +48,9 @@ public class Swagger20Parser implements SwaggerParserExtension {
             return convertToSwagger(data);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            if (System.getProperty("debugParser") != null) {
+//            if (System.getProperty("debugParser") != null) {
                 e.printStackTrace();
-            }
+//            }
             return null;
         }
     }
@@ -71,7 +73,9 @@ public class Swagger20Parser implements SwaggerParserExtension {
             if (swaggerNode == null) {
                 return null;
             } else {
-                Swagger convertValue = mapper.convertValue(rootNode, Swagger.class);
+                SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(rootNode);
+
+                Swagger convertValue = result.getSwagger();
                 if (System.getProperty("debugParser") != null) {
                     LOGGER.info("\n\nSwagger Tree convertValue : \n"
                         + ReflectionToStringBuilder.toString(convertValue, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");

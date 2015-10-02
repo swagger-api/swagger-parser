@@ -26,13 +26,28 @@ public class SwaggerParserTest {
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
     }
 
+    @Test(groups = "single")
+    public void testPetstore() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/petstore.json");
+
+//        Json.prettyPrint(swagger);
+    }
+
+    @Test
+    public void testTroublesomeFile() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/troublesome.yaml");
+
+        Json.prettyPrint(swagger);
+    }
+
     @Test
     public void testLoadRelativeFileTree_Yaml() throws Exception {
         JsonToYamlFileDuplicator.duplicateFilesInYamlFormat("src/test/resources/relative-file-references/json",
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
-        //Yaml.pretty().writeValue(new File("resolved.yaml"), swagger);
-        System.out.println(Yaml.mapper().writeValueAsString(swagger));
+//        System.out.println(Yaml.mapper().writeValueAsString(swagger));
     }
 
     @Test

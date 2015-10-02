@@ -35,6 +35,21 @@
         </plugin>
       </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>test-single</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>single</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>
