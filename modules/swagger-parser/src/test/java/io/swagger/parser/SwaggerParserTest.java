@@ -5,6 +5,7 @@ import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.testng.annotations.Test;
@@ -35,11 +36,26 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue75() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue99.json");
+
+        BodyParameter param = (BodyParameter)swagger.getPaths().get("/albums").getPost().getParameters().get(0);
+        Model model = param.getSchema();
+
+        assertNotNull(model);
+        assertTrue(model instanceof ArrayModel);
+
+        ArrayModel am = (ArrayModel) model;
+        assertTrue(am.getItems() instanceof StringProperty);
+        assertEquals(am.getItems().getFormat(), "bytes");
+    }
+
+    @Test
     public void testIssue62() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("https://raw.githubusercontent.com/swagger-api/swagger-spec/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
 
-        Json.prettyPrint(swagger);
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
     }
 
