@@ -48,7 +48,7 @@ public class SwaggerParserTest {
 
         ArrayModel am = (ArrayModel) model;
         assertTrue(am.getItems() instanceof StringProperty);
-        assertEquals(am.getItems().getFormat(), "bytes");
+        assertEquals(am.getItems().getFormat(), "byte");
     }
 
     @Test
