@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.type.MapType;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.properties.Property;
 import io.swagger.util.Json;
 
 import java.util.*;
@@ -17,16 +19,19 @@ import java.util.*;
 public class SwaggerDeserializer {
     static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
     static Set<String> EXTERNAL_DOCS_KEYS = new HashSet<String>(Arrays.asList("description", "url"));
+    static Set<String> INFO_KEYS = new HashSet<String>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
     static Set<String> TAG_KEYS = new HashSet<String>(Arrays.asList("description", "name", "externalDocs"));
+    static Set<String> RESPONSE_KEYS = new HashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
+    static Set<String> CONTACT_KEYS = new HashSet<String>(Arrays.asList("name", "url", "email"));
+
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
         ParseResult rootParse = new ParseResult();
         Swagger swagger = parseRoot(rootNode, rootParse);
 
-        Json.prettyPrint(rootParse);
-
         result.setSwagger(swagger);
+        result.setMessages(rootParse.getMessages());
         return result;
     }
 
@@ -37,16 +42,15 @@ public class SwaggerDeserializer {
             ObjectNode on = (ObjectNode)node;
             Iterator<JsonNode> it = null;
 
-            Set<String> keys = getKeys(on);
-
             // required
             String value = getString("swagger", on, true, location, result);
             swagger.setSwagger(value);
 
-            ObjectNode obj = getObject("info", on, true, location, result);
-            // TODO parse
-            Info info = Json.mapper().convertValue(obj, Info.class);
-            swagger.info(info);
+            ObjectNode obj = getObject("info", on, true, "", result);
+            if(obj != null) {
+                Info info = info(obj, "info", result);
+                swagger.info(info);
+            }
 
             // optional
             value = getString("host", on, false, location, result);
@@ -103,26 +107,25 @@ public class SwaggerDeserializer {
             Map<String, Path> paths = Json.mapper().convertValue(obj, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Path.class));
             swagger.paths(paths);
 
-            obj = getObject("definitions", on, true, location, result);
+            obj = getObject("definitions", on, false, location, result);
             // TODO: parse
             Map<String, Model> definitions = Json.mapper().convertValue(obj, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Model.class));
             swagger.setDefinitions(definitions);
 
-            obj = getObject("parameters", on, true, location, result);
+            obj = getObject("parameters", on, false, location, result);
             // TODO: parse
             Map<String, Parameter> parameters = Json.mapper().convertValue(obj, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Parameter.class));
             swagger.setParameters(parameters);
 
-            obj = getObject("responses", on, true, location, result);
-            // TODO: parse
-            Map<String, Response> responses = Json.mapper().convertValue(obj, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Response.class));
-//            swagger.responses(responses);
+            obj = getObject("responses", on, false, location, result);
+            Map<String, Response> responses = responses(obj, "responses", result);
+            swagger.responses(responses);
 
-            obj = getObject("securityDefinitions", on, true, location, result);
+            obj = getObject("securityDefinitions", on, false, location, result);
             Map<String, SecuritySchemeDefinition> securityDefinitions = securityDefinitions(obj, location, result);
             swagger.setSecurityDefinitions(securityDefinitions);
 
-            obj = getObject("security", on, true, location, result);
+            obj = getObject("security", on, false, location, result);
             List<SecurityRequirement> security = securityRequirements(obj, location, result);
             swagger.setSecurity(security);
 
@@ -130,11 +133,12 @@ public class SwaggerDeserializer {
             List<Tag> tags = tags(array, location, result);
             swagger.tags(tags);
 
-            obj = getObject("externalDocs", on, true, location, result);
+            obj = getObject("externalDocs", on, false, location, result);
             ExternalDocs docs = externalDocs(obj, location, result);
             swagger.externalDocs(docs);
 
             // extra keys
+            Set<String> keys = getKeys(on);
             for(String key : keys) {
                 if(!ROOT_KEYS.contains(key)) {
                     result.extra(location, key, node.get(key));
@@ -142,6 +146,126 @@ public class SwaggerDeserializer {
             }
         }
         return swagger;
+    }
+
+    public Map<String, Response> responses(ObjectNode node, String location, ParseResult result) {
+        if(node == null)
+            return null;
+
+        Map<String, Response> output = new TreeMap<String, Response>();
+
+        Set<String> keys = getKeys(node);
+
+        for(String key : keys) {
+            ObjectNode obj = getObject(key, node, false, location + ".responses", result);
+            Response response = response(obj, location + "." + key, result);
+            output.put(key, response);
+        }
+
+        return output;
+    }
+
+    public Response response(ObjectNode node, String location, ParseResult result) {
+        if(node == null)
+            return null;
+
+        Response output = new Response();
+
+        String value = getString("description", node, true, location, result);
+        output.description(value);
+
+        ObjectNode schema = getObject("schema", node, false, location, result);
+        if(schema != null) {
+            output.schema(Json.mapper().convertValue(schema, Property.class));
+        }
+        ObjectNode headersNode = getObject("headers", node, false, location, result);
+        if(headersNode != null) {
+            // TODO
+            Map<String, Property> headers = Json.mapper().convertValue(headersNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Path.class));
+            output.headers(headers);
+        }
+
+        ObjectNode examplesNode = getObject("examples", node, false, location, result);
+        if(examplesNode != null) {
+            // TODO
+            Map<String, Object> examples = Json.mapper().convertValue(examplesNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Object.class));
+            output.setExamples(examples);
+        }
+
+        // extra keys
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                output.setVendorExtension(key, Json.pretty(node.get(key)));
+            }
+            else if(!RESPONSE_KEYS.contains(key)) {
+                result.extra(location, key, node.get(key));
+            }
+        }
+        return output;
+    }
+
+    public Info info(ObjectNode node, String location, ParseResult result) {
+        if(node == null)
+            return null;
+
+        Info info = new Info();
+        String value = getString("title", node, true, location, result);
+        info.title(value);
+
+        value = getString("description", node, false, location, result);
+        info.description(value);
+
+        value = getString("termsOfService", node, false, location, result);
+        info.termsOfService(value);
+
+        ObjectNode obj = getObject("contact", node, false, "contact", result);
+        Contact contact = contact(obj, location, result);
+        info.contact(contact);
+
+        obj = getObject("license", node, false, location, result);
+
+        value = getString("version", node, false, location, result);
+        info.version(value);
+
+        // extra keys
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                info.setVendorExtension(key, Json.pretty(node.get(key)));
+            }
+            else if(!INFO_KEYS.contains(key)) {
+                result.extra(location, key, node.get(key));
+            }
+        }
+
+        return info;
+    }
+
+    public Contact contact(ObjectNode node, String location, ParseResult result) {
+        if(node == null)
+            return null;
+
+        Contact contact = new Contact();
+
+        String value = getString("name", node, false, location + ".name", result);
+        contact.name(value);
+
+        value = getString("url", node, false, location + ".url", result);
+        contact.url(value);
+
+        value = getString("email", node, false, location + ".email", result);
+        contact.email(value);
+
+        // extra keys
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(!CONTACT_KEYS.contains(key)) {
+                result.extra(location + ".contact", key, node.get(key));
+            }
+        }
+
+        return contact;
     }
 
     public Map<String, SecuritySchemeDefinition> securityDefinitions(ObjectNode node, String location, ParseResult result) {
@@ -348,14 +472,14 @@ public class SwaggerDeserializer {
     public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         String value = null;
         JsonNode v = node.get(key);
-        if(v != null) {
-            value = v.asText();
-            if (value == null) {
+        if (node == null || v == null) {
+            if (required) {
                 result.missing(location, key);
-                if (required) {
-                    result.invalid();
-                }
+                result.invalid();
             }
+        }
+        else {
+            value = v.asText();
         }
         return value;
     }
@@ -392,10 +516,83 @@ public class SwaggerDeserializer {
         public void invalid() {
             this.valid = false;
         }
+
+        public boolean isValid() {
+            return valid;
+        }
+
+        public void setValid(boolean valid) {
+            this.valid = valid;
+        }
+
+        public Map<Location, JsonNode> getExtra() {
+            return extra;
+        }
+
+        public void setExtra(Map<Location, JsonNode> extra) {
+            this.extra = extra;
+        }
+
+        public Map<Location, String> getInvalidType() {
+            return invalidType;
+        }
+
+        public void setInvalidType(Map<Location, String> invalidType) {
+            this.invalidType = invalidType;
+        }
+
+        public List<Location> getMissing() {
+            return missing;
+        }
+
+        public void setMissing(List<Location> missing) {
+            this.missing = missing;
+        }
+
+        public List<String> getMessages() {
+            List<String> messages = new ArrayList<String>();
+            for(Location l : extra.keySet()) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is unexpected";
+                messages.add(message);
+            }
+            for(Location l : invalidType.keySet()) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is not of type `" + invalidType.get(l) + "`";
+                messages.add(message);
+            }
+            for(Location l : missing) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            return messages;
+        }
     }
 
     static class Location {
-        private String location, key;
+        private String location;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Location)) return false;
+
+            Location location1 = (Location) o;
+
+            if (location != null ? !location.equals(location1.location) : location1.location != null) return false;
+            return !(key != null ? !key.equals(location1.key) : location1.key != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = location != null ? location.hashCode() : 0;
+            result = 31 * result + (key != null ? key.hashCode() : 0);
+            return result;
+        }
+
+        private String key;
         public Location(String location, String key) {
             this.location = location;
             this.key = key;

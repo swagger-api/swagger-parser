@@ -2,6 +2,7 @@ package io.swagger.parser.util;
 
 import io.swagger.models.Swagger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SwaggerDeserializationResult {
@@ -22,5 +23,13 @@ public class SwaggerDeserializationResult {
 
     public void setSwagger(Swagger swagger) {
         this.swagger = swagger;
+    }
+
+    public SwaggerDeserializationResult message(String message) {
+        if(messages == null) {
+            messages = new ArrayList<String>();
+        }
+        messages.add(message);
+        return this;
     }
 }

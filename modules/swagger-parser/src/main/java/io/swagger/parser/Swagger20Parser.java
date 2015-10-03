@@ -28,6 +28,12 @@ public class Swagger20Parser implements SwaggerParserExtension {
     private static final Logger LOGGER = LoggerFactory.getLogger(Swagger20Parser.class);
 
     @Override
+    public SwaggerDeserializationResult readWithInfo(JsonNode node) {
+        SwaggerDeserializer ser = new SwaggerDeserializer();
+        return ser.deserialize(node);
+    }
+
+    @Override
     public Swagger read(String location, List<AuthorizationValue> auths) throws IOException {
         System.out.println("reading from " + location);
 
