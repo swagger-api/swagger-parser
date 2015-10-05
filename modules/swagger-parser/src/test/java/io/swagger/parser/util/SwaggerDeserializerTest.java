@@ -114,4 +114,31 @@ public class SwaggerDeserializerTest {
 
         assertEquals(result.getSwagger().getResponses().get("foo").getVendorExtensions().get("x-foo"), "\"bar\"");
     }
+
+    @Test
+    public void testLicense () {
+        String json = "{\n" +
+                "\t\"swagger\": \"2.0\",\n" +
+                "\t\"info\": {\n" +
+                "\t\t\"license\": {\n" +
+                "\t\t\t\"invalid\": true,\n" +
+                "\t\t\t\"x-valid\": {\n" +
+                "\t\t\t\t\"isValid\": true\n" +
+                "\t\t\t}\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+
+        assertTrue(messages.contains("attribute info.license.invalid is unexpected"));
+        assertTrue(messages.contains("attribute info.title is missing"));
+        assertTrue(messages.contains("attribute paths is missing"));
+
+        assertEquals(result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid"), "{\n  \"isValid\" : true\n}");
+    }
 }

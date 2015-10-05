@@ -23,7 +23,7 @@ public class SwaggerDeserializer {
     static Set<String> TAG_KEYS = new HashSet<String>(Arrays.asList("description", "name", "externalDocs"));
     static Set<String> RESPONSE_KEYS = new HashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
     static Set<String> CONTACT_KEYS = new HashSet<String>(Arrays.asList("name", "url", "email"));
-
+    static Set<String> LICENSE_KEYS = new HashSet<String>(Arrays.asList("name", "url"));
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
@@ -224,6 +224,8 @@ public class SwaggerDeserializer {
         info.contact(contact);
 
         obj = getObject("license", node, false, location, result);
+        License license = license(obj, location, result);
+        info.license(license);
 
         value = getString("version", node, false, location, result);
         info.version(value);
@@ -240,6 +242,32 @@ public class SwaggerDeserializer {
         }
 
         return info;
+    }
+
+    public License license(ObjectNode node, String location, ParseResult result) {
+        if(node == null)
+            return null;
+
+        License license = new License();
+
+        String value = getString("name", node, true, location, result);
+        license.name(value);
+
+        value = getString("url", node, false, location, result);
+        license.url(value);
+
+        // extra keys
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                license.setVendorExtension(key, Json.pretty(node.get(key)));
+            }
+            else if(!LICENSE_KEYS.contains(key)) {
+                result.extra(location + ".license", key, node.get(key));
+            }
+        }
+
+        return license;
     }
 
     public Contact contact(ObjectNode node, String location, ParseResult result) {
