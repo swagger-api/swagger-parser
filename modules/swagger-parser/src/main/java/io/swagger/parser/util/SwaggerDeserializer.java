@@ -180,6 +180,7 @@ public class SwaggerDeserializer {
         ObjectNode properties = getObject("properties", node, true, location, result);
         if(properties != null) {
             Set<String> propertyNames = getKeys(properties);
+            Json.prettyPrint(propertyNames);
             for(String propertyName : propertyNames) {
                 JsonNode propertyNode = properties.get(propertyName);
                 if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -611,7 +612,7 @@ public class SwaggerDeserializer {
     }
 
     public Set<String> getKeys(ObjectNode node) {
-        Set<String> keys = new TreeSet<String>();
+        Set<String> keys = new LinkedHashSet<>();
 
         Iterator<String> it = node.fieldNames();
         while (it.hasNext()) {
