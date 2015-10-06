@@ -19,11 +19,13 @@ import java.util.*;
 public class SwaggerDeserializer {
     static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
     static Set<String> EXTERNAL_DOCS_KEYS = new HashSet<String>(Arrays.asList("description", "url"));
+    static Set<String> SCHEMA_KEYS = new HashSet<String>(Arrays.asList("$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties"));
     static Set<String> INFO_KEYS = new HashSet<String>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
     static Set<String> TAG_KEYS = new HashSet<String>(Arrays.asList("description", "name", "externalDocs"));
     static Set<String> RESPONSE_KEYS = new HashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
     static Set<String> CONTACT_KEYS = new HashSet<String>(Arrays.asList("name", "url", "email"));
     static Set<String> LICENSE_KEYS = new HashSet<String>(Arrays.asList("name", "url"));
+    static Set<String> REF_MODEL_KEYS = new HashSet<String>(Arrays.asList("$ref"));
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
@@ -108,8 +110,7 @@ public class SwaggerDeserializer {
             swagger.paths(paths);
 
             obj = getObject("definitions", on, false, location, result);
-            // TODO: parse
-            Map<String, Model> definitions = Json.mapper().convertValue(obj, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Model.class));
+            Map<String, Model> definitions = definitions(obj, "definitions", result);
             swagger.setDefinitions(definitions);
 
             obj = getObject("parameters", on, false, location, result);
@@ -146,6 +147,103 @@ public class SwaggerDeserializer {
             }
         }
         return swagger;
+    }
+
+    public Map<String, Model> definitions (ObjectNode node, String location, ParseResult result) {
+        Set<String> schemas = getKeys(node);
+        Map<String, Model> output = new LinkedHashMap<String, Model>();
+
+        for(String schemaName : schemas) {
+            JsonNode schema = node.get(schemaName);
+            if(schema.getNodeType().equals(JsonNodeType.OBJECT)) {
+                Model model = definition((ObjectNode) schema, location + "." + schemaName, result);
+                if(model != null) {
+                    output.put(schemaName, model);
+                }
+            }
+            else {
+                result.invalidType(location, schemaName, "object", schema);
+            }
+        }
+        return output;
+    }
+
+    public Model definition(ObjectNode node, String location, ParseResult result) {
+        if(node == null) {
+            result.missing(location, "empty schema");
+        }
+        if(node.get("$ref") != null) {
+            return refModel(node, location, result);
+        }
+        ModelImpl model = new ModelImpl();
+
+        ObjectNode properties = getObject("properties", node, true, location, result);
+        if(properties != null) {
+            Set<String> propertyNames = getKeys(properties);
+            for(String propertyName : propertyNames) {
+                JsonNode propertyNode = properties.get(propertyName);
+                if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
+                    ObjectNode on = (ObjectNode) propertyNode;
+                    Property property = property(on, location, result);
+                    model.property(propertyName, property);
+                }
+                else {
+                    result.invalidType(location, "properties", "object", propertyNode);
+                }
+            }
+        }
+
+        // need to set properties first
+        ArrayNode required = getArray("required", node, false, location, result);
+        if(required != null) {
+            List<String> requiredProperties = new ArrayList<String>();
+            for (JsonNode n : required) {
+                if(n.getNodeType().equals(JsonNodeType.STRING)) {
+                    requiredProperties.add(((TextNode)n).textValue());
+                }
+                else {
+                    result.invalidType(location, "required", "string", n);
+                }
+            }
+            if(requiredProperties.size() > 0) {
+                model.setRequired(requiredProperties);
+            }
+        }
+
+        // extra keys
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(!SCHEMA_KEYS.contains(key)) {
+                result.extra(location, key, node.get(key));
+            }
+        }
+        return model;
+    }
+
+    public Property property(ObjectNode node, String location, ParseResult result) {
+        Property output = Json.mapper().convertValue(node, Property.class);
+        return output;
+    }
+
+    public RefModel refModel(ObjectNode node, String location, ParseResult result) {
+        RefModel output = new RefModel();
+        if(node.getNodeType().equals(JsonNodeType.STRING)) {
+            String refValue = ((TextNode)node.get("$ref")).textValue();
+            output.set$ref(refValue);
+        }
+        else {
+            result.invalidType(location, "$ref", "string", node);
+        }
+
+        // extra keys
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(!REF_MODEL_KEYS.contains(key)) {
+                result.extra(location, key, node.get(key));
+            }
+        }
+
+        return output;
     }
 
     public Map<String, Response> responses(ObjectNode node, String location, ParseResult result) {
