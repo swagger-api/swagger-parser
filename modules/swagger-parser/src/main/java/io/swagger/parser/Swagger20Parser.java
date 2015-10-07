@@ -34,6 +34,37 @@ public class Swagger20Parser implements SwaggerParserExtension {
     }
 
     @Override
+    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
+        String data;
+
+        try {
+            if (location.toLowerCase().startsWith("http")) {
+                data = RemoteUrl.urlToString(location, auths);
+            } else {
+                final Path path = Paths.get(location);
+                if (Files.exists(path)) {
+                    data = FileUtils.readFileToString(path.toFile(), "UTF-8");
+                } else {
+                    data = ClasspathHelper.loadFileFromClasspath(location);
+                }
+            }
+            ObjectMapper mapper;
+            if (data.trim().startsWith("{")) {
+                mapper = Json.mapper();
+            } else {
+                mapper = Yaml.mapper();
+            }
+            JsonNode rootNode = mapper.readTree(data);
+            return readWithInfo(rootNode);
+        }
+        catch (Exception e) {
+            SwaggerDeserializationResult output = new SwaggerDeserializationResult();
+            output.message("unable to read location `" + location + "`");
+            return output;
+        }
+    }
+
+    @Override
     public Swagger read(String location, List<AuthorizationValue> auths) throws IOException {
         System.out.println("reading from " + location);
 
@@ -53,10 +84,9 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
             return convertToSwagger(data);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-//            if (System.getProperty("debugParser") != null) {
+            if (System.getProperty("debugParser") != null) {
                 e.printStackTrace();
-//            }
+            }
             return null;
         }
     }

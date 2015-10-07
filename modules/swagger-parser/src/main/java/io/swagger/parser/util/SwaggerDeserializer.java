@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.databind.type.MapType;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
@@ -262,6 +261,8 @@ public class SwaggerDeserializer {
                     result.extra(location, key, node.get(key));
                 }
             }
+            if("{ }".equals(Json.pretty(impl)))
+                return null;
             model = impl;
         }
         ObjectNode exampleNode = getObject("example", node, false, location, result);
@@ -273,8 +274,6 @@ public class SwaggerDeserializer {
         model.setDescription(value);
 
 //        m.setExample();
-
-        // example?
 
         // multipleOf
 
@@ -314,25 +313,46 @@ public class SwaggerDeserializer {
         } else if (allOf != null) {
             ComposedModel model = null;
             // we only support one parent, no multiple inheritance or composition
-            model = Json.mapper().convertValue(node, ComposedModel.class);
-            List<Model> allComponents = model.getAllOf();
-            if (allComponents.size() >= 1) {
-                model.setParent(allComponents.get(0));
-                if (allComponents.size() >= 2) {
-                    model.setChild(allComponents.get(allComponents.size() - 1));
-                    List<RefModel> interfaces = new ArrayList<RefModel>();
-                    int size = allComponents.size();
-                    for (Model m : allComponents.subList(1, size - 1)) {
-                        if (m instanceof RefModel) {
-                            RefModel ref = (RefModel) m;
-                            interfaces.add(ref);
+            if(allOf.getNodeType().equals(JsonNodeType.ARRAY)) {
+                model = new ComposedModel();
+                int pos = 0;
+                for(JsonNode part : allOf) {
+                    if(part.getNodeType().equals(JsonNodeType.OBJECT)) {
+                        Model segment = definition((ObjectNode) part, location, result);
+                        if(segment != null) {
+                            model.getAllOf().add(segment);
                         }
                     }
-                    model.setInterfaces(interfaces);
-                } else {
-                    model.setChild(new ModelImpl());
+                    else {
+                        result.invalidType(location, "allOf[" + pos + "]", "object", part);
+                    }
+                    pos++;
                 }
+
+                List<Model> allComponents = model.getAllOf();
+                if (allComponents.size() >= 1) {
+                    model.setParent(allComponents.get(0));
+                    if (allComponents.size() >= 2) {
+                        model.setChild(allComponents.get(allComponents.size() - 1));
+                        List<RefModel> interfaces = new ArrayList<RefModel>();
+                        int size = allComponents.size();
+                        for (Model m : allComponents.subList(1, size - 1)) {
+                            if (m instanceof RefModel) {
+                                RefModel ref = (RefModel) m;
+                                interfaces.add(ref);
+                            }
+                        }
+                        model.setInterfaces(interfaces);
+                    } else {
+                        model.setChild(new ModelImpl());
+                    }
+                }
+                return model;
             }
+            else {
+                result.invalidType(location, "allOf", "array", allOf);
+            }
+
             return model;
         }
         return null;

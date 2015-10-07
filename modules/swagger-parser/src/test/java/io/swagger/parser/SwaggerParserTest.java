@@ -6,6 +6,7 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.testng.annotations.Test;
@@ -74,7 +75,12 @@ public class SwaggerParserTest {
 
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read(location);
+        SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);
+        if(readResult.getMessages().size() > 0) {
+            throw new Exception
+        }
+        final Swagger swagger = readResult.getSwagger();
+
         final Path path = swagger.getPath("/health");
         assertEquals(path.getClass(), Path.class); //we successfully converted the RefPath to a Path
 

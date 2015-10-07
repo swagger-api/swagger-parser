@@ -15,6 +15,33 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 public class SwaggerParser {
+
+    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths, boolean resolve) {
+        if (location == null) {
+            return null;
+        }
+
+        List<SwaggerParserExtension> parserExtensions = getExtensions();
+        SwaggerDeserializationResult output;
+
+        if(auths == null) {
+            auths = new ArrayList<AuthorizationValue>();
+        }
+
+        output = new Swagger20Parser().readWithInfo(location, auths);
+        if (output != null) {
+            output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
+            return output;
+        }
+        for (SwaggerParserExtension extension : parserExtensions) {
+            output = extension.readWithInfo(location, auths);
+            if (output != null) {
+                return output;
+            }
+        }
+        return null;
+    }
+
     public Swagger read(String location) {
         return read(location, null, true);
     }
@@ -51,7 +78,7 @@ public class SwaggerParser {
         return null;
     }
 
-    public SwaggerDeserializationResult parseWithInfo(String swaggerAsString) {
+    public SwaggerDeserializationResult readWithInfo(String swaggerAsString) {
         if(swaggerAsString == null) {
             return new SwaggerDeserializationResult().message("empty or null swagger supplied");
         }

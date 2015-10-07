@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface SwaggerParserExtension {
     SwaggerDeserializationResult readWithInfo(JsonNode node);
+    SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths);
     Swagger read(String location, List<AuthorizationValue> auths) throws IOException;
     Swagger read(JsonNode node) throws IOException;
 }

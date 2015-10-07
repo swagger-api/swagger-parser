@@ -24,7 +24,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -43,7 +43,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -74,7 +74,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -110,7 +110,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -135,7 +135,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -172,7 +172,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -230,7 +230,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.parseWithInfo(json);
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 

@@ -18,6 +18,9 @@
     "composedCat": {
       "allOf": [
         {
+          "foo": "bar"
+        },
+        {
           "$ref": "./models/pet.json"
         },
         {
