@@ -150,6 +150,8 @@ public class SwaggerDeserializer {
     }
 
     public Map<String, Model> definitions (ObjectNode node, String location, ParseResult result) {
+        if(node == null)
+            return null;
         Set<String> schemas = getKeys(node);
         Map<String, Model> output = new LinkedHashMap<String, Model>();
 
@@ -175,50 +177,188 @@ public class SwaggerDeserializer {
         if(node.get("$ref") != null) {
             return refModel(node, location, result);
         }
-        ModelImpl model = new ModelImpl();
+        if(node.get("allOf") != null) {
+            return allOfModel(node, location, result);
+        }
+        Model model = null;
+        String value = null;
 
-        ObjectNode properties = getObject("properties", node, true, location, result);
-        if(properties != null) {
-            Set<String> propertyNames = getKeys(properties);
-            Json.prettyPrint(propertyNames);
-            for(String propertyName : propertyNames) {
-                JsonNode propertyNode = properties.get(propertyName);
-                if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
-                    ObjectNode on = (ObjectNode) propertyNode;
-                    Property property = property(on, location, result);
-                    model.property(propertyName, property);
-                }
-                else {
-                    result.invalidType(location, "properties", "object", propertyNode);
+        value = getString("title", node, false, location, result);
+//        model.title(value);
+        // TODO: name?
+
+        String type = getString("type", node, false, location, result);
+        Model m = new ModelImpl();
+        if("array".equals(type)) {
+            ArrayModel am = new ArrayModel();
+            ObjectNode propertyNode = getObject("properties", node, false, location, result);
+            Map<String, Property> properties = properties(propertyNode, location, result);
+            am.setProperties(properties);
+
+
+            ObjectNode itemsNode = getObject("items", node, false, location, result);
+            Property items = property(itemsNode, location, result);
+            if(items != null) {
+                am.items(items);
+            }
+
+//            am.setVendorExtension();
+
+            model = am;
+        }
+        else {
+            ModelImpl impl = new ModelImpl();
+            impl.setType(value);
+//            impl.setAdditionalProperties();
+//            impl.setDefaultValue();
+
+            value = getString("format", node, false, location, result);
+            impl.setFormat(value);
+
+//            impl.setDiscriminator();
+//            impl.setXml();
+//            impl.setExternalDocs();
+
+            ObjectNode properties = getObject("properties", node, true, location, result);
+            if(properties != null) {
+                Set<String> propertyNames = getKeys(properties);
+                for(String propertyName : propertyNames) {
+                    JsonNode propertyNode = properties.get(propertyName);
+                    if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
+                        ObjectNode on = (ObjectNode) propertyNode;
+                        Property property = property(on, location, result);
+                        impl.property(propertyName, property);
+                    }
+                    else {
+                        result.invalidType(location, "properties", "object", propertyNode);
+                    }
                 }
             }
+
+            // need to set properties first
+            ArrayNode required = getArray("required", node, false, location, result);
+            if(required != null) {
+                List<String> requiredProperties = new ArrayList<String>();
+                for (JsonNode n : required) {
+                    if(n.getNodeType().equals(JsonNodeType.STRING)) {
+                        requiredProperties.add(((TextNode) n).textValue());
+                    }
+                    else {
+                        result.invalidType(location, "required", "string", n);
+                    }
+                }
+                if(requiredProperties.size() > 0) {
+                    impl.setRequired(requiredProperties);
+                }
+            }
+
+            // extra keys
+            Set<String> keys = getKeys(node);
+            for(String key : keys) {
+                if(key.startsWith("x-")) {
+                    impl.setVendorExtension(key, Json.pretty(node.get(key)));
+                }
+                else if(!SCHEMA_KEYS.contains(key)) {
+                    result.extra(location, key, node.get(key));
+                }
+            }
+            model = impl;
+        }
+        ObjectNode exampleNode = getObject("example", node, false, location, result);
+        if(exampleNode != null) {
+            model.setExample(exampleNode);
         }
 
-        // need to set properties first
-        ArrayNode required = getArray("required", node, false, location, result);
-        if(required != null) {
-            List<String> requiredProperties = new ArrayList<String>();
-            for (JsonNode n : required) {
-                if(n.getNodeType().equals(JsonNodeType.STRING)) {
-                    requiredProperties.add(((TextNode)n).textValue());
-                }
-                else {
-                    result.invalidType(location, "required", "string", n);
-                }
-            }
-            if(requiredProperties.size() > 0) {
-                model.setRequired(requiredProperties);
-            }
-        }
+        value = getString("description", node, false, location, result);
+        model.setDescription(value);
 
-        // extra keys
-        Set<String> keys = getKeys(node);
-        for(String key : keys) {
-            if(!SCHEMA_KEYS.contains(key)) {
-                result.extra(location, key, node.get(key));
-            }
-        }
+//        m.setExample();
+
+        // example?
+
+        // multipleOf
+
+        // maximum
+        // Boolean bool = getBoolean("exclusiveMaximum", node, false, location, result);
+        // Boolean bool = getBoolean("exclusiveMinimum", node, false, location, result);
+
+        // maxLength
+        // minLength
+
+        // pattern
+
+        // maxItems
+        // minItems
+        // uniqueItems
+        // maxProperties
+        // minProperties
+        // enum
+        // items
+        // additionalProperties
+
         return model;
+    }
+
+    public Model allOfModel(ObjectNode node, String location, ParseResult result) {
+        JsonNode sub = node.get("$ref");
+        JsonNode allOf = node.get("allOf");
+
+        if (sub != null) {
+            return Json.mapper().convertValue(sub, RefModel.class);
+        } else if (allOf != null) {
+            ComposedModel model = null;
+            // we only support one parent, no multiple inheritance or composition
+            model = Json.mapper().convertValue(node, ComposedModel.class);
+            List<Model> allComponents = model.getAllOf();
+            if (allComponents.size() >= 1) {
+                model.setParent(allComponents.get(0));
+                if (allComponents.size() >= 2) {
+                    model.setChild(allComponents.get(allComponents.size() - 1));
+                    List<RefModel> interfaces = new ArrayList<RefModel>();
+                    int size = allComponents.size();
+                    for (Model m : allComponents.subList(1, size - 1)) {
+                        if (m instanceof RefModel) {
+                            RefModel ref = (RefModel) m;
+                            interfaces.add(ref);
+                        }
+                    }
+                    model.setInterfaces(interfaces);
+                } else {
+                    model.setChild(new ModelImpl());
+                }
+            }
+            return model;
+        } else {
+            sub = node.get("type");
+            Model model = null;
+            if (sub != null && "array".equals(((TextNode) sub).textValue())) {
+                model = Json.mapper().convertValue(node, ArrayModel.class);
+            } else {
+                model = Json.mapper().convertValue(node, ModelImpl.class);
+            }
+            return model;
+        }
+//        return Json.mapper().convertValue(node, ComposedModel.class);
+    }
+
+    public Map<String, Property> properties(ObjectNode node, String location, ParseResult result) {
+        if(node == null) {
+            return null;
+        }
+        Map<String, Property> output = new LinkedHashMap<String, Property>();
+
+        Set<String> keys = getKeys(node);
+        for(String propertyName : keys) {
+            JsonNode propertyNode = node.get(propertyName);
+            if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
+                Property property = property((ObjectNode)propertyNode, location, result);
+                output.put(propertyName, property);
+            }
+            else {
+                result.invalidType(location, propertyName, "object", propertyNode);
+            }
+        }
+        return output;
     }
 
     public Property property(ObjectNode node, String location, ParseResult result) {
@@ -228,12 +368,14 @@ public class SwaggerDeserializer {
 
     public RefModel refModel(ObjectNode node, String location, ParseResult result) {
         RefModel output = new RefModel();
-        if(node.getNodeType().equals(JsonNodeType.STRING)) {
+
+        if(node.getNodeType().equals(JsonNodeType.OBJECT)) {
             String refValue = ((TextNode)node.get("$ref")).textValue();
             output.set$ref(refValue);
         }
         else {
-            result.invalidType(location, "$ref", "string", node);
+            result.invalidType(location, "$ref", "object", node);
+            return null;
         }
 
         // extra keys
@@ -510,7 +652,7 @@ public class SwaggerDeserializer {
                 if(key.startsWith("x-")) {
                     tag.setVendorExtension(key, Json.pretty(node.get(key)));
                 }
-                else if(!TAG_KEYS.contains(key)) {
+                else if(!EXTERNAL_DOCS_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
                 }
             }
@@ -613,6 +755,9 @@ public class SwaggerDeserializer {
 
     public Set<String> getKeys(ObjectNode node) {
         Set<String> keys = new LinkedHashSet<>();
+        if(node == null) {
+            return keys;
+        }
 
         Iterator<String> it = node.fieldNames();
         while (it.hasNext()) {
