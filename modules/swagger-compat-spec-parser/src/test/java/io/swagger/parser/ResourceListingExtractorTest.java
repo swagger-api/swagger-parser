@@ -24,15 +24,6 @@ public class ResourceListingExtractorTest {
         List<ApiListingReference> apis = resourceListing.getApis();
         for (ApiListingReference ref : apis) {
             String path = ref.getPath();
-
-            if (path.startsWith("http")) {
-                // absolute listing, do some magic
-
-            } else {
-                // it is possible that the resource listing URL has a trailing slash and the path has a leading one
-                path = (resourceListingUri + path).replace("//", "/");
-            }
-
             System.out.println("found path " + path);
         }
     }

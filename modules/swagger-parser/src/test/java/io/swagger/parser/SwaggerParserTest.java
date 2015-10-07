@@ -45,7 +45,7 @@ public class SwaggerParserTest {
         JsonToYamlFileDuplicator.duplicateFilesInYamlFormat("src/test/resources/relative-file-references/json",
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
-//        System.out.println(Yaml.mapper().writeValueAsString(swagger));
+        System.out.println(Yaml.mapper().writeValueAsString(swagger));
     }
 
     @Test

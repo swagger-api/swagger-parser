@@ -256,7 +256,7 @@ public class SwaggerDeserializer {
             Set<String> keys = getKeys(node);
             for(String key : keys) {
                 if(key.startsWith("x-")) {
-                    impl.setVendorExtension(key, Json.pretty(node.get(key)));
+                    impl.setVendorExtension(key, node.get(key));
                 }
                 else if(!SCHEMA_KEYS.contains(key)) {
                     result.extra(location, key, node.get(key));
@@ -304,7 +304,13 @@ public class SwaggerDeserializer {
         JsonNode allOf = node.get("allOf");
 
         if (sub != null) {
-            return Json.mapper().convertValue(sub, RefModel.class);
+            if(sub.getNodeType().equals(JsonNodeType.OBJECT)) {
+                return refModel((ObjectNode)sub, location, result);
+            }
+            else {
+                result.invalidType(location, "$ref", "object", sub);
+                return null;
+            }
         } else if (allOf != null) {
             ComposedModel model = null;
             // we only support one parent, no multiple inheritance or composition
@@ -328,17 +334,8 @@ public class SwaggerDeserializer {
                 }
             }
             return model;
-        } else {
-            sub = node.get("type");
-            Model model = null;
-            if (sub != null && "array".equals(((TextNode) sub).textValue())) {
-                model = Json.mapper().convertValue(node, ArrayModel.class);
-            } else {
-                model = Json.mapper().convertValue(node, ModelImpl.class);
-            }
-            return model;
         }
-//        return Json.mapper().convertValue(node, ComposedModel.class);
+        return null;
     }
 
     public Map<String, Property> properties(ObjectNode node, String location, ParseResult result) {
@@ -437,7 +434,7 @@ public class SwaggerDeserializer {
         Set<String> keys = getKeys(node);
         for(String key : keys) {
             if(key.startsWith("x-")) {
-                output.setVendorExtension(key, Json.pretty(node.get(key)));
+                output.setVendorExtension(key, node.get(key));
             }
             else if(!RESPONSE_KEYS.contains(key)) {
                 result.extra(location, key, node.get(key));
@@ -475,7 +472,7 @@ public class SwaggerDeserializer {
         Set<String> keys = getKeys(node);
         for(String key : keys) {
             if(key.startsWith("x-")) {
-                info.setVendorExtension(key, Json.pretty(node.get(key)));
+                info.setVendorExtension(key, node.get(key));
             }
             else if(!INFO_KEYS.contains(key)) {
                 result.extra(location, key, node.get(key));
@@ -501,7 +498,7 @@ public class SwaggerDeserializer {
         Set<String> keys = getKeys(node);
         for(String key : keys) {
             if(key.startsWith("x-")) {
-                license.setVendorExtension(key, Json.pretty(node.get(key)));
+                license.setVendorExtension(key, node.get(key));
             }
             else if(!LICENSE_KEYS.contains(key)) {
                 result.extra(location + ".license", key, node.get(key));
@@ -650,7 +647,7 @@ public class SwaggerDeserializer {
             // extra keys
             for(String key : keys) {
                 if(key.startsWith("x-")) {
-                    tag.setVendorExtension(key, Json.pretty(node.get(key)));
+                    tag.setVendorExtension(key, node.get(key));
                 }
                 else if(!EXTERNAL_DOCS_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
@@ -677,7 +674,7 @@ public class SwaggerDeserializer {
             // extra keys
             for(String key : keys) {
                 if(key.startsWith("x-")) {
-                    output.setVendorExtension(key, Json.pretty(node.get(key)));
+                    output.setVendorExtension(key, node.get(key));
                 }
                 else if(!ROOT_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
