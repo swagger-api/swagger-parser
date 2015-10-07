@@ -64,6 +64,11 @@ public class SwaggerParser {
         }
         try {
             JsonNode node = mapper.readTree(swaggerAsString);
+
+            SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);
+            if (result != null) {
+                result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
+            }
             return new Swagger20Parser().readWithInfo(node);
         }
         catch (Exception e) {
