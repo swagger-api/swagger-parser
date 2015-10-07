@@ -237,11 +237,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         String format = param.getFormat() == null ? null : param.getFormat().toString();
 
         if (null == type) {
-            new Throwable("").printStackTrace();
             LOGGER.warn("Empty type in Param: " + param);
         }
         if (null == format) {
-            new Throwable("").printStackTrace();
             LOGGER.warn("Empty format in Param: " + param);
         }
 
