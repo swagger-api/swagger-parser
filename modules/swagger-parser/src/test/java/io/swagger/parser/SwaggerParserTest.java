@@ -38,8 +38,6 @@ public class SwaggerParserTest {
     public void testTroublesomeFile() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/troublesome.yaml");
-
-        Json.prettyPrint(swagger);
     }
 
     @Test
@@ -77,9 +75,6 @@ public class SwaggerParserTest {
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read(location);
-
-
-
         final Path path = swagger.getPath("/health");
         assertEquals(path.getClass(), Path.class); //we successfully converted the RefPath to a Path
 
@@ -103,7 +98,6 @@ public class SwaggerParserTest {
 
         final Map<String, Model> definitions = swagger.getDefinitions();
         final ModelImpl refInDefinitions = (ModelImpl) definitions.get("refInDefinitions");
-
         assertEquals(refInDefinitions.getDescription(), "The example model");
         expectedPropertiesInModel(refInDefinitions, "foo", "bar");
 
