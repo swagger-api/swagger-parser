@@ -77,6 +77,12 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     }
 
     @Override
+    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
+        // not implemented
+        return null;
+    }
+
+    @Override
     public Swagger read(JsonNode node) throws IOException {
         // TODO
         return null;

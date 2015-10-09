@@ -77,7 +77,7 @@ public class SwaggerParserTest {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);
         if(readResult.getMessages().size() > 0) {
-            throw new Exception
+            Json.prettyPrint(readResult.getMessages());
         }
         final Swagger swagger = readResult.getSwagger();
 
