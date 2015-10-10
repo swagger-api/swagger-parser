@@ -208,15 +208,29 @@ public class SwaggerDeserializer {
         else {
             ModelImpl impl = new ModelImpl();
             impl.setType(value);
-//            impl.setAdditionalProperties();
-//            impl.setDefaultValue();
+
+            JsonNode ap = node.get("additionalProperties");
+            if(ap != null) {
+                impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
+            }
+
+            value = getString("default", node, false, location, result);
+            impl.setDefaultValue(value);
 
             value = getString("format", node, false, location, result);
             impl.setFormat(value);
 
-//            impl.setDiscriminator();
-//            impl.setXml();
-//            impl.setExternalDocs();
+            value = getString("discriminator", node, false, location, result);
+            impl.setDescription(value);
+
+            JsonNode xml = node.get("xml");
+            if(xml != null) {
+                impl.setXml(Json.mapper().convertValue(xml, Xml.class));
+            }
+
+            ObjectNode externalDocs = getObject("externalDocs", node, false, location, result);
+            ExternalDocs docs = externalDocs(externalDocs, location, result);
+            impl.setExternalDocs(docs);
 
             ObjectNode properties = getObject("properties", node, true, location, result);
             if(properties != null) {
@@ -281,28 +295,6 @@ public class SwaggerDeserializer {
 
         value = getString("description", node, false, location, result);
         model.setDescription(value);
-
-//        m.setExample();
-
-        // multipleOf
-
-        // maximum
-        // Boolean bool = getBoolean("exclusiveMaximum", node, false, location, result);
-        // Boolean bool = getBoolean("exclusiveMinimum", node, false, location, result);
-
-        // maxLength
-        // minLength
-
-        // pattern
-
-        // maxItems
-        // minItems
-        // uniqueItems
-        // maxProperties
-        // minProperties
-        // enum
-        // items
-        // additionalProperties
 
         return model;
     }
@@ -670,7 +662,8 @@ public class SwaggerDeserializer {
             value = getString("description", node, true, location, result);
             tag.description(value);
 
-            ExternalDocs docs = externalDocs(node, location, result);
+            ObjectNode externalDocs = getObject("externalDocs", node, false, location, result);
+            ExternalDocs docs = externalDocs(externalDocs, location, result);
             tag.externalDocs(docs);
 
             // extra keys
