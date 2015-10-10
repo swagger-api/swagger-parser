@@ -9,8 +9,8 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.models.properties.IntegerProperty;
-import org.junit.Test;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.util.HashSet;
 import java.util.List;
