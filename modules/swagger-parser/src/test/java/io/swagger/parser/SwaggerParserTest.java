@@ -6,6 +6,7 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.testng.annotations.Test;
@@ -26,12 +27,25 @@ public class SwaggerParserTest {
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
     }
 
+    @Test(groups = "single")
+    public void testPetstore() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/petstore.json");
+
+//        Json.prettyPrint(swagger);
+    }
+
+    @Test
+    public void testTroublesomeFile() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/troublesome.yaml");
+    }
+
     @Test
     public void testLoadRelativeFileTree_Yaml() throws Exception {
         JsonToYamlFileDuplicator.duplicateFilesInYamlFormat("src/test/resources/relative-file-references/json",
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
-        //Yaml.pretty().writeValue(new File("resolved.yaml"), swagger);
         System.out.println(Yaml.mapper().writeValueAsString(swagger));
     }
 
@@ -61,9 +75,11 @@ public class SwaggerParserTest {
 
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read(location);
-
-
+        SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);
+        if(readResult.getMessages().size() > 0) {
+            Json.prettyPrint(readResult.getMessages());
+        }
+        final Swagger swagger = readResult.getSwagger();
 
         final Path path = swagger.getPath("/health");
         assertEquals(path.getClass(), Path.class); //we successfully converted the RefPath to a Path
@@ -88,7 +104,6 @@ public class SwaggerParserTest {
 
         final Map<String, Model> definitions = swagger.getDefinitions();
         final ModelImpl refInDefinitions = (ModelImpl) definitions.get("refInDefinitions");
-
         assertEquals(refInDefinitions.getDescription(), "The example model");
         expectedPropertiesInModel(refInDefinitions, "foo", "bar");
 

@@ -186,7 +186,6 @@ public class SwaggerResolverTest {
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final QueryParameter param = (QueryParameter) params.get(0);
-        io.swagger.util.Json.prettyPrint(swagger);
         assertEquals(param.getName(), "skip");
     }
 

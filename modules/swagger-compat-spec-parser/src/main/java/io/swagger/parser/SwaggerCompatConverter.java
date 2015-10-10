@@ -47,6 +47,7 @@ import io.swagger.models.resourcelisting.ImplicitGrant;
 import io.swagger.models.resourcelisting.OAuth2Authorization;
 import io.swagger.models.resourcelisting.ResourceListing;
 import io.swagger.parser.util.RemoteUrl;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.report.MessageBuilder;
 import io.swagger.transform.migrate.ApiDeclarationMigrator;
 import io.swagger.transform.migrate.ResourceListingMigrator;
@@ -68,6 +69,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class SwaggerCompatConverter implements SwaggerParserExtension {
     static Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
+
+    @Override
+    public SwaggerDeserializationResult readWithInfo(JsonNode node) {
+        // not implemented
+        return null;
+    }
+
+    @Override
+    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
+        // not implemented
+        return null;
+    }
 
     @Override
     public Swagger read(JsonNode node) throws IOException {
@@ -230,11 +243,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         String format = param.getFormat() == null ? null : param.getFormat().toString();
 
         if (null == type) {
-            new Throwable("").printStackTrace();
             LOGGER.warn("Empty type in Param: " + param);
         }
         if (null == format) {
-            new Throwable("").printStackTrace();
             LOGGER.warn("Empty format in Param: " + param);
         }
 

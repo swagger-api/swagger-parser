@@ -1,8 +1,12 @@
 package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +15,33 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 public class SwaggerParser {
+
+    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths, boolean resolve) {
+        if (location == null) {
+            return null;
+        }
+
+        List<SwaggerParserExtension> parserExtensions = getExtensions();
+        SwaggerDeserializationResult output;
+
+        if(auths == null) {
+            auths = new ArrayList<AuthorizationValue>();
+        }
+
+        output = new Swagger20Parser().readWithInfo(location, auths);
+        if (output != null) {
+            output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
+            return output;
+        }
+        for (SwaggerParserExtension extension : parserExtensions) {
+            output = extension.readWithInfo(location, auths);
+            if (output != null) {
+                return output;
+            }
+        }
+        return null;
+    }
+
     public Swagger read(String location) {
         return read(location, null, true);
     }
@@ -45,6 +76,31 @@ public class SwaggerParser {
             }
         }
         return null;
+    }
+
+    public SwaggerDeserializationResult readWithInfo(String swaggerAsString) {
+        if(swaggerAsString == null) {
+            return new SwaggerDeserializationResult().message("empty or null swagger supplied");
+        }
+        ObjectMapper mapper = null;
+        if(swaggerAsString.trim().startsWith("{")) {
+            mapper = Json.mapper();
+        }
+        else {
+            mapper = Yaml.mapper();
+        }
+        try {
+            JsonNode node = mapper.readTree(swaggerAsString);
+
+            SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);
+            if (result != null) {
+                result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
+            }
+            return new Swagger20Parser().readWithInfo(node);
+        }
+        catch (Exception e) {
+            return new SwaggerDeserializationResult().message("malformed or unreadable swagger supplied");
+        }
     }
 
     public Swagger parse(String swaggerAsString) {
