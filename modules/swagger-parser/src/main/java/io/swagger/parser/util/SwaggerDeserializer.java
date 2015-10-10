@@ -125,8 +125,8 @@ public class SwaggerDeserializer {
             Map<String, SecuritySchemeDefinition> securityDefinitions = securityDefinitions(obj, location, result);
             swagger.setSecurityDefinitions(securityDefinitions);
 
-            obj = getObject("security", on, false, location, result);
-            List<SecurityRequirement> security = securityRequirements(obj, location, result);
+            array = getArray("security", on, false, location, result);
+            List<SecurityRequirement> security = securityRequirements(array, location, result);
             swagger.setSecurity(security);
 
             array = getArray("tags", on, false, location, result);
@@ -605,29 +605,35 @@ public class SwaggerDeserializer {
         return output;
     }
 
-    public List<SecurityRequirement> securityRequirements(ObjectNode node, String location, ParseResult result) {
+    public List<SecurityRequirement> securityRequirements(ArrayNode node, String location, ParseResult result) {
         if(node == null)
             return null;
 
         List<SecurityRequirement> output = new ArrayList<SecurityRequirement>();
-        Set<String> keys = getKeys(node);
 
-        for(String key : keys) {
-            SecurityRequirement security = new SecurityRequirement().requirement(key);
+        for(JsonNode item : node) {
+            if(item.getNodeType().equals(JsonNodeType.OBJECT)) {
+                ObjectNode on = (ObjectNode) item;
+                Set<String> keys = getKeys(on);
 
-            ArrayNode obj = getArray(key, node, false, location + ".security", result);
-            if(obj != null) {
-                for(JsonNode n : obj) {
-                    if(n.getNodeType().equals(JsonNodeType.STRING)) {
-                        security.scope(n.asText());
+                for (String key : keys) {
+                    List<String> scopes = new ArrayList<>();
+                    ArrayNode obj = getArray(key, on, false, location + ".security", result);
+                    if (obj != null) {
+                        for (JsonNode n : obj) {
+                            if (n.getNodeType().equals(JsonNodeType.STRING)) {
+                                scopes.add(n.asText());
+                            } else {
+                                result.invalidType(location, key, "string", n);
+                            }
+                        }
                     }
-                    else {
-                        result.invalidType(location, key, "string", n);
-                    }
+                    SecurityRequirement security = new SecurityRequirement().requirement(key, scopes);
+                    output.add(security);
                 }
             }
-            output.add(security);
         }
+
         return output;
     }
 
@@ -639,7 +645,7 @@ public class SwaggerDeserializer {
 
         for(JsonNode node : nodes) {
             if(node.getNodeType().equals(JsonNodeType.OBJECT)) {
-                Tag tag = tag((ObjectNode)node, location + ".tags", result);
+                Tag tag = tag((ObjectNode) node, location + ".tags", result);
                 if(tag != null) {
                     output.add(tag);
                 }

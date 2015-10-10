@@ -2,6 +2,7 @@ package io.swagger.parser.util;
 
 import io.swagger.models.Contact;
 import io.swagger.models.ModelImpl;
+import io.swagger.models.SecurityRequirement;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
@@ -9,16 +10,18 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.models.properties.IntegerProperty;
 import org.junit.Test;
+import org.testng.Assert;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class SwaggerDeserializerTest {
-//    @Test
+    @Test
     public void testEmpty() {
         String json = "{}";
 
@@ -33,7 +36,41 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute paths is missing"));
     }
 
-//    @Test
+    @Test
+    public void testSecurity() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"security\": [\n" +
+                "    {\n" +
+                "      \"petstore_auth\": [\n" +
+                "        \"write:pets\",\n" +
+                "        \"read:pets\"\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+
+        Swagger swagger = result.getSwagger();
+
+        assertNotNull(swagger.getSecurity());
+        List<SecurityRequirement> security = swagger.getSecurity();
+        Assert.assertTrue(security.size() == 1);
+        Assert.assertTrue(security.get(0).getRequirements().size() == 1);
+
+        List<String> requirement = security.get(0).getRequirements().get("petstore_auth");
+        Assert.assertTrue(requirement.size() == 2);
+
+        Set<String> requirements = new HashSet(requirement);
+        Assert.assertTrue(requirements.contains("read:pets"));
+        Assert.assertTrue(requirements.contains("write:pets"));
+    }
+
+    @Test
     public void testRootInfo() {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
@@ -51,7 +88,7 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute info is not of type `object`"));
     }
 
-//    @Test
+    @Test
     public void testContact() {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
@@ -92,10 +129,10 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute info.bad is unexpected"));
         assertTrue(messages.contains("attribute info.contact.invalid is unexpected"));
 
-        assertEquals(result.getSwagger().getInfo().getVendorExtensions().get("x-foo"), "\"bar\"");
+        assertEquals(result.getSwagger().getInfo().getVendorExtensions().get("x-foo").toString(), "\"bar\"");
     }
 
-//    @Test
+    @Test
     public void testResponses() {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
@@ -116,10 +153,10 @@ public class SwaggerDeserializerTest {
 
         assertTrue(messages.contains("attribute responses.foo.bar is unexpected"));
 
-        assertEquals(result.getSwagger().getResponses().get("foo").getVendorExtensions().get("x-foo"), "\"bar\"");
+        assertEquals(result.getSwagger().getResponses().get("foo").getVendorExtensions().get("x-foo").toString(), "\"bar\"");
     }
 
-//    @Test
+    @Test
     public void testLicense () {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
@@ -143,10 +180,10 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute info.title is missing"));
         assertTrue(messages.contains("attribute paths is missing"));
 
-        assertEquals(result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid"), "{\n  \"isValid\" : true\n}");
+        assertEquals(result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid").toString(), "{\"isValid\":true}");
     }
 
-//    @Test
+    @Test
     public void testDefinitions () {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
