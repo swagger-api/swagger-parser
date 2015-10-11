@@ -678,7 +678,7 @@ public class SwaggerDeserializer {
                 if(key.startsWith("x-")) {
                     tag.setVendorExtension(key, node.get(key));
                 }
-                else if(!EXTERNAL_DOCS_KEYS.contains(key)) {
+                else if(!TAG_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
                 }
             }

@@ -1,9 +1,6 @@
 package io.swagger.parser.util;
 
-import io.swagger.models.Contact;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.SecurityRequirement;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
@@ -14,6 +11,7 @@ import org.testng.annotations.Test;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -287,5 +285,50 @@ public class SwaggerDeserializerTest {
 
         assertTrue(zipProperty.getMaximum() == 99999);
         assertTrue(zipProperty.getExclusiveMaximum());
+    }
+
+    @Test
+    public void testPaths() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"get\": {\n" +
+                "        \"security\": [\n" +
+                "          {\n" +
+                "            \"petstore_auth\": [\n" +
+                "              \"write:pets\",\n" +
+                "              \"read:pets\"\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+
+        Json.prettyPrint(result);
+        Swagger swagger = result.getSwagger();
+
+        Path path = swagger.getPath("/pet");
+        assertNotNull(path);
+        Operation operation = path.getGet();
+        assertNotNull(operation);
+        List<Map<String, List<String>>> security = operation.getSecurity();
+
+        assertTrue(security.size() == 1);
+        Map<String, List<String>> requirement = security.get(0);
+
+        assertTrue(requirement.containsKey("petstore_auth"));
+        List<String> scopesList = requirement.get("petstore_auth");
+
+        Set<String> scopes = new HashSet<String>(scopesList);
+        assertTrue(scopes.contains("read:pets"));
+        assertTrue(scopes.contains("write:pets"));
     }
 }
