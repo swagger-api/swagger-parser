@@ -69,6 +69,39 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testSecurityDefinition() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"securityDefinitions\": {\n" +
+                "    \"api_key\": {\n" +
+                "      \"type\": \"apiKey\",\n" +
+                "      \"name\": \"api_key\",\n" +
+                "      \"in\": \"header\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"get\": {\n" +
+                "        \"security\": [\n" +
+                "          {\n" +
+                "            \"api_key\": []\n" +
+                "          }\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+
+        Json.prettyPrint(result);
+    }
+
+    @Test
     public void testRootInfo() {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +

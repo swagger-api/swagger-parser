@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
+import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.Property;
@@ -566,6 +567,10 @@ public class SwaggerDeserializer {
         for(String key : keys) {
             ObjectNode obj = getObject(key, node, false, location, result);
             SecuritySchemeDefinition def = securityDefinition(obj, location, result);
+
+            if(def != null) {
+                output.put(key, def);
+            }
         }
 
         return output;
@@ -593,10 +598,12 @@ public class SwaggerDeserializer {
                 }
             }
             else if (type.equals("apiKey")) {
-
+                // TODO: parse manually for better feedback
+                output = Json.mapper().convertValue(node, ApiKeyAuthDefinition.class);
             }
             else if (type.equals("oauth2")) {
-
+                // TODO: parse manually for better feedback
+                output = Json.mapper().convertValue(node, OAuth2Definition.class);
             }
             else {
                 result.invalidType(location + ".type", "type", "basic|apiKey|oauth2", node);
