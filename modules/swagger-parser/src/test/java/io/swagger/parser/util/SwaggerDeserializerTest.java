@@ -1,6 +1,9 @@
 package io.swagger.parser.util;
 
 import io.swagger.models.*;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.In;
+import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
@@ -98,7 +101,16 @@ public class SwaggerDeserializerTest {
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
-        Json.prettyPrint(result);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getSecurityDefinitions());
+        assertTrue(swagger.getSecurityDefinitions().keySet().size() == 1);
+        SecuritySchemeDefinition definition = swagger.getSecurityDefinitions().get("api_key");
+        assertNotNull(definition);
+        assertTrue(definition instanceof ApiKeyAuthDefinition);
+
+        ApiKeyAuthDefinition apiKey = (ApiKeyAuthDefinition) definition;
+        assertEquals(apiKey.getName(), "api_key");
+        assertEquals(apiKey.getIn(), In.HEADER);
     }
 
     @Test
