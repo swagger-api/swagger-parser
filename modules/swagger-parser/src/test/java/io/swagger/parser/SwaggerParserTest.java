@@ -77,7 +77,7 @@ public class SwaggerParserTest {
     
     @Test
     public void testParameterRequired() {
-    	SwaggerParser parser = new SwaggerParser();
+        SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/petstore.json");
         final List<Parameter> operationParams = swagger.getPath("/pet/{petId}").getPost().getParameters();
         
