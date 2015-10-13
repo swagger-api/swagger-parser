@@ -526,7 +526,7 @@ public class SwaggerDeserializer {
                 value = getString("description", obj, false, location, result);
                 output.setDescription(value);
 
-                Boolean required = getBoolean("in", obj, false, location, result);
+                Boolean required = getBoolean("required", obj, false, location, result);
                 if(required != null) {
                     output.setRequired(required);
                 }
