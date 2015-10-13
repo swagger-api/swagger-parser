@@ -21,7 +21,7 @@ import java.util.*;
 public class SwaggerDeserializer {
     static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
     static Set<String> EXTERNAL_DOCS_KEYS = new HashSet<String>(Arrays.asList("description", "url"));
-    static Set<String> SCHEMA_KEYS = new HashSet<String>(Arrays.asList("example", "$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties"));
+    static Set<String> SCHEMA_KEYS = new HashSet<String>(Arrays.asList("example", "$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties", "xml"));
     static Set<String> INFO_KEYS = new HashSet<String>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
     static Set<String> TAG_KEYS = new HashSet<String>(Arrays.asList("description", "name", "externalDocs"));
     static Set<String> RESPONSE_KEYS = new HashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
@@ -29,7 +29,7 @@ public class SwaggerDeserializer {
     static Set<String> LICENSE_KEYS = new HashSet<String>(Arrays.asList("name", "url"));
     static Set<String> REF_MODEL_KEYS = new HashSet<String>(Arrays.asList("$ref"));
     static Set<String> PATH_KEYS = new HashSet<String>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options"));
-    static Set<String> OPERATION_KEYS = new HashSet<String>(Arrays.asList("tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
+    static Set<String> OPERATION_KEYS = new HashSet<String>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
     static Set<String> PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLenth", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf"));
     static Set<String> BODY_PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
 
@@ -199,49 +199,49 @@ public class SwaggerDeserializer {
         Path path = new Path();
         ObjectNode on = getObject("get", obj, false, location, result);
         if(on != null) {
-            Operation op = operation(on, location, result);
+            Operation op = operation(on, location + "(get)", result);
             if(op != null) {
                 path.setGet(op);
             }
         }
         on = getObject("put", obj, false, location, result);
         if(on != null) {
-            Operation op = operation(on, location, result);
+            Operation op = operation(on, location + "(put)", result);
             if(op != null) {
                 path.setPut(op);
             }
         }
         on = getObject("post", obj, false, location, result);
         if(on != null) {
-            Operation op = operation(on, location, result);
+            Operation op = operation(on, location + "(post)", result);
             if(op != null) {
                 path.setPost(op);
             }
         }
         on = getObject("head", obj, false, location, result);
         if(on != null) {
-            Operation op = operation(on, location, result);
+            Operation op = operation(on, location + "(head)", result);
             if(op != null) {
                 path.setHead(op);
             }
         }
         on = getObject("delete", obj, false, location, result);
         if(on != null) {
-            Operation op = operation(on, location, result);
+            Operation op = operation(on, location + "(delete)", result);
             if(op != null) {
                 path.setDelete(op);
             }
         }
         on = getObject("patch", obj, false, location, result);
         if(on != null) {
-            Operation op = operation(on, location, result);
+            Operation op = operation(on, location + "(patch)", result);
             if(op != null) {
                 path.setPatch(op);
             }
         }
         on = getObject("options", obj, false, location, result);
         if(on != null) {
-            Operation op = operation(on, location, result);
+            Operation op = operation(on, location + "(options)", result);
             if(op != null) {
                 path.setOptions(op);
             }
@@ -316,6 +316,8 @@ public class SwaggerDeserializer {
 
         ObjectNode responses = getObject("responses", obj, true, location, result);
         output.setResponses(responses(responses, location, result));
+
+        // TODO: scheme
 
         array = getArray("schemes", obj, false, location, result);
         if(array != null) {
@@ -415,9 +417,19 @@ public class SwaggerDeserializer {
             }
         }
 
+        String l = null;
+        JsonNode ln = obj.get("name");
+        if(ln != null) {
+            l = ln.asText();
+        }
+        else {
+            l = "['unknown']";
+        }
+        location += ".[" + l + "]";
+
         String value = getString("in", obj, true, location, result);
         if(value != null) {
-            String type = getString("type", obj, true, location, result);
+            String type = getString("type", obj, false, location, result);
             String format = getString("format", obj, false, location, result);
             AbstractSerializableParameter<?> sp = null;
             if("query".equals(value)) {
@@ -434,11 +446,13 @@ public class SwaggerDeserializer {
             }
 
             if(sp != null) {
+                // type is mandatory when sp != null
+                getString("type", obj, true, location, result);
                 Map<PropertyBuilder.PropertyId, Object> map = new HashMap<PropertyBuilder.PropertyId, Object>();
 
                 map.put(TYPE, type);
                 map.put(FORMAT, format);
-                map.put(DEFAULT, getObject("default", obj, false, location, result));
+                map.put(DEFAULT, getString("default", obj, false, location, result));
 
                 Double dbl = getDouble("maximum", obj, false, location, result);
                 if(dbl != null) {
@@ -516,7 +530,7 @@ public class SwaggerDeserializer {
                 output = sp;
             }
             else if ("body".equals(value)) {
-                output = new BodyParameter();
+//                output = new BodyParameter();
                 output = Json.mapper().convertValue(obj, Parameter.class);
             }
             if(output != null) {
@@ -1120,11 +1134,11 @@ public class SwaggerDeserializer {
             String value = getString("name", node, true, location, result);
             tag.name(value);
 
-            value = getString("description", node, true, location, result);
+            value = getString("description", node, false, location, result);
             tag.description(value);
 
             ObjectNode externalDocs = getObject("externalDocs", node, false, location, result);
-            ExternalDocs docs = externalDocs(externalDocs, location, result);
+            ExternalDocs docs = externalDocs(externalDocs, location + "externalDocs", result);
             tag.externalDocs(docs);
 
             // extra keys
@@ -1148,7 +1162,7 @@ public class SwaggerDeserializer {
             output = new ExternalDocs();
             Set<String> keys = getKeys(node);
 
-            String value = getString("description", node, true, location, result);
+            String value = getString("description", node, false, location, result);
             output.description(value);
 
             value = getString("url", node, true, location, result);
@@ -1159,7 +1173,7 @@ public class SwaggerDeserializer {
                 if(key.startsWith("x-")) {
                     output.setVendorExtension(key, extension(node.get(key)));
                 }
-                else if(!ROOT_KEYS.contains(key)) {
+                else if(!EXTERNAL_DOCS_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
                 }
             }

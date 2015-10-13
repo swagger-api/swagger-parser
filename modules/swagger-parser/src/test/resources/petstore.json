@@ -26,7 +26,9 @@
     {
       "name": "pet",
       "description": "Pet Operations",
-      "externalDocs": "http://swagger.io"
+      "externalDocs": {
+        "url": "http://swagger.io"
+      }
     }, {
       "name": "user",
       "description": "All about the Users"
@@ -861,14 +863,14 @@
       }
     }
   },
-  "security": {
+  "security": [{
     "foo": [
       "bar", "baz"
     ],
     "a": [
       "b", "c"
     ]
-  },
+  }],
   "securityDefinitions": {
     "api_key": {
       "type": "apiKey",

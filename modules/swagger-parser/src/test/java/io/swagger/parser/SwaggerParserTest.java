@@ -30,9 +30,9 @@ public class SwaggerParserTest {
     @Test(groups = "single")
     public void testPetstore() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/petstore.json");
+        SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);
 
-//        Json.prettyPrint(swagger);
+        Json.prettyPrint(result);
     }
 
     @Test
