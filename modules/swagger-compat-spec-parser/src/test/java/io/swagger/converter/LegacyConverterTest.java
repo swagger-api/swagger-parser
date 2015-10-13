@@ -16,6 +16,10 @@ import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerCompatConverter;
 
+import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
+import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Predicate;
@@ -32,6 +36,14 @@ import static org.testng.Assert.assertTrue;
 
 public class LegacyConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
+
+    @Test
+    public void testIssue43() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo("http://gateway.marvel.com/docs", null, true);
+
+        Assert.assertNotNull(result);
+    }
 
     /**
      * reads a single-file swagger definition

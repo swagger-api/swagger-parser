@@ -35,7 +35,6 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);
 
         assertNotNull(result);
-        assertTrue(result.getMessages().size() == 0);
     }
 
     @Test

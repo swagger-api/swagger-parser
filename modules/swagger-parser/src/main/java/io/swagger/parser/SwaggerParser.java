@@ -30,12 +30,14 @@ public class SwaggerParser {
 
         output = new Swagger20Parser().readWithInfo(location, auths);
         if (output != null) {
-            output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
-            return output;
+            if(output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
+                output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
+                return output;
+            }
         }
         for (SwaggerParserExtension extension : parserExtensions) {
             output = extension.readWithInfo(location, auths);
-            if (output != null) {
+            if (output != null && output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
                 return output;
             }
         }

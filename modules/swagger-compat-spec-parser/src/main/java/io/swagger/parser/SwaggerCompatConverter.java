@@ -78,8 +78,19 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
     @Override
     public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
-        // not implemented
-        return null;
+        SwaggerDeserializationResult result = new SwaggerDeserializationResult();
+        try {
+            Swagger swagger = read(location, auths);
+            if(swagger != null) {
+                result.setSwagger(swagger);
+                JsonNode jsonNode = Json.mapper().convertValue(swagger, JsonNode.class);
+                return new Swagger20Parser().readWithInfo(jsonNode);
+            }
+        }
+        catch (IOException e) {
+            // TODO
+        }
+        return result;
     }
 
     @Override
