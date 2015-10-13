@@ -501,13 +501,6 @@ public class SwaggerDeserializer {
 //                Property prop = schema(schemaItems, obj, location, result);
                 if(prop != null) {
                     sp.setProperty(prop);
-//                    if(prop instanceof ArrayProperty) {
-//                        sp.setType("array");
-//                        sp.setItems(prop);
-//                    }
-//                    else {
-//                        // TODO!
-//                    }
                 }
 
                 Set<String> keys = getKeys(obj);
@@ -1038,6 +1031,10 @@ public class SwaggerDeserializer {
         String type = getString("type", node, true, location, result);
         if(type != null) {
             if(type.equals("basic")) {
+                // TODO: parse manually for better feedback
+                output = Json.mapper().convertValue(node, ApiKeyAuthDefinition.class);
+            }
+            else if (type.equals("apiKey")) {
                 String position = getString("in", node, true, location, result);
                 String name = getString("name", node, true, location, result);
 
@@ -1047,12 +1044,9 @@ public class SwaggerDeserializer {
                         ApiKeyAuthDefinition auth = new ApiKeyAuthDefinition()
                                 .name(name)
                                 .in(in);
+                        output = auth;
                     }
                 }
-            }
-            else if (type.equals("apiKey")) {
-                // TODO: parse manually for better feedback
-                output = Json.mapper().convertValue(node, ApiKeyAuthDefinition.class);
             }
             else if (type.equals("oauth2")) {
                 // TODO: parse manually for better feedback

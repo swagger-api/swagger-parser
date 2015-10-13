@@ -55,6 +55,50 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testArraySchema() throws Exception {
+        String json = "{\n" +
+                "  \"properties\": {\n" +
+                "    \"data\": {\n" +
+                "      \"properties\": {\n" +
+                "        \"description\": \"the array type\",\n" +
+                "        \"type\": \"array\",\n" +
+                "        \"items\": {\n" +
+                "          \"properties\": {\n" +
+                "            \"name\": {\n" +
+                "              \"description\": \"the inner type\",\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"minLength\": 1\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"required\": [\n" +
+                "    \"data\"\n" +
+                "  ]\n" +
+                "}";
+
+        Model m = Json.mapper().readValue(json, Model.class);
+
+        Property data = m.getProperties().get("data");
+        assertTrue(data instanceof ArrayProperty);
+
+        ArrayProperty ap = (ArrayProperty) data;
+        assertEquals("the array type", ap.getDescription());
+
+        Property inner = ap.getItems();
+        assertNotNull(inner);
+
+        assertTrue(inner instanceof ObjectProperty);
+        ObjectProperty op = (ObjectProperty) inner;
+
+        Property name = op.getProperties().get("name");
+        assertEquals(name.getDescription(), "the inner type");
+        assertTrue(((StringProperty)name).getMinLength() == 1);
+    }
+
+    @Test
     public void testEmpty() {
         String json = "{}";
 
