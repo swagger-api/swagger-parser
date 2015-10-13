@@ -523,7 +523,7 @@ public class SwaggerDeserializer {
                 value = getString("name", obj, true, location, result);
                 output.setName(value);
 
-                value = getString("description", obj, true, location, result);
+                value = getString("description", obj, false, location, result);
                 output.setDescription(value);
 
                 Boolean required = getBoolean("in", obj, false, location, result);
