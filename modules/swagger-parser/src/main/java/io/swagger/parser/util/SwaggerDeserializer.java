@@ -488,8 +488,8 @@ public class SwaggerDeserializer {
                         _enum.add(n.textValue());
                     }
                     sp.setEnum(_enum);
+                    map.put(ENUM, _enum);
                 }
-                map.put(ENUM, an);
 
 //                map.put("allowEmptyValue", getBoolean("allowEmptyValue", obj, false, location, result));
 //                map.put("items", getObject("items", obj, false, location, result));
