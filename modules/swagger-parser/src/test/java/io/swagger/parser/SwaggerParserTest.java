@@ -29,12 +29,13 @@ public class SwaggerParserTest {
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
     }
 
-    @Test(groups = "single")
+    @Test
     public void testPetstore() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);
 
-        Json.prettyPrint(result);
+        assertNotNull(result);
+        assertTrue(result.getMessages().size() == 0);
     }
 
     @Test

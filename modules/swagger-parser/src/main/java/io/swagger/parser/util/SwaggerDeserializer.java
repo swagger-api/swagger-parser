@@ -266,11 +266,9 @@ public class SwaggerDeserializer {
         }
         Operation output = new Operation();
         ArrayNode array = getArray("tags", obj, false, location, result);
-        List<Tag> tags = tags(array, location, result);
+        List<String> tags = tagStrings(array, location, result);
         if(tags != null) {
-            for(Tag tag : tags) {
-                output.tag(tag.getName());
-            }
+            output.tags(tags);
         }
         String value = getString("summary", obj, false, location, result);
         output.summary(value);
@@ -1103,6 +1101,21 @@ public class SwaggerDeserializer {
             }
         }
 
+        return output;
+    }
+
+
+    public List<String> tagStrings(ArrayNode nodes, String location, ParseResult result) {
+        if(nodes == null)
+            return null;
+
+        List<String> output = new ArrayList<String>();
+
+        for(JsonNode node : nodes) {
+            if(node.getNodeType().equals(JsonNodeType.STRING)) {
+                output.add(node.textValue());
+            }
+        }
         return output;
     }
 
