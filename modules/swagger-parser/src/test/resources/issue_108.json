@@ -1,0 +1,53 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "2.0.0",
+    "title": "Beanhunter API",
+    "description": "Description of the api goes here."
+  },
+  "host": "local.xxx.com",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/city": {
+      "get": {
+        "description": "test description",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              "required": [
+                "data"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Endpoints": {
+      "title": "Endpoints object",
+      "properties": {
+        "links": {}
+      }
+    }
+  }
+}

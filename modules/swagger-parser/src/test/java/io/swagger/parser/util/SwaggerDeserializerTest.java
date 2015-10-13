@@ -4,11 +4,9 @@ import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
-import io.swagger.models.properties.IntegerProperty;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -22,6 +20,40 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class SwaggerDeserializerTest {
+    @Test
+    public void testSchema() throws Exception {
+        String json = "{\n" +
+                "  \"type\":\"object\",\n" +
+                "  \"properties\": {\n" +
+                "    \"data\": {\n" +
+                "      \"properties\": {\n" +
+                "        \"name\": {\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"minLength\": 1\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"required\": [\n" +
+                "    \"data\"\n" +
+                "  ]\n" +
+                "}";
+
+        Model m = Json.mapper().readValue(json, Model.class);
+        assertNotNull(m);
+        Map<String, Property> properties = m.getProperties();
+
+        assertTrue(properties.keySet().size() == 1);
+        Property data = properties.get("data");
+        assertTrue(data instanceof ObjectProperty);
+        ObjectProperty op = (ObjectProperty) data;
+        Map<String, Property> innerProperties = ((ObjectProperty) data).getProperties();
+        assertTrue(innerProperties.keySet().size() == 1);
+
+        Property name = innerProperties.get("name");
+        assertTrue(name instanceof StringProperty);
+    }
+
     @Test
     public void testEmpty() {
         String json = "{}";
@@ -172,7 +204,7 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute info.bad is unexpected"));
         assertTrue(messages.contains("attribute info.contact.invalid is unexpected"));
 
-        assertEquals(result.getSwagger().getInfo().getVendorExtensions().get("x-foo").toString(), "\"bar\"");
+        assertEquals(result.getSwagger().getInfo().getVendorExtensions().get("x-foo").toString(), "bar");
     }
 
     @Test
@@ -196,7 +228,7 @@ public class SwaggerDeserializerTest {
 
         assertTrue(messages.contains("attribute responses.foo.bar is unexpected"));
 
-        assertEquals(result.getSwagger().getResponses().get("foo").getVendorExtensions().get("x-foo").toString(), "\"bar\"");
+        assertEquals(result.getSwagger().getResponses().get("foo").getVendorExtensions().get("x-foo").toString(), "bar");
     }
 
     @Test
@@ -225,6 +257,8 @@ public class SwaggerDeserializerTest {
 
         assertEquals(result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid").toString(), "{\"isValid\":true}");
     }
+
+
 
     @Test
     public void testDefinitions () {
@@ -338,6 +372,7 @@ public class SwaggerDeserializerTest {
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"paths\": {\n" +
                 "    \"/pet\": {\n" +
+                "      \"foo\": \"bar\",\n" +
                 "      \"get\": {\n" +
                 "        \"security\": [\n" +
                 "          {\n" +
@@ -356,8 +391,7 @@ public class SwaggerDeserializerTest {
         SwaggerDeserializationResult result = parser.readWithInfo(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
-
-        Json.prettyPrint(result);
+        assertTrue(messages.contains("attribute paths.'/pet'.foo is unexpected"));
         Swagger swagger = result.getSwagger();
 
         Path path = swagger.getPath("/pet");

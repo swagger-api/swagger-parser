@@ -1,19 +1,21 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.*;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.*;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
+import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.util.Json;
 
+import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
+
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class SwaggerDeserializer {
@@ -26,6 +28,10 @@ public class SwaggerDeserializer {
     static Set<String> CONTACT_KEYS = new HashSet<String>(Arrays.asList("name", "url", "email"));
     static Set<String> LICENSE_KEYS = new HashSet<String>(Arrays.asList("name", "url"));
     static Set<String> REF_MODEL_KEYS = new HashSet<String>(Arrays.asList("$ref"));
+    static Set<String> PATH_KEYS = new HashSet<String>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options"));
+    static Set<String> OPERATION_KEYS = new HashSet<String>(Arrays.asList("tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
+    static Set<String> PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLenth", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf"));
+    static Set<String> BODY_PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
@@ -106,8 +112,7 @@ public class SwaggerDeserializer {
             }
 
             obj = getObject("paths", on, true, location, result);
-            // TODO: parse
-            Map<String, Path> paths = Json.mapper().convertValue(obj, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Path.class));
+            Map<String, Path> paths = paths(obj, "paths", result);
             swagger.paths(paths);
 
             obj = getObject("definitions", on, false, location, result);
@@ -148,6 +153,408 @@ public class SwaggerDeserializer {
             }
         }
         return swagger;
+    }
+
+    public Map<String,Path> paths(ObjectNode obj, String location, ParseResult result) {
+        Map<String, Path> output = new LinkedHashMap<>();
+        if(obj == null) {
+            return null;
+        }
+
+        Set<String> pathKeys = getKeys(obj);
+        for(String pathName : pathKeys) {
+            JsonNode pathValue = obj.get(pathName);
+            if(!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, pathName, "object", pathValue);
+            }
+            else {
+                ObjectNode path = (ObjectNode) pathValue;
+                Path pathObj = path(path, location + ".'" + pathName + "'", result);
+                output.put(pathName, pathObj);
+            }
+        }
+        return output;
+    }
+
+    public Path path(ObjectNode obj, String location, ParseResult result) {
+        boolean hasRef = false;
+        Path output = null;
+        if(obj.get("$ref") != null) {
+            JsonNode ref = obj.get("$ref");
+            if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+                return pathRef((TextNode)ref, location, result);
+            }
+
+            else if(ref.getNodeType().equals(JsonNodeType.OBJECT)){
+                ObjectNode on = (ObjectNode) ref;
+
+                // extra keys
+                Set<String> keys = getKeys(on);
+                for(String key : keys) {
+                    result.extra(location, key, on.get(key));
+                }
+            }
+            return null;
+        }
+        Path path = new Path();
+        ObjectNode on = getObject("get", obj, false, location, result);
+        if(on != null) {
+            Operation op = operation(on, location, result);
+            if(op != null) {
+                path.setGet(op);
+            }
+        }
+        on = getObject("put", obj, false, location, result);
+        if(on != null) {
+            Operation op = operation(on, location, result);
+            if(op != null) {
+                path.setPut(op);
+            }
+        }
+        on = getObject("post", obj, false, location, result);
+        if(on != null) {
+            Operation op = operation(on, location, result);
+            if(op != null) {
+                path.setPost(op);
+            }
+        }
+        on = getObject("head", obj, false, location, result);
+        if(on != null) {
+            Operation op = operation(on, location, result);
+            if(op != null) {
+                path.setHead(op);
+            }
+        }
+        on = getObject("delete", obj, false, location, result);
+        if(on != null) {
+            Operation op = operation(on, location, result);
+            if(op != null) {
+                path.setDelete(op);
+            }
+        }
+        on = getObject("patch", obj, false, location, result);
+        if(on != null) {
+            Operation op = operation(on, location, result);
+            if(op != null) {
+                path.setPatch(op);
+            }
+        }
+        on = getObject("options", obj, false, location, result);
+        if(on != null) {
+            Operation op = operation(on, location, result);
+            if(op != null) {
+                path.setOptions(op);
+            }
+        }
+
+        // extra keys
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                path.setVendorExtension(key, extension(obj.get(key)));
+            }
+            else if(!PATH_KEYS.contains(key)) {
+                result.extra(location, key, obj.get(key));
+            }
+        }
+        return path;
+    }
+
+    public Operation operation(ObjectNode obj, String location, ParseResult result) {
+        if(obj == null) {
+            return null;
+        }
+        Operation output = new Operation();
+        ArrayNode array = getArray("tags", obj, false, location, result);
+        List<Tag> tags = tags(array, location, result);
+        if(tags != null) {
+            for(Tag tag : tags) {
+                output.tag(tag.getName());
+            }
+        }
+        String value = getString("summary", obj, false, location, result);
+        output.summary(value);
+
+        value = getString("description", obj, false, location, result);
+        output.description(value);
+
+        ObjectNode externalDocs = getObject("externalDocs", obj, false, location, result);
+        ExternalDocs docs = externalDocs(externalDocs, location, result);
+        output.setExternalDocs(docs);
+
+        value = getString("operationId", obj, false, location, result);
+        output.operationId(value);
+
+        array = getArray("consumes", obj, false, location, result);
+        if(array != null) {
+            Iterator<JsonNode> it = array.iterator();
+            while (it.hasNext()) {
+                JsonNode n = it.next();
+                String s = getString(n, location + ".consumes", result);
+                if (s != null) {
+                    if (s != null) {
+                        output.consumes(s);
+                    }
+                }
+            }
+        }
+        array = getArray("produces", obj, false, location, result);
+        if(array != null) {
+            Iterator<JsonNode> it = array.iterator();
+            while (it.hasNext()) {
+                JsonNode n = it.next();
+                String s = getString(n, location + ".produces", result);
+                if (s != null) {
+                    if (s != null) {
+                        output.produces(s);
+                    }
+                }
+            }
+        }
+        ArrayNode parameters = getArray("parameters", obj, false, location, result);
+        output.setParameters(parameters(parameters, location, result));
+
+        ObjectNode responses = getObject("responses", obj, true, location, result);
+        output.setResponses(responses(responses, location, result));
+
+        array = getArray("schemes", obj, false, location, result);
+        if(array != null) {
+            Iterator<JsonNode> it = array.iterator();
+            while (it.hasNext()) {
+                JsonNode n = it.next();
+                String s = getString(n, location + ".schemes", result);
+                if (s != null) {
+                    Scheme scheme = Scheme.forValue(s);
+                    if (scheme != null) {
+                        output.scheme(scheme);
+                    }
+                }
+            }
+        }
+        Boolean deprecated = getBoolean("deprecated", obj, false, location, result);
+        if(deprecated != null) {
+            output.setDeprecated(deprecated);
+        }
+        array = getArray("security", obj, false, location, result);
+        List<SecurityRequirement> security = securityRequirements(array, location, result);
+        if(security != null) {
+            List<Map<String, List<String>>> ss = new ArrayList<>();
+            for(SecurityRequirement s : security) {
+                if(s.getRequirements() != null && s.getRequirements().size() > 0) {
+                    ss.add(s.getRequirements());
+                }
+            }
+            output.setSecurity(ss);
+        }
+
+        // extra keys
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                output.setVendorExtension(key, extension(obj.get(key)));
+            }
+            else if(!OPERATION_KEYS.contains(key)) {
+                result.extra(location, key, obj.get(key));
+            }
+        }
+
+        return output;
+    }
+
+    public Boolean getBoolean(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        Boolean value = null;
+        JsonNode v = node.get(key);
+        if (node == null || v == null) {
+            if (required) {
+                result.missing(location, key);
+                result.invalid();
+            }
+        }
+        else {
+            if(v.getNodeType().equals(JsonNodeType.BOOLEAN)) {
+                value = v.asBoolean();
+            }
+            else if(v.getNodeType().equals(JsonNodeType.STRING)) {
+                String stringValue = v.textValue();
+                return Boolean.parseBoolean(stringValue);
+            }
+        }
+        return value;
+    }
+
+    public List<Parameter> parameters(ArrayNode obj, String location, ParseResult result) {
+        List<Parameter> output = new ArrayList<Parameter>();
+        if(obj == null) {
+            return output;
+        }
+        for(JsonNode item : obj) {
+            if(item.getNodeType().equals(JsonNodeType.OBJECT)) {
+                Parameter param = parameter((ObjectNode) item, location, result);
+                if(param != null) {
+                    output.add(param);
+                }
+            }
+        }
+        return output;
+    }
+
+    public Parameter parameter(ObjectNode obj, String location, ParseResult result) {
+        if(obj == null) {
+            return null;
+        }
+
+        Parameter output = null;
+        JsonNode ref = obj.get("$ref");
+        if(ref != null) {
+            if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+                return refParameter((TextNode) ref, location, result);
+            }
+            else {
+                result.invalidType(location, "$ref", "string", obj);
+                return null;
+            }
+        }
+
+        String value = getString("in", obj, true, location, result);
+        if(value != null) {
+            String type = getString("type", obj, true, location, result);
+            String format = getString("format", obj, false, location, result);
+            AbstractSerializableParameter<?> sp = null;
+            if("query".equals(value)) {
+                sp = new QueryParameter();
+            }
+            else if ("header".equals(value)) {
+                sp = new HeaderParameter();
+            }
+            else if ("path".equals(value)) {
+                sp = new PathParameter();
+            }
+            else if ("formData".equals(value)) {
+                sp = new FormParameter();
+            }
+
+            if(sp != null) {
+                Map<PropertyBuilder.PropertyId, Object> map = new HashMap<PropertyBuilder.PropertyId, Object>();
+
+                map.put(TYPE, type);
+                map.put(FORMAT, format);
+                map.put(DEFAULT, getObject("default", obj, false, location, result));
+
+                Double dbl = getDouble("maximum", obj, false, location, result);
+                if(dbl != null) {
+                    map.put(MAXIMUM, dbl);
+                    sp.setMaximum(dbl);
+                }
+
+                Boolean bl = getBoolean("exclusiveMaximum", obj, false, location, result);
+                if(bl != null) {
+                    map.put(EXCLUSIVE_MAXIMUM, bl);
+                    sp.setExclusiveMaximum(bl);
+                }
+
+                dbl = getDouble("minimum", obj, false, location, result);
+                if(dbl != null) {
+                    map.put(MINIMUM, dbl);
+                    sp.setMinimum(dbl);
+                }
+
+                bl = getBoolean("exclusiveMinimum", obj, false, location, result);
+                if(bl != null) {
+                    map.put(EXCLUSIVE_MINIMUM, bl);
+                    sp.setExclusiveMinimum(bl);
+                }
+
+                map.put(MAX_LENGTH, getInteger("maxLength", obj, false, location, result));
+                map.put(MIN_LENGTH, getInteger("minLength", obj, false, location, result));
+
+                String pat = getString("pattern", obj, false, location, result);
+                map.put(PATTERN, pat);
+                sp.setPattern(pat);
+
+                Integer iv = getInteger("maxItems", obj, false, location, result);
+                map.put(MAX_ITEMS, iv);
+                sp.setMaxItems(iv);
+
+                iv = getInteger("minItems", obj, false, location, result);
+                map.put(MIN_ITEMS, iv);
+                sp.setMinItems(iv);
+
+                map.put(UNIQUE_ITEMS, getBoolean("uniqueItems", obj, false, location, result));
+
+                ArrayNode an = getArray("enum", obj, false, location, result);
+                if(an != null) {
+                    List<String> _enum = new ArrayList<String>();
+                    for(JsonNode n : an) {
+                        _enum.add(n.textValue());
+                    }
+                    sp.setEnum(_enum);
+                }
+                map.put(ENUM, an);
+
+//                map.put("allowEmptyValue", getBoolean("allowEmptyValue", obj, false, location, result));
+//                map.put("items", getObject("items", obj, false, location, result));
+//                map.put("collectionFormat", getString("collectionFormat", obj, false, location, result));
+//                map.put("multipleOf", getNumber("multipleOf", obj, false, location, result));
+
+                Property prop = PropertyBuilder.build(type, format, map);
+
+//                Property prop = schema(schemaItems, obj, location, result);
+                if(prop != null) {
+                    sp.setProperty(prop);
+//                    if(prop instanceof ArrayProperty) {
+//                        sp.setType("array");
+//                        sp.setItems(prop);
+//                    }
+//                    else {
+//                        // TODO!
+//                    }
+                }
+
+                Set<String> keys = getKeys(obj);
+                for(String key : keys) {
+                    if(key.startsWith("x-")) {
+                        sp.setVendorExtension(key, extension(obj.get(key)));
+                    }
+                    else if(!PARAMETER_KEYS.contains(key)) {
+                        result.extra(location, key, obj.get(key));
+                    }
+                }
+
+                output = sp;
+            }
+            else if ("body".equals(value)) {
+                output = new BodyParameter();
+                output = Json.mapper().convertValue(obj, Parameter.class);
+            }
+            if(output != null) {
+                value = getString("name", obj, true, location, result);
+                output.setName(value);
+
+                value = getString("description", obj, true, location, result);
+                output.setDescription(value);
+
+                Boolean required = getBoolean("in", obj, false, location, result);
+                if(required != null) {
+                    output.setRequired(required);
+                }
+            }
+        }
+
+        return output;
+    }
+
+    private Property schema(Map<String, Object> schemaItems, JsonNode obj, String location, ParseResult result) {
+        return Json.mapper().convertValue(obj, Property.class);
+    }
+
+    public RefParameter refParameter(TextNode obj, String location, ParseResult result) {
+        return new RefParameter(obj.asText());
+    }
+
+    public Path pathRef(TextNode ref, String location, ParseResult result) {
+        RefPath output = new RefPath();
+        output.set$ref(ref.textValue());
+        return output;
     }
 
     public Map<String, Model> definitions (ObjectNode node, String location, ParseResult result) {
@@ -271,7 +678,7 @@ public class SwaggerDeserializer {
             Set<String> keys = getKeys(node);
             for(String key : keys) {
                 if(key.startsWith("x-")) {
-                    impl.setVendorExtension(key, node.get(key));
+                    impl.setVendorExtension(key, extension(node.get(key)));
                 }
                 else if(!SCHEMA_KEYS.contains(key)) {
                     result.extra(location, key, node.get(key));
@@ -299,6 +706,52 @@ public class SwaggerDeserializer {
         model.setDescription(value);
 
         return model;
+    }
+
+    public Object extension(JsonNode jsonNode) {
+        if(jsonNode.getNodeType().equals(JsonNodeType.BOOLEAN)) {
+            return jsonNode.asBoolean();
+        }
+        if(jsonNode.getNodeType().equals(JsonNodeType.STRING)) {
+            return jsonNode.asText();
+        }
+        if(jsonNode.getNodeType().equals(JsonNodeType.NUMBER)) {
+            NumericNode n = (NumericNode) jsonNode;
+            if(n.isLong()) {
+                return jsonNode.asLong();
+            }
+            if(n.isInt()) {
+                return jsonNode.asInt();
+            }
+            if(n.isBigDecimal()) {
+                return jsonNode.textValue();
+            }
+            if(n.isBoolean()) {
+                return jsonNode.asBoolean();
+            }
+            if(n.isFloat()) {
+                return jsonNode.floatValue();
+            }
+            if(n.isDouble()) {
+                return jsonNode.doubleValue();
+            }
+            if(n.isShort()) {
+                return jsonNode.intValue();
+            }
+            return jsonNode.asText();
+        }
+        if(jsonNode.getNodeType().equals(JsonNodeType.ARRAY)) {
+            ArrayNode an = (ArrayNode) jsonNode;
+            List<Object> o = new ArrayList<Object>();
+            for(JsonNode i : an) {
+                Object obj = extension(i);
+                if(obj != null) {
+                    o.add(obj);
+                }
+            }
+            return o;
+        }
+        return jsonNode;
     }
 
     public Model allOfModel(ObjectNode node, String location, ParseResult result) {
@@ -457,7 +910,7 @@ public class SwaggerDeserializer {
         Set<String> keys = getKeys(node);
         for(String key : keys) {
             if(key.startsWith("x-")) {
-                output.setVendorExtension(key, node.get(key));
+                output.setVendorExtension(key, extension(node.get(key)));
             }
             else if(!RESPONSE_KEYS.contains(key)) {
                 result.extra(location, key, node.get(key));
@@ -495,7 +948,7 @@ public class SwaggerDeserializer {
         Set<String> keys = getKeys(node);
         for(String key : keys) {
             if(key.startsWith("x-")) {
-                info.setVendorExtension(key, node.get(key));
+                info.setVendorExtension(key, extension(node.get(key)));
             }
             else if(!INFO_KEYS.contains(key)) {
                 result.extra(location, key, node.get(key));
@@ -521,7 +974,7 @@ public class SwaggerDeserializer {
         Set<String> keys = getKeys(node);
         for(String key : keys) {
             if(key.startsWith("x-")) {
-                license.setVendorExtension(key, node.get(key));
+                license.setVendorExtension(key, extension(node.get(key)));
             }
             else if(!LICENSE_KEYS.contains(key)) {
                 result.extra(location + ".license", key, node.get(key));
@@ -683,7 +1136,7 @@ public class SwaggerDeserializer {
             // extra keys
             for(String key : keys) {
                 if(key.startsWith("x-")) {
-                    tag.setVendorExtension(key, node.get(key));
+                    tag.setVendorExtension(key, extension(node.get(key)));
                 }
                 else if(!TAG_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
@@ -710,7 +1163,7 @@ public class SwaggerDeserializer {
             // extra keys
             for(String key : keys) {
                 if(key.startsWith("x-")) {
-                    output.setVendorExtension(key, node.get(key));
+                    output.setVendorExtension(key, extension(node.get(key)));
                 }
                 else if(!ROOT_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
@@ -769,6 +1222,51 @@ public class SwaggerDeserializer {
             on = (ObjectNode) value;
         }
         return on;
+    }
+
+    public Double getDouble(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        Double value = null;
+        JsonNode v = node.get(key);
+        if (node == null || v == null) {
+            if (required) {
+                result.missing(location, key);
+                result.invalid();
+            }
+        }
+        else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
+            value = v.asDouble();
+        }
+        return value;
+    }
+
+    public Number getNumber(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        Number value = null;
+        JsonNode v = node.get(key);
+        if (node == null || v == null) {
+            if (required) {
+                result.missing(location, key);
+                result.invalid();
+            }
+        }
+        else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
+            value = v.numberValue();
+        }
+        return value;
+    }
+
+    public Integer getInteger(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        Integer value = null;
+        JsonNode v = node.get(key);
+        if (node == null || v == null) {
+            if (required) {
+                result.missing(location, key);
+                result.invalid();
+            }
+        }
+        else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
+            value = v.intValue();
+        }
+        return value;
     }
 
     public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {

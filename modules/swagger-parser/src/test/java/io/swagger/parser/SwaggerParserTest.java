@@ -46,7 +46,7 @@ public class SwaggerParserTest {
         JsonToYamlFileDuplicator.duplicateFilesInYamlFormat("src/test/resources/relative-file-references/json",
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
-        System.out.println(Yaml.mapper().writeValueAsString(swagger));
+        assertNotNull(Yaml.mapper().writeValueAsString(swagger));
     }
 
     @Test
@@ -71,6 +71,14 @@ public class SwaggerParserTest {
         final Swagger swagger = parser.read("https://raw.githubusercontent.com/swagger-api/swagger-spec/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
 
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
+    }
+
+    @Test
+    public void testIssue108() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_108.json");
+
+        assertNotNull(swagger);
     }
 
     private Swagger doRelativeFileTest(String location) {

@@ -7,6 +7,7 @@ import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.Model;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.util.Json;
 import io.swagger.util.ResourceUtils;
 
 import org.testng.annotations.Test;
