@@ -9,6 +9,8 @@ import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+
+import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -71,6 +73,19 @@ public class SwaggerParserTest {
         final Swagger swagger = parser.read("https://raw.githubusercontent.com/swagger-api/swagger-spec/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
 
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
+    }
+    
+    @Test
+    public void testParameterRequired() {
+    	SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/petstore.json");
+        final List<Parameter> operationParams = swagger.getPath("/pet/{petId}").getPost().getParameters();
+        
+        final PathParameter pathParameter = (PathParameter) operationParams.get(0);
+        Assert.assertTrue(pathParameter.getRequired());
+        
+        final FormParameter formParameter = (FormParameter) operationParams.get(1);
+        Assert.assertFalse(formParameter.getRequired());        
     }
 
     @Test
