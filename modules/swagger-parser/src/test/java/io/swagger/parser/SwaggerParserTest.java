@@ -96,19 +96,19 @@ public class SwaggerParserTest {
         final Swagger swagger = parser.read("src/test/resources/consumes_and_produces");
         Assert.assertNotNull(swagger);
 
-        // test consumes and produces in spec level
+        // test consumes and produces at spec level
         Assert.assertEquals(swagger.getConsumes(), Arrays.asList("application/json"));
         Assert.assertEquals(swagger.getProduces(), Arrays.asList("application/xml"));
         
-        // test consumes and produces in operation level
+        // test consumes and produces at operation level
         Assert.assertEquals(swagger.getPath("/pets").getPost().getConsumes(), Arrays.asList("image/jpeg"));
         Assert.assertEquals(swagger.getPath("/pets").getPost().getProduces(), Arrays.asList("image/png"));
  
-        // test empty consumes and produces
+        // test empty consumes and produces at operation level
         Assert.assertEquals(swagger.getPath("/pets").getGet().getConsumes(), Collections.<String> emptyList());
         Assert.assertEquals(swagger.getPath("/pets").getGet().getProduces(), Collections.<String> emptyList());
  
-        // test consumes and produces not defined
+        // test consumes and produces not defined at operation level
         Assert.assertNull(swagger.getPath("/pets").getPatch().getConsumes());
         Assert.assertNull(swagger.getPath("/pets").getPatch().getProduces());
 
