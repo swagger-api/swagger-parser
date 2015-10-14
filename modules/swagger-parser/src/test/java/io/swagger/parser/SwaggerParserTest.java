@@ -22,7 +22,6 @@ import static org.testng.Assert.assertTrue;
 
 
 public class SwaggerParserTest {
-
     @Test
     public void testLoadRelativeFileTree_Json() throws Exception {
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
