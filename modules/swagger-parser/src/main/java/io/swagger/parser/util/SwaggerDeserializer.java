@@ -1136,6 +1136,7 @@ public class SwaggerDeserializer {
         List<SecurityRequirement> output = new ArrayList<SecurityRequirement>();
 
         for(JsonNode item : node) {
+            SecurityRequirement security = new SecurityRequirement();
             if(item.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode on = (ObjectNode) item;
                 Set<String> keys = getKeys(on);
@@ -1152,10 +1153,10 @@ public class SwaggerDeserializer {
                             }
                         }
                     }
-                    SecurityRequirement security = new SecurityRequirement().requirement(key, scopes);
-                    output.add(security);
+                    security.requirement(key, scopes);
                 }
             }
+            output.add(security);
         }
 
         return output;

@@ -1,5 +1,8 @@
 package io.swagger.parser.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
@@ -20,6 +23,34 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class SwaggerDeserializerTest {
+    @Test
+    public void testSecurityDeserialization() throws Exception {
+        String json = "{\n" +
+                        "  \"swagger\": \"2.0\",\n" +
+                        "  \"security\": [\n" +
+                        "    {\n" +
+                        "      \"api_key1\": [],\n" +
+                        "      \"api_key2\": []\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"api_key3\": []\n" +
+                        "    }\n" +
+                        "  ]\n" +
+                        "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+
+        List<SecurityRequirement> security = swagger.getSecurity();
+        assertTrue(security.size() == 2);
+        
+    }
+
     @Test
     public void testSchema() throws Exception {
         String json = "{\n" +
