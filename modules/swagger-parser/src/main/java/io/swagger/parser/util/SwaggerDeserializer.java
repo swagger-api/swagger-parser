@@ -52,6 +52,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
 import io.swagger.models.Xml;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
@@ -1101,7 +1102,7 @@ public class SwaggerDeserializer {
         if(type != null) {
             if(type.equals("basic")) {
                 // TODO: parse manually for better feedback
-                output = Json.mapper().convertValue(node, ApiKeyAuthDefinition.class);
+                output = Json.mapper().convertValue(node, BasicAuthDefinition.class);
             }
             else if (type.equals("apiKey")) {
                 String position = getString("in", node, true, location, result);
