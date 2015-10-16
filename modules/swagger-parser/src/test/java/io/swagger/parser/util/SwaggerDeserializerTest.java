@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.properties.*;
@@ -183,6 +184,9 @@ public class SwaggerDeserializerTest {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"securityDefinitions\": {\n" +
+                "    \"basic_auth\": {\n" +
+                "      \"type\": \"basic\"\n" +
+                "    },\n" +
                 "    \"api_key\": {\n" +
                 "      \"type\": \"apiKey\",\n" +
                 "      \"name\": \"api_key\",\n" +
@@ -194,6 +198,7 @@ public class SwaggerDeserializerTest {
                 "      \"get\": {\n" +
                 "        \"security\": [\n" +
                 "          {\n" +
+                "            \"basic_auth\": [],\n" +
                 "            \"api_key\": []\n" +
                 "          }\n" +
                 "        ]\n" +
@@ -210,7 +215,14 @@ public class SwaggerDeserializerTest {
 
         Swagger swagger = result.getSwagger();
         assertNotNull(swagger.getSecurityDefinitions());
-        assertTrue(swagger.getSecurityDefinitions().keySet().size() == 1);
+        assertTrue(swagger.getSecurityDefinitions().keySet().size() == 2);
+
+        // Basic Authentication
+        SecuritySchemeDefinition definitionBasic = swagger.getSecurityDefinitions().get("basic_auth");
+        assertNotNull(definitionBasic);
+        assertTrue(definitionBasic instanceof BasicAuthDefinition);
+
+        // API Key Authentication
         SecuritySchemeDefinition definition = swagger.getSecurityDefinitions().get("api_key");
         assertNotNull(definition);
         assertTrue(definition instanceof ApiKeyAuthDefinition);
