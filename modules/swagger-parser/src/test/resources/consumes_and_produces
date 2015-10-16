@@ -1,0 +1,49 @@
+{
+    "swagger": "2.0",
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/xml"
+    ],
+    "info": {
+        "version": "1.0.0",
+        "title": "Pets Store"
+    },
+    "paths": {
+        "/pets": {
+            "get": {
+                "consumes": [],
+                "produces": [],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Returns all the pets"
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "image/jpeg"
+                ],
+                "produces": [
+                    "image/png"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Returns all the pets"
+                    }
+                }
+            },
+            "patch": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Returns all the pets"
+                    }
+                }
+            }
+        }
+    }
+}

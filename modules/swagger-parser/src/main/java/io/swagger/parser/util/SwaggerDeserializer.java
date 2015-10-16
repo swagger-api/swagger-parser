@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Collections;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -139,9 +140,7 @@ public class SwaggerDeserializer {
                     JsonNode n = it.next();
                     String s = getString(n, location + ".consumes", result);
                     if (s != null) {
-                        if (s != null) {
-                            swagger.consumes(s);
-                        }
+                        swagger.consumes(s);
                     }
                 }
             }
@@ -153,9 +152,7 @@ public class SwaggerDeserializer {
                     JsonNode n = it.next();
                     String s = getString(n, location + ".produces", result);
                     if (s != null) {
-                        if (s != null) {
-                            swagger.produces(s);
-                        }
+                        swagger.produces(s);
                     }
                 }
             }
@@ -341,29 +338,33 @@ public class SwaggerDeserializer {
 
         array = getArray("consumes", obj, false, location, result);
         if(array != null) {
-            Iterator<JsonNode> it = array.iterator();
-            while (it.hasNext()) {
-                JsonNode n = it.next();
-                String s = getString(n, location + ".consumes", result);
-                if (s != null) {
-                    if (s != null) {
-                        output.consumes(s);
-                    }
-                }
-            }
+           	if (array.size() == 0) {
+        		output.consumes(Collections.<String> emptyList());
+        	} else {
+	            Iterator<JsonNode> it = array.iterator();
+	            while (it.hasNext()) {
+	                JsonNode n = it.next();
+	                String s = getString(n, location + ".consumes", result);
+	                if (s != null) {
+	                    output.consumes(s);
+	                }
+	            }
+        	}
         }
         array = getArray("produces", obj, false, location, result);
-        if(array != null) {
-            Iterator<JsonNode> it = array.iterator();
-            while (it.hasNext()) {
-                JsonNode n = it.next();
-                String s = getString(n, location + ".produces", result);
-                if (s != null) {
-                    if (s != null) {
-                        output.produces(s);
-                    }
-                }
-            }
+        if (array != null) {
+        	if (array.size() == 0) {
+        		output.produces(Collections.<String> emptyList());
+        	} else {
+	            Iterator<JsonNode> it = array.iterator();
+	            while (it.hasNext()) {
+	                JsonNode n = it.next();
+	                String s = getString(n, location + ".produces", result);
+	                if (s != null) {
+	                    output.produces(s);
+	                }
+	            }
+        	}
         }
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
         output.setParameters(parameters(parameters, location, result));
