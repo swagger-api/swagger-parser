@@ -958,7 +958,8 @@ public class SwaggerDeserializer {
         ObjectNode headersNode = getObject("headers", node, false, location, result);
         if(headersNode != null) {
             // TODO
-            Map<String, Property> headers = Json.mapper().convertValue(headersNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Path.class));
+            Map<String, Property> headers = Json.mapper().convertValue(headersNode,
+                    Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Property.class));
             output.headers(headers);
         }
 
