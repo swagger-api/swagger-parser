@@ -86,9 +86,8 @@ public class SwaggerDeserializer {
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
         ParseResult rootParse = new ParseResult();
+
         Swagger swagger = parseRoot(rootNode, rootParse);
-
-
         result.setSwagger(swagger);
         result.setMessages(rootParse.getMessages());
         return result;
