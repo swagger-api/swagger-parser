@@ -8,6 +8,8 @@ import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
@@ -528,6 +530,56 @@ public class SwaggerDeserializerTest {
         Set<String> messages = new HashSet<String>(messageList);
         Swagger swagger = result.getSwagger();
 
-        Json.prettyPrint(swagger);
+        Property response = swagger.getPath("/store/inventory").getGet().getResponses().get("200").getSchema();
+        assertTrue(response instanceof MapProperty);
+    }
+
+    @Test
+    public void testArrayQueryParam() throws Exception {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet/findByStatus\": {\n" +
+                "      \"get\": {\n" +
+                "        \"parameters\": [\n" +
+                "          {\n" +
+                "            \"name\": \"status\",\n" +
+                "            \"in\": \"query\",\n" +
+                "            \"description\": \"Status values that need to be considered for filter\",\n" +
+                "            \"required\": false,\n" +
+                "            \"type\": \"array\",\n" +
+                "            \"items\": {\n" +
+                "              \"type\": \"string\"\n" +
+                "            },\n" +
+                "            \"collectionFormat\": \"pipes\",\n" +
+                "            \"default\": \"available\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"successful operation\",\n" +
+                "            \"schema\": {\n" +
+                "              \"$ref\": \"#/definitions/PetArray\"\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+
+        Swagger swagger = result.getSwagger();
+        Parameter param = swagger.getPath("/pet/findByStatus").getGet().getParameters().get(0);
+        
+        assertTrue(param instanceof QueryParameter);
+        QueryParameter qp = (QueryParameter) param;
+        Property p = qp.getItems();
+
+        assertEquals(qp.getType(), "array");
+        assertTrue(p instanceof StringProperty);
     }
 }

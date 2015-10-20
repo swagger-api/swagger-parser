@@ -561,16 +561,17 @@ public class SwaggerDeserializer {
                     map.put(ENUM, _enum);
                 }
 
-//                map.put("allowEmptyValue", getBoolean("allowEmptyValue", obj, false, location, result));
-//                map.put("items", getObject("items", obj, false, location, result));
-//                map.put("collectionFormat", getString("collectionFormat", obj, false, location, result));
-//                map.put("multipleOf", getNumber("multipleOf", obj, false, location, result));
+
 
                 Property prop = PropertyBuilder.build(type, format, map);
 
-//                Property prop = schema(schemaItems, obj, location, result);
                 if(prop != null) {
                     sp.setProperty(prop);
+                    ObjectNode items = getObject("items", obj, false, location, result);
+                    if(items != null) {
+                        Property inner = schema(null, items, location, result);
+                        sp.setItems(inner);
+                    }
                 }
 
                 Set<String> keys = getKeys(obj);
@@ -586,7 +587,6 @@ public class SwaggerDeserializer {
                 output = sp;
             }
             else if ("body".equals(value)) {
-//                output = new BodyParameter();
                 output = Json.mapper().convertValue(obj, Parameter.class);
             }
             if(output != null) {
