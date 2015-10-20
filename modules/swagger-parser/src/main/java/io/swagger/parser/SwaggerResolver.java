@@ -30,7 +30,6 @@ public class SwaggerResolver {
         this(swagger, auths, null);
     }
 
-
     public Swagger resolve() {
         if (swagger == null) {
             return null;
