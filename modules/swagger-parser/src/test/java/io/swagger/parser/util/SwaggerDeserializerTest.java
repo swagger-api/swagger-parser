@@ -497,4 +497,37 @@ public class SwaggerDeserializerTest {
         assertTrue(scopes.contains("read:pets"));
         assertTrue(scopes.contains("write:pets"));
     }
+
+    @Test
+    public void testArrayModelDefinition() {
+        String json = "{\n" +
+                "  \"paths\": {\n" +
+                "    \"/store/inventory\": {\n" +
+                "      \"get\": {\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"successful operation\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"object\",\n" +
+                "              \"additionalProperties\": {\n" +
+                "                \"type\": \"integer\",\n" +
+                "                \"format\": \"int32\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+
+        Json.prettyPrint(swagger);
+    }
 }

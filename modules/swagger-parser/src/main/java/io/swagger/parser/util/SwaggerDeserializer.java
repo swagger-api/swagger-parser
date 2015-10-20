@@ -655,8 +655,7 @@ public class SwaggerDeserializer {
         String value = null;
 
         value = getString("title", node, false, location, result);
-//        model.title(value);
-        // TODO: name?
+        model.setTitle(value);
 
         String type = getString("type", node, false, location, result);
         Model m = new ModelImpl();
@@ -672,8 +671,6 @@ public class SwaggerDeserializer {
             if(items != null) {
                 am.items(items);
             }
-
-//            am.setVendorExtension();
 
             model = am;
         }
@@ -965,7 +962,6 @@ public class SwaggerDeserializer {
 
         ObjectNode examplesNode = getObject("examples", node, false, location, result);
         if(examplesNode != null) {
-            // TODO
             Map<String, Object> examples = Json.mapper().convertValue(examplesNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Object.class));
             output.setExamples(examples);
         }
