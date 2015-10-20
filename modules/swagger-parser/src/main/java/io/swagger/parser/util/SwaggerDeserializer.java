@@ -654,9 +654,6 @@ public class SwaggerDeserializer {
         Model model = null;
         String value = null;
 
-        value = getString("title", node, false, location, result);
-        model.setTitle(value);
-
         String type = getString("type", node, false, location, result);
         Model m = new ModelImpl();
         if("array".equals(type)) {
@@ -762,8 +759,13 @@ public class SwaggerDeserializer {
             }
         }
 
-        value = getString("description", node, false, location, result);
-        model.setDescription(value);
+        if(model != null) {
+            value = getString("description", node, false, location, result);
+            model.setDescription(value);
+
+            value = getString("title", node, false, location, result);
+            model.setTitle(value);
+        }
 
         return model;
     }
