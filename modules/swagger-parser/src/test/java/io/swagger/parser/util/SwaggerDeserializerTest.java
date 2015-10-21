@@ -574,7 +574,7 @@ public class SwaggerDeserializerTest {
 
         Swagger swagger = result.getSwagger();
         Parameter param = swagger.getPath("/pet/findByStatus").getGet().getParameters().get(0);
-        
+
         assertTrue(param instanceof QueryParameter);
         QueryParameter qp = (QueryParameter) param;
         Property p = qp.getItems();

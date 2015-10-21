@@ -371,8 +371,6 @@ public class SwaggerDeserializer {
         ObjectNode responses = getObject("responses", obj, true, location, result);
         output.setResponses(responses(responses, location, result));
 
-        // TODO: scheme
-
         array = getArray("schemes", obj, false, location, result);
         if(array != null) {
             Iterator<JsonNode> it = array.iterator();
