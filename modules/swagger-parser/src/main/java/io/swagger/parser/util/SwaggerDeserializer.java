@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
 import io.swagger.models.Contact;
@@ -46,6 +47,7 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
 import io.swagger.models.RefPath;
+import io.swagger.models.RefResponse;
 import io.swagger.models.Response;
 import io.swagger.models.Scheme;
 import io.swagger.models.SecurityRequirement;
@@ -611,6 +613,10 @@ public class SwaggerDeserializer {
     public RefParameter refParameter(TextNode obj, String location, ParseResult result) {
         return new RefParameter(obj.asText());
     }
+    
+    public RefResponse refResponse(TextNode obj, String location, ParseResult result) {
+        return new RefResponse(obj.asText());
+    }
 
     public Path pathRef(TextNode ref, String location, ParseResult result) {
         RefPath output = new RefPath();
@@ -944,6 +950,16 @@ public class SwaggerDeserializer {
             return null;
 
         Response output = new Response();
+        JsonNode ref = node.get("$ref");
+        if(ref != null) {
+            if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+                return refResponse((TextNode) ref, location, result);
+            }
+            else {
+                result.invalidType(location, "$ref", "string", node);
+                return null;
+            }
+        }
 
         String value = getString("description", node, true, location, result);
         output.description(value);
