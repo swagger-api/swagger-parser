@@ -654,7 +654,6 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
                     swagger.securityDefinition(authNickname, def);
                 } else if (auth instanceof BasicAuthorization) {
-                    BasicAuthorization ba = (BasicAuthorization) auth;
                     BasicAuthDefinition def = new BasicAuthDefinition();
 
                     swagger.securityDefinition(authNickname, def);
