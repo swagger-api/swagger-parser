@@ -691,7 +691,7 @@ public class SwaggerDeserializer {
             impl.setFormat(value);
 
             value = getString("discriminator", node, false, location, result);
-            impl.setDescription(value);
+            impl.setDiscriminator(value);
 
             JsonNode xml = node.get("xml");
             if(xml != null) {
