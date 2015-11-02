@@ -499,6 +499,37 @@ public class SwaggerDeserializerTest {
         assertTrue(scopes.contains("read:pets"));
         assertTrue(scopes.contains("write:pets"));
     }
+    
+    @Test
+    public void testPathsWithRefResponse() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"get\": {\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"$ref\": \"#/responses/OK\"" +
+                "          }\n" +
+                "        }\n" +                
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        Swagger swagger = result.getSwagger();
+
+        Path path = swagger.getPath("/pet");
+        assertNotNull(path);
+        Operation operation = path.getGet();
+        assertNotNull(operation);
+        assertTrue(operation.getResponses().containsKey("200"));
+        assertEquals(RefResponse.class,operation.getResponses().get("200").getClass());
+        RefResponse refResponse = (RefResponse)operation.getResponses().get("200");
+        assertEquals("#/responses/OK",refResponse.get$ref());
+    }
 
     @Test
     public void testArrayModelDefinition() {

@@ -1,10 +1,43 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.*;
-import io.swagger.models.*;
-import io.swagger.models.auth.*;
-import io.swagger.models.parameters.*;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.NumericNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
+import io.swagger.models.ArrayModel;
+import io.swagger.models.ComposedModel;
+import io.swagger.models.Contact;
+import io.swagger.models.ExternalDocs;
+import io.swagger.models.Info;
+import io.swagger.models.License;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.RefPath;
+import io.swagger.models.RefResponse;
+import io.swagger.models.Response;
+import io.swagger.models.Scheme;
+import io.swagger.models.SecurityRequirement;
+import io.swagger.models.Swagger;
+import io.swagger.models.Tag;
+import io.swagger.models.Xml;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.BasicAuthDefinition;
+import io.swagger.models.auth.In;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.AbstractSerializableParameter;
+import io.swagger.models.parameters.FormParameter;
+import io.swagger.models.parameters.HeaderParameter;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.util.Json;
@@ -557,6 +590,10 @@ public class SwaggerDeserializer {
     public RefParameter refParameter(TextNode obj, String location, ParseResult result) {
         return new RefParameter(obj.asText());
     }
+    
+    public RefResponse refResponse(TextNode obj, String location, ParseResult result) {
+        return new RefResponse(obj.asText());
+    }
 
     public Path pathRef(TextNode ref, String location, ParseResult result) {
         RefPath output = new RefPath();
@@ -631,7 +668,7 @@ public class SwaggerDeserializer {
             impl.setFormat(value);
 
             value = getString("discriminator", node, false, location, result);
-            impl.setDescription(value);
+            impl.setDiscriminator(value);
 
             JsonNode xml = node.get("xml");
             if(xml != null) {
@@ -890,6 +927,16 @@ public class SwaggerDeserializer {
             return null;
 
         Response output = new Response();
+        JsonNode ref = node.get("$ref");
+        if(ref != null) {
+            if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+                return refResponse((TextNode) ref, location, result);
+            }
+            else {
+                result.invalidType(location, "$ref", "string", node);
+                return null;
+            }
+        }
 
         String value = getString("description", node, true, location, result);
         output.description(value);
