@@ -36,6 +36,20 @@ public class PathsProcessor {
         for (String pathStr : pathMap.keySet()) {
             Path path = pathMap.get(pathStr);
 
+            List<Parameter> parameters = path.getParameters();
+
+            if(parameters != null) {
+                // add parameters to each operation
+                List<Operation> operations = path.getOperations();
+                if(operations != null) {
+                    for(Operation operation : operations) {
+                        operation.getParameters().addAll(0, parameters);
+                    }
+                }
+            }
+            // remove the shared parameters
+            path.setParameters(null);
+
             if (path instanceof RefPath) {
                 RefPath refPath = (RefPath) path;
                 Path resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), Path.class);
