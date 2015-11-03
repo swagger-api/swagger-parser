@@ -12,7 +12,6 @@ import mockit.Expectations;
 import mockit.FullVerifications;
 import mockit.Injectable;
 import mockit.Mocked;
-import org.testng.annotations.Test;
 
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class PathsProcessorTest {
     @Mocked
     OperationProcessor operationProcessor;
 
-    @Test
+    @org.junit.Test
     public void testProcessPaths(@Injectable final List<Parameter> nonRefPathParameters,
                                  @Injectable final List<Parameter> processedNonRefPathParameters,
                                  @Injectable final List<Parameter> resolvedPathParamters,

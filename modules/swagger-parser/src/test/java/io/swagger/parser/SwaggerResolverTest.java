@@ -1,36 +1,22 @@
 package io.swagger.parser;
 
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.Response;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.parameters.RefParameter;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.*;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.PathsProcessor;
-
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
-
 import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class SwaggerResolverTest {
 
@@ -255,5 +241,38 @@ public class SwaggerResolverTest {
         final RefProperty ref = (RefProperty) array.getItems();
         assertEquals(ref.get$ref(), "#/definitions/Tag");
         assertNotNull(swagger.getDefinitions().get("Tag"));
+    }
+
+    @Test(description = "resolve shared path parameters")
+    public void testSharedPathParametersTest() {
+        final Swagger swagger = new Swagger();
+        Operation operation = new Operation()
+                .response(200, new Response().description("ok!"));
+        Path path = new Path().get(operation);
+        path.addParameter(new QueryParameter()
+                .name("username")
+                .property(new StringProperty()));
+        swagger.path("/fun", path);
+
+        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        assertNull(resolved.getPaths().get("/fun").getParameters());
+        assertTrue(resolved.getPaths().get("/fun").getGet().getParameters().size() == 1);
+    }
+
+    @Test(description = "resolve top-level parameters")
+    public void testSharedSwaggerParametersTest() {
+        final Swagger swagger = new Swagger();
+        swagger.path("/fun", new Path()
+                .get(new Operation()
+                        .parameter(new RefParameter("username"))
+                        .response(200, new Response().description("ok!"))));
+
+        swagger.parameter("username", new QueryParameter()
+                .name("username")
+                .property(new StringProperty()));
+
+        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        assertTrue(resolved.getParameters().size() == 1);
+        assertTrue(resolved.getPaths().get("/fun").getGet().getParameters().size() == 1);
     }
 }
