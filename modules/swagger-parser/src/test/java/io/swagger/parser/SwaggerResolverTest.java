@@ -175,7 +175,7 @@ public class SwaggerResolverTest {
         assertEquals(param.getName(), "skip");
     }
 
-    @Test(description = "resolve operation body parameter remote refs")
+    @org.junit.Test//(description = "resolve operation body parameter remote refs")
     public void testOperationBodyParameterRemoteRefs() {
         final ModelImpl schema = new ModelImpl();
 
@@ -274,5 +274,21 @@ public class SwaggerResolverTest {
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
         assertTrue(resolved.getParameters().size() == 1);
         assertTrue(resolved.getPaths().get("/fun").getGet().getParameters().size() == 1);
+    }
+
+    @Test(description = "resolve top-level responses")
+    public void testSharedResponses() {
+        final Swagger swagger = new Swagger();
+        swagger.path("/fun", new Path()
+                .get(new Operation()
+                        .parameter(new RefParameter("username"))
+                        .response(200, new RefResponse("foo"))));
+
+        swagger.response("foo", new Response().description("ok!"));
+
+        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        Response response = resolved.getPath("/fun").getGet().getResponses().get("200");
+        assertTrue(response.getDescription().equals("ok!"));
+        assertTrue(response instanceof Response);
     }
 }

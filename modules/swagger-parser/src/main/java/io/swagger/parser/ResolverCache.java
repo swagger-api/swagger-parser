@@ -11,7 +11,6 @@ import io.swagger.parser.util.RefUtils;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +30,7 @@ public class ResolverCache {
 
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefType.PARAMETER.getInternalPrefix() + "(?<name>\\S+)");
     private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefType.DEFINITION.getInternalPrefix() + "(?<name>\\S+)");
+    private static final Pattern RESPONSE_PATTERN = Pattern.compile("^" + RefType.RESPONSE.getInternalPrefix() + "(?<name>\\S+)");
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
@@ -117,9 +117,17 @@ public class ResolverCache {
     }
 
     private Object loadInternalRef(String ref) {
+        Object result = null;
 
-        Object result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
-
+        if(ref.startsWith("#/definitions")) {
+            result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
+        }
+        else if(ref.startsWith("#/responses")) {
+            result = getFromMap(ref, swagger.getResponses(), RESPONSE_PATTERN);
+        }
+        else if(ref.startsWith("#/parameters")) {
+            result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
+        }
         if (result == null) {
             result = getFromMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
         }
