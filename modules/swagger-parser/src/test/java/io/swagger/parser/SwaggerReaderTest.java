@@ -1,20 +1,24 @@
 package io.swagger.parser;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.Model;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.QueryParameter;
-import io.swagger.util.Json;
 import io.swagger.util.ResourceUtils;
-
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 public class SwaggerReaderTest {
+    @Test(description = "it should read the uber api with file protocol")
+    public void readUberApiFromFile() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("file://src/test/resources/uber.json");
+        assertNotNull(swagger);
+    }
 
     @Test(description = "it should read the uber api")
     public void readUberApi() {

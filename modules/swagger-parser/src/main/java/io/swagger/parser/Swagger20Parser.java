@@ -74,6 +74,9 @@ public class Swagger20Parser implements SwaggerParserExtension {
             if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths);
             } else {
+                if (location.toLowerCase().startsWith("file://")) {
+                    location = location.substring("file://".length());
+                }
                 final Path path = Paths.get(location);
                 if(Files.exists(path)) {
                     data = FileUtils.readFileToString(path.toFile(), "UTF-8");
