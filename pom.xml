@@ -12,7 +12,7 @@
     <version>1.0.13</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
-    <developers<name />
+    <developers>
         <developer>
             <id>fehguy</id>
             <name>Tony Tam</name>
