@@ -178,6 +178,11 @@ public class SwaggerDeserializer {
                 }
             }
         }
+        else {
+            result.invalidType("", "", "object", node);
+            result.invalid();
+            return null;
+        }
         return swagger;
     }
 
