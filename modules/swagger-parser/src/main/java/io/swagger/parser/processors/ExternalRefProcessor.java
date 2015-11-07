@@ -60,14 +60,15 @@ public final class ExternalRefProcessor {
             //If this is a new model, then check it for other sub references
             //Loop the properties and recursively call this method;
             Map<String, Property> subProps = model.getProperties();
-            for(Map.Entry<String,Property> prop: subProps.entrySet()){
-            	if(prop.getValue() instanceof RefProperty){
-            		RefProperty subRef = (RefProperty)prop.getValue();
-            		subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(),subRef.getRefFormat()));
-            	}            	
+            if(subProps != null) {
+                for (Map.Entry<String, Property> prop : subProps.entrySet()) {
+                    if (prop.getValue() instanceof RefProperty) {
+                        RefProperty subRef = (RefProperty) prop.getValue();
+                        subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+                    }
+                }
             }
             swagger.addDefinition(newRef, model);
-
         }
 
         return newRef;
