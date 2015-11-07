@@ -9,10 +9,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.13-SNAPSHOT</version>
+    <version>1.0.13</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
-    <developers>
+    <developers<name />
         <developer>
             <id>fehguy</id>
             <name>Tony Tam</name>
