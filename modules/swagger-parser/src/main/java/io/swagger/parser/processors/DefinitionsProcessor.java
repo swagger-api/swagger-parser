@@ -5,6 +5,7 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.parser.ResolverCache;
 
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class DefinitionsProcessor {
         modelProcessor = new ModelProcessor(cache, swagger);
     }
 
-    public void processDefinitions() {
+    public void processDefinitions(Path swaggerParentDirectory) {
         final Map<String, Model> definitions = swagger.getDefinitions();
 
         if (definitions == null) {
@@ -37,7 +38,7 @@ public class DefinitionsProcessor {
 
             String originalRef = model instanceof RefModel ? ((RefModel) model).get$ref() : null;
 
-            modelProcessor.processModel(model);
+            modelProcessor.processModel(model, swaggerParentDirectory);
 
             //if we process a RefModel here, in the #/definitions table, we want to overwrite it with the referenced value
             if (model instanceof RefModel) {

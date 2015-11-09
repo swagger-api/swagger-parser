@@ -117,17 +117,17 @@ public class ExternalRefProcessorTest {
         String newRef = new ExternalRefProcessor(cache, swagger).processRefToExternalDefinition(ref, refFormat);
         assertEquals(newRef, expectedNewRef);
     }
-    
+
     @Test
     public void testNestedExternalRefs(@Injectable final Model mockedModel){
     	final RefFormat refFormat = RefFormat.URL;
-  	
+
     	//Swagger test instance
     	Swagger testedSwagger = new Swagger();
-    	
+
     	//Start with customer, add address property to it
     	final String customerURL = "http://my.company.com/path/to/customer.json#/definitions/Customer";
-    	
+
     	final Model customerModel = new ModelImpl();
     	Map<String,Property> custProps = new HashMap<String, Property>();
     	RefProperty address = new RefProperty();
@@ -135,7 +135,7 @@ public class ExternalRefProcessorTest {
     	address.set$ref(addressURL);
     	custProps.put("Address", address);
     	customerModel.setProperties(custProps);
-    	
+
     	//create address model, add Contact Ref Property to it
     	final Model addressModel = new ModelImpl();
     	Map<String, Property> addressProps = new HashMap<String, Property>();
@@ -144,8 +144,8 @@ public class ExternalRefProcessorTest {
     	contact.set$ref(contactURL);
     	addressProps.put("Contact", contact);
     	addressModel.setProperties(addressProps);
-    	
-    	
+
+
     	//Create contact model, with basic type property
     	final Model contactModel = new ModelImpl();
     	Property contactProp = new StringProperty();
@@ -154,21 +154,21 @@ public class ExternalRefProcessorTest {
     	Map<String, Property> contactProps = new HashMap<String, Property>();
     	contactProps.put("PhoneNumber", contactProp);
     	contactModel.setProperties(contactProps);
-    	
+
     	new Expectations(){{
     		cache.loadRef(customerURL, refFormat, Model.class);
     		result = customerModel;
     		times = 1;
-    				
+
     		cache.loadRef(addressURL, refFormat, Model.class);
     		result = addressModel;
     		times = 1;
-    		
+
     		cache.loadRef(contactURL, refFormat, Model.class);
     		result = contactModel;
     		times = 1;
  		}};
-    	
+
     	String actualRef = new ExternalRefProcessor(cache, testedSwagger).processRefToExternalDefinition(customerURL, refFormat);
 
     	assertTrue(testedSwagger.getDefinitions().get("Customer")!=null);

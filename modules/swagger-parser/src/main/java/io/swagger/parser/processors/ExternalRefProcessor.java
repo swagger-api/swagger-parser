@@ -10,6 +10,8 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
+
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +31,8 @@ public final class ExternalRefProcessor {
         this.swagger = swagger;
     }
 
-    public String processRefToExternalDefinition(String $ref, RefFormat refFormat) {
-        final Model model = cache.loadRef($ref, refFormat, Model.class);
+    public String processRefToExternalDefinition(String $ref, RefFormat refFormat, Path modelDirectory) {
+        final Model model = cache.loadRef($ref, refFormat, Model.class, modelDirectory);
 
         String newRef;
 
@@ -64,7 +66,7 @@ public final class ExternalRefProcessor {
 
 
             //If this is a new model, then check it for other sub references
-            processModel(model);
+            processModel(model, modelDirectory);
             swagger.addDefinition(newRef, model);
         }
 
@@ -72,23 +74,23 @@ public final class ExternalRefProcessor {
     }
 
 
-    public void processModel(Model model) {
+    public void processModel(Model model, Path modelDirectory) {
         if (model == null) {
             return;
         }
 
         if (model instanceof RefModel) {
-            processRefModel((RefModel) model);
+            processRefModel((RefModel) model, modelDirectory);
         } else if (model instanceof ArrayModel) {
-            processArrayModel((ArrayModel) model);
+            processArrayModel((ArrayModel) model, modelDirectory);
         } else if (model instanceof ComposedModel) {
-            processComposedModel((ComposedModel) model);
+            processComposedModel((ComposedModel) model, modelDirectory);
         } else if (model instanceof ModelImpl) {
-            processModelImpl((ModelImpl) model);
+            processModelImpl((ModelImpl) model, modelDirectory);
         }
     }
 
-    private void processModelImpl(ModelImpl modelImpl) {
+    private void processModelImpl(ModelImpl modelImpl, Path modelDirectory) {
 
         final Map<String, Property> properties = modelImpl.getProperties();
 
@@ -100,26 +102,26 @@ public final class ExternalRefProcessor {
         for(Map.Entry<String,Property> prop: properties.entrySet()){
             if(prop.getValue() instanceof RefProperty){
                 RefProperty subRef = (RefProperty)prop.getValue();
-                subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(),subRef.getRefFormat()));
+                subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(),subRef.getRefFormat(), modelDirectory));
             }
         }
 
     }
 
-    private void processComposedModel(ComposedModel composedModel) {
+    private void processComposedModel(ComposedModel composedModel, Path modelDirectory) {
 
-        processModel(composedModel.getParent());
-        processModel(composedModel.getChild());
+        processModel(composedModel.getParent(), modelDirectory);
+        processModel(composedModel.getChild(), modelDirectory);
 
         final List<RefModel> interfaces = composedModel.getInterfaces();
         if (interfaces != null) {
             for (RefModel model : interfaces) {
-                processRefModel(model);
+                processRefModel(model, modelDirectory);
             }
         }
     }
 
-    private void processArrayModel(ArrayModel arrayModel) {
+    private void processArrayModel(ArrayModel arrayModel, Path modelDirectory) {
 
         final Property items = arrayModel.getItems();
 
@@ -128,7 +130,7 @@ public final class ExternalRefProcessor {
         if (items != null) {
             if (items instanceof RefProperty) {
                 RefProperty itemsRef = (RefProperty)items;
-                final String newRef = processRefToExternalDefinition(itemsRef.get$ref(), itemsRef.getRefFormat());
+                final String newRef = processRefToExternalDefinition(itemsRef.get$ref(), itemsRef.getRefFormat(), modelDirectory);
 
                 if (newRef != null) {
                     itemsRef.set$ref(newRef);
@@ -138,7 +140,7 @@ public final class ExternalRefProcessor {
     }
 
 
-    private void processRefModel(RefModel refModel) {
+    private void processRefModel(RefModel refModel, Path modelDirectory) {
         /* if this is a URL or relative ref:
             1) we need to load it into memory.
             2) shove it into the #/definitions
@@ -147,7 +149,7 @@ public final class ExternalRefProcessor {
 
         if (isAnExternalRefFormat(refModel.getRefFormat())) {
             final String newRef = processRefToExternalDefinition(refModel.get$ref(),
-                    refModel.getRefFormat());
+                    refModel.getRefFormat(), modelDirectory);
 
             if (newRef != null) {
                 refModel.set$ref(newRef);

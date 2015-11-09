@@ -7,6 +7,7 @@ import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.parser.ResolverCache;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class ParameterProcessor {
         this.modelProcessor = new ModelProcessor(cache, swagger);
     }
 
-    public List<Parameter> processParameters(List<Parameter> parameters) {
+    public List<Parameter> processParameters(List<Parameter> parameters, Path parameterDirectory) {
 
         if (parameters == null) {
             return null;
@@ -35,14 +36,14 @@ public class ParameterProcessor {
 
             if (parameter instanceof RefParameter) {
                 RefParameter refParameter = (RefParameter) parameter;
-                final Parameter resolvedParameter = cache.loadRef(refParameter.get$ref(), refParameter.getRefFormat(), Parameter.class);
+                final Parameter resolvedParameter = cache.loadRef(refParameter.get$ref(), refParameter.getRefFormat(), Parameter.class, parameterDirectory);
                 parameter = resolvedParameter;
             }
 
             if (parameter instanceof BodyParameter) {
                 BodyParameter bodyParameter = (BodyParameter) parameter;
                 final Model schema = bodyParameter.getSchema();
-                modelProcessor.processModel(schema);
+                modelProcessor.processModel(schema, parameterDirectory);
             }
 
             processedPathLevelParameters.add(parameter);

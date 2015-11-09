@@ -7,6 +7,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.ResolverCache;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,8 @@ public class OperationProcessor {
         responseProcessor = new ResponseProcessor(cache, swagger);
     }
 
-    public void processOperation(Operation operation) {
-        final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
+    public void processOperation(Operation operation, Path operationDirectory) {
+        final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters(), operationDirectory);
         operation.setParameters(processedOperationParameters);
 
         final Map<String, Response> responses = operation.getResponses();
@@ -34,14 +35,14 @@ public class OperationProcessor {
 
                 if (response instanceof RefResponse) {
                     RefResponse refResponse = (RefResponse) response;
-                    Response resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), Response.class);
+                    Response resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), Response.class, operationDirectory);
 
                     if (resolvedResponse != null) {
                         response = resolvedResponse;
                         responses.put(responseCode, resolvedResponse);
                     }
                 }
-                responseProcessor.processResponse(response);
+                responseProcessor.processResponse(response, operationDirectory);
             }
         }
     }

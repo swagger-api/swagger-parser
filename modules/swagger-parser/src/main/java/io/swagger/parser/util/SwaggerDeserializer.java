@@ -595,7 +595,7 @@ public class SwaggerDeserializer {
     public RefParameter refParameter(TextNode obj, String location, ParseResult result) {
         return new RefParameter(obj.asText());
     }
-    
+
     public RefResponse refResponse(TextNode obj, String location, ParseResult result) {
         return new RefResponse(obj.asText());
     }

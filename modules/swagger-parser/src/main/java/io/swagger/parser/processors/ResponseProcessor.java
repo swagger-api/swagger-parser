@@ -5,6 +5,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
 
+import java.nio.file.Path;
 import java.util.Map;
 
 public class ResponseProcessor {
@@ -15,12 +16,12 @@ public class ResponseProcessor {
         propertyProcessor = new PropertyProcessor(cache, swagger);
     }
 
-    public void processResponse(Response response) {
+    public void processResponse(Response response, Path responseModelDirectory) {
         //process the response body
         final Property schema = response.getSchema();
 
         if (schema != null) {
-            propertyProcessor.processProperty(schema);
+            propertyProcessor.processProperty(schema, responseModelDirectory);
         }
 
         /* intentionally ignoring the response headers, even those these were modelled as a

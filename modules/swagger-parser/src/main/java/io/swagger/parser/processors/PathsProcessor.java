@@ -26,7 +26,7 @@ public class PathsProcessor {
         operationProcessor = new OperationProcessor(cache, swagger);
     }
 
-    public void processPaths() {
+    public void processPaths(java.nio.file.Path pathLocation) {
         final Map<String, Path> pathMap = swagger.getPaths();
 
         if (pathMap == null) {
@@ -52,7 +52,7 @@ public class PathsProcessor {
 
             if (path instanceof RefPath) {
                 RefPath refPath = (RefPath) path;
-                Path resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), Path.class);
+                Path resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), Path.class, pathLocation);
 
                 if (resolvedPath != null) {
                     //we need to put the resolved path into swagger object
@@ -62,14 +62,14 @@ public class PathsProcessor {
             }
 
             //at this point we can process this path
-            final List<Parameter> processedPathParameters = parameterProcessor.processParameters(path.getParameters());
+            final List<Parameter> processedPathParameters = parameterProcessor.processParameters(path.getParameters(), pathLocation);
             path.setParameters(processedPathParameters);
 
             final Map<HttpMethod, Operation> operationMap = path.getOperationMap();
 
             for (HttpMethod httpMethod : operationMap.keySet()) {
                 Operation operation = operationMap.get(httpMethod);
-                operationProcessor.processOperation(operation);
+                operationProcessor.processOperation(operation, pathLocation);
             }
         }
     }

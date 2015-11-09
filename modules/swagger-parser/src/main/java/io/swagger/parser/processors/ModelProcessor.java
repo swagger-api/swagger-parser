@@ -9,6 +9,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -24,23 +25,23 @@ public class ModelProcessor {
         this.externalRefProcessor = new ExternalRefProcessor(cache, swagger);
     }
 
-    public void processModel(Model model) {
+    public void processModel(Model model, Path modelDirectory) {
         if (model == null) {
             return;
         }
 
         if (model instanceof RefModel) {
-            processRefModel((RefModel) model);
+            processRefModel((RefModel) model, modelDirectory);
         } else if (model instanceof ArrayModel) {
-            processArrayModel((ArrayModel) model);
+            processArrayModel((ArrayModel) model, modelDirectory);
         } else if (model instanceof ComposedModel) {
-            processComposedModel((ComposedModel) model);
+            processComposedModel((ComposedModel) model, modelDirectory);
         } else if (model instanceof ModelImpl) {
-            processModelImpl((ModelImpl) model);
+            processModelImpl((ModelImpl) model, modelDirectory);
         }
     }
 
-    private void processModelImpl(ModelImpl modelImpl) {
+    private void processModelImpl(ModelImpl modelImpl, Path modelDirectory) {
 
         final Map<String, Property> properties = modelImpl.getProperties();
 
@@ -50,38 +51,38 @@ public class ModelProcessor {
 
         for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
             final Property property = propertyEntry.getValue();
-            propertyProcessor.processProperty(property);
+            propertyProcessor.processProperty(property, modelDirectory);
         }
 
     }
 
-    private void processComposedModel(ComposedModel composedModel) {
+    private void processComposedModel(ComposedModel composedModel, Path modelDirectory) {
 
-        processModel(composedModel.getParent());
-        processModel(composedModel.getChild());
+        processModel(composedModel.getParent(), modelDirectory);
+        processModel(composedModel.getChild(), modelDirectory);
 
         final List<RefModel> interfaces = composedModel.getInterfaces();
         if (interfaces != null) {
             for (RefModel model : interfaces) {
-                processRefModel(model);
+                processRefModel(model, modelDirectory);
             }
         }
 
     }
 
-    private void processArrayModel(ArrayModel arrayModel) {
+    private void processArrayModel(ArrayModel arrayModel, Path modelDirectory) {
 
         final Property items = arrayModel.getItems();
 
         // ArrayModel has a properties map, but my reading of the swagger spec makes me think it should be ignored
 
         if (items != null) {
-            propertyProcessor.processProperty(items);
+            propertyProcessor.processProperty(items, modelDirectory);
         }
     }
 
 
-    private void processRefModel(RefModel refModel) {
+    private void processRefModel(RefModel refModel, Path modelDirectory) {
     /* if this is a URL or relative ref:
         1) we need to load it into memory.
         2) shove it into the #/definitions
@@ -89,7 +90,7 @@ public class ModelProcessor {
      */
 
         if (isAnExternalRefFormat(refModel.getRefFormat())) {
-            final String newRef = externalRefProcessor.processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat());
+            final String newRef = externalRefProcessor.processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat(), modelDirectory);
 
             if (newRef != null) {
                 refModel.set$ref(newRef);

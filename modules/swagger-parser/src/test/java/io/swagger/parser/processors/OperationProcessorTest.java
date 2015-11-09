@@ -8,12 +8,15 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
+import io.swagger.parser.util.PathUtils;
 import mockit.Expectations;
 import mockit.FullVerifications;
 import mockit.Injectable;
 import mockit.Mocked;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
@@ -41,7 +44,9 @@ public class OperationProcessorTest {
         Operation operation = new Operation();
         operation.setParameters(inputParameterList);
 
+
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
+        final Path refPath = PathUtils.getParentDirectoryOfFile(ref);
         RefResponse refResponse = new RefResponse(ref);
 
         operation.response(200, refResponse);
@@ -55,21 +60,21 @@ public class OperationProcessorTest {
             times = 1;
             result = responseProcessor;
 
-            parameterProcessor.processParameters(inputParameterList);
+            parameterProcessor.processParameters(inputParameterList, refPath);
             times = 1;
             result = outputParameterList;
 
-            cache.loadRef(ref, RefFormat.URL, Response.class);
+            cache.loadRef(ref, RefFormat.URL, Response.class, refPath);
             times = 1;
             result = resolvedResponse;
 
-            responseProcessor.processResponse(incomingResponse);
+            responseProcessor.processResponse(incomingResponse, refPath);
             times = 1;
-            responseProcessor.processResponse(resolvedResponse);
+            responseProcessor.processResponse(resolvedResponse, refPath);
             times = 1;
         }};
 
-        new OperationProcessor(cache, swagger).processOperation(operation);
+        new OperationProcessor(cache, swagger).processOperation(operation, refPath);
 
         new FullVerifications() {{}};
 
