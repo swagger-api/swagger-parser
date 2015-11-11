@@ -3,7 +3,9 @@ package io.swagger.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.swagger.models.Model;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.parameters.Parameter;
@@ -13,10 +15,13 @@ import io.swagger.parser.util.RefUtils;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -187,7 +192,7 @@ public class ResolverCacheTest {
         }
     }
 
-//    @Test
+    @Test
     public void testLoadInternalParameterRef(@Injectable Parameter mockedParameter) throws Exception {
         Swagger swagger = new Swagger();
         swagger.parameter("foo", mockedParameter);
@@ -198,6 +203,16 @@ public class ResolverCacheTest {
 
         assertNull(cache.loadRef("#/parameters/bar", RefFormat.INTERNAL, Parameter.class));
         assertNull(cache.loadRef("#/params/foo", RefFormat.INTERNAL, Parameter.class));
+    }
+    
+    @Test
+    public void testLoadInternalParameterRefWithSpaces(@Injectable Parameter mockedParameter) throws Exception {
+        Swagger swagger = new Swagger();
+        swagger.parameter("foo bar", mockedParameter);
+
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        Parameter actualResult = cache.loadRef("#/parameters/foo bar", RefFormat.INTERNAL, Parameter.class);
+        assertEquals(actualResult, mockedParameter);
     }
 
     @Test
@@ -212,6 +227,44 @@ public class ResolverCacheTest {
         assertNull(cache.loadRef("#/definitions/bar", RefFormat.INTERNAL, Model.class));
         assertNull(cache.loadRef("#/defs/bar", RefFormat.INTERNAL, Model.class));
     }
+
+    @Test
+    public void testLoadInternalDefinitionRefWithSpaces(@Injectable Model mockedModel) throws Exception {
+        Swagger swagger = new Swagger();
+        swagger.addDefinition("foo bar", mockedModel);
+
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        Model actualResult = cache.loadRef("#/definitions/foo bar", RefFormat.INTERNAL, Model.class);
+        assertEquals(actualResult, mockedModel);
+    }
+    
+    
+    @Test
+    public void testLoadInternalResponseRef(@Injectable Response mockedResponse) throws Exception {
+        Swagger swagger = new Swagger();
+        Map<String,Response> responses = new HashMap<>();
+        responses.put("foo", mockedResponse);
+        swagger.setResponses(responses);
+
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        Response actualResult = cache.loadRef("#/responses/foo", RefFormat.INTERNAL, Response.class);
+        assertEquals(actualResult, mockedResponse);
+
+        assertNull(cache.loadRef("#/responses/bar", RefFormat.INTERNAL, Response.class));
+    }
+
+    @Test
+    public void testLoadInternalResponseRefWithSpaces(@Injectable Response mockedResponse) throws Exception {
+        Swagger swagger = new Swagger();
+        Map<String,Response> responses = new HashMap<>();
+        responses.put("foo bar", mockedResponse);
+        swagger.setResponses(responses);
+
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        Response actualResult = cache.loadRef("#/responses/foo bar", RefFormat.INTERNAL, Response.class);
+        assertEquals(actualResult, mockedResponse);
+    }
+
 
     @Test
     public void testRenameCache() throws Exception {
