@@ -442,7 +442,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 .schema(responseProperty);
         if (output.getResponses() == null) {
             output.defaultResponse(response);
-        } else {
+        } else if (responseProperty != null) {
             output.response(200, response);
         }
 
