@@ -25,6 +25,7 @@ import io.swagger.models.apideclaration.ResponseMessage;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.auth.In;
+import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.FormParameter;
@@ -45,6 +46,7 @@ import io.swagger.models.resourcelisting.Authorization;
 import io.swagger.models.resourcelisting.AuthorizationCodeGrant;
 import io.swagger.models.resourcelisting.ImplicitGrant;
 import io.swagger.models.resourcelisting.OAuth2Authorization;
+import io.swagger.models.resourcelisting.BasicAuthorization;
 import io.swagger.models.resourcelisting.ResourceListing;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
@@ -649,6 +651,10 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                     }
 
                     def.setName(o2.getKeyname());
+
+                    swagger.securityDefinition(authNickname, def);
+                } else if (auth instanceof BasicAuthorization) {
+                    BasicAuthDefinition def = new BasicAuthDefinition();
 
                     swagger.securityDefinition(authNickname, def);
                 }
