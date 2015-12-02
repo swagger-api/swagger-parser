@@ -1,8 +1,5 @@
 package io.swagger.parser.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.BasicAuthDefinition;
@@ -12,6 +9,7 @@ import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.SwaggerResolver;
 import io.swagger.util.Json;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -21,9 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SwaggerDeserializerTest {
     @Test
@@ -612,5 +608,106 @@ public class SwaggerDeserializerTest {
 
         assertEquals(qp.getType(), "array");
         assertTrue(p instanceof StringProperty);
+    }
+
+
+    @Test(description = "it should read a top-level extension per https://github.com/swagger-api/validator-badge/issues/59")
+    public void testToplevelExtension() throws Exception {
+        String json = "\n" +
+                "{\n" +
+                "    \"swagger\": \"2.0\",\n" +
+                "\t\"x-foo\" : \"woof\",\n" +
+                "    \"info\": {\n" +
+                "        \"version\": \"0.0.0\",\n" +
+                "        \"title\": \"Simple API\"\n" +
+                "    },\n" +
+                "    \"paths\": {\n" +
+                "        \"/\": {\n" +
+                "            \"get\": {\n" +
+                "                \"responses\": {\n" +
+                "                    \"200\": {\n" +
+                "                        \"description\": \"OK\"\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+    }
+
+    @Test
+    public void testDeserializeBinaryString() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"info\": {\n" +
+                "    \"title\": \"foo\"\n" +
+                "  },\n" +
+                "  \"paths\": {\n" +
+                "    \"/test\": {\n" +
+                "      \"post\": {\n" +
+                "        \"parameters\": [\n" +
+                "          {\n" +
+                "            \"name\": \"AnyName\",\n" +
+                "            \"in\": \"body\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"format\": \"binary\"\n" +
+                "            }\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"ok\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+
+        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
+    }
+
+    @Test
+    public void testDeserializeEnum() {
+        String yaml = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: your title\n" +
+                "paths:\n" +
+                "  /persons:\n" +
+                "    get:\n" +
+                "      description: a test\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: Successful response\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/ExampleEnum'\n" +
+                "definitions:\n" +
+                "  ExampleEnum:\n" +
+                "    type: string\n" +
+                "    default: foo\n" +
+                "    enum:\n" +
+                "      - First\n" +
+                "      - Second";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
+
+        Model model = resolved.getDefinitions().get("ExampleEnum");
+        assertTrue(model instanceof ModelImpl);
+        ModelImpl impl = (ModelImpl) model;
+        List<String> enumValues = impl.getEnum();
+        assertTrue(enumValues.size() == 2);
+        assertEquals(enumValues.get(0), "First");
+        assertEquals(enumValues.get(1), "Second");
     }
 }
