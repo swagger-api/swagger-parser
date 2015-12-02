@@ -661,6 +661,7 @@ public class SwaggerDeserializer {
             ModelImpl impl = new ModelImpl();
             impl.setType(value);
 
+
             JsonNode ap = node.get("additionalProperties");
             if(ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
@@ -674,6 +675,16 @@ public class SwaggerDeserializer {
 
             value = getString("discriminator", node, false, location, result);
             impl.setDiscriminator(value);
+
+            ap = node.get("enum");
+            if(ap != null) {
+                ArrayNode arrayNode = getArray("enum", node, false, location, result);
+                if(arrayNode != null) {
+                    for(JsonNode n : arrayNode) {
+                        impl._enum(n.textValue());
+                    }
+                }
+            }
 
             JsonNode xml = node.get("xml");
             if(xml != null) {
