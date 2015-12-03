@@ -14,6 +14,7 @@ import mockit.Mocked;
 import mockit.StrictExpectations;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -30,8 +31,9 @@ public class SwaggerResolverTest {
                                     @Mocked final DefinitionsProcessor definitionsProcessor,
                                     @Mocked final PathsProcessor pathsProcessor) throws Exception {
 
+        final java.nio.file.Path blankPath = new File(".").toPath();
         new StrictExpectations() {{
-            new ResolverCache(swagger, auths, null);
+            new ResolverCache(swagger, auths);
             result = cache;
             times = 1;
 
@@ -43,10 +45,10 @@ public class SwaggerResolverTest {
             result = pathsProcessor;
             times = 1;
 
-            pathsProcessor.processPaths();
+            pathsProcessor.processPaths(blankPath);
             times = 1;
 
-            definitionsProcessor.processDefinitions();
+            definitionsProcessor.processDefinitions(blankPath);
             times = 1;
 
         }};

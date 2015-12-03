@@ -1,5 +1,7 @@
 package io.swagger.parser.processors;
 
+import java.nio.file.Path;
+
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
@@ -17,19 +19,19 @@ public class PropertyProcessor  {
         externalRefProcessor = new ExternalRefProcessor(cache, swagger);
     }
 
-    public void processProperty(Property property) {
+    public void processProperty(Property property, Path propertyModelDirectory) {
         if (property instanceof RefProperty) {
-            processRefProperty((RefProperty) property);
+            processRefProperty((RefProperty) property, propertyModelDirectory);
         } else if (property instanceof ArrayProperty) {
-            processArrayProperty((ArrayProperty) property);
+            processArrayProperty((ArrayProperty) property, propertyModelDirectory);
         } else if (property instanceof MapProperty) {
-            processMapProperty((MapProperty) property);
+            processMapProperty((MapProperty) property, propertyModelDirectory);
         }
     }
 
-    private void processRefProperty(RefProperty refProperty) {
+    private void processRefProperty(RefProperty refProperty, Path propertyModelDirectory) {
         if (isAnExternalRefFormat(refProperty.getRefFormat())) {
-            final String newRef = externalRefProcessor.processRefToExternalDefinition(refProperty.get$ref(), refProperty.getRefFormat());
+            final String newRef = externalRefProcessor.processRefToExternalDefinition(refProperty.get$ref(), refProperty.getRefFormat(), propertyModelDirectory);
 
             if (newRef != null) {
                 refProperty.set$ref(newRef);
@@ -37,17 +39,17 @@ public class PropertyProcessor  {
         }
     }
 
-    private void processMapProperty(MapProperty property) {
+    private void processMapProperty(MapProperty property, Path propertyModelDirectory) {
         final Property additionalProperties = property.getAdditionalProperties();
         if (additionalProperties != null) {
-            processProperty(additionalProperties);
+            processProperty(additionalProperties, propertyModelDirectory);
         }
     }
 
-    private void processArrayProperty(ArrayProperty property) {
+    private void processArrayProperty(ArrayProperty property, Path propertyModelDirectory) {
         final Property items = property.getItems();
         if (items != null) {
-            processProperty(items);
+            processProperty(items, propertyModelDirectory);
         }
     }
 }

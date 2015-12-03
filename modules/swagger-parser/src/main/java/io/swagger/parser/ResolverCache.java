@@ -1,6 +1,8 @@
 package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import io.swagger.models.Model;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
@@ -34,7 +36,6 @@ public class ResolverCache {
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
-    private final Path parentDirectory;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
 
@@ -43,27 +44,43 @@ public class ResolverCache {
      */
     private Map<String, String> renameCache = new HashMap<>();
 
-    public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
+    public ResolverCache(Swagger swagger, List<AuthorizationValue> auths/*, String parentFileLocation*/) {
         this.swagger = swagger;
         this.auths = auths;
 
+//        if(parentFileLocation != null) {
+//            if(parentFileLocation.startsWith("http")) {
+//                parentDirectory = null;
+//            } else {
+//                parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
+//            }
+//        } else {
+//            File file = new File(".");
+//            parentDirectory = file.toPath();
+//        }
+
+    }
+
+    //just for tests
+    <T> T _loadRef(String ref, RefFormat refFormat, Class<T> expectedType, String parentFileLocation) {
+        Path parentDirectory;
         if(parentFileLocation != null) {
-            if(parentFileLocation.startsWith("http")) {
-                parentDirectory = null;
-            } else {
-                parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
-            }
+            parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
         } else {
             File file = new File(".");
             parentDirectory = file.toPath();
         }
-
+        return loadRef(ref, refFormat, expectedType, parentDirectory);
     }
 
-    public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
+    public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType, Path modelDirectory) {
         if (refFormat == RefFormat.INTERNAL) {
             //we don't need to go get anything for internal refs
             return expectedType.cast(loadInternalRef(ref));
+        }
+
+        if (modelDirectory == null) {
+            modelDirectory = new File(".").toPath();
         }
 
         final String[] refParts = ref.split("#/");
@@ -88,7 +105,7 @@ public class ResolverCache {
         String contents = externalFileCache.get(file);
 
         if (contents == null) {
-            contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
+            contents = RefUtils.readExternalRef(file, refFormat, auths, modelDirectory);
             externalFileCache.put(file, contents);
         }
 

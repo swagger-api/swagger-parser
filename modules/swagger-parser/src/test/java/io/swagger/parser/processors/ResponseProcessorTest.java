@@ -30,14 +30,14 @@ public class ResponseProcessorTest {
         new StrictExpectations(){{
             new PropertyProcessor(cache, swagger); times=1; result = propertyProcessor;
 
-            propertyProcessor.processProperty(responseSchema); times=1;
+            propertyProcessor.processProperty(responseSchema, null); times=1;
         }};
 
         Response response = new Response();
         response.setSchema(responseSchema);
         response.addHeader("foo", responseHeader);
 
-        new ResponseProcessor(cache, swagger).processResponse(response);
+        new ResponseProcessor(cache, swagger).processResponse(response, null);
 
         new FullVerifications(){{}};
     }

@@ -7,6 +7,7 @@ import io.swagger.parser.ResolverCache;
 import mockit.*;
 import org.testng.annotations.Test;
 
+import java.nio.file.Path;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
@@ -20,6 +21,7 @@ public class DefinitionsProcessorTest {
     @Test
     public void testDefinitionsProcessor(@Injectable final Model model1,
                                          @Injectable final Model model2,
+                                         @Injectable final Path path,
                                          @Injectable final ResolverCache cache) throws Exception {
 
         final Swagger swagger = new Swagger();
@@ -31,15 +33,15 @@ public class DefinitionsProcessorTest {
             new ModelProcessor(cache, swagger);
             times = 1;
             result = modelProcessor;
-            modelProcessor.processModel((Model) any);
+            modelProcessor.processModel((Model) any, path);
             times = 2;
         }};
 
-        new DefinitionsProcessor(cache, swagger).processDefinitions();
+        new DefinitionsProcessor(cache, swagger).processDefinitions(path);
 
         new Verifications() {{
-            modelProcessor.processModel(model1);
-            modelProcessor.processModel(model2);
+            modelProcessor.processModel(model1, path);
+            modelProcessor.processModel(model2, path);
         }};
     }
 
@@ -56,7 +58,7 @@ public class DefinitionsProcessorTest {
             result = null;
         }};
 
-        new DefinitionsProcessor(cache, swagger).processDefinitions();
+        new DefinitionsProcessor(cache, swagger).processDefinitions(null);
 
         new FullVerifications() {{
         }};

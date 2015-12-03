@@ -65,14 +65,14 @@ public class RefUtils {
             throw new RuntimeException("Ref is not external");
         }
 
+        final Path pathToUse = parentDirectory.resolve(file).normalize();
         String result;
 
         try {
             if (refFormat == RefFormat.URL) {
-                result = RemoteUrl.urlToString(file, auths);
+                result = RemoteUrl.urlToString(pathToUse.toString(), auths);
             } else {
                 //its assumed to be a relative file ref
-                final Path pathToUse = parentDirectory.resolve(file).normalize();
 
                 if(Files.exists(pathToUse)) {
                     result = IOUtils.toString(new FileInputStream(pathToUse.toFile()));
