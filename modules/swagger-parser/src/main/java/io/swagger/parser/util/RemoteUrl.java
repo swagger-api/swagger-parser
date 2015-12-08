@@ -1,15 +1,23 @@
 package io.swagger.parser.util;
 
 import io.swagger.models.auth.AuthorizationValue;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -17,6 +25,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.Joiner;
 
 public class RemoteUrl {
 
@@ -60,6 +72,24 @@ public class RemoteUrl {
         }
     }
 
+	private static String encodeParts(final String path, final String delim) throws UnsupportedEncodingException {
+		if( null == path ) return path;
+		List<String> parts = new ArrayList<String>();
+		for (String part : path.split(delim)) {
+			parts.add(URLEncoder.encode(URLDecoder.decode(part, UTF_8.toString()),UTF_8.toString()));
+		}
+		return Joiner.on(delim).join(parts) + (path.endsWith(delim) ? delim : "");
+	}
+
+    public static String encodePathParameters(final String inputurl) throws MalformedURLException, UnsupportedEncodingException {
+        URL orig=new URL( inputurl );
+		if( StringUtils.isNotBlank( orig.getPath())){
+			return URI.create( inputurl.replace(orig.getPath(),
+						                     encodeParts(orig.getPath(), "/"))).toString();
+		}
+		return URI.create(inputurl).toString();
+	}
+
     public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {
         InputStream is = null;
         URLConnection conn = null;
@@ -92,7 +122,7 @@ public class RemoteUrl {
                     }
                 }
             } else {
-                conn = new URL(url).openConnection();
+                conn = new URL(encodePathParameters( url )).openConnection();
             }
 
             conn.setRequestProperty("Accept", ACCEPT_HEADER_VALUE);
