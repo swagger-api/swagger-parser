@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
 import static io.swagger.parser.util.RefUtils.deconflictName;
-
+import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
 
@@ -24,8 +24,12 @@ public final class ExternalRefProcessor {
     }
 
     public String processRefToExternalDefinition(String $ref, RefFormat refFormat) {
+    	System.out.println("Processing: "+$ref);
         final Model model = cache.loadRef($ref, refFormat, Model.class);
 
+        if(model==null){
+        	System.out.println("Model is null for "+$ref);;
+        }
         String newRef;
 
         Map<String, Model> definitions = swagger.getDefinitions();
@@ -64,7 +68,11 @@ public final class ExternalRefProcessor {
                 for (Map.Entry<String, Property> prop : subProps.entrySet()) {
                     if (prop.getValue() instanceof RefProperty) {
                         RefProperty subRef = (RefProperty) prop.getValue();
-                        subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+                        
+                        System.out.println(subRef.get$ref()+"," +subRef.getRefFormat());
+                        
+                        if(isAnExternalRefFormat(subRef.getRefFormat()))
+                        	subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
                     }
                 }
             }
