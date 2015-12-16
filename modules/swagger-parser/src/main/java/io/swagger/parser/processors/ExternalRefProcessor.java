@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
 import static io.swagger.parser.util.RefUtils.deconflictName;
-
+import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
 
@@ -64,7 +64,9 @@ public final class ExternalRefProcessor {
                 for (Map.Entry<String, Property> prop : subProps.entrySet()) {
                     if (prop.getValue() instanceof RefProperty) {
                         RefProperty subRef = (RefProperty) prop.getValue();
-                        subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+
+                        if(isAnExternalRefFormat(subRef.getRefFormat()))
+                        	subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
                     }
                 }
             }

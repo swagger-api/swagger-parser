@@ -134,6 +134,16 @@ public class ExternalRefProcessorTest {
     	final String addressURL = "http://my.company.com/path/to/address.json#/definitions/Address";
     	address.set$ref(addressURL);
     	custProps.put("Address", address);
+    	
+    	//Create a 'local' reference to something in #/definitions, this should be ignored a no longer result in a null pointer exception
+    	final String loyaltyURL = "#/definitions/LoyaltyScheme";
+    	
+    	RefProperty loyaltyProp = new RefProperty();
+    	loyaltyProp.set$ref(loyaltyURL);
+    	loyaltyProp.setName("LoyaltyCardNumber");
+    	loyaltyProp.setRequired(true);
+    	
+    	custProps.put("Loyalty", loyaltyProp);
     	customerModel.setProperties(custProps);
     	
     	//create address model, add Contact Ref Property to it
@@ -174,6 +184,5 @@ public class ExternalRefProcessorTest {
     	assertTrue(testedSwagger.getDefinitions().get("Customer")!=null);
     	assertTrue(testedSwagger.getDefinitions().get("Contact")!=null);
     	assertTrue(testedSwagger.getDefinitions().get("Address")!=null);
-    	assertTrue(testedSwagger.getDefinitions().size()==3);
     }
 }
