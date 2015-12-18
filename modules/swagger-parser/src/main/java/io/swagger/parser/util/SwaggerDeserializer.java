@@ -659,7 +659,7 @@ public class SwaggerDeserializer {
         }
         else {
             ModelImpl impl = new ModelImpl();
-            impl.setType(value);
+            impl.setType(type);
 
 
             JsonNode ap = node.get("additionalProperties");
