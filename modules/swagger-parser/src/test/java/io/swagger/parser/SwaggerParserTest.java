@@ -3,20 +3,19 @@ package io.swagger.parser;
 import io.swagger.models.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
@@ -64,7 +63,7 @@ public class SwaggerParserTest {
         assertTrue(model instanceof ArrayModel);
 
         ArrayModel am = (ArrayModel) model;
-        assertTrue(am.getItems() instanceof StringProperty);
+        assertTrue(am.getItems() instanceof ByteArrayProperty);
         assertEquals(am.getItems().getFormat(), "byte");
     }
 
