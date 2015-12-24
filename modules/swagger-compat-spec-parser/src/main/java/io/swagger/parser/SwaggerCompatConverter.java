@@ -439,15 +439,13 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
         // default response type
         Property responseProperty = propertyFromTypedObject(operation);
-        if (responseProperty != null) {
-            Response response = new Response()
-                    .description("success")
-                    .schema(responseProperty);
-            if (output.getResponses() == null) {
-                output.defaultResponse(response);
-            } else {
-                output.response(200, response);
-            }
+        Response response = new Response()
+                .description("success")
+                .schema(responseProperty);
+        if (output.getResponses() == null) {
+            output.defaultResponse(response);
+        } else if (responseProperty != null) {
+            output.response(200, response);
         }
 
         Map<String, List<AuthorizationScope>> auths = operation.getAuthorizations();

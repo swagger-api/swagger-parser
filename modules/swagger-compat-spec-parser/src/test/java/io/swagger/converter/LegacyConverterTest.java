@@ -130,7 +130,10 @@ public class LegacyConverterTest {
         for (Response item : path.getPost().getResponses().values()) {
             assertNull(item.getSchema());
         }
-        assertNull(path.getDelete().getResponses());
+        assertEquals(path.getDelete().getResponses().size(), 1);
+        assertEquals(path.getDelete().getResponses().containsKey("default"), true);
+        assertEquals(path.getDelete().getResponses().get("default").getDescription(), "success");
+
         final PathParameter id = (PathParameter) Iterables.find(path.getPatch().getParameters(),
                 new Predicate<Parameter>() {
 
