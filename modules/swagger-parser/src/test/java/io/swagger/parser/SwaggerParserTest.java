@@ -70,7 +70,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue62() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("https://raw.githubusercontent.com/swagger-api/swagger-spec/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
+        final Swagger swagger = parser.read("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
 
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
     }
