@@ -1,59 +1,24 @@
 package io.swagger.parser;
 
-import io.swagger.models.ArrayModel;
-import io.swagger.models.AuthorizationScope;
-import io.swagger.models.Contact;
-import io.swagger.models.Info;
-import io.swagger.models.License;
-import io.swagger.models.Method;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.models.*;
 import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
-import io.swagger.models.ParamType;
-import io.swagger.models.PassAs;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.Response;
-import io.swagger.models.Scheme;
-import io.swagger.models.Swagger;
-import io.swagger.models.apideclaration.Api;
-import io.swagger.models.apideclaration.ApiDeclaration;
-import io.swagger.models.apideclaration.ExtendedTypedObject;
-import io.swagger.models.apideclaration.Items;
-import io.swagger.models.apideclaration.ModelProperty;
-import io.swagger.models.apideclaration.ResponseMessage;
-import io.swagger.models.auth.ApiKeyAuthDefinition;
-import io.swagger.models.auth.AuthorizationValue;
-import io.swagger.models.auth.In;
-import io.swagger.models.auth.BasicAuthDefinition;
-import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.FormParameter;
-import io.swagger.models.parameters.HeaderParameter;
+import io.swagger.models.apideclaration.*;
+import io.swagger.models.auth.*;
+import io.swagger.models.parameters.*;
 import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.PathParameter;
-import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.parameters.SerializableParameter;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.PropertyBuilder;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
-import io.swagger.models.resourcelisting.ApiInfo;
-import io.swagger.models.resourcelisting.ApiKeyAuthorization;
-import io.swagger.models.resourcelisting.ApiListingReference;
-import io.swagger.models.resourcelisting.Authorization;
-import io.swagger.models.resourcelisting.AuthorizationCodeGrant;
-import io.swagger.models.resourcelisting.ImplicitGrant;
-import io.swagger.models.resourcelisting.OAuth2Authorization;
-import io.swagger.models.resourcelisting.BasicAuthorization;
-import io.swagger.models.resourcelisting.ResourceListing;
+import io.swagger.models.properties.*;
+import io.swagger.models.resourcelisting.*;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.report.MessageBuilder;
 import io.swagger.transform.migrate.ApiDeclarationMigrator;
 import io.swagger.transform.migrate.ResourceListingMigrator;
 import io.swagger.util.Json;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,11 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 // legacy models
 
@@ -257,9 +217,6 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
         if (null == type) {
             LOGGER.warn("Empty type in Param: " + param);
-        }
-        if (null == format) {
-            LOGGER.warn("Empty format in Param: " + param);
         }
 
         if (output instanceof BodyParameter) {
