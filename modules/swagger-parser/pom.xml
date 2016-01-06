@@ -13,28 +13,6 @@
     <version>1.0.15-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>swagger-parser</name>
-    <build>
-      <plugins>
-        <plugin>
-          <groupId>org.scalatest</groupId>
-          <artifactId>scalatest-maven-plugin</artifactId>
-          <version>1.0</version>
-          <configuration>
-            <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-            <junitxml>.</junitxml>
-            <filereports>WDF TestSuite.txt</filereports>
-          </configuration>
-          <executions>
-            <execution>
-              <id>test</id>
-              <goals>
-                <goal>test</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </build>
     <profiles>
         <profile>
             <id>test-single</id>
@@ -73,12 +51,6 @@
             <artifactId>swagger-core</artifactId>
             <version>${swagger-core-version}</version>
             <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.10</artifactId>
-            <version>${scala-test-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
