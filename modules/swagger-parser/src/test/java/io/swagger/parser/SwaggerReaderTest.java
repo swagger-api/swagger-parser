@@ -1,16 +1,15 @@
 package io.swagger.parser;
 
 import io.swagger.matchers.SerializationMatchers;
-import io.swagger.models.Model;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.util.ResourceUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 public class SwaggerReaderTest {
     @Test(description = "it should read the uber api with file protocol")
@@ -84,5 +83,25 @@ public class SwaggerReaderTest {
         final Swagger swaggerFromFile = parser.read(path);
 
         assertEquals(swaggerFromFile, swaggerFromString);
+    }
+
+    @Test
+    public void testIssueSwaggerUi1792() throws Exception {
+        final SwaggerParser parser = new SwaggerParser();
+        final String path = "thing.json";
+
+        final Swagger swaggerFromString = parser.parse(ResourceUtils.loadClassResource(getClass(), path));
+
+        Model thing = swaggerFromString.getDefinitions().get("Thing");
+        assertTrue(thing instanceof ComposedModel);
+
+        ComposedModel composedModel = (ComposedModel) thing;
+        List<Model> models = composedModel.getAllOf();
+        assertTrue(models.size() == 2);
+        assertTrue(models.get(0) instanceof RefModel);
+        assertTrue(models.get(1) instanceof ModelImpl);
+
+        Model thingSummary = swaggerFromString.getDefinitions().get("ThingSummary");
+        assertTrue(thingSummary instanceof ModelImpl);
     }
 }

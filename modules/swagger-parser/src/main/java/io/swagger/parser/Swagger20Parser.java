@@ -107,6 +107,9 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 LOGGER.info("\n\nSwagger Tree: \n"
                     + ReflectionToStringBuilder.toString(rootNode, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");
             }
+            if(rootNode == null) {
+                return null;
+            }
             // must have swagger node set
             JsonNode swaggerNode = rootNode.get("swagger");
             if (swaggerNode == null) {

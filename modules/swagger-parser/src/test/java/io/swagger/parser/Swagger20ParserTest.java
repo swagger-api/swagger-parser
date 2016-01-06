@@ -7,13 +7,8 @@ import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.util.Json;
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.StrictExpectations;
-import mockit.Tested;
+import mockit.*;
 import org.apache.commons.io.FileUtils;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,22 +81,6 @@ public class Swagger20ParserTest {
             Files.exists(path); times=1; result=true;
             path.toFile(); times=1; result=file;
             FileUtils.readFileToString(file, "UTF-8"); times=1; result=expectedJson;
-        }};
-
-        setupCommonExpectations();
-
-        doTest(location, null);
-    }
-
-//    @Test
-    public void testRead_RelativeFile_OnClasspath(@Injectable final File file) throws Exception {
-
-        final String location = "./path/to/file.json";
-
-        new StrictExpectations(){{
-            Paths.get(location); times=1; result=path;
-            Files.exists(path); times=1; result=false;
-            ClasspathHelper.loadFileFromClasspath(location); times=1; result=expectedJson;
         }};
 
         setupCommonExpectations();
