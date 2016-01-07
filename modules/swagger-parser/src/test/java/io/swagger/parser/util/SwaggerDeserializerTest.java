@@ -710,4 +710,21 @@ public class SwaggerDeserializerTest {
         assertEquals(enumValues.get(0), "First");
         assertEquals(enumValues.get(1), "Second");
     }
+
+    @Test
+    public void testDeserializeWithMessages() {
+        String yaml = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title:\n" +
+                "    - bar";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Set<String> messages = new HashSet<String>(result.getMessages());
+        assertTrue(messages.size() == 2);
+
+        assertTrue(messages.contains("attribute info.title is not of type `string`"));
+        assertTrue(messages.contains("attribute paths is missing"));
+    }
 }
