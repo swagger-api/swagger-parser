@@ -1,43 +1,10 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.NumericNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-
-import io.swagger.models.ArrayModel;
-import io.swagger.models.ComposedModel;
-import io.swagger.models.Contact;
-import io.swagger.models.ExternalDocs;
-import io.swagger.models.Info;
-import io.swagger.models.License;
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.RefPath;
-import io.swagger.models.RefResponse;
-import io.swagger.models.Response;
-import io.swagger.models.Scheme;
-import io.swagger.models.SecurityRequirement;
-import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
-import io.swagger.models.Xml;
-import io.swagger.models.auth.ApiKeyAuthDefinition;
-import io.swagger.models.auth.BasicAuthDefinition;
-import io.swagger.models.auth.In;
-import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.AbstractSerializableParameter;
-import io.swagger.models.parameters.FormParameter;
-import io.swagger.models.parameters.HeaderParameter;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.PathParameter;
-import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.parameters.RefParameter;
+import com.fasterxml.jackson.databind.node.*;
+import io.swagger.models.*;
+import io.swagger.models.auth.*;
+import io.swagger.models.parameters.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.util.Json;
@@ -1322,6 +1289,9 @@ public class SwaggerDeserializer {
         else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
             value = v.asDouble();
         }
+        else if(!v.isValueNode()) {
+            result.invalidType(location, key, "double", node);
+        }
         return value;
     }
 
@@ -1336,6 +1306,9 @@ public class SwaggerDeserializer {
         }
         else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
             value = v.numberValue();
+        }
+        else if(!v.isValueNode()) {
+            result.invalidType(location, key, "number", node);
         }
         return value;
     }
@@ -1352,6 +1325,9 @@ public class SwaggerDeserializer {
         else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
             value = v.intValue();
         }
+        else if(!v.isValueNode()) {
+            result.invalidType(location, key, "integer", node);
+        }
         return value;
     }
 
@@ -1363,6 +1339,9 @@ public class SwaggerDeserializer {
                 result.missing(location, key);
                 result.invalid();
             }
+        }
+        else if(!v.isValueNode()) {
+            result.invalidType(location, key, "string", node);
         }
         else {
             value = v.asText();
