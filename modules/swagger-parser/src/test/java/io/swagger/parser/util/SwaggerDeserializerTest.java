@@ -727,4 +727,35 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute info.title is not of type `string`"));
         assertTrue(messages.contains("attribute paths is missing"));
     }
+
+    @Test
+    public void testDeserializeWithDiscriminator() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "definitions: \n" +
+                "  Animal:\n" +
+                "    type: object\n" +
+                "    discriminator: petType\n" +
+                "    description: |\n" +
+                "      A basic `Animal` object which can extend to other animal types.\n" +
+                "    required:\n" +
+                "      - commonName\n" +
+                "      - petType\n" +
+                "    properties:\n" +
+                "      commonName:\n" +
+                "        description: the household name of the animal\n" +
+                "        type: string\n" +
+                "      petType:\n" +
+                "        description: |\n" +
+                "          The discriminator for the animal type.  It _must_\n" +
+                "          match one of the concrete schemas by name (i.e. `Cat`)\n" +
+                "          for proper deserialization\n" +
+                "        type: string";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Set<String> messages = new HashSet<String>(result.getMessages());
+        assertFalse(messages.contains("attribute definitions.Animal.discriminator is unexpected"));
+    }
 }
