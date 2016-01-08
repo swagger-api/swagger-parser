@@ -662,7 +662,7 @@ public class SwaggerDeserializer {
             ExternalDocs docs = externalDocs(externalDocs, location, result);
             impl.setExternalDocs(docs);
 
-            ObjectNode properties = getObject("properties", node, true, location, result);
+            ObjectNode properties = getObject("properties", node, false, location, result);
             if(properties != null) {
                 Set<String> propertyNames = getKeys(properties);
                 for(String propertyName : propertyNames) {
