@@ -25,7 +25,7 @@ public class SwaggerDeserializer {
     static Set<String> REF_MODEL_KEYS = new HashSet<String>(Arrays.asList("$ref"));
     static Set<String> PATH_KEYS = new HashSet<String>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options", "parameters"));
     static Set<String> OPERATION_KEYS = new HashSet<String>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
-    static Set<String> PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLenth", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf"));
+    static Set<String> PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf"));
     static Set<String> BODY_PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
