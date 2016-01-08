@@ -758,4 +758,28 @@ public class SwaggerDeserializerTest {
         Set<String> messages = new HashSet<String>(result.getMessages());
         assertFalse(messages.contains("attribute definitions.Animal.discriminator is unexpected"));
     }
+
+    @Test
+    public void testIssue161() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "paths:\n" +
+                "  /users:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - in: query\n" +
+                "          name: name\n" +
+                "          type: string\n" +
+                "          minLength: 10\n" +
+                "          maxLength: 100\n" +
+                "          required: false\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: ok";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Set<String> messages = new HashSet<String>(result.getMessages());
+        assertFalse(messages.contains("attribute paths.'/users'(get).[name].maxLength is unexpected"));
+    }
 }
