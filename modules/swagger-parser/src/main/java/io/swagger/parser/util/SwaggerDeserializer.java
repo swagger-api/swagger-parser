@@ -829,10 +829,20 @@ public class SwaggerDeserializer {
                         model.setChild(new ModelImpl());
                     }
                 }
-                return model;
             }
             else {
                 result.invalidType(location, "allOf", "array", allOf);
+            }
+
+            // extra keys
+            Set<String> keys = getKeys(node);
+            for(String key : keys) {
+                if(key.startsWith("x-")) {
+                    model.setVendorExtension(key, extension(node.get(key)));
+                }
+                else if(!SCHEMA_KEYS.contains(key)) {
+                    result.extra(location, key, node.get(key));
+                }
             }
 
             return model;

@@ -782,4 +782,68 @@ public class SwaggerDeserializerTest {
         Set<String> messages = new HashSet<String>(result.getMessages());
         assertFalse(messages.contains("attribute paths.'/users'(get).[name].maxLength is unexpected"));
     }
+
+    @Test
+    public void testIssue151() throws Exception {
+        String json =
+                "{\n" +
+                "    \"swagger\": \"2.0\",\n" +
+                "    \"paths\": {\n" +
+                "        \"/\": {\n" +
+                "            \"get\": {\n" +
+                "                \"responses\": {\n" +
+                "                    \"200\": {\n" +
+                "                        \"description\": \"OK\"\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            }\n" +
+                "        }\n" +
+                "    },\n" +
+                "    \"definitions\": {\n" +
+                "        \"Pet\": {\n" +
+                "            \"type\": \"object\",\n" +
+                "            \"required\": [\n" +
+                "                \"id\"\n" +
+                "            ],\n" +
+                "            \"properties\": {\n" +
+                "                \"id\": {\n" +
+                "                    \"type\": \"integer\",\n" +
+                "                    \"format\": \"int64\"\n" +
+                "                }\n" +
+                "            }\n" +
+                "        },\n" +
+                "        \"Dog\": {\n" +
+                "            \"type\": \"object\",\n" +
+                "            \"allOf\": [\n" +
+                "                {\n" +
+                "                    \"$ref\": \"#/definitions/Pet\"\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"required\": [\n" +
+                "                        \"name\"\n" +
+                "                    ],\n" +
+                "                    \"properties\": {\n" +
+                "                        \"name\": {\n" +
+                "                            \"type\": \"string\"\n" +
+                "                        }\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            ],\n" +
+                "            \"x-vendor-ext\": \"some data\"\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        Swagger swagger = result.getSwagger();
+
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.size() == 2);
+        Model allOfModel = definitions.get("Dog");
+        assertTrue(allOfModel instanceof ComposedModel);
+        assertFalse(allOfModel.getVendorExtensions().isEmpty());
+        assertEquals("some data", allOfModel.getVendorExtensions().get("x-vendor-ext"));
+    }
 }
