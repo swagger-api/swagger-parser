@@ -100,6 +100,28 @@ public class RemoteUrlTest {
         );
     }
 
+    @Test
+    public void testGetRemoteUrlWithCharactersInPathThatShouldBeEncoded() throws Exception {
+
+        final String expectedBody = "a really good body";
+
+        stubFor(get(urlPathEqualTo("/v2/pet/%7Bid%7D"))
+
+                        .willReturn(aResponse()
+                                .withBody(expectedBody)
+                                .withHeader("Content-Type", "application/json"))
+        );
+
+        final String actualBody = RemoteUrl.urlToString("http://localhost:" + WIRE_MOCK_PORT + "/v2/pet/{id}", null);
+
+        assertEquals(actualBody, expectedBody);
+
+        verify(getRequestedFor(urlPathEqualTo("/v2/pet/%7Bid%7D"))
+                        .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+        );
+
+    }
+
     private String setupStub() {
         final String expectedBody = "a really good body";
         stubFor(get(urlEqualTo("/v2/pet/1"))
