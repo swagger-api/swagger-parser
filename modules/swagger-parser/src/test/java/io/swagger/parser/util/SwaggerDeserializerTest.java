@@ -782,4 +782,47 @@ public class SwaggerDeserializerTest {
         Set<String> messages = new HashSet<String>(result.getMessages());
         assertFalse(messages.contains("attribute paths.'/users'(get).[name].maxLength is unexpected"));
     }
+
+    @Test
+    public void testValidatorIssue50() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"info\": {\n" +
+                "    \"version\": \"2.0.0\",\n" +
+                "    \"title\": \"Beanhunter API\",\n" +
+                "    \"description\": \"Description of the api goes here.\"\n" +
+                "  },\n" +
+                "  \"host\": \"local.xxx.com\",\n" +
+                "  \"schemes\": [\n" +
+                "    \"http\"\n" +
+                "  ],\n" +
+                "  \"consumes\": [\n" +
+                "    \"application/json\"\n" +
+                "  ],\n" +
+                "  \"produces\": [\n" +
+                "    \"application/json\"\n" +
+                "  ],\n" +
+                "  \"paths\": {\n" +
+                "    \"/city\": {\n" +
+                "      \"get\": {\n" +
+                "        \"description\": \"test description\",\n" +
+                "        \"responses\": {}\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"definitions\": {\n" +
+                "    \"Endpoints\": {\n" +
+                "      \"title\": \"Endpoints object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"links\": {}\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+
+        assertTrue(result.getMessages().size() == 1);
+    }
 }

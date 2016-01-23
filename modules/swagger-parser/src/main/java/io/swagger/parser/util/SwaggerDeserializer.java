@@ -319,7 +319,11 @@ public class SwaggerDeserializer {
         output.setParameters(parameters(parameters, location, result));
 
         ObjectNode responses = getObject("responses", obj, true, location, result);
-        output.setResponses(responses(responses, location, result));
+        Map<String, Response> responsesObject = responses(responses, location, result);
+        if(responsesObject != null && responsesObject.size() == 0) {
+            result.missing(location, "responses");
+        }
+        output.setResponses(responsesObject);
 
         array = getArray("schemes", obj, false, location, result);
         if(array != null) {
