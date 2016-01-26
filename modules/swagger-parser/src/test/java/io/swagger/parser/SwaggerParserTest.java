@@ -74,7 +74,7 @@ public class SwaggerParserTest {
 
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
     }
-    
+
     @Test(description="Test (path & form) parameter's required attribute")
     public void testParameterRequired() {
         SwaggerParser parser = new SwaggerParser();
