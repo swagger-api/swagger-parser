@@ -21,7 +21,7 @@ import javax.net.ssl.X509TrustManager;
 public class RemoteUrl {
 
     private static final String ACCEPT_HEADER_VALUE = "application/json, application/yaml, */*";
-    private static final String USER_AGENT_HEADER_VALUE = "Apache-HttpClient/UNAVAILABLE";
+    private static final String USER_AGENT_HEADER_VALUE = "Apache-HttpClient/Swagger";
 
     private static void disableSslVerification() {
         try {
