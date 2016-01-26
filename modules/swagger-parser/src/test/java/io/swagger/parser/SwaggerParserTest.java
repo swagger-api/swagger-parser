@@ -74,6 +74,13 @@ public class SwaggerParserTest {
 
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
     }
+
+    @Test
+    public void testIssue169() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("https://api.rocrooster.net/api-docs.json");
+        assertNotNull(swagger);
+    }
     
     @Test(description="Test (path & form) parameter's required attribute")
     public void testParameterRequired() {

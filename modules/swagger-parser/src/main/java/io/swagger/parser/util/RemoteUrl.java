@@ -21,6 +21,7 @@ import javax.net.ssl.X509TrustManager;
 public class RemoteUrl {
 
     private static final String ACCEPT_HEADER_VALUE = "application/json, application/yaml, */*";
+    private static final String USER_AGENT_HEADER_VALUE = "Apache-HttpClient/UNAVAILABLE";
 
     private static void disableSslVerification() {
         try {
@@ -96,6 +97,7 @@ public class RemoteUrl {
             }
 
             conn.setRequestProperty("Accept", ACCEPT_HEADER_VALUE);
+            conn.setRequestProperty("User-Agent", USER_AGENT_HEADER_VALUE);
             conn.connect();
             InputStream in = conn.getInputStream();
 
