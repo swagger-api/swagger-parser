@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,10 +39,17 @@ public class Swagger20Parser implements SwaggerParserExtension {
         String data;
 
         try {
+            location = location.replaceAll("\\\\","/");
             if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths);
             } else {
-                final Path path = Paths.get(location);
+                final String fileScheme = "file://";
+                Path path;
+                if (location.toLowerCase().startsWith(fileScheme)) {
+                    path = Paths.get(URI.create(location));
+                } else {
+                    path = Paths.get(location);
+                }
                 if (Files.exists(path)) {
                     data = FileUtils.readFileToString(path.toFile(), "UTF-8");
                 } else {
@@ -67,17 +75,19 @@ public class Swagger20Parser implements SwaggerParserExtension {
     @Override
     public Swagger read(String location, List<AuthorizationValue> auths) throws IOException {
         System.out.println("reading from " + location);
-
         try {
             String data;
-
+            location = location.replaceAll("\\\\","/");
             if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths);
             } else {
-                if (location.toLowerCase().startsWith("file://")) {
-                    location = location.substring("file://".length());
+                final String fileScheme = "file://";
+                Path path;
+                if (location.toLowerCase().startsWith(fileScheme)) {
+                    path = Paths.get(URI.create(location));
+                } else {
+                    path = Paths.get(location);
                 }
-                final Path path = Paths.get(location);
                 if(Files.exists(path)) {
                     data = FileUtils.readFileToString(path.toFile(), "UTF-8");
                 } else {
