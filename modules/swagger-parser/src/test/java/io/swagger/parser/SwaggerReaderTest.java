@@ -7,15 +7,34 @@ import io.swagger.util.ResourceUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.List;
 
 import static org.testng.Assert.*;
 
 public class SwaggerReaderTest {
-    @Test(description = "it should read the uber api with file protocol")
+    @Test(description = "it should read the uber api with file scheme")
     public void readUberApiFromFile() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("file://src/test/resources/uber.json");
+        java.nio.file.Path currentRelativePath = Paths.get("");
+        String curPath = currentRelativePath.toAbsolutePath().toString();
+        final Swagger swagger = parser.read("file:///" + curPath + "/src/test/resources/uber.json");
+        assertNotNull(swagger);
+    }
+
+    @Test(description = "it should read the uber api with file scheme and spaces")
+    public void readUberApiFromFileWithSpaces() {
+        final SwaggerParser parser = new SwaggerParser();
+        java.nio.file.Path currentRelativePath = Paths.get("");
+        String curPath = currentRelativePath.toAbsolutePath().toString();
+        final Swagger swagger = parser.read("file:///" + curPath + "/src/test/resources/s%20p%20a%20c%20e%20s/uber.json");
+        assertNotNull(swagger);
+    }
+
+    @Test(description = "it should read the uber api with url string without file scheme")
+    public void readUberApiFromFileNoScheme() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/uber.json");
         assertNotNull(swagger);
     }
 

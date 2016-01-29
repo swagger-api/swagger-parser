@@ -20,7 +20,7 @@ public class SwaggerParser {
         if (location == null) {
             return null;
         }
-
+        location = location.replaceAll("\\\\","/");
         List<SwaggerParserExtension> parserExtensions = getExtensions();
         SwaggerDeserializationResult output;
 
@@ -56,7 +56,7 @@ public class SwaggerParser {
         if (location == null) {
             return null;
         }
-
+        location = location.replaceAll("\\\\","/");
         List<SwaggerParserExtension> parserExtensions = getExtensions();
         Swagger output;
 
