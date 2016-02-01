@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.ClasspathHelper;
+import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.parser.util.SwaggerDeserializer;
 import io.swagger.util.Json;
-import io.swagger.util.Yaml;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -56,13 +56,13 @@ public class Swagger20Parser implements SwaggerParserExtension {
                     data = ClasspathHelper.loadFileFromClasspath(location);
                 }
             }
-            ObjectMapper mapper;
+            JsonNode rootNode;
             if (data.trim().startsWith("{")) {
-                mapper = Json.mapper();
+                ObjectMapper mapper = Json.mapper();
+                rootNode = mapper.readTree(data);
             } else {
-                mapper = Yaml.mapper();
+                rootNode = DeserializationUtils.readYamlTree(data);
             }
-            JsonNode rootNode = mapper.readTree(data);
             return readWithInfo(rootNode);
         }
         catch (Exception e) {
@@ -106,13 +106,14 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     private Swagger convertToSwagger(String data) throws IOException {
         if (data != null) {
-            ObjectMapper mapper;
+            JsonNode rootNode;
             if (data.trim().startsWith("{")) {
-                mapper = Json.mapper();
+                ObjectMapper mapper = Json.mapper();
+                rootNode = mapper.readTree(data);
             } else {
-                mapper = Yaml.mapper();
+                rootNode = DeserializationUtils.readYamlTree(data);
             }
-            JsonNode rootNode = mapper.readTree(data);
+
             if (System.getProperty("debugParser") != null) {
                 LOGGER.info("\n\nSwagger Tree: \n"
                     + ReflectionToStringBuilder.toString(rootNode, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");

@@ -6,6 +6,7 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
@@ -73,6 +74,16 @@ public class SwaggerParserTest {
         final Swagger swagger = parser.read("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
 
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
+    }
+
+    @Test
+    public void testIssue146() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_146.yaml");
+        assertNotNull(swagger);
+        QueryParameter p = ((QueryParameter)swagger.getPaths().get("/checker").getGet().getParameters().get(0));
+        StringProperty pp = (StringProperty)p.getItems();
+        assertTrue("registration".equalsIgnoreCase(pp.getEnum().get(0)));
     }
 
     @Test(description="Test (path & form) parameter's required attribute")

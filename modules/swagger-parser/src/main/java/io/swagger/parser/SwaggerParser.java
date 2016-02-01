@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
-import io.swagger.util.Yaml;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -88,15 +88,14 @@ public class SwaggerParser {
         if(swaggerAsString == null) {
             return new SwaggerDeserializationResult().message("empty or null swagger supplied");
         }
-        ObjectMapper mapper = null;
-        if(swaggerAsString.trim().startsWith("{")) {
-            mapper = Json.mapper();
-        }
-        else {
-            mapper = Yaml.mapper();
-        }
         try {
-            JsonNode node = mapper.readTree(swaggerAsString);
+            JsonNode node;
+            if (swaggerAsString.trim().startsWith("{")) {
+                ObjectMapper mapper = Json.mapper();
+                node = mapper.readTree(swaggerAsString);
+            } else {
+                node = DeserializationUtils.readYamlTree(swaggerAsString);
+            }
 
             SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);
             if (result != null) {

@@ -23,7 +23,7 @@ public class DeserializationUtilsTest {
 
 
     @Test
-    public void testDeserializeYamlIntoObject(@Mocked Yaml yaml,
+    public void testDeserializeYamlIntoObject(@Mocked Yaml yaml, @Mocked final org.yaml.snakeyaml.Yaml snakeYaml,
                                               @Injectable final ObjectMapper objectMapper,
                                               @Injectable final Model model) throws Exception {
 
@@ -34,7 +34,7 @@ public class DeserializationUtilsTest {
             Yaml.mapper();
             result = objectMapper;
             times = 1;
-            objectMapper.readValue(anyString, withAny(Object.class));
+            snakeYaml.load(anyString);
             times = 1;
             result = model;
         }};
@@ -111,17 +111,14 @@ public class DeserializationUtilsTest {
     }
 
     @Test
-    public void testDeserializeYamlIntoTree(@Mocked Yaml yaml,
+    public void testDeserializeYamlIntoTree(@Mocked Yaml yaml, @Mocked final org.yaml.snakeyaml.Yaml snakeYaml,
                                             @Injectable final ObjectMapper objectMapper,
                                             @Injectable final JsonNode jsonNode) throws Exception {
 
         String jsonStr = "really good yaml";
 
         new Expectations() {{
-            Yaml.mapper();
-            result = objectMapper;
-            times = 1;
-            objectMapper.readTree(anyString);
+            snakeYaml.load(anyString);
             result = jsonNode;
             times = 1;
         }};
