@@ -16,7 +16,7 @@ public class DeserializationUtils {
 
         try {
             if (fileOrHost.endsWith(".yaml")) {
-                result = Yaml.mapper().readTree(contents);
+                result = readYamlTree(contents);
             } else {
                 result = Json.mapper().readTree(contents);
             }
@@ -31,16 +31,22 @@ public class DeserializationUtils {
         T result;
 
         ObjectMapper mapper;
+        boolean isYaml = false;
 
         if(fileOrHost.endsWith(".yaml")) {
             mapper = Yaml.mapper();
+            isYaml = true;
         } else {
             mapper = Json.mapper();
         }
 
         try {
             if (contents instanceof String) {
-                result = mapper.readValue((String) contents, expectedType);
+                if (isYaml) {
+                    result = readYamlValue((String) contents, expectedType);
+                } else {
+                    result = mapper.readValue((String) contents, expectedType);
+                }
             } else {
                 result = mapper.convertValue(contents, expectedType);
             }
@@ -49,5 +55,15 @@ public class DeserializationUtils {
         }
 
         return result;
+    }
+
+    public static JsonNode readYamlTree(String contents) {
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
+        return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
+    }
+
+    public static <T> T readYamlValue(String contents, Class<T> expectedType) {
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
+        return Json.mapper().convertValue(yaml.load(contents), expectedType);
     }
 }

@@ -1,0 +1,32 @@
+swagger: '2.0'
+
+info:
+  version: "0.0.1"
+  title: API
+
+x-types:
+  OperationType: &OperationType
+    - registration
+
+# Describe your paths here
+paths:
+  /checker:
+    get:
+      parameters:
+        - name: operations
+          in: query
+          type: array
+          items:
+            type: string
+            enum: *OperationType
+          default: [registration]
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/OperationType'
+
+definitions:
+  OperationType:
+    type: string
+    enum: *OperationType
