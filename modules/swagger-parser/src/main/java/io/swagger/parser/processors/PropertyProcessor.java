@@ -1,11 +1,10 @@
 package io.swagger.parser.processors;
 
 import io.swagger.models.Swagger;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.*;
 import io.swagger.parser.ResolverCache;
+
+import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
@@ -24,6 +23,8 @@ public class PropertyProcessor  {
             processArrayProperty((ArrayProperty) property);
         } else if (property instanceof MapProperty) {
             processMapProperty((MapProperty) property);
+        } else if (property instanceof ObjectProperty) {
+            processObjectProperty((ObjectProperty) property);
         }
     }
 
@@ -49,5 +50,12 @@ public class PropertyProcessor  {
         if (items != null) {
             processProperty(items);
         }
+    }
+
+    private void processObjectProperty(ObjectProperty property) {
+        final Map<String, Property> properties = property.getProperties();
+        if (properties != null)
+            for (Property p : properties.values())
+                processProperty(p);
     }
 }
