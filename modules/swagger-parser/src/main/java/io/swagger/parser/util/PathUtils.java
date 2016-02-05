@@ -6,6 +6,9 @@ import java.nio.file.Paths;
 
 public class PathUtils {
 
+    private PathUtils() {
+        throw new InstantiationError("Must not instantiate this class");
+    }
 
     public static Path getParentDirectoryOfFile(String fileStr) {
         final String fileScheme = "file://";

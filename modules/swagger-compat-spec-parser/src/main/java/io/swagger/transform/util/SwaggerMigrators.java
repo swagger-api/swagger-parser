@@ -12,6 +12,7 @@ import io.swagger.transform.migrate.SwaggerMigrator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
@@ -21,6 +22,11 @@ import java.util.Set;
  */
 @ParametersAreNonnullByDefault
 public final class SwaggerMigrators {
+
+    private SwaggerMigrators() {
+        throw new InstantiationError("Must not instantiate this class");
+    }
+
     private static final ObjectMapper MAPPER = JacksonUtils.newMapper();
 
     /**

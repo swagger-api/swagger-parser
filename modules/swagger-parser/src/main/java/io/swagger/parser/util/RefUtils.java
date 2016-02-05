@@ -13,6 +13,10 @@ import java.util.Map;
 
 public class RefUtils {
 
+    private RefUtils() {
+        throw new InstantiationError("Must not instantiate this class");
+    }
+
     public static String computeDefinitionName(String ref) {
 
         final String[] refParts = ref.split("#/");
