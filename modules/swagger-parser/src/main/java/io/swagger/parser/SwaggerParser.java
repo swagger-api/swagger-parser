@@ -14,7 +14,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SwaggerParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SwaggerParser.class);
+    private static final String I_O_EXCEPTION_HAS_OCCURRED = "I/O Exception of some sort has occurred";
 
     public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths, boolean resolve) {
         if (location == null) {
@@ -76,7 +81,7 @@ public class SwaggerParser {
                 }
             } catch (IOException e) {
                 if (System.getProperty("debugParser") != null) {
-                    e.printStackTrace();
+                    LOGGER.error(I_O_EXCEPTION_HAS_OCCURRED, e);
                 }
                 // continue to next parser
             }
@@ -158,7 +163,7 @@ public class SwaggerParser {
                 }
             } catch (IOException e) {
                 if (System.getProperty("debugParser") != null) {
-                    e.printStackTrace();
+                    LOGGER.error(I_O_EXCEPTION_HAS_OCCURRED, e);
                 }
                 // continue to next parser
             }

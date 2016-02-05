@@ -98,7 +98,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
             return convertToSwagger(data);
         } catch (Exception e) {
             if (System.getProperty("debugParser") != null) {
-                e.printStackTrace();
+                LOGGER.error("Exception while execution", e);
             }
             return null;
         }
