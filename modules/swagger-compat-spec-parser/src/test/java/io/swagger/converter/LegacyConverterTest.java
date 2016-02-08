@@ -1,12 +1,8 @@
 package io.swagger.converter;
 
-import io.swagger.models.Contact;
-import io.swagger.models.Info;
-import io.swagger.models.License;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Response;
-import io.swagger.models.Swagger;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
@@ -15,27 +11,30 @@ import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerCompatConverter;
-
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
 import org.junit.Assert;
 import org.testng.annotations.Test;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class LegacyConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
+
+
+    @Test
+    public void testIssueFun() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo("http://localhost:8080/api-docs/resources.json", null, true);
+
+        Swagger swagger = parser.read("http://localhost:8080/api-docs/resources.json");
+        Assert.assertNotNull(result);
+    }
+
 
     @Test
     public void testIssue43() throws Exception {
