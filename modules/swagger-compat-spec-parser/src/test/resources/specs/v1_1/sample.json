@@ -1,0 +1,65 @@
+{
+  "apiVersion": "1.0.0",
+  "swaggerVersion": "1.2",
+  "resourcePath": "/api-docs/events.{format}",
+  "apis": [
+    {
+      "path": "/events",
+      "operations": [
+        {
+          "httpMethod": "GET",
+          "upgrade": "websocket",
+          "nickname": "eventWebsocket",
+          "responseClass": "Message",
+          "parameters": [
+            {
+              "name": "subscribeAll",
+              "paramType": "query",
+              "required": false,
+              "allowMultiple": false,
+              "dataType": "boolean"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "models": {
+    "Message": {
+      "id": "Message",
+      "discriminator": "type",
+      "properties": {
+        "type": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "subTypes": [
+        "MissingParams",
+        "Event"
+      ]
+    },
+    "MissingParams": {
+      "id": "MissingParams",
+      "properties": {
+        "params": {
+          "required": true,
+          "type": "List[string]"
+        }
+      }
+    },
+    "Event": {
+      "id": "Event",
+      "properties": {
+        "application": {
+          "type": "string",
+          "required": true
+        },
+        "timestamp": {
+          "type": "Date",
+          "required": false
+        }
+      }
+    }
+  }
+}

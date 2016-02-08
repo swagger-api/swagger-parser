@@ -1,4 +1,11 @@
 {
+  "boolean": [
+    {
+      "op": "move",
+      "from": "/dataType",
+      "path": "/type"
+    }
+  ],
   "int": [
     {
       "op": "remove",
