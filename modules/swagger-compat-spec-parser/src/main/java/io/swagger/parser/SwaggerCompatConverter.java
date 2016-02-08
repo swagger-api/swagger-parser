@@ -99,7 +99,15 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                                 location = pathLocation;
                             } else {
                                 if (pathLocation.startsWith("/")) {
-                                    location = input + pathLocation;
+                                    // handle 1.1 specs
+                                    if(resourceListing.getSwaggerVersion().equals(SwaggerVersion.V1_1) &&
+                                            resourceListing.getExtraFields().get("basePath") != null) {
+                                        String basePath = resourceListing.getExtraFields().get("basePath").textValue();
+                                        location = basePath + pathLocation;
+                                    }
+                                    else {
+                                        location = input + pathLocation;
+                                    }
                                 } else {
                                     location = input + "/" + pathLocation;
                                 }
