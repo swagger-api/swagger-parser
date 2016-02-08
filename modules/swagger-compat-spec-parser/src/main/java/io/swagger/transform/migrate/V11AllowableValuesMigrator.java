@@ -54,22 +54,27 @@ public final class V11AllowableValuesMigrator
         }
         final String valueType = JsonPointer.of("allowableValues", "valueType")
                 .get(input).textValue();
-        if (!"LIST".equals(valueType)) {
-            throw new SwaggerMigrationException();
+        if ("LIST".equals(valueType)) {
+            return SwaggerMigrators.fromPatch(PATCH).migrate(input);
         }
-        return SwaggerMigrators.fromPatch(PATCH).migrate(input);
+
+        // TODO: unsupported type of allowableValues!
+        return input;
     }
 
     static {
-        final String op
-                = "[{"
-                + "\"op\":\"move\","
-                + "\"from\":\"/allowableValues/values\","
-                + "\"path\":\"/enum\""
-                + "},"
-                + "{"
-                + "\"op\": \"remove\", \"path\": \"/allowableValues\""
-                + "}]";
+        final String op =
+                "[                                              \n" +
+                "  {                                            \n" +
+                "    \"op\": \"move\",                          \n" +
+                "    \"from\": \"/allowableValues/values\",     \n" +
+                "    \"path\": \"/enum\"                        \n" +
+                "  },                                           \n" +
+                "  {                                            \n" +
+                "    \"op\": \"remove\",                        \n" +
+                "    \"path\": \"/allowableValues\"             \n" +
+                "  }                                            \n" +
+                "]";
         try {
             PATCH = MAPPER.readValue(op, JsonPatch.class);
         } catch (IOException e) {
