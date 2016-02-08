@@ -145,4 +145,13 @@ public class LegacyConverterTest {
         assertEquals(id.getType(), "string");
         assertNull(id.getFormat());
     }
+
+    /**
+     * reads a single-file swagger definition
+     **/
+    @Test
+    public void convertSingle1_1File() throws Exception {
+        Swagger swagger = converter.read("src/test/resources/specs/v1_1/sample.json");
+        Parameter param = swagger.getPaths().get("/events").getGet().getParameters().get(0);
+    }
 }
