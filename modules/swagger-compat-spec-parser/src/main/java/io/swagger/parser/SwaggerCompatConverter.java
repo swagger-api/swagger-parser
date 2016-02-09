@@ -30,7 +30,7 @@ import java.util.Map;
 // legacy models
 
 public class SwaggerCompatConverter implements SwaggerParserExtension {
-    static Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
 
     @Override
     public SwaggerDeserializationResult readWithInfo(JsonNode node) {
@@ -155,7 +155,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         } catch (java.lang.IllegalArgumentException e) {
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Exception while execution", e);
         }
         return output;
     }
@@ -449,7 +449,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         } catch (java.lang.IllegalArgumentException e) {
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Exception while execution", e);
         }
         return output;
     }

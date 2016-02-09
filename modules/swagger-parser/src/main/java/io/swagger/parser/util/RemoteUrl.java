@@ -17,9 +17,12 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RemoteUrl {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteUrl.class);
     private static final String ACCEPT_HEADER_VALUE = "application/json, application/yaml, */*";
     private static final String USER_AGENT_HEADER_VALUE = "Apache-HttpClient/Swagger";
 
@@ -55,9 +58,9 @@ public class RemoteUrl {
             // Install the all-trusting host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            LOGGER.error("Cryptographic algorithm is not available", e);
         } catch (KeyManagementException e) {
-            e.printStackTrace();
+            LOGGER.error("Exception dealing with key management", e);
         }
     }
 
@@ -122,10 +125,10 @@ public class RemoteUrl {
         } catch (javax.net.ssl.SSLProtocolException e) {
             System.out.println("there is a problem with the target SSL certificate");
             System.out.println("**** you may want to run with -Djsse.enableSNIExtension=false\n\n");
-            e.printStackTrace();
+            LOGGER.error("Error in the operation of the SSL protocol", e);
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Exception while execution", e);
             throw e;
         } finally {
             if (is != null) {
