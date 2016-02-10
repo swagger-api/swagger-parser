@@ -2,6 +2,9 @@ package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.google.common.base.Optional;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.ClasspathHelper;
@@ -9,6 +12,7 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.parser.util.SwaggerDeserializer;
+import static io.swagger.parser.util.SwaggerDeserializer.allPathParametersAccountForExtractedPathParameters;
 import io.swagger.util.Json;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
@@ -129,6 +133,23 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(rootNode);
 
                 Swagger convertValue = result.getSwagger();
+
+                if(convertValue.getPaths() == null) {
+                    // no need to validate Path Parameters since there are no paths
+                }
+                else {
+                    final Optional<Boolean> validPaths = allPathParametersAccountForExtractedPathParameters(convertValue);
+                    if(validPaths.isPresent()) {
+                        final Boolean validResult = validPaths.get();
+                        if(validResult.equals(Boolean.FALSE)) {
+                            return null;
+                        }
+                    }
+                    else {
+                        return null;
+                    }
+                }
+
                 if (System.getProperty("debugParser") != null) {
                     LOGGER.info("\n\nSwagger Tree convertValue : \n"
                         + ReflectionToStringBuilder.toString(convertValue, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");

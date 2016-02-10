@@ -8,10 +8,12 @@ import io.swagger.models.parameters.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.util.Json;
+import com.google.common.base.Optional;
 
 import java.util.*;
 
 import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
+import static io.swagger.parser.util.PathUtils.*;
 
 public class SwaggerDeserializer {
     static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
@@ -172,6 +174,176 @@ public class SwaggerDeserializer {
             }
         }
         return output;
+    }
+
+    public static Optional<Boolean> allPathParametersAccountForExtractedPathParameters(final Swagger swagger) {
+        final Map<String, Path> paths =
+                swagger.getPaths() == null ? Collections.<String, Path>emptyMap() : swagger.getPaths();
+
+        Optional<Boolean> result = Optional.of(Boolean.TRUE);
+
+        for(final Map.Entry<String, Path> entry : paths.entrySet()) {
+            if(result.isPresent()) {
+                final Boolean res = result.get();
+                if(res.equals(Boolean.FALSE)) {
+                    result = Optional.of(Boolean.FALSE);
+                }
+                else {
+                    final String pathValue = entry.getKey();
+                    final Path path        = entry.getValue();
+
+                    final Collection<Parameter> pathSpecificParameters =
+                            path.getParameters() == null ? Collections.<Parameter>emptyList() : path.getParameters();
+
+                    result = allOperationsParametersMatchPathParameters(pathValue, pathSpecificParameters, path.getOperations());
+                }
+            }
+        }
+        return result;
+    }
+
+    public static Optional<Boolean> pathParametersMatchParameters(final String path,
+                                                                  final Collection<Parameter> pathSpecificParameters,
+                                                                  final Collection<Parameter> operationSpecificParameters) {
+        final Optional<Boolean> result;
+
+        final Optional<List<String>> pathParameters = extractPathParameters(path);
+
+        if(pathParameters.isPresent()) {
+            final List<String> paramsExtractedFromPath = pathParameters.get();
+            result = Optional.of(parameterListMatchesPathParameters(pathSpecificParameters, operationSpecificParameters, paramsExtractedFromPath));
+        }
+        else {
+            result = Optional.absent();
+        }
+
+        return result;
+    }
+
+    public static Optional<Boolean> allOperationsParametersMatchPathParameters(final String pathValue,
+                                                                               final Collection<Parameter> pathSpecificParameters,
+                                                                               final Collection<Operation> operations) {
+        Optional<Boolean> result = Optional.of(Boolean.TRUE);
+
+        if(operations == null) {
+            result = Optional.absent();
+        }
+        else {
+            for (final Operation o : operations) {
+                if (result.isPresent()) {
+                    final Boolean res = result.get();
+                    if (res.equals(Boolean.FALSE)) {
+                        result = Optional.of(Boolean.FALSE);
+                    } else {
+                        final List<Parameter> opPathParams = o.getParameters();
+                        result = pathParametersMatchParameters(pathValue, pathSpecificParameters, opPathParams);
+                    }
+                }
+            }
+        }
+        return result;
+
+    }
+
+    private static boolean parameterListMatchesPathParameters(final Collection<Parameter> pathSpecificParameters,
+                                                              final Collection<Parameter> operationSpecificParameters,
+                                                              final Collection<String> paramsExtractedFromPath) {
+        final boolean result;
+
+        final List<Parameter> totalParameters = new ArrayList<>();
+        totalParameters.addAll(pathSpecificParameters);
+        totalParameters.addAll(operationSpecificParameters);
+
+        final List<String> totalPathParamNames = new ArrayList<>();
+
+        for (final Parameter p : totalParameters) {
+            if (p instanceof PathParameter) { // TODO: Is this idiomatic Java?
+                totalPathParamNames.add(p.getName());
+            }
+        }
+
+        result = totalPathParamNames.containsAll(paramsExtractedFromPath);
+
+        return result;
+    }
+
+    /**
+     * Given a Path, e.g. "http://foo.bar.com/{id}", extract the path's parameters, where
+     *  id in `{id}` represents a single parameter.
+     *
+     * Return Optional.absent in the event of an error.
+     *
+     * Examples:
+     *
+     * extractPathParameters("http://foo.bar.com/{id}") == Optional.of(["id"])
+     * extractPathParameters("http://foo.bar.com/{id}/abc/{foo}") == Optional.of(["id", "foo"])
+     *
+     * extractPathParameters("http://foo.bar.com/{}") == Optional.absent
+     * extractPathParameters("http://foo.bar.com/}{}") == Optional.absent // closing, and then opening brace
+     * extractPathParameters("http://foo.bar.com") == Optional.op([]) // empty list
+     *
+     */
+    public static Optional<List<String>> extractPathParameters(final String path) {
+        return extractPathParametersHelper(path, Collections.<String>emptyList());
+    }
+
+    // Each path parameter is surrounded by braces. Example: `/pets/{id}`.
+    private static char OPENING_BRACE = '{';
+    private static char CLOSING_BRACE = '}';
+
+    private static Optional<List<String>> extractPathParametersHelper(final String path, final List<String> accumulator) {
+        final Optional<List<String>> result;
+        final List<String> breakAtOpeningBrace = breakFn(path, OPENING_BRACE);
+
+        if (breakAtOpeningBrace.size() == 2) {
+            final String beginPathParam = breakAtOpeningBrace.get(1);
+            if(beginPathParam.isEmpty()) {
+                result = Optional.of(accumulator);
+            }
+            else {
+                final String removeOpenBrace = drop(beginPathParam, 1);
+                final List<String> paramWithRest = breakFn(removeOpenBrace, CLOSING_BRACE);
+                if (paramWithRest.size() == 2) {
+                    final String param = paramWithRest.get(0);
+                    final String restOfPath = paramWithRest.get(1);
+
+                    if(param.trim().isEmpty() || restOfPath.isEmpty()) {
+                        result = Optional.absent();
+                    }
+                    else {
+                        final String restOfPathWithoutClosingBrace = drop(restOfPath, 1);
+                        final List<String> updatedParams = new ArrayList<>();
+                        updatedParams.addAll(accumulator);
+                        updatedParams.add(param);
+                        result = extractPathParametersHelper(restOfPathWithoutClosingBrace, updatedParams);
+                    }
+                } else {
+                    result = Optional.absent(); // indicates an error with PathUtils#breakFn
+                }
+            }
+        }
+        else {
+            result = Optional.absent(); // indicates an error with PathUtils#breakFn
+        }
+        return result;
+    }
+
+    private Optional<String> extractParamValue(final String path, final int openingBraceIndex, final int closingBraceIndex) {
+        final Optional<String> result;
+
+        if(openingBraceIndex > closingBraceIndex) {
+            final String pathField = path.substring(openingBraceIndex, closingBraceIndex);
+            if(pathField.length() > 0) {
+                result = Optional.of(pathField);
+            }
+            else {
+                result = Optional.absent();
+            }
+        }
+        else {
+            result = Optional.absent();
+        }
+        return result;
     }
 
     public Path path(ObjectNode obj, String location, ParseResult result) {

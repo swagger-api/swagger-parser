@@ -1,0 +1,37 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Pets Store"
+  },
+  "paths": {
+    "/pets/{id}/{foo}/{bippy}": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all the pets"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "foo",
+          "in": "path",
+          "description": "...",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "parameters": {
+    "bippyField" : {
+      "name": "bippy",
+      "in": "path",
+      "description": "...",
+      "required": true,
+      "type": "string"
+    }
+  }
+}
