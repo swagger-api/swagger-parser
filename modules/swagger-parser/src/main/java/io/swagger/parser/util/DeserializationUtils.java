@@ -11,6 +11,11 @@ import java.io.IOException;
  * Created by russellb337 on 7/14/15.
  */
 public class DeserializationUtils {
+
+    private DeserializationUtils() {
+        throw new InstantiationError("Must not instantiate this class");
+    }
+
     public static JsonNode deserializeIntoTree(String contents, String fileOrHost) {
         JsonNode result;
 

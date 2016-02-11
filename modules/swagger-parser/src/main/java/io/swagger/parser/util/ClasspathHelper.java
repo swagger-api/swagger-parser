@@ -8,6 +8,10 @@ import java.io.InputStream;
 
 public class ClasspathHelper {
 
+    private ClasspathHelper() {
+        throw new InstantiationError("Must not instantiate this class");
+    }
+
     public static String loadFileFromClasspath(String location) {
 
         InputStream inputStream = ClasspathHelper.class.getResourceAsStream(location);

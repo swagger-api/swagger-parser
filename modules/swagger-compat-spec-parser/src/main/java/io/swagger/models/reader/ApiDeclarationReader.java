@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.net.URL;
 
 public class ApiDeclarationReader {
+
+    private ApiDeclarationReader() {
+        throw new InstantiationError("Must not instantiate this class");
+    }
+
     public static void main(String[] args) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
