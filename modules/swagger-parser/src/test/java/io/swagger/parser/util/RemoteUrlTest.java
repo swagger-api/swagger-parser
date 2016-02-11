@@ -3,9 +3,7 @@ package io.swagger.parser.util;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.swagger.models.auth.AuthorizationValue;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,6 +23,8 @@ public class RemoteUrlTest {
 
     private static final int WIRE_MOCK_PORT = 9999;
     private static final String EXPECTED_ACCEPTS_HEADER = "application/json, application/yaml, */*";
+    private static final String LOCALHOST = "localhost";
+    private static final String SOME_HOST = "somehost";
     private WireMockServer wireMockServer;
 
 
@@ -54,7 +54,7 @@ public class RemoteUrlTest {
     }
 
     private String getUrl() {
-        return "http://localhost:" + WIRE_MOCK_PORT + "/v2/pet/1";
+        return String.format("http://%s:%d/v2/pet/1", LOCALHOST, WIRE_MOCK_PORT);
     }
 
     @Test
@@ -73,6 +73,43 @@ public class RemoteUrlTest {
                         .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
                         .withHeader(headerName, equalTo(headerValue))
         );
+    }
+
+    @Test
+    public void testHostHeader() throws Exception {
+
+        final String expectedBody = setupStub();
+
+        final String headerName = "Authorization";
+        final String headerValue = "foobar";
+        final AuthorizationValue authorizationValue = new HostAuthorizationValue(LOCALHOST,
+                headerName, headerValue, "header");
+        final String actualBody = RemoteUrl.urlToString(getUrl(),
+                Arrays.asList(authorizationValue));
+
+        assertEquals(actualBody, expectedBody);
+
+        verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+                .withHeader(headerName, equalTo(headerValue)));
+    }
+
+    @Test
+    public void testSkippedHeader() throws Exception {
+
+        final String expectedBody = setupStub();
+
+        final String headerName = "Authorization";
+        final String headerValue = "foobar";
+        final AuthorizationValue authorizationValue = new HostAuthorizationValue(SOME_HOST,
+                headerName, headerValue, "header");
+        final String actualBody = RemoteUrl.urlToString(getUrl(),
+                Arrays.asList(authorizationValue));
+
+        assertEquals(actualBody, expectedBody);
+
+        verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER)).withoutHeader(headerName));
     }
 
     @Test
@@ -98,6 +135,78 @@ public class RemoteUrlTest {
                         .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
                         .withQueryParam(queryParamName, equalTo(queryParamValue))
         );
+    }
+
+    @Test
+    public void testHostQueryParam() throws Exception {
+        final String queryParamName = "Authorization";
+        final String queryParamValue = "foobar";
+        final String expectedBody = "a really good body";
+
+        stubFor(get(urlPathEqualTo("/v2/pet/1"))
+                .withQueryParam(queryParamName, equalTo(queryParamValue)).willReturn(aResponse()
+                        .withBody(expectedBody).withHeader("Content-Type", "application/json"))
+
+        );
+
+        final AuthorizationValue authorizationValue = new HostAuthorizationValue(LOCALHOST,
+                queryParamName, queryParamValue, "query");
+        final String actualBody = RemoteUrl.urlToString(getUrl(),
+                Arrays.asList(authorizationValue));
+
+        assertEquals(actualBody, expectedBody);
+
+        verify(getRequestedFor(urlPathEqualTo("/v2/pet/1"))
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+                .withQueryParam(queryParamName, equalTo(queryParamValue)));
+    }
+
+    @Test
+    public void testSkippedQueryParam() throws Exception {
+        final String queryParamName = "Authorization";
+        final String queryParamValue = "foobar";
+        final String expectedBody = "a really good body";
+
+        stubFor(get(urlPathEqualTo("/v2/pet/1")).willReturn(
+                aResponse().withBody(expectedBody).withHeader("Content-Type", "application/json")));
+
+        final AuthorizationValue authorizationValue = new HostAuthorizationValue(SOME_HOST,
+                queryParamName, queryParamValue, "query");
+        final String actualBody = RemoteUrl.urlToString(getUrl(),
+                Arrays.asList(authorizationValue));
+
+        assertEquals(actualBody, expectedBody);
+
+        verify(getRequestedFor(urlPathEqualTo("/v2/pet/1"))
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+                .withoutHeader(queryParamName));
+    }
+
+    @Test
+    public void testAppendQueryParam() throws Exception {
+        final String firstParamName = "first";
+        final String firstParamValue = "first-value";
+        final String queryParamName = "Authorization";
+        final String queryParamValue = "foobar";
+        final String expectedBody = "a really good body";
+
+        stubFor(get(urlPathEqualTo("/v2/pet/1"))
+                .withQueryParam(firstParamName, equalTo(firstParamValue))
+                .withQueryParam(queryParamName, equalTo(queryParamValue)).willReturn(aResponse()
+                        .withBody(expectedBody).withHeader("Content-Type", "application/json")));
+
+        final AuthorizationValue authorizationValue = new HostAuthorizationValue(LOCALHOST,
+                queryParamName, queryParamValue, "query");
+        final String actualBody = RemoteUrl.urlToString(
+                String.format("%s?%s=%s", getUrl(), firstParamName, firstParamValue),
+                Arrays.asList(authorizationValue));
+
+        assertEquals(actualBody, expectedBody);
+
+        verify(getRequestedFor(urlPathEqualTo("/v2/pet/1"))
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+                .withQueryParam(firstParamName, equalTo(firstParamValue))
+                .withQueryParam(queryParamName, equalTo(queryParamValue)));
     }
 
     private String setupStub() {

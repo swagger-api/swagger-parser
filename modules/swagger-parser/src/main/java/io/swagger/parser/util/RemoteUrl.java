@@ -1,34 +1,47 @@
 package io.swagger.parser.util;
 
 import io.swagger.models.auth.AuthorizationValue;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+
 public class RemoteUrl {
 
+    private static final String TRUST_ALL = String.format("%s.trustAll", RemoteUrl.class.getName());
+    private static final ConnectionConfigurator CONNECTION_CONFIGURATOR = createConnectionConfigurator();
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
     private static final String ACCEPT_HEADER_VALUE = "application/json, application/yaml, */*";
     private static final String USER_AGENT_HEADER_VALUE = "Apache-HttpClient/Swagger";
 
-    private static void disableSslVerification() {
-        try {
-            // Create a trust manager that does not validate certificate chains
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+    private static ConnectionConfigurator createConnectionConfigurator() {
+        if (Boolean.parseBoolean(System.getProperty(TRUST_ALL))) {
+            try {
+                // Create a trust manager that does not validate certificate chains
+                final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+
+                    public X509Certificate[] getAcceptedIssuers() {
                         return null;
                     }
 
@@ -37,63 +50,84 @@ public class RemoteUrl {
 
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
                     }
-                }
-            };
+                } };
 
-            // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                // Install the all-trusting trust manager
+                final SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                final SSLSocketFactory sf = sc.getSocketFactory();
 
-            // Create all-trusting host name verifier
-            HostnameVerifier allHostsValid = new HostnameVerifier() {
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            };
+                // Create all-trusting host name verifier
+                final HostnameVerifier trustAllNames = new HostnameVerifier() {
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }
+                };
 
-            // Install the all-trusting host verifier
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
+                return new ConnectionConfigurator() {
+
+                    @Override
+                    public void process(URLConnection connection) {
+                        if (connection instanceof HttpsURLConnection) {
+                            final HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
+                            httpsConnection.setSSLSocketFactory(sf);
+                            httpsConnection.setHostnameVerifier(trustAllNames);
+                        }
+                    }
+                };
+            }
+            catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            catch (KeyManagementException e) {
+                e.printStackTrace();
+            }
         }
+        return new ConnectionConfigurator() {
+
+            @Override
+            public void process(URLConnection connection) {
+                // Do nothing
+            }
+        };
     }
 
     public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {
         InputStream is = null;
-        URLConnection conn = null;
         BufferedReader br = null;
 
         try {
+            final URL inUrl = new URL(url);
+            final List<AuthorizationValue> query = new ArrayList<>();
+            final List<AuthorizationValue> header = new ArrayList<>();
             if (auths != null) {
-                StringBuilder queryString = new StringBuilder();
-                // build a new url if needed
                 for (AuthorizationValue auth : auths) {
                     if ("query".equals(auth.getType())) {
-                        if (queryString.toString().length() == 0) {
-                            queryString.append("?");
-                        } else {
-                            queryString.append("&");
-                        }
-                        queryString.append(URLEncoder.encode(auth.getKeyName(), "UTF-8"))
-                                .append("=")
-                                .append(URLEncoder.encode(auth.getValue(), "UTF-8"));
+                        appendValue(inUrl, auth, query);
+                    } else if ("header".equals(auth.getType())) {
+                        appendValue(inUrl, auth, header);
                     }
                 }
-                if (queryString.toString().length() != 0) {
-                    url = url + queryString.toString();
-                }
-                conn = new URL(url).openConnection();
-
-                for (AuthorizationValue auth : auths) {
-                    if ("header".equals(auth.getType())) {
-                        conn.setRequestProperty(auth.getKeyName(), auth.getValue());
+            }
+            final URLConnection conn;
+            if (!query.isEmpty()) {
+                final URI inUri = inUrl.toURI();
+                final StringBuilder newQuery = new StringBuilder(inUri.getQuery() == null ? "" : inUri.getQuery());
+                for (AuthorizationValue item : query) {
+                    if (newQuery.length() > 0) {
+                        newQuery.append("&");
                     }
+                    newQuery.append(URLEncoder.encode(item.getKeyName(), UTF_8.name())).append("=")
+                            .append(URLEncoder.encode(item.getValue(), UTF_8.name()));
                 }
+                conn = new URI(inUri.getScheme(), inUri.getAuthority(), inUri.getPath(), newQuery.toString(),
+                        inUri.getFragment()).toURL().openConnection();
             } else {
-                conn = new URL(url).openConnection();
+                conn = inUrl.openConnection();
+            }
+            CONNECTION_CONFIGURATOR.process(conn);
+            for (AuthorizationValue item : header) {
+                conn.setRequestProperty(item.getKeyName(), item.getValue());
             }
 
             conn.setRequestProperty("Accept", ACCEPT_HEADER_VALUE);
@@ -103,8 +137,7 @@ public class RemoteUrl {
 
             StringBuilder contents = new StringBuilder();
 
-            BufferedReader input = new BufferedReader(
-                    new InputStreamReader(in, "UTF-8"));
+            BufferedReader input = new BufferedReader(new InputStreamReader(in, UTF_8));
 
             for (int i = 0; i != -1; i = input.read()) {
                 char c = (char) i;
@@ -137,7 +170,17 @@ public class RemoteUrl {
         }
     }
 
-    static {
-        disableSslVerification();
+    private static void appendValue(URL url, AuthorizationValue value, Collection<AuthorizationValue> to) {
+        if (value instanceof ManagedValue) {
+            if (!((ManagedValue) value).process(url)) {
+                return;
+            }
+        }
+        to.add(value);
+    }
+
+    private interface ConnectionConfigurator {
+
+        void process(URLConnection connection);
     }
 }
