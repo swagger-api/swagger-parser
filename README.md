@@ -120,4 +120,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ---
-<img src="http://2434zd29misd3e4a4f1e73ki.wpengine.netdna-cdn.com/wp-content/uploads/2016/02/swagger-logo.png"/>**Swagger API**</span>
+<img src="http://swagger.io/wp-content/uploads/2016/02/logo.jpg"/>
