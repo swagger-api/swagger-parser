@@ -13,6 +13,10 @@ public class ClasspathHelper {
         InputStream inputStream = ClasspathHelper.class.getResourceAsStream(location);
 
         if(inputStream == null) {
+            inputStream = ClasspathHelper.class.getClassLoader().getResourceAsStream(location);
+        }
+
+        if(inputStream == null) {
             inputStream = ClassLoader.getSystemResourceAsStream(location);
         }
 
