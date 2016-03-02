@@ -1,27 +1,29 @@
 package io.swagger.parser.util;
 
+import com.google.common.base.Optional;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
+import static io.swagger.parser.util.SwaggerDeserializer.allPathParametersAccountForExtractedPathParameters;
 import io.swagger.util.Json;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
 public class SwaggerDeserializerTest {
+
     @Test
     public void testSecurityDeserialization() throws Exception {
         String json = "{\n" +
@@ -888,4 +890,368 @@ public class SwaggerDeserializerTest {
         assertFalse(allOfModel.getVendorExtensions().isEmpty());
         assertEquals("some data", allOfModel.getVendorExtensions().get("x-vendor-ext"));
     }
+
+    @Test
+    public void testExtractParametersOne() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id}";
+        final List<String> expectedParams = new ArrayList<>();
+        expectedParams.add("id");
+
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+
+        assertEquals(expectedParams, extractedParams.get());
+    }
+
+    @Test
+    public void testExtractParametersTwo() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id}/{foo}";
+        final List<String> expectedParams = new ArrayList<>();
+        expectedParams.add("id");
+        expectedParams.add("foo");
+
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+
+        assertEquals(expectedParams, extractedParams.get());
+    }
+
+    @Test
+    public void testExtractParametersThree() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id}/{foo}/zzzz/bbb/{bar}";
+        final List<String> expectedParams = new ArrayList<>();
+        expectedParams.add("id");
+        expectedParams.add("foo");
+        expectedParams.add("bar");
+
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+
+        assertEquals(expectedParams, extractedParams.get());
+    }
+
+    @Test
+    public void testExtractParametersNoClosingBrace() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id";
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+        assertFalse(extractedParams.isPresent());
+    }
+
+    @Test
+    public void testExtractParametersNoParams() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com";
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+        assertTrue(extractedParams.get().isEmpty());
+    }
+
+    @Test
+    public void testExtractParametersEmptyParam() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{}";
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+        assertFalse(extractedParams.isPresent());
+    }
+
+    @Test
+    public void testExtractParametersWhitespaceParam() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{    }";
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+        assertFalse(extractedParams.isPresent());
+    }
+
+    @Test
+    public void testExtractParametersClosingThenOpeningBraces() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/}{";
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+        assertFalse(extractedParams.isPresent());
+    }
+
+    @Test
+    public void testExtractParametersClosingThenOpeningBracesWithWhitespace() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/}   {";
+        final Optional<List<String>> extractedParams = deserializer.extractPathParameters(path);
+        assertFalse(extractedParams.isPresent());
+    }
+
+    @Test
+    public void testExtractParameters3Params() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id}/{foo}/{b}";
+        final List<String> expectedParams = new ArrayList<>();
+        expectedParams.add("id");
+        expectedParams.add("foo");
+        expectedParams.add("b");
+
+        final Optional<List<String>> actualParams = deserializer.extractPathParameters(path);
+        assertEquals(actualParams.get(), expectedParams);
+    }
+    
+    final Collection<Parameter> emptyPathSpecificParameters = Collections.emptyList();
+
+    @Test
+    public void testParametersMatchPathParameters() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id}";
+        final List<Parameter> operationSpecificParameters = new ArrayList<>();
+        final PathParameter p = new PathParameter();
+        p.setName("id");
+        operationSpecificParameters.add(p);
+
+        final Optional<Boolean> matches = deserializer.pathParametersMatchParameters(path, emptyPathSpecificParameters, operationSpecificParameters);
+
+        assertTrue(matches.get());
+    }
+
+    @Test
+    public void testParametersOnePathParameterMatching() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id}";
+        final List<Parameter> operationSpecificParameters = new ArrayList<>();
+        final PathParameter p = new PathParameter();
+        p.setName("id");
+
+        final BodyParameter bp = new BodyParameter();
+        bp.setName("foo");
+
+        operationSpecificParameters.add(p);
+        operationSpecificParameters.add(bp);
+
+        final Optional<Boolean> matches =
+                deserializer.pathParametersMatchParameters(path, emptyPathSpecificParameters, operationSpecificParameters);
+
+        assertTrue(matches.get());
+    }
+
+    @Test
+    public void testParametersNoPathParameters() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://www.google.com";
+        final List<Parameter> operationSpecificParameters = new ArrayList<>();
+
+        final BodyParameter bp = new BodyParameter();
+        bp.setName("foo");
+
+        operationSpecificParameters.add(bp);
+
+        final Optional<Boolean> matches = deserializer.pathParametersMatchParameters(path, emptyPathSpecificParameters, operationSpecificParameters);
+
+        assertTrue(matches.get());
+    }
+
+    @Test
+    public void testParametersNoMatchDifferentValues() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com/{id}";
+        final List<Parameter> operationSpecificParameters = new ArrayList<>();
+        final PathParameter p = new PathParameter();
+        p.setName("foobar");
+        operationSpecificParameters.add(p);
+
+        final Optional<Boolean> matches = deserializer.pathParametersMatchParameters(path, emptyPathSpecificParameters, operationSpecificParameters);
+
+        assertFalse(matches.get());
+    }
+
+    @Test
+    public void testParametersMatchNoParams() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final Collection<Parameter> emptyOperationSpecificParameters = Collections.emptyList();
+
+        final String path = "http://foo.bar.com";
+        final Optional<Boolean> matches = deserializer.pathParametersMatchParameters(path, emptyPathSpecificParameters,emptyOperationSpecificParameters);
+
+        assertTrue(matches.get());
+    }
+
+    @Test
+    public void testNoPathParametersInPathButOneOperationSpecificParameter() {
+        SwaggerDeserializer deserializer = new SwaggerDeserializer();
+
+        final String path = "http://foo.bar.com";
+        final List<Parameter> operationSpecificParameters = new ArrayList<>();
+        final PathParameter p = new PathParameter();
+        p.setName("id");
+        operationSpecificParameters.add(p);
+
+        final Optional<Boolean> matches = deserializer.pathParametersMatchParameters(path, emptyPathSpecificParameters, operationSpecificParameters);
+
+        assertTrue(matches.get());
+    }
+
+    @Test
+    public void validateSwaggerPathsNoPathParams() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("minimal_j");
+
+        final Optional<Boolean> actualResult = allPathParametersAccountForExtractedPathParameters(swagger);
+        final Optional<Boolean> expectedResult = Optional.of(Boolean.TRUE);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void validateSwaggerPathsPathParamsOnlyInPath() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_parameter_path_only");
+
+        assertNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerPathsPathParamsOnlyInParametersKeyValues() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_parameters_in_path_body_only");
+
+        final Optional<Boolean> actualResult = allPathParametersAccountForExtractedPathParameters(swagger);
+        final Optional<Boolean> expectedResult = Optional.of(Boolean.TRUE);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void validateSwaggerPathsPathOperationParamsMatch() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_params_match");
+
+        final Optional<Boolean> actualResult = allPathParametersAccountForExtractedPathParameters(swagger);
+        final Optional<Boolean> expectedResult = Optional.of(Boolean.TRUE);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void validateSwaggerPathsGlobalPathParamMatches() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_global_params_match");
+
+        assertNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerPathsPathSpecificPathParamMatches() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger      = parser.read("path_param_test_path_path_specific_params_match");
+
+        final Optional<Boolean> actualResult   = allPathParametersAccountForExtractedPathParameters(swagger);
+        final Optional<Boolean> expectedResult = Optional.of(Boolean.TRUE);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void validateSwaggerPathsPathParamsMatchTwoPathParams() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_2_params_match");
+
+        final Optional<Boolean> actualResult = allPathParametersAccountForExtractedPathParameters(swagger);
+        final Optional<Boolean> expectedResult = Optional.of(Boolean.TRUE);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void validateSwaggerPathsInvalidPath() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("minimal_invalid_path");
+
+        assertNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerPathsTwoOperations() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_2_operations_matching_params");
+
+        final Optional<Boolean> actualResult = allPathParametersAccountForExtractedPathParameters(swagger);
+        final Optional<Boolean> expectedResult = Optional.of(Boolean.TRUE);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void validateSwaggerDocPathsTwoOperations() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_2_operations_matching_params");
+
+        assertNotNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerPathsThreePathParamsParamFromEach() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_3_path_params_each_type");
+
+        assertNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerDocThreePathParamsParamFromEach() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_3_path_params_each_type");
+
+        assertNull(swagger);
+    }
+
+    @Test
+    public void singlePathHasNoParamsButDocHasEachTypeOfPathParam() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_no_params_with_each_param");
+
+        final Optional<Boolean> actualResult = allPathParametersAccountForExtractedPathParameters(swagger);
+        final Optional<Boolean> expectedResult = Optional.of(Boolean.TRUE);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void validateSwaggerDocsinglePathHasNoParamsButDocHasEachTypeOfPathParam() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_no_params_with_each_param");
+
+        assertNotNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerPathsThreePathParamsMissingOperationSpecificParam() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_3_path_params_missing_operation_specific");
+        assertNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerDocThreePathParamsMissingOperationSpecificParam() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_3_path_params_missing_operation_specific");
+
+        assertNull(swagger);
+    }
+
+    @Test
+    public void validateSwaggerPathsTwoOperationsFirstOperationWrongPathParams() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("path_param_test_path_2_operations_non_matching_params");
+
+        assertNull(swagger);
+    }
+
 }
