@@ -826,10 +826,16 @@ public class SwaggerDeserializerTest {
         assertTrue(result.getMessages().size() == 1);
     }
 
+    @Test
     public void testIssue151() throws Exception {
         String json =
                 "{\n" +
                 "    \"swagger\": \"2.0\",\n" +
+                "    \"info\": {\n" +
+                "        \"version\": \"2.0.0\",\n" +
+                "        \"title\": \"Test Issue 151\",\n" +
+                "        \"description\": \"Tests that ComposedModel vendor extensions are deserialized correctly.\"\n" +
+                "    },\n" +
                 "    \"paths\": {\n" +
                 "        \"/\": {\n" +
                 "            \"get\": {\n" +
@@ -879,6 +885,7 @@ public class SwaggerDeserializerTest {
         SwaggerParser parser = new SwaggerParser();
 
         SwaggerDeserializationResult result = parser.readWithInfo(json);
+        assertTrue("Parser returned errors:", result.getMessages().isEmpty());
         Swagger swagger = result.getSwagger();
 
         Map<String, Model> definitions = swagger.getDefinitions();
@@ -887,5 +894,106 @@ public class SwaggerDeserializerTest {
         assertTrue(allOfModel instanceof ComposedModel);
         assertFalse(allOfModel.getVendorExtensions().isEmpty());
         assertEquals("some data", allOfModel.getVendorExtensions().get("x-vendor-ext"));
+    }
+
+    @Test
+    public void testIssue204_allOf() throws Exception {
+        String json =
+                "{\n" +
+                "    \"swagger\": \"2.0\",\n" +
+                "    \"info\": {\n" +
+                "        \"version\": \"2.0.0\",\n" +
+                "        \"title\": \"Test allOf API\",\n" +
+                "        \"description\": \"Tests the allOf API for parent, interface and child models.\"\n" +
+                "    },\n" +
+                "    \"paths\": {\n" +
+                "        \"/\": {\n" +
+                "            \"get\": {\n" +
+                "                \"responses\": {\n" +
+                "                    \"200\": {\n" +
+                "                        \"description\": \"OK\"\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            }\n" +
+                "        }\n" +
+                "    },\n" +
+                "    \"definitions\": {\n" +
+                "        \"Pet\": {\n" +
+                "            \"type\": \"object\",\n" +
+                "            \"required\": [\n" +
+                "                \"id\"\n" +
+                "            ],\n" +
+                "            \"properties\": {\n" +
+                "                \"id\": {\n" +
+                "                    \"type\": \"integer\",\n" +
+                "                    \"format\": \"int64\"\n" +
+                "                }\n" +
+                "            }\n" +
+                "        },\n" +
+                "        \"Furry\": {\n" +
+                "            \"type\": \"object\",\n" +
+                "            \"required\": [\n" +
+                "                \"coatColour\"\n" +
+                "            ],\n" +
+                "            \"properties\": {\n" +
+                "                \"coatColour\": {\n" +
+                "                    \"type\": \"string\"\n" +
+                "                }\n" +
+                "            }\n" +
+                "        },\n" +
+                "        \"Dog\": {\n" +
+                "            \"type\": \"object\",\n" +
+                "            \"allOf\": [\n" +
+                "                {\n" +
+                "                    \"$ref\": \"#/definitions/Pet\"\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"$ref\": \"#/definitions/Furry\"\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"required\": [\n" +
+                "                        \"name\"\n" +
+                "                    ],\n" +
+                "                    \"properties\": {\n" +
+                "                        \"name\": {\n" +
+                "                            \"type\": \"string\"\n" +
+                "                        }\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            ]\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        assertTrue("Parser returned errors:", result.getMessages().isEmpty());
+        Swagger swagger = result.getSwagger();
+        assertNotNull("Parser result does not contain a Swagger instance", swagger);
+
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertNotNull("Swagger instance does not contain any definitions", definitions);
+        assertEquals("Missing/extraneous definition;", 3, definitions.size());
+
+        Model pet = definitions.get("Pet");
+        Model furry = definitions.get("Furry");
+        Model dog = definitions.get("Dog");
+
+        assertNotNull("Pet model not found", pet);
+        assertNotNull("Furry model not found", furry);
+        assertNotNull("Dog model not found", dog);
+        assertTrue("Dog model is not composed", dog instanceof ComposedModel);
+        ComposedModel dogComposed = (ComposedModel) dog;
+        assertTrue("Dog does not have a parent", dogComposed.getParent() instanceof RefModel);
+        RefModel dogParentRef = (RefModel) dogComposed.getParent();
+        Model dogParent = definitions.get(dogParentRef.getSimpleRef());
+        assertEquals("Dog does not extend Pet", pet, dogParent);
+        assertNotNull("Dog does not implement any interfaces", dogComposed.getInterfaces());
+        assertEquals("Dog implements the wrong number of interfaces;", 1, dogComposed.getInterfaces().size());
+        RefModel dogInterfaceRef = dogComposed.getInterfaces().get(0);
+        Model dogInterface = definitions.get(dogInterfaceRef.getSimpleRef());
+        assertEquals("Dog does not implement Furry;", furry, dogInterface);
+        assertTrue("Dog does not have child properties", dogComposed.getChild() instanceof ModelImpl);
     }
 }

@@ -816,22 +816,24 @@ public class SwaggerDeserializer {
                 }
 
                 List<Model> allComponents = model.getAllOf();
-                if (allComponents.size() >= 1) {
+                int size = allComponents.size();
+                if (size >= 1) {
+                    // Parent is the first composed component, by definition.
                     model.setParent(allComponents.get(0));
-                    if (allComponents.size() >= 2) {
-                        model.setChild(allComponents.get(allComponents.size() - 1));
+                    Model child = null;
+                    if (size >= 2) {
                         List<RefModel> interfaces = new ArrayList<RefModel>();
-                        int size = allComponents.size();
-                        for (Model m : allComponents.subList(1, size - 1)) {
+                        for (Model m : allComponents.subList(1, size/* - 1*/)) {
                             if (m instanceof RefModel) {
-                                RefModel ref = (RefModel) m;
-                                interfaces.add(ref);
+                                interfaces.add((RefModel) m);
+                            } else if (m instanceof ModelImpl) {
+                                // NOTE: since ComposedModel.child allows only one inline child schema, the last one 'wins'.
+                                child = m;
                             }
                         }
                         model.setInterfaces(interfaces);
-                    } else {
-                        model.setChild(new ModelImpl());
                     }
+                    model.setChild(child == null ? new ModelImpl() : child);
                 }
             }
             else {
