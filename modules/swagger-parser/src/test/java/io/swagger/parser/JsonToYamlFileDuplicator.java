@@ -6,17 +6,18 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.util.Yaml;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 
 public class JsonToYamlFileDuplicator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonToYamlFileDuplicator.class);
 
     public static void duplicateFilesInYamlFormat(String inputDirectoryStr, String outputDirectoryStr) {
         Path outputDirectory = Paths.get(outputDirectoryStr);
@@ -47,7 +48,7 @@ public class JsonToYamlFileDuplicator {
             final String relativePath = "./" + next.toString().replace(inputDirectory.toString(), "").replace(".json", ".yaml");
 
             final Path outputFile = outputDirectory.resolve(relativePath).normalize();
-            System.out.println(outputFile);
+            LOGGER.debug("output file: " + outputFile);
 
             final File file = outputFile.toAbsolutePath().toFile();
             FileUtils.forceMkdir(outputFile.getParent().toFile());

@@ -14,7 +14,6 @@ import static io.swagger.parser.util.RefUtils.deconflictName;
 import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
-
     private final ResolverCache cache;
     private final Swagger swagger;
 

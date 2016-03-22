@@ -79,8 +79,7 @@ public class ResolverCache {
         Object previouslyResolvedEntity = resolutionCache.get(ref);
 
         if (previouslyResolvedEntity != null) {
-            T result = expectedType.cast(previouslyResolvedEntity);
-            return result;
+            return expectedType.cast(previouslyResolvedEntity);
         }
 
         //we have not resolved this particular ref

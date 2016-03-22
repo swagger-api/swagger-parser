@@ -13,8 +13,8 @@ public class PathUtilTest {
 
         final String actualResult = PathUtils.getParentDirectoryOfFile("src/test/resources/parent.json").toString();
 
-        final String execptedResult = Paths.get("src/test/resources").toAbsolutePath().toString();
+        final String expectedResult = Paths.get("src/test/resources").toAbsolutePath().toString();
 
-        assertEquals(actualResult, execptedResult);
+        assertEquals(actualResult, expectedResult);
     }
 }

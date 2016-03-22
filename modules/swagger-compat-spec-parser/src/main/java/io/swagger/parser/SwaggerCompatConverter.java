@@ -241,7 +241,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             } else {
                 p = propertyFromTypedObject(param);
                 if (p == null) {
-                    System.out.println(String.format(
+                    LOGGER.warn(String.format(
                             "WARNING! No property detected for parameter '%s' (%s)! Falling back to string!",
                             param.getName(), param.getParamType()));
                     p = new StringProperty();
@@ -307,7 +307,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             ArrayProperty am = new ArrayProperty();
             Items items = obj.getItems();
             if (items == null) {
-                System.out.println("Error! Missing array type for property!  Assuming `object` -- please fix your spec");
+                LOGGER.error("Error! Missing array type for property!  Assuming `object` -- please fix your spec");
                 items = new Items();
                 items.setType("object");
             }
@@ -498,7 +498,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
             if (basePath != null) {
                 if (!basePath.equals(apiDeclaration.getBasePath()) && apiDeclaration.getBasePath() != null) {
-                    System.out.println("warning!  multiple basePath values not supported!");
+                    LOGGER.warn("warning!  multiple basePath values not supported!");
                 }
             } else {
                 basePath = apiDeclaration.getBasePath();
@@ -521,7 +521,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                     if (op.getMethod() != null) {
                         path.set(op.getMethod().toString().toLowerCase(), operation);
                     } else {
-                        System.out.println("skipping operation with missing method:\n" + Json.pretty(op));
+                        LOGGER.info("skipping operation with missing method:\n" + Json.pretty(op));
                     }
                 }
             }

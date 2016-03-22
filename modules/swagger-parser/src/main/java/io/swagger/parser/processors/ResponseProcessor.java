@@ -5,8 +5,6 @@ import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
 
-import java.util.Map;
-
 public class ResponseProcessor {
 
     private final PropertyProcessor propertyProcessor;

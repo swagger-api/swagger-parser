@@ -25,7 +25,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Swagger20Parser implements SwaggerParserExtension {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Swagger20Parser.class);
 
     @Override
@@ -74,7 +73,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     @Override
     public Swagger read(String location, List<AuthorizationValue> auths) throws IOException {
-        System.out.println("reading from " + location);
+        LOGGER.info("reading from " + location);
         try {
             String data;
             location = location.replaceAll("\\\\","/");
