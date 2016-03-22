@@ -1,7 +1,10 @@
 package io.swagger.parser.util;
 
 import io.swagger.models.auth.AuthorizationValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,16 +21,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 
 public class RemoteUrl {
+    static Logger LOGGER = LoggerFactory.getLogger(RemoteUrl.class);
 
     private static final String TRUST_ALL = String.format("%s.trustAll", RemoteUrl.class.getName());
     private static final ConnectionConfigurator CONNECTION_CONFIGURATOR = createConnectionConfigurator();
@@ -39,7 +35,7 @@ public class RemoteUrl {
         if (Boolean.parseBoolean(System.getProperty(TRUST_ALL))) {
             try {
                 // Create a trust manager that does not validate certificate chains
-                final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+                final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
 
                     public X509Certificate[] getAcceptedIssuers() {
                         return null;
@@ -50,7 +46,7 @@ public class RemoteUrl {
 
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
                     }
-                } };
+                }};
 
                 // Install the all-trusting trust manager
                 final SSLContext sc = SSLContext.getInstance("SSL");
@@ -75,11 +71,9 @@ public class RemoteUrl {
                         }
                     }
                 };
-            }
-            catch (NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
-            }
-            catch (KeyManagementException e) {
+            } catch (KeyManagementException e) {
                 e.printStackTrace();
             }
         }
@@ -153,8 +147,8 @@ public class RemoteUrl {
 
             return contents.toString();
         } catch (javax.net.ssl.SSLProtocolException e) {
-            System.out.println("there is a problem with the target SSL certificate");
-            System.out.println("**** you may want to run with -Djsse.enableSNIExtension=false\n\n");
+            LOGGER.warn("there is a problem with the target SSL certificate");
+            LOGGER.warn("**** you may want to run with -Djsse.enableSNIExtension=false\n\n");
             e.printStackTrace();
             throw e;
         } catch (Exception e) {

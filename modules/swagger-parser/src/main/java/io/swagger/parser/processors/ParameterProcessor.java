@@ -28,10 +28,9 @@ public class ParameterProcessor {
             return null;
         }
 
-        final List<Parameter> incomingParameterList = parameters;
         final List<Parameter> processedPathLevelParameters = new ArrayList<>();
 
-        for (Parameter parameter : incomingParameterList) {
+        for (Parameter parameter : parameters) {
 
             if (parameter instanceof RefParameter) {
                 RefParameter refParameter = (RefParameter) parameter;

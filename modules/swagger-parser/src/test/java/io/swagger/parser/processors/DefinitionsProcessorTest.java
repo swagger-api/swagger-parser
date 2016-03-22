@@ -63,7 +63,7 @@ public class DefinitionsProcessorTest {
     }
 
     @Test
-    public void testDefinitiosProcessor_RefModelInDefinitionsMap(
+    public void testDefinitionsProcessor_RefModelInDefinitionsMap(
             @Injectable final Model resolvedModel) throws Exception {
         final Swagger swagger = new Swagger();
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";

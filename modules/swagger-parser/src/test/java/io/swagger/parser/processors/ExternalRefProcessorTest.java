@@ -1,9 +1,7 @@
 package io.swagger.parser.processors;
 
-import static org.testng.AssertJUnit.assertTrue;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
-import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
@@ -19,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 
 public class ExternalRefProcessorTest {

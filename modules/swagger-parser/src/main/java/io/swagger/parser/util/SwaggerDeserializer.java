@@ -601,6 +601,7 @@ public class SwaggerDeserializer {
     public Model definition(ObjectNode node, String location, ParseResult result) {
         if(node == null) {
             result.missing(location, "empty schema");
+            return null;
         }
         if(node.get("$ref") != null) {
             return refModel(node, location, result);
@@ -877,8 +878,7 @@ public class SwaggerDeserializer {
     }
 
     public Property property(ObjectNode node, String location, ParseResult result) {
-        Property output = Json.mapper().convertValue(node, Property.class);
-        return output;
+        return Json.mapper().convertValue(node, Property.class);
     }
 
     public RefModel refModel(ObjectNode node, String location, ParseResult result) {
@@ -1100,10 +1100,9 @@ public class SwaggerDeserializer {
                 if(name != null && ("header".equals(position) || "query".equals(position))) {
                     In in = In.forValue(position);
                     if(in != null) {
-                        ApiKeyAuthDefinition auth = new ApiKeyAuthDefinition()
+                        output = new ApiKeyAuthDefinition()
                                 .name(name)
                                 .in(in);
-                        output = auth;
                     }
                 }
             }

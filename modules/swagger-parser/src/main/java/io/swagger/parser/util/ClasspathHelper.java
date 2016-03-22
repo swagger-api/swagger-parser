@@ -22,8 +22,7 @@ public class ClasspathHelper {
 
         if(inputStream != null) {
             try {
-                final String result = IOUtils.toString(inputStream);
-                return result;
+                return IOUtils.toString(inputStream);
             } catch (IOException e) {
                 throw new RuntimeException("Could not read " + location + " from the classpath", e);
             }

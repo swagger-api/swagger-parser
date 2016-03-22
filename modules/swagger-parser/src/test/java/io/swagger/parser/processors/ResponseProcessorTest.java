@@ -2,7 +2,6 @@ package io.swagger.parser.processors;
 
 
 import io.swagger.models.Response;
-import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
