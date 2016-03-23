@@ -3,11 +3,15 @@ package io.swagger.parser;
 import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.*;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.ResourceUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -122,5 +126,52 @@ public class SwaggerReaderTest {
 
         Model thingSummary = swaggerFromString.getDefinitions().get("ThingSummary");
         assertTrue(thingSummary instanceof ModelImpl);
+    }
+
+    @Test
+    public void testIssue207() throws Exception {
+        String spec = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/foo\": {\n" +
+                "      \"get\": {\n" +
+                "        \"parameters\": {},\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"successful operation\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"array\",\n" +
+                "              \"items\": {\n" +
+                "                \"$ref\": \"#/definitions/Pet\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"definitions\": {\n" +
+                "    \"Pet\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"name\": {\n" +
+                "          \"type\": \"string\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+
+        assertNotNull(result);
+        Response response = result.getSwagger().getPath("/foo").getGet().getResponses().get("200");
+        assertNotNull(response);
+        Property schema = response.getSchema();
+        assertTrue(schema instanceof ArrayProperty);
+        ArrayProperty ap = (ArrayProperty) schema;
+        assertTrue(ap.getItems() instanceof RefProperty);
+
+
     }
 }
