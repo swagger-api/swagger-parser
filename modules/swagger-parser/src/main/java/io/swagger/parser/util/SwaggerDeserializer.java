@@ -802,6 +802,7 @@ public class SwaggerDeserializer {
             // we only support one parent, no multiple inheritance or composition
             if(allOf.getNodeType().equals(JsonNodeType.ARRAY)) {
                 model = new ComposedModel();
+
                 int pos = 0;
                 for(JsonNode part : allOf) {
                     if(part.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -834,7 +835,9 @@ public class SwaggerDeserializer {
                         }
                         model.setInterfaces(interfaces);
                     }
-                    model.setChild(child == null ? new ModelImpl() : child);
+                    if(child != null) {
+                        model.setChild(child);
+                    }
                 }
             }
             else {
@@ -849,6 +852,13 @@ public class SwaggerDeserializer {
                 }
                 else if(!SCHEMA_KEYS.contains(key)) {
                     result.extra(location, key, node.get(key));
+                }
+                else {
+                    String value = getString("title", node, false, location, result);
+                    model.setTitle(value);
+
+                    value = getString("description", node, false, location, result);
+                    model.setDescription(value);
                 }
             }
 

@@ -171,7 +171,41 @@ public class SwaggerReaderTest {
         assertTrue(schema instanceof ArrayProperty);
         ArrayProperty ap = (ArrayProperty) schema;
         assertTrue(ap.getItems() instanceof RefProperty);
+    }
 
+    @Test
+    public void testIssue208() throws Exception {
+        String spec = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"paths\": {},\n" +
+                "  \"definitions\": {\n" +
+                "    \"Dog\": {\n" +
+                "      \"title\": \"Dog\",\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"allOf\": [\n" +
+                "        {\n" +
+                "          \"$ref\": \"#/definitions/Pet\"\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"x-color\": \"red\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+
+        assertNotNull(result);
+        Swagger swagger = result.getSwagger();
+
+        assertNotNull(swagger);
+        Model dog = swagger.getDefinitions().get("Dog");
+        assertNotNull(dog);
+        assertTrue(dog instanceof ComposedModel);
+        ComposedModel cm = (ComposedModel) dog;
+        assertEquals(cm.getTitle(), "Dog");
+        assertTrue(cm.getAllOf().size() == 1);
+        assertTrue(cm.getAllOf().get(0) instanceof RefModel);
+        assertNotNull(cm.getVendorExtensions());
+        assertEquals(cm.getVendorExtensions().get("x-color"), "red");
     }
 }
