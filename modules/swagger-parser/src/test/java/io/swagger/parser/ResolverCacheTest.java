@@ -14,7 +14,6 @@ import io.swagger.parser.util.RefUtils;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
-import mockit.StrictExpectations;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
@@ -22,7 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class ResolverCacheTest {
 
@@ -90,126 +90,6 @@ public class ResolverCacheTest {
         Model secondActualResult = cache.loadRef(ref, format, Model.class);
         assertEquals(expectedResult, secondActualResult);
 
-    }
-
-//    @Test
-    public void testLoadExternalRef_TwoRefsFromSameFile(@Injectable final Model expectedResult1,
-                                                        @Injectable final Model expectedResult2) throws Exception {
-
-        final RefFormat format = RefFormat.URL;
-        final String file = "http://my.company.com/path/to/file.json";
-        final String path1 = "#/hello/world/foo/bar";
-        final String path2 = "#/hello/world/this/that";
-        final String fullRef1 = file + path1;
-        final String fullRef2 = file + path2;
-        final String contentsOfExternalFile = "really good json";
-        final Pair<JsonNode, JsonNode> nodePair = constructJsonTree("hello", "world", "foo", "bar");
-
-        ObjectNode parentNode = (ObjectNode) nodePair.getLeft();
-        ObjectNode intermediateNode = (ObjectNode) parentNode.get("hello").get("world");
-        final ObjectNode secondLeaf = intermediateNode.putObject("this").putObject("that");
-
-
-        new Expectations() {{
-            RefUtils.readExternalRef(file, format, auths, null);
-            times = 1;
-            result = contentsOfExternalFile;
-
-            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, file);
-            times = 1;
-            result = nodePair.getLeft();
-
-            DeserializationUtils.deserialize(nodePair.getRight(), file, Model.class);
-            times = 1;
-            result = expectedResult1;
-
-            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, file);
-            times = 1;
-            result = nodePair.getLeft();
-
-            DeserializationUtils.deserialize(secondLeaf, file, Model.class);
-            times = 1;
-            result = expectedResult2;
-        }};
-
-        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
-
-        Model firstRefResult = cache.loadRef(fullRef1, format, Model.class);
-        assertEquals(expectedResult1, cache.getResolutionCache().get(fullRef1));
-        assertEquals(expectedResult1, firstRefResult);
-
-        Model secondRefResult = cache.loadRef(fullRef2, format, Model.class);
-        assertEquals(expectedResult2, cache.getResolutionCache().get(fullRef2));
-        assertEquals(expectedResult2, secondRefResult);
-
-        assertEquals(contentsOfExternalFile, cache.getExternalFileCache().get(file));
-    }
-
-//    @Test
-    public void testLoadExternalRef_WithDefinitionPath(@Injectable final Model expectedResult) throws Exception {
-
-        final RefFormat format = RefFormat.URL;
-        final String file = "http://my.company.com/path/to/file.json";
-        final String path = "#/hello/world/foo/bar";
-        final String fullRef = file + path;
-        final String contentsOfExternalFile = "really good json";
-        final Pair<JsonNode, JsonNode> nodePair = constructJsonTree("hello", "world", "foo", "bar");
-
-        new StrictExpectations() {{
-            RefUtils.readExternalRef(file, format, auths, null);
-            times = 1;
-            result = contentsOfExternalFile;
-
-            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, file);
-            times = 1;
-            result = nodePair.getLeft();
-
-            DeserializationUtils.deserialize(nodePair.getRight(), file, Model.class);
-            times = 1;
-            result = expectedResult;
-        }};
-
-        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
-        Model firstActualResult = cache.loadRef(fullRef, format, Model.class);
-
-        assertEquals(contentsOfExternalFile, cache.getExternalFileCache().get(file));
-        assertEquals(expectedResult, cache.getResolutionCache().get(fullRef));
-        assertEquals(expectedResult, firstActualResult);
-
-        //requesting the same ref a second time should not result in reading the external file again
-        Model secondActualResult = cache.loadRef(fullRef, format, Model.class);
-        assertEquals(expectedResult, secondActualResult);
-    }
-
-//    @Test
-    public void testLoadExternalRef_WithInvalidDefinitionPath() throws Exception {
-
-        final RefFormat format = RefFormat.URL;
-        final String file = "http://my.company.com/path/to/file.json";
-        final String path = "hello/world/bar/foo";
-        final String fullRef = file + "#/" + path;
-        final String contentsOfExternalFile = "really good json";
-        final Pair<JsonNode, JsonNode> nodePair = constructJsonTree("hello", "world", "foo", "bar");
-
-        new StrictExpectations() {{
-            RefUtils.readExternalRef(file, format, auths, null);
-            times = 1;
-            result = contentsOfExternalFile;
-
-            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, file);
-            times = 1;
-            result = nodePair.getLeft();
-
-        }};
-
-        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
-
-        try {
-            cache.loadRef(fullRef, format, Model.class);
-            fail("Should have thrown an exception");
-        } catch(RuntimeException e) {
-            assertEquals("Could not find " + path + " in contents of " + file, e.getMessage());
-        }
     }
 
     @Test
