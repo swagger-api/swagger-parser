@@ -14,7 +14,6 @@ import java.util.List;
  *
  */
 public class SwaggerResolver {
-
     private final Swagger swagger;
     private final ResolverCache cache;
     private final PathsProcessor pathProcessor;
