@@ -208,4 +208,41 @@ public class SwaggerReaderTest {
         assertNotNull(cm.getVendorExtensions());
         assertEquals(cm.getVendorExtensions().get("x-color"), "red");
     }
+
+    @Test(description = "issue 206, not supported yet")
+    public void testIssue206() {
+        String spec =
+            "swagger: '2.0'\n" +
+            "paths: {}\n" +
+            "definitions:\n" +
+            "  Model:\n" +
+            "    properties:\n" +
+            "      name:\n" +
+            "        type: string\n" +
+            "        required: true";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        // TODO: when 206 is resolved, enable the assertions here
+    }
+
+    @Test
+    public void testIssue205() {
+        String spec =
+            "swagger: '2.0'\n" +
+            "info:\n" +
+            "  title: nice\n" +
+            "paths: {}\n" +
+            "definitions:\n" +
+            "  Empty:\n" +
+            "    type: string\n" +
+            "    description: 'Expected empty response could be {}'";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        assertTrue(result.getMessages().size() == 0);
+
+        Swagger swagger = result.getSwagger();
+        Model definition = swagger.getDefinitions().get("Empty");
+        assertNotNull(definition);
+        assertTrue(definition instanceof ModelImpl);
+    }
 }
