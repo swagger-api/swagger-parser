@@ -37,6 +37,29 @@ public class ResolverCacheTest {
     @Injectable
     List<AuthorizationValue> auths;
 
+    @Test
+    public void testMock(@Injectable final Model expectedResult) throws Exception {
+        final RefFormat format = RefFormat.URL;
+        final String ref = "http://my.company.com/path/to/file.json";
+        final String contentsOfExternalFile = "really good json";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
+            times = 1;
+            result = contentsOfExternalFile;
+
+            DeserializationUtils.deserialize(contentsOfExternalFile, ref, Model.class);
+            times = 1;
+            result = expectedResult;
+        }};
+
+        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
+
+        Model firstActualResult = cache.loadRef(ref, RefFormat.URL, Model.class);
+
+
+        assertEquals(firstActualResult, expectedResult);
+    }
 
     @Test
     public void testLoadExternalRef_NoDefinitionPath(@Injectable final Model expectedResult) throws Exception {
