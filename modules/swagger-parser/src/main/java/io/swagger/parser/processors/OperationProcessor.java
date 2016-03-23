@@ -32,16 +32,18 @@ public class OperationProcessor {
             for (String responseCode : responses.keySet()) {
                 Response response = responses.get(responseCode);
 
-                if (response instanceof RefResponse) {
-                    RefResponse refResponse = (RefResponse) response;
-                    Response resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), Response.class);
+                if(response != null) {
+                    if (response instanceof RefResponse) {
+                        RefResponse refResponse = (RefResponse) response;
+                        Response resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), Response.class);
 
-                    if (resolvedResponse != null) {
-                        response = resolvedResponse;
-                        responses.put(responseCode, resolvedResponse);
+                        if (resolvedResponse != null) {
+                            response = resolvedResponse;
+                            responses.put(responseCode, resolvedResponse);
+                        }
                     }
+                    responseProcessor.processResponse(response);
                 }
-                responseProcessor.processResponse(response);
             }
         }
     }
