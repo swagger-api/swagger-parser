@@ -93,22 +93,12 @@ public class ApiDeclarationParser extends SwaggerParser {
             String description = readString(value.get("description"));
             model.setDescription(description);
 
-//            String name = readString(value.get("name"));
-//            model.setName(name);
-//
-//            String baseModel = readString(value.get("baseModel"));
-//            model.setBaseModel(baseModel);
-//
-//            String qualifiedType = readString(value.get("qualifiedType"));
-//            model.setQualifiedType(qualifiedType);
 
             String discriminator = readString(value.get("discriminator"));
             model.setDiscriminator(discriminator);
 
             Object properties = value.get("properties");
             if (properties != null) {
-//                List<ModelProperty> props = readProperties((Map<String, Object>) properties, messages);
-//                model.setProperties(props);
             }
             output.put(modelName, model);
         }
@@ -127,17 +117,8 @@ public class ApiDeclarationParser extends SwaggerParser {
             prop.setType(type);
 
             String qualifiedType = readString(value.get("qualifiedType"));
-//            prop.setQualifiedType(qualifiedType);
-//
-//            Integer position = readInteger(value.get("position"));
-//            prop.setPosition(position);
-//
-//            Boolean required = readBoolean(value.get("required"));
-//            prop.setRequired(required);
 
             output.add(prop);
-            // private List<AllowableValues> allowableValues = new ArrayList<AllowableValues>();
-            // private ModelRef items = null;
         }
 
         return output;
@@ -167,48 +148,7 @@ public class ApiDeclarationParser extends SwaggerParser {
     }
 
     List<Operation> readOperations(List<Map<String, Object>> ops, MessageBuilder messages) {
-        List<Operation> output = new ArrayList<Operation>();
-
-//        for (Map<String, Object> o : ops) {
-//            Operation op = new Operation();
-//            String method = readString(o.get("method"));
-////            if (method != null)
-////                op.setMethod(method);
-////            else
-////                messages.append(new Message("ApiDeclaration.apis.operations.method", "missing method", Severity.ERROR));
-//            String summary = readString(o.get("summary"));
-//            if (summary != null)
-//                op.setSummary(summary);
-//            String notes = readString(o.get("notes"));
-//            if (notes != null)
-//                op.setNotes(notes);
-////            String type = readString(o.get("type"));
-////            if (type != null)
-//////                op.setResponseClass(type);
-////            else
-////                messages.append(new Message("ApiDeclaration.apis.operations.type", "missing return type", Severity.ERROR));
-//            String nickname = readString(o.get("nickname"));
-//            if (nickname != null)
-//                op.setNickname(nickname);
-//            else
-//                messages.append(new Message("ApiDeclaration.apis.operations.nickname", "missing nickname", Severity.ERROR));
-//
-////            Object authorizations = o.get("authorizations");
-////            if (authorizations != null) {
-////                Map<String, Authorization> auths = readAuthorizations((Map<String, List<Object>>) authorizations, messages);
-////                if (auths.size() > 0)
-////                    op.setAuthorizations(auths);
-////            }
-//
-//            Object parameters = o.get("parameters");
-//            if (parameters != null) {
-//                List<Parameter> params = readParameters((List<Map<String, Object>>) parameters, messages);
-//                op.setParameters(params);
-//            }
-//
-//            output.add(op);
-//        }
-        return output;
+        return new ArrayList<Operation>();
     }
 
     List<Parameter> readParameters(List<Map<String, Object>> o, MessageBuilder messages) {
@@ -240,30 +180,10 @@ public class ApiDeclarationParser extends SwaggerParser {
         String type = readString(o.get("type"));
         param.setType(type);
 
-//        String format = readString(o.get("format"));
-//        param.setFormat(format);
-
-        // TODO: items
-//        String paramType = readString(o.get("paramType"));
-//        param.setParamType(paramType);
-
         Boolean allowMultiple = readBoolean(o.get("allowMultiple"));
         param.setAllowMultiple(allowMultiple);
 
         return param;
     }
 
-//    Map<String, Authorization> readAuthorizations(Map<String, List<Object>> ops, MessageBuilder messages) {
-//        Map<String, Authorization> output = new HashMap<String, Authorization>();
-//
-//        for (String key : ops.keySet()) {
-//            Authorization auth = new Authorization();
-//            Object value = ops.get(key);
-//            List<AuthorizationScope> scopes = readAuthorizationScopes((List<Map<String, Object>>) value, messages);
-//            auth.setScopes(scopes);
-//            output.put(key, auth);
-//        }
-//
-//        return output;
-//    }
 }

@@ -66,7 +66,6 @@ public class SwaggerParser {
                 return new SwaggerResolver(output, auths, location).resolve();
             }
         } catch (IOException e) {
-            // continue;
         }
         for (SwaggerParserExtension extension : parserExtensions) {
             try {
@@ -120,7 +119,6 @@ public class SwaggerParser {
                 return new SwaggerResolver(output, auths, null).resolve();
             }
         } catch (IOException e) {
-            // continue;
         }
         return null;
     }
@@ -148,7 +146,6 @@ public class SwaggerParser {
                 }
             }
         } catch (IOException e) {
-            // continue;
         }
         for (SwaggerParserExtension extension : parserExtensions) {
             try {

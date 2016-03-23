@@ -26,7 +26,6 @@ public class HttpClient {
 
     public void addQueryParam(String name, String value) {
         queryParams.put(name, value);
-//        uriBuilder.addParameter(name, value);
     }
 
     public void addHeader(String name, String value) {
