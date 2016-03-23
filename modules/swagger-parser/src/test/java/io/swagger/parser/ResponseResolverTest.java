@@ -1,8 +1,10 @@
 package io.swagger.parser;
 
+import io.swagger.models.Swagger;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertNotNull;
 
 public class ResponseResolverTest {
     static String spec =
@@ -23,6 +25,8 @@ public class ResponseResolverTest {
     public void testIssue211() throws Exception {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
 
-        Json.prettyPrint(result);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        assertNotNull(swagger.getPath("/persons").getGet().getResponses().get("200"));
     }
 }
