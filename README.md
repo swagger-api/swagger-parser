@@ -1,7 +1,9 @@
 # Swagger Parser
 
-[![Build Status](https://travis-ci.org/swagger-api/swagger-parser.png)](https://travis-ci.org/swagger-api/swagger-parser)
+[![Build Status](https://travis-ci.org/swagger-api/swagger-parser.svg)](https://travis-ci.org/swagger-api/swagger-parser)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser-project/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser-project)
+[![PR Stats](http://issuestats.com/github/swagger-api/swagger-parser/badge/pr)](http://issuestats.com/github/swagger-api/swagger-parser) [![Issue Stats](http://issuestats.com/github/swagger-api/swagger-parser/badge/issue)](http://issuestats.com/github/swagger-api/swagger-parser)
+
 
 ## Overview 
 This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
