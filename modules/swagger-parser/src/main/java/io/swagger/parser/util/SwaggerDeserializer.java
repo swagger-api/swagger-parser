@@ -913,9 +913,14 @@ public class SwaggerDeserializer {
         Set<String> keys = getKeys(node);
 
         for(String key : keys) {
-            ObjectNode obj = getObject(key, node, false, location + ".responses", result);
-            Response response = response(obj, location + "." + key, result);
-            output.put(key, response);
+            if (key.startsWith("x-")) {
+
+            }
+            else {
+                ObjectNode obj = getObject(key, node, false, location + ".responses", result);
+                Response response = response(obj, location + "." + key, result);
+                output.put(key, response);
+            }
         }
 
         return output;
@@ -1313,7 +1318,7 @@ public class SwaggerDeserializer {
     public Number getNumber(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         Number value = null;
         JsonNode v = node.get(key);
-        if (node == null || v == null) {
+        if (v == null) {
             if (required) {
                 result.missing(location, key);
                 result.invalid();
