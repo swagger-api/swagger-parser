@@ -35,6 +35,7 @@ public class ResolverCache {
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
+    private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
 
@@ -46,6 +47,7 @@ public class ResolverCache {
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
         this.auths = auths;
+        this.rootPath = parentFileLocation;
 
         if(parentFileLocation != null) {
             if(parentFileLocation.startsWith("http")) {
@@ -87,7 +89,12 @@ public class ResolverCache {
         String contents = externalFileCache.get(file);
 
         if (contents == null) {
-            contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
+            if(parentDirectory != null) {
+                contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
+            }
+            else if(rootPath != null) {
+                contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath);
+            }
             externalFileCache.put(file, contents);
         }
 

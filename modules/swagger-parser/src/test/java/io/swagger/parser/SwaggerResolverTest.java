@@ -9,6 +9,7 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.*;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.PathsProcessor;
+import io.swagger.util.Json;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
@@ -290,5 +291,14 @@ public class SwaggerResolverTest {
         Response response = resolved.getPath("/fun").getGet().getResponses().get("200");
         assertTrue(response.getDescription().equals("ok!"));
         assertTrue(response instanceof Response);
+    }
+
+    @Test
+    public void testIssue213() {
+        String url = "https://raw.githubusercontent.com/communityelf/UpContent-API-Spec/testforron/index.yaml";
+
+        Swagger swagger = new SwaggerParser().read(url);
+        Json.prettyPrint(swagger);
+
     }
 }

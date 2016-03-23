@@ -4,6 +4,7 @@ import io.swagger.models.Model;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileInputStream;
 import java.nio.file.Files;
@@ -56,6 +57,75 @@ public class RefUtils {
 
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
         return refFormat == RefFormat.URL || refFormat == RefFormat.RELATIVE;
+    }
+
+
+    public static String readExternalUrlRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
+                                         String rootPath) {
+
+        if (!RefUtils.isAnExternalRefFormat(refFormat)) {
+            throw new RuntimeException("Ref is not external");
+        }
+
+        String result;
+
+        try {
+            if (refFormat == RefFormat.URL) {
+                result = RemoteUrl.urlToString(file, auths);
+            } else {
+                //its assumed to be a relative ref
+                String url = buildUrl(rootPath, file);
+
+                return readExternalRef(url, RefFormat.URL, auths, null);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+        }
+
+        return result;
+
+    }
+
+    public static String buildUrl(String rootPath, String relativePath) {
+        String[] rootPathParts = rootPath.split("/");
+        String [] relPathParts = relativePath.split("/");
+
+        if(rootPath == null || relativePath == null) {
+            return null;
+        }
+
+        int trimRoot = 0;
+        int trimRel = 0;
+
+        if(!"".equals(rootPathParts[rootPathParts.length - 1])) {
+            trimRoot = 1;
+        }
+        for(int i = 0; i < rootPathParts.length; i++) {
+            if("".equals(rootPathParts[i])) {
+                trimRel += 1;
+            }
+            else {
+                break;
+            }
+        }
+        for(int i = 0; i < relPathParts.length; i ++) {
+            if(".".equals(relPathParts[i])) {
+                trimRel += 1;
+            }
+            else if ("..".equals(relPathParts[i])) {
+                trimRel += 1;
+            }
+        }
+
+        String [] outputParts = new String[rootPathParts.length + relPathParts.length - trimRoot - trimRel];
+        System.arraycopy(rootPathParts, 0, outputParts, 0, rootPathParts.length - trimRoot);
+        System.arraycopy(relPathParts,
+                trimRel,
+                outputParts,
+                rootPathParts.length - trimRoot + trimRel - 1,
+                relPathParts.length - trimRel);
+
+        return StringUtils.join(outputParts, "/");
     }
 
     public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,

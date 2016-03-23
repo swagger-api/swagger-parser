@@ -53,6 +53,14 @@ public class ResolverCacheTest {
             times = 1;
             result = contentsOfExternalFile;
 
+            RefUtils.readExternalUrlRef(ref, format, auths, null);
+            times = 1;
+            result = "";
+
+            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
+            times = 1;
+            result = "";
+
             DeserializationUtils.deserialize(contentsOfExternalFile, ref, Model.class);
             times = 1;
             result = expectedResult;
