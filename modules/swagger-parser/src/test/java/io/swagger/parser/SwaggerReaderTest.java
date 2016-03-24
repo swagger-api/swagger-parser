@@ -2,6 +2,8 @@ package io.swagger.parser;
 
 import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.*;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
@@ -269,5 +271,39 @@ public class SwaggerReaderTest {
         Property property = swagger.getPath("/foo").getGet().getResponses().get("200").getSchema();
         assertNotNull(property);
         assertTrue(property instanceof RefProperty);
+    }
+
+    @Test
+    public void testIssue192() {
+        String spec =
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  title: issue 192\n" +
+                "paths:\n" +
+                "  /foo:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - name: Code\n" +
+                "          in: path\n" +
+                "          description: The code\n" +
+                "          required: true\n" +
+                "          type: string\n" +
+                "          minLength: 4\n" +
+                "          maxLength: 5\n" +
+                "          pattern: '^[a-zA-Z]'\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: 'the pet'";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+
+        Swagger swagger = result.getSwagger();
+        Parameter param = swagger.getPath("/foo").getGet().getParameters().get(0);
+        assertTrue(param instanceof PathParameter);
+        PathParameter pathParameter = (PathParameter) param;
+
+        assertEquals(pathParameter.getMinLength(), new Integer(4));
+        assertEquals(pathParameter.getMaxLength(), new Integer(5));
+        assertEquals(pathParameter.getPattern(), "^[a-zA-Z]");
     }
 }

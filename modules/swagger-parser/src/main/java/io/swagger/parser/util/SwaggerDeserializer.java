@@ -438,6 +438,7 @@ public class SwaggerDeserializer {
             String type = getString("type", obj, false, location, result);
             String format = getString("format", obj, false, location, result);
             AbstractSerializableParameter<?> sp = null;
+
             if("query".equals(value)) {
                 sp = new QueryParameter();
             }
@@ -500,6 +501,14 @@ public class SwaggerDeserializer {
                 iv = getInteger("minItems", obj, false, location, result);
                 map.put(MIN_ITEMS, iv);
                 sp.setMinItems(iv);
+
+                iv = getInteger("minLength", obj, false, location, result);
+                map.put(MIN_LENGTH, iv);
+                sp.setMinLength(iv);
+
+                iv = getInteger("maxLength", obj, false, location, result);
+                map.put(MAX_LENGTH, iv);
+                sp.setMaxLength(iv);
 
                 map.put(UNIQUE_ITEMS, getBoolean("uniqueItems", obj, false, location, result));
 
