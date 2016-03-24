@@ -245,4 +245,29 @@ public class SwaggerReaderTest {
         assertNotNull(definition);
         assertTrue(definition instanceof ModelImpl);
     }
+
+
+    @Test
+    public void testIssue136() {
+        String spec =
+            "swagger: '2.0'\n" +
+            "info:\n" +
+            "  title: issue 136\n" +
+            "paths:\n" +
+            "  /foo:\n" +
+            "    get:\n" +
+            "      parameters: []\n" +
+            "      responses:\n" +
+            "        200:\n" +
+            "          description: 'the pet'\n" +
+            "          schema:\n" +
+            "            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+
+        Swagger swagger = result.getSwagger();
+        Property property = swagger.getPath("/foo").getGet().getResponses().get("200").getSchema();
+        assertNotNull(property);
+        assertTrue(property instanceof RefProperty);
+    }
 }
