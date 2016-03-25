@@ -131,6 +131,37 @@ public class SwaggerParserTest {
         assertNotNull(swagger);
     }
 
+    @Test
+    public void testIssue() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  description: 'No description provided.'\n" +
+                "  version: '2.0'\n" +
+                "  title: 'My web service'\n" +
+                "  x-endpoint-name: 'default'\n" +
+                "paths:\n" +
+                "  x-nothing: 'sorry not supported'\n" +
+                "  /foo:\n" +
+                "    x-something: 'yes, it is supported'\n" +
+                "    get:\n" +
+                "      parameters: []\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: 'Swagger API document for this service'\n" +
+                "x-some-vendor:\n" +
+                "  sometesting: 'bye!'";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Swagger swagger = result.getSwagger();
+
+        assertEquals(swagger.getVendorExtensions().get("x-some-vendor"), Json.mapper().createObjectNode().put("sometesting", "bye!"));
+        assertEquals(swagger.getPath("/foo").getVendorExtensions().get("x-something"), "yes, it is supported");
+        assertTrue(result.getMessages().size() == 1);
+        assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
+    }
+
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);

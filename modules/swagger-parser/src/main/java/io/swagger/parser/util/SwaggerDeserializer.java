@@ -162,13 +162,17 @@ public class SwaggerDeserializer {
         Set<String> pathKeys = getKeys(obj);
         for(String pathName : pathKeys) {
             JsonNode pathValue = obj.get(pathName);
-            if(!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, pathName, "object", pathValue);
+            if(pathName.startsWith("x-")) {
+                result.unsupported(location, pathName, pathValue);
             }
             else {
-                ObjectNode path = (ObjectNode) pathValue;
-                Path pathObj = path(path, location + ".'" + pathName + "'", result);
-                output.put(pathName, pathObj);
+                if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                    result.invalidType(location, pathName, "object", pathValue);
+                } else {
+                    ObjectNode path = (ObjectNode) pathValue;
+                    Path pathObj = path(path, location + ".'" + pathName + "'", result);
+                    output.put(pathName, pathObj);
+                }
             }
         }
         return output;
@@ -1405,8 +1409,13 @@ public class SwaggerDeserializer {
     static class ParseResult {
         private boolean valid = true;
         private Map<Location, JsonNode> extra = new HashMap<Location, JsonNode>();
+        private Map<Location, JsonNode> unsupported = new HashMap<Location, JsonNode>();
         private Map<Location, String> invalidType = new HashMap<Location, String>();
         private List<Location> missing = new ArrayList<Location>();
+
+        public void unsupported(String location, String key, JsonNode value) {
+            unsupported.put(new Location(location, key), value);
+        }
 
         public void extra(String location, String key, JsonNode value) {
             extra.put(new Location(location, key), value);
@@ -1422,6 +1431,14 @@ public class SwaggerDeserializer {
 
         public void invalid() {
             this.valid = false;
+        }
+
+        public Map<Location, JsonNode> getUnsupported() {
+            return unsupported;
+        }
+
+        public void setUnsupported(Map<Location, JsonNode> unsupported) {
+            this.unsupported = unsupported;
         }
 
         public boolean isValid() {
@@ -1471,6 +1488,11 @@ public class SwaggerDeserializer {
             for(Location l : missing) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            for(Location l : unsupported.keySet()) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is unsupported";
                 messages.add(message);
             }
             return messages;
