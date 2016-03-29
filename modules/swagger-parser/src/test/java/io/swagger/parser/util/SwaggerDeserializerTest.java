@@ -183,12 +183,14 @@ public class SwaggerDeserializerTest {
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"securityDefinitions\": {\n" +
                 "    \"basic_auth\": {\n" +
-                "      \"type\": \"basic\"\n" +
+                "      \"type\": \"basic\",\n" +
+                "      \"x-foo\": \"basicBar\"\n" +
                 "    },\n" +
                 "    \"api_key\": {\n" +
                 "      \"type\": \"apiKey\",\n" +
                 "      \"name\": \"api_key\",\n" +
-                "      \"in\": \"header\"\n" +
+                "      \"in\": \"header\",\n" +
+                "      \"x-foo\": \"apiKeyBar\"\n" +
                 "    }\n" +
                 "  },\n" +
                 "  \"paths\": {\n" +
@@ -219,7 +221,7 @@ public class SwaggerDeserializerTest {
         SecuritySchemeDefinition definitionBasic = swagger.getSecurityDefinitions().get("basic_auth");
         assertNotNull(definitionBasic);
         assertTrue(definitionBasic instanceof BasicAuthDefinition);
-
+        assertEquals(definitionBasic.getVendorExtensions().get("x-foo"), "basicBar");
         // API Key Authentication
         SecuritySchemeDefinition definition = swagger.getSecurityDefinitions().get("api_key");
         assertNotNull(definition);
@@ -228,6 +230,7 @@ public class SwaggerDeserializerTest {
         ApiKeyAuthDefinition apiKey = (ApiKeyAuthDefinition) definition;
         assertEquals(apiKey.getName(), "api_key");
         assertEquals(apiKey.getIn(), In.HEADER);
+        assertEquals(apiKey.getVendorExtensions().get("x-foo"), "apiKeyBar");
     }
 
     @Test

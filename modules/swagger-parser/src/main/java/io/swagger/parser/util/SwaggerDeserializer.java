@@ -27,6 +27,7 @@ public class SwaggerDeserializer {
     static Set<String> OPERATION_KEYS = new HashSet<String>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
     static Set<String> PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf"));
     static Set<String> BODY_PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
+    static Set<String> SECURITY_SCHEME_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
@@ -1141,7 +1142,19 @@ public class SwaggerDeserializer {
             else {
                 result.invalidType(location + ".type", "type", "basic|apiKey|oauth2", node);
             }
+            
+            // extra keys
+            Set<String> keys = getKeys(node);
+            for(String key : keys) {
+                if(key.startsWith("x-")) {
+                    output.setVendorExtension(key, extension(node.get(key)));
+                }
+                else if(!SECURITY_SCHEME_KEYS.contains(key)) {
+                    result.extra(location, key, node.get(key));
+                }
+            }
         }
+
 
         return output;
     }
