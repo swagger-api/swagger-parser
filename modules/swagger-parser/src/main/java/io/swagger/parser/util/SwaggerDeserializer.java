@@ -1143,6 +1143,14 @@ public class SwaggerDeserializer {
             }
         }
 
+            Set<String> keys = getKeys(node);
+            for (String key : keys)
+            {
+                if (key.startsWith("x-"))
+                {
+                    output.setVendorExtension(key, extension(node.get(key)));
+                }
+            }
         return output;
     }
 
