@@ -124,10 +124,14 @@ public class SwaggerParser {
     }
 
     public Swagger read(JsonNode node) {
-        return read(node, false);
+        return read(node, new ArrayList<AuthorizationValue>(), false);
     }
 
     public Swagger read(JsonNode node, boolean resolve) {
+        return read(node, new ArrayList<AuthorizationValue>(), resolve);
+    }
+
+    public Swagger read(JsonNode node, List<AuthorizationValue> authorizationValues, boolean resolve) {
         if (node == null) {
             return null;
         }
@@ -139,7 +143,7 @@ public class SwaggerParser {
             output = new Swagger20Parser().read(node);
             if (output != null) {
                 if(resolve) {
-                    return new SwaggerResolver(output, new ArrayList<AuthorizationValue>()).resolve();
+                    return new SwaggerResolver(output, authorizationValues).resolve();
                 }
                 else {
                     return output;
