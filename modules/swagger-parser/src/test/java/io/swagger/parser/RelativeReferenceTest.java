@@ -4,6 +4,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.util.RemoteUrl;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.testng.annotations.Test;
@@ -53,7 +54,8 @@ public class RelativeReferenceTest {
             result = samplePath;
         }};
 
-        Swagger swagger = new SwaggerParser().read("http://foo.bar.com/swagger.json");
+        SwaggerDeserializationResult result = new SwaggerParser().parseLocation("http://foo.bar.com/swagger.json");
+        Swagger swagger = result.getSwagger();
 
         assertNotNull(swagger.getPath("/samplePath").getGet());
         assertNotNull(swagger.getPath("/samplePath").getGet().getParameters().get(0));

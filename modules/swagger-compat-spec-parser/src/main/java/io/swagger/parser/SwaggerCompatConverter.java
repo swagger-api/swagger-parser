@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,44 +28,26 @@ import java.util.Map;
 
 // legacy models
 
-public class SwaggerCompatConverter implements SwaggerParserExtension {
+public class SwaggerCompatConverter extends AbstractParser implements SwaggerParserExtension {
     static Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
 
     @Override
-    public SwaggerDeserializationResult readWithInfo(JsonNode node) {
-        // not implemented
-        return null;
+    public SwaggerDeserializationResult parseContents(JsonNode node) throws UnparseableContentException {
+        throw new UnparseableContentException();
     }
 
     @Override
-    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
-        SwaggerDeserializationResult result = new SwaggerDeserializationResult();
-        try {
-            Swagger swagger = read(location, auths);
-            if(swagger != null) {
-                result.setSwagger(swagger);
-                JsonNode jsonNode = Json.mapper().convertValue(swagger, JsonNode.class);
-                return new Swagger20Parser().readWithInfo(jsonNode);
-            }
-        }
-        catch (IOException e) {
-            // TODO
-        }
-        return result;
+    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> authorizationValues, boolean resolve) throws UnparseableContentException {
+        throw new UnparseableContentException();
     }
 
     @Override
-    public Swagger read(JsonNode node) throws IOException {
-        // TODO
-        return null;
-    }
-
-    public Swagger read(String input) throws IOException {
-        return read(input, null);
+    public SwaggerDeserializationResult parseLocation(String input) throws UnparseableContentException {
+        return parseLocation(input, new ArrayList<AuthorizationValue>(), true);
     }
 
     @Override
-    public Swagger read(String input, List<AuthorizationValue> auths) throws IOException {
+    public SwaggerDeserializationResult parseLocation(String input, List<AuthorizationValue> auths, boolean resolve) throws UnparseableContentException {
         Swagger output = null;
         MessageBuilder migrationMessages = new MessageBuilder();
         SwaggerLegacyParser swaggerParser = new SwaggerLegacyParser();
@@ -133,7 +114,14 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
             output = convert(resourceListing, apis);
         }
-        return output;
+        SwaggerDeserializationResult result = new SwaggerDeserializationResult();
+        if(resolve) {
+            result.setSwagger(new SwaggerResolver(output, auths).resolve());
+        }
+        else {
+            result.setSwagger(output);
+        }
+        return result;
     }
 
     public ResourceListing readResourceListing(String input, MessageBuilder messages, List<AuthorizationValue> auths) {

@@ -23,7 +23,7 @@ public class ResponseResolverTest {
 
     @Test
     public void testIssue211() throws Exception {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
 
         Swagger swagger = result.getSwagger();
         assertNotNull(swagger);

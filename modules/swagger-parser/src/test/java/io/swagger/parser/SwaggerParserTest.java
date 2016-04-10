@@ -33,7 +33,7 @@ public class SwaggerParserTest {
     @Test
     public void testPetstore() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);
+        SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/petstore.json");
 
         assertNotNull(result);
     }
@@ -41,7 +41,7 @@ public class SwaggerParserTest {
     @Test
     public void testTroublesomeFile() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/troublesome.yaml");
+        final SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/troublesome.yaml");
     }
 
     @Test
@@ -53,10 +53,11 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testIssue75() {
+    public void testIssue75() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue99.json");
+        final SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/issue99.json");
 
+        Swagger swagger = result.getSwagger();
         BodyParameter param = (BodyParameter)swagger.getPaths().get("/albums").getPost().getParameters().get(0);
         Model model = param.getSchema();
 
@@ -69,17 +70,21 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testIssue62() {
+    public void testIssue62() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
+        final SwaggerDeserializationResult result = parser.parseLocation("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
+        Swagger swagger = result.getSwagger();
 
         assertNotNull(swagger.getPaths().get("/pets/{petId}").getGet());
     }
 
     @Test
-    public void testIssue146() {
+    public void testIssue146() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue_146.yaml");
+        final SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/issue_146.yaml");
+
+        Swagger swagger = result.getSwagger();
+
         assertNotNull(swagger);
         QueryParameter p = ((QueryParameter)swagger.getPaths().get("/checker").getGet().getParameters().get(0));
         StringProperty pp = (StringProperty)p.getItems();
@@ -87,9 +92,11 @@ public class SwaggerParserTest {
     }
 
     @Test(description="Test (path & form) parameter's required attribute")
-    public void testParameterRequired() {
+    public void testParameterRequired() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/petstore.json");
+        final SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/petstore.json");
+        Swagger swagger = result.getSwagger();
+
         final List<Parameter> operationParams = swagger.getPath("/pet/{petId}").getPost().getParameters();
         
         final PathParameter pathParameter = (PathParameter) operationParams.get(0);
@@ -100,9 +107,11 @@ public class SwaggerParserTest {
     }
     
     @Test(description="Test consumes and produces in top level and operation level")
-    public void testConsumesAndProduces() {
+    public void testConsumesAndProduces() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/consumes_and_produces");
+        final SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/consumes_and_produces");
+        Swagger swagger = result.getSwagger();
+
         Assert.assertNotNull(swagger);
 
         // test consumes and produces at spec level
@@ -124,15 +133,15 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testIssue108() {
+    public void testIssue108() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue_108.json");
+        final SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/issue_108.json");
 
-        assertNotNull(swagger);
+        assertNotNull(result);
     }
 
     @Test
-    public void testIssue() {
+    public void testIssue() throws Exception {
         String yaml =
                 "swagger: '2.0'\n" +
                 "info:\n" +
@@ -152,7 +161,7 @@ public class SwaggerParserTest {
                 "x-some-vendor:\n" +
                 "  sometesting: 'bye!'";
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        SwaggerDeserializationResult result = parser.parseContents(yaml, null, true);
 
         Swagger swagger = result.getSwagger();
 
@@ -162,9 +171,9 @@ public class SwaggerParserTest {
         assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
     }
 
-    private Swagger doRelativeFileTest(String location) {
+    private Swagger doRelativeFileTest(String location) throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);
+        SwaggerDeserializationResult readResult = parser.parseLocation(location, null, true);
         if(readResult.getMessages().size() > 0) {
             Json.prettyPrint(readResult.getMessages());
         }

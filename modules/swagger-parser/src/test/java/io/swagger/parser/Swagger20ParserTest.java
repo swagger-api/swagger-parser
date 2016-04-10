@@ -6,12 +6,12 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.parser.util.RemoteUrl;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import mockit.*;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -88,8 +88,9 @@ public class Swagger20ParserTest {
         doTest(location, null);
     }
 
-    private void doTest(String location, @Injectable List<AuthorizationValue> auths) throws IOException {
-        final Swagger actualSwagger = parser.read(location, auths);
+    private void doTest(String location, @Injectable List<AuthorizationValue> auths) throws Exception {
+        final SwaggerDeserializationResult result = parser.parseLocation(location, auths, true);
+        Swagger actualSwagger = result.getSwagger();
 
         new FullVerifications(){{}};
 
