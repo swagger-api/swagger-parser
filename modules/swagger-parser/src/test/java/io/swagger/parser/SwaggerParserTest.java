@@ -161,7 +161,7 @@ public class SwaggerParserTest {
                 "x-some-vendor:\n" +
                 "  sometesting: 'bye!'";
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.parseContents(yaml, null, true);
+        SwaggerDeserializationResult result = parser.parseContents(yaml, null, null, true);
 
         Swagger swagger = result.getSwagger();
 

@@ -54,7 +54,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
             } else {
                 rootNode = DeserializationUtils.readYamlTree(data);
             }
-            return parseContents(rootNode, auths, resolve);
+            return parseContents(rootNode, auths, location, resolve);
         }
         catch (Exception e) {
             SwaggerDeserializationResult output = new SwaggerDeserializationResult();
@@ -65,15 +65,15 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     @Override
     public SwaggerDeserializationResult parseContents(JsonNode node) throws UnparseableContentException {
-        return parseContents(node, new ArrayList<AuthorizationValue>(), true);
+        return parseContents(node, new ArrayList<AuthorizationValue>(), null, true);
     }
 
     @Override
-    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> auth, boolean resolve) throws UnparseableContentException {
+    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> auth, String parentLocation, boolean resolve) throws UnparseableContentException {
         SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(node);
 
         if(result != null && result.getSwagger() != null) {
-            Swagger resolved = new SwaggerResolver(result.getSwagger(), auth).resolve();
+            Swagger resolved = new SwaggerResolver(result.getSwagger(), auth, parentLocation).resolve();
             if(resolved != null) {
                 result.setSwagger(resolved);
             }

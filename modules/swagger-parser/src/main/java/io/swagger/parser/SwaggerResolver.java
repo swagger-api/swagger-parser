@@ -20,16 +20,12 @@ public class SwaggerResolver {
     private final DefinitionsProcessor definitionsProcessor;
     private final OperationProcessor operationsProcessor;
 
-    public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
+    public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentLocation) {
         this.swagger = swagger;
-        this.cache = new ResolverCache(swagger, auths, parentFileLocation);
+        this.cache = new ResolverCache(swagger, auths, parentLocation);
         definitionsProcessor = new DefinitionsProcessor(cache, swagger);
         pathProcessor = new PathsProcessor(cache, swagger);
         operationsProcessor = new OperationProcessor(cache, swagger);
-    }
-
-    public SwaggerResolver(Swagger swagger,  List<AuthorizationValue> auths) {
-        this(swagger, auths, null);
     }
 
     public Swagger resolve() {

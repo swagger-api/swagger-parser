@@ -57,10 +57,10 @@ public class SwaggerParser extends AbstractParser {
         throw new UnparseableContentException();
     }
 
-    public SwaggerDeserializationResult parseContents(String swaggerAsString, List<AuthorizationValue> auths, boolean resolve) throws UnparseableContentException {
+    public SwaggerDeserializationResult parseContents(String swaggerAsString, List<AuthorizationValue> auths, String parentLocation, boolean resolve) throws UnparseableContentException {
         JsonNode node = stringToNode(swaggerAsString);
         try {
-            return new Swagger20Parser().parseContents(node, auths, resolve);
+            return new Swagger20Parser().parseContents(node, auths, parentLocation, resolve);
         }
         catch (UnparseableContentException e) {
             LOGGER.debug("unable to parse as swagger 2.0");
@@ -69,7 +69,7 @@ public class SwaggerParser extends AbstractParser {
         List<SwaggerParserExtension> parserExtensions = getExtensions();
         for (SwaggerParserExtension extension : parserExtensions) {
             try {
-                return extension.parseContents(node, auths, resolve);
+                return extension.parseContents(node, auths, parentLocation, resolve);
             } catch (UnparseableContentException e) {
                 if (System.getProperty("debugParser") != null) {
                     e.printStackTrace();
@@ -86,10 +86,10 @@ public class SwaggerParser extends AbstractParser {
     }
 
     public SwaggerDeserializationResult parseContents(JsonNode node) throws UnparseableContentException {
-        return parseContents(node, new ArrayList<AuthorizationValue>(), false);
+        return parseContents(node, new ArrayList<AuthorizationValue>(), null, false);
     }
 
-    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> authorizationValues, boolean resolve) throws UnparseableContentException {
+    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> authorizationValues, String parentLocation, boolean resolve) throws UnparseableContentException {
         if (node == null) {
             return null;
         }
@@ -97,12 +97,12 @@ public class SwaggerParser extends AbstractParser {
         List<SwaggerParserExtension> parserExtensions = getExtensions();
 
         try {
-            return new Swagger20Parser().parseContents(node, authorizationValues, resolve);
+            return new Swagger20Parser().parseContents(node, authorizationValues, parentLocation, resolve);
         } catch (UnparseableContentException e) {
         }
         for (SwaggerParserExtension extension : parserExtensions) {
             try {
-                return extension.parseContents(node, authorizationValues, resolve);
+                return extension.parseContents(node, authorizationValues, parentLocation, resolve);
             } catch (UnparseableContentException e) {
                 if (System.getProperty("debugParser") != null) {
                     e.printStackTrace();

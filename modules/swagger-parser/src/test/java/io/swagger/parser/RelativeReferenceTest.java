@@ -1,6 +1,7 @@
 package io.swagger.parser;
 
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.util.RemoteUrl;
@@ -8,6 +9,8 @@ import io.swagger.parser.util.SwaggerDeserializationResult;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -45,11 +48,11 @@ public class RelativeReferenceTest {
     @Test
     public void testIssue213() throws Exception {
         new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", null);
+            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", new ArrayList<AuthorizationValue>());
             times = 1;
             result = spec;
 
-            RemoteUrl.urlToString("http://foo.bar.com/path/samplePath.yaml", null);
+            RemoteUrl.urlToString("http://foo.bar.com/path/samplePath.yaml", new ArrayList<AuthorizationValue>());
             times = 1;
             result = samplePath;
         }};

@@ -72,7 +72,7 @@ public class SwaggerReaderTest {
     public void detectYaml() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
         final SwaggerDeserializationResult result = parser.parseLocation("minimal_y");
-        assertEquals(result.getSwagger(), "2.0");
+        assertEquals(result.getSwagger().getSwagger(), "2.0");
     }
 
     @Test(description = "it should detect json")
@@ -105,10 +105,10 @@ public class SwaggerReaderTest {
         final SwaggerParser parser = new SwaggerParser();
         final String path = "uber.json";
 
-        final SwaggerDeserializationResult result = parser.parseLocation(ResourceUtils.loadClassResource(getClass(), path));
+        final SwaggerDeserializationResult result = parser.parseContents(ResourceUtils.loadClassResource(getClass(), path));
         final SwaggerDeserializationResult swaggerFromString = parser.parseLocation(path);
 
-        assertEquals(result, swaggerFromString);
+        assertEquals(result.getSwagger(), swaggerFromString.getSwagger());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class SwaggerReaderTest {
         final SwaggerParser parser = new SwaggerParser();
         final String path = "thing.json";
 
-        final SwaggerDeserializationResult result = parser.parseLocation(ResourceUtils.loadClassResource(getClass(), path));
+        final SwaggerDeserializationResult result = parser.parseContents(ResourceUtils.loadClassResource(getClass(), path));
         Swagger swaggerFromString = result.getSwagger();
 
         Model thing = swaggerFromString.getDefinitions().get("Thing");

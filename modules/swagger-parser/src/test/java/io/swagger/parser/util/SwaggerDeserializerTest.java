@@ -675,7 +675,7 @@ public class SwaggerDeserializerTest {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult result = parser.parseContents(json);
 
-        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
+        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null, null).resolve();
     }
 
     @Test
@@ -703,7 +703,7 @@ public class SwaggerDeserializerTest {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult result = parser.parseContents(yaml);
 
-        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
+        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null, null).resolve();
 
         Model model = resolved.getDefinitions().get("ExampleEnum");
         assertTrue(model instanceof ModelImpl);
