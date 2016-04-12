@@ -39,7 +39,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
         Swagger swagger = result.getSwagger();
@@ -129,12 +129,12 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testEmpty() {
+    public void testEmpty() throws Exception {
         String json = "{}";
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -144,7 +144,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testSecurity() {
+    public void testSecurity() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"security\": [\n" +
@@ -158,7 +158,7 @@ public class SwaggerDeserializerTest {
                 "}";
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -178,7 +178,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testSecurityDefinition() {
+    public void testSecurityDefinition() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"securityDefinitions\": {\n" +
@@ -209,7 +209,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -234,7 +234,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testRootInfo() {
+    public void testRootInfo() throws Exception {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
                 "\t\"foo\": \"bar\",\n" +
@@ -243,7 +243,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -252,7 +252,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testContact() {
+    public void testContact() throws Exception {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
                 "\t\"info\": {\n" +
@@ -274,7 +274,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -296,7 +296,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testResponses() {
+    public void testResponses() throws Exception {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
                 "\t\"responses\": {\n" +
@@ -310,7 +310,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -320,7 +320,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testLicense () {
+    public void testLicense () throws Exception {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
                 "\t\"info\": {\n" +
@@ -335,7 +335,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -349,7 +349,7 @@ public class SwaggerDeserializerTest {
 
 
     @Test
-    public void testDefinitions () {
+    public void testDefinitions () throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"definitions\": {\n" +
@@ -374,7 +374,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -389,7 +389,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testNestedDefinitions() {
+    public void testNestedDefinitions() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"definitions\": {\n" +
@@ -432,7 +432,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
@@ -455,7 +455,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testPaths() {
+    public void testPaths() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"paths\": {\n" +
@@ -476,7 +476,7 @@ public class SwaggerDeserializerTest {
                 "}";
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
         assertTrue(messages.contains("attribute paths.'/pet'.foo is unexpected"));
@@ -500,7 +500,7 @@ public class SwaggerDeserializerTest {
     }
     
     @Test
-    public void testPathsWithRefResponse() {
+    public void testPathsWithRefResponse() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"paths\": {\n" +
@@ -517,7 +517,7 @@ public class SwaggerDeserializerTest {
                 "}";
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         Swagger swagger = result.getSwagger();
 
         Path path = swagger.getPath("/pet");
@@ -531,7 +531,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testArrayModelDefinition() {
+    public void testArrayModelDefinition() throws Exception {
         String json = "{\n" +
                 "  \"paths\": {\n" +
                 "    \"/store/inventory\": {\n" +
@@ -555,7 +555,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
         Swagger swagger = result.getSwagger();
@@ -600,7 +600,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
 
         Swagger swagger = result.getSwagger();
         Parameter param = swagger.getPath("/pet/findByStatus").getGet().getParameters().get(0);
@@ -639,11 +639,11 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
     }
 
     @Test
-    public void testDeserializeBinaryString() {
+    public void testDeserializeBinaryString() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"info\": {\n" +
@@ -673,13 +673,13 @@ public class SwaggerDeserializerTest {
                 "}";
 
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
 
-        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
+        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null, null).resolve();
     }
 
     @Test
-    public void testDeserializeEnum() {
+    public void testDeserializeEnum() throws Exception {
         String yaml = "swagger: '2.0'\n" +
                 "info:\n" +
                 "  version: 0.0.0\n" +
@@ -701,9 +701,9 @@ public class SwaggerDeserializerTest {
                 "      - First\n" +
                 "      - Second";
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        SwaggerDeserializationResult result = parser.parseContents(yaml);
 
-        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
+        final Swagger resolved = new SwaggerResolver(result.getSwagger(), null, null).resolve();
 
         Model model = resolved.getDefinitions().get("ExampleEnum");
         assertTrue(model instanceof ModelImpl);
@@ -715,14 +715,14 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testDeserializeWithMessages() {
+    public void testDeserializeWithMessages() throws Exception {
         String yaml = "swagger: '2.0'\n" +
                 "info:\n" +
                 "  version: 0.0.0\n" +
                 "  title:\n" +
                 "    - bar";
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        SwaggerDeserializationResult result = parser.parseContents(yaml);
 
         Set<String> messages = new HashSet<String>(result.getMessages());
         assertTrue(messages.size() == 2);
@@ -732,7 +732,7 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testDeserializeWithDiscriminator() {
+    public void testDeserializeWithDiscriminator() throws Exception {
         String yaml =
                 "swagger: '2.0'\n" +
                 "definitions: \n" +
@@ -756,14 +756,14 @@ public class SwaggerDeserializerTest {
                 "        type: string";
 
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        SwaggerDeserializationResult result = parser.parseContents(yaml);
 
         Set<String> messages = new HashSet<String>(result.getMessages());
         assertFalse(messages.contains("attribute definitions.Animal.discriminator is unexpected"));
     }
 
     @Test
-    public void testIssue161() {
+    public void testIssue161() throws Exception {
         String yaml =
                 "swagger: '2.0'\n" +
                 "paths:\n" +
@@ -780,14 +780,14 @@ public class SwaggerDeserializerTest {
                 "        default:\n" +
                 "          description: ok";
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        SwaggerDeserializationResult result = parser.parseContents(yaml);
 
         Set<String> messages = new HashSet<String>(result.getMessages());
         assertFalse(messages.contains("attribute paths.'/users'(get).[name].maxLength is unexpected"));
     }
 
     @Test
-    public void testValidatorIssue50() {
+    public void testValidatorIssue50() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"info\": {\n" +
@@ -824,7 +824,7 @@ public class SwaggerDeserializerTest {
                 "}";
 
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
 
         assertTrue(result.getMessages().size() == 1);
     }
@@ -887,7 +887,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         assertTrue("Parser returned errors:", result.getMessages().isEmpty());
         Swagger swagger = result.getSwagger();
 
@@ -970,7 +970,7 @@ public class SwaggerDeserializerTest {
 
         SwaggerParser parser = new SwaggerParser();
 
-        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        SwaggerDeserializationResult result = parser.parseContents(json);
         assertTrue("Parser returned errors:", result.getMessages().isEmpty());
         Swagger swagger = result.getSwagger();
         assertNotNull("Parser result does not contain a Swagger instance", swagger);

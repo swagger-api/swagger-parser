@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,49 +28,31 @@ import java.util.Map;
 
 // legacy models
 
-public class SwaggerCompatConverter implements SwaggerParserExtension {
+public class SwaggerCompatConverter extends AbstractParser implements SwaggerParserExtension {
     static Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
 
     @Override
-    public SwaggerDeserializationResult readWithInfo(JsonNode node) {
-        // not implemented
-        return null;
+    public SwaggerDeserializationResult parseContents(JsonNode node) throws UnparseableContentException {
+        throw new UnparseableContentException();
     }
 
     @Override
-    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
-        SwaggerDeserializationResult result = new SwaggerDeserializationResult();
-        try {
-            Swagger swagger = read(location, auths);
-            if(swagger != null) {
-                result.setSwagger(swagger);
-                JsonNode jsonNode = Json.mapper().convertValue(swagger, JsonNode.class);
-                return new Swagger20Parser().readWithInfo(jsonNode);
-            }
-        }
-        catch (IOException e) {
-            // TODO
-        }
-        return result;
+    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> authorizationValues, String parentLocation, boolean resolve) throws UnparseableContentException {
+        throw new UnparseableContentException();
     }
 
     @Override
-    public Swagger read(JsonNode node) throws IOException {
-        // TODO
-        return null;
-    }
-
-    public Swagger read(String input) throws IOException {
-        return read(input, null);
+    public SwaggerDeserializationResult parseLocation(String input) throws UnparseableContentException {
+        return parseLocation(input, new ArrayList<AuthorizationValue>(), true);
     }
 
     @Override
-    public Swagger read(String input, List<AuthorizationValue> auths) throws IOException {
+    public SwaggerDeserializationResult parseLocation(String location, List<AuthorizationValue> auths, boolean resolve) throws UnparseableContentException {
         Swagger output = null;
         MessageBuilder migrationMessages = new MessageBuilder();
         SwaggerLegacyParser swaggerParser = new SwaggerLegacyParser();
         ResourceListing resourceListing = null;
-        resourceListing = readResourceListing(input, migrationMessages, auths);
+        resourceListing = readResourceListing(location, migrationMessages, auths);
 
         List<ApiDeclaration> apis = new ArrayList<ApiDeclaration>();
 
@@ -86,45 +67,45 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                     if (operations != null) {
                         if (!readAsSingleFile) {
                             // this is a single-file swagger definition
-                            apiDeclaration = readDeclaration(input, migrationMessages, auths);
+                            apiDeclaration = readDeclaration(location, migrationMessages, auths);
                             readAsSingleFile = true; // avoid doing this again
                         }
                     } else {
-                        String location = null;
-                        if (input.startsWith("http")) {
+                        String remoteLocation = null;
+                        if (location.startsWith("http")) {
                             // look up as url
                             String pathLocation = ref.getPath();
                             if (pathLocation.startsWith("http")) {
                                 // use as absolute url
-                                location = pathLocation;
+                                remoteLocation = pathLocation;
                             } else {
                                 if (pathLocation.startsWith("/")) {
                                     // handle 1.1 specs
                                     if(resourceListing.getSwaggerVersion().equals(SwaggerVersion.V1_1) &&
                                             resourceListing.getExtraFields().get("basePath") != null) {
                                         String basePath = resourceListing.getExtraFields().get("basePath").textValue();
-                                        location = basePath + pathLocation;
+                                        remoteLocation = basePath + pathLocation;
                                     }
                                     else {
-                                        location = input + pathLocation;
+                                        remoteLocation = location + pathLocation;
                                     }
                                 } else {
-                                    location = input + "/" + pathLocation;
+                                    remoteLocation = location + "/" + pathLocation;
                                 }
                             }
                         } else {
                             // file system
-                            File fileLocation = new File(input);
+                            File fileLocation = new File(location);
                             if (ref.getPath().startsWith("/")) {
-                                location = fileLocation.getParent() + ref.getPath();
+                                remoteLocation = fileLocation.getParent() + ref.getPath();
                             } else {
-                                location = fileLocation.getParent() + File.separator + ref.getPath();
+                                remoteLocation = fileLocation.getParent() + File.separator + ref.getPath();
                             }
                         }
-                        if (location.indexOf(".{format}") != -1) {
-                            location = location.replaceAll("\\.\\{format\\}", ".json");
+                        if (remoteLocation.indexOf(".{format}") != -1) {
+                            remoteLocation = remoteLocation.replaceAll("\\.\\{format\\}", ".json");
                         }
-                        apiDeclaration = readDeclaration(location, migrationMessages, auths);
+                        apiDeclaration = readDeclaration(remoteLocation, migrationMessages, auths);
                     }
                     if (apiDeclaration != null) {
                         apis.add(apiDeclaration);
@@ -133,7 +114,14 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
             output = convert(resourceListing, apis);
         }
-        return output;
+        SwaggerDeserializationResult result = new SwaggerDeserializationResult();
+        if(resolve) {
+            result.setSwagger(new SwaggerResolver(output, auths, location).resolve());
+        }
+        else {
+            result.setSwagger(output);
+        }
+        return result;
     }
 
     public ResourceListing readResourceListing(String input, MessageBuilder messages, List<AuthorizationValue> auths) {

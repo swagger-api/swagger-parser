@@ -12,7 +12,6 @@ import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.ResourceUtils;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -20,94 +19,96 @@ import static org.testng.Assert.*;
 
 public class SwaggerReaderTest {
     @Test(description = "it should read the uber api with file scheme")
-    public void readUberApiFromFile() {
+    public void readUberApiFromFile() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
         java.nio.file.Path currentRelativePath = Paths.get("");
         String curPath = currentRelativePath.toAbsolutePath().toString();
-        final Swagger swagger = parser.read("file:///" + curPath + "/src/test/resources/uber.json");
-        assertNotNull(swagger);
+        final SwaggerDeserializationResult result = parser.parseLocation("file:///" + curPath + "/src/test/resources/uber.json");
+        assertNotNull(result.getSwagger());
     }
 
     @Test(description = "it should read the uber api with file scheme and spaces")
-    public void readUberApiFromFileWithSpaces() {
+    public void readUberApiFromFileWithSpaces() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
         java.nio.file.Path currentRelativePath = Paths.get("");
         String curPath = currentRelativePath.toAbsolutePath().toString();
-        final Swagger swagger = parser.read("file:///" + curPath + "/src/test/resources/s%20p%20a%20c%20e%20s/uber.json");
-        assertNotNull(swagger);
+        final SwaggerDeserializationResult result = parser.parseLocation("file:///" + curPath + "/src/test/resources/s%20p%20a%20c%20e%20s/uber.json");
+        assertNotNull(result.getSwagger());
     }
 
     @Test(description = "it should read the uber api with url string without file scheme")
-    public void readUberApiFromFileNoScheme() {
+    public void readUberApiFromFileNoScheme() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/uber.json");
-        assertNotNull(swagger);
+        final SwaggerDeserializationResult result = parser.parseLocation("src/test/resources/uber.json");
+        assertNotNull(result.getSwagger());
     }
 
     @Test(description = "it should read the uber api")
-    public void readUberApi() {
+    public void readUberApi() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("uber.json");
-        assertNotNull(swagger);
+        final SwaggerDeserializationResult result = parser.parseLocation("uber.json");
+        assertNotNull(result.getSwagger());
     }
 
     @Test(description = "it should read the simple example with minimum values")
-    public void readSimpleExampleWithMinimumValues() {
+    public void readSimpleExampleWithMinimumValues() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("sampleWithMinimumValues.yaml");
+        final SwaggerDeserializationResult result = parser.parseLocation("sampleWithMinimumValues.yaml");
+        final Swagger swagger = result.getSwagger();
         final QueryParameter qp = (QueryParameter) swagger.getPaths().get("/pets").getGet().getParameters().get(0);
         assertEquals(qp.getMinimum(), 0.0);
     }
 
     @Test(description = "it should read the simple example with model extensions")
-    public void readSimpleExampleWithModelExtensions() {
+    public void readSimpleExampleWithModelExtensions() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("sampleWithMinimumValues.yaml");
+        final SwaggerDeserializationResult result = parser.parseLocation("sampleWithMinimumValues.yaml");
+        final Swagger swagger = result.getSwagger();
         final Model model = swagger.getDefinitions().get("Cat");
         assertNotNull(model.getVendorExtensions().get("x-extension-here"));
     }
 
     @Test(description = "it should detect yaml")
-    public void detectYaml() {
+    public void detectYaml() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("minimal_y");
-        assertEquals(swagger.getSwagger(), "2.0");
+        final SwaggerDeserializationResult result = parser.parseLocation("minimal_y");
+        assertEquals(result.getSwagger().getSwagger(), "2.0");
     }
 
     @Test(description = "it should detect json")
-    public void detectJson() {
+    public void detectJson() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("minimal_j");
-        assertEquals(swagger.getSwagger(), "2.0");
+        final SwaggerDeserializationResult result = parser.parseLocation("minimal_j");
+        assertEquals(result.getSwagger().getSwagger(), "2.0");
     }
 
     @Test(description = "it should read the issue 16 resource")
-    public void testIssue16() {
+    public void testIssue16() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("issue_16.yaml");
-        assertNotNull(swagger);
+        final SwaggerDeserializationResult result = parser.parseLocation("issue_16.yaml");
+        assertNotNull(result.getSwagger());
     }
 
     @Test(description = "it should test https://github.com/swagger-api/swagger-codegen/issues/469")
-    public void testIssue469() {
+    public void testIssue469() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("issue_469.json");
+        final SwaggerDeserializationResult result = parser.parseLocation("issue_469.json");
         final String expectedJson = "{" +
                 "  \"id\" : 12345," +
                 "  \"name\" : \"Gorilla\"" +
                 "}";
-        SerializationMatchers.assertEqualsToJson(swagger.getDefinitions().get("Pet").getExample(), expectedJson);
+        SerializationMatchers.assertEqualsToJson(result.getSwagger().getDefinitions().get("Pet").getExample(), expectedJson);
     }
 
     @Test(description = "it should read the issue 59 resource")
-    public void testIssue59() throws IOException {
+    public void testIssue59() throws Exception {
         final SwaggerParser parser = new SwaggerParser();
         final String path = "uber.json";
 
-        final Swagger swaggerFromString = parser.parse(ResourceUtils.loadClassResource(getClass(), path));
-        final Swagger swaggerFromFile = parser.read(path);
+        final SwaggerDeserializationResult result = parser.parseContents(ResourceUtils.loadClassResource(getClass(), path));
+        final SwaggerDeserializationResult swaggerFromString = parser.parseLocation(path);
 
-        assertEquals(swaggerFromFile, swaggerFromString);
+        assertEquals(result.getSwagger(), swaggerFromString.getSwagger());
     }
 
     @Test
@@ -115,7 +116,8 @@ public class SwaggerReaderTest {
         final SwaggerParser parser = new SwaggerParser();
         final String path = "thing.json";
 
-        final Swagger swaggerFromString = parser.parse(ResourceUtils.loadClassResource(getClass(), path));
+        final SwaggerDeserializationResult result = parser.parseContents(ResourceUtils.loadClassResource(getClass(), path));
+        Swagger swaggerFromString = result.getSwagger();
 
         Model thing = swaggerFromString.getDefinitions().get("Thing");
         assertTrue(thing instanceof ComposedModel);
@@ -164,7 +166,7 @@ public class SwaggerReaderTest {
                 "  }\n" +
                 "}";
 
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
 
         assertNotNull(result);
         Response response = result.getSwagger().getPath("/foo").getGet().getResponses().get("200");
@@ -194,7 +196,7 @@ public class SwaggerReaderTest {
                 "  }\n" +
                 "}";
 
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
 
         assertNotNull(result);
         Swagger swagger = result.getSwagger();
@@ -212,7 +214,7 @@ public class SwaggerReaderTest {
     }
 
     @Test(description = "issue 206, not supported yet")
-    public void testIssue206() {
+    public void testIssue206() throws Exception {
         String spec =
             "swagger: '2.0'\n" +
             "paths: {}\n" +
@@ -223,12 +225,12 @@ public class SwaggerReaderTest {
             "        type: string\n" +
             "        required: true";
 
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
         // TODO: when 206 is resolved, enable the assertions here
     }
 
     @Test
-    public void testIssue205() {
+    public void testIssue205() throws Exception {
         String spec =
             "swagger: '2.0'\n" +
             "info:\n" +
@@ -239,7 +241,7 @@ public class SwaggerReaderTest {
             "    type: string\n" +
             "    description: 'Expected empty response could be {}'";
 
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
         assertTrue(result.getMessages().size() == 0);
 
         Swagger swagger = result.getSwagger();
@@ -250,7 +252,7 @@ public class SwaggerReaderTest {
 
 
     @Test
-    public void testIssue136() {
+    public void testIssue136() throws Exception {
         String spec =
             "swagger: '2.0'\n" +
             "info:\n" +
@@ -265,7 +267,7 @@ public class SwaggerReaderTest {
             "          schema:\n" +
             "            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
 
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
 
         Swagger swagger = result.getSwagger();
         Property property = swagger.getPath("/foo").getGet().getResponses().get("200").getSchema();
@@ -274,7 +276,7 @@ public class SwaggerReaderTest {
     }
 
     @Test
-    public void testIssue192() {
+    public void testIssue192() throws Exception {
         String spec =
                 "swagger: '2.0'\n" +
                 "info:\n" +
@@ -295,7 +297,7 @@ public class SwaggerReaderTest {
                 "        200:\n" +
                 "          description: 'the pet'";
 
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
 
         Swagger swagger = result.getSwagger();
         Parameter param = swagger.getPath("/foo").getGet().getParameters().get(0);

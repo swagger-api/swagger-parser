@@ -16,7 +16,6 @@ import io.swagger.parser.util.SwaggerDeserializationResult;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +28,9 @@ public class LegacyConverterTest {
     @Test
     public void testIssueFun() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo("http://localhost:8080/api-docs/resources.json", null, true);
+        SwaggerDeserializationResult result = parser.parseLocation("http://localhost:8080/api-docs/resources.json", null, true);
 
-        Swagger swagger = parser.read("http://localhost:8080/api-docs/resources.json");
+        SwaggerDeserializationResult swagger = parser.parseLocation("http://localhost:8080/api-docs/resources.json");
         Assert.assertNotNull(result);
     }
 
@@ -39,7 +38,7 @@ public class LegacyConverterTest {
     @Test
     public void testIssue43() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo("http://gateway.marvel.com/docs", null, true);
+        SwaggerDeserializationResult result = parser.parseLocation("http://gateway.marvel.com/docs", null, true);
 
         Assert.assertNotNull(result);
     }
@@ -49,7 +48,9 @@ public class LegacyConverterTest {
      **/
     @Test
     public void convertSingleFile() throws Exception {
-        Swagger swagger = converter.read("src/test/resources/specs/v1_2/singleFile.json");
+        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_2/singleFile.json");
+
+        Swagger swagger = result.getSwagger();
 
         assertTrue(swagger.getSecurityDefinitions().size() == 2);
         SecuritySchemeDefinition auth = swagger.getSecurityDefinitions().get("oauth2");
@@ -116,14 +117,15 @@ public class LegacyConverterTest {
 
     @Test
     public void failConversionTest() throws Exception {
-        Swagger swagger = converter.read("src/test/resources/specs/v1_2/empty.json");
+        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_2/empty.json");
 
-        assertNull(swagger);
+        assertNull(result.getSwagger());
     }
 
     @Test
-    public void testFixedProperties() throws IOException {
-        final Swagger swagger = converter.read("src/test/resources/specs/v1_2/singleFile.json");
+    public void testFixedProperties() throws Exception {
+        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_2/singleFile.json");
+        final Swagger swagger = result.getSwagger();
         final Path path = swagger.getPath("/pet/{petId}");
         assertEquals(path.getPost().getResponses().size(), 1);
         for (Response item : path.getPost().getResponses().values()) {
@@ -151,7 +153,8 @@ public class LegacyConverterTest {
      **/
     @Test
     public void convertSingle1_1File() throws Exception {
-        Swagger swagger = converter.read("src/test/resources/specs/v1_1/sample.json");
+        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_1/sample.json");
+        Swagger swagger = result.getSwagger();
         Parameter param = swagger.getPaths().get("/events").getGet().getParameters().get(0);
     }
 }

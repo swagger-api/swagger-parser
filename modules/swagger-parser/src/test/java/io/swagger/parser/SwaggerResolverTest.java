@@ -65,7 +65,7 @@ public class SwaggerResolverTest {
                 "Sample", new ModelImpl()
                         .property("remoteRef", new RefProperty(remoteRef)));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final Property prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef");
         assertTrue(prop instanceof RefProperty);
         final RefProperty ref = (RefProperty) prop;
@@ -89,7 +89,7 @@ public class SwaggerResolverTest {
                 "Sample", new ModelImpl()
                         .property("remoteRef", new ArrayProperty(new RefProperty(remoteRef))));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final Property prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef");
         assertTrue(prop instanceof ArrayProperty);
         final ArrayProperty ap = (ArrayProperty) prop;
@@ -114,7 +114,7 @@ public class SwaggerResolverTest {
                 "Sample", new ModelImpl()
                         .property("remoteRef", new MapProperty(new RefProperty(remoteRef))));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final Property prop = resolved.getDefinitions().get("Sample").getProperties().get("remoteRef");
         assertTrue(prop instanceof MapProperty);
         final MapProperty ap = (MapProperty) prop;
@@ -140,7 +140,7 @@ public class SwaggerResolverTest {
                         .parameter(new BodyParameter()
                                 .schema(new RefModel(remoteRef)))));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final BodyParameter param = (BodyParameter) swagger.getPaths().get("/fun").getGet().getParameters().get(0);
         final RefModel ref = (RefModel) param.getSchema();
         assertEquals(ref.get$ref(), "#/definitions/Tag");
@@ -168,7 +168,7 @@ public class SwaggerResolverTest {
                 .name("skip")
                 .property(new IntegerProperty()));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final QueryParameter param = (QueryParameter) params.get(0);
@@ -192,7 +192,7 @@ public class SwaggerResolverTest {
                 .name("skip")
                 .schema(schema));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final BodyParameter param = (BodyParameter) params.get(0);
@@ -206,7 +206,7 @@ public class SwaggerResolverTest {
                         .response(200, new Response()
                                 .schema(new RefProperty(remoteRef)))));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
         final RefProperty ref = (RefProperty) response.getSchema();
         assertEquals(ref.get$ref(), "#/definitions/Tag");
@@ -233,7 +233,7 @@ public class SwaggerResolverTest {
                                         new ArrayProperty(
                                                 new RefProperty(REMOTE_REF_YAML))))));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
         final ArrayProperty array = (ArrayProperty) response.getSchema();
         assertNotNull(array.getItems());
@@ -254,7 +254,7 @@ public class SwaggerResolverTest {
                 .property(new StringProperty()));
         swagger.path("/fun", path);
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         assertNull(resolved.getPaths().get("/fun").getParameters());
         assertTrue(resolved.getPaths().get("/fun").getGet().getParameters().size() == 1);
     }
@@ -271,7 +271,7 @@ public class SwaggerResolverTest {
                 .name("username")
                 .property(new StringProperty()));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         assertTrue(resolved.getParameters().size() == 1);
         assertTrue(resolved.getPaths().get("/fun").getGet().getParameters().size() == 1);
     }
@@ -286,7 +286,7 @@ public class SwaggerResolverTest {
 
         swagger.response("foo", new Response().description("ok!"));
 
-        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+        final Swagger resolved = new SwaggerResolver(swagger, null, null).resolve();
         Response response = resolved.getPath("/fun").getGet().getResponses().get("200");
         assertTrue(response.getDescription().equals("ok!"));
         assertTrue(response instanceof Response);

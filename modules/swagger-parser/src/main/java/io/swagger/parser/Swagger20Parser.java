@@ -4,37 +4,29 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
-import io.swagger.parser.util.ClasspathHelper;
-import io.swagger.parser.util.DeserializationUtils;
-import io.swagger.parser.util.RemoteUrl;
-import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.parser.util.SwaggerDeserializer;
+import io.swagger.parser.util.*;
 import io.swagger.util.Json;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Swagger20Parser implements SwaggerParserExtension {
     private static final Logger LOGGER = LoggerFactory.getLogger(Swagger20Parser.class);
 
     @Override
-    public SwaggerDeserializationResult readWithInfo(JsonNode node) {
-        SwaggerDeserializer ser = new SwaggerDeserializer();
-        return ser.deserialize(node);
+    public SwaggerDeserializationResult parseLocation(String location) throws UnparseableContentException {
+        return parseLocation(location, new ArrayList<AuthorizationValue>(), true);
     }
 
     @Override
-    public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
+    public SwaggerDeserializationResult parseLocation(String location, List<AuthorizationValue> auths, boolean resolve) throws UnparseableContentException {
         String data;
 
         try {
@@ -62,7 +54,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
             } else {
                 rootNode = DeserializationUtils.readYamlTree(data);
             }
-            return readWithInfo(rootNode);
+            return parseContents(rootNode, auths, location, resolve);
         }
         catch (Exception e) {
             SwaggerDeserializationResult output = new SwaggerDeserializationResult();
@@ -72,84 +64,20 @@ public class Swagger20Parser implements SwaggerParserExtension {
     }
 
     @Override
-    public Swagger read(String location, List<AuthorizationValue> auths) throws IOException {
-        LOGGER.info("reading from " + location);
-        try {
-            String data;
-            location = location.replaceAll("\\\\","/");
-            if (location.toLowerCase().startsWith("http")) {
-                data = RemoteUrl.urlToString(location, auths);
-            } else {
-                final String fileScheme = "file://";
-                Path path;
-                if (location.toLowerCase().startsWith(fileScheme)) {
-                    path = Paths.get(URI.create(location));
-                } else {
-                    path = Paths.get(location);
-                }
-                if(Files.exists(path)) {
-                    data = FileUtils.readFileToString(path.toFile(), "UTF-8");
-                } else {
-                    data = ClasspathHelper.loadFileFromClasspath(location);
-                }
-            }
-
-            return convertToSwagger(data);
-        } catch (Exception e) {
-            if (System.getProperty("debugParser") != null) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
-    private Swagger convertToSwagger(String data) throws IOException {
-        if (data != null) {
-            JsonNode rootNode;
-            if (data.trim().startsWith("{")) {
-                ObjectMapper mapper = Json.mapper();
-                rootNode = mapper.readTree(data);
-            } else {
-                rootNode = DeserializationUtils.readYamlTree(data);
-            }
-
-            if (System.getProperty("debugParser") != null) {
-                LOGGER.info("\n\nSwagger Tree: \n"
-                    + ReflectionToStringBuilder.toString(rootNode, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");
-            }
-            if(rootNode == null) {
-                return null;
-            }
-            // must have swagger node set
-            JsonNode swaggerNode = rootNode.get("swagger");
-            if (swaggerNode == null) {
-                return null;
-            } else {
-                SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(rootNode);
-
-                Swagger convertValue = result.getSwagger();
-                if (System.getProperty("debugParser") != null) {
-                    LOGGER.info("\n\nSwagger Tree convertValue : \n"
-                        + ReflectionToStringBuilder.toString(convertValue, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");
-                }
-                return convertValue;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    public Swagger parse(String data) throws IOException {
-        Validate.notEmpty(data, "data must not be null!");
-        return convertToSwagger(data);
+    public SwaggerDeserializationResult parseContents(JsonNode node) throws UnparseableContentException {
+        return parseContents(node, new ArrayList<AuthorizationValue>(), null, true);
     }
 
     @Override
-    public Swagger read(JsonNode node) throws IOException {
-        if (node == null) {
-            return null;
-        }
+    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> auth, String parentLocation, boolean resolve) throws UnparseableContentException {
+        SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(node);
 
-        return Json.mapper().convertValue(node, Swagger.class);
+        if(result != null && result.getSwagger() != null) {
+            Swagger resolved = new SwaggerResolver(result.getSwagger(), auth, parentLocation).resolve();
+            if(resolved != null) {
+                result.setSwagger(resolved);
+            }
+        }
+        return result;
     }
 }
