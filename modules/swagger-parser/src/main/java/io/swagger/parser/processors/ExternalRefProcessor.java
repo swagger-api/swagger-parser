@@ -6,14 +6,17 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
-import static io.swagger.parser.util.RefUtils.deconflictName;
 import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ExternalRefProcessor.class);
+
     private final ResolverCache cache;
     private final Swagger swagger;
 
@@ -38,37 +41,27 @@ public final class ExternalRefProcessor {
         final Model existingModel = definitions.get(possiblyConflictingDefinitionName);
 
         if (existingModel != null) {
-            //so this is either a conflict, or another reference to something we have previously renamed
-            final String previouslyRenamedRef = cache.getRenamedRef($ref);
-            if (previouslyRenamedRef != null) {
-                //this is an additional reference to something we have renamed once
-                newRef = previouslyRenamedRef;
-            } else {
-                //this is a conflict
-                String deconflictedName = deconflictName(possiblyConflictingDefinitionName, definitions);
-                cache.putRenamedRef($ref, deconflictedName);
-                newRef = deconflictedName;
-                swagger.addDefinition(deconflictedName, model);
-            }
+            LOGGER.debug("A model for " + existingModel + " already exists");
+        }
+        newRef = possiblyConflictingDefinitionName;
+        cache.putRenamedRef($ref, newRef);
 
-        } else {
-            newRef = possiblyConflictingDefinitionName;
-            cache.putRenamedRef($ref, newRef);
 
-            
-            //If this is a new model, then check it for other sub references
-            //Loop the properties and recursively call this method;
-            Map<String, Property> subProps = model.getProperties();
-            if(subProps != null) {
-                for (Map.Entry<String, Property> prop : subProps.entrySet()) {
-                    if (prop.getValue() instanceof RefProperty) {
-                        RefProperty subRef = (RefProperty) prop.getValue();
+        //If this is a new model, then check it for other sub references
+        //Loop the properties and recursively call this method;
+        Map<String, Property> subProps = model.getProperties();
+        if(subProps != null) {
+            for (Map.Entry<String, Property> prop : subProps.entrySet()) {
+                if (prop.getValue() instanceof RefProperty) {
+                    RefProperty subRef = (RefProperty) prop.getValue();
 
-                        if(isAnExternalRefFormat(subRef.getRefFormat()))
-                        	subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
-                    }
+                    if(isAnExternalRefFormat(subRef.getRefFormat()))
+                        subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
                 }
             }
+        }
+        if(existingModel == null) {
+            // don't overwrite existing model reference
             swagger.addDefinition(newRef, model);
         }
 

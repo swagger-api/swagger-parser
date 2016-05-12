@@ -220,7 +220,7 @@ public class SwaggerParserTest {
         assertEquals(parent.get$ref(), "#/definitions/pet");
 
         assertEquals(composedCat.getInterfaces().size(), 1);
-        assertEquals(composedCat.getInterfaces().get(0).get$ref(), "#/definitions/foo1");
+        assertEquals(composedCat.getInterfaces().get(0).get$ref(), "#/definitions/foo");
 
         return swagger;
     }

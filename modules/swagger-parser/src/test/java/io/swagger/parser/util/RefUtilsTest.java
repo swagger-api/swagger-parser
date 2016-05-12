@@ -66,18 +66,6 @@ public class RefUtilsTest {
         assertEquals(expectedDefinitionName, RefUtils.computeDefinitionName(ref));
     }
 
-    @Test
-    public void testDeconflictName() throws Exception {
-        doDeconflictNameTestCase("foo", "foo");
-        doDeconflictNameTestCase("foo", "foo1", "foo");
-        doDeconflictNameTestCase("foo", "foo2", "foo", "foo1");
-        doDeconflictNameTestCase("foo", "foo3", "foo", "foo1", "foo2");
-    }
-
-    private void doDeconflictNameTestCase(String input, String expectedOutput, String... existingKeys) {
-        assertEquals(expectedOutput, RefUtils.deconflictName(input, createMap(existingKeys)));
-    }
-
     private Map<String, Model> createMap(String... keys) {
         Map<String, Model> definitionMap = new HashMap<>();
 

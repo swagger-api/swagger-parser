@@ -1,6 +1,5 @@
 package io.swagger.parser.util;
 
-import io.swagger.models.Model;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
@@ -10,7 +9,6 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 public class RefUtils {
 
@@ -40,19 +38,6 @@ public class RefUtils {
         }
 
         return plausibleName;
-    }
-
-    public static String deconflictName(String possiblyConflictingDefinitionName, Map<String, Model> definitions) {
-
-        String result = possiblyConflictingDefinitionName;
-        int count = 1;
-
-        while (definitions.containsKey(result)) {
-            result = possiblyConflictingDefinitionName + count;
-            count++;
-        }
-
-        return result;
     }
 
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
