@@ -988,14 +988,13 @@ public class SwaggerDeserializerTest {
         assertNotNull("Dog model not found", dog);
         assertTrue("Dog model is not composed", dog instanceof ComposedModel);
         ComposedModel dogComposed = (ComposedModel) dog;
-        assertTrue("Dog does not have a parent", dogComposed.getParent() instanceof RefModel);
-        RefModel dogParentRef = (RefModel) dogComposed.getParent();
-        Model dogParent = definitions.get(dogParentRef.getSimpleRef());
-        assertEquals("Dog does not extend Pet", pet, dogParent);
         assertNotNull("Dog does not implement any interfaces", dogComposed.getInterfaces());
-        assertEquals("Dog implements the wrong number of interfaces;", 1, dogComposed.getInterfaces().size());
+        assertEquals("Dog implements the wrong number of interfaces;", 2, dogComposed.getInterfaces().size());
         RefModel dogInterfaceRef = dogComposed.getInterfaces().get(0);
         Model dogInterface = definitions.get(dogInterfaceRef.getSimpleRef());
+        assertEquals("Dog does not implement Pet;", pet, dogInterface);
+        dogInterfaceRef = dogComposed.getInterfaces().get(1);
+        dogInterface = definitions.get(dogInterfaceRef.getSimpleRef());
         assertEquals("Dog does not implement Furry;", furry, dogInterface);
         assertTrue("Dog does not have child properties", dogComposed.getChild() instanceof ModelImpl);
     }
