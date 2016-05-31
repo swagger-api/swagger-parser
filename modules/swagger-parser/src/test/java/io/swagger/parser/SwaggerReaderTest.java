@@ -211,6 +211,30 @@ public class SwaggerReaderTest {
         assertEquals(cm.getVendorExtensions().get("x-color"), "red");
     }
 
+    @Test(description = "It should show some context information on failures")
+    public void testIssue250() {
+        String spec = "{ wrong content }";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        assertEquals(result.getMessages().size(), 2);
+        assertTrue(result.getMessages().get(0).contains("Unexpected character"));
+        assertTrue(result.getMessages().get(1).contains("line: 1"));
+    }
+
+    @Test(description = "It should show some context information on failures")
+    public void testIssue250FileNotFound() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue250NotFound.json", null, true);
+        assertEquals(result.getMessages().size(), 1);
+        assertTrue(result.getMessages().get(0).contains("issue250NotFound.json"));
+    }
+
+    @Test(description = "It should show some context information on failures")
+    public void testIssue250Location() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue250.json", null, true);
+        assertEquals(result.getMessages().size(), 2);
+        assertTrue(result.getMessages().get(0).contains("Unexpected character"));
+        assertTrue(result.getMessages().get(1).contains("line: 1"));
+    }
+
     @Test(description = "issue 206, not supported yet")
     public void testIssue206() {
         String spec =
