@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
@@ -43,8 +44,6 @@ public class SwaggerParser {
                 return output;
             }
         }
-        output = new SwaggerDeserializationResult();
-        output.message("The swagger definition could not be read");
         return output;
     }
 
@@ -101,8 +100,12 @@ public class SwaggerParser {
                 result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
             }
             return new Swagger20Parser().readWithInfo(node);
-        }
-        catch (Exception e) {
+        } catch (JsonParseException e) {
+            SwaggerDeserializationResult result = new SwaggerDeserializationResult();
+            result.message(e.getOriginalMessage());
+            result.message(e.getLocation().toString());
+            return result;
+        } catch (Exception e) {
             return new SwaggerDeserializationResult().message("malformed or unreadable swagger supplied");
         }
     }
