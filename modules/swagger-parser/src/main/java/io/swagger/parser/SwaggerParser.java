@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.SwaggerDeserializationResult;
@@ -34,7 +35,6 @@ public class SwaggerParser extends AbstractParser {
         }
         location = location.replaceAll("\\\\","/");
         List<SwaggerParserExtension> parserExtensions = getExtensions();
-        SwaggerDeserializationResult output;
 
         if(auths == null) {
             auths = new ArrayList<AuthorizationValue>();
@@ -58,7 +58,18 @@ public class SwaggerParser extends AbstractParser {
     }
 
     public SwaggerDeserializationResult parseContents(String swaggerAsString, List<AuthorizationValue> auths, String parentLocation, boolean resolve) throws UnparseableContentException {
-        JsonNode node = stringToNode(swaggerAsString);
+        JsonNode node;
+        try {
+            node = stringToNode(swaggerAsString);
+        } catch (JsonParseException e) {
+            SwaggerDeserializationResult result = new SwaggerDeserializationResult();
+            result.message(e.getOriginalMessage());
+            result.message(e.getLocation().toString());
+            return result;
+        } catch (Exception e) {
+            throw new UnparseableContentException();
+        }
+
         try {
             return new Swagger20Parser().parseContents(node, auths, parentLocation, resolve);
         }
@@ -81,7 +92,17 @@ public class SwaggerParser extends AbstractParser {
     }
 
     public SwaggerDeserializationResult parseContents(String swaggerAsString) throws UnparseableContentException {
-        JsonNode node = stringToNode(swaggerAsString);
+        JsonNode node;
+        try {
+            node = stringToNode(swaggerAsString);
+        } catch (JsonParseException e) {
+            SwaggerDeserializationResult result = new SwaggerDeserializationResult();
+            result.message(e.getOriginalMessage());
+            result.message(e.getLocation().toString());
+            return result;
+        } catch (Exception e) {
+            throw new UnparseableContentException();
+        }
         return parseContents(node);
     }
 
