@@ -132,6 +132,30 @@ public class SwaggerReaderTest {
         assertTrue(thingSummary instanceof ModelImpl);
     }
 
+    @Test(enabled = false, description = "It should show some context information on failures")
+    public void testIssue250() throws UnparseableContentException {
+        String spec = "{ wrong content }";
+        SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
+        assertEquals(result.getMessages().size(), 2);
+        assertTrue(result.getMessages().get(0).contains("Unexpected character"));
+        assertTrue(result.getMessages().get(1).contains("line: 1"));
+    }
+
+    @Test(description = "It should show some context information on failures")
+    public void testIssue250FileNotFound() throws UnparseableContentException {
+        SwaggerDeserializationResult result = new SwaggerParser().parseLocation("issue250NotFound.json");
+        assertEquals(result.getMessages().size(), 1);
+        assertTrue(result.getMessages().get(0).contains("issue250NotFound.json"));
+    }
+
+    @Test(description = "It should show some context information on failures")
+    public void testIssue250Location() throws UnparseableContentException {
+        SwaggerDeserializationResult result = new SwaggerParser().parseLocation("issue250.json");
+        assertEquals(result.getMessages().size(), 2);
+        assertTrue(result.getMessages().get(0).contains("Unexpected character"));
+        assertTrue(result.getMessages().get(1).contains("line: 1"));
+    }
+
     @Test
     public void testIssue207() throws Exception {
         String spec = "{\n" +

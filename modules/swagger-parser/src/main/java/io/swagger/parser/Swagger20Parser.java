@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
@@ -55,10 +56,15 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 rootNode = DeserializationUtils.readYamlTree(data);
             }
             return parseContents(rootNode, auths, location, resolve);
+        } catch (JsonParseException e) {
+            SwaggerDeserializationResult result = new SwaggerDeserializationResult();
+            result.message(e.getOriginalMessage());
+            result.message(e.getLocation().toString());
+            return result;
         }
         catch (Exception e) {
             SwaggerDeserializationResult output = new SwaggerDeserializationResult();
-            output.message("unable to read location `" + location + "`");
+            output.message("unable to read location `" + location + "`: " + e.getMessage());
             return output;
         }
     }
