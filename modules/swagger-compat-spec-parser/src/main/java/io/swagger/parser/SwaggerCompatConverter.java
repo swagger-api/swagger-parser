@@ -38,6 +38,11 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
     @Override
     public SwaggerDeserializationResult parseContents(final JsonNode swaggerAsJson, final List<AuthorizationValue> auths, final String location, final boolean resolve) throws UnparseableContentException {
+        if (!supports(swaggerAsJson)) {
+            // BUG: somebody is calling me with a spec I don't support.
+            throw new UnsupportedOperationException("This is not a plain swagger 1.x spec.");
+        }
+
         Swagger output = null;
         MessageBuilder migrationMessages = new MessageBuilder();
         SwaggerLegacyParser swaggerParser = new SwaggerLegacyParser();

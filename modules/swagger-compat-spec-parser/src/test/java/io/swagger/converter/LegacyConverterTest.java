@@ -137,11 +137,9 @@ public class LegacyConverterTest {
         assertEquals(_enum.get(2), "sold");
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void failConversionTest() throws Exception {
-        SwaggerDeserializationResult result = parseLocation("src/test/resources/specs/v1_2/empty.json");
-
-        assertNull(result.getSwagger());
+        parseLocation("src/test/resources/specs/v1_2/empty.json");
     }
 
     @Test
@@ -180,15 +178,12 @@ public class LegacyConverterTest {
         Parameter param = swagger.getPaths().get("/events").getGet().getParameters().get(0);
     }
 
-    private SwaggerDeserializationResult parseLocation(final String location) {
+    private SwaggerDeserializationResult parseLocation(final String location) throws Exception {
         SwaggerDeserializationResult result;
-        try {
-            String data = FileUtils.readFileToString(Paths.get(location).toFile(), "UTF-8");
-            JsonNode node = mapper.readTree(data);
-            result = converter.parseContents(node, new ArrayList<AuthorizationValue>(), location, true);
-        } catch (Exception e) {
-            throw new RuntimeException("Error parsing " + location, e);
-        }
+        String data = FileUtils.readFileToString(Paths.get(location).toFile(), "UTF-8");
+        JsonNode node = mapper.readTree(data);
+        result = converter.parseContents(node, new ArrayList<AuthorizationValue>(), location, true);
+
         return result;
     }
 }

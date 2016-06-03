@@ -18,6 +18,11 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     @Override
     public SwaggerDeserializationResult parseContents(final JsonNode node, final List<AuthorizationValue> auth, final String parentLocation, final boolean resolve) throws UnparseableContentException {
+        if (!supports(node)) {
+            // BUG: somebody is calling me with a spec I don't support.
+            throw new UnsupportedOperationException("This is not a swagger 2.0 spec.");
+        }
+
         SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(node);
 
         if(result != null && result.getSwagger() != null) {
