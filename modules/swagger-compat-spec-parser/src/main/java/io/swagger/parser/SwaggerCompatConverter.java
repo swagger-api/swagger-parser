@@ -28,31 +28,26 @@ import java.util.Map;
 
 // legacy models
 
-public class SwaggerCompatConverter extends AbstractParser implements SwaggerParserExtension {
+public class SwaggerCompatConverter implements SwaggerParserExtension {
     static Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
 
     @Override
-    public SwaggerDeserializationResult parseContents(JsonNode node) throws UnparseableContentException {
-        throw new UnparseableContentException();
+    public boolean supports(final JsonNode node) {
+        return node.get("swaggerVersion") != null;
     }
 
     @Override
-    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> authorizationValues, String parentLocation, boolean resolve) throws UnparseableContentException {
-        throw new UnparseableContentException();
-    }
+    public SwaggerDeserializationResult parseContents(final JsonNode swaggerAsJson, final List<AuthorizationValue> auths, final String location, final boolean resolve) throws UnparseableContentException {
+        if (!supports(swaggerAsJson)) {
+            // BUG: somebody is calling me with a spec I don't support.
+            throw new UnsupportedOperationException("This is not a plain swagger 1.x spec.");
+        }
 
-    @Override
-    public SwaggerDeserializationResult parseLocation(String input) throws UnparseableContentException {
-        return parseLocation(input, new ArrayList<AuthorizationValue>(), true);
-    }
-
-    @Override
-    public SwaggerDeserializationResult parseLocation(String location, List<AuthorizationValue> auths, boolean resolve) throws UnparseableContentException {
         Swagger output = null;
         MessageBuilder migrationMessages = new MessageBuilder();
         SwaggerLegacyParser swaggerParser = new SwaggerLegacyParser();
         ResourceListing resourceListing = null;
-        resourceListing = readResourceListing(location, migrationMessages, auths);
+        resourceListing = readResourceListing(swaggerAsJson, migrationMessages, auths);
 
         List<ApiDeclaration> apis = new ArrayList<ApiDeclaration>();
 
@@ -124,16 +119,9 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return result;
     }
 
-    public ResourceListing readResourceListing(String input, MessageBuilder messages, List<AuthorizationValue> auths) {
+    public ResourceListing readResourceListing(final JsonNode jsonNode, final MessageBuilder messages, final List<AuthorizationValue> auths) {
         ResourceListing output = null;
-        JsonNode jsonNode = null;
         try {
-            if (input.startsWith("http")) {
-                String json = RemoteUrl.urlToString(input, auths);
-                jsonNode = Json.mapper().readTree(json);
-            } else {
-                jsonNode = Json.mapper().readTree(new File(input));
-            }
             if (jsonNode.get("swaggerVersion") == null) {
                 return null;
             }
@@ -148,7 +136,7 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return output;
     }
 
-    public Model convertModel(io.swagger.models.apideclaration.Model model) {
+    public Model convertModel(final io.swagger.models.apideclaration.Model model) {
         ModelImpl output = new ModelImpl();
         output.setName(model.getId());
         output.setDescription(model.getDescription());
@@ -165,14 +153,14 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return output;
     }
 
-    public Property convertProperty(ModelProperty property) {
+    public Property convertProperty(final ModelProperty property) {
         Property output = null;
         output = propertyFromTypedObject(property);
         output.setDescription(property.getDescription());
         return output;
     }
 
-    public Parameter convertParameter(io.swagger.models.apideclaration.Parameter param) {
+    public Parameter convertParameter(final io.swagger.models.apideclaration.Parameter param) {
         Parameter output = null;
         List<String> _enum = param.getEnumValues();
 
@@ -252,7 +240,7 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return output;
     }
 
-    public Model modelFromExtendedTypedObject(ExtendedTypedObject obj) {
+    public Model modelFromExtendedTypedObject(final ExtendedTypedObject obj) {
         String type = obj.getType() == null ? null : obj.getType().toString();
         String format = obj.getFormat() == null ? null : obj.getFormat().toString();
 
@@ -286,7 +274,7 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return output;
     }
 
-    public Property propertyFromTypedObject(ExtendedTypedObject obj) {
+    public Property propertyFromTypedObject(final ExtendedTypedObject obj) {
         String type = obj.getType() == null ? null : obj.getType().toString();
         String format = obj.getFormat() == null ? null : obj.getFormat().toString();
 
@@ -338,8 +326,8 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return output;
     }
 
-    public Operation convertOperation(String tag, io.swagger.models.apideclaration.Operation operation,
-                                      ApiDeclaration apiDeclaration) {
+    public Operation convertOperation(final String tag, final io.swagger.models.apideclaration.Operation operation,
+                                      final ApiDeclaration apiDeclaration) {
         Method method;
 
         if (operation.getMethod() == null) {
@@ -415,7 +403,7 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return output;
     }
 
-    public ApiDeclaration readDeclaration(String input, MessageBuilder messages, List<AuthorizationValue> auths) {
+    public ApiDeclaration readDeclaration(final String input, final MessageBuilder messages, final List<AuthorizationValue> auths) {
         ApiDeclaration output = null;
         try {
             JsonNode jsonNode = null;
@@ -442,7 +430,7 @@ public class SwaggerCompatConverter extends AbstractParser implements SwaggerPar
         return output;
     }
 
-    public Swagger convert(ResourceListing resourceListing, List<ApiDeclaration> apiDeclarations) {
+    public Swagger convert(final ResourceListing resourceListing, final List<ApiDeclaration> apiDeclarations) {
         Info info = new Info();
         if (resourceListing.getInfo() != null) {
             ApiInfo apiInfo = resourceListing.getInfo();

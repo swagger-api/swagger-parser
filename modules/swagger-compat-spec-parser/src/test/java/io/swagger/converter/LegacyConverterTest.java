@@ -1,9 +1,13 @@
 package io.swagger.converter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
@@ -13,9 +17,15 @@ import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
+
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +33,19 @@ import static org.testng.Assert.*;
 
 public class LegacyConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
+    ObjectMapper mapper = Json.mapper();
 
+    @Test
+    public void testSupportsTrue() throws JsonProcessingException, IOException {
+        JsonNode node = mapper.readTree("{\"swaggerVersion\" : \"1.2\"}");
+        assertTrue(converter.supports(node));
+    }
+
+    @Test
+    public void testSupportsFalse() throws JsonProcessingException, IOException {
+        JsonNode node = mapper.readTree("{\"swagger\" : \"2.0\"}");
+        assertFalse(converter.supports(node));
+    }
 
     @Test
     public void testIssueFun() throws Exception {
@@ -48,7 +70,7 @@ public class LegacyConverterTest {
      **/
     @Test
     public void convertSingleFile() throws Exception {
-        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_2/singleFile.json");
+        SwaggerDeserializationResult result = parseLocation("src/test/resources/specs/v1_2/singleFile.json");
 
         Swagger swagger = result.getSwagger();
 
@@ -115,16 +137,14 @@ public class LegacyConverterTest {
         assertEquals(_enum.get(2), "sold");
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void failConversionTest() throws Exception {
-        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_2/empty.json");
-
-        assertNull(result.getSwagger());
+        parseLocation("src/test/resources/specs/v1_2/empty.json");
     }
 
     @Test
     public void testFixedProperties() throws Exception {
-        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_2/singleFile.json");
+        SwaggerDeserializationResult result = parseLocation("src/test/resources/specs/v1_2/singleFile.json");
         final Swagger swagger = result.getSwagger();
         final Path path = swagger.getPath("/pet/{petId}");
         assertEquals(path.getPost().getResponses().size(), 1);
@@ -139,7 +159,7 @@ public class LegacyConverterTest {
                 new Predicate<Parameter>() {
 
                     @Override
-                    public boolean apply(Parameter input) {
+                    public boolean apply(final Parameter input) {
                         return "petId".equals(input.getName());
                     }
                 });
@@ -153,8 +173,17 @@ public class LegacyConverterTest {
      **/
     @Test
     public void convertSingle1_1File() throws Exception {
-        SwaggerDeserializationResult result = converter.parseLocation("src/test/resources/specs/v1_1/sample.json");
+        SwaggerDeserializationResult result = parseLocation("src/test/resources/specs/v1_1/sample.json");
         Swagger swagger = result.getSwagger();
         Parameter param = swagger.getPaths().get("/events").getGet().getParameters().get(0);
+    }
+
+    private SwaggerDeserializationResult parseLocation(final String location) throws Exception {
+        SwaggerDeserializationResult result;
+        String data = FileUtils.readFileToString(Paths.get(location).toFile(), "UTF-8");
+        JsonNode node = mapper.readTree(data);
+        result = converter.parseContents(node, new ArrayList<AuthorizationValue>(), location, true);
+
+        return result;
     }
 }

@@ -23,11 +23,11 @@ import java.net.URISyntaxException;
 
 public class SwaggerLegacyParser {
 
-    public ResourceListing read(String url) {
+    public ResourceListing read(final String url) {
         return read(url, new NoAuthentication());
     }
 
-    public ResourceListing read(String url, Authentication authentication) {
+    public ResourceListing read(final String url, final Authentication authentication) {
         MessageBuilder messageBuilder = new MessageBuilder();
         SwaggerReader swaggerReader = new SwaggerReaderFactory(new SwaggerReaderConfiguration()).newReader();
 
@@ -53,11 +53,11 @@ public class SwaggerLegacyParser {
         return resourceListing;
     }
 
-    public ApiDeclaration read(String url, String resourcePath) {
+    public ApiDeclaration read(final String url, final String resourcePath) {
         return read(url, resourcePath, new NoAuthentication());
     }
 
-    public ApiDeclaration read(String url, String resourcePath, Authentication authentication) {
+    public ApiDeclaration read(final String url, final String resourcePath, final Authentication authentication) {
         MessageBuilder messageBuilder = new MessageBuilder();
         SwaggerReader swaggerReader = new SwaggerReaderFactory(new SwaggerReaderConfiguration()).newReader();
 
@@ -92,7 +92,7 @@ public class SwaggerLegacyParser {
         return apiDeclaration;
     }
 
-    private String getResourceListingURL(String url, String resourcePath) throws URISyntaxException {
+    private String getResourceListingURL(final String url, final String resourcePath) throws URISyntaxException {
         String resourceListingUrl;
 
         URI uri = new URI(resourcePath);
@@ -105,7 +105,7 @@ public class SwaggerLegacyParser {
         return resourceListingUrl;
     }
 
-    private void validateMessageReport(MessageBuilder messageBuilder) {
+    private void validateMessageReport(final MessageBuilder messageBuilder) {
         System.out.println(messageBuilder.getHighestSeverity());
         if (messageBuilder.getHighestSeverity() == Severity.ERROR) {
             throw new SwaggerException(messageBuilder.toString());

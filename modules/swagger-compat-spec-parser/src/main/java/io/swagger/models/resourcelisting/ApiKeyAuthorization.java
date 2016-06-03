@@ -18,7 +18,7 @@ public class ApiKeyAuthorization extends Authorization {
         return passAs;
     }
 
-    public void setPassAs(PassAs passAs) {
+    public void setPassAs(final PassAs passAs) {
         this.passAs = passAs;
     }
 
@@ -26,7 +26,7 @@ public class ApiKeyAuthorization extends Authorization {
         return keyname;
     }
 
-    public void setKeyname(String keyname) {
+    public void setKeyname(final String keyname) {
         this.keyname = keyname;
     }
 

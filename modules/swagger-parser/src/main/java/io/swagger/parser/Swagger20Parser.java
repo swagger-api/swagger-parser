@@ -1,81 +1,28 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.*;
-import io.swagger.util.Json;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Swagger20Parser implements SwaggerParserExtension {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Swagger20Parser.class);
 
     @Override
-    public SwaggerDeserializationResult parseLocation(String location) throws UnparseableContentException {
-        return parseLocation(location, new ArrayList<AuthorizationValue>(), true);
+    public boolean supports(final JsonNode node) {
+        // Supports swagger v2.x.
+        String version = node.path("swagger").asText("0").trim();
+        return version.equals("2") || version.startsWith("2.");
     }
 
     @Override
-    public SwaggerDeserializationResult parseLocation(String location, List<AuthorizationValue> auths, boolean resolve) throws UnparseableContentException {
-        String data;
-
-        try {
-            location = location.replaceAll("\\\\","/");
-            if (location.toLowerCase().startsWith("http")) {
-                data = RemoteUrl.urlToString(location, auths);
-            } else {
-                final String fileScheme = "file://";
-                Path path;
-                if (location.toLowerCase().startsWith(fileScheme)) {
-                    path = Paths.get(URI.create(location));
-                } else {
-                    path = Paths.get(location);
-                }
-                if (Files.exists(path)) {
-                    data = FileUtils.readFileToString(path.toFile(), "UTF-8");
-                } else {
-                    data = ClasspathHelper.loadFileFromClasspath(location);
-                }
-            }
-            JsonNode rootNode;
-            if (data.trim().startsWith("{")) {
-                ObjectMapper mapper = Json.mapper();
-                rootNode = mapper.readTree(data);
-            } else {
-                rootNode = DeserializationUtils.readYamlTree(data);
-            }
-            return parseContents(rootNode, auths, location, resolve);
-        } catch (JsonParseException e) {
-            SwaggerDeserializationResult result = new SwaggerDeserializationResult();
-            result.message(e.getOriginalMessage());
-            result.message(e.getLocation().toString());
-            return result;
+    public SwaggerDeserializationResult parseContents(final JsonNode node, final List<AuthorizationValue> auth, final String parentLocation, final boolean resolve) throws UnparseableContentException {
+        if (!supports(node)) {
+            // BUG: somebody is calling me with a spec I don't support.
+            throw new UnsupportedOperationException("This is not a swagger 2.0 spec.");
         }
-        catch (Exception e) {
-            SwaggerDeserializationResult output = new SwaggerDeserializationResult();
-            output.message("unable to read location `" + location + "`: " + e.getMessage());
-            return output;
-        }
-    }
 
-    @Override
-    public SwaggerDeserializationResult parseContents(JsonNode node) throws UnparseableContentException {
-        return parseContents(node, new ArrayList<AuthorizationValue>(), null, true);
-    }
-
-    @Override
-    public SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> auth, String parentLocation, boolean resolve) throws UnparseableContentException {
         SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(node);
 
         if(result != null && result.getSwagger() != null) {
