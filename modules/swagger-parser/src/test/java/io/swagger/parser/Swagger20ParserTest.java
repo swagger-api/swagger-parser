@@ -88,8 +88,8 @@ public class Swagger20ParserTest {
         doTest(location, null);
     }
 
-    private void doTest(String location, @Injectable List<AuthorizationValue> auths) throws Exception {
-        final SwaggerDeserializationResult result = parser.parseLocation(location, auths, true);
+    private void doTest(final String location, @Injectable final List<AuthorizationValue> auths) throws Exception {
+        final SwaggerDeserializationResult result = null;//= parser.parseLocation(location, auths, true);
         Swagger actualSwagger = result.getSwagger();
 
         new FullVerifications(){{}};
