@@ -1,5 +1,6 @@
 package io.swagger.converter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
@@ -22,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,19 @@ import static org.testng.Assert.*;
 
 public class LegacyConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
+    ObjectMapper mapper = Json.mapper();
 
+    @Test
+    public void testSupportsTrue() throws JsonProcessingException, IOException {
+        JsonNode node = mapper.readTree("{\"swaggerVersion\" : \"1.2\"}");
+        assertTrue(converter.supports(node));
+    }
+
+    @Test
+    public void testSupportsFalse() throws JsonProcessingException, IOException {
+        JsonNode node = mapper.readTree("{\"swagger\" : \"2.0\"}");
+        assertFalse(converter.supports(node));
+    }
 
     @Test
     public void testIssueFun() throws Exception {
@@ -170,7 +184,6 @@ public class LegacyConverterTest {
         SwaggerDeserializationResult result;
         try {
             String data = FileUtils.readFileToString(Paths.get(location).toFile(), "UTF-8");
-            ObjectMapper mapper = Json.mapper();
             JsonNode node = mapper.readTree(data);
             result = converter.parseContents(node, new ArrayList<AuthorizationValue>(), location, true);
         } catch (Exception e) {
@@ -178,5 +191,4 @@ public class LegacyConverterTest {
         }
         return result;
     }
-
 }

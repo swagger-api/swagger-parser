@@ -47,7 +47,7 @@ public class SwaggerDeserializerTest {
 
         List<SecurityRequirement> security = swagger.getSecurity();
         assertTrue(security.size() == 2);
-        
+
     }
 
     @Test
@@ -129,8 +129,8 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
-    public void testEmpty() throws Exception {
-        String json = "{}";
+    public void testNoContent() throws Exception {
+        String json = "{\"swagger\": \"2.0\"}";
 
         SwaggerParser parser = new SwaggerParser();
 
@@ -138,7 +138,6 @@ public class SwaggerDeserializerTest {
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
-        assertTrue(messages.contains("attribute swagger is missing"));
         assertTrue(messages.contains("attribute info is missing"));
         assertTrue(messages.contains("attribute paths is missing"));
     }
@@ -498,7 +497,7 @@ public class SwaggerDeserializerTest {
         assertTrue(scopes.contains("read:pets"));
         assertTrue(scopes.contains("write:pets"));
     }
-    
+
     @Test
     public void testPathsWithRefResponse() throws Exception {
         String json = "{\n" +
@@ -510,7 +509,7 @@ public class SwaggerDeserializerTest {
                 "          \"200\": {\n" +
                 "            \"$ref\": \"#/responses/OK\"" +
                 "          }\n" +
-                "        }\n" +                
+                "        }\n" +
                 "      }\n" +
                 "    }\n" +
                 "  }\n" +
@@ -533,6 +532,7 @@ public class SwaggerDeserializerTest {
     @Test
     public void testArrayModelDefinition() throws Exception {
         String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
                 "  \"paths\": {\n" +
                 "    \"/store/inventory\": {\n" +
                 "      \"get\": {\n" +

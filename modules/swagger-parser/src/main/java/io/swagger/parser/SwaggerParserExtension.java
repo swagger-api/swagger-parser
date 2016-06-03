@@ -7,5 +7,6 @@ import io.swagger.parser.util.SwaggerDeserializationResult;
 import java.util.List;
 
 public interface SwaggerParserExtension {
+    boolean supports (JsonNode node);
     SwaggerDeserializationResult parseContents(JsonNode node, List<AuthorizationValue> auth, String parentLocation, boolean resolve) throws UnparseableContentException;
 }

@@ -105,24 +105,24 @@ public class SwaggerParser {
         if (node == null) {
             return null;
         }
-
+        SwaggerParserExtension currentExtension = null;
         List<SwaggerParserExtension> parserExtensions = getExtensions();
-
-        try {
-            return new Swagger20Parser().parseContents(node, authorizationValues, parentLocation, resolve);
-        } catch (UnparseableContentException e) {
-        }
         for (SwaggerParserExtension extension : parserExtensions) {
-            try {
-                return extension.parseContents(node, authorizationValues, parentLocation, resolve);
-            } catch (UnparseableContentException e) {
-                if (System.getProperty("debugParser") != null) {
-                    e.printStackTrace();
+            if (extension.supports(node)) {
+                if (currentExtension != null) {
+                  // BUG: there are two extensions that support the spec.
+                  throw new UnparseableContentException();
                 }
-                // continue to next parser
+                currentExtension = extension;
             }
         }
-        throw new UnparseableContentException();
+
+        if (currentExtension == null) {
+            // Error: no extension supports the spec.
+            throw new UnparseableContentException();
+        }
+
+        return currentExtension.parseContents(node, authorizationValues, parentLocation, resolve);
     }
 
     private SwaggerDeserializationResult convertToDeserializationResult(final String location, final Exception ex) {

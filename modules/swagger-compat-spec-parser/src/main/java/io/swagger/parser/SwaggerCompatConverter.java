@@ -32,6 +32,11 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
     static Logger LOGGER = LoggerFactory.getLogger(SwaggerCompatConverter.class);
 
     @Override
+    public boolean supports(final JsonNode node) {
+        return node.get("swaggerVersion") != null;
+    }
+
+    @Override
     public SwaggerDeserializationResult parseContents(final JsonNode swaggerAsJson, final List<AuthorizationValue> auths, final String location, final boolean resolve) throws UnparseableContentException {
         Swagger output = null;
         MessageBuilder migrationMessages = new MessageBuilder();

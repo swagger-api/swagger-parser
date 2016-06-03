@@ -10,6 +10,7 @@ import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import mockit.*;
 import org.apache.commons.io.FileUtils;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -17,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 public class Swagger20ParserTest {
 
@@ -35,6 +36,7 @@ public class Swagger20ParserTest {
 
     @Mocked
     Files files;
+    /*
 
     @Mocked
     Json json;
@@ -47,6 +49,7 @@ public class Swagger20ParserTest {
 
     @Injectable
     JsonNode jsonNode;
+    */
 
     @Injectable
     Path path;
@@ -54,8 +57,28 @@ public class Swagger20ParserTest {
     @Injectable
     Swagger swagger;
 
-
     final String expectedJson = "{ \"swagger\": \"2.0\" }";
+
+    @Test
+    public void testSupportsTrue() throws Exception {
+        ObjectMapper mapper = Json.mapper();
+        JsonNode node = mapper.readTree("{ \"swagger\": \"2.0\" }");
+        assertTrue(parser.supports(node));
+    }
+
+    @Test
+    public void testSupportsFalseOldVersion() throws Exception {
+        ObjectMapper mapper = Json.mapper();
+        JsonNode node = mapper.readTree("{\"swaggerVersion\" : \"1.2\"}");
+        assertFalse(parser.supports(node));
+    }
+
+    @Test
+    public void testSupportsFalseInvalidVersion() throws Exception {
+        ObjectMapper mapper = Json.mapper();
+        JsonNode node = mapper.readTree("{ \"swagger\": \"ERROR\" }");
+        assertFalse(parser.supports(node));
+    }
 
 //    @Test
     public void testRead_UrlLocation(@Injectable final List<AuthorizationValue> auths) throws Exception {
@@ -89,7 +112,7 @@ public class Swagger20ParserTest {
     }
 
     private void doTest(final String location, @Injectable final List<AuthorizationValue> auths) throws Exception {
-        final SwaggerDeserializationResult result = null;//= parser.parseLocation(location, auths, true);
+        final SwaggerDeserializationResult result = parseLocation(location, auths);
         Swagger actualSwagger = result.getSwagger();
 
         new FullVerifications(){{}};
@@ -98,6 +121,7 @@ public class Swagger20ParserTest {
     }
 
     private void setupCommonExpectations() throws Exception {
+      /*
         new StrictExpectations(){{
             Json.mapper(); times=1; result=objectMapper;
 
@@ -107,5 +131,19 @@ public class Swagger20ParserTest {
 
             objectMapper.convertValue(jsonNode, Swagger.class); times=1; result=swagger;
         }};
+        */
     }
+
+    private SwaggerDeserializationResult parseLocation(final String location, final List<AuthorizationValue> auths) {
+      SwaggerDeserializationResult result;
+      try {
+          String data = FileUtils.readFileToString(Paths.get(location).toFile(), "UTF-8");
+          ObjectMapper mapper = Json.mapper();
+          JsonNode node = mapper.readTree(data);
+          result = parser.parseContents(node, auths, location, true);
+      } catch (Exception e) {
+          throw new RuntimeException("Error parsing " + location, e);
+      }
+      return result;
+  }
 }
