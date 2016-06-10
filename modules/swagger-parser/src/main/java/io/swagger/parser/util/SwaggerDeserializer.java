@@ -738,7 +738,7 @@ public class SwaggerDeserializer {
                 }
             }
             else {
-                model.setExample(exampleNode.asText());
+                model.setExample(exampleNode.toString());
             }
         }
 

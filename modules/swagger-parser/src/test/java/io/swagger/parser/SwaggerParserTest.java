@@ -162,6 +162,14 @@ public class SwaggerParserTest {
         assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
     }
 
+    @Test
+    public void testIssue255() {
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.read("objectExample.json");
+        assertEquals(swagger.getDefinitions().get("SamplePayload").getExample(), "[{\"op\":\"replace\",\"path\":\"/s\",\"v\":\"w\"}]");
+    }
+
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);
