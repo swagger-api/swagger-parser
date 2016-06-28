@@ -224,11 +224,9 @@ public class SwaggerParserTest {
         final RefProperty reflexMapAdditionalProperties = (RefProperty) reflexMap.getAdditionalProperties();
         assertEquals(reflexMapAdditionalProperties.get$ref(), "#/definitions/reflex");
 
-        final RefModel parent = (RefModel) composedCat.getParent();
-        assertEquals(parent.get$ref(), "#/definitions/pet");
-
-        assertEquals(composedCat.getInterfaces().size(), 1);
-        assertEquals(composedCat.getInterfaces().get(0).get$ref(), "#/definitions/foo");
+        assertEquals(composedCat.getInterfaces().size(), 2);
+        assertEquals(composedCat.getInterfaces().get(0).get$ref(), "#/definitions/pet");
+        assertEquals(composedCat.getInterfaces().get(1).get$ref(), "#/definitions/foo");
 
         return swagger;
     }

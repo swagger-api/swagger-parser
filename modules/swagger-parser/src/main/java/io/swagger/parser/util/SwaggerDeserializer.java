@@ -813,7 +813,6 @@ public class SwaggerDeserializer {
             }
         } else if (allOf != null) {
             ComposedModel model = null;
-            // we only support one parent, no multiple inheritance or composition
             if(allOf.getNodeType().equals(JsonNodeType.ARRAY)) {
                 model = new ComposedModel();
 
@@ -831,28 +830,22 @@ public class SwaggerDeserializer {
                     pos++;
                 }
 
-                List<Model> allComponents = model.getAllOf();
-                int size = allComponents.size();
-                if (size >= 1) {
-                    // Parent is the first composed component, by definition.
-                    model.setParent(allComponents.get(0));
-                    Model child = null;
-                    if (size >= 2) {
-                        List<RefModel> interfaces = new ArrayList<RefModel>();
-                        for (Model m : allComponents.subList(1, size/* - 1*/)) {
-                            if (m instanceof RefModel) {
-                                interfaces.add((RefModel) m);
-                            } else if (m instanceof ModelImpl) {
-                                // NOTE: since ComposedModel.child allows only one inline child schema, the last one 'wins'.
-                                child = m;
-                            }
-                        }
-                        model.setInterfaces(interfaces);
-                    }
-                    if(child != null) {
-                        model.setChild(child);
+                Model child = null;
+                List<RefModel> interfaces = new ArrayList<RefModel>();
+                for (Model m : model.getAllOf()) {
+                    if (m instanceof RefModel) {
+                        interfaces.add((RefModel) m);
+                    } else if (m instanceof ModelImpl) {
+                        // NOTE: since ComposedModel.child allows only one inline child schema, the last one 'wins'.
+                        child = m;
                     }
                 }
+                model.setInterfaces(interfaces);
+
+                if(child != null) {
+                    model.setChild(child);
+                }
+
             }
             else {
                 result.invalidType(location, "allOf", "array", allOf);
