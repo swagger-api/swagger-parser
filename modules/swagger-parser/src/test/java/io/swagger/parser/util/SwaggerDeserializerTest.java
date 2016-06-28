@@ -11,6 +11,7 @@ import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -997,5 +998,63 @@ public class SwaggerDeserializerTest {
         dogInterface = definitions.get(dogInterfaceRef.getSimpleRef());
         assertEquals("Dog does not implement Furry;", furry, dogInterface);
         assertTrue("Dog does not have child properties", dogComposed.getChild() instanceof ModelImpl);
+    }
+
+    @Test
+    public void testPR246() throws Exception {
+        String yaml = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  description: 'Tests the allOf API for parent, interface and child models.'\n" +
+                "  version: '2.0.0'\n" +
+                "  title: 'Test allOf API'\n" +
+                "paths:\n" +
+                "  /:\n" +
+                "    get:\n" +
+                "      parameters: []\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: 'OK'\n" +
+                "    parameters: []\n" +
+                "definitions:\n" +
+                "  Pet:\n" +
+                "    type: 'object'\n" +
+                "    required:\n" +
+                "    - 'id'\n" +
+                "    properties:\n" +
+                "      id:\n" +
+                "        type: 'integer'\n" +
+                "        format: 'int64'\n" +
+                "  Furry:\n" +
+                "    type: 'object'\n" +
+                "    required:\n" +
+                "    - 'coatColour'\n" +
+                "    properties:\n" +
+                "      coatColour:\n" +
+                "        type: 'string'\n" +
+                "  Dog:\n" +
+                "    allOf:\n" +
+                "    - $ref: '#/definitions/Pet'\n" +
+                "    - $ref: '#/definitions/Furry'\n" +
+                "    - type: object\n" +
+                "      required:\n" +
+                "      - 'name'\n" +
+                "      properties:\n" +
+                "        name:\n" +
+                "          type: 'string'\n" +
+                "";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+
+        Model dog = swagger.getDefinitions().get("Dog");
+        assertNotNull(dog);
+        assertTrue(dog instanceof ComposedModel);
+        ComposedModel composed = (ComposedModel) dog;
+
+        assertTrue(composed.getChild() instanceof ModelImpl);
+        assertTrue(composed.getInterfaces().size() == 2);
+        Yaml.prettyPrint(swagger);
     }
 }
