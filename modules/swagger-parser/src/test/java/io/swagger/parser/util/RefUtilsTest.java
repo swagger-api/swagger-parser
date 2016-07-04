@@ -7,7 +7,7 @@ import io.swagger.models.refs.RefFormat;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -139,8 +139,7 @@ public class RefUtilsTest {
 
     @Test
     public void testReadExternalRef_RelativeFileFormat(@Injectable final List<AuthorizationValue> auths,
-                                                       @Mocked IOUtils ioUtils,
-                                                       @Mocked final FileInputStream fileInputStream,
+                                                       @Mocked FileUtils fileUtils,
                                                        @Mocked Files files,
                                                        @Injectable final Path parentDirectory,
                                                        @Injectable final Path pathToUse,
@@ -150,10 +149,10 @@ public class RefUtilsTest {
         final String filePath = "./path/to/file.json";
         final String expectedResult = "really good json";
 
-        setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
+        setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString(fileInputStream);
+            FileUtils.readFileToString(file, "UTF-8");
             times = 1;
             result = expectedResult;
         }};
@@ -162,7 +161,7 @@ public class RefUtilsTest {
         assertEquals(expectedResult, actualResult);
     }
 
-    private void setupRelativeFileExpectations(@Mocked final FileInputStream fileInputStream, @Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
+    private void setupRelativeFileExpectations(@Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
         new StrictExpectations() {{
 
             parentDirectory.resolve(filePath).normalize();
@@ -176,17 +175,12 @@ public class RefUtilsTest {
             pathToUse.toFile();
             times = 1;
             result = file;
-
-            new FileInputStream(file);
-            times = 1;
-            result = fileInputStream;
         }};
     }
 
     @Test
     public void testReadExternalRef_RelativeFileFormat_ExceptionThrown(@Injectable final List<AuthorizationValue> auths,
-                                                                       @Mocked IOUtils ioUtils,
-                                                                       @Mocked final FileInputStream fileInputStream,
+                                                                       @Mocked FileUtils fileUtils,
                                                                        @Mocked Files files,
                                                                        @Injectable final IOException mockedException,
                                                                        @Injectable final Path parentDirectory,
@@ -195,10 +189,10 @@ public class RefUtilsTest {
     ) throws Exception {
         final String filePath = "./path/to/file.json";
 
-        setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
+        setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString(fileInputStream);
+            FileUtils.readFileToString(file, "UTF-8");
             times = 1;
             result = mockedException;
         }};
