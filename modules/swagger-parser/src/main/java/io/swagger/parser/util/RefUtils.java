@@ -2,7 +2,7 @@ package io.swagger.parser.util;
 
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileInputStream;
@@ -130,7 +130,7 @@ public class RefUtils {
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
 
                 if(Files.exists(pathToUse)) {
-                    result = IOUtils.toString(new FileInputStream(pathToUse.toFile()));
+                    result = FileUtils.readFileToString(pathToUse.toFile(), "UTF-8");
                 } else {
                     result = ClasspathHelper.loadFileFromClasspath(file);
                 }
