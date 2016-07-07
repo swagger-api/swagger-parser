@@ -130,7 +130,7 @@ public class RefUtils {
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
 
                 if(Files.exists(pathToUse)) {
-                    result = IOUtils.toString(new FileInputStream(pathToUse.toFile()));
+                    result = IOUtils.toString(new FileInputStream(pathToUse.toFile()), "UTF-8");
                 } else {
                     result = ClasspathHelper.loadFileFromClasspath(file);
                 }

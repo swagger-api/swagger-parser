@@ -153,7 +153,7 @@ public class RefUtilsTest {
         setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString(fileInputStream);
+            IOUtils.toString(fileInputStream, "UTF-8");
             times = 1;
             result = expectedResult;
         }};
@@ -198,7 +198,7 @@ public class RefUtilsTest {
         setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString(fileInputStream);
+            IOUtils.toString(fileInputStream, "UTF-8");
             times = 1;
             result = mockedException;
         }};
