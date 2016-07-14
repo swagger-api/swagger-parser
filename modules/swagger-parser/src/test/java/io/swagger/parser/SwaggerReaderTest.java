@@ -132,7 +132,7 @@ public class SwaggerReaderTest {
         assertTrue(thingSummary instanceof ModelImpl);
     }
 
-    @Test(enabled = false, description = "It should show some context information on failures")
+    @Test(description = "It should show some context information on failures")
     public void testIssue250() throws UnparseableContentException {
         String spec = "{ wrong content }";
         SwaggerDeserializationResult result = new SwaggerParser().parseContents(spec);
