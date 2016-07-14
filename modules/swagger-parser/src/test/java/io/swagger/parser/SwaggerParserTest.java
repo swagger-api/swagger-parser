@@ -25,6 +25,44 @@ import static org.testng.Assert.assertTrue;
 
 public class SwaggerParserTest {
     @Test
+    public void testParseSharedPathParameters() throws Exception {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: \"0.0.0\"\n" +
+                "  title: test\n" +
+                "paths:\n" +
+                "  /persons/{id}:\n" +
+                "    parameters:\n" +
+                "      - in: path\n" +
+                "        name: id\n" +
+                "        type: string\n" +
+                "        required: true\n" +
+                "        description: \"no\"\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - name: id\n" +
+                "          in: path\n" +
+                "          required: true\n" +
+                "          type: string\n" +
+                "          description: \"yes\"\n" +
+                "        - name: name\n" +
+                "          in: query\n" +
+                "          type: string\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: ok\n";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.parse(yaml);
+        List<Parameter> parameters = swagger.getPath("/persons/{id}").getGet().getParameters();
+        assertTrue(parameters.size() == 2);
+        Parameter id = parameters.get(0);
+        assertEquals(id.getDescription(), "yes");
+    }
+
+    @Test
     public void testLoadRelativeFileTree_Json() throws Exception {
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);

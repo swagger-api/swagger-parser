@@ -8,6 +8,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.ResolverCache;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,9 +42,25 @@ public class PathsProcessor {
             if(parameters != null) {
                 // add parameters to each operation
                 List<Operation> operations = path.getOperations();
+                List<Parameter> parametersToAdd = new ArrayList<Parameter>();
                 if(operations != null) {
                     for(Operation operation : operations) {
-                        operation.getParameters().addAll(0, parameters);
+                        boolean matched = false;
+                        List<Parameter> existingParameters = operation.getParameters();
+                        for(Parameter parameterToAdd : parameters) {
+                            for(Parameter existingParameter : existingParameters) {
+                                if(parameterToAdd.getIn().equals(existingParameter.getIn()) &&
+                                        parameterToAdd.getName().equals(existingParameter.getName())) {
+                                    matched = true;
+                                }
+                            }
+                            if(!matched) {
+                                parametersToAdd.add(parameterToAdd);
+                            }
+                        }
+                        if(parametersToAdd.size() > 0) {
+                            operation.getParameters().addAll(0, parametersToAdd);
+                        }
                     }
                 }
             }
