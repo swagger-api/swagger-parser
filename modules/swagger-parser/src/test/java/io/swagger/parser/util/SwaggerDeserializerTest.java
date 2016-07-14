@@ -764,6 +764,39 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testDeserializeWithEnumDiscriminator() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "definitions: \n" +
+                        "  Animal:\n" +
+                        "    type: object\n" +
+                        "    discriminator: petType\n" +
+                        "    description: |\n" +
+                        "      A basic `Animal` object which can extend to other animal types.\n" +
+                        "    required:\n" +
+                        "      - commonName\n" +
+                        "      - petType\n" +
+                        "    properties:\n" +
+                        "      commonName:\n" +
+                        "        description: the household name of the animal\n" +
+                        "        type: string\n" +
+                        "      petType:\n" +
+                        "        description: |\n" +
+                        "          The discriminator for the animal type.  It _must_\n" +
+                        "          match one of the concrete schemas by name (i.e. `Cat`)\n" +
+                        "          for proper deserialization\n" +
+                        "        enum:\n" +
+                        "        - cat\n" +
+                        "        - dog";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Map<String, Property> properties = result.getSwagger().getDefinitions().get("Animal").getProperties();
+        assertTrue(properties.containsKey("commonName"));
+        assertTrue(properties.containsKey("petType"));
+    }
+
+    @Test
     public void testIssue161() {
         String yaml =
                 "swagger: '2.0'\n" +
