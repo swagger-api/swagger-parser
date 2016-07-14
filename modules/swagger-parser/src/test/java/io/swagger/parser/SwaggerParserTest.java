@@ -25,6 +25,34 @@ import static org.testng.Assert.assertTrue;
 
 public class SwaggerParserTest {
     @Test
+    public void testModelParameters() throws Exception {
+        String yaml = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: \"0.0.0\"\n" +
+                "  title: test\n" +
+                "paths:\n" +
+                "  /foo:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "      - name: amount\n" +
+                "        in: body\n" +
+                "        schema:\n" +
+                "          type: integer\n" +
+                "          format: int64\n" +
+                "          description: amount of money\n" +
+                "          default: 1000\n" +
+                "          maximum: 100000\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: ok";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.parse(yaml);
+
+    }
+
+    @Test
     public void testParseSharedPathParameters() throws Exception {
         String yaml =
                 "swagger: '2.0'\n" +
