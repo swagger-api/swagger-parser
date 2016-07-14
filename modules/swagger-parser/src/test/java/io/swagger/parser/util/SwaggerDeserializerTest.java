@@ -794,6 +794,66 @@ public class SwaggerDeserializerTest {
         Map<String, Property> properties = result.getSwagger().getDefinitions().get("Animal").getProperties();
         assertTrue(properties.containsKey("commonName"));
         assertTrue(properties.containsKey("petType"));
+        assertEquals(properties.get("petType").getType(), "string");
+    }
+
+    @Test
+    public void testDeserializeWithNumericEnumDiscriminator() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "definitions: \n" +
+                        "  Animal:\n" +
+                        "    type: object\n" +
+                        "    discriminator: petType\n" +
+                        "    description: |\n" +
+                        "      A basic `Animal` object which can extend to other animal types.\n" +
+                        "    required:\n" +
+                        "      - commonName\n" +
+                        "      - petType\n" +
+                        "    properties:\n" +
+                        "      commonName:\n" +
+                        "        description: the household name of the animal\n" +
+                        "        type: string\n" +
+                        "      petType:\n" +
+                        "        enum:\n" +
+                        "        - 1\n" +
+                        "        - 2";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Map<String, Property> properties = result.getSwagger().getDefinitions().get("Animal").getProperties();
+        assertTrue(properties.containsKey("commonName"));
+        assertTrue(properties.containsKey("petType"));
+        assertEquals(properties.get("petType").getType(), "number");
+    }
+
+    @Test
+    public void testDeserializeWithBooleanEnumDiscriminator() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "definitions: \n" +
+                        "  Animal:\n" +
+                        "    type: object\n" +
+                        "    discriminator: petType\n" +
+                        "    description: |\n" +
+                        "      A basic `Animal` object which can extend to other animal types.\n" +
+                        "    required:\n" +
+                        "      - commonName\n" +
+                        "      - petType\n" +
+                        "    properties:\n" +
+                        "      commonName:\n" +
+                        "        description: the household name of the animal\n" +
+                        "        type: string\n" +
+                        "      petType:\n" +
+                        "        enum:\n" +
+                        "        - true\n" +
+                        "        - false";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Map<String, Property> properties = result.getSwagger().getDefinitions().get("Animal").getProperties();
+        assertTrue(properties.containsKey("commonName"));
+        assertTrue(properties.containsKey("petType"));
+        assertEquals(properties.get("petType").getType(), "boolean");
     }
 
     @Test

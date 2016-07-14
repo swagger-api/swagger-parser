@@ -895,7 +895,48 @@ public class SwaggerDeserializer {
     }
 
     public Property property(ObjectNode node, String location, ParseResult result) {
+        if(node != null) {
+            if(node.get("type") == null) {
+                // may have an enum where type can be inferred
+                JsonNode enumNode = node.get("enum");
+                if(enumNode != null && enumNode.isArray()) {
+                    String type = inferTypeFromArray((ArrayNode) enumNode);
+                    node.put("type", type);
+                }
+            }
+        }
         return Json.mapper().convertValue(node, Property.class);
+    }
+
+    public String inferTypeFromArray(ArrayNode an) {
+        if(an.size() == 0) {
+            return "string";
+        }
+        String type = null;
+        for(int i = 0; i < an.size(); i++) {
+            JsonNode element = an.get(0);
+            if(element.isBoolean()) {
+                if(type == null) {
+                    type = "boolean";
+                }
+                else if(!"boolean".equals(type)) {
+                    type = "string";
+                }
+            }
+            else if(element.isNumber()) {
+                if(type == null) {
+                    type = "number";
+                }
+                else if(!"number".equals(type)) {
+                    type = "string";
+                }
+            }
+            else {
+                type = "string";
+            }
+        }
+
+        return type;
     }
 
     public RefModel refModel(ObjectNode node, String location, ParseResult result) {
