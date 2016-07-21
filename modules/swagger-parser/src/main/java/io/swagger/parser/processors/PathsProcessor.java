@@ -49,7 +49,7 @@ public class PathsProcessor {
                         List<Parameter> existingParameters = operation.getParameters();
                         for(Parameter parameterToAdd : parameters) {
                             for(Parameter existingParameter : existingParameters) {
-                                if(parameterToAdd.getIn().equals(existingParameter.getIn()) &&
+                                if(parameterToAdd.getIn() != null && parameterToAdd.getIn().equals(existingParameter.getIn()) &&
                                         parameterToAdd.getName().equals(existingParameter.getName())) {
                                     matched = true;
                                 }
