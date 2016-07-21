@@ -1,6 +1,8 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
@@ -145,19 +147,13 @@ public class RefUtils {
 
         // Replace local references for external references
         JsonNode tree = DeserializationUtils.deserializeIntoTree(result, file);
-        Set<String> refs = new HashSet<>();
-        for (JsonNode refNode : tree.findValues("$ref")) {
-            refs.add(refNode.asText());
-        }
-
-        for (String ref : refs) {
-            // Replace local references only
-            if (ref.startsWith("#")) {
-                result = result.replace(ref, file + ref);
+        for (JsonNode refNodeParent : tree.findParents("$ref")) {
+            if (refNodeParent.get("$ref").asText().startsWith("#")) {
+                ((ObjectNode) refNodeParent).put("$ref", file + refNodeParent.get("$ref").asText());
             }
         }
 
-        return result;
+        return tree.toString();
 
     }
 }

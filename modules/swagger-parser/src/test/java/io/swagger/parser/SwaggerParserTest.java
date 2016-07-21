@@ -331,5 +331,6 @@ public class SwaggerParserTest {
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalArray"));
         assertTrue(swagger.getDefinitions().containsKey("externalObject"));
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
+        assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
     }
 }
