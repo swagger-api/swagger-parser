@@ -20,6 +20,9 @@
     "properties": {
       "hello1": {
         "$ref": "#/referencedByLocalElement"
+      },
+      "shareprefix": {
+        "$ref": "#/referencedBy"
       }
     }
   },
@@ -30,6 +33,13 @@
       },
       "world2": {
         "type": "integer"
+      }
+    }
+  },
+  "referencedBy": {
+    "properties": {
+      "shareprefix": {
+        "type": "string"
       }
     }
   }

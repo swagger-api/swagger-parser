@@ -107,7 +107,7 @@ public class RefUtilsTest {
     ) throws Exception {
 
         final String url = "http://my.company.com/path/to/file.json";
-        final String expectedResult = "{ }";
+        final String expectedResult = "{}";
 
         new StrictExpectations() {{
             RemoteUrl.urlToString(url, auths);
@@ -153,7 +153,7 @@ public class RefUtilsTest {
     ) throws Exception {
 
         final String filePath = "./path/to/file.json";
-        final String expectedResult = "{ }";
+        final String expectedResult = "{}";
 
         setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
 
@@ -235,7 +235,7 @@ public class RefUtilsTest {
                                                 @Injectable final Path parentDirectory,
                                                 @Injectable final Path pathToUse) throws Exception {
         final String filePath = "./path/to/file.json";
-        final String expectedResult = "{ }";
+        final String expectedResult = "{}";
 
         new StrictExpectations() {{
 
@@ -259,13 +259,30 @@ public class RefUtilsTest {
 
 
     @Test
-    public void testReadExternalRef_AppendPathToLocalRefs(@Mocked Files files,
+    public void testReadExternalRef_AppendPathToLocalRefs_Yaml(@Mocked Files files,
+            @Mocked ClasspathHelper classpathHelper,
+            @Injectable final Path parentDirectory,
+            @Injectable final Path pathToUse) throws Exception {
+        final String filePath = "./path/to/file.yaml";
+        final String fileContent = IOUtils.toString(getClass().getResource("/relative-file-references/yaml/models/localrefence.yaml"));
+        testReadExternalRef_AppendPathToLocalRefs(files,classpathHelper,parentDirectory,pathToUse,filePath,fileContent);
+    }
+
+    @Test
+    public void testReadExternalRef_AppendPathToLocalRefs_Json(@Mocked Files files,
             @Mocked ClasspathHelper classpathHelper,
             @Injectable final Path parentDirectory,
             @Injectable final Path pathToUse) throws Exception {
         final String filePath = "./path/to/file.json";
         final String fileContent = IOUtils.toString(getClass().getResource("/relative-file-references/json/models/localrefence.json"));
+        testReadExternalRef_AppendPathToLocalRefs(files,classpathHelper,parentDirectory,pathToUse,filePath,fileContent);
+    }
 
+    private void testReadExternalRef_AppendPathToLocalRefs(Files files,
+            ClasspathHelper classpathHelper,
+            final Path parentDirectory,
+            final Path pathToUse,
+            final String filePath, final String fileContent ) {
         new StrictExpectations() {{
 
             parentDirectory.resolve(filePath).normalize();
@@ -284,5 +301,7 @@ public class RefUtilsTest {
 
         assertEquals(JsonPath.read(actualResult,"$.localArray.items.['$ref']"),filePath+"#/referencedByLocalArray");
         assertEquals(JsonPath.read(actualResult,"$.localObject.properties.hello1.['$ref']"),filePath+"#/referencedByLocalElement");
+        assertEquals(JsonPath.read(actualResult,"$.localObject.properties.shareprefix.['$ref']"),filePath+"#/referencedBy");
+
     }
 }
