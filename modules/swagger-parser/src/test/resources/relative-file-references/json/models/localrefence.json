@@ -1,0 +1,36 @@
+{
+  "localArray": {
+    "description": "This array has references to this file",
+    "type": "array",
+    "items": {
+      "$ref": "#/referencedByLocalArray"
+    }
+  },
+  "referencedByLocalArray": {
+    "properties": {
+      "hello1": {
+        "type": "string"
+      },
+      "world2": {
+        "type": "integer"
+      }
+    }
+  },
+  "localObject": {
+    "properties": {
+      "hello1": {
+        "$ref": "#/referencedByLocalElement"
+      }
+    }
+  },
+  "referencedByLocalElement": {
+    "properties": {
+      "hello1": {
+        "type": "string"
+      },
+      "world2": {
+        "type": "integer"
+      }
+    }
+  }
+}
