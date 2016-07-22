@@ -91,6 +91,48 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testParseRefPathParameters() throws Exception {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  title: test\n" +
+                "  version: '0.0.0'\n" +
+                "parameters:\n" +
+                "  report-id:\n" +
+                "    name: id\n" +
+                "    in: path\n" +
+                "    type: string\n" +
+                "    required: true\n" +
+                "paths:\n" +
+                "  /reports/{id}:\n" +
+                "    parameters:\n" +
+                "        - $ref: '#/parameters/report-id'\n" +
+                "    put:\n" +
+                "      parameters:\n" +
+                "        - name: id\n" +
+                "          in: body\n" +
+                "          required: true\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/report'\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: ok\n" +
+                "definitions:\n" +
+                "  report:\n" +
+                "    type: object\n" +
+                "    properties:\n" +
+                "      id:\n" +
+                "        type: string\n" +
+                "      name:\n" +
+                "        type: string\n" +
+                "    required:\n" +
+                "    - id\n" +
+                "    - name\n";
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.parse(yaml);
+    }
+
+    @Test
     public void testLoadRelativeFileTree_Json() throws Exception {
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
