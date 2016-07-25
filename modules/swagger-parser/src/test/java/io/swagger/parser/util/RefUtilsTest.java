@@ -5,13 +5,16 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.parser.JsonToYamlFileDuplicator;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -19,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +34,9 @@ import static org.testng.Assert.fail;
 
 @RunWith(JMockit.class)
 public class RefUtilsTest {
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testComputeDefinitionName() throws Exception {
@@ -264,7 +271,10 @@ public class RefUtilsTest {
             @Injectable final Path parentDirectory,
             @Injectable final Path pathToUse) throws Exception {
         final String filePath = "./path/to/file.yaml";
-        final String fileContent = IOUtils.toString(getClass().getResource("/relative-file-references/yaml/models/localrefence.yaml"));
+        File tmpFolder = temporaryFolder.newFolder("testReadExternalRef_AppendPathToLocalRefs_Json");
+        JsonToYamlFileDuplicator.duplicateFilesInYamlFormat("src/test/resources/relative-file-references/json",
+                tmpFolder.getAbsolutePath());
+        final String fileContent = FileUtils.readFileToString(Paths.get(tmpFolder.toURI()).resolve("models").resolve("localrefence.yaml").toFile());
         testReadExternalRef_AppendPathToLocalRefs(files,classpathHelper,parentDirectory,pathToUse,filePath,fileContent);
     }
 
