@@ -5,7 +5,9 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.refs.GenericRef;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +75,19 @@ public final class ExternalRefProcessor {
                 }
             }
         }
+        Map<String, Object> vendorExtensions = model.getVendorExtensions();
+        if (vendorExtensions != null && vendorExtensions.containsKey("x-collection")) {
+            String sub$ref = ((Map<String, String>) vendorExtensions.get("x-collection")).get("schema");
+            GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+            if(isAnExternalRefFormat(subRef.getFormat())) {
+                processRefToExternalDefinition(subRef.getRef(), subRef.getFormat());
+            } else {
+                processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+            }
+        }
         if(existingModel == null) {
             // don't overwrite existing model reference
+            vendorExtensions.put("x-reference", $ref);
             swagger.addDefinition(newRef, model);
         }
 
