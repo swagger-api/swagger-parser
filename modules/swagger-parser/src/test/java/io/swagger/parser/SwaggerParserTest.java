@@ -239,6 +239,16 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testLoadExternalXLinks() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/b.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("n"));
+        assertTrue(!definitions.containsKey("m"));
+        assertTrue(definitions.containsKey("p"));
+    }
+
+    @Test
     public void testIssue75() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue99.json");

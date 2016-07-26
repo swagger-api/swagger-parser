@@ -7,3 +7,5 @@ paths: {}
 definitions:
   x:
     $ref: "./a.yaml#/definitions/y"
+  n:
+    $ref: "./a.yaml#/definitions/m"

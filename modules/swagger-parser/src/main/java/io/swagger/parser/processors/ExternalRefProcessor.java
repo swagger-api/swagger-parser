@@ -62,12 +62,12 @@ public final class ExternalRefProcessor {
         }
         //Loop the properties and recursively call this method;
         Map<String, Property> subProps = model.getProperties();
-        if(subProps != null) {
+        if (subProps != null) {
             for (Map.Entry<String, Property> prop : subProps.entrySet()) {
                 if (prop.getValue() instanceof RefProperty) {
                     RefProperty subRef = (RefProperty) prop.getValue();
 
-                    if(isAnExternalRefFormat(subRef.getRefFormat())) {
+                    if (isAnExternalRefFormat(subRef.getRefFormat())) {
                         subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
                     } else {
                         processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
@@ -76,13 +76,29 @@ public final class ExternalRefProcessor {
             }
         }
         Map<String, Object> vendorExtensions = model.getVendorExtensions();
-        if (vendorExtensions != null && vendorExtensions.containsKey("x-collection")) {
-            String sub$ref = ((Map<String, String>) vendorExtensions.get("x-collection")).get("schema");
-            GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-            if(isAnExternalRefFormat(subRef.getFormat())) {
-                processRefToExternalDefinition(subRef.getRef(), subRef.getFormat());
-            } else {
-                processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+        if (vendorExtensions != null) {
+            if (vendorExtensions.containsKey("x-collection")) {
+                String sub$ref = (String) ((Map<String, Object>) vendorExtensions.get("x-collection")).get("schema");
+                GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                if (isAnExternalRefFormat(subRef.getFormat())) {
+                    processRefToExternalDefinition(subRef.getRef(), subRef.getFormat());
+                    // FIXME: needs to change link
+                } else {
+                    processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                }
+            }
+            if (vendorExtensions.containsKey("x-links")) {
+                Map<String, Object> xLinks = (Map<String, Object>) vendorExtensions.get("x-links");
+                for (Map.Entry<String, Object> xLink : xLinks.entrySet()) {
+                    String sub$ref = (String) ((Map<String, Object>) xLink.getValue()).get("schema");
+                    GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                    if (isAnExternalRefFormat(subRef.getFormat())) {
+                        processRefToExternalDefinition(subRef.getRef(), subRef.getFormat());
+                        // FIXME: needs to change link
+                    } else {
+                        processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                    }
+                }
             }
         }
         if(existingModel == null) {

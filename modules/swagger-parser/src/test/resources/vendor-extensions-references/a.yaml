@@ -14,3 +14,13 @@ definitions:
     properties:
       name:
         type: string
+  m:
+    type: object
+    x-links:
+      o:
+        schema: "#/definitions/p"
+  p:
+    type: object
+    properties:
+      name:
+        type: string
