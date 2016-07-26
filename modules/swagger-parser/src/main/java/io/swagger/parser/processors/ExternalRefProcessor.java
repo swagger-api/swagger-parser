@@ -11,6 +11,7 @@ import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 import org.slf4j.LoggerFactory;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,7 +104,7 @@ public final class ExternalRefProcessor {
         }
         if(existingModel == null) {
             // don't overwrite existing model reference
-            if (vendorExtensions != null)
+            if (vendorExtensions != null && !(vendorExtensions instanceof AbstractMap))
                 vendorExtensions.put("x-pointer", $ref);
             swagger.addDefinition(newRef, model);
         }
