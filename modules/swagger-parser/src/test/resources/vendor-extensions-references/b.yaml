@@ -9,3 +9,15 @@ definitions:
     $ref: "./a.yaml#/definitions/y"
   n:
     $ref: "./a.yaml#/definitions/m"
+  r:
+    type: object
+    properties:
+      name:
+        type: string
+  t:
+    type: object
+    properties:
+      name:
+        type: string
+  u:
+    $ref: "./a.yaml#/definitions/s"

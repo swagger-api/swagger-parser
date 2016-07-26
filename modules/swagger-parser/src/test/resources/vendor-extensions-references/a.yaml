@@ -19,8 +19,14 @@ definitions:
     x-links:
       o:
         schema: "#/definitions/p"
+      q:
+        schema: "./b.yaml#/definitions/r"
   p:
     type: object
     properties:
       name:
         type: string
+  s:
+    type: object
+    x-collection:
+      schema: "./b.yaml#/definitions/t"

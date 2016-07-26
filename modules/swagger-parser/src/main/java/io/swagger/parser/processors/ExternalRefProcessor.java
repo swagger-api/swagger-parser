@@ -78,23 +78,23 @@ public final class ExternalRefProcessor {
         Map<String, Object> vendorExtensions = model.getVendorExtensions();
         if (vendorExtensions != null) {
             if (vendorExtensions.containsKey("x-collection")) {
-                String sub$ref = (String) ((Map<String, Object>) vendorExtensions.get("x-collection")).get("schema");
+                Map<String, Object> xCollection = (Map<String, Object>) vendorExtensions.get("x-collection");
+                String sub$ref = (String) xCollection.get("schema");
                 GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
                 if (isAnExternalRefFormat(subRef.getFormat())) {
-                    processRefToExternalDefinition(subRef.getRef(), subRef.getFormat());
-                    // FIXME: needs to change link
+                    xCollection.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
                 } else {
                     processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
                 }
             }
             if (vendorExtensions.containsKey("x-links")) {
                 Map<String, Object> xLinks = (Map<String, Object>) vendorExtensions.get("x-links");
-                for (Map.Entry<String, Object> xLink : xLinks.entrySet()) {
-                    String sub$ref = (String) ((Map<String, Object>) xLink.getValue()).get("schema");
+                for (Map.Entry<String, Object> xLinkEntry : xLinks.entrySet()) {
+                    Map<String, Object> xLink = (Map<String, Object>) xLinkEntry.getValue();
+                    String sub$ref = (String) xLink.get("schema");
                     GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
                     if (isAnExternalRefFormat(subRef.getFormat())) {
-                        processRefToExternalDefinition(subRef.getRef(), subRef.getFormat());
-                        // FIXME: needs to change link
+                        xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
                     } else {
                         processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
                     }
