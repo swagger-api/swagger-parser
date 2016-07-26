@@ -54,7 +54,7 @@ public final class ExternalRefProcessor {
         String file = $ref.split("#/")[0];
         if (model instanceof RefModel) {
             RefModel refModel = (RefModel) model;
-            if(isAnExternalRefFormat(refModel.getRefFormat())) {
+            if (isAnExternalRefFormat(refModel.getRefFormat())) {
                 refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
             } else {
                 processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
@@ -103,7 +103,8 @@ public final class ExternalRefProcessor {
         }
         if(existingModel == null) {
             // don't overwrite existing model reference
-            vendorExtensions.put("x-reference", $ref);
+            if (vendorExtensions != null)
+                vendorExtensions.put("x-pointer", $ref);
             swagger.addDefinition(newRef, model);
         }
 
