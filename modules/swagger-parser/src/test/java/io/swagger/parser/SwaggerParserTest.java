@@ -146,6 +146,7 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(!definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
+        assertEquals(((RefModel) definitions.get("i")).get$ref(), "#/definitions/k");
     }
 
     @Test

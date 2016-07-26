@@ -12,3 +12,5 @@ definitions:
     properties:
       name:
         type: string
+  j:
+    $ref: "./b.yaml#/definitions/k"
