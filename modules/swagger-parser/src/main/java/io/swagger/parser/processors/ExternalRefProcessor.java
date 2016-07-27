@@ -80,24 +80,28 @@ public final class ExternalRefProcessor {
         if (vendorExtensions != null) {
             if (vendorExtensions.containsKey("x-collection")) {
                 Map<String, Object> xCollection = (Map<String, Object>) vendorExtensions.get("x-collection");
-                String sub$ref = (String) xCollection.get("schema");
-                GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-                if (isAnExternalRefFormat(subRef.getFormat())) {
-                    xCollection.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                } else {
-                    processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                if (xCollection.containsKey("schema")) {
+                    String sub$ref = (String) xCollection.get("schema");
+                    GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                    if (isAnExternalRefFormat(subRef.getFormat())) {
+                        xCollection.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
+                    } else {
+                        processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                    }
                 }
             }
             if (vendorExtensions.containsKey("x-links")) {
                 Map<String, Object> xLinks = (Map<String, Object>) vendorExtensions.get("x-links");
                 for (Map.Entry<String, Object> xLinkEntry : xLinks.entrySet()) {
                     Map<String, Object> xLink = (Map<String, Object>) xLinkEntry.getValue();
-                    String sub$ref = (String) xLink.get("schema");
-                    GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-                    if (isAnExternalRefFormat(subRef.getFormat())) {
-                        xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                    } else {
-                        processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                    if (xLink.containsKey("schema")) {
+                        String sub$ref = (String) xLink.get("schema");
+                        GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                        if (isAnExternalRefFormat(subRef.getFormat())) {
+                            xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
+                        } else {
+                            processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                        }
                     }
                 }
             }
