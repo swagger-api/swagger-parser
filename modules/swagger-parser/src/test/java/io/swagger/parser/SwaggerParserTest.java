@@ -147,6 +147,15 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testFileReferenceWithVendorExt() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/file-reference-with-vendor-ext/b.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.get("x").getVendorExtensions().get("x-foo") instanceof Map);
+        assertTrue(definitions.get("z").getVendorExtensions().get("x-foo") instanceof Map);
+    }
+
+    @Test
     public void testTroublesomeFile() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/troublesome.yaml");
