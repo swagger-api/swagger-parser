@@ -1,5 +1,6 @@
 package io.swagger.parser.processors;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
@@ -79,9 +81,9 @@ public final class ExternalRefProcessor {
         Map<String, Object> vendorExtensions = model.getVendorExtensions();
         if (vendorExtensions != null) {
             if (vendorExtensions.containsKey("x-collection")) {
-                Map<String, Object> xCollection = (Map<String, Object>) vendorExtensions.get("x-collection");
-                if (xCollection.containsKey("schema")) {
-                    String sub$ref = (String) xCollection.get("schema");
+                ObjectNode xCollection = (ObjectNode) vendorExtensions.get("x-collection");
+                if (xCollection.has("schema")) {
+                    String sub$ref = xCollection.get("schema").asText();
                     GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
                     if (isAnExternalRefFormat(subRef.getFormat())) {
                         xCollection.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
@@ -89,21 +91,27 @@ public final class ExternalRefProcessor {
                         processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
                     }
                 }
+
             }
             if (vendorExtensions.containsKey("x-links")) {
-                Map<String, Object> xLinks = (Map<String, Object>) vendorExtensions.get("x-links");
-                for (Map.Entry<String, Object> xLinkEntry : xLinks.entrySet()) {
-                    Map<String, Object> xLink = (Map<String, Object>) xLinkEntry.getValue();
-                    if (xLink.containsKey("schema")) {
-                        String sub$ref = (String) xLink.get("schema");
-                        GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-                        if (isAnExternalRefFormat(subRef.getFormat())) {
-                            xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                        } else {
-                            processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                ObjectNode xLinks = (ObjectNode) vendorExtensions.get("x-links");
+                Iterator<String> xLinksNames = xLinks.fieldNames();
+                while (xLinksNames.hasNext()) {
+                    String linkName = xLinksNames.next();
+                    if (xLinks.get(linkName) instanceof ObjectNode) {
+                        ObjectNode xLink = (ObjectNode) xLinks.get(linkName);
+                        if (xLink.has("schema")) {
+                            String sub$ref = xLink.get("schema").asText();
+                            GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                            if (isAnExternalRefFormat(subRef.getFormat())) {
+                                xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
+                            } else {
+                                processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                            }
                         }
                     }
                 }
+
             }
         }
         if(existingModel == null) {

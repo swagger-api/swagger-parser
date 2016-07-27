@@ -236,7 +236,7 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(!definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
-        assertEquals(((Map<String, Object>) definitions.get("u").getVendorExtensions().get("x-collection")).get("schema"), "#/definitions/t");
+        assertEquals(((ObjectNode) definitions.get("u").getVendorExtensions().get("x-collection")).get("schema").asText(), "#/definitions/t");
     }
 
     @Test
@@ -248,7 +248,7 @@ public class SwaggerParserTest {
         assertTrue(!definitions.containsKey("m"));
         assertTrue(definitions.containsKey("p"));
         assertTrue(definitions.containsKey("r"));
-        assertEquals(((Map<String, Map<String, Object>>) definitions.get("n").getVendorExtensions().get("x-links")).get("q").get("schema"), "#/definitions/r");
+        assertEquals(((ObjectNode) definitions.get("n").getVendorExtensions().get("x-links")).get("q").get("schema").asText(), "#/definitions/r");
     }
 
     @Test
