@@ -252,6 +252,24 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testLoadXCollectionToExternalDef() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("t"));
+        assertEquals(((ObjectNode) definitions.get("s").getVendorExtensions().get("x-collection")).get("schema").asText(), "#/definitions/t");
+    }
+
+    @Test
+    public void testLoadXLinksToExternalDef() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("r"));
+        assertEquals(((ObjectNode) definitions.get("m").getVendorExtensions().get("x-links")).get("q").get("schema").asText(), "#/definitions/r");
+    }
+
+    @Test
     public void testIssue75() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue99.json");

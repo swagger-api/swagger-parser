@@ -7,8 +7,12 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
+import io.swagger.models.refs.GenericRef;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,15 +48,37 @@ public class ModelProcessor {
 
         final Map<String, Property> properties = modelImpl.getProperties();
 
-        if (properties == null) {
-            return;
+        if (properties != null) {
+            for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                final Property property = propertyEntry.getValue();
+                propertyProcessor.processProperty(property);
+            }
         }
 
-        for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
-            final Property property = propertyEntry.getValue();
-            propertyProcessor.processProperty(property);
+        Map<String, Object> vendorExtensions = modelImpl.getVendorExtensions();
+        if (vendorExtensions != null) {
+            if (vendorExtensions.containsKey("x-collection")) {
+                ObjectNode xCollection = (ObjectNode) vendorExtensions.get("x-collection");
+                String sub$ref = xCollection.get("schema").asText();
+                GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                if (isAnExternalRefFormat(subRef.getFormat())) {
+                    xCollection.put("schema", "#/definitions/" + externalRefProcessor.processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
+                }
+            }
+            if (vendorExtensions.containsKey("x-links")) {
+                ObjectNode xLinks = (ObjectNode) vendorExtensions.get("x-links");
+                Iterator<String> xLinksNames = xLinks.fieldNames();
+                while (xLinksNames.hasNext()) {
+                    String linkName = xLinksNames.next();
+                    ObjectNode xLink = (ObjectNode) xLinks.get(linkName);
+                    String sub$ref = xLink.get("schema").asText();
+                    GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                    if (isAnExternalRefFormat(subRef.getFormat())) {
+                        xLink.put("schema", "#/definitions/" + externalRefProcessor.processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
+                    }
+                }
+            }
         }
-
     }
 
     private void processComposedModel(ComposedModel composedModel) {
