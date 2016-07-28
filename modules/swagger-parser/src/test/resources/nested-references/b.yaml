@@ -1,0 +1,16 @@
+---
+swagger: "2.0"
+info:
+  title: test
+  version: '0.0.0'
+paths: {}
+definitions:
+  x:
+    $ref: "./a.yaml#/definitions/y"
+  i:
+    $ref: "./a.yaml#/definitions/j"
+  k:
+    type: object
+    properties:
+      name:
+        type: string
