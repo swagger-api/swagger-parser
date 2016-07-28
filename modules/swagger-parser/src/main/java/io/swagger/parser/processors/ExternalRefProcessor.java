@@ -78,6 +78,16 @@ public final class ExternalRefProcessor {
                 }
             }
         }
+        processRefsFromVendorExtensions(model, file);
+        if(existingModel == null) {
+            // don't overwrite existing model reference
+            swagger.addDefinition(newRef, model);
+        }
+
+        return newRef;
+    }
+
+    public void processRefsFromVendorExtensions(Model model, String externalFile) {
         Map<String, Object> vendorExtensions = model.getVendorExtensions();
         if (vendorExtensions != null) {
             if (vendorExtensions.containsKey("x-collection")) {
@@ -87,11 +97,10 @@ public final class ExternalRefProcessor {
                     GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
                     if (isAnExternalRefFormat(subRef.getFormat())) {
                         xCollection.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                    } else {
-                        processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                    } else if (externalFile != null) {
+                        processRefToExternalDefinition(externalFile + subRef.getRef(), RefFormat.RELATIVE);
                     }
                 }
-
             }
             if (vendorExtensions.containsKey("x-links")) {
                 ObjectNode xLinks = (ObjectNode) vendorExtensions.get("x-links");
@@ -105,22 +114,13 @@ public final class ExternalRefProcessor {
                             GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
                             if (isAnExternalRefFormat(subRef.getFormat())) {
                                 xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                            } else {
-                                processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                            } else if (externalFile != null) {
+                                processRefToExternalDefinition(externalFile + subRef.getRef(), RefFormat.RELATIVE);
                             }
                         }
                     }
                 }
-
             }
         }
-        if(existingModel == null) {
-            // don't overwrite existing model reference
-            if (vendorExtensions != null && !(vendorExtensions instanceof AbstractMap))
-                vendorExtensions.put("x-pointer", $ref);
-            swagger.addDefinition(newRef, model);
-        }
-
-        return newRef;
     }
 }
