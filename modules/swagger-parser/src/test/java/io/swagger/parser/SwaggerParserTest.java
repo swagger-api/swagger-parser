@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
@@ -144,6 +145,15 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);
 
         assertNotNull(result);
+    }
+
+    @Test
+    public void testFileReferenceWithVendorExt() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/file-reference-with-vendor-ext/b.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.get("z").getVendorExtensions().get("x-foo") instanceof ObjectNode);
+        assertTrue(definitions.get("x").getVendorExtensions().get("x-foo") instanceof ObjectNode);
     }
 
     @Test

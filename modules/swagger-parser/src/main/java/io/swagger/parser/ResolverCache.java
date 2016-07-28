@@ -1,6 +1,8 @@
 package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.models.Model;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
@@ -8,6 +10,7 @@ import io.swagger.models.refs.RefType;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.PathUtils;
 import io.swagger.parser.util.RefUtils;
+import io.swagger.parser.util.SwaggerDeserializer;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -116,7 +119,13 @@ public class ResolverCache {
             }
         }
 
-        T result = DeserializationUtils.deserialize(tree, file, expectedType);
+        T result;
+        if (expectedType.equals(Model.class)) {
+            SwaggerDeserializer ser = new SwaggerDeserializer();
+            result = (T) ser.definition((ObjectNode) tree, definitionPath.replace("/", "."), null);
+        } else {
+            result = DeserializationUtils.deserialize(tree, file, expectedType);
+        }
         resolutionCache.put(ref, result);
 
         return result;
