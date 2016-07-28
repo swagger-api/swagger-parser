@@ -195,6 +195,7 @@ public class SwaggerParserTest {
         assertTrue(!definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
         assertEquals(((RefModel) definitions.get("i")).get$ref(), "#/definitions/k");
+        assertEquals(definitions.get("z").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/z");
     }
 
     @Test
@@ -237,6 +238,9 @@ public class SwaggerParserTest {
         assertTrue(!definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
         assertEquals(((ObjectNode) definitions.get("u").getVendorExtensions().get("x-collection")).get("schema").asText(), "#/definitions/t");
+        assertEquals(definitions.get("z").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/z");
+        assertEquals(definitions.get("u").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/s");
+        assertEquals(definitions.get("x").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/y");
     }
 
     @Test
@@ -249,6 +253,8 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("p"));
         assertTrue(definitions.containsKey("r"));
         assertEquals(((ObjectNode) definitions.get("n").getVendorExtensions().get("x-links")).get("q").get("schema").asText(), "#/definitions/r");
+        assertEquals(definitions.get("p").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/p");
+        assertEquals(definitions.get("n").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/m");
     }
 
     @Test
@@ -258,6 +264,7 @@ public class SwaggerParserTest {
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.containsKey("t"));
         assertEquals(((ObjectNode) definitions.get("s").getVendorExtensions().get("x-collection")).get("schema").asText(), "#/definitions/t");
+        assertEquals(definitions.get("t").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/t");
     }
 
     @Test
@@ -267,6 +274,7 @@ public class SwaggerParserTest {
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.containsKey("r"));
         assertEquals(((ObjectNode) definitions.get("m").getVendorExtensions().get("x-links")).get("q").get("schema").asText(), "#/definitions/r");
+        assertEquals(definitions.get("r").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/r");
     }
 
     @Test

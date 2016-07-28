@@ -12,7 +12,6 @@ import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 import org.slf4j.LoggerFactory;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -79,12 +78,20 @@ public final class ExternalRefProcessor {
             }
         }
         processRefsFromVendorExtensions(model, file);
+        addXPointer(model, $ref);
         if(existingModel == null) {
             // don't overwrite existing model reference
             swagger.addDefinition(newRef, model);
         }
 
         return newRef;
+    }
+
+    private void addXPointer(Model model, String externalRef) {
+        Map<String, Object> vendorExtensions = model.getVendorExtensions();
+        if (vendorExtensions != null && !vendorExtensions.getClass().getName().equals("java.util.Collections$EmptyMap")) {
+            vendorExtensions.put("x-pointer", externalRef);
+        }
     }
 
     public void processRefsFromVendorExtensions(Model model, String externalFile) {
