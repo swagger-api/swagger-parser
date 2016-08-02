@@ -51,39 +51,38 @@ public final class ExternalRefProcessor {
         newRef = possiblyConflictingDefinitionName;
         cache.putRenamedRef($ref, newRef);
 
-
-        //If this is a new model, then check it for other sub references
-        String file = $ref.split("#/")[0];
-        if (model instanceof RefModel) {
-            RefModel refModel = (RefModel) model;
-            if (isAnExternalRefFormat(refModel.getRefFormat())) {
-                refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
-            } else {
-                processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
-            }
-        }
-        //Loop the properties and recursively call this method;
-        Map<String, Property> subProps = model.getProperties();
-        if (subProps != null) {
-            for (Map.Entry<String, Property> prop : subProps.entrySet()) {
-                if (prop.getValue() instanceof RefProperty) {
-                    RefProperty subRef = (RefProperty) prop.getValue();
-
-                    if (isAnExternalRefFormat(subRef.getRefFormat())) {
-                        subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
-                    } else {
-                        processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
-                    }
-                }
-            }
-        }
-        processRefsFromVendorExtensions(model, file);
-        addXPointer(model, $ref);
         if(existingModel == null) {
             // don't overwrite existing model reference
             swagger.addDefinition(newRef, model);
-        }
 
+            //If this is a new model, then check it for other sub references
+            String file = $ref.split("#/")[0];
+            if (model instanceof RefModel) {
+                RefModel refModel = (RefModel) model;
+                if (isAnExternalRefFormat(refModel.getRefFormat())) {
+                    refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
+                } else {
+                    processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+            //Loop the properties and recursively call this method;
+            Map<String, Property> subProps = model.getProperties();
+            if (subProps != null) {
+                for (Map.Entry<String, Property> prop : subProps.entrySet()) {
+                    if (prop.getValue() instanceof RefProperty) {
+                        RefProperty subRef = (RefProperty) prop.getValue();
+
+                        if (isAnExternalRefFormat(subRef.getRefFormat())) {
+                            subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+                        } else {
+                            processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
+                        }
+                    }
+                }
+            }
+            processRefsFromVendorExtensions(model, file);
+            addXPointer(model, $ref);
+        }
         return newRef;
     }
 
