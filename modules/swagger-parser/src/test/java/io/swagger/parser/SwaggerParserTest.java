@@ -228,6 +228,18 @@ public class SwaggerParserTest {
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
     }
 
+    @Test(enabled = false)
+    public void testLoadRecursiveExternalDef() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/file-reference-to-recursive-defs/b.yaml");
+
+        Json.prettyPrint(swagger);
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertEquals(((RefProperty) ((ArrayProperty) definitions.get("v").getProperties().get("children")).getItems()).get$ref(), "#/definitions/v");
+        assertTrue(!definitions.containsKey("y"));
+        assertEquals(((RefProperty) ((ArrayProperty) definitions.get("x").getProperties().get("children")).getItems()).get$ref(), "#/definitions/x");
+    }
+
     @Test
     public void testIssue75() {
         SwaggerParser parser = new SwaggerParser();
