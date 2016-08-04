@@ -6,6 +6,7 @@ import io.swagger.models.Path;
 import io.swagger.models.RefPath;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.RefParameter;
 import io.swagger.parser.ResolverCache;
 
 import java.util.ArrayList;
@@ -49,9 +50,21 @@ public class PathsProcessor {
                         List<Parameter> existingParameters = operation.getParameters();
                         for(Parameter parameterToAdd : parameters) {
                             for(Parameter existingParameter : existingParameters) {
-                                if(parameterToAdd.getIn() != null && parameterToAdd.getIn().equals(existingParameter.getIn()) &&
-                                        parameterToAdd.getName().equals(existingParameter.getName())) {
+                                if(
+                                      parameterToAdd instanceof RefParameter
+                                   && existingParameter instanceof RefParameter
+                                   && ((RefParameter) parameterToAdd).get$ref().equals(((RefParameter) existingParameter).get$ref())
+                                ) {
                                     matched = true;
+                                } else if (
+                                      !(parameterToAdd instanceof RefParameter)
+                                   && !(existingParameter instanceof RefParameter)
+                                ) {
+                                    if (   parameterToAdd.getIn().equals(existingParameter.getIn())
+                                        && parameterToAdd.getName().equals(existingParameter.getName())
+                                    ) {
+                                        matched = true;
+                                    }
                                 }
                             }
                             if(!matched) {
