@@ -134,6 +134,53 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testUniqueParameters() throws Exception {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  title: test\n" +
+                "  version: '0.0.0'\n" +
+                "parameters:\n" +
+                "  foo-id:\n" +
+                "    name: id\n" +
+                "    in: path\n" +
+                "    type: string\n" +
+                "    required: true\n" +
+                "paths:\n" +
+                "  /foos/{id}:\n" +
+                "    parameters:\n" +
+                "        - $ref: '#/parameters/foo-id'\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/foo'\n" +
+                "    put:\n" +
+                "      parameters:\n" +
+                "        - name: foo\n" +
+                "          in: body\n" +
+                "          required: true\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/foo'\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/foo'\n" +
+                "definitions:\n" +
+                "  foo:\n" +
+                "    type: object\n" +
+                "    properties:\n" +
+                "      id:\n" +
+                "        type: string\n" +
+                "    required:\n" +
+                "      - id\n";
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.parse(yaml);
+        List<Parameter> parameters = swagger.getPath("/foos/{id}").getPut().getParameters();
+        assertTrue(parameters.size() == 2);
+    }
+
+    @Test
     public void testLoadRelativeFileTree_Json() throws Exception {
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
