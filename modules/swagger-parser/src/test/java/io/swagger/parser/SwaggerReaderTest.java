@@ -306,4 +306,19 @@ public class SwaggerReaderTest {
         assertEquals(pathParameter.getMaxLength(), new Integer(5));
         assertEquals(pathParameter.getPattern(), "^[a-zA-Z]");
     }
+
+    @Test
+    public void testIssue277() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("issue_277.yaml");
+
+        Path path = swagger.getPath("/buckets/{bucketKey}/details");
+        assertNotNull(path);
+        Operation get = path.getGet();
+        assertNotNull(get);
+        assertTrue(get.getParameters().size() == 1);
+        Parameter param1 = get.getParameters().get(0);
+        assertEquals(param1.getIn(), "path");
+        assertEquals(param1.getName(), "bucketKey");
+    }
 }

@@ -1,0 +1,55 @@
+swagger: '2.0'
+
+info:
+  title: test
+  version: "1.0.0"
+  description: test
+
+host: api.test.com
+schemes:
+  - https
+
+paths:
+  '/buckets/{bucketKey}/details':
+    parameters:
+      - $ref: '#/parameters/bucketKey'
+    get:
+      operationId: get_bucket_details
+      description: test
+    responses:
+        '200':
+          $ref: '#/responses/OK'
+  '/buckets/{bucketKey}/objects/{objectName}':
+    parameters:
+      - $ref: '#/parameters/bucketKey'
+      - $ref: '#/parameters/objectName'
+    put:
+      operationId: upload_object
+      description: test
+      responses:
+        '200':
+          $ref: '#/responses/OK'
+    get:
+      operationId: get_object
+      description: test
+      responses:
+        '200':
+          $ref: '#/responses/OK'
+
+parameters:
+  bucketKey:
+    name: bucketKey
+    in: path
+    description: URL-encoded bucket key
+    required: true
+    type: string
+  objectName:
+    name: objectName
+    in: path
+    description: URL-encoded object name
+    required: true
+    type: string
+
+responses:
+  OK:
+    description: OK, Success
