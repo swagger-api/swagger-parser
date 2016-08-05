@@ -1,5 +1,6 @@
 package io.swagger.parser.processors;
 
+import io.swagger.models.ArrayModel;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
@@ -72,6 +73,10 @@ public final class ExternalRefProcessor {
                     }
                 }
             }
+        } else if (model instanceof ArrayModel && ((ArrayModel)model).getItems() instanceof RefProperty) {
+            RefProperty subRef = (RefProperty) ((ArrayModel)model).getItems();
+            if(isAnExternalRefFormat(subRef.getRefFormat()))
+                subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
         }
         if(existingModel == null) {
             // don't overwrite existing model reference

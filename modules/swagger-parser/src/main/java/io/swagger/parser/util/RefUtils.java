@@ -1,5 +1,8 @@
 package io.swagger.parser.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
@@ -8,7 +11,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RefUtils {
 
@@ -140,7 +145,15 @@ public class RefUtils {
             throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
         }
 
-        return result;
+        // Replace local references for external references
+        JsonNode tree = DeserializationUtils.deserializeIntoTree(result, file);
+        for (JsonNode refNodeParent : tree.findParents("$ref")) {
+            if (refNodeParent.get("$ref").asText().startsWith("#")) {
+                ((ObjectNode) refNodeParent).put("$ref", file + refNodeParent.get("$ref").asText());
+            }
+        }
+
+        return tree.toString();
 
     }
 }
