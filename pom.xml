@@ -1,44 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>5</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.swagger</groupId>
+    <groupId>com.medallia</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.22-SNAPSHOT</version>
+    <version>1.0.23-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>swagger-parser-project</name>
-    <developers>
-        <developer>
-            <id>fehguy</id>
-            <name>Tony Tam</name>
-            <email>fehguy@gmail.com</email>
-        </developer>
-        <developer>
-            <id>webron</id>
-            <name>Ron Ratovsky</name>
-            <email>webron@gmail.com</email>
-        </developer>
-        <developer>
-            <id>fge</id>
-            <name>Francis Galiegue</name>
-            <email>fgaliegue@gmail.com</email>
-        </developer>
-    </developers>
-    <issueManagement>
-        <system>github</system>
-        <url>https://github.com/swagger-api/swagger-parser/issues</url>
-    </issueManagement>
-    <mailingLists>
-        <mailingList>
-            <name>swagger-swaggersocket</name>
-            <archive>https://groups.google.com/forum/#!forum/swagger-swaggersocket</archive>
-        </mailingList>
-    </mailingLists>
+    <name>com.medallia:swagger-parser-project</name>
+
+    <url>github.com/medallia/swagger-parser</url>
+    <description>Medallia fork for Swagger Parser</description>
+    
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -46,6 +18,23 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    
+    <distributionManagement>
+        <snapshotRepository>
+            <id>medallia</id>
+            <url>http://maven.medallia.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+
+        <repository>
+            <id>medallia</id>
+            <url>http://maven.medallia.com/nexus/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
+
+    <prerequisites>
+        <maven>2.2.0</maven>
+    </prerequisites>
+
     <build>
         <defaultGoal>install</defaultGoal>
         <resources>
