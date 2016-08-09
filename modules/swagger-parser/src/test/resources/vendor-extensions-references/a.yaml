@@ -3,6 +3,8 @@ swagger: "2.0"
 info:
   title: test
   version: '0.0.0'
+x-responses-reference:
+  $ref: "./b.yaml#/responses"
 paths: {}
 definitions:
   y:
