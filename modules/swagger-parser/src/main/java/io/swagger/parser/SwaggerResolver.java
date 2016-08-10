@@ -7,6 +7,7 @@ import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.OperationProcessor;
 import io.swagger.parser.processors.PathsProcessor;
+import io.swagger.parser.processors.XResponsesReferenceProcessor;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class SwaggerResolver {
     private final Swagger swagger;
     private final ResolverCache cache;
+    private final XResponsesReferenceProcessor xResponsesReferenceProcessor;
     private final PathsProcessor pathProcessor;
     private final DefinitionsProcessor definitionsProcessor;
     private final OperationProcessor operationsProcessor;
@@ -23,6 +25,7 @@ public class SwaggerResolver {
     public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
         this.cache = new ResolverCache(swagger, auths, parentFileLocation);
+        xResponsesReferenceProcessor = new XResponsesReferenceProcessor(cache, swagger);
         definitionsProcessor = new DefinitionsProcessor(cache, swagger);
         pathProcessor = new PathsProcessor(cache, swagger);
         operationsProcessor = new OperationProcessor(cache, swagger);
@@ -37,6 +40,7 @@ public class SwaggerResolver {
             return null;
         }
 
+        xResponsesReferenceProcessor.processXResponsesReferences();
         pathProcessor.processPaths();
         definitionsProcessor.processDefinitions();
 

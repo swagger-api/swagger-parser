@@ -3,6 +3,17 @@ swagger: "2.0"
 info:
   title: test
   version: '0.0.0'
+
+responses:
+  200:
+    description: "Good response"
+    schema:
+      $ref: "#/definitions/r"
+  500:
+    description: "Bad response"
+    schema:
+      $ref: "#/definitions/t"
+
 paths: {}
 definitions:
   x:
