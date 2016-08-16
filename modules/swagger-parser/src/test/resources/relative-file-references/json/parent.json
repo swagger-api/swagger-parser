@@ -61,7 +61,12 @@
           ]
         }
       ]
+    },
+    "externalArray": {
+      "$ref": "./models/localrefence.json#/localArray"
+    },
+    "externalObject": {
+      "$ref": "./models/localrefence.json#/localObject"
     }
   }
-
 }
