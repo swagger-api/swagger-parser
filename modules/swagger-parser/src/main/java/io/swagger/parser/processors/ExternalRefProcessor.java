@@ -1,6 +1,7 @@
 package io.swagger.parser.processors;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.models.ArrayModel;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
@@ -90,6 +91,14 @@ public final class ExternalRefProcessor {
                             }
                         }
                     }
+                }
+            }
+            if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
+                RefProperty subRef = (RefProperty) ((ArrayModel) model).getItems();
+                if (isAnExternalRefFormat(subRef.getRefFormat())) {
+                    subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+                } else {
+                    processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
                 }
             }
             processRefsFromVendorExtensions(model, file);
