@@ -78,16 +78,16 @@ public final class ExternalRefProcessor {
                         } else {
                             processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
                         }
-                    }
-                } else if (prop.getValue() instanceof ArrayProperty) {
-                    ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
-                    if (arrayProp.getItems() instanceof RefProperty) {
-                        RefProperty subRef = (RefProperty) arrayProp.getItems();
+                    } else if (prop.getValue() instanceof ArrayProperty) {
+                        ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
+                        if (arrayProp.getItems() instanceof RefProperty) {
+                            RefProperty subRef = (RefProperty) arrayProp.getItems();
 
-                        if (isAnExternalRefFormat(subRef.getRefFormat())) {
-                            subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
-                        } else {
-                            processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
+                            if (isAnExternalRefFormat(subRef.getRefFormat())) {
+                                subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+                            } else {
+                                processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
+                            }
                         }
                     }
                 }
