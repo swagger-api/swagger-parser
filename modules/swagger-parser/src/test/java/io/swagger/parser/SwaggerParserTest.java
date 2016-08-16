@@ -320,6 +320,15 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testLoadNestedItemsReferences() {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/nested-items-references/b.yaml", null, true);
+        Swagger swagger = result.getSwagger();
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("z"));
+    }
+
+    @Test
     public void testIssue75() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue99.json");

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.GenericRef;
@@ -71,6 +72,17 @@ public final class ExternalRefProcessor {
                 for (Map.Entry<String, Property> prop : subProps.entrySet()) {
                     if (prop.getValue() instanceof RefProperty) {
                         RefProperty subRef = (RefProperty) prop.getValue();
+
+                        if (isAnExternalRefFormat(subRef.getRefFormat())) {
+                            subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+                        } else {
+                            processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
+                        }
+                    }
+                } else if (prop.getValue() instanceof ArrayProperty) {
+                    ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
+                    if (arrayProp.getItems() instanceof RefProperty) {
+                        RefProperty subRef = (RefProperty) arrayProp.getItems();
 
                         if (isAnExternalRefFormat(subRef.getRefFormat())) {
                             subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
