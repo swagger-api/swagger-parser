@@ -15,5 +15,13 @@ definitions:
   z:
     type: object
     properties:
+      ws:
+        type: object
+        additionalProperties:
+          type: array
+          $ref: "#/definitions/w"
+  w:
+    type: object
+    properties:
       name:
         type: string
