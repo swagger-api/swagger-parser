@@ -4,6 +4,7 @@ import io.swagger.models.Model;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
@@ -77,6 +78,17 @@ public final class ExternalRefProcessor {
                         RefProperty subRef = (RefProperty) arrayProp.getItems();
 
                         if (isAnExternalRefFormat(subRef.getRefFormat())) {
+                            subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+                        } else {
+                            processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
+                        }
+                    }
+                } else if(prop.getValue() instanceof MapProperty) {
+                    MapProperty mapProp = (MapProperty) prop.getValue();
+                    if (mapProp.getAdditionalProperties() instanceof RefProperty) {
+                        RefProperty subRef = (RefProperty) mapProp.getAdditionalProperties();
+
+                        if(isAnExternalRefFormat(subRef.getRefFormat())) {
                             subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
                         } else {
                             processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);

@@ -247,6 +247,7 @@ public class SwaggerParserTest {
         Swagger swagger = result.getSwagger();
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.containsKey("z"));
+        assertTrue(definitions.containsKey("w"));
     }
 
     @Test
