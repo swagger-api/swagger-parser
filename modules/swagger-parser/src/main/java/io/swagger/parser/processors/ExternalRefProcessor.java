@@ -53,7 +53,7 @@ public final class ExternalRefProcessor {
         String file = $ref.split("#/")[0];
         if (model instanceof RefModel) {
             RefModel refModel = (RefModel) model;
-            if(isAnExternalRefFormat(refModel.getRefFormat())) {
+            if (isAnExternalRefFormat(refModel.getRefFormat())) {
                 refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
             } else {
                 processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
@@ -61,22 +61,26 @@ public final class ExternalRefProcessor {
         }
         //Loop the properties and recursively call this method;
         Map<String, Property> subProps = model.getProperties();
-        if(subProps != null) {
+        if (subProps != null) {
             for (Map.Entry<String, Property> prop : subProps.entrySet()) {
                 if (prop.getValue() instanceof RefProperty) {
                     RefProperty subRef = (RefProperty) prop.getValue();
 
-                    if(isAnExternalRefFormat(subRef.getRefFormat())) {
+                    if (isAnExternalRefFormat(subRef.getRefFormat())) {
                         subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
                     } else {
                         processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
                     }
                 }
             }
-        } else if (model instanceof ArrayModel && ((ArrayModel)model).getItems() instanceof RefProperty) {
-            RefProperty subRef = (RefProperty) ((ArrayModel)model).getItems();
-            if(isAnExternalRefFormat(subRef.getRefFormat()))
-                subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+        }
+        if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
+            RefProperty subRef = (RefProperty) ((ArrayModel) model).getItems();
+            if (isAnExternalRefFormat(subRef.getRefFormat())) {
+               subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+           } else {
+               processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
+           }
         }
         if(existingModel == null) {
             // don't overwrite existing model reference
