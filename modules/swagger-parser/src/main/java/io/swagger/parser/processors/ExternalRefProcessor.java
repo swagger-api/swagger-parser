@@ -73,45 +73,25 @@ public final class ExternalRefProcessor {
             if (subProps != null) {
                 for (Map.Entry<String, Property> prop : subProps.entrySet()) {
                     if (prop.getValue() instanceof RefProperty) {
-                        RefProperty subRef = (RefProperty) prop.getValue();
-
-                        if (isAnExternalRefFormat(subRef.getRefFormat())) {
-                            subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
-                        } else {
-                            processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
-                        }
+                        processRefProperty((RefProperty) prop.getValue(), file);
                     } else if (prop.getValue() instanceof ArrayProperty) {
                         ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
                         if (arrayProp.getItems() instanceof RefProperty) {
-                            RefProperty subRef = (RefProperty) arrayProp.getItems();
-
-                            if (isAnExternalRefFormat(subRef.getRefFormat())) {
-                                subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
-                            } else {
-                                processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
-                            }
+                            processRefProperty((RefProperty) arrayProp.getItems(), file);
                         }
                     } else if (prop.getValue() instanceof MapProperty) {
                         MapProperty mapProp = (MapProperty) prop.getValue();
                         if (mapProp.getAdditionalProperties() instanceof RefProperty) {
-                            RefProperty subRef = (RefProperty) mapProp.getAdditionalProperties();
-
-                            if (isAnExternalRefFormat(subRef.getRefFormat())) {
-                                subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
-                            } else {
-                                processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
-                            }
+                            processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
+                        } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
+                                ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
+                            processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(), file);
                         }
                     }
                 }
             }
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
-                RefProperty subRef = (RefProperty) ((ArrayModel) model).getItems();
-                if (isAnExternalRefFormat(subRef.getRefFormat())) {
-                    subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
-                } else {
-                    processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
-                }
+                processRefProperty((RefProperty) ((ArrayModel) model).getItems(), file);
             }
             processRefsFromVendorExtensions(model, file);
             addXPointer(model, $ref);
@@ -123,6 +103,14 @@ public final class ExternalRefProcessor {
         Map<String, Object> vendorExtensions = model.getVendorExtensions();
         if (vendorExtensions != null && !vendorExtensions.getClass().getName().equals("java.util.Collections$EmptyMap")) {
             vendorExtensions.put("x-pointer", externalRef);
+        }
+    }
+
+    private void processRefProperty(RefProperty subRef, String externalFile) {
+        if (isAnExternalRefFormat(subRef.getRefFormat())) {
+            subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+        } else {
+            processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
         }
     }
 
