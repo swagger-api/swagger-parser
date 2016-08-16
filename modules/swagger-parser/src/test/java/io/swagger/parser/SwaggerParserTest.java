@@ -453,4 +453,16 @@ public class SwaggerParserTest {
         assertEquals(param1.getName(), expectedName);
         assertEquals(param1.getIn(), expectedIn);
     }
+
+
+    @Test
+    public void testNestedReferences() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/relative-file-references/json/parent.json");
+        assertTrue(swagger.getDefinitions().containsKey("externalArray"));
+        assertTrue(swagger.getDefinitions().containsKey("referencedByLocalArray"));
+        assertTrue(swagger.getDefinitions().containsKey("externalObject"));
+        assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
+        assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
+    }
 }
