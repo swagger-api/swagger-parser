@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.medallia</groupId>
         <artifactId>swagger-parser-project</artifactId>
-        <version>1.0.22-5</version>
+        <version>1.0.22-6</version>
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
