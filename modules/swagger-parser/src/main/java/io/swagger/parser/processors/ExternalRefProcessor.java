@@ -1,6 +1,13 @@
 package io.swagger.parser.processors;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import static io.swagger.parser.util.RefUtils.computeDefinitionName;
+import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.LoggerFactory;
+
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
@@ -9,28 +16,21 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.models.refs.GenericRef;
 import io.swagger.models.refs.RefFormat;
-import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import static io.swagger.parser.util.RefUtils.computeDefinitionName;
-import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ExternalRefProcessor.class);
 
     private final ResolverCache cache;
     private final Swagger swagger;
+    
+    private VendorExtensionProcessor vendorExtensionProcessor;
 
-    public ExternalRefProcessor(ResolverCache cache, Swagger swagger) {
+	public ExternalRefProcessor(ResolverCache cache, Swagger swagger) {
         this.cache = cache;
         this.swagger = swagger;
+        this.vendorExtensionProcessor = new VendorExtensionProcessor(cache, this);
     }
 
     public String processRefToExternalDefinition(String $ref, RefFormat refFormat) {
@@ -93,7 +93,7 @@ public final class ExternalRefProcessor {
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
                 processRefProperty((RefProperty) ((ArrayModel) model).getItems(), file);
             }
-            processRefsFromVendorExtensions(model, file);
+            vendorExtensionProcessor.processRefsFromVendorExtensions(model, file);
             addXPointer(model, $ref);
         }
         return newRef;
@@ -114,40 +114,4 @@ public final class ExternalRefProcessor {
         }
     }
 
-    public void processRefsFromVendorExtensions(Model model, String externalFile) {
-        Map<String, Object> vendorExtensions = model.getVendorExtensions();
-        if (vendorExtensions != null) {
-            if (vendorExtensions.containsKey("x-collection")) {
-                ObjectNode xCollection = (ObjectNode) vendorExtensions.get("x-collection");
-                if (xCollection.has("schema")) {
-                    String sub$ref = xCollection.get("schema").asText();
-                    GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-                    if (isAnExternalRefFormat(subRef.getFormat())) {
-                        xCollection.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                    } else if (externalFile != null) {
-                        processRefToExternalDefinition(externalFile + subRef.getRef(), RefFormat.RELATIVE);
-                    }
-                }
-            }
-            if (vendorExtensions.containsKey("x-links")) {
-                ObjectNode xLinks = (ObjectNode) vendorExtensions.get("x-links");
-                Iterator<String> xLinksNames = xLinks.fieldNames();
-                while (xLinksNames.hasNext()) {
-                    String linkName = xLinksNames.next();
-                    if (xLinks.get(linkName) instanceof ObjectNode) {
-                        ObjectNode xLink = (ObjectNode) xLinks.get(linkName);
-                        if (xLink.has("schema")) {
-                            String sub$ref = xLink.get("schema").asText();
-                            GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-                            if (isAnExternalRefFormat(subRef.getFormat())) {
-                                xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                            } else if (externalFile != null) {
-                                processRefToExternalDefinition(externalFile + subRef.getRef(), RefFormat.RELATIVE);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

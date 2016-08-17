@@ -1,8 +1,20 @@
 package io.swagger.parser;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.swagger.exception.RefException;
 import io.swagger.models.Model;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
@@ -14,15 +26,6 @@ import io.swagger.parser.util.RefUtils;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
-import org.apache.commons.lang3.tuple.Pair;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 public class ResolverCacheTest {
 
@@ -100,9 +103,24 @@ public class ResolverCacheTest {
         ResolverCache cache = new ResolverCache(swagger, auths, null);
         Parameter actualResult = cache.loadRef("#/parameters/foo", RefFormat.INTERNAL, Parameter.class);
         assertEquals(actualResult, mockedParameter);
+    }
+    
+    @Test(expectedExceptions = RefException.class)
+    public void testLoadNonExistenceInternalParameterRef(@Injectable Parameter mockedParameter) throws Exception {
+    	Swagger swagger = new Swagger();
+        swagger.parameter("foo", mockedParameter);
 
-        assertNull(cache.loadRef("#/parameters/bar", RefFormat.INTERNAL, Parameter.class));
-        assertNull(cache.loadRef("#/params/foo", RefFormat.INTERNAL, Parameter.class));
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        cache.loadRef("#/parameters/bar", RefFormat.INTERNAL, Parameter.class);
+    }
+
+    @Test(expectedExceptions = RefException.class)
+    public void testLoadBadInternalParameterRef(@Injectable Parameter mockedParameter) throws Exception {
+    	Swagger swagger = new Swagger();
+        swagger.parameter("foo", mockedParameter);
+
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        cache.loadRef("#/params/foo", RefFormat.INTERNAL, Parameter.class);
     }
     
     @Test
@@ -123,11 +141,26 @@ public class ResolverCacheTest {
         ResolverCache cache = new ResolverCache(swagger, auths, null);
         Model actualResult = cache.loadRef("#/definitions/foo", RefFormat.INTERNAL, Model.class);
         assertEquals(actualResult, mockedModel);
+    }
+    
+    @Test(expectedExceptions = RefException.class)
+    public void testLoadNonExistenceInternalDefinitionRef(@Injectable Model mockedModel) throws Exception {
+        Swagger swagger = new Swagger();
+        swagger.addDefinition("foo", mockedModel);
 
-        assertNull(cache.loadRef("#/definitions/bar", RefFormat.INTERNAL, Model.class));
-        assertNull(cache.loadRef("#/defs/bar", RefFormat.INTERNAL, Model.class));
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        cache.loadRef("#/definitions/bar", RefFormat.INTERNAL, Model.class);
     }
 
+    @Test(expectedExceptions = RefException.class)
+    public void testLoadBadInternalDefinitionRef(@Injectable Model mockedModel) throws Exception {
+        Swagger swagger = new Swagger();
+        swagger.addDefinition("foo", mockedModel);
+
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        cache.loadRef("#/defs/bar", RefFormat.INTERNAL, Model.class);
+    }
+    
     @Test
     public void testLoadInternalDefinitionRefWithSpaces(@Injectable Model mockedModel) throws Exception {
         Swagger swagger = new Swagger();
@@ -149,8 +182,17 @@ public class ResolverCacheTest {
         ResolverCache cache = new ResolverCache(swagger, auths, null);
         Response actualResult = cache.loadRef("#/responses/foo", RefFormat.INTERNAL, Response.class);
         assertEquals(actualResult, mockedResponse);
+    }
+    
+    @Test(expectedExceptions = RefException.class)
+    public void testNonExistenceInternalResponseRef(@Injectable Response mockedResponse) throws Exception {
+        Swagger swagger = new Swagger();
+        Map<String,Response> responses = new HashMap<>();
+        responses.put("foo", mockedResponse);
+        swagger.setResponses(responses);
 
-        assertNull(cache.loadRef("#/responses/bar", RefFormat.INTERNAL, Response.class));
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        cache.loadRef("#/responses/bar", RefFormat.INTERNAL, Response.class);
     }
 
     @Test

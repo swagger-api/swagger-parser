@@ -181,6 +181,9 @@ public class SwaggerReaderTest {
                 "  \"swagger\": \"2.0\",\n" +
                 "  \"paths\": {},\n" +
                 "  \"definitions\": {\n" +
+                "    \"Pet\": {\n" +
+                "      \"type\": \"object\"\n" +
+                "    },\n" +
                 "    \"Dog\": {\n" +
                 "      \"title\": \"Dog\",\n" +
                 "      \"type\": \"object\",\n" +

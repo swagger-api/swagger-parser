@@ -132,8 +132,6 @@ public class ModelProcessorTest {
             times = 1;
             propertyProcessor.processProperty(property2);
             times = 1;
-            externalRefProcessor.processRefsFromVendorExtensions(model, null);
-            times = 1;
         }};
 
         new ModelProcessor(cache, swagger).processModel(model);

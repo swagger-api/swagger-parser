@@ -11,9 +11,11 @@ import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 public class PropertyProcessor  {
 
     private final ExternalRefProcessor externalRefProcessor;
+    private final ResolverCache cache;
 
     public PropertyProcessor(ResolverCache cache, Swagger swagger) {
         externalRefProcessor = new ExternalRefProcessor(cache, swagger);
+        this.cache = cache;
     }
 
     public void processProperty(Property property) {
@@ -35,6 +37,8 @@ public class PropertyProcessor  {
             if (newRef != null) {
                 refProperty.set$ref(newRef);
             }
+        } else {
+        	cache.checkInternalRef(refProperty.get$ref());
         }
     }
 
