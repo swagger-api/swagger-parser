@@ -198,6 +198,17 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testLoadExternalNestedListRefDefinitions() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/nested-list-references/api.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(!definitions.isEmpty());
+        assertTrue(definitions.containsKey("PetList"));
+        assertTrue(definitions.containsKey("Pet"));
+        assertTrue(definitions.containsKey("Allergy"));
+    }
+
+    @Test
     public void testPetstore() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);

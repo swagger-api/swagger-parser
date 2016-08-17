@@ -1,0 +1,6 @@
+title: "Allergy"
+properties:
+  name:
+    type: string
+  severity:
+    type: number

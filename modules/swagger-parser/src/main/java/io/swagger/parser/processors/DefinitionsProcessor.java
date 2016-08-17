@@ -51,5 +51,8 @@ public class DefinitionsProcessor {
 
             }
         }
+        if (!swagger.getDefinitions().keySet().equals(keySet)) {
+            processDefinitions();
+        }
     }
 }
