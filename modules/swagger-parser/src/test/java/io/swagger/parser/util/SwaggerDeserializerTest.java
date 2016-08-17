@@ -514,13 +514,18 @@ public class SwaggerDeserializerTest {
                 "        }\n" +                
                 "      }\n" +
                 "    }\n" +
+                "  },\n" +
+                "  \"responses\": {\n" +
+                "    \"OK\": {\n" +
+                "      \"description\": \"OK, Success\"" +                
+                "    }\n" +
                 "  }\n" +
                 "}";
         SwaggerParser parser = new SwaggerParser();
-
+        
         SwaggerDeserializationResult result = parser.readWithInfo(json);
         Swagger swagger = result.getSwagger();
-
+        
         Path path = swagger.getPath("/pet");
         assertNotNull(path);
         Operation operation = path.getGet();
@@ -595,6 +600,11 @@ public class SwaggerDeserializerTest {
                 "          }\n" +
                 "        }\n" +
                 "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"definitions\": {\n" +
+                "    \"PetArray\": {\n" +
+                "      \"type\": \"object\"\n" +
                 "    }\n" +
                 "  }\n" +
                 "}";

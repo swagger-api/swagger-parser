@@ -1,0 +1,34 @@
+---
+swagger: "2.0"
+info:
+  title: test
+  version: '0.0.0'
+
+responses:
+  200:
+    description: "Good response"
+    schema:
+      $ref: "#/definitions/r"
+  500:
+    description: "Bad response"
+    schema:
+      $ref: "#/definitions/t"
+
+paths: {}
+definitions:
+  x:
+    $ref: "./a.yaml#/definitions/y"
+  n:
+    $ref: "./a.yaml#/definitions/m"
+  r:
+    type: object
+    properties:
+      name:
+        type: string
+  t:
+    type: object
+    properties:
+      name:
+        type: string
+  u:
+    $ref: "./a.yaml#/definitions/s"

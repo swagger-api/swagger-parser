@@ -1,0 +1,27 @@
+---
+swagger: "2.0"
+info:
+  title: test
+  version: '0.0.0'
+paths: {}
+definitions:
+  y:
+    type: object
+    properties:
+      zs:
+        type: array
+        items:
+          $ref: "#/definitions/z"
+  z:
+    type: object
+    properties:
+      ws:
+        type: object
+        additionalProperties:
+          type: array
+          $ref: "#/definitions/w"
+  w:
+    type: object
+    properties:
+      name:
+        type: string

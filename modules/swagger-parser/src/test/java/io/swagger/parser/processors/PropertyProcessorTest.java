@@ -60,6 +60,8 @@ public class PropertyProcessorTest {
         new PropertyProcessor(cache, swagger).processProperty(property);
 
         new FullVerifications() {{
+        	cache.checkInternalRef(property.get$ref());
+            times = 1;
         }};
 
         assertEquals(property.get$ref(), expectedRef);

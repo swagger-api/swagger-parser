@@ -2,15 +2,15 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.swagger</groupId>
+        <groupId>com.medallia</groupId>
         <artifactId>swagger-parser-project</artifactId>
-        <version>1.0.23-SNAPSHOT</version>
+        <version>1.0.22-7</version>
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>swagger-parser</artifactId>
     <packaging>jar</packaging>
-    <name>swagger-parser</name>
+    <name>com.medallia:swagger-parser</name>
     <profiles>
         <profile>
             <id>test-single</id>
@@ -45,7 +45,7 @@
             <version>${swagger-core-version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.parent.groupId}</groupId>
+            <groupId>io.swagger</groupId>
             <artifactId>swagger-core</artifactId>
             <version>${swagger-core-version}</version>
             <type>test-jar</type>

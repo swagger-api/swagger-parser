@@ -14,3 +14,6 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/y"
+    x-links:
+      z:
+        schema: "#/definitions/y"

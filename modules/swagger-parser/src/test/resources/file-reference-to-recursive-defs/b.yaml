@@ -16,3 +16,6 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/v"
+    x-links:
+      w:
+        schema: "#/definitions/v"

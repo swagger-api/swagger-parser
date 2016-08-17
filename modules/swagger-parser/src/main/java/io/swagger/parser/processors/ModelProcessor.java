@@ -1,5 +1,10 @@
 package io.swagger.parser.processors;
 
+import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
+
+import java.util.List;
+import java.util.Map;
+
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
 import io.swagger.models.Model;
@@ -9,19 +14,18 @@ import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
 
-import java.util.List;
-import java.util.Map;
-
-import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
-
 
 public class ModelProcessor {
     private final PropertyProcessor propertyProcessor;
     private final ExternalRefProcessor externalRefProcessor;
+    private final VendorExtensionProcessor vendorExtensionProcessor;
+    private final ResolverCache cache;
 
     public ModelProcessor(ResolverCache cache, Swagger swagger) {
         this.propertyProcessor = new PropertyProcessor(cache, swagger);
         this.externalRefProcessor = new ExternalRefProcessor(cache, swagger);
+        this.vendorExtensionProcessor = new VendorExtensionProcessor(cache, externalRefProcessor);
+        this.cache = cache;
     }
 
     public void processModel(Model model) {
@@ -44,15 +48,14 @@ public class ModelProcessor {
 
         final Map<String, Property> properties = modelImpl.getProperties();
 
-        if (properties == null) {
-            return;
+        if (properties != null) {
+            for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                final Property property = propertyEntry.getValue();
+                propertyProcessor.processProperty(property);
+            }
         }
 
-        for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
-            final Property property = propertyEntry.getValue();
-            propertyProcessor.processProperty(property);
-        }
-
+        vendorExtensionProcessor.processRefsFromVendorExtensions(modelImpl, null);
     }
 
     private void processComposedModel(ComposedModel composedModel) {
@@ -94,6 +97,8 @@ public class ModelProcessor {
             if (newRef != null) {
                 refModel.set$ref(newRef);
             }
+        } else {
+        	cache.checkInternalRef(refModel.get$ref());
         }
     }
 

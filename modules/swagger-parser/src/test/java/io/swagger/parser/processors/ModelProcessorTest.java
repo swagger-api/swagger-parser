@@ -123,7 +123,7 @@ public class ModelProcessorTest {
                                      @Injectable final Property property2) throws Exception {
         setupPropertyAndExternalRefProcessors();
 
-        ModelImpl model = new ModelImpl();
+        final ModelImpl model = new ModelImpl();
         model.addProperty("foo", property1);
         model.addProperty("bar", property2);
 

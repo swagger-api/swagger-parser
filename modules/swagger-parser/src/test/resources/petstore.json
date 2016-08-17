@@ -1031,6 +1031,13 @@
       "items": {
         "$ref": "#/definitions/Pet"
       }
+    },
+    "ApiResponse": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        }
+      }
     }
   },
   "parameters": {
