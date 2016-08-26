@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 
@@ -358,6 +359,65 @@ public class SwaggerParserTest {
         assertEquals(swagger.getPath("/foo").getVendorExtensions().get("x-something"), "yes, it is supported");
         assertTrue(result.getMessages().size() == 1);
         assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
+    }
+
+    @Test
+    public void testIssue292WithNoCollectionFormat() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: '0.0.0'\n" +
+                "  title: nada\n" +
+                "paths:\n" +
+                "  /persons:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "      - name: testParam\n" +
+                "        in: query\n" +
+                "        type: array\n" +
+                "        items:\n" +
+                "          type: string\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: Successful response";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Swagger swagger = result.getSwagger();
+
+        Parameter param = swagger.getPaths().get("/persons").getGet().getParameters().get(0);
+        QueryParameter qp = (QueryParameter) param;
+        assertNull(qp.getCollectionFormat());
+    }
+
+    @Test
+    public void testIssue292WithCSVCollectionFormat() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  version: '0.0.0'\n" +
+                        "  title: nada\n" +
+                        "paths:\n" +
+                        "  /persons:\n" +
+                        "    get:\n" +
+                        "      parameters:\n" +
+                        "      - name: testParam\n" +
+                        "        in: query\n" +
+                        "        type: array\n" +
+                        "        items:\n" +
+                        "          type: string\n" +
+                        "        collectionFormat: csv\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: Successful response";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Swagger swagger = result.getSwagger();
+
+        Parameter param = swagger.getPaths().get("/persons").getGet().getParameters().get(0);
+        QueryParameter qp = (QueryParameter) param;
+        assertEquals(qp.getCollectionFormat(), "csv");
     }
 
     @Test
