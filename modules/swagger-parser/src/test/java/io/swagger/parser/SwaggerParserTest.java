@@ -241,6 +241,16 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testLoadNestedItemsReferences() {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/nested-items-references/b.yaml", null, true);
+        Swagger swagger = result.getSwagger();
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("z"));
+        assertTrue(definitions.containsKey("w"));
+    }
+
+    @Test
     public void testIssue75() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue99.json");
@@ -442,5 +452,17 @@ public class SwaggerParserTest {
         assertEquals(param1.getClass(), expectedType);
         assertEquals(param1.getName(), expectedName);
         assertEquals(param1.getIn(), expectedIn);
+    }
+
+
+    @Test
+    public void testNestedReferences() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/relative-file-references/json/parent.json");
+        assertTrue(swagger.getDefinitions().containsKey("externalArray"));
+        assertTrue(swagger.getDefinitions().containsKey("referencedByLocalArray"));
+        assertTrue(swagger.getDefinitions().containsKey("externalObject"));
+        assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
+        assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
     }
 }
