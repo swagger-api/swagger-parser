@@ -3,11 +3,7 @@ package io.swagger.parser;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.*;
 import io.swagger.models.parameters.*;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.ByteArrayProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
+import io.swagger.models.properties.*;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
@@ -20,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 
 public class SwaggerParserTest {
@@ -427,6 +421,18 @@ public class SwaggerParserTest {
         Swagger swagger = parser.read("objectExample.json");
         assertEquals(swagger.getDefinitions().get("SamplePayload").getExample(), "[{\"op\":\"replace\",\"path\":\"/s\",\"v\":\"w\"}]");
     }
+
+    @Test
+    public void testIssue286() {
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.read("issue_286.yaml");
+        Property response = swagger.getPath("/").getGet().getResponses().get("200").getSchema();
+        assertTrue(response instanceof RefProperty);
+        assertEquals(((RefProperty)response).getSimpleRef(), "issue_286_PetList");
+        assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
+    }
+
 
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
