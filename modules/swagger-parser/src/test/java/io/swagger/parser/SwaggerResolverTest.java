@@ -9,6 +9,7 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.*;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.PathsProcessor;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
@@ -290,5 +291,56 @@ public class SwaggerResolverTest {
         Response response = resolved.getPath("/fun").getGet().getResponses().get("200");
         assertTrue(response.getDescription().equals("ok!"));
         assertTrue(response instanceof Response);
+    }
+
+    @Test
+    public void testIssue291() {
+        String json =
+                "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"info\": {\n" +
+                "    \"title\": \"test spec\",\n" +
+                "    \"version\": \"1.0\"\n" +
+                "  },\n" +
+                "  \"parameters\": {\n" +
+                "    \"testParam\": {\n" +
+                "      \"collectionFormat\": \"csv\",\n" +
+                "      \"name\": \"test\",\n" +
+                "      \"in\": \"query\",\n" +
+                "      \"type\": \"array\",\n" +
+                "      \"items\": {\n" +
+                "        \"type\": \"string\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"paths\": {\n" +
+                "    \"/test\": {\n" +
+                "      \"get\": {\n" +
+                "        \"description\": \"test get\",\n" +
+                "        \"parameters\": [\n" +
+                "          {\n" +
+                "            \"$ref\": \"#/parameters/testParam\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"responses\": {\n" +
+                "          \"default\": {\n" +
+                "             \"description\": \"test response\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+
+        Swagger swagger = result.getSwagger();
+
+        final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
+
+
+        Parameter param = resolved.getPaths().get("/test").getGet().getParameters().get(0);
+        QueryParameter qp = (QueryParameter) param;
+        assertEquals(qp.getCollectionFormat(), "csv");
     }
 }

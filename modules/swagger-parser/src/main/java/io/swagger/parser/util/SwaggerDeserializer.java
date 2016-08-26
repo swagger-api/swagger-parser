@@ -112,8 +112,19 @@ public class SwaggerDeserializer {
 
             obj = getObject("parameters", on, false, location, result);
             // TODO: parse
-            Map<String, Parameter> parameters = Json.mapper().convertValue(obj, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Parameter.class));
-            swagger.setParameters(parameters);
+
+            if(obj != null) {
+                Map<String, Parameter> parameters = new HashMap<>();
+                Set<String> keys = getKeys(obj);
+                for(String key : keys) {
+                    JsonNode paramNode = obj.get(key);
+                    if(paramNode instanceof ObjectNode) {
+                        Parameter parameter = this.parameter((ObjectNode)paramNode, location, result);
+                        parameters.put(key, parameter);
+                    }
+                }
+                swagger.setParameters(parameters);
+            }
 
             obj = getObject("responses", on, false, location, result);
             Map<String, Response> responses = responses(obj, "responses", result);
