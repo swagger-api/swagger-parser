@@ -1,0 +1,11 @@
+swagger: "2.0"
+info:
+  title: test data for nested list ext references
+  version: '0.0.0'
+paths:
+  /:
+    get:
+      responses:
+        "200":
+          schema:
+            $ref: "./issue_286_PetList.yaml"

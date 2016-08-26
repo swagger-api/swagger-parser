@@ -1,0 +1,6 @@
+title: "Pet"
+properties:
+  allergies:
+    type: array
+    items:
+      $ref: "./issue_286_Allergy.yaml"
