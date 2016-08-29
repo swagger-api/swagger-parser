@@ -112,7 +112,7 @@ public class ResolverCache {
 
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
-            tree = tree.get(unescapeElement(jsonPathElement));
+            tree = tree.get(unescapePointer(jsonPathElement));
             //if at any point we do find an element we expect, print and error and abort
             if (tree == null) {
                 throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
@@ -131,7 +131,7 @@ public class ResolverCache {
         return result;
     }
 
-    private String unescapeElement(String jsonPathElement) {
+    private String unescapePointer(String jsonPathElement) {
         // Unescape the JSON Pointer segment using the algorithm described in RFC 6901, section 4:
         // https://tools.ietf.org/html/rfc6901#section-4
         // First transform any occurrence of the sequence '~1' to '/'
@@ -164,7 +164,7 @@ public class ResolverCache {
         final Matcher parameterMatcher = pattern.matcher(ref);
 
         if (parameterMatcher.matches()) {
-            final String paramName = parameterMatcher.group("name");
+            final String paramName = unescapePointer(parameterMatcher.group("name"));
 
             if (map != null) {
                 return map.get(paramName);
