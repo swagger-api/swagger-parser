@@ -1,0 +1,7 @@
+---
+400:
+  description: "Invalid input"
+  type: object
+  properties:
+    message:
+      type: string

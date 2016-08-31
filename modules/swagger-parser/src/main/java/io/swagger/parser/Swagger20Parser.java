@@ -30,7 +30,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
     @Override
     public SwaggerDeserializationResult readWithInfo(JsonNode node) {
         SwaggerDeserializer ser = new SwaggerDeserializer();
-        return ser.deserialize(node);
+        return ser.deserialize(node, null);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 }
             }
 
-            return convertToSwagger(data);
+            return convertToSwagger(data, location);
         } catch (Exception e) {
             if (System.getProperty("debugParser") != null) {
                 e.printStackTrace();
@@ -103,7 +103,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
         }
     }
 
-    private Swagger convertToSwagger(String data) throws IOException {
+    private Swagger convertToSwagger(String data, String location) throws IOException {
         if (data != null) {
             JsonNode rootNode;
             if (data.trim().startsWith("{")) {
@@ -125,7 +125,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
             if (swaggerNode == null) {
                 return null;
             } else {
-                SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(rootNode);
+                SwaggerDeserializationResult result = new SwaggerDeserializer().deserialize(rootNode, location);
 
                 Swagger convertValue = result.getSwagger();
                 if (System.getProperty("debugParser") != null) {
@@ -141,7 +141,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     public Swagger parse(String data) throws IOException {
         Validate.notEmpty(data, "data must not be null!");
-        return convertToSwagger(data);
+        return convertToSwagger(data, null);
     }
 
     @Override

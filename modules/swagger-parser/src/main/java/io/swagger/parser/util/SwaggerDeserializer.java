@@ -3,10 +3,14 @@ package io.swagger.parser.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
 import io.swagger.models.*;
+import io.swagger.models.Path;
 import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
+import io.swagger.models.refs.GenericRef;
+import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.util.Json;
 
 import java.util.*;
@@ -29,17 +33,17 @@ public class SwaggerDeserializer {
     static Set<String> BODY_PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
     static Set<String> SECURITY_SCHEME_KEYS = new HashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
 
-    public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
+    public SwaggerDeserializationResult deserialize(JsonNode rootNode, String parentFileLocation) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
         ParseResult rootParse = new ParseResult();
 
-        Swagger swagger = parseRoot(rootNode, rootParse);
+        Swagger swagger = parseRoot(rootNode, rootParse, parentFileLocation);
         result.setSwagger(swagger);
         result.setMessages(rootParse.getMessages());
         return result;
     }
 
-    public Swagger parseRoot(JsonNode node, ParseResult result) {
+    public Swagger parseRoot(JsonNode node, ParseResult result, String parentFileLocation) {
         String location = "";
         Swagger swagger = new Swagger();
         if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -50,7 +54,7 @@ public class SwaggerDeserializer {
             String value = getString("swagger", on, true, location, result);
             swagger.setSwagger(value);
 
-            ObjectNode obj = getObject("info", on, true, "", result);
+            ObjectNode obj = getRootObject("info", on, true, "", result, parentFileLocation);
             if(obj != null) {
                 Info info = info(obj, "info", result);
                 swagger.info(info);
@@ -102,15 +106,15 @@ public class SwaggerDeserializer {
                 }
             }
 
-            obj = getObject("paths", on, true, location, result);
+            obj = getRootObject("paths", on, true, location, result, parentFileLocation);
             Map<String, Path> paths = paths(obj, "paths", result);
             swagger.paths(paths);
 
-            obj = getObject("definitions", on, false, location, result);
+            obj = getRootObject("definitions", on, false, location, result, parentFileLocation);
             Map<String, Model> definitions = definitions(obj, "definitions", result);
             swagger.setDefinitions(definitions);
 
-            obj = getObject("parameters", on, false, location, result);
+            obj = getRootObject("parameters", on, false, location, result, parentFileLocation);
             // TODO: parse
 
             if(obj != null) {
@@ -126,11 +130,11 @@ public class SwaggerDeserializer {
                 swagger.setParameters(parameters);
             }
 
-            obj = getObject("responses", on, false, location, result);
+            obj = getRootObject("responses", on, false, location, result, parentFileLocation);
             Map<String, Response> responses = responses(obj, "responses", result);
             swagger.responses(responses);
 
-            obj = getObject("securityDefinitions", on, false, location, result);
+            obj = getRootObject("securityDefinitions", on, false, location, result, parentFileLocation);
             Map<String, SecuritySchemeDefinition> securityDefinitions = securityDefinitions(obj, location, result);
             swagger.setSecurityDefinitions(securityDefinitions);
 
@@ -142,7 +146,7 @@ public class SwaggerDeserializer {
             List<Tag> tags = tags(array, location, result);
             swagger.tags(tags);
 
-            obj = getObject("externalDocs", on, false, location, result);
+            obj = getRootObject("externalDocs", on, false, location, result, parentFileLocation);
             ExternalDocs docs = externalDocs(obj, location, result);
             swagger.externalDocs(docs);
 
@@ -1374,6 +1378,53 @@ public class SwaggerDeserializer {
         }
         else {
             on = (ObjectNode) value;
+        }
+        return on;
+    }
+
+    private void changeInternalRefsToRelative(ObjectNode node, String file) {
+        if (node != null && node.has("$ref")) {
+            String $ref = node.get("$ref").asText();
+            GenericRef ref = new GenericRef(RefType.DEFINITION, $ref);
+            if (ref.getFormat() == RefFormat.INTERNAL) {
+                node.put("$ref", file + $ref);
+            }
+        }
+        Iterator<JsonNode> it = node.iterator();
+        while (it.hasNext()) {
+            JsonNode child = it.next();
+            if (child.getNodeType().equals(JsonNodeType.OBJECT)) {
+                changeInternalRefsToRelative((ObjectNode) child, file);
+            }
+        }
+    }
+
+    public ObjectNode getRootObject(String key, ObjectNode node, boolean required, String location, ParseResult result, String parentFileLocation) {
+        ObjectNode on = getObject(key, node, required, location, result);
+        while (on != null && on.has("$ref")) {
+            String ref = on.get("$ref").asText();
+            String[] refParts = ref.split("#/");
+            String file = refParts[0];
+            String definitionPath = refParts.length == 2 ? refParts[1] : null;
+            java.nio.file.Path parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
+            String contents = RefUtils.readExternalRef(file, RefFormat.RELATIVE, null, parentDirectory);
+
+            if (definitionPath == null) {
+                on = DeserializationUtils.deserialize(contents, file, ObjectNode.class);
+            } else {
+                JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
+
+                String[] jsonPathElements = definitionPath.split("/");
+                for (String jsonPathElement : jsonPathElements) {
+                    tree = tree.get(jsonPathElement);
+                    if (tree == null) {
+                        result.missing(location, key);
+                        return null;
+                    }
+                }
+                on = DeserializationUtils.deserialize(tree, file, ObjectNode.class);
+                changeInternalRefsToRelative(on, file);
+            }
         }
         return on;
     }

@@ -1,0 +1,24 @@
+---
+swagger: "2.0"
+info:
+  title: test
+  version: '0.0.0'
+responses:
+  400:
+    description: "Invalid input"
+    type: object
+    properties:
+      message:
+        type: string
+paths:
+  /foo:
+    get:
+      responses:
+        200:
+          description: "OK"
+definitions:
+  x:
+    type: object
+    properties:
+      name:
+        type: string

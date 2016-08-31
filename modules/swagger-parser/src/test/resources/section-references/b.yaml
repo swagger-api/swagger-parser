@@ -1,0 +1,11 @@
+---
+swagger: "2.0"
+info:
+  title: test
+  version: '0.0.0'
+responses:
+  $ref: "./a.yaml#/responses"
+paths:
+  $ref: "./a.yaml#/paths"
+definitions:
+  $ref: "./a.yaml#/definitions"
