@@ -6,10 +6,11 @@ info:
 responses:
   400:
     description: "Invalid input"
-    type: object
-    properties:
-      message:
-        type: string
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
 paths:
   /foo:
     get:
