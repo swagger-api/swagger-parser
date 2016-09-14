@@ -1,26 +1,48 @@
 package io.swagger.parser.util;
 
-import io.swagger.models.*;
-import io.swagger.models.auth.ApiKeyAuthDefinition;
-import io.swagger.models.auth.BasicAuthDefinition;
-import io.swagger.models.auth.In;
-import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.properties.*;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.parser.SwaggerResolver;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.swagger.models.ComposedModel;
+import io.swagger.models.Contact;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.RefResponse;
+import io.swagger.models.SecurityRequirement;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.BasicAuthDefinition;
+import io.swagger.models.auth.In;
+import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.SwaggerResolver;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 
 public class SwaggerDeserializerTest {
     @Test
@@ -1149,5 +1171,42 @@ public class SwaggerDeserializerTest {
         assertTrue(composed.getChild() instanceof ModelImpl);
         assertTrue(composed.getInterfaces().size() == 2);
         Yaml.prettyPrint(swagger);
+    }
+    
+    @Test
+    public void testReadOnlyInsideArray() throws Exception {
+    	
+    	String propJson = "{" + 
+    	"\"type\": \"array\", " +
+        "\"readOnly\": true, " +
+        "\"items\":" +
+         "{\"$ref\":\"#/definitions/link\"}" +
+        "}";
+    	
+    	ObjectMapper mapper = Json.mapper();
+        ObjectNode node = (ObjectNode) mapper.readTree(propJson);
+    	
+    	SwaggerDeserializer swaggerDeserializer = new SwaggerDeserializer();
+    	Property property = swaggerDeserializer.property(node);
+    	
+    	assertTrue(property.getReadOnly() != null);
+    	assertTrue(property.getReadOnly());
+    }
+    
+    @Test
+    public void testVendorExtensionInRefProperties() throws Exception {
+    	
+    	String propJson = "{" + 
+    	"\"$ref\":\"#/definitions/link\", " +
+        "\"x-some-vendor-extension\": true" +
+        "}";
+    	
+    	ObjectMapper mapper = Json.mapper();
+        ObjectNode node = (ObjectNode) mapper.readTree(propJson);
+    	
+    	SwaggerDeserializer swaggerDeserializer = new SwaggerDeserializer();
+    	Property property = swaggerDeserializer.property(node);
+    	
+    	assertTrue(property.getVendorExtensions().containsKey("x-some-vendor-extension"));
     }
 }
