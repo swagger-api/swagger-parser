@@ -1,9 +1,22 @@
 package io.swagger.parser;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.swagger.models.Model;
+import io.swagger.models.Path;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
@@ -14,15 +27,6 @@ import io.swagger.parser.util.RefUtils;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
-import org.apache.commons.lang3.tuple.Pair;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 public class ResolverCacheTest {
 
@@ -93,6 +97,35 @@ public class ResolverCacheTest {
     }
 
     @Test
+    public void testLoadExternalRefWithEscapedCharacters() throws Exception {
+        final RefFormat format = RefFormat.URL;
+        final String ref = "http://my.company.com/path/to/main.yaml";
+        final String contentsOfExternalFile = "swagger: \"2.0\"\n" + 
+            "\n" + 
+            "info:\n" + 
+            "  version: 1.0.0\n" + 
+            "  title: Path include test case child\n" + 
+            "\n" + 
+            "paths:\n" + 
+            "  /foo~bar~1:\n" + 
+            "    get:\n" + 
+            "      responses:\n" + 
+            "        200:\n" + 
+            "          description: \"Request successful\"\n";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
+            times = 1;
+            result = contentsOfExternalFile;
+        }};
+
+        ResolverCache cache = new ResolverCache(swagger, auths, "http://my.company.com/path/parent.json");
+
+        Path path = cache.loadRef(ref+"#/paths/~1foo~0bar~01", RefFormat.URL, Path.class);
+        assertNotNull(path);
+    }
+
+    @Test
     public void testLoadInternalParameterRef(@Injectable Parameter mockedParameter) throws Exception {
         Swagger swagger = new Swagger();
         swagger.parameter("foo", mockedParameter);
@@ -138,6 +171,15 @@ public class ResolverCacheTest {
         assertEquals(actualResult, mockedModel);
     }
     
+    @Test
+    public void testLoadInternalDefinitionRefWithEscapedCharacters(@Injectable Model mockedModel) throws Exception {
+        Swagger swagger = new Swagger();
+        swagger.addDefinition("foo~bar/baz~1", mockedModel);
+
+        ResolverCache cache = new ResolverCache(swagger, auths, null);
+        Model actualResult = cache.loadRef("#/definitions/foo~0bar~1baz~01", RefFormat.INTERNAL, Model.class);
+        assertEquals(actualResult, mockedModel);
+    }
     
     @Test
     public void testLoadInternalResponseRef(@Injectable Response mockedResponse) throws Exception {
@@ -164,7 +206,6 @@ public class ResolverCacheTest {
         Response actualResult = cache.loadRef("#/responses/foo bar", RefFormat.INTERNAL, Response.class);
         assertEquals(actualResult, mockedResponse);
     }
-
 
     @Test
     public void testRenameCache() throws Exception {
