@@ -1,0 +1,36 @@
+---
+swagger: "2.0"
+info:
+  title: test
+  version: '0.0.0'
+paths: {}
+definitions:
+  y:
+    type: object
+    x-collection:
+      schema: 
+        $ref: "#/definitions/z"
+  z:
+    type: object
+    properties:
+      name:
+        type: string
+  m:
+    type: object
+    x-links:
+      o:
+        schema: 
+          $ref: "#/definitions/p"
+      q:
+        schema:
+          $ref: "./b.yaml#/definitions/r"
+  p:
+    type: object
+    properties:
+      name:
+        type: string
+  s:
+    type: object
+    x-collection:
+      schema: 
+        $ref: "./b.yaml#/definitions/t"

@@ -18,10 +18,12 @@ import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 public class ModelProcessor {
     private final PropertyProcessor propertyProcessor;
     private final ExternalRefProcessor externalRefProcessor;
+    private final VendorExtensionProcessor vendorExtensionProcessor;
 
     public ModelProcessor(ResolverCache cache, Swagger swagger) {
         this.propertyProcessor = new PropertyProcessor(cache, swagger);
         this.externalRefProcessor = new ExternalRefProcessor(cache, swagger);
+        this.vendorExtensionProcessor = new VendorExtensionProcessor(cache, externalRefProcessor);
     }
 
     public void processModel(Model model) {
@@ -44,15 +46,14 @@ public class ModelProcessor {
 
         final Map<String, Property> properties = modelImpl.getProperties();
 
-        if (properties == null) {
-            return;
+        if (properties != null) {
+            for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                final Property property = propertyEntry.getValue();
+                propertyProcessor.processProperty(property);
+            }
         }
 
-        for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
-            final Property property = propertyEntry.getValue();
-            propertyProcessor.processProperty(property);
-        }
-
+        vendorExtensionProcessor.processRefsFromVendorExtensions(modelImpl, null);
     }
 
     private void processComposedModel(ComposedModel composedModel) {
