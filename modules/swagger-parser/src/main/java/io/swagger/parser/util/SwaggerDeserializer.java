@@ -916,6 +916,16 @@ public class SwaggerDeserializer {
                 }
             }
         }
+
+        // work-around for https://github.com/swagger-api/swagger-core/issues/1977
+        if(node.get("$ref") != null && node.get("$ref").isTextual()) {
+            // check if it's a relative ref
+            String refString = node.get("$ref").textValue();
+            if(refString.indexOf("/") == -1 && refString.indexOf(".") > 0) {
+                refString = "./" + refString;
+                node.put("$ref", refString);
+            }
+        }
         return Json.mapper().convertValue(node, Property.class);
     }
 

@@ -20,6 +20,7 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <groups>single</groups>
+                            <workingDirectory>.</workingDirectory>
                         </configuration>
                     </plugin>
                 </plugins>
