@@ -24,4 +24,15 @@ public class FileReferenceTests {
         // copied from `./book.yaml`
         assertNotNull(swagger.getDefinitions().get("book"));
     }
+
+    @Test
+    public void testIssue308() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-308.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+
+        assertTrue(swagger.getDefinitions().size() == 2);
+        assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
+    }
 }
