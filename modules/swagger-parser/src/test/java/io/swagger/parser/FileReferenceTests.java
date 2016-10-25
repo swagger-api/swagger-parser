@@ -4,6 +4,7 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -50,7 +51,6 @@ public class FileReferenceTests {
         assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
     }
 
-
     @Test
     public void testIssue312() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-312.yaml", null, true);
@@ -64,6 +64,25 @@ public class FileReferenceTests {
         Operation get = path.getGet();
         assertEquals(get.getOperationId(), "getEvents");
         assertTrue(swagger.getDefinitions().size() == 2);
+        assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
+    }
+
+    @Test
+    public void testIssue314() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-314.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/events"));
+        Path path = swagger.getPath("/events");
+        assertNotNull(path.getGet());
+
+        Json.prettyPrint(result);
+        Operation get = path.getGet();
+        assertEquals(get.getOperationId(), "getEvents");
+        assertTrue(swagger.getDefinitions().size() == 3);
+        assertTrue(swagger.getDefinitions().get("Foobar").getProperties().size() == 1);
+        assertTrue(swagger.getDefinitions().get("StatusResponse").getProperties().size() == 1);
         assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
     }
 }
