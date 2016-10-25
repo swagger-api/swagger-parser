@@ -1,0 +1,5 @@
+definitions:
+  Category:
+    properties:
+      name:
+        type: string
