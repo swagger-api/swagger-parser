@@ -1,9 +1,12 @@
 package io.swagger.parser;
 
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -43,6 +46,23 @@ public class FileReferenceTests {
 
         Swagger swagger = result.getSwagger();
 
+        assertTrue(swagger.getDefinitions().size() == 2);
+        assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
+    }
+
+
+    @Test
+    public void testIssue312() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-312.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/events"));
+        Path path = swagger.getPath("/events");
+        assertNotNull(path.getGet());
+
+        Operation get = path.getGet();
+        assertEquals(get.getOperationId(), "getEvents");
         assertTrue(swagger.getDefinitions().size() == 2);
         assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
     }
