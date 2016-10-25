@@ -35,4 +35,15 @@ public class FileReferenceTests {
         assertTrue(swagger.getDefinitions().size() == 2);
         assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
     }
+
+    @Test
+    public void testIssue310() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-310.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+
+        assertTrue(swagger.getDefinitions().size() == 2);
+        assertTrue(swagger.getDefinitions().get("Paging").getProperties().size() == 1);
+    }
 }
