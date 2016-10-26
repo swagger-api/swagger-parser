@@ -6,6 +6,7 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
@@ -82,7 +83,17 @@ public final class ExternalRefProcessor {
                                 ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
                             processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(), file);
                         }
-                    }
+                    } else if (prop.getValue() instanceof ObjectProperty) {
+			ObjectProperty objectProperty = (ObjectProperty) prop.getValue();
+			Map<String, Property> subSubProperties = objectProperty.getProperties();
+			if(subSubProperties != null) {
+			    for (Map.Entry<String, Property> subSubprop : subSubProperties.entrySet()) {
+				if(subSubprop.getValue() instanceof RefProperty) {
+				    processRefProperty((RefProperty)subSubprop.getValue(), file);
+				}
+			    }
+			}
+		    }
                 }
             }
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {

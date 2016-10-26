@@ -15,7 +15,7 @@ public class DeserializationUtils {
         JsonNode result;
 
         try {
-            if (fileOrHost.endsWith(".yaml")) {
+            if (fileOrHost.endsWith(".yaml") || fileOrHost.endsWith(".yml")) {
                 result = readYamlTree(contents);
             } else {
                 result = Json.mapper().readTree(contents);
@@ -33,7 +33,7 @@ public class DeserializationUtils {
         ObjectMapper mapper;
         boolean isYaml = false;
 
-        if(fileOrHost.endsWith(".yaml")) {
+        if(fileOrHost.endsWith(".yaml") || fileOrHost.endsWith(".yml")) {
             mapper = Yaml.mapper();
             isYaml = true;
         } else {
