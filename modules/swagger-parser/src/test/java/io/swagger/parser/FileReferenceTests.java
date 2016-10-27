@@ -120,4 +120,13 @@ public class FileReferenceTests {
         assertNotNull(swagger.getDefinitions().get("Paging"));
         assertNotNull(swagger.getDefinitions().get("Foobar"));
     }
+
+    @Test
+    public void testIssue289() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/issue-289.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/foo").getGet());
+    }
 }
