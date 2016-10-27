@@ -12,6 +12,7 @@ import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,9 +96,50 @@ public final class ExternalRefProcessor {
 
     private void processRefProperty(RefProperty subRef, String externalFile) {
         if (isAnExternalRefFormat(subRef.getRefFormat())) {
-            subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
+            String $ref = constructRef(subRef, externalFile);
+            subRef.set$ref($ref);
+            if($ref.startsWith("."))
+                processRefToExternalDefinition($ref, RefFormat.RELATIVE);
+            else {
+                processRefToExternalDefinition($ref, RefFormat.URL);
+            }
+
         } else {
             processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+        }
+    }
+
+    protected String constructRef(RefProperty refProperty, String rootLocation) {
+        String ref = refProperty.get$ref();
+        return join(rootLocation, ref);
+    }
+
+    public static String join(String source, String fragment) {
+        try {
+            boolean isRelative = false;
+            if(source.startsWith("/") || source.startsWith(".")) {
+                isRelative = true;
+            }
+            URI uri = new URI(source);
+
+            if(!source.endsWith("/") && (fragment.startsWith("./") && "".equals(uri.getPath()))) {
+                uri = new URI(source + "/");
+            }
+            else if("".equals(uri.getPath()) && !fragment.startsWith("/")) {
+                uri = new URI(source + "/");
+            }
+            URI f = new URI(fragment);
+
+            URI resolved = uri.resolve(f);
+
+            URI normalized = resolved.normalize();
+            if(Character.isAlphabetic(normalized.toString().charAt(0)) && isRelative) {
+                return "./" + normalized.toString();
+            }
+            return normalized.toString();
+        }
+        catch(Exception e) {
+            return source;
         }
     }
 }

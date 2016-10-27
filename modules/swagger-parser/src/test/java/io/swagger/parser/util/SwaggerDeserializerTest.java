@@ -11,7 +11,6 @@ import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.util.Json;
-import io.swagger.util.Yaml;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -1148,6 +1147,5 @@ public class SwaggerDeserializerTest {
 
         assertTrue(composed.getChild() instanceof ModelImpl);
         assertTrue(composed.getInterfaces().size() == 2);
-        Yaml.prettyPrint(swagger);
     }
 }

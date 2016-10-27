@@ -115,7 +115,7 @@ public class ExternalRefProcessorTest {
     	
     	String actualRef = new ExternalRefProcessor(cache, testedSwagger).processRefToExternalDefinition(customerURL, refFormat);
 
-    	assertTrue(testedSwagger.getDefinitions().get("Customer")!=null);
+		assertTrue(testedSwagger.getDefinitions().get("Customer")!=null);
     	assertTrue(testedSwagger.getDefinitions().get("Contact")!=null);
     	assertTrue(testedSwagger.getDefinitions().get("Address")!=null);
     }

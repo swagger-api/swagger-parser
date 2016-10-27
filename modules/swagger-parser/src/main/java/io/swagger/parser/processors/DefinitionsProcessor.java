@@ -30,9 +30,17 @@ public class DefinitionsProcessor {
         }
 
         Set<String> keySet = new HashSet<>();
-        keySet.addAll(definitions.keySet());
 
-        for (String modelName : keySet) {
+        // the definitions can grow as we resolve references
+        while(definitions.keySet().size() > keySet.size()) {
+            processDefinitions(keySet, definitions);
+        }
+    }
+
+    public void processDefinitions(Set<String> modelKeys, Map<String, Model> definitions) {
+        modelKeys.addAll(definitions.keySet());
+
+        for (String modelName : modelKeys) {
             final Model model = definitions.get(modelName);
 
             String originalRef = model instanceof RefModel ? ((RefModel) model).get$ref() : null;
@@ -48,7 +56,6 @@ public class DefinitionsProcessor {
                     final Model resolvedModel = definitions.remove(renamedRef);
                     definitions.put(modelName, resolvedModel);
                 }
-
             }
         }
     }
