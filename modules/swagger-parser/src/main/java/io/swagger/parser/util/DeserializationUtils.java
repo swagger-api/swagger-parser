@@ -1,7 +1,6 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 
@@ -30,27 +29,23 @@ public class DeserializationUtils {
     public static <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType) {
         T result;
 
-        ObjectMapper mapper;
-        boolean isYaml = false;
+        boolean isJson = false;
 
-        if(fileOrHost.endsWith(".yaml")) {
-            mapper = Yaml.mapper();
-            isYaml = true;
-        } else {
-            mapper = Json.mapper();
+        if(contents instanceof String && contents.toString().trim().startsWith("{")) {
+            isJson = true;
         }
 
         try {
             if (contents instanceof String) {
-                if (isYaml) {
-                    result = readYamlValue((String) contents, expectedType);
+                if (isJson) {
+                    result = Json.mapper().readValue((String) contents, expectedType);
                 } else {
-                    result = mapper.readValue((String) contents, expectedType);
+                    result = Yaml.mapper().readValue((String) contents, expectedType);
                 }
             } else {
-                result = mapper.convertValue(contents, expectedType);
+                result = Json.mapper().convertValue(contents, expectedType);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into type " + expectedType, e);
         }
 
