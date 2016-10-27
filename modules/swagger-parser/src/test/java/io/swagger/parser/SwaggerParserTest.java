@@ -185,9 +185,10 @@ public class SwaggerParserTest {
     public void testLoadExternalNestedDefinitions() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/nested-references/b.yaml");
+
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.containsKey("x"));
-        assertTrue(!definitions.containsKey("y"));
+        assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
         assertEquals(((RefModel) definitions.get("i")).get$ref(), "#/definitions/k");
     }
@@ -223,15 +224,15 @@ public class SwaggerParserTest {
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
     }
 
-    @Test(enabled = false)
+    @Test
     public void testLoadRecursiveExternalDef() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/file-reference-to-recursive-defs/b.yaml");
 
         Map<String, Model> definitions = swagger.getDefinitions();
         assertEquals(((RefProperty) ((ArrayProperty) definitions.get("v").getProperties().get("children")).getItems()).get$ref(), "#/definitions/v");
-        assertTrue(!definitions.containsKey("y"));
-        assertEquals(((RefProperty) ((ArrayProperty) definitions.get("x").getProperties().get("children")).getItems()).get$ref(), "#/definitions/x");
+        assertTrue(definitions.containsKey("y"));
+        assertEquals(((RefProperty) ((ArrayProperty) definitions.get("x").getProperties().get("children")).getItems()).get$ref(), "#/definitions/y");
     }
 
     @Test

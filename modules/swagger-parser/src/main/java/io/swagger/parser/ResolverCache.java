@@ -14,10 +14,7 @@ import io.swagger.parser.util.SwaggerDeserializer;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +38,7 @@ public class ResolverCache {
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
+    private Set<String> referencedModelKeys = new HashSet<>();
 
     /*
     a map that stores original external references, and their associated renamed references
@@ -171,6 +169,17 @@ public class ResolverCache {
             }
         }
         return null;
+    }
+
+    public boolean hasReferencedKey(String modelKey) {
+        if(referencedModelKeys == null) {
+            return false;
+        }
+        return referencedModelKeys.contains(modelKey);
+    }
+
+    public void addReferencedKey(String modelKey) {
+        referencedModelKeys.add(modelKey);
     }
 
     public String getRenamedRef(String originalRef) {

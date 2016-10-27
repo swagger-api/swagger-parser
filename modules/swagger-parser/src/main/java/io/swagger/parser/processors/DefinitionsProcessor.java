@@ -53,7 +53,15 @@ public class DefinitionsProcessor {
 
                 if (renamedRef != null) {
                     //we definitely resolved the referenced and shoved it in the definitions map
-                    final Model resolvedModel = definitions.remove(renamedRef);
+                    // because the referenced model may be in the definitions map, we need to remove old instances
+                    final Model resolvedModel = definitions.get(renamedRef);
+
+                    // ensure the reference isn't still in use
+                    if(!cache.hasReferencedKey(renamedRef)) {
+                        definitions.remove(renamedRef);
+                    }
+
+                    // add the new key
                     definitions.put(modelName, resolvedModel);
                 }
             }
