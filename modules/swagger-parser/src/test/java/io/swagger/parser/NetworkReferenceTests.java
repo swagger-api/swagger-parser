@@ -4,6 +4,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.testng.annotations.Test;
@@ -21,18 +22,24 @@ public class NetworkReferenceTests {
 
     private static String issue_323_yaml, issue_323_events_yaml, issue_323_paging_yaml, issue_323_bar_yaml;
     private static String issue_328_yaml, issue_328_events_yaml, issue_328_paging_yaml, issue_328_bar_yaml;
+    private static String issue_330_yaml, issue_330_users_yaml, issue_330_paging_yaml, issue_330_entities_yaml;
 
     static {
         try {
-            issue_323_yaml = readFile("src/test/resources/nested-file-references/issue-323.yaml");
-            issue_323_events_yaml = readFile("src/test/resources/nested-file-references/eventsCase9.yaml");
-            issue_323_paging_yaml = readFile("src/test/resources/nested-file-references/common/pagingWithFolderRef.yaml");
-            issue_323_bar_yaml = readFile("src/test/resources/nested-file-references/common/common2/bar.yaml");
+            issue_323_yaml          = readFile("src/test/resources/nested-file-references/issue-323.yaml");
+            issue_323_events_yaml   = readFile("src/test/resources/nested-file-references/eventsCase9.yaml");
+            issue_323_paging_yaml   = readFile("src/test/resources/nested-file-references/common/pagingWithFolderRef.yaml");
+            issue_323_bar_yaml      = readFile("src/test/resources/nested-file-references/common/common2/bar.yaml");
 
-            issue_328_yaml = readFile("src/test/resources/nested-file-references/issue-328.yaml");
-            issue_328_events_yaml = readFile("src/test/resources/nested-file-references/issue-328-events.yaml");
-            issue_328_paging_yaml = readFile("src/test/resources/nested-file-references/common/issue-328-paging.yaml");
-            issue_328_bar_yaml = readFile("src/test/resources/nested-file-references/common/common2/issue-328-bar.yaml");
+            issue_328_yaml          = readFile("src/test/resources/nested-file-references/issue-328.yaml");
+            issue_328_events_yaml   = readFile("src/test/resources/nested-file-references/issue-328-events.yaml");
+            issue_328_paging_yaml   = readFile("src/test/resources/nested-file-references/common/issue-328-paging.yaml");
+            issue_328_bar_yaml      = readFile("src/test/resources/nested-file-references/common/common2/issue-328-bar.yaml");
+
+            issue_330_yaml          = readFile("src/test/resources/nested-network-references/issue-330.yaml");
+            issue_330_paging_yaml   = readFile("src/test/resources/nested-network-references/common/issue-330-paging.yaml");
+            issue_330_users_yaml    = readFile("src/test/resources/nested-network-references/common/issue-330-users.yaml");
+            issue_330_entities_yaml = readFile("src/test/resources/nested-network-references/common/issue-330-entities.yaml");
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -66,7 +73,6 @@ public class NetworkReferenceTests {
         assertNotNull(swagger.getDefinitions().get("Foobar"));
     }
 
-
     @Test
     public void testIssue328() throws Exception {
         new Expectations() {{
@@ -91,6 +97,34 @@ public class NetworkReferenceTests {
         assertNotNull(swagger.getDefinitions().get("StatusResponse"));
         assertNotNull(swagger.getDefinitions().get("Paging"));
         assertNotNull(swagger.getDefinitions().get("Foobar"));
+    }
+
+    @Test
+    public void testIssue330() throws Exception {
+        new Expectations() {{
+            remoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<AuthorizationValue>());
+            result = issue_330_yaml;
+
+            remoteUrl.urlToString("http://server1/resources/common/paging.yaml", new ArrayList<AuthorizationValue>());
+            result = issue_330_paging_yaml;
+
+            remoteUrl.urlToString("http://server1/resources/common/users.yaml", new ArrayList<AuthorizationValue>());
+            result = issue_330_users_yaml;
+
+            remoteUrl.urlToString("http://server2/resources/common/entities.yaml", new ArrayList<AuthorizationValue>());
+            result = issue_330_entities_yaml;
+        }};
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("http://server1/resources/swagger.yaml", null, true);
+        Json.prettyPrint(result);
+
+        assertNotNull(result.getSwagger());
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/events"));
+
+        assertNotNull(swagger.getDefinitions().get("Address"));
+        assertNotNull(swagger.getDefinitions().get("Paging"));
+        assertNotNull(swagger.getDefinitions().get("users"));
+        assertNotNull(swagger.getDefinitions().get("Phone"));
     }
 
     static String readFile(String name) {
