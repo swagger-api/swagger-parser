@@ -1,0 +1,12 @@
+swagger: "2.0"
+
+info:
+  version: 1.0.0
+  title: Path include test case child
+
+paths:
+  /foo:
+    get:
+      responses:
+        200:
+          description: "Request successful"
