@@ -7,6 +7,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -106,5 +107,17 @@ public class FileReferenceTests {
         assertTrue(property instanceof RefProperty);
         RefProperty ref = (RefProperty) property;
         assertEquals(ref.get$ref(), "#/definitions/Foobar");
+    }
+
+
+    @Test
+    public void testIssue323() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-323.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/events"));
+
+        Json.prettyPrint(swagger);
     }
 }
