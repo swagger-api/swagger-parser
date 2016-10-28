@@ -54,6 +54,7 @@ public final class ExternalRefProcessor {
         if(existingModel == null) {
             // don't overwrite existing model reference
             swagger.addDefinition(newRef, model);
+            cache.addReferencedKey(newRef);
 
             String file = $ref.split("#/")[0];
             if (model instanceof RefModel) {

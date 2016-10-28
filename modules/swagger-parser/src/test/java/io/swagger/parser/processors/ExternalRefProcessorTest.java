@@ -46,6 +46,10 @@ public class ExternalRefProcessorTest {
 
             cache.putRenamedRef(ref, "bar");
             swagger.addDefinition("bar", mockedModel); times=1;
+
+			cache.addReferencedKey("bar");
+			times = 1;
+			result = null;
         }};
 
         String newRef = new ExternalRefProcessor(cache, swagger).processRefToExternalDefinition(ref, refFormat);
