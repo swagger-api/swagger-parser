@@ -129,4 +129,12 @@ public class FileReferenceTests {
         Swagger swagger = result.getSwagger();
         assertNotNull(swagger.getPath("/foo").getGet());
     }
+
+    @Test
+    public void testIssue336() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-336.json", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+    }
 }
