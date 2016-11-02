@@ -4,7 +4,6 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.testng.annotations.Test;
@@ -24,6 +23,8 @@ public class NetworkReferenceTests {
     private static String issue_328_yaml, issue_328_events_yaml, issue_328_paging_yaml, issue_328_bar_yaml;
     private static String issue_330_yaml, issue_330_users_yaml, issue_330_paging_yaml, issue_330_entities_yaml;
 
+    private static String issue_335_json, issue_335_bar_json;
+
     static {
         try {
             issue_323_yaml          = readFile("src/test/resources/nested-file-references/issue-323.yaml");
@@ -40,6 +41,9 @@ public class NetworkReferenceTests {
             issue_330_paging_yaml   = readFile("src/test/resources/nested-network-references/common/issue-330-paging.yaml");
             issue_330_users_yaml    = readFile("src/test/resources/nested-network-references/common/issue-330-users.yaml");
             issue_330_entities_yaml = readFile("src/test/resources/nested-network-references/common/issue-330-entities.yaml");
+
+            issue_335_json          = readFile("src/test/resources/nested-file-references/issue-335.json");
+            issue_335_bar_json      = readFile("src/test/resources/nested-file-references/issue-335-bar.json");
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -115,7 +119,6 @@ public class NetworkReferenceTests {
             result = issue_330_entities_yaml;
         }};
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("http://server1/resources/swagger.yaml", null, true);
-        Json.prettyPrint(result);
 
         assertNotNull(result.getSwagger());
         Swagger swagger = result.getSwagger();
@@ -125,6 +128,26 @@ public class NetworkReferenceTests {
         assertNotNull(swagger.getDefinitions().get("Paging"));
         assertNotNull(swagger.getDefinitions().get("users"));
         assertNotNull(swagger.getDefinitions().get("Phone"));
+    }
+
+    @Test
+    public void testIssue335() throws Exception {
+        new Expectations() {{
+            remoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<AuthorizationValue>());
+            result = issue_335_json;
+
+            remoteUrl.urlToString("http://server1/resources/Bar.json", new ArrayList<AuthorizationValue>());
+            result = issue_335_bar_json;
+        }};
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("http://server1/resources/swagger.json", null, true);
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+
+        assertNotNull(swagger.getDefinitions());
+        assertNotNull(swagger.getDefinitions().get("BarData"));
+        assertNotNull(swagger.getDefinitions().get("BarSettingsRequest"));
     }
 
     static String readFile(String name) {

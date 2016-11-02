@@ -29,6 +29,7 @@ public class PropertyProcessor  {
     }
 
     private void processRefProperty(RefProperty refProperty) {
+        // TODO: if the parent document is remote, then this will be remote by definition.
         if (isAnExternalRefFormat(refProperty.getRefFormat())) {
             final String newRef = externalRefProcessor.processRefToExternalDefinition(refProperty.get$ref(), refProperty.getRefFormat());
 
