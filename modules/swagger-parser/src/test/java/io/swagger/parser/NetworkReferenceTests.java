@@ -4,7 +4,6 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.testng.annotations.Test;
@@ -142,7 +141,13 @@ public class NetworkReferenceTests {
         }};
 
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("http://server1/resources/swagger.json", null, true);
-        Json.prettyPrint(result);
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+
+        assertNotNull(swagger.getDefinitions());
+        assertNotNull(swagger.getDefinitions().get("BarData"));
+        assertNotNull(swagger.getDefinitions().get("BarSettingsRequest"));
     }
 
     static String readFile(String name) {

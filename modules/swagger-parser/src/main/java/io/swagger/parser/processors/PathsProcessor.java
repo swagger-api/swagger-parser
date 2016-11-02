@@ -1,11 +1,10 @@
 package io.swagger.parser.processors;
 
-import io.swagger.models.HttpMethod;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.RefPath;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.ResolverCache;
 
 import java.util.ArrayList;
@@ -71,6 +70,11 @@ public class PathsProcessor {
                 RefPath refPath = (RefPath) path;
                 Path resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), Path.class);
 
+                // TODO: update references to the parent location
+
+                String pathRef = refPath.get$ref().split("#")[0];
+                updateLocalRefs(resolvedPath, pathRef);
+
                 if (resolvedPath != null) {
                     //we need to put the resolved path into swagger object
                     swagger.path(pathStr, resolvedPath);
@@ -89,5 +93,92 @@ public class PathsProcessor {
                 operationProcessor.processOperation(operation);
             }
         }
+    }
+
+    protected void updateLocalRefs(Path path, String pathRef) {
+        if(path.getParameters() != null) {
+            List<Parameter> params = path.getParameters();
+            for(Parameter param : params) {
+                updateLocalRefs(param, pathRef);
+            }
+        }
+        List<Operation> ops = path.getOperations();
+        for(Operation op : ops) {
+            if(op.getParameters() != null) {
+                for (Parameter param : op.getParameters()) {
+                    updateLocalRefs(param, pathRef);
+                }
+            }
+            if(op.getResponses() != null) {
+                for(Response response : op.getResponses().values()) {
+                    updateLocalRefs(response, pathRef);
+                }
+            }
+        }
+    }
+
+    protected void updateLocalRefs(Response response, String pathRef) {
+        if(response.getSchema() != null) {
+            updateLocalRefs(response.getSchema(), pathRef);
+        }
+    }
+
+    protected void updateLocalRefs(Parameter param, String pathRef) {
+        if(param instanceof BodyParameter) {
+            BodyParameter bp = (BodyParameter) param;
+            if(bp.getSchema() != null) {
+                updateLocalRefs(bp.getSchema(), pathRef);
+            }
+        }
+    }
+
+    protected void updateLocalRefs(Model model, String pathRef) {
+        if(model instanceof RefModel) {
+            RefModel refModel = (RefModel) model;
+            if(isLocalRef(refModel.get$ref())) {
+                refModel.set$ref(computeLocalRef(refModel.get$ref(), pathRef));
+            }
+        }
+        else if(model instanceof ModelImpl) {
+            // process properties
+            ModelImpl impl = (ModelImpl) model;
+            if(impl.getProperties() != null) {
+                for(Property property : impl.getProperties().values()) {
+                    updateLocalRefs(property, pathRef);
+                }
+            }
+        }
+        else if(model instanceof ComposedModel) {
+            ComposedModel cm = (ComposedModel) model;
+            for(Model innerModel : cm.getAllOf()) {
+                updateLocalRefs(innerModel, pathRef);
+            }
+        }
+        else if(model instanceof ArrayModel) {
+            ArrayModel am = (ArrayModel) model;
+            if(am.getItems() != null) {
+                updateLocalRefs(am.getItems(), pathRef);
+            }
+        }
+    }
+
+    protected void updateLocalRefs(Property property, String pathRef) {
+        if(property instanceof RefProperty) {
+            RefProperty ref = (RefProperty) property;
+            if(isLocalRef(ref.get$ref())) {
+                ref.set$ref(computeLocalRef(ref.get$ref(), pathRef));
+            }
+        }
+    }
+
+    protected boolean isLocalRef(String ref) {
+        if(ref.startsWith("#")) {
+            return true;
+        }
+        return false;
+    }
+
+    protected String computeLocalRef(String ref, String prefix) {
+        return prefix + ref;
     }
 }
