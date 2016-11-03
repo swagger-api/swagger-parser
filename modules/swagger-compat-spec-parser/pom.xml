@@ -64,5 +64,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.3.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.19</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

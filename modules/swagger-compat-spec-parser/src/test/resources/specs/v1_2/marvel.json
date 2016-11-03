@@ -1,0 +1,11 @@
+{
+    "apiVersion": "Cable",
+    "apis": [
+        {
+            "description": "",
+            "path": "/docs/public"
+        }
+    ],
+    "basePath": "http://gateway.marvel.com",
+    "swaggerVersion": "1.0"
+}

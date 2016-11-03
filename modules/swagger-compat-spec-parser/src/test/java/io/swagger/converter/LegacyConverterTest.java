@@ -3,20 +3,24 @@ package io.swagger.converter;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import io.swagger.models.*;
-import io.swagger.models.auth.ApiKeyAuthDefinition;
-import io.swagger.models.auth.In;
-import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.auth.*;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import mockit.Expectations;
+import mockit.Mocked;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,23 +29,77 @@ import static org.testng.Assert.*;
 public class LegacyConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
 
+    private static String resources_json, pet_json, store_json, user_json, marvel_json, public_json;
+
+    @Mocked
+    public RemoteUrl remoteUrl = new RemoteUrl();
+
+    static {
+        try {
+            resources_json = readFile("src/test/resources/specs/v1_2/petstore/api-docs");
+            pet_json = readFile("src/test/resources/specs/v1_2/petstore/pet");
+            user_json = readFile("src/test/resources/specs/v1_2/petstore/user");
+            store_json = readFile("src/test/resources/specs/v1_2/petstore/store");
+
+            marvel_json = readFile("src/test/resources/specs/v1_2/marvel.json");
+            public_json = readFile("src/test/resources/specs/v1_2/public.json");
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void testIssueFun() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo("http://localhost:8080/api-docs/resources.json", null, true);
+        new Expectations() {{
+            remoteUrl.urlToString("http://localhost:8080/api-docs", new ArrayList<AuthorizationValue>());
+            result = resources_json;
 
-        Swagger swagger = parser.read("http://localhost:8080/api-docs/resources.json");
-        Assert.assertNotNull(result);
+            remoteUrl.urlToString("http://localhost:8080/api-docs/pet", new ArrayList<AuthorizationValue>());
+            result = pet_json;
+
+            remoteUrl.urlToString("http://localhost:8080/api-docs/store", new ArrayList<AuthorizationValue>());
+            result = store_json;
+
+            remoteUrl.urlToString("http://localhost:8080/api-docs/user", new ArrayList<AuthorizationValue>());
+            result = user_json;
+
+            remoteUrl.urlToString("http://localhost:8080/api-docs", null);
+            result = resources_json;
+
+            remoteUrl.urlToString("http://localhost:8080/api-docs/pet", null);
+            result = pet_json;
+
+            remoteUrl.urlToString("http://localhost:8080/api-docs/store", null);
+            result = store_json;
+
+            remoteUrl.urlToString("http://localhost:8080/api-docs/user", null);
+            result = user_json;
+
+        }};
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo("http://localhost:8080/api-docs", null, true);
+
+        Swagger swagger = parser.read("http://localhost:8080/api-docs");
+        Assert.assertNotNull(swagger);
     }
 
 
     @Test
     public void testIssue43() throws Exception {
+        new Expectations() {{
+            remoteUrl.urlToString("http://gateway.marvel.com/docs", new ArrayList<AuthorizationValue>());
+            result = marvel_json;
+
+            remoteUrl.urlToString("http://gateway.marvel.com/docs/public", new ArrayList<AuthorizationValue>());
+            result = public_json;
+        }};
+
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult result = parser.readWithInfo("http://gateway.marvel.com/docs", null, true);
 
-        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getSwagger());
     }
 
     /**
@@ -153,5 +211,15 @@ public class LegacyConverterTest {
     public void convertSingle1_1File() throws Exception {
         Swagger swagger = converter.read("src/test/resources/specs/v1_1/sample.json");
         Parameter param = swagger.getPaths().get("/events").getGet().getParameters().get(0);
+    }
+
+
+    static String readFile(String name) {
+        try {
+            return new String(Files.readAllBytes(new File(name).toPath()), Charset.forName("UTF-8"));
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 }
