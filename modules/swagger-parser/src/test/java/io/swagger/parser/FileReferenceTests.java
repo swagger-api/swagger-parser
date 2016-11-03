@@ -1,9 +1,6 @@
 package io.swagger.parser;
 
-import io.swagger.models.Model;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
@@ -136,5 +133,14 @@ public class FileReferenceTests {
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
+    }
+
+    @Test
+    public void testIssue340() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-340.json", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertFalse(swagger.getDefinitions().get("BarData") instanceof RefModel);
     }
 }

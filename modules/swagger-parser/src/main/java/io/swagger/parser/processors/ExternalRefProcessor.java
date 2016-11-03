@@ -43,10 +43,14 @@ public final class ExternalRefProcessor {
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
-        final Model existingModel = definitions.get(possiblyConflictingDefinitionName);
+        Model existingModel = definitions.get(possiblyConflictingDefinitionName);
 
         if (existingModel != null) {
             LOGGER.debug("A model for " + existingModel + " already exists");
+            if(existingModel instanceof RefModel) {
+                // use the new model
+                existingModel = null;
+            }
         }
         newRef = possiblyConflictingDefinitionName;
         cache.putRenamedRef($ref, newRef);
