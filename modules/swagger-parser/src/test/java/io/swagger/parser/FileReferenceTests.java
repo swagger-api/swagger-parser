@@ -133,11 +133,21 @@ public class FileReferenceTests {
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPaths());
     }
 
     @Test
     public void testIssue340() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-340.json", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertFalse(swagger.getDefinitions().get("BarData") instanceof RefModel);
+    }
+
+    @Test
+    public void testIssue304() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-304.json", null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
