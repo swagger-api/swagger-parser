@@ -123,23 +123,16 @@ public class ResolverCache {
     }
 
     private Object loadInternalRef(String ref) {
-        Object result = null;
-
         if(ref.startsWith("#/definitions")) {
-            result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
+          return getFromMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
         }
-        else if(ref.startsWith("#/responses")) {
-            result = getFromMap(ref, swagger.getResponses(), RESPONSE_PATTERN);
+        if(ref.startsWith("#/responses")) {
+          return getFromMap(ref, swagger.getResponses(), RESPONSE_PATTERN);
         }
-        else if(ref.startsWith("#/parameters")) {
-            result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
+        if(ref.startsWith("#/parameters")) {
+          return getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
         }
-        if (result == null) {
-            result = getFromMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
-        }
-
-        return result;
-
+        return null;
     }
 
     private Object getFromMap(String ref, Map map, Pattern pattern) {
