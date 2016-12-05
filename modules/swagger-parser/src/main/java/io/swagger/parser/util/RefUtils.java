@@ -61,7 +61,7 @@ public class RefUtils {
 
 
     public static String readExternalUrlRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
-                                         String rootPath) {
+                                            String rootPath) {
 
         if (!RefUtils.isAnExternalRefFormat(refFormat)) {
             throw new RuntimeException("Ref is not external");
@@ -114,16 +114,13 @@ public class RefUtils {
             }
             else if ("..".equals(relPathParts[i])) {
                 trimRel += 1;
+                trimRoot += 1;
             }
         }
 
         String [] outputParts = new String[rootPathParts.length + relPathParts.length - trimRoot - trimRel];
         System.arraycopy(rootPathParts, 0, outputParts, 0, rootPathParts.length - trimRoot);
-        System.arraycopy(relPathParts,
-                trimRel,
-                outputParts,
-                rootPathParts.length - trimRoot + trimRel - 1,
-                relPathParts.length - trimRel);
+        System.arraycopy(relPathParts, trimRel, outputParts, rootPathParts.length - trimRoot, relPathParts.length - trimRel);
 
         return StringUtils.join(outputParts, "/");
     }
