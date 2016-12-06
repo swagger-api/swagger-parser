@@ -4,9 +4,10 @@ import io.swagger.models.Model;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -61,7 +62,7 @@ public class RefUtils {
 
 
     public static String readExternalUrlRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
-                                         String rootPath) {
+                                            String rootPath) {
 
         if (!RefUtils.isAnExternalRefFormat(refFormat)) {
             throw new RuntimeException("Ref is not external");
@@ -86,46 +87,20 @@ public class RefUtils {
 
     }
 
-    public static String buildUrl(String rootPath, String relativePath) {
-        String[] rootPathParts = rootPath.split("/");
-        String [] relPathParts = relativePath.split("/");
-
+    public static String buildUrl(String rootPath, String relativePath) throws URISyntaxException {
         if(rootPath == null || relativePath == null) {
             return null;
         }
 
-        int trimRoot = 0;
-        int trimRel = 0;
+        URI uriRootPath = new URI(rootPath);
 
-        if(!"".equals(rootPathParts[rootPathParts.length - 1])) {
-            trimRoot = 1;
-        }
-        for(int i = 0; i < rootPathParts.length; i++) {
-            if("".equals(rootPathParts[i])) {
-                trimRel += 1;
-            }
-            else {
-                break;
-            }
-        }
-        for(int i = 0; i < relPathParts.length; i ++) {
-            if(".".equals(relPathParts[i])) {
-                trimRel += 1;
-            }
-            else if ("..".equals(relPathParts[i])) {
-                trimRel += 1;
-            }
-        }
+        // Cater for filename in URL
+        if(uriRootPath.getPath().length() == 0)
+            relativePath = "/" + relativePath;
+        else if(!uriRootPath.getPath().endsWith("/") && !relativePath.startsWith("."))
+            relativePath = "../" + relativePath;
 
-        String [] outputParts = new String[rootPathParts.length + relPathParts.length - trimRoot - trimRel];
-        System.arraycopy(rootPathParts, 0, outputParts, 0, rootPathParts.length - trimRoot);
-        System.arraycopy(relPathParts,
-                trimRel,
-                outputParts,
-                rootPathParts.length - trimRoot + trimRel - 1,
-                relPathParts.length - trimRel);
-
-        return StringUtils.join(outputParts, "/");
+        return uriRootPath.resolve(relativePath).normalize().toString();
     }
 
     public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
