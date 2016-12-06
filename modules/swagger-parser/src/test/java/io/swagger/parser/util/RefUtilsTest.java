@@ -13,16 +13,14 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 public class RefUtilsTest {
 
@@ -172,6 +170,18 @@ public class RefUtilsTest {
 
         String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
         assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void testBuildURLRelativePath() throws URISyntaxException {
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/foo/bar", "/fun"), "http://foo.bar.com/fun");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/foo/bar#/baz/bat", "/fun"), "http://foo.bar.com/fun");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/foo/bar#/baz/bat", "/fun#for/all"), "http://foo.bar.com/fun#for/all");
+
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com", "./fun"), "http://foo.bar.com/fun");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/veryFun", "./fun"), "http://foo.bar.com/fun");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/veryFun/", "../fun#nothing"), "http://foo.bar.com/fun#nothing");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/veryFun/notFun", "../fun#/it/is/fun"), "http://foo.bar.com/fun#/it/is/fun");
     }
 
     private void setupRelativeFileExpectations(@Mocked final FileInputStream fileInputStream, @Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
