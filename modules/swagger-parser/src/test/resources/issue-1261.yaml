@@ -1,0 +1,25 @@
+swagger: '2.0'
+info:
+  version: "1"
+  title: Inline schema example
+
+paths:
+  /user:
+    get:
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int32
+              name:
+                type: string
+            required: [id, name]
+            example:
+              id: 42
+              name: Arthur Dent
