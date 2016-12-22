@@ -692,26 +692,67 @@ public class SwaggerDeserializerTest {
                 "        '200':\n" +
                 "          description: Successful response\n" +
                 "          schema:\n" +
-                "            $ref: '#/definitions/ExampleEnum'\n" +
+                "            type: object\n" +
+                "            properties:\n" +
+                "              se:\n" +
+                "                $ref: '#/definitions/StringEnum'\n" +
+                "              ie:\n" +
+                "                $ref: '#/definitions/IntegerEnum'\n" +
+                "              ne:\n" +
+                "                $ref: '#/definitions/NumberEnum'\n" +
                 "definitions:\n" +
-                "  ExampleEnum:\n" +
+                "  StringEnum:\n" +
                 "    type: string\n" +
                 "    default: foo\n" +
                 "    enum:\n" +
                 "      - First\n" +
-                "      - Second";
+                "      - Second\n" +
+                "  IntegerEnum:\n" +
+                "    type: integer\n" +
+                "    default: 1\n" +
+                "    enum:\n" +
+                "      - -1\n" +
+                "      - 0\n" +
+                "      - 1\n" +
+                "  NumberEnum:\n" +
+                "    type: number\n" +
+                "    default: 3.14\n" +
+                "    enum:\n" +
+                "      - -1.151\n" +
+                "      - 0.0\n" +
+                "      - 1.6161\n" +
+                "      - 3.14";
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult result = parser.readWithInfo(yaml);
 
         final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
 
-        Model model = resolved.getDefinitions().get("ExampleEnum");
-        assertTrue(model instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) model;
-        List<String> enumValues = impl.getEnum();
-        assertTrue(enumValues.size() == 2);
-        assertEquals(enumValues.get(0), "First");
-        assertEquals(enumValues.get(1), "Second");
+        Model stringModel = resolved.getDefinitions().get("StringEnum");
+        assertTrue(stringModel instanceof ModelImpl);
+        ModelImpl stringImpl = (ModelImpl) stringModel;
+        List<String> stringValues = stringImpl.getEnum();
+        assertEquals(2, stringValues.size());
+        assertEquals("First", stringValues.get(0));
+        assertEquals("Second", stringValues.get(1));
+
+        Model integerModel = resolved.getDefinitions().get("IntegerEnum");
+        assertTrue(integerModel instanceof ModelImpl);
+        ModelImpl integerImpl = (ModelImpl) integerModel;
+        List<String> integerValues = integerImpl.getEnum();
+        assertEquals(3, integerValues.size());
+        assertEquals("-1", integerValues.get(0));
+        assertEquals("0", integerValues.get(1));
+        assertEquals("1", integerValues.get(2));
+
+        Model numberModel = resolved.getDefinitions().get("NumberEnum");
+        assertTrue(numberModel instanceof ModelImpl);
+        ModelImpl numberImpl = (ModelImpl) numberModel;
+        List<String> numberValues = numberImpl.getEnum();
+        assertEquals(4, numberValues.size());
+        assertEquals("-1.151", numberValues.get(0));
+        assertEquals("0.0", numberValues.get(1));
+        assertEquals("1.6161", numberValues.get(2));
+        assertEquals("3.14", numberValues.get(3));
     }
 
     @Test
