@@ -678,7 +678,12 @@ public class SwaggerDeserializer {
                 ArrayNode arrayNode = getArray("enum", node, false, location, result);
                 if(arrayNode != null) {
                     for(JsonNode n : arrayNode) {
-                        impl._enum(n.textValue());
+                        if(n.isValueNode()) {
+                            impl._enum(n.asText());
+                        }
+                        else {
+                            result.invalidType(location, "enum", "value", n);
+                        }
                     }
                 }
             }
