@@ -240,7 +240,7 @@
         <junit-version>4.8.1</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>
-        <wiremock-version>1.57</wiremock-version>
+        <wiremock-version>2.4.1</wiremock-version>
         <surefire-version>2.18.1</surefire-version>
     </properties>
 </project>

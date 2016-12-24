@@ -54,22 +54,11 @@ public class DeserializationUtils {
 
     public static JsonNode readYamlTree(String contents) {
         org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
-        Object yamlObject = yaml.load(contents);
-        try {
-            JsonNode obj =  Yaml.mapper().readValue(contents, JsonNode.class);
-            return obj;
-        }
-        catch(Exception e) {
-            return null;
-        }
+        return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
     }
 
     public static <T> T readYamlValue(String contents, Class<T> expectedType) {
-        try {
-            return Json.mapper().readValue(contents, expectedType);
-        }
-        catch(Exception e) {
-            return null;
-        }
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
+        return Json.mapper().convertValue(yaml.load(contents), expectedType);
     }
 }
