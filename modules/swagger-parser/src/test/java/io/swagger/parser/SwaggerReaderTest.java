@@ -304,6 +304,7 @@ public class SwaggerReaderTest {
 
         assertEquals(pathParameter.getMinLength(), new Integer(4));
         assertEquals(pathParameter.getMaxLength(), new Integer(5));
+        assertNull(pathParameter.isReadOnly());
         assertEquals(pathParameter.getPattern(), "^[a-zA-Z]");
     }
 
@@ -320,5 +321,36 @@ public class SwaggerReaderTest {
         Parameter param1 = get.getParameters().get(0);
         assertEquals(param1.getIn(), "path");
         assertEquals(param1.getName(), "bucketKey");
+    }
+
+    @Test
+    public void testIssue364() {
+        String spec =
+            "swagger: '2.0'\n" +
+            "info:\n" +
+            "  title: issue 192\n" +
+            "paths:\n" +
+            "  /foo:\n" +
+            "    get:\n" +
+            "      parameters:\n" +
+            "        - name: Code\n" +
+            "          in: query\n" +
+            "          description: The code\n" +
+            "          required: true\n" +
+            "          readOnly: true\n" +
+            "          allowEmptyValue: true\n" +
+            "      responses:\n" +
+            "        200:\n" +
+            "          description: 'the pet'";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+
+        Swagger swagger = result.getSwagger();
+        Parameter param = swagger.getPath("/foo").getGet().getParameters().get(0);
+        assertTrue(param instanceof QueryParameter);
+        QueryParameter pathParameter = (QueryParameter) param;
+
+        assertTrue(pathParameter.isReadOnly());
+        assertTrue(pathParameter.getAllowEmptyValue());
     }
 }
