@@ -9,6 +9,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.util.Json;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
@@ -481,8 +482,8 @@ public class SwaggerDeserializer {
 
                 Double dbl = getDouble("maximum", obj, false, location, result);
                 if(dbl != null) {
-                    map.put(MAXIMUM, dbl);
-                    sp.setMaximum(dbl);
+                    map.put(MAXIMUM, new BigDecimal(dbl));
+                    sp.setMaximum(new BigDecimal(dbl));
                 }
 
                 Boolean bl = getBoolean("exclusiveMaximum", obj, false, location, result);
@@ -493,8 +494,8 @@ public class SwaggerDeserializer {
 
                 dbl = getDouble("minimum", obj, false, location, result);
                 if(dbl != null) {
-                    map.put(MINIMUM, dbl);
-                    sp.setMinimum(dbl);
+                    map.put(MINIMUM, new BigDecimal(dbl));
+                    sp.setMinimum(new BigDecimal(dbl));
                 }
 
                 bl = getBoolean("exclusiveMinimum", obj, false, location, result);
