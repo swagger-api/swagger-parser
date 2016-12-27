@@ -41,20 +41,19 @@ public class RemoteUrlTest {
     }
 
     @Test
+    public void testCleanUrl() {
+        String cleaned = RemoteUrl.cleanUrl("http://foo/bar/com/{v2}/fun");
+        assertEquals(cleaned, "http://foo/bar/com/%7Bv2%7D/fun");
+    }
+
+    @Test
     public void testReadARemoteUrl() throws Exception {
-
         final String expectedBody = setupStub();
-
         final String actualBody = RemoteUrl.urlToString(getUrl(), null);
         assertEquals(actualBody, expectedBody);
 
         verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
-                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER)));
-
-    }
-
-    private String getUrl() {
-        return String.format("http://%s:%d/v2/pet/1", LOCALHOST, WIRE_MOCK_PORT);
+            .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER)));
     }
 
     @Test
@@ -209,12 +208,16 @@ public class RemoteUrlTest {
                 .withQueryParam(queryParamName, equalTo(queryParamValue)));
     }
 
+    private String getUrl() {
+        return String.format("http://%s:%d/v2/pet/1", LOCALHOST, WIRE_MOCK_PORT);
+    }
+
     private String setupStub() {
         final String expectedBody = "a really good body";
         stubFor(get(urlEqualTo("/v2/pet/1"))
                 .willReturn(aResponse()
-                                .withBody(expectedBody)
-                                .withHeader("Content-Type", "application/json")
+                    .withBody(expectedBody)
+                    .withHeader("Content-Type", "application/json")
                 ));
         return expectedBody;
     }

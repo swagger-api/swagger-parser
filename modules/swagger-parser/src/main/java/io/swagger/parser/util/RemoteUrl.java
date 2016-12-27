@@ -86,12 +86,16 @@ public class RemoteUrl {
         };
     }
 
+    public static String cleanUrl(String url) {
+        return url.replaceAll("\\{", "%7B").replaceAll("\\}", "%7D");
+    }
+
     public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {
         InputStream is = null;
         BufferedReader br = null;
 
         try {
-            final URL inUrl = new URL(url);
+            final URL inUrl = new URL(cleanUrl(url));
             final List<AuthorizationValue> query = new ArrayList<>();
             final List<AuthorizationValue> header = new ArrayList<>();
             if (auths != null) {
