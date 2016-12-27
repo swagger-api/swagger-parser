@@ -528,8 +528,10 @@ public class SwaggerDeserializer {
                 sp.setMaxLength(iv);
 
                 dbl = getDouble("multipleOf", obj, false, location, result);
-                map.put(MULTIPLE_OF, new BigDecimal(dbl));
-                sp.setMultipleOf(dbl);
+                if(dbl != null) {
+                    map.put(MULTIPLE_OF, new BigDecimal(dbl));
+                    sp.setMultipleOf(dbl);
+                }
 
                 map.put(UNIQUE_ITEMS, getBoolean("uniqueItems", obj, false, location, result));
 
