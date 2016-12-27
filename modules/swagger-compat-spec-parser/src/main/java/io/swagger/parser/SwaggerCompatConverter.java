@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -329,10 +330,10 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 args.put(PropertyBuilder.PropertyId.ENUM, obj.getEnumValues());
             }
             if (obj.getMinimum() != null) {
-                args.put(PropertyBuilder.PropertyId.MINIMUM, Double.parseDouble(obj.getMinimum()));
+                args.put(PropertyBuilder.PropertyId.MINIMUM, new BigDecimal(obj.getMinimum()));
             }
             if (obj.getMaximum() != null) {
-                args.put(PropertyBuilder.PropertyId.MAXIMUM, Double.parseDouble(obj.getMaximum()));
+                args.put(PropertyBuilder.PropertyId.MAXIMUM, new BigDecimal(obj.getMaximum()));
             }
 
             Property i = PropertyBuilder.build(type, format, args);

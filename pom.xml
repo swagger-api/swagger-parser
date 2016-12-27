@@ -202,6 +202,12 @@
                 <artifactId>testng</artifactId>
                 <version>${testng-version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>snakeyaml</artifactId>
+                        <groupId>org.yaml</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jmockit</groupId>
@@ -230,11 +236,11 @@
     <properties>
         <commons-io-version>2.4</commons-io-version>
         <slf4j-version>1.6.3</slf4j-version>
-        <swagger-core-version>1.5.10</swagger-core-version>
+        <swagger-core-version>1.5.12-SNAPSHOT</swagger-core-version>
         <junit-version>4.8.1</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>
-        <wiremock-version>1.57</wiremock-version>
+        <wiremock-version>2.4.1</wiremock-version>
         <surefire-version>2.18.1</surefire-version>
     </properties>
 </project>

@@ -14,6 +14,7 @@ import io.swagger.util.Json;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -447,10 +448,10 @@ public class SwaggerDeserializerTest {
         assertTrue(zip instanceof IntegerProperty);
 
         IntegerProperty zipProperty = (IntegerProperty) zip;
-        assertTrue(zipProperty.getMinimum() == 0);
+        assertEquals(zipProperty.getMinimum(), new BigDecimal("0"));
         assertTrue(zipProperty.getExclusiveMinimum());
 
-        assertTrue(zipProperty.getMaximum() == 99999);
+        assertEquals(zipProperty.getMaximum(), new BigDecimal("99999"));
         assertTrue(zipProperty.getExclusiveMaximum());
     }
 

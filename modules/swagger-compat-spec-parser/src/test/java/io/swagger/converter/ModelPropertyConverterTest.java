@@ -15,6 +15,7 @@ import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerCompatConverter;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,8 +77,8 @@ public class ModelPropertyConverterTest {
         property.setType("integer");
         property.setFormat(Format.INT32);
         property.setDescription("a simple int32 property");
-        property.setMinimum("1.00");
-        property.setMaximum("4.00");
+        property.setMinimum("1");
+        property.setMaximum("4");
 
         Property converted = converter.convertProperty(property);
         assertEquals(converted.getClass(), IntegerProperty.class);
@@ -85,8 +86,8 @@ public class ModelPropertyConverterTest {
         assertEquals(converted.getFormat(), "int32");
 
         IntegerProperty prop = (IntegerProperty) converted;
-        assertEquals(prop.getMinimum(), new Double(1.00));
-        assertEquals(prop.getMaximum(), new Double(4.00));
+        assertEquals(prop.getMinimum(), new BigDecimal("1"));
+        assertEquals(prop.getMaximum(), new BigDecimal("4"));
     }
 
     @Test
@@ -95,8 +96,8 @@ public class ModelPropertyConverterTest {
         property.setType("integer");
         property.setFormat(Format.INT64);
         property.setDescription("a simple int64 property");
-        property.setMinimum("1.00");
-        property.setMaximum("4.00");
+        property.setMinimum("1");
+        property.setMaximum("4");
 
         Property converted = converter.convertProperty(property);
         assertEquals(converted.getClass(), LongProperty.class);
@@ -104,8 +105,8 @@ public class ModelPropertyConverterTest {
         assertEquals(converted.getFormat(), "int64");
 
         LongProperty prop = (LongProperty) converted;
-        assertEquals(prop.getMinimum(), new Double(1.00));
-        assertEquals(prop.getMaximum(), new Double(4.00));
+        assertEquals(prop.getMinimum(), new BigDecimal("1"));
+        assertEquals(prop.getMaximum(), new BigDecimal("4"));
     }
 
     @Test
@@ -123,8 +124,8 @@ public class ModelPropertyConverterTest {
         assertEquals(converted.getFormat(), "float");
 
         FloatProperty prop = (FloatProperty) converted;
-        assertEquals(prop.getMinimum(), new Double(1.23));
-        assertEquals(prop.getMaximum(), new Double(4.56));
+        assertEquals(prop.getMinimum(), new BigDecimal("1.23"));
+        assertEquals(prop.getMaximum(), new BigDecimal("4.56"));
     }
 
     @Test
@@ -142,8 +143,8 @@ public class ModelPropertyConverterTest {
         assertEquals(converted.getFormat(), "double");
 
         DoubleProperty prop = (DoubleProperty) converted;
-        assertEquals(prop.getMinimum(), new Double(1.23));
-        assertEquals(prop.getMaximum(), new Double(4.56));
+        assertEquals(prop.getMinimum(), new BigDecimal("1.23"));
+        assertEquals(prop.getMaximum(), new BigDecimal("4.56"));
     }
 
     @Test
