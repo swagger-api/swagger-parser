@@ -197,7 +197,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         } catch (java.lang.IllegalArgumentException e) {
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("failed to read resource listing", e);
         }
         return output;
     }
@@ -501,7 +501,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         } catch (java.lang.IllegalArgumentException e) {
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("failed to read api declaration", e);
         }
         return output;
     }

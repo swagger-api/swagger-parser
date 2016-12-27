@@ -72,9 +72,9 @@ public class RemoteUrl {
                     }
                 };
             } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+                LOGGER.error("Not Supported", e);
             } catch (KeyManagementException e) {
-                e.printStackTrace();
+                LOGGER.error("Not Supported", e);
             }
         }
         return new ConnectionConfigurator() {
@@ -153,10 +153,10 @@ public class RemoteUrl {
         } catch (javax.net.ssl.SSLProtocolException e) {
             LOGGER.warn("there is a problem with the target SSL certificate");
             LOGGER.warn("**** you may want to run with -Djsse.enableSNIExtension=false\n\n");
-            e.printStackTrace();
+            LOGGER.error("unable to read", e);
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("unable to read", e);
             throw e;
         } finally {
             if (is != null) {
