@@ -527,6 +527,10 @@ public class SwaggerDeserializer {
                 map.put(MAX_LENGTH, iv);
                 sp.setMaxLength(iv);
 
+                dbl = getDouble("multipleOf", obj, false, location, result);
+                map.put(MULTIPLE_OF, new BigDecimal(dbl));
+                sp.setMultipleOf(dbl);
+
                 map.put(UNIQUE_ITEMS, getBoolean("uniqueItems", obj, false, location, result));
 
                 ArrayNode an = getArray("enum", obj, false, location, result);
@@ -671,7 +675,6 @@ public class SwaggerDeserializer {
             ModelImpl impl = new ModelImpl();
             impl.setType(type);
 
-
             JsonNode ap = node.get("additionalProperties");
             if(ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
@@ -685,6 +688,11 @@ public class SwaggerDeserializer {
 
             value = getString("discriminator", node, false, location, result);
             impl.setDiscriminator(value);
+
+            Boolean bp = getBoolean("uniqueItems", node, false, location, result);
+            if(bp != null) {
+                impl.setUniqueItems(bp);
+            }
 
             ap = node.get("enum");
             if(ap != null) {

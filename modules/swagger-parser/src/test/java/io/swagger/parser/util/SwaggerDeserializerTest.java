@@ -5,6 +5,7 @@ import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.*;
@@ -1193,7 +1194,6 @@ public class SwaggerDeserializerTest {
 
     @Test
     public void testIssue247() {
-
         String yaml =
             "swagger: '2.0'\n" +
             "info:\n" +
@@ -1224,6 +1224,66 @@ public class SwaggerDeserializerTest {
         SwaggerDeserializationResult result = parser.readWithInfo(yaml);
         Swagger swagger = result.getSwagger();
 
-        Json.prettyPrint(swagger);
+        assertNotNull(swagger.getDefinitions().get("Pet"));
     }
+
+    @Test
+    public void testIssue343Parameter() {
+        String yaml =
+            "swagger: '2.0'\n" +
+            "info:\n" +
+            "  description: 'bleh'\n" +
+            "  version: '2.0.0'\n" +
+            "  title: 'Test'\n" +
+            "paths:\n" +
+            "  /foo:\n" +
+            "    post:\n" +
+            "      parameters:\n" +
+            "        - in: query\n" +
+            "          name: skip\n" +
+            "          type: integer\n" +
+            "          format: int32\n" +
+            "          multipleOf: 3\n" +
+            "        - in: body\n" +
+            "          name: body\n" +
+            "          required: true\n" +
+            "          schema:\n" +
+            "            type: object\n" +
+            "            additionalProperties:\n" +
+            "              type: string\n" +
+            "      responses:\n" +
+            "        200:\n" +
+            "          description: 'OK'\n" +
+            "definitions:\n" +
+            "  Fun:\n" +
+            "    properties:\n" +
+            "      id:\n" +
+            "        type: integer\n" +
+            "        format: int32\n" +
+            "        multipleOf: 5\n" +
+            "      mySet:\n" +
+            "        type: array\n" +
+            "        uniqueItems: true\n" +
+            "        items:\n" +
+            "          type: string";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+
+        QueryParameter qp = (QueryParameter)swagger.getPath("/foo").getPost().getParameters().get(0);
+        assertEquals(qp.getMultipleOf(), 3.0);
+
+        BodyParameter bp = (BodyParameter) swagger.getPath("/foo").getPost().getParameters().get(1);
+        ModelImpl schema = (ModelImpl)bp.getSchema();
+        assertTrue(schema.getAdditionalProperties() != null);
+
+        IntegerProperty id = (IntegerProperty)swagger.getDefinitions().get("Fun").getProperties().get("id");
+        assertEquals(id.getMultipleOf(), new BigDecimal("5"));
+
+        ArrayProperty ap = (ArrayProperty)swagger.getDefinitions().get("Fun").getProperties().get("mySet");
+        assertTrue(ap.getUniqueItems());
+    }
+
 }
