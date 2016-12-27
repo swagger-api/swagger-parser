@@ -2,15 +2,29 @@ package io.swagger.converter;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import io.swagger.models.*;
-import io.swagger.models.auth.*;
+import io.swagger.models.Contact;
+import io.swagger.models.Info;
+import io.swagger.models.License;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Response;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.auth.In;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.junit.Assert;
@@ -21,10 +35,16 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class LegacyConverterTest {
     SwaggerCompatConverter converter = new SwaggerCompatConverter();
@@ -213,7 +233,6 @@ public class LegacyConverterTest {
         Parameter param = swagger.getPaths().get("/events").getGet().getParameters().get(0);
     }
 
-
     static String readFile(String name) {
         try {
             return new String(Files.readAllBytes(new File(name).toPath()), Charset.forName("UTF-8"));
@@ -221,5 +240,22 @@ public class LegacyConverterTest {
         catch (Exception e) {
             return null;
         }
+    }
+
+    @Test
+    public void testIssue104() throws Exception {
+        Swagger swagger = converter.read("src/test/resources/specs/v1_2/issue-104.json");
+        Json.prettyPrint(swagger);
+        Property p = swagger.getDefinitions().get("Issue").getProperties().get("availableTransitions");
+        assertTrue(p instanceof ArrayProperty);
+        ArrayProperty ap = (ArrayProperty) p;
+        Property items = ap.getItems();
+        assertTrue(items instanceof StringProperty);
+        StringProperty sp = (StringProperty) items;
+
+        Set<String> expected = new HashSet<String>(Arrays.asList("startProgress", "stopProgress", "resolve", "reopen", "close"));
+        Set<String> actual = new HashSet<>(sp.getEnum());
+
+        assertEquals(actual, expected);
     }
 }
