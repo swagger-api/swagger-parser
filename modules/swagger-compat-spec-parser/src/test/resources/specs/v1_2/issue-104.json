@@ -1,0 +1,75 @@
+{
+  "apiVersion": "1.0.0",
+  "swaggerVersion": "1.2",
+  "basePath": "http://petstore.swagger.io/api",
+  "produces": [
+    "application/json",
+    "application/xml",
+    "text/plain",
+    "text/html"
+  ],
+  "info": {
+    "title": "Swagger Sample App",
+    "description": "This is a sample server Petstore server.  You can find out more about Swagger \n    at <a href=\"http://swagger.io\">http://swagger.io</a> or on irc.freenode.net, #swagger.  For this sample,\n    you can use the api key \"special-key\" to test the authorization filters",
+    "termsOfServiceUrl": "http://swagger.io/terms/",
+    "contact": "apiteam@swagger.io",
+    "license": "Apache 2.0",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html"
+  },
+  "apis": [
+    {
+      "path": "/test",
+      "operations": [
+        {
+          "method": "GET",
+          "summary": "Find pet by ID",
+          "notes": "Returns a pet based on ID",
+          "type": "Pet",
+          "nickname": "getPetById",
+          "authorizations": {},
+          "parameters": [],
+          "responseMessages": [
+            {
+              "code": 400,
+              "message": "Invalid ID supplied"
+            },
+            {
+              "code": 404,
+              "message": "Pet not found"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "models": {
+    "Issue" : {
+      "id" : "Issue",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "version" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "subject" : {
+          "type" : "string"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "open", "inProgress", "resolved", "closed" ]
+        },
+        "availableTransitions" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "enum" : [ "startProgress", "stopProgress", "resolve", "reopen", "close" ]
+          }
+        }
+      }
+    }
+  }
+}
+
+
