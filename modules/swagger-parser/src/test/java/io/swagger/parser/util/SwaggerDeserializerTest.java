@@ -1190,4 +1190,40 @@ public class SwaggerDeserializerTest {
         assertTrue(composed.getChild() instanceof ModelImpl);
         assertTrue(composed.getInterfaces().size() == 2);
     }
+
+    @Test
+    public void testIssue247() {
+
+        String yaml =
+            "swagger: '2.0'\n" +
+            "info:\n" +
+            "  description: 'bleh'\n" +
+            "  version: '2.0.0'\n" +
+            "  title: 'Test'\n" +
+            "paths:\n" +
+            "  /:\n" +
+            "    get:\n" +
+            "      parameters: []\n" +
+            "      responses:\n" +
+            "        200:\n" +
+            "          description: 'OK'\n" +
+            "    parameters: []\n" +
+            "definitions:\n" +
+            "  Pet:\n" +
+            "    allOf:\n" +
+            "      - type: 'object'\n" +
+            "        required:\n" +
+            "        - 'id'\n" +
+            "        properties:\n" +
+            "          id:\n" +
+            "            type: 'integer'\n" +
+            "            format: 'int64'";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+
+        Json.prettyPrint(swagger);
+    }
 }
