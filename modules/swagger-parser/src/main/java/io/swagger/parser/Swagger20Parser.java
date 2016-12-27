@@ -42,7 +42,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
             if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths);
             } else {
-                final String fileScheme = "file://";
+                final String fileScheme = "file:";
                 Path path;
                 if (location.toLowerCase().startsWith(fileScheme)) {
                     path = Paths.get(URI.create(location));
@@ -80,7 +80,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
             if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths);
             } else {
-                final String fileScheme = "file://";
+                final String fileScheme = "file:";
                 Path path;
                 if (location.toLowerCase().startsWith(fileScheme)) {
                     path = Paths.get(URI.create(location));

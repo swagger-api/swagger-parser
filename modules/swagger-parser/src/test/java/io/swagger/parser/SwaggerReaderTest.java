@@ -38,6 +38,22 @@ public class SwaggerReaderTest {
         assertNotNull(swagger);
     }
 
+    @Test(description = "it should read the uber api from Path URI")
+    public void readUberApiFromPathUri() {
+        final SwaggerParser parser = new SwaggerParser();
+        java.nio.file.Path uberPath = Paths.get("src/test/resources/uber.json");
+        final Swagger swagger = parser.read(uberPath.toUri().toString());
+        assertNotNull(swagger);
+    }
+
+    @Test(description = "it should read the uber api from File URI")
+    public void readUberApiFromFileUri() {
+        final SwaggerParser parser = new SwaggerParser();
+        java.io.File uberFile = new java.io.File("src/test/resources/uber.json");
+        final Swagger swagger = parser.read(uberFile.toURI().toString());
+        assertNotNull(swagger);
+    }
+
     @Test(description = "it should read the uber api with url string without file scheme")
     public void readUberApiFromFileNoScheme() {
         final SwaggerParser parser = new SwaggerParser();

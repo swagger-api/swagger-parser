@@ -8,7 +8,7 @@ public class PathUtils {
 
 
     public static Path getParentDirectoryOfFile(String fileStr) {
-        final String fileScheme = "file://";
+        final String fileScheme = "file:";
         Path file;
         fileStr = fileStr.replaceAll("\\\\","/");
         if (fileStr.toLowerCase().startsWith(fileScheme)) {
