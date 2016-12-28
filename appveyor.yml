@@ -1,0 +1,15 @@
+# http://www.appveyor.com/docs/appveyor-yml
+environment:
+  matrix:
+    - JAVA_HOME: C:\Program Files\Java\jdk1.7.0
+    - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+install:
+  # Log versions for debugging
+  - java -version
+  - mvn --version
+build_script:
+  - mvn --batch-mode -DskipTests package
+test_script:
+  - mvn --batch-mode test verify install
+cache:
+  - C:\Users\appveyor\.m2
