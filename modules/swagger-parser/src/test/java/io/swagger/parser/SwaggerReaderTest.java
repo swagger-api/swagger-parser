@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.*;
 import io.swagger.models.parameters.Parameter;
@@ -353,5 +354,25 @@ public class SwaggerReaderTest {
 
         assertTrue(pathParameter.isReadOnly());
         assertTrue(pathParameter.getAllowEmptyValue());
+    }
+
+    @Test(description = "it should read an example within an inlined schema")
+    public void testIssue1261InlineSchemaExample() {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("issue-1261.yaml");
+
+        Path path = swagger.getPath("/user");
+        assertNotNull(path);
+        Operation get = path.getGet();
+        assertNotNull(get);
+        assertTrue(get.getResponses().size() == 1);
+        Response response = get.getResponses().get("200");
+        Property schema = response.getSchema();
+        Object example = schema.getExample();
+        assertNotNull(example);
+        assertTrue(example instanceof ObjectNode);
+        ObjectNode objectNode = (ObjectNode) example;
+        assertEquals(objectNode.get("id").intValue(), 42);
+        assertEquals(objectNode.get("name").textValue(), "Arthur Dent");
     }
 }
