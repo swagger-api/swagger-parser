@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/swagger-api/swagger-parser.svg)](https://travis-ci.org/swagger-api/swagger-parser)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser)
+[![Windows Test](https://ci.appveyor.com/api/projects/status/github/swagger-api/swagger-parser?branch=master&svg=true&passingText=Windows%20Test%20-%20OK&failingText=Windows%20Test%20-%20Fails)](https://ci.appveyor.com/project/WilliamCheng/swagger-codegen-wh2wu)
 [![PR Stats](http://issuestats.com/github/swagger-api/swagger-parser/badge/pr)](http://issuestats.com/github/swagger-api/swagger-parser) [![Issue Stats](http://issuestats.com/github/swagger-api/swagger-parser/badge/issue)](http://issuestats.com/github/swagger-api/swagger-parser)
 
 
