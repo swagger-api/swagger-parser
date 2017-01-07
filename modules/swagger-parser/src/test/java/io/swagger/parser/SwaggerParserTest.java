@@ -10,11 +10,13 @@ import io.swagger.util.Yaml;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.*;
 
@@ -520,7 +522,6 @@ public class SwaggerParserTest {
         assertEquals(param1.getIn(), expectedIn);
     }
 
-
     @Test
     public void testNestedReferences() {
         SwaggerParser parser = new SwaggerParser();
@@ -530,5 +531,32 @@ public class SwaggerParserTest {
         assertTrue(swagger.getDefinitions().containsKey("externalObject"));
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
         assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
+    }
+
+    @Test
+    public void testCodegenPetstore() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/petstore-codegen.yaml");
+        Json.prettyPrint(swagger);
+        ModelImpl enumModel = (ModelImpl)swagger.getDefinitions().get("Enum_Test");
+        assertNotNull(enumModel);
+        Property enumProperty = enumModel.getProperties().get("enum_integer");
+        assertNotNull(enumProperty);
+
+        assertTrue(enumProperty instanceof IntegerProperty);
+        IntegerProperty enumIntegerProperty = (IntegerProperty) enumProperty;
+        List<Integer> integers = enumIntegerProperty.getEnum();
+        assertEquals(integers.get(0), new Integer(1));
+        assertEquals(integers.get(1), new Integer(-1));
+
+        Operation getOrderOperation = swagger.getPath("/store/order/{orderId}").getGet();
+        assertNotNull(getOrderOperation);
+        Parameter orderId = getOrderOperation.getParameters().get(0);
+        assertTrue(orderId instanceof PathParameter);
+        PathParameter orderIdPathParam = (PathParameter) orderId;
+        assertNotNull(orderIdPathParam.getMinimum());
+
+        BigDecimal minimum = orderIdPathParam.getMinimum();
+        assertEquals(minimum.toString(), "1");
     }
 }
