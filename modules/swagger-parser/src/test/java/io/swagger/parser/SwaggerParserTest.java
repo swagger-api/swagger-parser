@@ -558,5 +558,9 @@ public class SwaggerParserTest {
 
         BigDecimal minimum = orderIdPathParam.getMinimum();
         assertEquals(minimum.toString(), "1");
+
+        FormParameter formParam = (FormParameter)swagger.getPath("/fake").getPost().getParameters().get(3);
+
+        Json.prettyPrint(formParam);
     }
 }
