@@ -15,6 +15,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -201,6 +204,34 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);
 
         assertNotNull(result);
+        assertTrue(result.getMessages().isEmpty());
+
+        Swagger swagger = result.getSwagger();
+        Map<String, Model> definitions = swagger.getDefinitions();
+        Set<String> expectedDefinitions = new HashSet<String>();
+        expectedDefinitions.add("User");
+        expectedDefinitions.add("Category");
+        expectedDefinitions.add("Pet");
+        expectedDefinitions.add("Tag");
+        expectedDefinitions.add("Order");
+        expectedDefinitions.add("PetArray");
+        assertEquals(definitions.keySet(), expectedDefinitions);
+
+        Model petModel = definitions.get("Pet");
+        Set<String> expectedPetProps = new HashSet<String>();
+        expectedPetProps.add("id");
+        expectedPetProps.add("category");
+        expectedPetProps.add("name");
+        expectedPetProps.add("photoUrls");
+        expectedPetProps.add("tags");
+        expectedPetProps.add("status");
+        assertEquals(petModel.getProperties().keySet(), expectedPetProps);
+
+        ArrayModel petArrayModel = (ArrayModel) definitions.get("PetArray");
+        assertEquals(petArrayModel.getType(), "array");
+        RefProperty refProp = (RefProperty) petArrayModel.getItems();
+        assertEquals(refProp.get$ref(), "#/definitions/Pet");
+        assertNull(petArrayModel.getProperties());
     }
 
     @Test
