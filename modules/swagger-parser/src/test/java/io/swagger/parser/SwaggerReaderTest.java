@@ -74,7 +74,7 @@ public class SwaggerReaderTest {
         final SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("sampleWithMinimumValues.yaml");
         final QueryParameter qp = (QueryParameter) swagger.getPaths().get("/pets").getGet().getParameters().get(0);
-        assertEquals(qp.getMinimum(), new BigDecimal("0"));
+        assertEquals(qp.getMinimum(), new BigDecimal("0.0"));
     }
 
     @Test(description = "it should read the simple example with model extensions")

@@ -537,7 +537,6 @@ public class SwaggerParserTest {
     public void testCodegenPetstore() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/petstore-codegen.yaml");
-        Json.prettyPrint(swagger);
         ModelImpl enumModel = (ModelImpl)swagger.getDefinitions().get("Enum_Test");
         assertNotNull(enumModel);
         Property enumProperty = enumModel.getProperties().get("enum_integer");
@@ -557,10 +556,10 @@ public class SwaggerParserTest {
         assertNotNull(orderIdPathParam.getMinimum());
 
         BigDecimal minimum = orderIdPathParam.getMinimum();
-        assertEquals(minimum.toString(), "1");
+        assertEquals(minimum.toString(), "1.0");
 
         FormParameter formParam = (FormParameter)swagger.getPath("/fake").getPost().getParameters().get(3);
 
-        Json.prettyPrint(formParam);
+        assertEquals(formParam.getMinimum().toString(), "32.1");
     }
 }
