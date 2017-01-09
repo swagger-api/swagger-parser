@@ -466,6 +466,13 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
     }
 
+    @Test
+    public void testIssue360() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_360.yaml");
+
+        assertNotNull(swagger);
+    }
 
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
