@@ -519,6 +519,21 @@ public class SwaggerParserTest {
 
         ObjectNode objectNode = (ObjectNode) jn;
         assertEquals(objectNode.get("foo").textValue(), "bar");
+
+        Parameter stringBodyParameter = swagger.getPath("/otherPets").getPost().getParameters().get(0);
+
+        assertTrue(stringBodyParameter instanceof BodyParameter);
+        BodyParameter sbp = (BodyParameter) stringBodyParameter;
+        assertTrue(sbp.getRequired());
+        assertTrue(sbp.getAllowEmptyValue());
+        assertEquals(sbp.getName(), "simple");
+
+        Model sbpModel = sbp.getSchema();
+        assertTrue(sbpModel instanceof ModelImpl);
+        ModelImpl sbpModelImpl = (ModelImpl)sbpModel;
+
+        assertEquals(sbpModelImpl.getType(), "string");
+        assertEquals(sbpModelImpl.getFormat(), "uuid");
     }
 
     private Swagger doRelativeFileTest(String location) {

@@ -594,12 +594,10 @@ public class SwaggerDeserializer {
                 // examples
                 ObjectNode examplesNode = getObject("examples", obj, false, location, result);
                 if(examplesNode != null) {
-                    Map<String, Object> examples = Json.mapper().convertValue(examplesNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Object.class));
-//                    bp.setExamples(examples);
-                    Json.prettyPrint(examples);
+                    Map<String, String> examples = Json.mapper().convertValue(examplesNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Object.class));
+                    bp.setExamples(examples);
                 }
 
-                // access
                 // pattern
                 String pat = getString("pattern", obj, false, location, result);
                 if(pat != null) {

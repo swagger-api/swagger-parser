@@ -21,3 +21,13 @@ paths:
           description: Success
           schema:
             type: object
+  /otherPets:
+    post:
+      parameters:
+      - name: simple
+        in: body
+        required: true
+        allowEmptyValue: true
+        schema:
+          type: string
+          format: uuid
