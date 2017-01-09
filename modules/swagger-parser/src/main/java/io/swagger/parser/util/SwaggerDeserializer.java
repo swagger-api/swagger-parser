@@ -584,7 +584,50 @@ public class SwaggerDeserializer {
                 output = sp;
             }
             else if ("body".equals(value)) {
-                output = Json.mapper().convertValue(obj, Parameter.class);
+                BodyParameter bp = new BodyParameter();
+
+                JsonNode node = obj.get("schema");
+                if(node != null && node instanceof ObjectNode) {
+                    bp.setSchema(this.definition((ObjectNode)node, location, result));
+                }
+
+                // examples
+                ObjectNode examplesNode = getObject("examples", obj, false, location, result);
+                if(examplesNode != null) {
+                    Map<String, String> examples = Json.mapper().convertValue(examplesNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Object.class));
+                    bp.setExamples(examples);
+                }
+
+                // pattern
+                String pat = getString("pattern", obj, false, location, result);
+                if(pat != null) {
+                    bp.setPattern(pat);
+                }
+
+                // allowEmptyValue
+                Boolean bl = getBoolean("allowEmptyValue", obj, false, location, result);
+                if(bl != null) {
+                    bp.setAllowEmptyValue(bl);
+                }
+                // readOnly
+                bl = getBoolean("readOnly", obj, false, location, result);
+                if(bl != null) {
+                    bp.setReadOnly(bl);
+                }
+
+                // vendor extensions
+                Set<String> keys = getKeys(obj);
+                for(String key : keys) {
+                    if(key.startsWith("x-")) {
+                        bp.setVendorExtension(key, extension(obj.get(key)));
+                    }
+                    else if(!BODY_PARAMETER_KEYS.contains(key)) {
+                        result.extra(location, key, obj.get(key));
+                    }
+                }
+                output = bp;
+
+//                output = Json.mapper().convertValue(obj, Parameter.class);
             }
             if(output != null) {
                 value = getString("name", obj, true, location, result);

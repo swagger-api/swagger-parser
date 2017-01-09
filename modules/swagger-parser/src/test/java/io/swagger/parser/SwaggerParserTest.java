@@ -1,9 +1,29 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.swagger.models.*;
-import io.swagger.models.parameters.*;
-import io.swagger.models.properties.*;
+import io.swagger.models.ArrayModel;
+import io.swagger.models.ComposedModel;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.Response;
+import io.swagger.models.Swagger;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.FormParameter;
+import io.swagger.models.parameters.HeaderParameter;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ByteArrayProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
@@ -13,15 +33,15 @@ import org.testng.annotations.Test;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Set;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 
 public class SwaggerParserTest {
@@ -466,6 +486,55 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
     }
 
+    @Test
+    public void testIssue360() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_360.yaml");
+        assertNotNull(swagger);
+
+        Parameter parameter = swagger.getPath("/pets").getPost().getParameters().get(0);
+        assertNotNull(parameter);
+        assertTrue(parameter instanceof BodyParameter);
+
+        BodyParameter bp = (BodyParameter) parameter;
+
+        assertNotNull(bp.getSchema());
+        Model model = bp.getSchema();
+        assertTrue(model instanceof ModelImpl);
+
+        ModelImpl impl = (ModelImpl) model;
+        assertNotNull(impl.getProperties().get("foo"));
+
+        Map<String, Object> extensions = bp.getVendorExtensions();
+        assertNotNull(extensions);
+
+        assertNotNull(extensions.get("x-examples"));
+        Object o = extensions.get("x-examples");
+        assertTrue(o instanceof ObjectNode);
+
+        ObjectNode on = (ObjectNode) o;
+
+        JsonNode jn = on.get("application/json");
+        assertTrue(jn instanceof ObjectNode);
+
+        ObjectNode objectNode = (ObjectNode) jn;
+        assertEquals(objectNode.get("foo").textValue(), "bar");
+
+        Parameter stringBodyParameter = swagger.getPath("/otherPets").getPost().getParameters().get(0);
+
+        assertTrue(stringBodyParameter instanceof BodyParameter);
+        BodyParameter sbp = (BodyParameter) stringBodyParameter;
+        assertTrue(sbp.getRequired());
+        assertTrue(sbp.getAllowEmptyValue());
+        assertEquals(sbp.getName(), "simple");
+
+        Model sbpModel = sbp.getSchema();
+        assertTrue(sbpModel instanceof ModelImpl);
+        ModelImpl sbpModelImpl = (ModelImpl)sbpModel;
+
+        assertEquals(sbpModelImpl.getType(), "string");
+        assertEquals(sbpModelImpl.getFormat(), "uuid");
+    }
 
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
