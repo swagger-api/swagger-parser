@@ -67,6 +67,31 @@ then you are in luck - you have the spec in pojo form, now pass it to pretty() a
     String swaggerString = Json.pretty(swagger);
 ```
 
+### Dealing with self-signed SSL certificates
+If you're dealing with self-signed SSL certificates, or those signed by GoDaddy, you'll need to disable SSL Trust 
+Manager.  That's done by setting a system environment variable as such:
+
+```
+export TRUST_ALL=true
+```
+
+And then the swagger-parser will _ignore_ invalid certificates.  Of course this is generally a bad idea, but if you're 
+working inside a firewall or really know what you're doing, well, there's your rope.
+
+### Dealing with Let's Encrypt
+Depending on the version of Java that you use, certificates signed by the [Let's Encrypt]() certificate authority _may not work_
+by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
+JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
+not accepting Let's Encrypt signed certificates.
+
+Your options include:
+
+* Accepting all certificates per above
+* Installing the certificate manually in your JVM using the keystore using the `keytool` command
+* Configuring the JVM on startup to load your certificate
+
+But... this is all standard SSL configuration stuff and is well documented across the web.
+
 ### Prerequisites
 You need the following installed and available in your $PATH:
 
