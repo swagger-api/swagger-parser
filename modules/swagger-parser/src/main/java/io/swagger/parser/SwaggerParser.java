@@ -43,8 +43,10 @@ public class SwaggerParser {
                 return output;
             }
         }
-        output = new SwaggerDeserializationResult();
-        output.message("The swagger definition could not be read");
+        if(output == null) {
+            output = new SwaggerDeserializationResult()
+                .message("The swagger definition could not be read");
+        }
         return output;
     }
 
