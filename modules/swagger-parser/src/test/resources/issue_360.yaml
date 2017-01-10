@@ -31,3 +31,19 @@ paths:
         schema:
           type: string
           format: uuid
+  /evenMorePets:
+    post:
+      parameters:
+      - name: simple
+        in: body
+        required: true
+        allowEmptyValue: true
+        schema:
+          $ref: '#/definitions/Pet'
+definitions:
+  Pet:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
