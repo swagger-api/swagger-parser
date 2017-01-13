@@ -1285,5 +1285,52 @@ public class SwaggerDeserializerTest {
         ArrayProperty ap = (ArrayProperty)swagger.getDefinitions().get("Fun").getProperties().get("mySet");
         assertTrue(ap.getUniqueItems());
     }
+    @Test
+    public void testIssue386() {
+        String yaml =
+            "swagger: '2.0'\n" +
+            "info:\n" +
+            "  description: 'bleh'\n" +
+            "  version: '2.0.0'\n" +
+            "  title: 'Test'\n" +
+            "paths:\n" +
+            "  /foo:\n" +
+            "    post:\n" +
+            "      parameters:\n" +
+            "      - in: body\n" +
+            "        name: ugly\n" +
+            "        schema:\n" +
+            "          type: object\n" +
+            "          enum:\n" +
+            "          - id: fun\n" +
+            "          properties:\n" +
+            "            id:\n" +
+            "              type: string\n" +
+            "      responses:\n" +
+            "        200:\n" +
+            "          description: 'OK'\n" +
+            "definitions:\n" +
+            "  Fun:\n" +
+            "    type: object\n" +
+            "    properties:\n" +
+            "      complex:\n" +
+            "        enum:\n" +
+            "        - id: 110\n" +
+            "        type: object\n" +
+            "        properties:\n" +
+            "          id:\n" +
+            "            type: string\n" +
+            "  MyEnum:\n" +
+            "    type: integer\n" +
+            "    enum:\n" +
+            "    - value: 3\n" +
+            "      description: Value 1\n" +
+            "    - value: 10\n" +
+            "      description: Value 2";
+        SwaggerParser parser = new SwaggerParser();
 
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+        Json.prettyPrint(result);
+    }
 }
