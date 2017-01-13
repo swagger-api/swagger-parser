@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -63,6 +64,13 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 rootNode = DeserializationUtils.readYamlTree(data);
             }
             return readWithInfo(rootNode);
+        }
+        catch (SSLHandshakeException e) {
+            SwaggerDeserializationResult output = new SwaggerDeserializationResult();
+            output.message("unable to read location `" + location + "` due to a SSL configuration error.  " +
+                    "It is possible that the server SSL certificate is invalid, self-signed, or has an untrusted " +
+                    "Certificate Authority.");
+            return output;
         }
         catch (Exception e) {
             SwaggerDeserializationResult output = new SwaggerDeserializationResult();

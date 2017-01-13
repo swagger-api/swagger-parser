@@ -534,6 +534,20 @@ public class SwaggerParserTest {
 
         assertEquals(sbpModelImpl.getType(), "string");
         assertEquals(sbpModelImpl.getFormat(), "uuid");
+
+        Parameter refBodyParameter = swagger.getPath("/evenMorePets").getPost().getParameters().get(0);
+
+        assertTrue(refBodyParameter instanceof BodyParameter);
+        BodyParameter ref = (BodyParameter) refBodyParameter;
+        assertTrue(ref.getRequired());
+        assertTrue(ref.getAllowEmptyValue());
+        assertEquals(ref.getName(), "simple");
+
+        Model refModel = ref.getSchema();
+        assertTrue(refModel instanceof RefModel);
+        RefModel refModelImpl = (RefModel)refModel;
+
+        assertEquals(refModelImpl.getSimpleRef(), "Pet");
     }
 
     private Swagger doRelativeFileTest(String location) {
