@@ -1,0 +1,8 @@
+---
+400:
+  description: "Invalid input"
+  schema:
+    type: object
+    properties:
+      message:
+        type: string
