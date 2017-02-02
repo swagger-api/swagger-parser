@@ -1285,6 +1285,7 @@ public class SwaggerDeserializerTest {
         ArrayProperty ap = (ArrayProperty)swagger.getDefinitions().get("Fun").getProperties().get("mySet");
         assertTrue(ap.getUniqueItems());
     }
+
     @Test
     public void testIssue386() {
         String yaml =
@@ -1331,6 +1332,22 @@ public class SwaggerDeserializerTest {
 
         SwaggerDeserializationResult result = parser.readWithInfo(yaml);
         Swagger swagger = result.getSwagger();
-        Json.prettyPrint(result);
+        assertNotNull(swagger);
+    }
+
+    @Test
+    public void testIssue360() {
+        Swagger swagger = new Swagger();
+
+        ModelImpl model = new ModelImpl()._enum((String) null);
+        swagger.addDefinition("modelWithNullEnum", model);
+
+        String json = Json.pretty(swagger);
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        Swagger rebuilt = result.getSwagger();
+        assertNotNull(rebuilt);
     }
 }
