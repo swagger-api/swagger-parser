@@ -670,7 +670,7 @@ public class SwaggerParserTest {
         assertNotNull(orderIdPathParam.getMinimum());
 
         BigDecimal minimum = orderIdPathParam.getMinimum();
-        assertEquals(minimum.toString(), "1.0");
+        assertEquals(minimum.toString(), "1");
 
         FormParameter formParam = (FormParameter)swagger.getPath("/fake").getPost().getParameters().get(3);
 
@@ -688,5 +688,77 @@ public class SwaggerParserTest {
 
         assertTrue(pp.getMinimum().toString().equals("1"));
         assertTrue(pp.getMaximum().toString().equals("5"));
+    }
+
+    @Test
+    public void testCodegenIssue4555() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        String yaml = "swagger: '2.0'\n" +
+                "\n" +
+                "info:\n" +
+                "  title: test\n" +
+                "  version: \"0.0.1\"\n" +
+                "\n" +
+                "schemes:\n" +
+                "  - http\n" +
+                "produces:\n" +
+                "  - application/json\n" +
+                "\n" +
+                "paths:\n" +
+                "  /contents/{id}:\n" +
+                "    parameters:\n" +
+                "      - name: id\n" +
+                "        in: path\n" +
+                "        description: test\n" +
+                "        required: true\n" +
+                "        type: integer\n" +
+                "\n" +
+                "    get:\n" +
+                "      description: test\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: OK\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/Content'\n" +
+                "\n" +
+                "definitions:\n" +
+                "  Content:\n" +
+                "    type: object\n" +
+                "    title: \t\ttest";
+        final SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        // can't parse with tabs!
+        assertNull(result.getSwagger());
+    }
+
+    @Test
+    public void testIssue393() {
+        SwaggerParser parser = new SwaggerParser();
+
+        String yaml =
+            "swagger: '2.0'\n" +
+                    "info:\n" +
+                    "  title: x\n" +
+                    "  version: 1.0.0\n" +
+                    "paths:\n" +
+                    "  /test:\n" +
+                    "    get:\n" +
+                    "      parameters: []\n" +
+                    "      responses:\n" +
+                    "        '400':\n" +
+                    "          description: |\n" +
+                    "            The account could not be created because a credential didn't meet the complexity requirements.\n" +
+                    "          x-error-refs:\n" +
+                    "            - '$ref': '#/x-error-defs/credentialTooShort'\n" +
+                    "            - '$ref': '#/x-error-defs/credentialTooLong'\n" +
+                    "x-error-defs:\n" +
+                    "  credentialTooShort:\n" +
+                    "    errorID: credentialTooShort";
+        final SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        assertNotNull(result.getSwagger());
+        Swagger swagger = result.getSwagger();
+
+        assertNotNull(swagger.getVendorExtensions().get("x-error-defs"));
     }
 }
