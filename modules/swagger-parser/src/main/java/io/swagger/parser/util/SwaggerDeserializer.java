@@ -480,10 +480,10 @@ public class SwaggerDeserializer {
                 map.put(DEFAULT, defaultValue);
                 sp.setDefault(defaultValue);
 
-                Double dbl = getDouble("maximum", obj, false, location, result);
-                if(dbl != null) {
-                    map.put(MAXIMUM, new BigDecimal(dbl.toString()));
-                    sp.setMaximum(new BigDecimal(dbl.toString()));
+                String numberAsString = getString("maximum", obj, false, location, result);
+                if(numberAsString != null) {
+                    map.put(MAXIMUM, new BigDecimal(numberAsString));
+                    sp.setMaximum(new BigDecimal(numberAsString));
                 }
 
                 Boolean bl = getBoolean("exclusiveMaximum", obj, false, location, result);
@@ -492,10 +492,10 @@ public class SwaggerDeserializer {
                     sp.setExclusiveMaximum(bl);
                 }
 
-                dbl = getDouble("minimum", obj, false, location, result);
-                if(dbl != null) {
-                    map.put(MINIMUM, new BigDecimal(dbl.toString()));
-                    sp.setMinimum(new BigDecimal(dbl.toString()));
+                numberAsString = getString("minimum", obj, false, location, result);
+                if(numberAsString != null) {
+                    map.put(MINIMUM, new BigDecimal(numberAsString.toString()));
+                    sp.setMinimum(new BigDecimal(numberAsString.toString()));
                 }
 
                 bl = getBoolean("exclusiveMinimum", obj, false, location, result);
@@ -527,7 +527,7 @@ public class SwaggerDeserializer {
                 map.put(MAX_LENGTH, iv);
                 sp.setMaxLength(iv);
 
-                dbl = getDouble("multipleOf", obj, false, location, result);
+                Double dbl = getDouble("multipleOf", obj, false, location, result);
                 if(dbl != null) {
                     map.put(MULTIPLE_OF, new BigDecimal(dbl.toString()));
                     sp.setMultipleOf(dbl);
