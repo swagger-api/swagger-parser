@@ -670,11 +670,24 @@ public class SwaggerParserTest {
         assertNotNull(orderIdPathParam.getMinimum());
 
         BigDecimal minimum = orderIdPathParam.getMinimum();
-        assertEquals(minimum.toString(), "1.0");
+        assertEquals(minimum.toString(), "1");
 
         FormParameter formParam = (FormParameter)swagger.getPath("/fake").getPost().getParameters().get(3);
 
         assertEquals(formParam.getMinimum().toString(), "32.1");
+    }
+
+    @Test
+    public void testIssue339() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue-339.json");
+
+        Parameter param = swagger.getPath("/store/order/{orderId}").getGet().getParameters().get(0);
+        assertTrue(param instanceof PathParameter);
+        PathParameter pp = (PathParameter) param;
+
+        assertTrue(pp.getMinimum().toString().equals("1"));
+        assertTrue(pp.getMaximum().toString().equals("5"));
     }
 
     @Test
