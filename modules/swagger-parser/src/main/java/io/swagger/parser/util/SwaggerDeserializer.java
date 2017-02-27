@@ -15,20 +15,20 @@ import java.util.*;
 import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
 
 public class SwaggerDeserializer {
-    static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
-    static Set<String> EXTERNAL_DOCS_KEYS = new HashSet<String>(Arrays.asList("description", "url"));
-    static Set<String> SCHEMA_KEYS = new HashSet<String>(Arrays.asList("discriminator", "example", "$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties", "xml", "readOnly", "allowEmptyValue"));
-    static Set<String> INFO_KEYS = new HashSet<String>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
-    static Set<String> TAG_KEYS = new HashSet<String>(Arrays.asList("description", "name", "externalDocs"));
-    static Set<String> RESPONSE_KEYS = new HashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
-    static Set<String> CONTACT_KEYS = new HashSet<String>(Arrays.asList("name", "url", "email"));
-    static Set<String> LICENSE_KEYS = new HashSet<String>(Arrays.asList("name", "url"));
-    static Set<String> REF_MODEL_KEYS = new HashSet<String>(Arrays.asList("$ref"));
-    static Set<String> PATH_KEYS = new HashSet<String>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options", "parameters"));
-    static Set<String> OPERATION_KEYS = new HashSet<String>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
-    static Set<String> PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf", "readOnly", "allowEmptyValue"));
-    static Set<String> BODY_PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
-    static Set<String> SECURITY_SCHEME_KEYS = new HashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
+    static Set<String> ROOT_KEYS = new LinkedHashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
+    static Set<String> EXTERNAL_DOCS_KEYS = new LinkedHashSet<String>(Arrays.asList("description", "url"));
+    static Set<String> SCHEMA_KEYS = new LinkedHashSet<String>(Arrays.asList("discriminator", "example", "$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties", "xml", "readOnly", "allowEmptyValue"));
+    static Set<String> INFO_KEYS = new LinkedHashSet<String>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
+    static Set<String> TAG_KEYS = new LinkedHashSet<String>(Arrays.asList("description", "name", "externalDocs"));
+    static Set<String> RESPONSE_KEYS = new LinkedHashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
+    static Set<String> CONTACT_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "url", "email"));
+    static Set<String> LICENSE_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "url"));
+    static Set<String> REF_MODEL_KEYS = new LinkedHashSet<String>(Arrays.asList("$ref"));
+    static Set<String> PATH_KEYS = new LinkedHashSet<String>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options", "parameters"));
+    static Set<String> OPERATION_KEYS = new LinkedHashSet<String>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
+    static Set<String> PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf", "readOnly", "allowEmptyValue"));
+    static Set<String> BODY_PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
+    static Set<String> SECURITY_SCHEME_KEYS = new LinkedHashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
@@ -115,7 +115,7 @@ public class SwaggerDeserializer {
             // TODO: parse
 
             if(obj != null) {
-                Map<String, Parameter> parameters = new HashMap<>();
+                Map<String, Parameter> parameters = new LinkedHashMap<>();
                 Set<String> keys = getKeys(obj);
                 for(String key : keys) {
                     JsonNode paramNode = obj.get(key);
@@ -472,7 +472,7 @@ public class SwaggerDeserializer {
             if(sp != null) {
                 // type is mandatory when sp != null
                 getString("type", obj, true, location, result);
-                Map<PropertyBuilder.PropertyId, Object> map = new HashMap<PropertyBuilder.PropertyId, Object>();
+                Map<PropertyBuilder.PropertyId, Object> map = new LinkedHashMap<PropertyBuilder.PropertyId, Object>();
 
                 map.put(TYPE, type);
                 map.put(FORMAT, format);
@@ -1221,7 +1221,7 @@ public class SwaggerDeserializer {
         if(node == null)
             return null;
 
-        Map<String, SecuritySchemeDefinition> output = new HashMap<String, SecuritySchemeDefinition>();
+        Map<String, SecuritySchemeDefinition> output = new LinkedHashMap<>();
         Set<String> keys = getKeys(node);
 
         for(String key : keys) {
@@ -1547,9 +1547,9 @@ public class SwaggerDeserializer {
 
     static class ParseResult {
         private boolean valid = true;
-        private Map<Location, JsonNode> extra = new HashMap<Location, JsonNode>();
-        private Map<Location, JsonNode> unsupported = new HashMap<Location, JsonNode>();
-        private Map<Location, String> invalidType = new HashMap<Location, String>();
+        private Map<Location, JsonNode> extra = new LinkedHashMap<Location, JsonNode>();
+        private Map<Location, JsonNode> unsupported = new LinkedHashMap<Location, JsonNode>();
+        private Map<Location, String> invalidType = new LinkedHashMap<Location, String>();
         private List<Location> missing = new ArrayList<Location>();
 
         public void unsupported(String location, String key, JsonNode value) {

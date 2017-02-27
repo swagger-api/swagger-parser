@@ -36,14 +36,14 @@ public class ResolverCache {
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
     private final String rootPath;
-    private Map<String, Object> resolutionCache = new HashMap<>();
-    private Map<String, String> externalFileCache = new HashMap<>();
-    private Set<String> referencedModelKeys = new HashSet<>();
+    private Map<String, Object> resolutionCache = new LinkedHashMap<>();
+    private Map<String, String> externalFileCache = new LinkedHashMap<>();
+    private Set<String> referencedModelKeys = new LinkedHashSet<>();
 
     /*
     a map that stores original external references, and their associated renamed references
      */
-    private Map<String, String> renameCache = new HashMap<>();
+    private Map<String, String> renameCache = new LinkedHashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
