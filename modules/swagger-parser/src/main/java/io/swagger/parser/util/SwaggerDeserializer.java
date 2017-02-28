@@ -836,49 +836,7 @@ public class SwaggerDeserializer {
     }
 
     public Object extension(JsonNode jsonNode) {
-        if(jsonNode.getNodeType().equals(JsonNodeType.BOOLEAN)) {
-            return jsonNode.asBoolean();
-        }
-        if(jsonNode.getNodeType().equals(JsonNodeType.STRING)) {
-            return jsonNode.asText();
-        }
-        if(jsonNode.getNodeType().equals(JsonNodeType.NUMBER)) {
-            NumericNode n = (NumericNode) jsonNode;
-            if(n.isLong()) {
-                return jsonNode.asLong();
-            }
-            if(n.isInt()) {
-                return jsonNode.asInt();
-            }
-            if(n.isBigDecimal()) {
-                return jsonNode.textValue();
-            }
-            if(n.isBoolean()) {
-                return jsonNode.asBoolean();
-            }
-            if(n.isFloat()) {
-                return jsonNode.floatValue();
-            }
-            if(n.isDouble()) {
-                return jsonNode.doubleValue();
-            }
-            if(n.isShort()) {
-                return jsonNode.intValue();
-            }
-            return jsonNode.asText();
-        }
-        if(jsonNode.getNodeType().equals(JsonNodeType.ARRAY)) {
-            ArrayNode an = (ArrayNode) jsonNode;
-            List<Object> o = new ArrayList<Object>();
-            for(JsonNode i : an) {
-                Object obj = extension(i);
-                if(obj != null) {
-                    o.add(obj);
-                }
-            }
-            return o;
-        }
-        return jsonNode;
+        return Json.mapper().convertValue(jsonNode, Object.class);
     }
 
     public Model allOfModel(ObjectNode node, String location, ParseResult result) {

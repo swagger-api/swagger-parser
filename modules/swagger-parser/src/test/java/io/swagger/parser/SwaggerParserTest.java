@@ -1,6 +1,5 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
@@ -27,7 +26,7 @@ import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
@@ -259,8 +258,10 @@ public class SwaggerParserTest {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/file-reference-with-vendor-ext/b.yaml");
         Map<String, Model> definitions = swagger.getDefinitions();
-        assertTrue(definitions.get("z").getVendorExtensions().get("x-foo") instanceof ObjectNode);
-        assertTrue(definitions.get("x").getVendorExtensions().get("x-foo") instanceof ObjectNode);
+        assertTrue(definitions.get("z").getVendorExtensions().get("x-foo") instanceof Map);
+        assertEquals(((Map)definitions.get("z").getVendorExtensions().get("x-foo")).get("bar"), "baz");
+        assertTrue(definitions.get("x").getVendorExtensions().get("x-foo") instanceof Map);
+        assertEquals(((Map)definitions.get("x").getVendorExtensions().get("x-foo")).get("bar"), "baz");
     }
 
     @Test
@@ -402,7 +403,7 @@ public class SwaggerParserTest {
 
         Swagger swagger = result.getSwagger();
 
-        assertEquals(swagger.getVendorExtensions().get("x-some-vendor"), Json.mapper().createObjectNode().put("sometesting", "bye!"));
+        assertEquals(((Map)swagger.getVendorExtensions().get("x-some-vendor")).get("sometesting"), "bye!");
         assertEquals(swagger.getPath("/foo").getVendorExtensions().get("x-something"), "yes, it is supported");
         assertTrue(result.getMessages().size() == 1);
         assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
@@ -510,15 +511,15 @@ public class SwaggerParserTest {
 
         assertNotNull(extensions.get("x-examples"));
         Object o = extensions.get("x-examples");
-        assertTrue(o instanceof ObjectNode);
+        assertTrue(o instanceof Map);
 
-        ObjectNode on = (ObjectNode) o;
+        Map<String, Object> on = (Map<String, Object>) o;
 
-        JsonNode jn = on.get("application/json");
-        assertTrue(jn instanceof ObjectNode);
+        Object jn = on.get("application/json");
+        assertTrue(jn instanceof Map);
 
-        ObjectNode objectNode = (ObjectNode) jn;
-        assertEquals(objectNode.get("foo").textValue(), "bar");
+        Map<String, Object> objectNode = (Map<String, Object>) jn;
+        assertEquals(objectNode.get("foo"), "bar");
 
         Parameter stringBodyParameter = swagger.getPath("/otherPets").getPost().getParameters().get(0);
 

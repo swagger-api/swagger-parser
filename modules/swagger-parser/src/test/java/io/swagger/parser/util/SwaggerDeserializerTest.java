@@ -345,7 +345,7 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute info.title is missing"));
         assertTrue(messages.contains("attribute paths is missing"));
 
-        assertEquals(result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid").toString(), "{\"isValid\":true}");
+        assertEquals(((Map)result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid")).get("isValid"), true);
     }
 
 
