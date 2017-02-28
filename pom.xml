@@ -12,6 +12,15 @@
     <version>1.0.26-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
+
+
+    <scm>
+        <connection>scm:git:git@github.com:restlet/swagger-parser.git</connection>
+        <developerConnection>scm:git:git@github.com:restlet/swagger-parser.git</developerConnection>
+        <url>https://github.com/restlet/swagger-parser</url>
+    </scm>
+
+
     <developers>
         <developer>
             <id>fehguy</id>
@@ -243,4 +252,17 @@
         <wiremock-version>2.4.1</wiremock-version>
         <surefire-version>2.18.1</surefire-version>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>Nexus Release Repository</name>
+            <url>https://nexus.rest-let.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>https://nexus.rest-let.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
