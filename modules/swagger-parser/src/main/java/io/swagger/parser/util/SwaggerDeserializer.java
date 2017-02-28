@@ -480,10 +480,10 @@ public class SwaggerDeserializer {
                 map.put(DEFAULT, defaultValue);
                 sp.setDefault(defaultValue);
 
-                String numberAsString = getString("maximum", obj, false, location, result);
-                if(numberAsString != null) {
-                    map.put(MAXIMUM, new BigDecimal(numberAsString));
-                    sp.setMaximum(new BigDecimal(numberAsString));
+                BigDecimal bd = getBigDecimal("maximum", obj, false, location, result);
+                if(bd != null) {
+                    map.put(MAXIMUM, bd);
+                    sp.setMaximum(bd);
                 }
 
                 Boolean bl = getBoolean("exclusiveMaximum", obj, false, location, result);
@@ -492,10 +492,10 @@ public class SwaggerDeserializer {
                     sp.setExclusiveMaximum(bl);
                 }
 
-                numberAsString = getString("minimum", obj, false, location, result);
-                if(numberAsString != null) {
-                    map.put(MINIMUM, new BigDecimal(numberAsString.toString()));
-                    sp.setMinimum(new BigDecimal(numberAsString.toString()));
+                bd = getBigDecimal("minimum", obj, false, location, result);
+                if(bd != null) {
+                    map.put(MINIMUM, bd);
+                    sp.setMinimum(bd);
                 }
 
                 bl = getBoolean("exclusiveMinimum", obj, false, location, result);
@@ -504,8 +504,13 @@ public class SwaggerDeserializer {
                     sp.setExclusiveMinimum(bl);
                 }
 
-                map.put(MAX_LENGTH, getInteger("maxLength", obj, false, location, result));
-                map.put(MIN_LENGTH, getInteger("minLength", obj, false, location, result));
+                Integer maxLength = getInteger("maxLength", obj, false, location, result);
+                map.put(MAX_LENGTH, maxLength);
+                sp.setMaxLength(maxLength);
+
+                Integer minLength = getInteger("minLength", obj, false, location, result);
+                map.put(MIN_LENGTH, minLength);
+                sp.setMinLength(minLength);
 
                 String pat = getString("pattern", obj, false, location, result);
                 map.put(PATTERN, pat);
@@ -527,19 +532,26 @@ public class SwaggerDeserializer {
                 map.put(MAX_LENGTH, iv);
                 sp.setMaxLength(iv);
 
-                Double dbl = getDouble("multipleOf", obj, false, location, result);
-                if(dbl != null) {
-                    map.put(MULTIPLE_OF, new BigDecimal(dbl.toString()));
-                    sp.setMultipleOf(dbl);
+                bd = getBigDecimal("multipleOf", obj, false, location, result);
+                if(bd != null) {
+                    map.put(MULTIPLE_OF, bd);
+                    sp.setMultipleOf(bd.doubleValue());
                 }
 
-                map.put(UNIQUE_ITEMS, getBoolean("uniqueItems", obj, false, location, result));
+                Boolean uniqueItems = getBoolean("uniqueItems", obj, false, location, result);
+                map.put(UNIQUE_ITEMS, uniqueItems);
+                sp.setUniqueItems(uniqueItems);
 
                 ArrayNode an = getArray("enum", obj, false, location, result);
                 if(an != null) {
                     List<String> _enum = new ArrayList<String>();
                     for(JsonNode n : an) {
-                        _enum.add(n.textValue());
+                        if(n.isValueNode()) {
+                            _enum.add(n.asText());
+                        }
+                        else {
+                            result.invalidType(location, "enum", "value", n);
+                        }
                     }
                     sp.setEnum(_enum);
                     map.put(ENUM, _enum);
@@ -1419,8 +1431,8 @@ public class SwaggerDeserializer {
         return on;
     }
 
-    public Double getDouble(String key, ObjectNode node, boolean required, String location, ParseResult result) {
-        Double value = null;
+    public BigDecimal getBigDecimal(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        BigDecimal value = null;
         JsonNode v = node.get(key);
         if (node == null || v == null) {
             if (required) {
@@ -1429,7 +1441,7 @@ public class SwaggerDeserializer {
             }
         }
         else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
-            value = v.asDouble();
+            value = new BigDecimal(v.asText());
         }
         else if(!v.isValueNode()) {
             result.invalidType(location, key, "double", node);

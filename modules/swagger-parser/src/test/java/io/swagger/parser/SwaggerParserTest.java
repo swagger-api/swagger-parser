@@ -1,6 +1,5 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
 import io.swagger.models.Model;
@@ -762,4 +761,45 @@ public class SwaggerParserTest {
 
         assertNotNull(swagger.getVendorExtensions().get("x-error-defs"));
     }
+
+    @Test
+    public void testBadFormat() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/bad_format.yaml");
+
+        Path path = swagger.getPath("/pets");
+
+        Parameter parameter = path.getGet().getParameters().get(0);
+        assertNotNull(parameter);
+        assertTrue(parameter instanceof QueryParameter);
+        QueryParameter queryParameter = (QueryParameter) parameter;
+        assertEquals(queryParameter.getName(), "query-param-int32");
+        assertNotNull(queryParameter.getEnum());
+        assertEquals(queryParameter.getEnum().size(), 3);
+        List<Object> enumValues = queryParameter.getEnumValue();
+        assertEquals(enumValues.get(0), 1);
+        assertEquals(enumValues.get(1), 2);
+        assertEquals(enumValues.get(2), 7);
+
+        parameter = path.getGet().getParameters().get(1);
+        assertNotNull(parameter);
+        assertTrue(parameter instanceof QueryParameter);
+        queryParameter = (QueryParameter) parameter;
+        assertEquals(queryParameter.getName(), "query-param-invalid-format");
+        assertNotNull(queryParameter.getEnum());
+        assertEquals(queryParameter.getEnum().size(), 3);
+        enumValues = queryParameter.getEnumValue();
+        assertEquals(enumValues.get(0), 1);
+        assertEquals(enumValues.get(1), 2);
+        assertEquals(enumValues.get(2), 7);
+
+        parameter = path.getGet().getParameters().get(2);
+        assertNotNull(parameter);
+        assertTrue(parameter instanceof QueryParameter);
+        queryParameter = (QueryParameter) parameter;
+        assertEquals(queryParameter.getName(), "query-param-collection-format-and-uniqueItems");
+        assertEquals(queryParameter.getCollectionFormat(), "multi");
+        assertEquals(queryParameter.isUniqueItems(), true);
+    }
+
 }
