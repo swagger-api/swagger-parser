@@ -132,19 +132,19 @@ public class SwaggerDeserializer {
             swagger.responses(responses);
 
             obj = getObject("securityDefinitions", on, false, location, result);
-            Map<String, SecuritySchemeDefinition> securityDefinitions = securityDefinitions(obj, location, result);
+            Map<String, SecuritySchemeDefinition> securityDefinitions = securityDefinitions(obj, "securityDefinitions", result);
             swagger.setSecurityDefinitions(securityDefinitions);
 
             array = getArray("security", on, false, location, result);
-            List<SecurityRequirement> security = securityRequirements(array, location, result);
+            List<SecurityRequirement> security = securityRequirements(array, "security", result);
             swagger.setSecurity(security);
 
             array = getArray("tags", on, false, location, result);
-            List<Tag> tags = tags(array, location, result);
+            List<Tag> tags = tags(array, "tags", result);
             swagger.tags(tags);
 
             obj = getObject("externalDocs", on, false, location, result);
-            ExternalDocs docs = externalDocs(obj, location, result);
+            ExternalDocs docs = externalDocs(obj, "externalDocs", result);
             swagger.externalDocs(docs);
 
             // extra keys
@@ -1184,7 +1184,7 @@ public class SwaggerDeserializer {
 
         for(String key : keys) {
             ObjectNode obj = getObject(key, node, false, location, result);
-            SecuritySchemeDefinition def = securityDefinition(obj, location, result);
+            SecuritySchemeDefinition def = securityDefinition(obj, location + "." + key, result);
 
             if(def != null) {
                 output.put(key, def);

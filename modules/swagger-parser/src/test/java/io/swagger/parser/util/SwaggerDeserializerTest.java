@@ -238,6 +238,26 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testSecurityDefinitionWithMissingAttribute() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"securityDefinitions\": {\n" +
+                "    \"api_key\": {\n" +
+                "      \"description\": \"api key description\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute securityDefinitions.api_key.type is missing"));
+    }
+
+    @Test
     public void testRootInfo() {
         String json = "{\n" +
                 "\t\"swagger\": \"2.0\",\n" +
