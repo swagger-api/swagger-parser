@@ -192,6 +192,7 @@ public class SwaggerDeserializerTest {
                 "      \"type\": \"apiKey\",\n" +
                 "      \"name\": \"api_key\",\n" +
                 "      \"in\": \"header\",\n" +
+                "      \"description\": \"api key description\",\n" +
                 "      \"x-foo\": \"apiKeyBar\"\n" +
                 "    }\n" +
                 "  },\n" +
@@ -232,6 +233,7 @@ public class SwaggerDeserializerTest {
         ApiKeyAuthDefinition apiKey = (ApiKeyAuthDefinition) definition;
         assertEquals(apiKey.getName(), "api_key");
         assertEquals(apiKey.getIn(), In.HEADER);
+        assertEquals(apiKey.getDescription(), "api key description");
         assertEquals(apiKey.getVendorExtensions().get("x-foo"), "apiKeyBar");
     }
 

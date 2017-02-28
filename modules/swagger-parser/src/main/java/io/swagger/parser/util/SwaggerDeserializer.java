@@ -1216,6 +1216,8 @@ public class SwaggerDeserializer {
                         output = new ApiKeyAuthDefinition()
                                 .name(name)
                                 .in(in);
+                        String description = getString("description", node, false, location, result);
+                        output.setDescription(description);
                     }
                 }
             }
