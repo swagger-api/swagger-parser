@@ -5,9 +5,10 @@ Transform this README to a bash script accompanied with its Jenkins job :)
 # How to deploy a new release to Restlet's Nexus
 
 ```
+version=TO BE DEFINED # Example: 1.0.26.2-restlet
+
 # Prepare release. 
-# Accept all default value execpt \for tag name. Use this pattern: v1.0.26.x-restlet
-mvn release:clean release:prepare 
+mvn release:clean release:prepare -B -Dtag="v$version" -DreleaseVersion="$version"
 
 # Release version. 
 mvn release:perform
