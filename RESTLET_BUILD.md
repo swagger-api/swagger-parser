@@ -7,8 +7,10 @@ Transform this README to a bash script accompanied with its Jenkins job :)
 ```
 version=TO BE DEFINED # Example: 1.0.26.2-restlet
 
-# Prepare release. 
-mvn release:clean release:prepare -B -Dtag="v$version" -DreleaseVersion="$version"
+# Prepare release (check and accept default values). 
+mvn release:clean release:prepare 
+# To change the version, you can use the following properties
+# mvn release:clean release:prepare -B -Dtag="v$version" -DreleaseVersion="$version"
 
 # Release version. 
 mvn release:perform
