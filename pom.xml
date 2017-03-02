@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.26.4-restlet-SNAPSHOT</version>
+    <version>1.0.26.5-restlet-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
 
