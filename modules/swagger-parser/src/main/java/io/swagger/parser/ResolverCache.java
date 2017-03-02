@@ -14,7 +14,12 @@ import io.swagger.parser.util.SwaggerDeserializer;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,14 +41,14 @@ public class ResolverCache {
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
     private final String rootPath;
-    private Map<String, Object> resolutionCache = new LinkedHashMap<>();
-    private Map<String, String> externalFileCache = new LinkedHashMap<>();
-    private Set<String> referencedModelKeys = new LinkedHashSet<>();
+    private Map<String, Object> resolutionCache = new HashMap<>();
+    private Map<String, String> externalFileCache = new HashMap<>();
+    private Set<String> referencedModelKeys = new HashSet<>();
 
     /*
     a map that stores original external references, and their associated renamed references
      */
-    private Map<String, String> renameCache = new LinkedHashMap<>();
+    private Map<String, String> renameCache = new HashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
