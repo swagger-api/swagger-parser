@@ -19,17 +19,27 @@ public class SwaggerResolver {
     private final PathsProcessor pathProcessor;
     private final DefinitionsProcessor definitionsProcessor;
     private final OperationProcessor operationsProcessor;
+    private Settings settings = new Settings();
 
-    public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
-        this.swagger = swagger;
-        this.cache = new ResolverCache(swagger, auths, parentFileLocation);
-        definitionsProcessor = new DefinitionsProcessor(cache, swagger);
-        pathProcessor = new PathsProcessor(cache, swagger);
-        operationsProcessor = new OperationProcessor(cache, swagger);
+    public SwaggerResolver(Swagger swagger) {
+        this(swagger, null, null, null);
     }
 
     public SwaggerResolver(Swagger swagger,  List<AuthorizationValue> auths) {
-        this(swagger, auths, null);
+        this(swagger, auths, null, null);
+    }
+
+    public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
+        this(swagger, auths, parentFileLocation, null);
+    }
+
+    public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation, Settings settings) {
+        this.swagger = swagger;
+        this.settings = settings != null ? settings : new Settings();
+        this.cache = new ResolverCache(swagger, auths, parentFileLocation);
+        definitionsProcessor = new DefinitionsProcessor(cache, swagger);
+        pathProcessor = new PathsProcessor(cache, swagger, this.settings);
+        operationsProcessor = new OperationProcessor(cache, swagger);
     }
 
     public Swagger resolve() {
@@ -52,5 +62,27 @@ public class SwaggerResolver {
         }
 
         return swagger;
+    }
+
+    public static class Settings {
+
+        private boolean addParametersToEachOperation = true;
+
+        /**
+         * If true, resource parameters are added to each operation
+         */
+        public boolean addParametersToEachOperation() {
+            return this.addParametersToEachOperation;
+        }
+
+        /**
+         * If true, resource parameters are added to each operation
+         */
+        public Settings addParametersToEachOperation(final boolean addParametersToEachOperation) {
+            this.addParametersToEachOperation = addParametersToEachOperation;
+            return this;
+        }
+
+
     }
 }

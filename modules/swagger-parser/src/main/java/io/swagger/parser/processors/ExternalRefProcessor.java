@@ -13,7 +13,7 @@ import io.swagger.parser.ResolverCache;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
@@ -38,7 +38,7 @@ public final class ExternalRefProcessor {
         Map<String, Model> definitions = swagger.getDefinitions();
 
         if (definitions == null) {
-            definitions = new HashMap<>();
+            definitions = new LinkedHashMap<>();
         }
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);

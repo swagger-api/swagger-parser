@@ -15,20 +15,20 @@ import java.util.*;
 import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
 
 public class SwaggerDeserializer {
-    static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
-    static Set<String> EXTERNAL_DOCS_KEYS = new HashSet<String>(Arrays.asList("description", "url"));
-    static Set<String> SCHEMA_KEYS = new HashSet<String>(Arrays.asList("discriminator", "example", "$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties", "xml", "readOnly", "allowEmptyValue"));
-    static Set<String> INFO_KEYS = new HashSet<String>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
-    static Set<String> TAG_KEYS = new HashSet<String>(Arrays.asList("description", "name", "externalDocs"));
-    static Set<String> RESPONSE_KEYS = new HashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
-    static Set<String> CONTACT_KEYS = new HashSet<String>(Arrays.asList("name", "url", "email"));
-    static Set<String> LICENSE_KEYS = new HashSet<String>(Arrays.asList("name", "url"));
-    static Set<String> REF_MODEL_KEYS = new HashSet<String>(Arrays.asList("$ref"));
-    static Set<String> PATH_KEYS = new HashSet<String>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options", "parameters"));
-    static Set<String> OPERATION_KEYS = new HashSet<String>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
-    static Set<String> PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf", "readOnly", "allowEmptyValue"));
-    static Set<String> BODY_PARAMETER_KEYS = new HashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
-    static Set<String> SECURITY_SCHEME_KEYS = new HashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
+    static Set<String> ROOT_KEYS = new LinkedHashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
+    static Set<String> EXTERNAL_DOCS_KEYS = new LinkedHashSet<String>(Arrays.asList("description", "url"));
+    static Set<String> SCHEMA_KEYS = new LinkedHashSet<String>(Arrays.asList("discriminator", "example", "$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties", "xml", "readOnly", "allowEmptyValue"));
+    static Set<String> INFO_KEYS = new LinkedHashSet<String>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
+    static Set<String> TAG_KEYS = new LinkedHashSet<String>(Arrays.asList("description", "name", "externalDocs"));
+    static Set<String> RESPONSE_KEYS = new LinkedHashSet<String>(Arrays.asList("description", "schema", "headers", "examples"));
+    static Set<String> CONTACT_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "url", "email"));
+    static Set<String> LICENSE_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "url"));
+    static Set<String> REF_MODEL_KEYS = new LinkedHashSet<String>(Arrays.asList("$ref"));
+    static Set<String> PATH_KEYS = new LinkedHashSet<String>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options", "parameters"));
+    static Set<String> OPERATION_KEYS = new LinkedHashSet<String>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
+    static Set<String> PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf", "readOnly", "allowEmptyValue"));
+    static Set<String> BODY_PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
+    static Set<String> SECURITY_SCHEME_KEYS = new LinkedHashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
@@ -115,7 +115,7 @@ public class SwaggerDeserializer {
             // TODO: parse
 
             if(obj != null) {
-                Map<String, Parameter> parameters = new HashMap<>();
+                Map<String, Parameter> parameters = new LinkedHashMap<>();
                 Set<String> keys = getKeys(obj);
                 for(String key : keys) {
                     JsonNode paramNode = obj.get(key);
@@ -132,19 +132,19 @@ public class SwaggerDeserializer {
             swagger.responses(responses);
 
             obj = getObject("securityDefinitions", on, false, location, result);
-            Map<String, SecuritySchemeDefinition> securityDefinitions = securityDefinitions(obj, location, result);
+            Map<String, SecuritySchemeDefinition> securityDefinitions = securityDefinitions(obj, "securityDefinitions", result);
             swagger.setSecurityDefinitions(securityDefinitions);
 
             array = getArray("security", on, false, location, result);
-            List<SecurityRequirement> security = securityRequirements(array, location, result);
+            List<SecurityRequirement> security = securityRequirements(array, "security", result);
             swagger.setSecurity(security);
 
             array = getArray("tags", on, false, location, result);
-            List<Tag> tags = tags(array, location, result);
+            List<Tag> tags = tags(array, "tags", result);
             swagger.tags(tags);
 
             obj = getObject("externalDocs", on, false, location, result);
-            ExternalDocs docs = externalDocs(obj, location, result);
+            ExternalDocs docs = externalDocs(obj, "externalDocs", result);
             swagger.externalDocs(docs);
 
             // extra keys
@@ -472,7 +472,7 @@ public class SwaggerDeserializer {
             if(sp != null) {
                 // type is mandatory when sp != null
                 getString("type", obj, true, location, result);
-                Map<PropertyBuilder.PropertyId, Object> map = new HashMap<PropertyBuilder.PropertyId, Object>();
+                Map<PropertyBuilder.PropertyId, Object> map = new LinkedHashMap<PropertyBuilder.PropertyId, Object>();
 
                 map.put(TYPE, type);
                 map.put(FORMAT, format);
@@ -480,10 +480,10 @@ public class SwaggerDeserializer {
                 map.put(DEFAULT, defaultValue);
                 sp.setDefault(defaultValue);
 
-                String numberAsString = getString("maximum", obj, false, location, result);
-                if(numberAsString != null) {
-                    map.put(MAXIMUM, new BigDecimal(numberAsString));
-                    sp.setMaximum(new BigDecimal(numberAsString));
+                BigDecimal bd = getBigDecimal("maximum", obj, false, location, result);
+                if(bd != null) {
+                    map.put(MAXIMUM, bd);
+                    sp.setMaximum(bd);
                 }
 
                 Boolean bl = getBoolean("exclusiveMaximum", obj, false, location, result);
@@ -492,10 +492,10 @@ public class SwaggerDeserializer {
                     sp.setExclusiveMaximum(bl);
                 }
 
-                numberAsString = getString("minimum", obj, false, location, result);
-                if(numberAsString != null) {
-                    map.put(MINIMUM, new BigDecimal(numberAsString.toString()));
-                    sp.setMinimum(new BigDecimal(numberAsString.toString()));
+                bd = getBigDecimal("minimum", obj, false, location, result);
+                if(bd != null) {
+                    map.put(MINIMUM, bd);
+                    sp.setMinimum(bd);
                 }
 
                 bl = getBoolean("exclusiveMinimum", obj, false, location, result);
@@ -504,8 +504,13 @@ public class SwaggerDeserializer {
                     sp.setExclusiveMinimum(bl);
                 }
 
-                map.put(MAX_LENGTH, getInteger("maxLength", obj, false, location, result));
-                map.put(MIN_LENGTH, getInteger("minLength", obj, false, location, result));
+                Integer maxLength = getInteger("maxLength", obj, false, location, result);
+                map.put(MAX_LENGTH, maxLength);
+                sp.setMaxLength(maxLength);
+
+                Integer minLength = getInteger("minLength", obj, false, location, result);
+                map.put(MIN_LENGTH, minLength);
+                sp.setMinLength(minLength);
 
                 String pat = getString("pattern", obj, false, location, result);
                 map.put(PATTERN, pat);
@@ -527,19 +532,26 @@ public class SwaggerDeserializer {
                 map.put(MAX_LENGTH, iv);
                 sp.setMaxLength(iv);
 
-                Double dbl = getDouble("multipleOf", obj, false, location, result);
-                if(dbl != null) {
-                    map.put(MULTIPLE_OF, new BigDecimal(dbl.toString()));
-                    sp.setMultipleOf(dbl);
+                bd = getBigDecimal("multipleOf", obj, false, location, result);
+                if(bd != null) {
+                    map.put(MULTIPLE_OF, bd);
+                    sp.setMultipleOf(bd.doubleValue());
                 }
 
-                map.put(UNIQUE_ITEMS, getBoolean("uniqueItems", obj, false, location, result));
+                Boolean uniqueItems = getBoolean("uniqueItems", obj, false, location, result);
+                map.put(UNIQUE_ITEMS, uniqueItems);
+                sp.setUniqueItems(uniqueItems);
 
                 ArrayNode an = getArray("enum", obj, false, location, result);
                 if(an != null) {
                     List<String> _enum = new ArrayList<String>();
                     for(JsonNode n : an) {
-                        _enum.add(n.textValue());
+                        if(n.isValueNode()) {
+                            _enum.add(n.asText());
+                        }
+                        else {
+                            result.invalidType(location, "enum", "value", n);
+                        }
                     }
                     sp.setEnum(_enum);
                     map.put(ENUM, _enum);
@@ -836,49 +848,7 @@ public class SwaggerDeserializer {
     }
 
     public Object extension(JsonNode jsonNode) {
-        if(jsonNode.getNodeType().equals(JsonNodeType.BOOLEAN)) {
-            return jsonNode.asBoolean();
-        }
-        if(jsonNode.getNodeType().equals(JsonNodeType.STRING)) {
-            return jsonNode.asText();
-        }
-        if(jsonNode.getNodeType().equals(JsonNodeType.NUMBER)) {
-            NumericNode n = (NumericNode) jsonNode;
-            if(n.isLong()) {
-                return jsonNode.asLong();
-            }
-            if(n.isInt()) {
-                return jsonNode.asInt();
-            }
-            if(n.isBigDecimal()) {
-                return jsonNode.textValue();
-            }
-            if(n.isBoolean()) {
-                return jsonNode.asBoolean();
-            }
-            if(n.isFloat()) {
-                return jsonNode.floatValue();
-            }
-            if(n.isDouble()) {
-                return jsonNode.doubleValue();
-            }
-            if(n.isShort()) {
-                return jsonNode.intValue();
-            }
-            return jsonNode.asText();
-        }
-        if(jsonNode.getNodeType().equals(JsonNodeType.ARRAY)) {
-            ArrayNode an = (ArrayNode) jsonNode;
-            List<Object> o = new ArrayList<Object>();
-            for(JsonNode i : an) {
-                Object obj = extension(i);
-                if(obj != null) {
-                    o.add(obj);
-                }
-            }
-            return o;
-        }
-        return jsonNode;
+        return Json.mapper().convertValue(jsonNode, Object.class);
     }
 
     public Model allOfModel(ObjectNode node, String location, ParseResult result) {
@@ -1221,12 +1191,12 @@ public class SwaggerDeserializer {
         if(node == null)
             return null;
 
-        Map<String, SecuritySchemeDefinition> output = new HashMap<String, SecuritySchemeDefinition>();
+        Map<String, SecuritySchemeDefinition> output = new LinkedHashMap<>();
         Set<String> keys = getKeys(node);
 
         for(String key : keys) {
             ObjectNode obj = getObject(key, node, false, location, result);
-            SecuritySchemeDefinition def = securityDefinition(obj, location, result);
+            SecuritySchemeDefinition def = securityDefinition(obj, location + "." + key, result);
 
             if(def != null) {
                 output.put(key, def);
@@ -1258,6 +1228,8 @@ public class SwaggerDeserializer {
                         output = new ApiKeyAuthDefinition()
                                 .name(name)
                                 .in(in);
+                        String description = getString("description", node, false, location, result);
+                        output.setDescription(description);
                     }
                 }
             }
@@ -1459,8 +1431,8 @@ public class SwaggerDeserializer {
         return on;
     }
 
-    public Double getDouble(String key, ObjectNode node, boolean required, String location, ParseResult result) {
-        Double value = null;
+    public BigDecimal getBigDecimal(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        BigDecimal value = null;
         JsonNode v = node.get(key);
         if (node == null || v == null) {
             if (required) {
@@ -1469,7 +1441,7 @@ public class SwaggerDeserializer {
             }
         }
         else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
-            value = v.asDouble();
+            value = new BigDecimal(v.asText());
         }
         else if(!v.isValueNode()) {
             result.invalidType(location, key, "double", node);
@@ -1547,9 +1519,9 @@ public class SwaggerDeserializer {
 
     static class ParseResult {
         private boolean valid = true;
-        private Map<Location, JsonNode> extra = new HashMap<Location, JsonNode>();
-        private Map<Location, JsonNode> unsupported = new HashMap<Location, JsonNode>();
-        private Map<Location, String> invalidType = new HashMap<Location, String>();
+        private Map<Location, JsonNode> extra = new LinkedHashMap<Location, JsonNode>();
+        private Map<Location, JsonNode> unsupported = new LinkedHashMap<Location, JsonNode>();
+        private Map<Location, String> invalidType = new LinkedHashMap<Location, String>();
         private List<Location> missing = new ArrayList<Location>();
 
         public void unsupported(String location, String key, JsonNode value) {
