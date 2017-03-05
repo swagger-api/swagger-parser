@@ -700,7 +700,9 @@
         "tags": [
           "user"
         ],
-        "scheme": "https",
+        "scheme": [
+          "https"
+        ],
         "summary": "Logs user into the system",
         "description": "",
         "operationId": "loginUser",
@@ -743,7 +745,9 @@
         "tags": [
           "user"
         ],
-        "scheme": "https",
+        "scheme": [
+          "https"
+        ],
         "summary": "Logs out current logged in user session",
         "description": "",
         "operationId": "logoutUser",
