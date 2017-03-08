@@ -28,6 +28,9 @@ import io.swagger.util.Yaml;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -801,5 +804,15 @@ public class SwaggerParserTest {
         assertEquals(queryParameter.getCollectionFormat(), "multi");
         assertEquals(queryParameter.isUniqueItems(), true);
     }
+    
+    
+    @Test(description = "it should parse the example with $ref headers")
+    public void testRefHeaders() throws JsonProcessingException {
+        final SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("headers.yaml");
+        final Property property = (Property) swagger.getPaths().get("/pets").getGet().getResponses().get("200").getHeaders().get("ETag");
+        assertEquals(property.getType(), "string");
+    }
+
 
 }
