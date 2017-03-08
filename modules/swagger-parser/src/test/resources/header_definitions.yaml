@@ -1,0 +1,9 @@
+headers:
+  ETag:
+    description: |
+      The ETag response-header field provides the value of the entity tag for the requested entity.
+      The entity tag MAY be used for comparison with other entities from the same resource.
+
+      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.19
+    type: string
+    pattern: '([wW]/)?"([^"]|\\")*"'
