@@ -6,6 +6,7 @@ import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.ResolverCache;
+import io.swagger.parser.SwaggerResolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +17,17 @@ public class PathsProcessor {
 
     private final Swagger swagger;
     private final ResolverCache cache;
+    private final SwaggerResolver.Settings settings;
     private final ParameterProcessor parameterProcessor;
     private final OperationProcessor operationProcessor;
 
     public PathsProcessor(ResolverCache cache, Swagger swagger) {
+        this(cache, swagger, new SwaggerResolver.Settings());
+    }
+    public PathsProcessor(ResolverCache cache, Swagger swagger, SwaggerResolver.Settings settings) {
         this.swagger = swagger;
         this.cache = cache;
+        this.settings = settings;
         parameterProcessor = new ParameterProcessor(cache, swagger);
         operationProcessor = new OperationProcessor(cache, swagger);
     }
@@ -36,35 +42,37 @@ public class PathsProcessor {
         for (String pathStr : pathMap.keySet()) {
             Path path = pathMap.get(pathStr);
 
-            List<Parameter> parameters = path.getParameters();
+            if (settings.addParametersToEachOperation()) {
+                List<Parameter> parameters = path.getParameters();
 
-            if(parameters != null) {
-                // add parameters to each operation
-                List<Operation> operations = path.getOperations();
-                if(operations != null) {
-                    for(Operation operation : operations) {
-                        List<Parameter> parametersToAdd = new ArrayList<Parameter>();
-                        boolean matched = false;
-                        List<Parameter> existingParameters = operation.getParameters();
-                        for(Parameter parameterToAdd : parameters) {
-                            for(Parameter existingParameter : existingParameters) {
-                                if(parameterToAdd.getIn() != null && parameterToAdd.getIn().equals(existingParameter.getIn()) &&
-                                        parameterToAdd.getName().equals(existingParameter.getName())) {
-                                    matched = true;
+                if (parameters != null) {
+                    // add parameters to each operation
+                    List<Operation> operations = path.getOperations();
+                    if (operations != null) {
+                        for (Operation operation : operations) {
+                            List<Parameter> parametersToAdd = new ArrayList<Parameter>();
+                            boolean matched = false;
+                            List<Parameter> existingParameters = operation.getParameters();
+                            for (Parameter parameterToAdd : parameters) {
+                                for (Parameter existingParameter : existingParameters) {
+                                    if (parameterToAdd.getIn() != null && parameterToAdd.getIn().equals(existingParameter.getIn()) &&
+                                            parameterToAdd.getName().equals(existingParameter.getName())) {
+                                        matched = true;
+                                    }
+                                }
+                                if (!matched) {
+                                    parametersToAdd.add(parameterToAdd);
                                 }
                             }
-                            if(!matched) {
-                                parametersToAdd.add(parameterToAdd);
+                            if (parametersToAdd.size() > 0) {
+                                operation.getParameters().addAll(0, parametersToAdd);
                             }
-                        }
-                        if(parametersToAdd.size() > 0) {
-                            operation.getParameters().addAll(0, parametersToAdd);
                         }
                     }
                 }
+                // remove the shared parameters
+                path.setParameters(null);
             }
-            // remove the shared parameters
-            path.setParameters(null);
 
             if (path instanceof RefPath) {
                 RefPath refPath = (RefPath) path;

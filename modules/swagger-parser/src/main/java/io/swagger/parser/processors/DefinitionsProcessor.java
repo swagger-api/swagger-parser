@@ -5,7 +5,7 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.parser.ResolverCache;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +29,7 @@ public class DefinitionsProcessor {
             return;
         }
 
-        Set<String> keySet = new HashSet<>();
+        Set<String> keySet = new LinkedHashSet<>();
 
         // the definitions can grow as we resolve references
         while(definitions.keySet().size() > keySet.size()) {

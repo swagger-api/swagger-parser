@@ -4,6 +4,7 @@ import io.swagger.models.*;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.*;
@@ -40,7 +41,7 @@ public class SwaggerResolverTest {
             result = definitionsProcessor;
             times = 1;
 
-            new PathsProcessor(cache, swagger);
+            new PathsProcessor(cache, swagger, withInstanceOf(SwaggerResolver.Settings.class));
             result = pathsProcessor;
             times = 1;
 
@@ -342,5 +343,49 @@ public class SwaggerResolverTest {
         Parameter param = resolved.getPaths().get("/test").getGet().getParameters().get(0);
         QueryParameter qp = (QueryParameter) param;
         assertEquals(qp.getCollectionFormat(), "csv");
+    }
+
+    @Test
+    public void testSettingsAddParametersToEachOperationDisabled() {
+        String yaml =
+                "---\n" +
+                        "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  title: test spec\n" +
+                        "  version: '1.0'\n" +
+                        "paths:\n" +
+                        "  \"/test/{id}\":\n" +
+                        "    parameters:\n" +
+                        "    - name: id\n" +
+                        "      in: path\n" +
+                        "      type: string\n" +
+                        "      required: true\n" +
+                        "    get:\n" +
+                        "      description: test get\n" +
+                        "      parameters:\n" +
+                        "      - name: page\n" +
+                        "        in: query\n" +
+                        "        type: string\n" +
+                        "      responses:\n" +
+                        "        default:\n" +
+                        "          description: test response\n";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Swagger swagger = result.getSwagger();
+
+        final Swagger resolved = new SwaggerResolver(swagger, null, null,
+                new SwaggerResolver.Settings().addParametersToEachOperation(false))
+                .resolve();
+
+
+        assertEquals(resolved.getPaths().get("/test/{id}").getParameters().size(), 1);
+        PathParameter pp = (PathParameter)resolved.getPaths().get("/test/{id}").getParameters().get(0);
+        assertEquals(pp.getName(), "id");
+
+        assertEquals(resolved.getPaths().get("/test/{id}").getGet().getParameters().size(), 1);
+        QueryParameter qp = (QueryParameter)resolved.getPaths().get("/test/{id}").getGet().getParameters().get(0);
+        assertEquals(qp.getName(), "page");
     }
 }

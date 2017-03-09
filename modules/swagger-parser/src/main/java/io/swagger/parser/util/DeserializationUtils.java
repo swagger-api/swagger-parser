@@ -14,10 +14,10 @@ public class DeserializationUtils {
         JsonNode result;
 
         try {
-            if (fileOrHost.endsWith(".yaml")) {
-                result = readYamlTree(contents);
-            } else {
+            if (isJson(contents)) {
                 result = Json.mapper().readTree(contents);
+            } else {
+                result = readYamlTree(contents);
             }
         } catch (IOException e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into a JsonNode tree", e);
@@ -31,7 +31,7 @@ public class DeserializationUtils {
 
         boolean isJson = false;
 
-        if(contents instanceof String && contents.toString().trim().startsWith("{")) {
+        if(contents instanceof String && isJson((String)contents)) {
             isJson = true;
         }
 
@@ -50,6 +50,10 @@ public class DeserializationUtils {
         }
 
         return result;
+    }
+
+    private static boolean isJson(String contents) {
+        return contents.toString().trim().startsWith("{");
     }
 
     public static JsonNode readYamlTree(String contents) {

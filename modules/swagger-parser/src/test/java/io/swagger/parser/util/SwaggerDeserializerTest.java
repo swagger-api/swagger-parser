@@ -192,6 +192,7 @@ public class SwaggerDeserializerTest {
                 "      \"type\": \"apiKey\",\n" +
                 "      \"name\": \"api_key\",\n" +
                 "      \"in\": \"header\",\n" +
+                "      \"description\": \"api key description\",\n" +
                 "      \"x-foo\": \"apiKeyBar\"\n" +
                 "    }\n" +
                 "  },\n" +
@@ -232,7 +233,28 @@ public class SwaggerDeserializerTest {
         ApiKeyAuthDefinition apiKey = (ApiKeyAuthDefinition) definition;
         assertEquals(apiKey.getName(), "api_key");
         assertEquals(apiKey.getIn(), In.HEADER);
+        assertEquals(apiKey.getDescription(), "api key description");
         assertEquals(apiKey.getVendorExtensions().get("x-foo"), "apiKeyBar");
+    }
+
+    @Test
+    public void testSecurityDefinitionWithMissingAttribute() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"securityDefinitions\": {\n" +
+                "    \"api_key\": {\n" +
+                "      \"description\": \"api key description\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute securityDefinitions.api_key.type is missing"));
     }
 
     @Test
@@ -345,7 +367,7 @@ public class SwaggerDeserializerTest {
         assertTrue(messages.contains("attribute info.title is missing"));
         assertTrue(messages.contains("attribute paths is missing"));
 
-        assertEquals(result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid").toString(), "{\"isValid\":true}");
+        assertEquals(((Map)result.getSwagger().getInfo().getLicense().getVendorExtensions().get("x-valid")).get("isValid"), true);
     }
 
 

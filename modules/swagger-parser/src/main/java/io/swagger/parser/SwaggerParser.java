@@ -59,7 +59,6 @@ public class SwaggerParser {
             return null;
         }
         location = location.replaceAll("\\\\","/");
-        List<SwaggerParserExtension> parserExtensions = getExtensions();
         Swagger output;
 
         try {
@@ -69,6 +68,8 @@ public class SwaggerParser {
             }
         } catch (IOException e) {
         }
+
+        List<SwaggerParserExtension> parserExtensions = getExtensions();
         for (SwaggerParserExtension extension : parserExtensions) {
             try {
                 output = extension.read(location, auths);

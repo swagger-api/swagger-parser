@@ -1,0 +1,37 @@
+---
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Pets Store
+paths:
+  /pets:
+    parameters:
+    - name: "query-param-int32"
+      in: "query"
+      type: "integer"
+      format: "int32"
+      enum:
+      - 1
+      - 2
+      - 7
+      collectionFormat: "multi"
+      uniqueItems: true
+    - name: "query-param-invalid-format"
+      in: "query"
+      type: "integer"
+      format: "invalid"
+      enum:
+      - 1
+      - 2
+      - 7
+    - name: "query-param-collection-format-and-uniqueItems"
+      in: "query"
+      type: "array"
+      items:
+        type: "string"
+      collectionFormat: "multi"
+      uniqueItems: true
+    get:
+      responses:
+        200:
+          description: Returns all the pets
