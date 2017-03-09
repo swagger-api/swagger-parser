@@ -761,4 +761,26 @@ public class SwaggerParserTest {
 
         assertNotNull(swagger.getVendorExtensions().get("x-error-defs"));
     }
+
+    @Test
+    public void testPathReference() {
+        SwaggerParser parser = new SwaggerParser();
+        String yaml = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  description: |\n" +
+                "  version: 1.0.0\n" +
+                "  title: testing\n" +
+                "paths:\n" +
+                "   /foo:\n" +
+                "     $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n" +
+                "   /bar:\n" +
+                "     $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n" +
+                "schemes:\n" +
+                " - https\n" +
+                " - http";
+        final SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        assertNotNull(result.getSwagger());
+        assertTrue(result.getMessages().size() == 0);
+        assertTrue(result.getSwagger().getDefinitions().size() == 3);
+    }
 }
