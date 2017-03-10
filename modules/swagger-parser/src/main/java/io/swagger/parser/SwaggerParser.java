@@ -103,7 +103,10 @@ public class SwaggerParser {
             if (result != null) {
                 result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
             }
-            return new Swagger20Parser().readWithInfo(node);
+            else {
+                result.message("Definition does not appear to be a valid Swagger format");
+            }
+            return result;
         }
         catch (Exception e) {
             return new SwaggerDeserializationResult().message("malformed or unreadable swagger supplied");

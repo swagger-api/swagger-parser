@@ -698,6 +698,10 @@ public class SwaggerDeserializer {
     }
 
     public Model definition(ObjectNode node, String location, ParseResult result) {
+        if(result == null) {
+            // TODO, this shouldn't happen, but the `ResolverCache#loadRef` method is passing null
+            result = new ParseResult();
+        }
         if(node == null) {
             result.missing(location, "empty schema");
             return null;

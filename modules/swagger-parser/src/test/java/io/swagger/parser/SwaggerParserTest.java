@@ -762,7 +762,6 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getVendorExtensions().get("x-error-defs"));
     }
 
-    @Test
     public void testBadFormat() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/bad_format.yaml");
@@ -801,5 +800,4 @@ public class SwaggerParserTest {
         assertEquals(queryParameter.getCollectionFormat(), "multi");
         assertEquals(queryParameter.isUniqueItems(), true);
     }
-
 }
