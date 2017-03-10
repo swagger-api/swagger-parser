@@ -34,7 +34,7 @@ public final class ExternalRefProcessor {
         final Model model = cache.loadRef($ref, refFormat, Model.class);
 
         if(model == null) {
-            // stop!  There's a problem
+            // stop!  There's a problem.  retain the original ref
             LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
                     "or the reference isn't a valid model schema");
             return $ref;
