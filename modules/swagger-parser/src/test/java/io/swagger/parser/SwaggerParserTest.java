@@ -800,4 +800,15 @@ public class SwaggerParserTest {
         assertEquals(queryParameter.getCollectionFormat(), "multi");
         assertEquals(queryParameter.isUniqueItems(), true);
     }
+
+    @Test
+    public void testIssue358() {
+	SwaggerParser parser = new SwaggerParser();
+	final Swagger swagger = parser.read("src/test/resources/issue_358.yaml");
+	assertNotNull(swagger);
+	List<Parameter> parms = swagger.getPath("/testApi").getGet().getParameters();
+	assertEquals(1, parms.size());
+	assertEquals("pathParam", parms.get(0).getName());
+    }
 }
+
