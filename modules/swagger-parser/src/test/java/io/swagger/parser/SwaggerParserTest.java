@@ -813,16 +813,28 @@ public class SwaggerParserTest {
         for (Parameter param : getParams) {
             SerializableParameter sp = (SerializableParameter) param;
             switch (param.getName()) {
-            case "pathParam1":
-                assertEquals(sp.getType(), "integer");
-                break;
-            case "pathParam2":
-                assertEquals(sp.getType(), "string");
-                break;
-            default:
-                fail("Unexpected parameter named "+sp.getName());
-                break;
+                case "pathParam1":
+                    assertEquals(sp.getType(), "integer");
+                    break;
+                case "pathParam2":
+                    assertEquals(sp.getType(), "string");
+                    break;
+                default:
+                    fail("Unexpected parameter named " + sp.getName());
+                    break;
             }
         }
+    }
+
+    @Test
+    public void testIssue358() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_358.yaml");
+        Json.prettyPrint(swagger);
+        assertNotNull(swagger);
+        List<Parameter> parms = swagger.getPath("/testApi").getGet().getParameters();
+        assertEquals(1, parms.size());
+        assertEquals("pathParam", parms.get(0).getName());
+        assertEquals("string", ((SerializableParameter)parms.get(0)).getType());
     }
 }

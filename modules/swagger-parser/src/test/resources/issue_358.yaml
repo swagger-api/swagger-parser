@@ -1,0 +1,28 @@
+swagger: "2.0"
+info:
+  title: Test model for swagger-parser issue 357
+  contact:
+    name: Andy Lowry
+    email: andy.lowry@reprezen.com
+  version: "1.0"
+paths:
+  /testApi:
+    get:
+      operationId: getTest
+      parameters: 
+        - name: pathParam
+          in: query
+          type: integer
+      responses:
+        default:
+          description: OK
+          
+    parameters:
+      - $ref: "#/parameters/pathParam"
+
+
+parameters:
+  pathParam:
+    name: pathParam
+    in: query
+    type: string
