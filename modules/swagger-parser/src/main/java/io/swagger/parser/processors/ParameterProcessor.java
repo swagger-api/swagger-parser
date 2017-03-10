@@ -30,22 +30,35 @@ public class ParameterProcessor {
 
         final List<Parameter> processedPathLevelParameters = new ArrayList<>();
 
+        final List<Parameter> refParameters = new ArrayList<>();
         for (Parameter parameter : parameters) {
 
             if (parameter instanceof RefParameter) {
                 RefParameter refParameter = (RefParameter) parameter;
                 final Parameter resolvedParameter = cache.loadRef(refParameter.get$ref(), refParameter.getRefFormat(), Parameter.class);
                 parameter = resolvedParameter;
+                refParameters.add(parameter);
             }
 
-            if (parameter instanceof BodyParameter) {
+            else if (parameter instanceof BodyParameter) {
                 BodyParameter bodyParameter = (BodyParameter) parameter;
                 final Model schema = bodyParameter.getSchema();
                 modelProcessor.processModel(schema);
             }
+            else {
+                processedPathLevelParameters.add(parameter);
+            }
 
-            processedPathLevelParameters.add(parameter);
-
+        }
+        for(Parameter refParam : refParameters) {
+            int pos = 0;
+            for(Parameter param : processedPathLevelParameters) {
+                if(refParam.getName().equals(param.getName())) {
+                    // ref param wins
+                    processedPathLevelParameters.set(pos, refParam);
+                }
+                pos++;
+            }
         }
         return processedPathLevelParameters;
     }
