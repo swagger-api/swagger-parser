@@ -15,6 +15,7 @@ import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.IntegerProperty;
@@ -40,6 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 
 public class SwaggerParserTest {
@@ -799,5 +801,28 @@ public class SwaggerParserTest {
         assertEquals(queryParameter.getName(), "query-param-collection-format-and-uniqueItems");
         assertEquals(queryParameter.getCollectionFormat(), "multi");
         assertEquals(queryParameter.isUniqueItems(), true);
+    }
+
+    @Test
+    public void testIssue357() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_357.yaml");
+        assertNotNull(swagger);
+        List<Parameter> getParams = swagger.getPath("/testApi").getGet().getParameters();
+        assertEquals(2, getParams.size());
+        for (Parameter param : getParams) {
+            SerializableParameter sp = (SerializableParameter) param;
+            switch (param.getName()) {
+            case "pathParam1":
+                assertEquals(sp.getType(), "integer");
+                break;
+            case "pathParam2":
+                assertEquals(sp.getType(), "string");
+                break;
+            default:
+                fail("Unexpected parameter named "+sp.getName());
+                break;
+            }
+        }
     }
 }
