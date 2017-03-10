@@ -51,9 +51,9 @@ public class PathsProcessor {
                     if (operations != null) {
                         for (Operation operation : operations) {
                             List<Parameter> parametersToAdd = new ArrayList<Parameter>();
-                            boolean matched = false;
                             List<Parameter> existingParameters = operation.getParameters();
                             for (Parameter parameterToAdd : parameters) {
+                                boolean matched = false;
                                 for (Parameter existingParameter : existingParameters) {
                                     if (parameterToAdd.getIn() != null && parameterToAdd.getIn().equals(existingParameter.getIn()) &&
                                             parameterToAdd.getName().equals(existingParameter.getName())) {
