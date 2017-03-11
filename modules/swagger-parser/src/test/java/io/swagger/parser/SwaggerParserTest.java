@@ -837,4 +837,34 @@ public class SwaggerParserTest {
         assertEquals("pathParam", parms.get(0).getName());
         assertEquals("string", ((SerializableParameter)parms.get(0)).getType());
     }
+
+    @Test
+    public void testIncompatibleRefs() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "paths:\n" +
+                "  /test:\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        # this is not the correct reference type\n" +
+                "        - $ref: '#/definitions/Model'\n" +
+                "        - in: body\n" +
+                "          name: incorrectType\n" +
+                "          required: true\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/Model'\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          # this is not the correct reference type\n" +
+                "          $ref: '#/definitions/Model'\n" +
+                "        400:\n" +
+                "          definitions: this is right\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/Model'\n" +
+                "definitions:\n" +
+                "  Model:\n" +
+                "    type: object";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        Json.prettyPrint(result);
+    }
 }
