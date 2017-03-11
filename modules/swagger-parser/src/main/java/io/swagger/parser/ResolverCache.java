@@ -73,10 +73,10 @@ public class ResolverCache {
             //we don't need to go get anything for internal refs
             Object loadedRef = loadInternalRef(ref);
 
-            if(loadedRef.getClass().isAssignableFrom(expectedType)) {
+            try{
                 return expectedType.cast(loadedRef);
             }
-            else {
+            catch (Exception e) {
                 return null;
             }
         }
