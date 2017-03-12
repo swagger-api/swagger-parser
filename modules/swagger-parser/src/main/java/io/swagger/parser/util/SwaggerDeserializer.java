@@ -7,6 +7,7 @@ import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.util.Json;
 
 import java.math.BigDecimal;
@@ -432,6 +433,15 @@ public class SwaggerDeserializer {
         JsonNode ref = obj.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
+                // work-around for https://github.com/swagger-api/swagger-core/issues/2138
+                String refString = ref.textValue();
+                if (!refString.startsWith("/") && refString.indexOf(".") > 0) {
+                    refString = "./" + refString;
+                    obj.put("$ref", refString);
+                    ref = obj.get("$ref");
+                }
+
                 return refParameter((TextNode) ref, location, result);
             }
             else {
@@ -1071,7 +1081,26 @@ public class SwaggerDeserializer {
 
         ObjectNode schema = getObject("schema", node, false, location, result);
         if(schema != null) {
-            output.schema(Json.mapper().convertValue(schema, Property.class));
+            JsonNode schemaRef = schema.get("$ref");
+            if (schemaRef != null) {
+                if (schemaRef.getNodeType().equals(JsonNodeType.STRING)) {
+
+                    // work-around for https://github.com/swagger-api/swagger-core/issues/2138
+                    String schemaRefString = schemaRef.textValue();
+                    if (!schemaRefString.startsWith("/") && schemaRefString.indexOf(".") > 0) {
+                        schemaRefString = "./" + schemaRefString;
+                        schema.put("$ref", schemaRefString);
+                        schemaRef = schema.get("$ref");
+                    }
+
+                    Property schemaProp = new RefProperty(schemaRef.textValue());
+                    output.schema(schemaProp);
+                } else {
+                    result.invalidType(location, "$ref", "string", node);
+                }
+            } else {
+                output.schema(Json.mapper().convertValue(schema, Property.class));
+            }
         }
         ObjectNode headersNode = getObject("headers", node, false, location, result);
         if(headersNode != null) {

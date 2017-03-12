@@ -1,0 +1,30 @@
+swagger: '2.0'
+info:
+  title: Test API
+  version: '1'
+host: example.com
+basePath: /api/v1
+schemes:
+  - https
+
+paths:
+  '/pet/{petId}':
+    get:
+      tags:
+        - pet
+      summary: Find pet by ID
+      description: Returns a single pet
+      operationId: getPetById
+      produces:
+        - application/json
+      parameters:
+        - $ref: 'common/issue-421-parms.yaml#/petIdParam'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: 'common/issue-421-defns.yaml#/definitions/Pet'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found

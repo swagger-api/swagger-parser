@@ -1,6 +1,7 @@
 package io.swagger.parser;
 
 import io.swagger.models.*;
+import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
@@ -152,5 +153,21 @@ public class FileReferenceTests {
 
         Swagger swagger = result.getSwagger();
         assertFalse(swagger.getDefinitions().get("BarData") instanceof RefModel);
+    }
+
+    @Test
+    public void testIssue421() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-421.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/pet/{petId}"));
+        assertNotNull(swagger.getPath("/pet/{petId}").getGet());
+        assertNotNull(swagger.getPath("/pet/{petId}").getGet().getParameters());
+        assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().size() == 1);
+        Parameter param = swagger.getPath("/pet/{petId}").getGet().getParameters().get(0);
+        assertTrue(param.getName().equals("petId"));
+        assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
+        assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 6);
     }
 }
