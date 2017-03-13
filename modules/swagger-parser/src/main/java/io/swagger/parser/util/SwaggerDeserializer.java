@@ -436,7 +436,7 @@ public class SwaggerDeserializer {
 
                 // work-around for https://github.com/swagger-api/swagger-core/issues/2138
                 String refString = ref.textValue();
-                if (!refString.startsWith("/") && refString.indexOf(".") > 0) {
+                if (!refString.startsWith("/") && !refString.contains(":") && refString.indexOf(".") > 0) {
                     refString = "./" + refString;
                     obj.put("$ref", refString);
                     ref = obj.get("$ref");
@@ -1087,7 +1087,7 @@ public class SwaggerDeserializer {
 
                     // work-around for https://github.com/swagger-api/swagger-core/issues/2138
                     String schemaRefString = schemaRef.textValue();
-                    if (!schemaRefString.startsWith("/") && schemaRefString.indexOf(".") > 0) {
+                    if (!schemaRefString.startsWith("/") && !schemaRefString.contains(":") && schemaRefString.indexOf(".") > 0) {
                         schemaRefString = "./" + schemaRefString;
                         schema.put("$ref", schemaRefString);
                         schemaRef = schema.get("$ref");
