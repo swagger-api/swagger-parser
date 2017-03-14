@@ -1,11 +1,16 @@
 package io.swagger.parser;
 
 import io.swagger.models.*;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static org.testng.Assert.*;
 
@@ -165,9 +170,27 @@ public class FileReferenceTests {
         assertNotNull(swagger.getPath("/pet/{petId}").getGet());
         assertNotNull(swagger.getPath("/pet/{petId}").getGet().getParameters());
         assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().size() == 1);
-        Parameter param = swagger.getPath("/pet/{petId}").getGet().getParameters().get(0);
-        assertTrue(param.getName().equals("petId"));
+        assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().get(0).getName().equals("petId"));
         assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
         assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 6);
+
+        assertNotNull(swagger.getPath("/pet/{petId}").getPost());
+        assertNotNull(swagger.getPath("/pet/{petId}").getPost().getParameters());
+        assertTrue(swagger.getPath("/pet/{petId}").getPost().getParameters().size() == 3);
+        assertTrue(swagger.getPath("/pet/{petId}").getPost().getParameters().get(1) instanceof RefParameter);
+        assertTrue(((RefParameter)swagger.getPath("/pet/{petId}").getPost().getParameters().get(1)).getRefFormat() == RefFormat.INTERNAL);
+        assertTrue(((RefParameter)swagger.getPath("/pet/{petId}").getPost().getParameters().get(1)).getSimpleRef().equals("name"));
+
+        assertNotNull(swagger.getPath("/store/order"));
+        assertNotNull(swagger.getPath("/store/order").getPost());
+        assertNotNull(swagger.getPath("/store/order").getPost().getParameters());
+        assertTrue(swagger.getPath("/store/order").getPost().getParameters().size() == 1);
+        assertTrue(swagger.getPath("/store/order").getPost().getParameters().get(0) instanceof BodyParameter);
+        assertNotNull(((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema());
+        assertTrue(((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema() instanceof RefModel);
+        assertTrue(((RefModel)((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema()).getSimpleRef().equals("Order"));
+
+        assertTrue(swagger.getDefinitions().get("Order") instanceof ModelImpl);
+        assertTrue(swagger.getDefinitions().get("Order").getProperties().size() == 6);
     }
 }
