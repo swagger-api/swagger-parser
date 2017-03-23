@@ -865,6 +865,28 @@ public class SwaggerParserTest {
                 "  Model:\n" +
                 "    type: object";
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
-        Json.prettyPrint(result);
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
+    public void testIssue243() {
+        String yaml =
+                "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: Simple API\n" +
+                "paths:\n" +
+                "  /:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK\n" +
+                "          schema:\n" +
+                "            $ref: \"#/definitions/Simple\"\n" +
+                "definitions:\n" +
+                "  Simple:\n" +
+                "    type: string";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertNotNull(result.getSwagger());
     }
 }
