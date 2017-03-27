@@ -35,7 +35,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>io.swagger.parser</Export-Package>
+                        <Export-Package>
+                            io.swagger.parser;version="${project.version}",
+                            io.swagger.parser.util;version="${project.version}"
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
