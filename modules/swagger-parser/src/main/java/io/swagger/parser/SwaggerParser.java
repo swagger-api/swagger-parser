@@ -64,7 +64,11 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().read(location, auths);
             if (output != null) {
-                return new SwaggerResolver(output, auths, location).resolve();
+            	if(resolve){
+            		return new SwaggerResolver(output, auths, location).resolve();
+            	} else {
+            		return output;
+            	}
             }
         } catch (IOException e) {
         }
