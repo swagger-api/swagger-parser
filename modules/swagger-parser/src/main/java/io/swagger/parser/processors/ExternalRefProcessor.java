@@ -72,7 +72,7 @@ public final class ExternalRefProcessor {
                 if (isAnExternalRefFormat(refModel.getRefFormat())) {
                     refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
                 } else {
-                    processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                	refModel.set$ref(processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE));
                 }
             }
             //Loop the properties and recursively call this method;
@@ -116,7 +116,7 @@ public final class ExternalRefProcessor {
             }
 
         } else {
-            processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+        	subRef.set$ref(processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
         }
     }
 
