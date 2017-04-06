@@ -108,11 +108,10 @@ public final class ExternalRefProcessor {
     private void processRefProperty(RefProperty subRef, String externalFile) {
         if (isAnExternalRefFormat(subRef.getRefFormat())) {
             String $ref = constructRef(subRef, externalFile);
-            subRef.set$ref($ref);
             if($ref.startsWith(".") || $ref.startsWith("/"))
-                processRefToExternalDefinition($ref, RefFormat.RELATIVE);
+            	subRef.set$ref(processRefToExternalDefinition($ref, RefFormat.RELATIVE));
             else {
-                processRefToExternalDefinition($ref, RefFormat.URL);
+            	subRef.set$ref(processRefToExternalDefinition($ref, RefFormat.URL));
             }
 
         } else {
