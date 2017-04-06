@@ -109,7 +109,7 @@ public final class ExternalRefProcessor {
         if (isAnExternalRefFormat(subRef.getRefFormat())) {
             String $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
-            if($ref.startsWith("."))
+            if($ref.startsWith(".") || $ref.startsWith("/"))
                 processRefToExternalDefinition($ref, RefFormat.RELATIVE);
             else {
                 processRefToExternalDefinition($ref, RefFormat.URL);

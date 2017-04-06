@@ -893,4 +893,11 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
         assertNotNull(result.getSwagger());
     }
+    
+    @Test
+    public void testIssue435() {
+        Swagger swagger = new SwaggerParser().read("issue_435.yaml");
+        assertNotNull(swagger.getDefinitions().get("issue_435_a"));
+        assertNotNull(swagger.getDefinitions().get("issue_435_b"));
+    }
 }
