@@ -104,7 +104,7 @@ public class SwaggerParser {
                 result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
             }
             else {
-                result.message("Definition does not appear to be a valid Swagger format");
+            	result = new SwaggerDeserializationResult().message("Definition does not appear to be a valid Swagger format");
             }
             return result;
         }
