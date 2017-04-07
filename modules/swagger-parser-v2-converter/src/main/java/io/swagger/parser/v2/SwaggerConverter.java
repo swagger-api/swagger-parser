@@ -109,14 +109,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         List<Model> models = inventory.getModels();
 
-        Paths v3Paths = new Paths();
-        for(String pathname : swagger.getPaths().keySet()) {
-            v2.io.swagger.models.Path v2Path = swagger.getPath(pathname);
-            PathItem v3Path = convert(v2Path);
-            v3Paths.put(pathname, v3Path);
-        }
-        openAPI.setPaths(v3Paths);
-
         // TODO until we have the example object working correctly in v3 pojos...
         for(Model model : models) {
             if(model.getExample() != null) {
@@ -142,7 +134,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 }
             }
         }
-
+        Paths v3Paths = new Paths();
+        for(String pathname : swagger.getPaths().keySet()) {
+            v2.io.swagger.models.Path v2Path = swagger.getPath(pathname);
+            PathItem v3Path = convert(v2Path);
+            v3Paths.put(pathname, v3Path);
+        }
+        openAPI.setPaths(v3Paths);
         Components components = new Components();
         if(swagger.getParameters() != null) {
             for(String name : swagger.getParameters().keySet()) {
