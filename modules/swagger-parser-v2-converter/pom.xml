@@ -30,10 +30,24 @@
         </dependency>
 
         <!-- these are required because the jackson libs are not included in the parser jar -->
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -46,5 +60,7 @@
 
     <properties>
         <commons-lang-version>3.2.1</commons-lang-version>
+        <jackson-version>2.8.6</jackson-version>
+        <jackson-annotations-version>2.8.0</jackson-annotations-version>
     </properties>
 </project>
