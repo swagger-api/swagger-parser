@@ -29,6 +29,7 @@
             <version>${parent.version}</version>
         </dependency>
 
+        <!-- these are required because the jackson libs are not included in the parser jar -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
