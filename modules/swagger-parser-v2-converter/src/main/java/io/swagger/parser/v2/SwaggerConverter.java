@@ -181,6 +181,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
     }
 
     private License convert(v2.io.swagger.models.License v2License) {
+        if(v2License == null) {
+            return null;
+        }
+
         License license = new License();
 
         if(v2License.getVendorExtensions() != null && v2License.getVendorExtensions().size() > 0) {
@@ -193,6 +197,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
     }
 
     public Contact convert(v2.io.swagger.models.Contact v2Contact) {
+        if(v2Contact == null) {
+            return null;
+        }
+
         Contact contact = new Contact();
 
         contact.setUrl(v2Contact.getUrl());
