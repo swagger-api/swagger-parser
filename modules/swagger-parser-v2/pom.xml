@@ -25,16 +25,15 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>io.swagger:*</include>
+                                </includes>
+                            </artifactSet>
                             <relocations>
                                 <relocation>
                                     <pattern>io.swagger</pattern>
                                     <shadedPattern>v2.io.swagger</shadedPattern>
-                                    <!--<excludes>-->
-                                        <!--<exclude>io.swagger.parser.models.AuthorizationValue</exclude>-->
-                                        <!--<exclude>io.swagger.parser.models.ParseOptions</exclude>-->
-                                        <!--<exclude>io.swagger.parser.models.SwaggerParseResult</exclude>-->
-                                        <!--<exclude>io.swagger.parser.extensions.SwaggerParserExtension</exclude>-->
-                                    <!--</excludes>-->
                                 </relocation>
                             </relocations>
                         </configuration>

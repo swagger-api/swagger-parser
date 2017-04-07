@@ -6,6 +6,6 @@ import org.junit.Test;
 public class OpenAPIParserTest {
     @Test
     public void testSimple() {
-        Json.prettyPrint(new OpenAPIParser().readLocation("http://petstore.swagger.io/v2/swagger.json", null, null).getOpenAPI());
+        Json.prettyPrint(new OpenAPIParser().readLocation("petstore.yaml", null, null).getOpenAPI());
     }
 }
