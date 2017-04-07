@@ -234,7 +234,6 @@ public class SwaggerInventory {
                 }
             }
         }
-
     }
 
     public void process(Property property) {
