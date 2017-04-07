@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.29-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
     <developers>
@@ -17,16 +17,6 @@
             <id>fehguy</id>
             <name>Tony Tam</name>
             <email>fehguy@gmail.com</email>
-        </developer>
-        <developer>
-            <id>webron</id>
-            <name>Ron Ratovsky</name>
-            <email>webron@gmail.com</email>
-        </developer>
-        <developer>
-            <id>fge</id>
-            <name>Francis Galiegue</name>
-            <email>fgaliegue@gmail.com</email>
         </developer>
     </developers>
     <issueManagement>
@@ -193,11 +183,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-core</artifactId>
-                <version>${swagger-core-version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng-version}</version>
@@ -231,12 +216,24 @@
     </dependencyManagement>
     <modules>
         <module>modules/swagger-parser</module>
-        <module>modules/swagger-compat-spec-parser</module>
+        <module>modules/swagger-parser-core</module>
+        <module>modules/swagger-parser-v2-converter</module>
+        <module>modules/swagger-parser-v2</module>
     </modules>
+    <repositories>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <properties>
+        <swagger-parser-v2-version>1.0.28</swagger-parser-v2-version>
         <commons-io-version>2.4</commons-io-version>
         <slf4j-version>1.6.3</slf4j-version>
-        <swagger-core-version>1.5.12</swagger-core-version>
+        <swagger-core-version>2.0.0-SNAPSHOT</swagger-core-version>
         <junit-version>4.8.1</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>
