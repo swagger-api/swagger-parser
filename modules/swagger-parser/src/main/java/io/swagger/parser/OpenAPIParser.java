@@ -3,6 +3,7 @@ package io.swagger.parser;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.parser.v3.OpenAPIV3Parser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,6 +45,7 @@ public class OpenAPIParser {
         while (itr.hasNext()) {
             extensions.add(itr.next());
         }
+        extensions.add(0, new OpenAPIV3Parser());
         return extensions;
     }
 

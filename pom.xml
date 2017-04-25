@@ -219,6 +219,7 @@
         <module>modules/swagger-parser-core</module>
         <module>modules/swagger-parser-v2-converter</module>
         <module>modules/swagger-parser-v2</module>
+        <module>modules/swagger-parser-v3</module>
     </modules>
     <repositories>
         <repository>
