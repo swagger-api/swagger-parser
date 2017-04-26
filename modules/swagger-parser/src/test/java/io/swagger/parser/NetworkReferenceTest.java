@@ -11,10 +11,10 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.util.TestUtils;
 import io.swagger.util.Json;
 import mockit.Expectations;
 import mockit.Mocked;
-import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -40,28 +40,28 @@ public class NetworkReferenceTest {
 
     static {
         try {
-            issue_323_yaml          = readFile("src/test/resources/nested-file-references/issue-323.yaml");
-            issue_323_events_yaml   = readFile("src/test/resources/nested-file-references/eventsCase9.yaml");
-            issue_323_paging_yaml   = readFile("src/test/resources/nested-file-references/common/pagingWithFolderRef.yaml");
-            issue_323_bar_yaml      = readFile("src/test/resources/nested-file-references/common/common2/bar.yaml");
+            issue_323_yaml          = readFile("/nested-file-references/issue-323.yaml");
+            issue_323_events_yaml   = readFile("/nested-file-references/eventsCase9.yaml");
+            issue_323_paging_yaml   = readFile("/nested-file-references/common/pagingWithFolderRef.yaml");
+            issue_323_bar_yaml      = readFile("/nested-file-references/common/common2/bar.yaml");
 
-            issue_328_yaml          = readFile("src/test/resources/nested-file-references/issue-328.yaml");
-            issue_328_events_yaml   = readFile("src/test/resources/nested-file-references/issue-328-events.yaml");
-            issue_328_paging_yaml   = readFile("src/test/resources/nested-file-references/common/issue-328-paging.yaml");
-            issue_328_bar_yaml      = readFile("src/test/resources/nested-file-references/common/common2/issue-328-bar.yaml");
+            issue_328_yaml          = readFile("/nested-file-references/issue-328.yaml");
+            issue_328_events_yaml   = readFile("/nested-file-references/issue-328-events.yaml");
+            issue_328_paging_yaml   = readFile("/nested-file-references/common/issue-328-paging.yaml");
+            issue_328_bar_yaml      = readFile("/nested-file-references/common/common2/issue-328-bar.yaml");
 
-            issue_330_yaml          = readFile("src/test/resources/nested-network-references/issue-330.yaml");
-            issue_330_paging_yaml   = readFile("src/test/resources/nested-network-references/common/issue-330-paging.yaml");
-            issue_330_users_yaml    = readFile("src/test/resources/nested-network-references/common/issue-330-users.yaml");
-            issue_330_entities_yaml = readFile("src/test/resources/nested-network-references/common/issue-330-entities.yaml");
+            issue_330_yaml          = readFile("/nested-network-references/issue-330.yaml");
+            issue_330_paging_yaml   = readFile("/nested-network-references/common/issue-330-paging.yaml");
+            issue_330_users_yaml    = readFile("/nested-network-references/common/issue-330-users.yaml");
+            issue_330_entities_yaml = readFile("/nested-network-references/common/issue-330-entities.yaml");
 
-            issue_335_json          = readFile("src/test/resources/nested-file-references/issue-335.json");
-            issue_335_bar_json      = readFile("src/test/resources/nested-file-references/issue-335-bar.json");
+            issue_335_json          = readFile("/nested-file-references/issue-335.json");
+            issue_335_bar_json      = readFile("/nested-file-references/issue-335-bar.json");
 
-            issue_407_json          = readFile("src/test/resources/petstore.json");
+            issue_407_json          = readFile("/petstore.json");
 
-            issue_411_server        = readFile("src/test/resources/nested-network-references/issue-411-server.yaml");
-            issue_411_components    = readFile("src/test/resources/nested-network-references/issue-411-remote2.yaml");
+            issue_411_server        = readFile("/nested-network-references/issue-411-server.yaml");
+            issue_411_components    = readFile("/nested-network-references/issue-411-remote2.yaml");
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -192,7 +192,7 @@ public class NetworkReferenceTest {
                 " - https\n" +
                 " - http";
         final SwaggerDeserializationResult result = parser.readWithInfo(yaml);
-        Assert.assertNotNull(result.getSwagger());
+        assertNotNull(result.getSwagger());
         assertTrue(result.getMessages().size() == 0);
         assertTrue(result.getSwagger().getDefinitions().size() == 3);
     }
@@ -246,6 +246,7 @@ public class NetworkReferenceTest {
     }
 
     static String readFile(String name) throws Exception {
-        return new String(Files.readAllBytes(new File(name).toPath()), Charset.forName("UTF-8"));
+        String path = TestUtils.getResourceAbsolutePath(name);
+        return new String(Files.readAllBytes(new File(path).toPath()), Charset.forName("UTF-8"));
     }
 }

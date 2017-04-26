@@ -12,7 +12,6 @@ import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.util.Json;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
@@ -21,7 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class SwaggerDeserializerTest {
 
@@ -215,15 +217,15 @@ public class SwaggerDeserializerTest {
 
         assertNotNull(swagger.getSecurity());
         List<SecurityRequirement> security = swagger.getSecurity();
-        Assert.assertTrue(security.size() == 1);
-        Assert.assertTrue(security.get(0).getRequirements().size() == 1);
+        assertTrue(security.size() == 1);
+        assertTrue(security.get(0).getRequirements().size() == 1);
 
         List<String> requirement = security.get(0).getRequirements().get("petstore_auth");
-        Assert.assertTrue(requirement.size() == 2);
+        assertTrue(requirement.size() == 2);
 
         Set<String> requirements = new HashSet(requirement);
-        Assert.assertTrue(requirements.contains("read:pets"));
-        Assert.assertTrue(requirements.contains("write:pets"));
+        assertTrue(requirements.contains("read:pets"));
+        assertTrue(requirements.contains("write:pets"));
     }
 
     @Test
@@ -1093,7 +1095,7 @@ public class SwaggerDeserializerTest {
         SwaggerParser parser = new SwaggerParser();
 
         SwaggerDeserializationResult result = parser.readWithInfo(json);
-        assertTrue("Parser returned errors:", result.getMessages().isEmpty());
+        assertTrue(result.getMessages().isEmpty(), "Parser returned errors");
         Swagger swagger = result.getSwagger();
 
         Map<String, Model> definitions = swagger.getDefinitions();
@@ -1176,32 +1178,32 @@ public class SwaggerDeserializerTest {
         SwaggerParser parser = new SwaggerParser();
 
         SwaggerDeserializationResult result = parser.readWithInfo(json);
-        assertTrue("Parser returned errors:", result.getMessages().isEmpty());
+        assertTrue(result.getMessages().isEmpty(), "Parser returned errors");
         Swagger swagger = result.getSwagger();
-        assertNotNull("Parser result does not contain a Swagger instance", swagger);
+        assertNotNull(swagger, "Parser result does not contain a Swagger instance");
 
         Map<String, Model> definitions = swagger.getDefinitions();
-        assertNotNull("Swagger instance does not contain any definitions", definitions);
-        assertEquals("Missing/extraneous definition;", 3, definitions.size());
+        assertNotNull(definitions, "Swagger instance does not contain any definitions");
+        assertEquals(definitions.size(), 3, "Missing/extraneous definition");
 
         Model pet = definitions.get("Pet");
         Model furry = definitions.get("Furry");
         Model dog = definitions.get("Dog");
 
-        assertNotNull("Pet model not found", pet);
-        assertNotNull("Furry model not found", furry);
-        assertNotNull("Dog model not found", dog);
-        assertTrue("Dog model is not composed", dog instanceof ComposedModel);
+        assertNotNull(pet, "Pet model not found");
+        assertNotNull(furry, "Furry model not found");
+        assertNotNull(dog, "Dog model not found");
+        assertTrue(dog instanceof ComposedModel, "Dog model is not composed");
         ComposedModel dogComposed = (ComposedModel) dog;
-        assertNotNull("Dog does not implement any interfaces", dogComposed.getInterfaces());
-        assertEquals("Dog implements the wrong number of interfaces;", 2, dogComposed.getInterfaces().size());
+        assertNotNull(dogComposed.getInterfaces(), "Dog does not implement any interfaces");
+        assertEquals(dogComposed.getInterfaces().size(), 2, "Dog implements the wrong number of interfaces;");
         RefModel dogInterfaceRef = dogComposed.getInterfaces().get(0);
         Model dogInterface = definitions.get(dogInterfaceRef.getSimpleRef());
-        assertEquals("Dog does not implement Pet;", pet, dogInterface);
+        assertEquals(pet, dogInterface, "Dog does not implement Pet");
         dogInterfaceRef = dogComposed.getInterfaces().get(1);
         dogInterface = definitions.get(dogInterfaceRef.getSimpleRef());
-        assertEquals("Dog does not implement Furry;", furry, dogInterface);
-        assertTrue("Dog does not have child properties", dogComposed.getChild() instanceof ModelImpl);
+        assertEquals(furry, dogInterface, "Dog does not implement Furry");
+        assertTrue(dogComposed.getChild() instanceof ModelImpl, "Dog does not have child properties");
     }
 
     @Test

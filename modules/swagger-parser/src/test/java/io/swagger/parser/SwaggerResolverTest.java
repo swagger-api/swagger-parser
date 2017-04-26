@@ -10,8 +10,10 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.*;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.PathsProcessor;
+import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
+import io.swagger.parser.util.SwaggerDeserializer;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
@@ -178,7 +180,7 @@ public class SwaggerResolverTest {
         assertEquals(param.getName(), "skip");
     }
 
-    @org.junit.Test//(description = "resolve operation body parameter remote refs")
+    @Test//(description = "resolve operation body parameter remote refs")
     public void testOperationBodyParameterRemoteRefs() {
         final ModelImpl schema = new ModelImpl();
 
@@ -371,12 +373,11 @@ public class SwaggerResolverTest {
                         "        default:\n" +
                         "          description: test response\n";
 
-        SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
 
-        Swagger swagger = result.getSwagger();
+        SwaggerDeserializationResult swaggerDeserializationResult = new SwaggerDeserializer().deserialize(DeserializationUtils.readYamlTree(yaml));
+        Swagger swaggerParsed = swaggerDeserializationResult.getSwagger();
 
-        final Swagger resolved = new SwaggerResolver(swagger, null, null,
+        final Swagger resolved = new SwaggerResolver(swaggerParsed, null, null,
                 new SwaggerResolver.Settings().addParametersToEachOperation(false))
                 .resolve();
 
