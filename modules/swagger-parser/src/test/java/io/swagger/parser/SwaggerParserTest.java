@@ -15,6 +15,7 @@ import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.IntegerProperty;
@@ -40,6 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 
 public class SwaggerParserTest {
@@ -762,7 +764,6 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getVendorExtensions().get("x-error-defs"));
     }
 
-    @Test
     public void testBadFormat() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/bad_format.yaml");
@@ -802,4 +803,90 @@ public class SwaggerParserTest {
         assertEquals(queryParameter.isUniqueItems(), true);
     }
 
+    @Test
+    public void testIssue357() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_357.yaml");
+        assertNotNull(swagger);
+        List<Parameter> getParams = swagger.getPath("/testApi").getGet().getParameters();
+        assertEquals(2, getParams.size());
+        for (Parameter param : getParams) {
+            SerializableParameter sp = (SerializableParameter) param;
+            switch (param.getName()) {
+                case "pathParam1":
+                    assertEquals(sp.getType(), "integer");
+                    break;
+                case "pathParam2":
+                    assertEquals(sp.getType(), "string");
+                    break;
+                default:
+                    fail("Unexpected parameter named " + sp.getName());
+                    break;
+            }
+        }
+    }
+
+    @Test
+    public void testIssue358() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue_358.yaml");
+        Json.prettyPrint(swagger);
+        assertNotNull(swagger);
+        List<Parameter> parms = swagger.getPath("/testApi").getGet().getParameters();
+        assertEquals(1, parms.size());
+        assertEquals("pathParam", parms.get(0).getName());
+        assertEquals("string", ((SerializableParameter)parms.get(0)).getType());
+    }
+
+    @Test
+    public void testIncompatibleRefs() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "paths:\n" +
+                "  /test:\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        # this is not the correct reference type\n" +
+                "        - $ref: '#/definitions/Model'\n" +
+                "        - in: body\n" +
+                "          name: incorrectType\n" +
+                "          required: true\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/Model'\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          # this is not the correct reference type\n" +
+                "          $ref: '#/definitions/Model'\n" +
+                "        400:\n" +
+                "          definitions: this is right\n" +
+                "          schema:\n" +
+                "            $ref: '#/definitions/Model'\n" +
+                "definitions:\n" +
+                "  Model:\n" +
+                "    type: object";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
+    public void testIssue243() {
+        String yaml =
+                "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: Simple API\n" +
+                "paths:\n" +
+                "  /:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK\n" +
+                "          schema:\n" +
+                "            $ref: \"#/definitions/Simple\"\n" +
+                "definitions:\n" +
+                "  Simple:\n" +
+                "    type: string";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertNotNull(result.getSwagger());
+    }
 }

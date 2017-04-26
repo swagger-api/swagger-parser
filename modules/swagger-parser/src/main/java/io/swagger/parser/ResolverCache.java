@@ -71,7 +71,14 @@ public class ResolverCache {
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
         if (refFormat == RefFormat.INTERNAL) {
             //we don't need to go get anything for internal refs
-            return expectedType.cast(loadInternalRef(ref));
+            Object loadedRef = loadInternalRef(ref);
+
+            try{
+                return expectedType.cast(loadedRef);
+            }
+            catch (Exception e) {
+                return null;
+            }
         }
 
         final String[] refParts = ref.split("#/");

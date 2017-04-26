@@ -63,4 +63,49 @@ public class RelativeReferenceTest {
         BodyParameter bp = (BodyParameter) param;
         assertNotNull(bp.getSchema());
     }
+
+    @Test
+    public void testIssue409() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "schemes:\n" +
+                "  - https\n" +
+                "basePath: /\n" +
+                "produces:\n" +
+                "  - application/json\n" +
+                "info:\n" +
+                "  title: My API\n" +
+                "  description: It works.\n" +
+                "  version: '1.0.0'\n" +
+                "definitions:\n" +
+                "\n" +
+                "  # ===============================================================================\n" +
+                "  # Fragments\n" +
+                "  # ===============================================================================\n" +
+                "\n" +
+                "  ID:\n" +
+                "    description: An entity identifer\n" +
+                "    type: integer\n" +
+                "    format: int64\n" +
+                "    readOnly: true\n" +
+                "\n" +
+                "  # ===========================================================================\n" +
+                "  # Users\n" +
+                "  # ===========================================================================\n" +
+                "\n" +
+                "  User:\n" +
+                "    type: object\n" +
+                "    required:\n" +
+                "      - emailAddress\n" +
+                "    properties:\n" +
+                "      id:\n" +
+                "        $ref: '#/definitions/ID'\n" +
+                "      emailAddress:\n" +
+                "        type: string\n" +
+                "        format: email\n" +
+                "        minLength: 6\n" +
+                "        maxLength: 254";
+        Swagger swagger = new SwaggerParser().parse(yaml);
+        assertNotNull(swagger.getDefinitions().get("ID"));
+    }
 }
