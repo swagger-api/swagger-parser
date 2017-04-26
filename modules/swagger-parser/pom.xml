@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.swagger</groupId>
         <artifactId>swagger-parser-project</artifactId>
-        <version>1.0.29.1-restlet</version>
+        <version>1.0.29.2-restlet-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
