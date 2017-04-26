@@ -16,7 +16,7 @@ public class OpenAPIParser {
 
         for(io.swagger.parser.extensions.SwaggerParserExtension extension : getExtensions()) {
             output = extension.readLocation(url, transform(auth), options);
-            if(output != null) {
+            if(output != null && output.getOpenAPI() != null) {
                 return output;
             }
         }
@@ -29,7 +29,7 @@ public class OpenAPIParser {
 
         for(io.swagger.parser.extensions.SwaggerParserExtension extension : getExtensions()) {
             output = extension.readContents(swaggerAsString, transform(auth), options);
-            if(output != null) {
+            if(output != null && output.getOpenAPI() != null) {
                 return output;
             }
         }
