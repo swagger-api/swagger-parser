@@ -12,7 +12,7 @@ mvn release:clean release:prepare
 # To change the version, you can use the following properties
 # mvn release:clean release:prepare -B -Dtag="v$version" -DreleaseVersion="$version"
 
-# Release version. 
+# Release version. If release fails with a 400 error from nexus, trying allowing temporary to Redeploy Artefact on the repository (weird, but it works for me - issue in maven plugin??) 
 mvn release:perform
 
 #Commit the new POMs with the message
