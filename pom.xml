@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.29.2-restlet-SNAPSHOT</version>
+    <version>1.0.29.2-restlet</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
 
@@ -12,7 +12,7 @@
         <connection>scm:git:git@github.com:restlet/swagger-parser.git</connection>
         <developerConnection>scm:git:git@github.com:restlet/swagger-parser.git</developerConnection>
         <url>https://github.com/restlet/swagger-parser</url>
-      <tag>HEAD</tag>
+      <tag>v1.0.29.2-restlet</tag>
   </scm>
 
 
