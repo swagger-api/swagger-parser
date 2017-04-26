@@ -471,14 +471,6 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testIssue255() {
-        SwaggerParser parser = new SwaggerParser();
-
-        Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/objectExample.json"));
-        assertEquals(swagger.getDefinitions().get("SamplePayload").getExample(), "[{\"op\":\"replace\",\"path\":\"/s\",\"v\":\"w\"}]");
-    }
-
-    @Test
     public void testIssue286() {
         SwaggerParser parser = new SwaggerParser();
 
@@ -805,6 +797,53 @@ public class SwaggerParserTest {
         assertTrue(queryParameter.isUniqueItems());
     }
 
+
+    @Test
+    public void testDefinitionExample() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/definition_example.yaml"));
+
+        ModelImpl model;
+        ArrayModel arrayModel;
+
+        model = (ModelImpl)swagger.getDefinitions().get("NumberType");
+        assertEquals((Double)model.getExample(), 2.0d, 0d);
+
+        model = (ModelImpl)swagger.getDefinitions().get("IntegerType");
+        assertEquals((int)model.getExample(), 2);
+
+        model = (ModelImpl)swagger.getDefinitions().get("StringType");
+        assertEquals((String)model.getExample(), "2");
+
+        model = (ModelImpl)swagger.getDefinitions().get("ObjectType");
+        assertTrue(model.getExample() instanceof Map);
+        Map objectExample = (Map) model.getExample();
+        assertEquals((String)objectExample.get("propertyA"), "valueA");
+        assertEquals((Integer)objectExample.get("propertyB"), new Integer(123));
+
+        arrayModel = (ArrayModel)swagger.getDefinitions().get("ArrayType");
+        assertTrue(arrayModel.getExample() instanceof List);
+        List<Map> arrayExample = (List<Map>) arrayModel.getExample();
+        assertEquals((String)arrayExample.get(0).get("propertyA"), "valueA1");
+        assertEquals((Integer)arrayExample.get(0).get("propertyB"), new Integer(123));
+        assertEquals((String)arrayExample.get(1).get("propertyA"), "valueA2");
+        assertEquals((Integer)arrayExample.get(1).get("propertyB"), new Integer(456));
+
+        model = (ModelImpl)swagger.getDefinitions().get("NumberTypeStringExample");
+        assertEquals((String)model.getExample(), "2.0");
+
+        model = (ModelImpl)swagger.getDefinitions().get("IntegerTypeStringExample");
+        assertEquals((String)model.getExample(), "2");
+
+        model = (ModelImpl)swagger.getDefinitions().get("StringTypeStringExample");
+        assertEquals((String)model.getExample(), "2");
+
+        model = (ModelImpl)swagger.getDefinitions().get("ObjectTypeStringExample");
+        assertEquals((String)model.getExample(), "{\"propertyA\": \"valueA\", \"propertyB\": 123}");
+
+        arrayModel = (ArrayModel) swagger.getDefinitions().get("ArrayTypeStringExample");
+        assertEquals((String)arrayModel.getExample(), "[{\"propertyA\": \"valueA1\", \"propertyB\": 123}, {\"propertyA\": \"valueA2\", \"propertyB\": 456}]");
+    }
 
     @Test
     public void testIssue357() {

@@ -829,16 +829,8 @@ public class SwaggerDeserializer {
         }
         JsonNode exampleNode = node.get("example");
         if(exampleNode != null) {
-            // we support text or object nodes
-            if(exampleNode.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode on = getObject("example", node, false, location, result);
-                if(on != null) {
-                    model.setExample(on);
-                }
-            }
-            else {
-                model.setExample(exampleNode.toString());
-            }
+            Object example = Json.mapper().convertValue(exampleNode, Object.class);
+            model.setExample(example);
         }
 
         if(model != null) {
