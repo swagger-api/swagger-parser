@@ -9,7 +9,7 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileInputStream;

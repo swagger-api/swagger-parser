@@ -24,6 +24,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.util.TestUtils;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.testng.Assert;
@@ -37,11 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
+import static org.testng.AssertJUnit.assertNotNull;
 
 
 public class SwaggerParserTest {
@@ -202,14 +203,14 @@ public class SwaggerParserTest {
 
     @Test
     public void testLoadRelativeFileTree_Json() throws Exception {
-        final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/json/parent.json");
+        final Swagger swagger = doRelativeFileTest(TestUtils.getResourceAbsolutePath("/relative-file-references/json/parent.json"));
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
     }
 
     @Test
     public void testLoadExternalNestedDefinitions() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/nested-references/b.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/nested-references/b.yaml"));
 
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.containsKey("x"));
@@ -221,7 +222,7 @@ public class SwaggerParserTest {
     @Test
     public void testPetstore() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/petstore.json", null, true);
+        SwaggerDeserializationResult result = parser.readWithInfo(TestUtils.getResourceAbsolutePath("/petstore.json"), null, true);
 
         assertNotNull(result);
         assertTrue(result.getMessages().isEmpty());
@@ -257,7 +258,7 @@ public class SwaggerParserTest {
     @Test
     public void testFileReferenceWithVendorExt() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/file-reference-with-vendor-ext/b.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/file-reference-with-vendor-ext/b.yaml"));
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.get("z").getVendorExtensions().get("x-foo") instanceof Map);
         assertEquals(((Map)definitions.get("z").getVendorExtensions().get("x-foo")).get("bar"), "baz");
@@ -268,21 +269,21 @@ public class SwaggerParserTest {
     @Test
     public void testTroublesomeFile() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/troublesome.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/troublesome.yaml"));
     }
 
     @Test
     public void testLoadRelativeFileTree_Yaml() throws Exception {
-        JsonToYamlFileDuplicator.duplicateFilesInYamlFormat("src/test/resources/relative-file-references/json",
-                "src/test/resources/relative-file-references/yaml");
-        final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
+        String relativeFileReferenceFolder = TestUtils.getResourceAbsolutePath("/relative-file-references");
+        JsonToYamlFileDuplicator.duplicateFilesInYamlFormat(relativeFileReferenceFolder + "/json", relativeFileReferenceFolder + "/yaml");
+        final Swagger swagger = doRelativeFileTest(relativeFileReferenceFolder + "/yaml/parent.yaml");
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
     }
 
     @Test
     public void testLoadRecursiveExternalDef() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/file-reference-to-recursive-defs/b.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/file-reference-to-recursive-defs/b.yaml"));
 
         Map<String, Model> definitions = swagger.getDefinitions();
         assertEquals(((RefProperty) ((ArrayProperty) definitions.get("v").getProperties().get("children")).getItems()).get$ref(), "#/definitions/v");
@@ -293,7 +294,7 @@ public class SwaggerParserTest {
     @Test
     public void testLoadNestedItemsReferences() {
         SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo("src/test/resources/nested-items-references/b.yaml", null, true);
+        SwaggerDeserializationResult result = parser.readWithInfo(TestUtils.getResourceAbsolutePath("/nested-items-references/b.yaml"), null, true);
         Swagger swagger = result.getSwagger();
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.containsKey("z"));
@@ -303,7 +304,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue75() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue99.json");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue99.json"));
 
         BodyParameter param = (BodyParameter)swagger.getPaths().get("/albums").getPost().getParameters().get(0);
         Model model = param.getSchema();
@@ -327,7 +328,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue146() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue_146.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_146.yaml"));
         assertNotNull(swagger);
         QueryParameter p = ((QueryParameter)swagger.getPaths().get("/checker").getGet().getParameters().get(0));
         StringProperty pp = (StringProperty)p.getItems();
@@ -337,7 +338,7 @@ public class SwaggerParserTest {
     @Test(description="Test (path & form) parameter's required attribute")
     public void testParameterRequired() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/petstore.json");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/petstore.json"));
         final List<Parameter> operationParams = swagger.getPath("/pet/{petId}").getPost().getParameters();
         
         final PathParameter pathParameter = (PathParameter) operationParams.get(0);
@@ -350,20 +351,20 @@ public class SwaggerParserTest {
     @Test(description="Test consumes and produces in top level and operation level")
     public void testConsumesAndProduces() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/consumes_and_produces");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/consumes_and_produces"));
         Assert.assertNotNull(swagger);
 
         // test consumes and produces at spec level
-        Assert.assertEquals(swagger.getConsumes(), Arrays.asList("application/json"));
-        Assert.assertEquals(swagger.getProduces(), Arrays.asList("application/xml"));
+        assertEquals(swagger.getConsumes(), Arrays.asList("application/json"));
+        assertEquals(swagger.getProduces(), Arrays.asList("application/xml"));
         
         // test consumes and produces at operation level
-        Assert.assertEquals(swagger.getPath("/pets").getPost().getConsumes(), Arrays.asList("image/jpeg"));
-        Assert.assertEquals(swagger.getPath("/pets").getPost().getProduces(), Arrays.asList("image/png"));
+        assertEquals(swagger.getPath("/pets").getPost().getConsumes(), Arrays.asList("image/jpeg"));
+        assertEquals(swagger.getPath("/pets").getPost().getProduces(), Arrays.asList("image/png"));
  
         // test empty consumes and produces at operation level
-        Assert.assertEquals(swagger.getPath("/pets").getGet().getConsumes(), Collections.<String> emptyList());
-        Assert.assertEquals(swagger.getPath("/pets").getGet().getProduces(), Collections.<String> emptyList());
+        assertEquals(swagger.getPath("/pets").getGet().getConsumes(), Collections.<String> emptyList());
+        assertEquals(swagger.getPath("/pets").getGet().getProduces(), Collections.<String> emptyList());
  
         // test consumes and produces not defined at operation level
         Assert.assertNull(swagger.getPath("/pets").getPatch().getConsumes());
@@ -374,7 +375,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue108() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue_108.json");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_108.json"));
 
         assertNotNull(swagger);
     }
@@ -473,7 +474,7 @@ public class SwaggerParserTest {
     public void testIssue255() {
         SwaggerParser parser = new SwaggerParser();
 
-        Swagger swagger = parser.read("objectExample.json");
+        Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/objectExample.json"));
         assertEquals(swagger.getDefinitions().get("SamplePayload").getExample(), "[{\"op\":\"replace\",\"path\":\"/s\",\"v\":\"w\"}]");
     }
 
@@ -481,7 +482,7 @@ public class SwaggerParserTest {
     public void testIssue286() {
         SwaggerParser parser = new SwaggerParser();
 
-        Swagger swagger = parser.read("issue_286.yaml");
+        Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_286.yaml"));
         Property response = swagger.getPath("/").getGet().getResponses().get("200").getSchema();
         assertTrue(response instanceof RefProperty);
         assertEquals(((RefProperty)response).getSimpleRef(), "issue_286_PetList");
@@ -491,7 +492,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue360() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue_360.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_360.yaml"));
         assertNotNull(swagger);
 
         Parameter parameter = swagger.getPath("/pets").getPost().getParameters().get(0);
@@ -641,7 +642,7 @@ public class SwaggerParserTest {
     @Test
     public void testNestedReferences() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/relative-file-references/json/parent.json");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/relative-file-references/json/parent.json"));
         assertTrue(swagger.getDefinitions().containsKey("externalArray"));
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalArray"));
         assertTrue(swagger.getDefinitions().containsKey("externalObject"));
@@ -652,7 +653,7 @@ public class SwaggerParserTest {
     @Test
     public void testCodegenPetstore() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/petstore-codegen.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/petstore-codegen.yaml"));
         ModelImpl enumModel = (ModelImpl)swagger.getDefinitions().get("Enum_Test");
         assertNotNull(enumModel);
         Property enumProperty = enumModel.getProperties().get("enum_integer");
@@ -682,7 +683,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue339() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue-339.json");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue-339.json"));
 
         Parameter param = swagger.getPath("/store/order/{orderId}").getGet().getParameters().get(0);
         assertTrue(param instanceof PathParameter);
@@ -764,9 +765,10 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getVendorExtensions().get("x-error-defs"));
     }
 
+    @Test
     public void testBadFormat() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/bad_format.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/bad_format.yaml"));
 
         Path path = swagger.getPath("/pets");
 
@@ -800,13 +802,14 @@ public class SwaggerParserTest {
         queryParameter = (QueryParameter) parameter;
         assertEquals(queryParameter.getName(), "query-param-collection-format-and-uniqueItems");
         assertEquals(queryParameter.getCollectionFormat(), "multi");
-        assertEquals(queryParameter.isUniqueItems(), true);
+        assertTrue(queryParameter.isUniqueItems());
     }
+
 
     @Test
     public void testIssue357() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue_357.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_357.yaml"));
         assertNotNull(swagger);
         List<Parameter> getParams = swagger.getPath("/testApi").getGet().getParameters();
         assertEquals(2, getParams.size());
@@ -829,7 +832,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue358() {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue_358.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_358.yaml"));
         Json.prettyPrint(swagger);
         assertNotNull(swagger);
         List<Parameter> parms = swagger.getPath("/testApi").getGet().getParameters();

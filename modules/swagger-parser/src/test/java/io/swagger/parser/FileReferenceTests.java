@@ -4,6 +4,7 @@ import io.swagger.models.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.util.TestUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -11,12 +12,16 @@ import static org.testng.Assert.*;
 public class FileReferenceTests {
     @Test
     public void testIssue306() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-306.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-306.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
 
-        assertTrue(swagger.getDefinitions().size() == 3);
+        assertEquals(swagger.getDefinitions().size(), 5);
+
+        assertNotNull(swagger.getDefinitions().get("Animal"));
+        assertNotNull(swagger.getDefinitions().get("Category"));
+
         // resolved from `$ref: './book.yaml'`
         assertNotNull(swagger.getDefinitions().get("Inventory"));
         // resolved from `$ref: 'book.yaml'`
@@ -28,7 +33,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue308() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-308.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-308.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -39,7 +44,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue310() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-310.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-310.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -50,7 +55,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue312() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-312.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-312.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -66,7 +71,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue314() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-314.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-314.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -84,7 +89,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue316() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-316.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-316.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -107,7 +112,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue323() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-323.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-323.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -120,7 +125,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue289() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/issue-289.yaml", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/issue-289.yaml"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -129,7 +134,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue336() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-336.json", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-336.json"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -138,7 +143,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue340() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-340.json", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-340.json"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
@@ -147,7 +152,7 @@ public class FileReferenceTests {
 
     @Test
     public void testIssue304() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-304.json", null, true);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(TestUtils.getResourceAbsolutePath("/nested-file-references/issue-304.json"), null, true);
         assertNotNull(result.getSwagger());
 
         Swagger swagger = result.getSwagger();
