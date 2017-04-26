@@ -17,6 +17,17 @@ public class OpenAPIParserTest {
     }
 
     @Test
+    public void test30Url() {
+        String location = "http://petstore.swagger.io/v2/swagger.json";
+
+        SwaggerParseResult result = new OpenAPIParser().readLocation(location, null, null);
+
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc0");
+    }
+
+    @Test
     public void test30() {
         String yaml =
             "{\n" +

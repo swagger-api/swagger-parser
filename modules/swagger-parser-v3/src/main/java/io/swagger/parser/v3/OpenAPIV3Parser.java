@@ -7,6 +7,7 @@ import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            OpenAPI api = JSON_MAPPER.readValue(url, OpenAPI.class);
+            OpenAPI api = JSON_MAPPER.readValue(new URL(url), OpenAPI.class);
             result.setOpenAPI(api);
         }
         catch (Exception e) {
