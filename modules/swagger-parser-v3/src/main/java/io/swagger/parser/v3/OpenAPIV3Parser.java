@@ -1,11 +1,13 @@
 package io.swagger.parser.v3;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.OpenAPI;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.parser.v3.util.OpenAPIDeserializer;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -22,8 +24,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            OpenAPI api = JSON_MAPPER.readValue(new URL(url), OpenAPI.class);
-            result.setOpenAPI(api);
+            // TODO
+            JsonNode node = JSON_MAPPER.readValue(new URL(url), JsonNode.class);
+            result = new OpenAPIDeserializer().deserialize(node);
         }
         catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
