@@ -731,6 +731,14 @@ public class SwaggerDeserializer {
                 am.items(items);
             }
 
+            // extra keys
+            Set<String> keys = getKeys(node);
+            for(String key : keys) {
+                if(key.startsWith("x-")) {
+                    am.setVendorExtension(key, extension(node.get(key)));
+                }
+            }
+
             model = am;
         }
         else {
