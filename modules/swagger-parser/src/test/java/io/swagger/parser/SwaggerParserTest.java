@@ -889,4 +889,46 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
         assertNotNull(result.getSwagger());
     }
+
+    @Test
+    public void testIssue450() {
+        String desc = "An array of Pets";
+        String xTag = "x-my-tag";
+        String xVal = "An extension tag";
+        String yaml =
+            "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: Simple API\n" +
+                "paths:\n" +
+                "  /:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK\n" +
+                "definitions:\n" +
+                "  PetArray:\n" +
+                "    type: array\n" +
+                "    items:\n" +
+                "      $ref: \"#/definitions/Pet\"\n" +
+                "    description: " + desc + "\n" +
+                "    " + xTag + ": " + xVal + "\n" +
+                "  Pet:\n" +
+                "    type: object\n" +
+                "    properties:\n" +
+                "      id:\n" +
+                "        type: string";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertNotNull(result.getSwagger());
+        final Swagger swagger = result.getSwagger();
+
+        Model petArray = swagger.getDefinitions().get("PetArray");
+        assertNotNull(petArray);
+        assertTrue(petArray instanceof ArrayModel);
+        assertEquals(petArray.getDescription(),desc);
+        assertNotNull(petArray.getVendorExtensions());
+        assertNotNull(petArray.getVendorExtensions().get(xTag));
+        assertEquals(petArray.getVendorExtensions().get(xTag),xVal);
+    }
+
 }
