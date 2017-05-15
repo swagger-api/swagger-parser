@@ -1,22 +1,22 @@
 package io.swagger.parser.v2;
 
-import io.swagger.models.Components;
-import io.swagger.models.OpenAPI;
-import io.swagger.models.Operation;
-import io.swagger.models.PathItem;
-import io.swagger.models.Paths;
-import io.swagger.models.info.Contact;
-import io.swagger.models.info.Info;
-import io.swagger.models.info.License;
-import io.swagger.models.media.ArraySchema;
-import io.swagger.models.media.Content;
-import io.swagger.models.media.FileSchema;
-import io.swagger.models.media.MediaType;
-import io.swagger.models.media.Schema;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.RequestBody;
-import io.swagger.models.responses.Response;
-import io.swagger.models.responses.Responses;
+import io.swagger.oas.models.Components;
+import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.Operation;
+import io.swagger.oas.models.PathItem;
+import io.swagger.oas.models.Paths;
+import io.swagger.oas.models.info.Contact;
+import io.swagger.oas.models.info.Info;
+import io.swagger.oas.models.info.License;
+import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.Content;
+import io.swagger.oas.models.media.FileSchema;
+import io.swagger.oas.models.media.MediaType;
+import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.parameters.Parameter;
+import io.swagger.oas.models.parameters.RequestBody;
+import io.swagger.oas.models.responses.ApiResponse;
+import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
@@ -351,16 +351,16 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             for(String responseCode : v2Operation.getResponses().keySet()) {
                 v2.io.swagger.models.Response v2Response = v2Operation.getResponses().get(responseCode);
-                Response response = convert(v2Response, mediaTypes);
-                operation.responses(new Responses().addResponse(responseCode, response));
+                ApiResponse response = convert(v2Response, mediaTypes);
+                operation.responses(new ApiResponses().addApiResponse(responseCode, response));
             }
         }
 
         return operation;
     }
 
-    public Response convert(v2.io.swagger.models.Response v2Response, List<String> mediaTypes) {
-        Response response = new Response();
+    public ApiResponse convert(v2.io.swagger.models.Response v2Response, List<String> mediaTypes) {
+        ApiResponse response = new ApiResponse();
         Content content = new Content();
 
         response.setDescription(v2Response.getDescription());
@@ -416,7 +416,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
             if(sp.getEnum() != null) {
                 for(String e : sp.getEnum()) {
-                    schema.addEnumItem(e);
+                    // TODO: use the proper method for enum items on schema
+                    //schema.addEnumItem(e);
                 }
             }
 
