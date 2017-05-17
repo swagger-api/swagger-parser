@@ -31,6 +31,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(license);
         Assert.assertEquals(license.getName(), "Apache 2.0");
         Assert.assertEquals(license.getUrl(), "http://www.apache.org/licenses/LICENSE-2.0.html");
+        Assert.assertEquals(info.getVersion(), "1.0.1");
     }
 
     @DataProvider(name="openApiSpecification")
@@ -39,4 +40,7 @@ public class OpenAPIDeserializerTest {
         final JsonNode rootNode = mapper.readTree(Files.readAllBytes(Paths.get(getClass().getResource("/oas.yaml").toURI())));
         return new Object[][]{new Object[]{rootNode}};
     }
+
+
+
 }
