@@ -9,30 +9,85 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version:
+  version: 1.0.1
 
 paths:
-/pets:
-  get:
-    description: Returns all pets from the system that the user has access to
-    responses:
-      '200':
-        description: A list of pets.
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/pet'
+  /pet:
+    post:
+      tags:
+        - pet
+      summary: "Add a new pet to the store"
+      description: ""
+      operationId: addPet
+      parameters:
+      responses:
+        405:
+          description: "Invalid input"
+      security:
+        - petstore_auth:
+          - "write:pets"
+          - "read:pets"
+      requestBody:
+        "$ref": "#/components/requestBodies/requestBody1"
+    put:
+      tags:
+      - pet
+      summary: "Update an existing pet"
+      description: ""
+      operationId: updatePet
+      parameters:
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Pet not found"
+        405:
+          description: "Validation exception"
+        security:
+          - petstore_auth:
+            - "write:pets"
+            - "read:pets"
+        requestBody:
+          "$ref": "#/components/requestBodies/requestBody1"
 
-/pet:
-  post:
-    tags: pet
-  summary: add a new pet to the store
-  description:
-  operationId: addPet
-  parameters:
-  responses:
-    '405':
-        description: invalid input
-  security:
+  /pet/findByStatus:
+    get:
+      tags:
+        - pet
+      summary: "Finds Pets by status"
+      description: "Multiple status values can be provided with comma separated strings"
+      operationId: findPetsByStatus
+      parameters:
+        - name: status
+          in: query
+          description: "Status values that need to be considered for filter"
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - available
+                - pending
+                - sold
+              default: available
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Pet"
+            application/json:
+              schema:
+                type: array
+                items:
+                "$ref": "#/components/schemas/Pet"
+        400:
+          description: "Invalid status value"
+      security:
+        - petstore_auth:
+          - "write:pets"
+          - "read:pets"

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.License;
 import io.swagger.oas.models.info.Info;
@@ -24,11 +25,9 @@ import io.swagger.oas.models.parameters.PathParameter;*/
 import io.swagger.oas.models.media.EncodingProperty;
 
 
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -80,9 +79,7 @@ public class OpenAPIDeserializer {
 
             obj = getObject("paths", on, true, location, result);
             if (obj != null) {
-                Map<String, PathItem> paths = paths(obj, "paths", result);
-
-
+                Paths paths = createPaths(obj, "paths", result);
                 openAPI.paths(paths);
             }
 
@@ -93,8 +90,8 @@ public class OpenAPIDeserializer {
 
     //PathsObject
 
-    public Map<String,Paths> paths(ObjectNode obj, String location, ParseResult result) {
-        Map<String, Paths> output = new LinkedHashMap<>();
+    public Paths createPaths(ObjectNode obj, String location, ParseResult result) {
+        final Paths paths = new Paths();
         if(obj == null) {
             return null;
         }
@@ -110,17 +107,17 @@ public class OpenAPIDeserializer {
                     result.invalidType(location, pathName, "object", pathValue);
                 } else {
                     ObjectNode path = (ObjectNode) pathValue;
-                    PathItem pathObj = path(path, location + ".'" + pathName + "'", result);
-                    output.put(pathName, pathObj);
+                    PathItem pathObj = createPathItem(path, location + ".'" + pathName + "'", result);
+                    paths.put(pathName, pathObj);
                 }
             }
         }
-        return output;
+        return paths;
     }
 
 
 
-    public PathItem path(ObjectNode obj, String location, ParseResult result) {
+    public PathItem createPathItem(ObjectNode obj, String location, ParseResult result) {
         boolean hasRef = false;
         PathItem output = null;
         if(obj.get("$ref") != null) {
@@ -140,58 +137,57 @@ public class OpenAPIDeserializer {
             }
             return null;
         }
-        PathItem path = new PathItem();
-
+        PathItem pathItem = new PathItem();
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
-        path.setParameters(parameters(parameters, location, result));
+        pathItem.setParameters(parameters(parameters, location, result));
 
         ObjectNode on = getObject("get", obj, false, location, result);
         if(on != null) {
             Operation op = operation(on, location + "(get)", result);
             if(op != null) {
-                path.setGet(op);
+                pathItem.setGet(op);
             }
         }
         on = getObject("put", obj, false, location, result);
         if(on != null) {
             Operation op = operation(on, location + "(put)", result);
             if(op != null) {
-                path.setPut(op);
+                pathItem.setPut(op);
             }
         }
         on = getObject("post", obj, false, location, result);
         if(on != null) {
             Operation op = operation(on, location + "(post)", result);
             if(op != null) {
-                path.setPost(op);
+                pathItem.setPost(op);
             }
         }
         on = getObject("head", obj, false, location, result);
         if(on != null) {
             Operation op = operation(on, location + "(head)", result);
             if(op != null) {
-                path.setHead(op);
+                pathItem.setHead(op);
             }
         }
         on = getObject("delete", obj, false, location, result);
         if(on != null) {
             Operation op = operation(on, location + "(delete)", result);
             if(op != null) {
-                path.setDelete(op);
+                pathItem.setDelete(op);
             }
         }
         on = getObject("patch", obj, false, location, result);
         if(on != null) {
             Operation op = operation(on, location + "(patch)", result);
             if(op != null) {
-                path.setPatch(op);
+                pathItem.setPatch(op);
             }
         }
         on = getObject("options", obj, false, location, result);
         if(on != null) {
             Operation op = operation(on, location + "(options)", result);
             if(op != null) {
-                path.setOptions(op);
+                pathItem.setOptions(op);
             }
         }
 
@@ -199,13 +195,13 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(obj);
         for(String key : keys) {
             if(key.startsWith("x-")) {
-                //path.setVendorExtension(key, extension(obj.get(key)));
+                //createPathItem.setVendorExtension(key, extension(obj.get(key)));
             }
             else if(!PATH_KEYS.contains(key)) {
                 result.extra(location, key, obj.get(key));
             }
         }
-        return path;
+        return pathItem;
     }
 
     public ExternalDocumentation externalDocs(ObjectNode node, String location, ParseResult result) {
@@ -512,7 +508,7 @@ public class OpenAPIDeserializer {
             else if ("header".equals(value)) {
                 sp = new HeaderParameter();
             }
-            else if ("path".equals(value)) {
+            else if ("createPathItem".equals(value)) {
                 sp = new PathParameter();
             }
             else if ("formData".equals(value)) {
@@ -709,20 +705,21 @@ public class OpenAPIDeserializer {
     }
 
 
-    public Map<String, ApiResponse> responses(ObjectNode node, String location, ParseResult result) {
-        if(node == null)
+    public ApiResponses responses(ObjectNode node, String location, ParseResult result) {
+        if(node == null) {
             return null;
+        }
 
-        Map<String, ApiResponse> output = new TreeMap<String, ApiResponse>();
-
+        ApiResponses output = new ApiResponses();
         Set<String> keys = getKeys(node);
 
         for(String key : keys) {
+            System.out.println("KEY: " + key);
             if (key.startsWith("x-")) {
-
+                // TODO: check the extension for this object.
             }
             else {
-                ObjectNode obj = getObject(key, node, false, location + ".responses", result);
+                ObjectNode obj = getObject(key, node, false, location + "responses", result);
                 ApiResponse response = response(obj, location + "." + key, result);
                 output.put(key, response);
             }
@@ -732,8 +729,9 @@ public class OpenAPIDeserializer {
     }
 
     public ApiResponse response(ObjectNode node, String location, ParseResult result) {
-        if(node == null)
+        if(node == null) {
             return null;
+        }
 
         ApiResponse output = new ApiResponse();
         JsonNode ref = node.get("$ref");
@@ -748,6 +746,7 @@ public class OpenAPIDeserializer {
         }
 
         String value = getString("description", node, true, location, result);
+        System.out.println("VALUE DESC: " + value);
         output.description(value);
 
         ObjectNode schema = getObject("schema", node, false, location, result);
@@ -800,64 +799,33 @@ public class OpenAPIDeserializer {
         if(obj == null) {
             return null;
         }
-        Operation output = new Operation();
+        Operation operation = new Operation();
         ArrayNode array = getArray("tags", obj, false, location, result);
         List<String> tags = tagStrings(array, location, result);
         if(tags != null) {
-            output.tags(tags);
+            operation.tags(tags);
         }
         String value = getString("summary", obj, false, location, result);
-        output.summary(value);
+        operation.summary(value);
 
         value = getString("description", obj, false, location, result);
-        output.description(value);
+        operation.description(value);
 
         ObjectNode externalDocs = getObject("externalDocs", obj, false, location, result);
         ExternalDocumentation docs = externalDocs(externalDocs, location, result);
-        output.setExternalDocs(docs);
+        operation.setExternalDocs(docs);
 
         value = getString("operationId", obj, false, location, result);
-        output.operationId(value);
-
-        array = getArray("consumes", obj, false, location, result);
-        if(array != null) {
-            if (array.size() == 0) {
-                //output.consumes(Collections.<String> emptyList());
-            } else {
-                Iterator<JsonNode> it = array.iterator();
-                while (it.hasNext()) {
-                    JsonNode n = it.next();
-                    String s = getString(n, location + ".consumes", result);
-                    if (s != null) {
-                        //output.consumes(s);
-                    }
-                }
-            }
-        }
-        array = getArray("produces", obj, false, location, result);
-        if (array != null) {
-            if (array.size() == 0) {
-                //output.produces(Collections.<String> emptyList());
-            } else {
-                Iterator<JsonNode> it = array.iterator();
-                while (it.hasNext()) {
-                    JsonNode n = it.next();
-                    String s = getString(n, location + ".produces", result);
-                    if (s != null) {
-                        //output.produces(s);
-                    }
-                }
-            }
-        }
+        operation.operationId(value);
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
-        output.setParameters(parameters(parameters, location, result));
+        operation.setParameters(parameters(parameters, location, result));
 
-        ObjectNode responses = getObject("responses", obj, true, location, result);
-        Map<String, ApiResponse> responsesObject = responses(responses, location, result);
-        if(responsesObject != null && responsesObject.size() == 0) {
-            result.missing(location, "responses");
-        }
-        output.setResponses(responsesObject);
+        ObjectNode responsesNode = getObject("responses", obj, false, location, result);
+
+        ApiResponses responses = responses(responsesNode, "responses", result);
+        operation.setResponses(responses);
+
+        //output.setResponses(responsesObject);
 
         array = getArray("schemes", obj, false, location, result);
         if(array != null) {
@@ -875,7 +843,7 @@ public class OpenAPIDeserializer {
         }
         Boolean deprecated = getBoolean("deprecated", obj, false, location, result);
         if(deprecated != null) {
-            output.setDeprecated(deprecated);
+            operation.setDeprecated(deprecated);
         }
         array = getArray("security", obj, false, location, result);
         List<SecurityRequirement> security = securityRequirements(array, location, result);
@@ -886,7 +854,7 @@ public class OpenAPIDeserializer {
                     ss.add(s.getRequirements());
                 }
             }*/
-            output.setSecurity(ss);
+            //output.setSecurity(ss);
         }
 
         // extra keys
@@ -900,7 +868,7 @@ public class OpenAPIDeserializer {
             }
         }
 
-        return output;
+        return operation;
     }
 
     public List<SecurityRequirement> securityRequirements(ArrayNode node, String location, ParseResult result) {
@@ -1088,7 +1056,13 @@ public class OpenAPIDeserializer {
         return value;
     }
 
-    /*public Object extension(JsonNode jsonNode) {
+    /*public Path pathRef(TextNode ref, String location, ParseResult result) {
+        RefPath output = new RefPath();
+        output.set$ref(ref.textValue());
+        return output;
+    }
+
+    public Object extension(JsonNode jsonNode) {
         return Json.mapper().convertValue(jsonNode, Object.class);
     }*/
 
