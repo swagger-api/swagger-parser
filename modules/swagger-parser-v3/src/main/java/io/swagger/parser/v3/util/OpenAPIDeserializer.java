@@ -19,10 +19,11 @@ import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.util.Json;
-/*import io.swagger.oas.models.parameters.QueryParameter;
+import io.swagger.oas.models.parameters.QueryParameter;
 import io.swagger.oas.models.parameters.HeaderParameter;
-import io.swagger.oas.models.parameters.PathParameter;*/
+import io.swagger.oas.models.parameters.PathParameter;
 import io.swagger.oas.models.media.EncodingProperty;
+
 
 
 import java.math.BigDecimal;
@@ -520,7 +521,7 @@ public class OpenAPIDeserializer {
             else if ("header".equals(value)) {
                 sp = new HeaderParameter();
             }
-            else if ("createPathItem".equals(value)) {
+            else if ("pathItem".equals(value)) {
                 sp = new PathParameter();
             }
             else if ("formData".equals(value)) {
