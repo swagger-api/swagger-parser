@@ -6,10 +6,10 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.License;
 import io.swagger.oas.models.info.Info;
+import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.responses.ApiResponse;
@@ -73,7 +73,7 @@ public class OpenAPIDeserializer {
 
             ObjectNode obj = getObject("info", on, true, "", result);
             if (obj != null) {
-                Info  info = info(obj, "info", result);
+                Info  info = createInfo(obj, "info", result);
                 openAPI.info(info);
             }
 
@@ -99,19 +99,15 @@ public class OpenAPIDeserializer {
         Set<String> pathKeys = getKeys(obj);
         for(String pathName : pathKeys) {
             JsonNode pathValue = obj.get(pathName);
-            if(pathName.startsWith("x-")) {
-                result.unsupported(location, pathName, pathValue);
-            }
-            else {
-                if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                    result.invalidType(location, pathName, "object", pathValue);
-                } else {
-                    ObjectNode path = (ObjectNode) pathValue;
-                    PathItem pathObj = createPathItem(path, location + ".'" + pathName + "'", result);
-                    paths.put(pathName, pathObj);
-                }
+            if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, pathName, "object", pathValue);
+            } else {
+                ObjectNode path = (ObjectNode) pathValue;
+                PathItem pathObj = createPathItem(path, location + ".'" + pathName + "'", result);
+                paths.put(pathName, pathObj);
             }
         }
+
         return paths;
     }
 
@@ -119,9 +115,12 @@ public class OpenAPIDeserializer {
 
     public PathItem createPathItem(ObjectNode obj, String location, ParseResult result) {
         boolean hasRef = false;
-        PathItem output = null;
+
+        System.out.println("Location " + location);
+
         if(obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");
+
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
                 //return pathRef((TextNode)ref, location, result);
             }
@@ -138,8 +137,18 @@ public class OpenAPIDeserializer {
             return null;
         }
         PathItem pathItem = new PathItem();
+
+        String value = getString("summary", obj, true, location, result);
+        pathItem.setSummary(value);
+
+        value = getString("description", obj, false, location, result);
+        pathItem.setDescription(value);
+
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
         pathItem.setParameters(parameters(parameters, location, result));
+
+        ArrayNode servers = getArray("servers", obj, false, location, result);
+        //TODO: pathItem.setServers(servers(servers, location, result));
 
         ObjectNode on = getObject("get", obj, false, location, result);
         if(on != null) {
@@ -203,6 +212,8 @@ public class OpenAPIDeserializer {
         }
         return pathItem;
     }
+
+
 
     public ExternalDocumentation externalDocs(ObjectNode node, String location, ParseResult result) {
         ExternalDocumentation output = null;
@@ -311,30 +322,30 @@ public class OpenAPIDeserializer {
 
     //Info Object
 
-    public Info info(ObjectNode node, String location, ParseResult result) {
+    public Info createInfo(ObjectNode node, String location, ParseResult result) {
         if(node == null)
             return null;
 
         Info info = new Info();
         String value = getString("title", node, true, location, result);
-        info.title(value);
+        info.setTitle(value);
 
         value = getString("description", node, false, location, result);
-        info.description(value);
+        info.setDescription(value);
 
         value = getString("termsOfService", node, false, location, result);
-        info.termsOfService(value);
+        info.setTermsOfService(value);
 
         ObjectNode obj = getObject("contact", node, false, "contact", result);
-        Contact contact = contact(obj, location, result);
-        info.contact(contact);
+        Contact contact = createContact(obj, location, result);
+        info.setContact(contact);
 
         obj = getObject("license", node, false, location, result);
-        License license = license(obj, location, result);
-        info.license(license);
+        License license = createLicense(obj, location, result);
+        info.setLicense(license);
 
         value = getString("version", node, true, location, result);
-        info.version(value);
+        info.setVersion(value);
 
         // extra keys
         Set<String> keys = getKeys(node);
@@ -350,7 +361,7 @@ public class OpenAPIDeserializer {
         return info;
     }
 
-    public License license(ObjectNode node, String location, ParseResult result) {
+    public License createLicense(ObjectNode node, String location, ParseResult result) {
         if(node == null)
             return null;
 
@@ -376,7 +387,7 @@ public class OpenAPIDeserializer {
         return license;
     }
 
-    public Contact contact(ObjectNode node, String location, ParseResult result) {
+    public Contact createContact(ObjectNode node, String location, ParseResult result) {
         if(node == null)
             return null;
 
@@ -453,7 +464,7 @@ public class OpenAPIDeserializer {
 
 
     public List<Parameter> parameters(ArrayNode obj, String location, ParseResult result) {
-        List<Parameter> output = new ArrayList<Parameter>();
+        List<Parameter> output = new ArrayList<>();
         if(obj == null) {
             return output;
         }
@@ -465,6 +476,7 @@ public class OpenAPIDeserializer {
                 }
             }
         }
+        System.out.println("parameter "+output);
         return output;
     }
 
@@ -496,8 +508,8 @@ public class OpenAPIDeserializer {
         location += ".[" + l + "]";
 
         String value = getString("in", obj, true, location, result);
-        // Comentado por GRACE
-        /*if(value != null) {
+        // Commented by GRACE
+        if(value != null) {
             String type = getString("type", obj, false, location, result);
             String format = getString("format", obj, false, location, result);
             AbstractSerializableParameter<?> sp = null;
@@ -699,7 +711,7 @@ public class OpenAPIDeserializer {
                     output.setRequired(required);
                 }
             }
-        }*/
+        }
 
         return output;
     }

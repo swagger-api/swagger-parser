@@ -8,6 +8,7 @@ import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.info.License;
+import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.parser.models.SwaggerParseResult;
@@ -25,31 +26,61 @@ public class OpenAPIDeserializerTest {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas.yaml").toURI())));
 
-        System.out.println("can you read me??????????????????'");
+
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
         Assert.assertNotNull(result);
+
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
+
         final Info info = openAPI.getInfo();
         Assert.assertNotNull(info);
         Assert.assertEquals(info.getTitle(), "Sample Pet Store App");
         Assert.assertEquals(info.getDescription(), "This is a sample server for a pet store.");
+        Assert.assertEquals(info.getTermsOfService(), "http://example.com/terms/");
+
+        final Contact contact = info.getContact();
+        Assert.assertNotNull(contact);
+        Assert.assertEquals(contact.getName(),"API Support");
+        Assert.assertEquals(contact.getUrl(),"http://www.example.com/support");
+        Assert.assertEquals(contact.getEmail(),"support@example.com");
+
         final License license = info.getLicense();
         Assert.assertNotNull(license);
         Assert.assertEquals(license.getName(), "Apache 2.0");
         Assert.assertEquals(license.getUrl(), "http://www.apache.org/licenses/LICENSE-2.0.html");
+
         Assert.assertEquals(info.getVersion(), "1.0.1");
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
         Assert.assertEquals(paths.size(), 2);
 
+
+
         PathItem petEndpoint = paths.get("/pet");
+        //System.out.println("$REF: "+ petEndpoint.getRef());
         Assert.assertNotNull(petEndpoint);
+        Assert.assertEquals(petEndpoint.getSummary(),"summary");
+        Assert.assertEquals(petEndpoint.getDescription(),"description");
+
+        //Operation post
         Assert.assertNotNull(petEndpoint.getPost());
+        Assert.assertNotNull(petEndpoint.getPost().getTags());
+        Assert.assertEquals(petEndpoint.getPost().getTags().size(), 1);
         Assert.assertEquals(petEndpoint.getPost().getSummary(), "Add a new pet to the store");
+        Assert.assertEquals(petEndpoint.getPost().getDescription(),"");
         Assert.assertEquals(petEndpoint.getPost().getOperationId(), "addPet");
+
+
+
+        //parameters operation get
+        Assert.assertNotNull(petEndpoint.getPost().getParameters());
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        Assert.assertNotNull(petByStatusEndpoint.getGet());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(),5);
 
         ApiResponses responses = petEndpoint.getPost().getResponses();
         Assert.assertNotNull(responses);
