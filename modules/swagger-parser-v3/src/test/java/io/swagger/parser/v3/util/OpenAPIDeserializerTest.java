@@ -54,6 +54,24 @@ public class OpenAPIDeserializerTest {
 
         Assert.assertEquals(info.getVersion(), "1.0.1");
 
+    }
+
+    @Test
+    //@Test(dataProvider = "openApiSpecification")
+    public void readPathsObject(/**JsonNode rootNode*/) throws Exception {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas.yaml").toURI())));
+
+
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
         Assert.assertEquals(paths.size(), 2);
@@ -81,13 +99,16 @@ public class OpenAPIDeserializerTest {
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
-
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"cookie");
+        //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());
+        //System.out.println("style: " + petByStatusEndpoint.getGet().getParameters().get(0).getStyle());
         ApiResponses responses = petEndpoint.getPost().getResponses();
         Assert.assertNotNull(responses);
         Assert.assertTrue(responses.containsKey("405"));
         ApiResponse response = responses.get("405");
         Assert.assertEquals(response.getDescription(), "Invalid input");
     }
+
 
     @DataProvider(name="openApiSpecification")
     private Object[][] getRootNode() throws Exception {
