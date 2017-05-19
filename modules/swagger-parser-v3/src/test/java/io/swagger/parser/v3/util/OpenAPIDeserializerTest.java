@@ -20,13 +20,8 @@ import java.nio.file.Files;
 
 public class OpenAPIDeserializerTest {
 
-    @Test
-    //@Test(dataProvider = "openApiSpecification")
-    public void readInfoObject(/**JsonNode rootNode*/) throws Exception {
-        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas.yaml").toURI())));
-
-
+    @Test(dataProvider = "data")
+    public void readInfoObject(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -56,13 +51,8 @@ public class OpenAPIDeserializerTest {
 
     }
 
-    @Test
-    //@Test(dataProvider = "openApiSpecification")
-    public void readPathsObject(/**JsonNode rootNode*/) throws Exception {
-        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas.yaml").toURI())));
-
-
+    @Test(dataProvider = "data")
+    public void readPathsObject(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -110,7 +100,7 @@ public class OpenAPIDeserializerTest {
     }
 
 
-    @DataProvider(name="openApiSpecification")
+    @DataProvider(name="data")
     private Object[][] getRootNode() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas.yaml").toURI())));
