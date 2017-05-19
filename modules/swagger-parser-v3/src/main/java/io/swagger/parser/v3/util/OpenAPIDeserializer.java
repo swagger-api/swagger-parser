@@ -12,6 +12,8 @@ import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Operation;
+import io.swagger.oas.models.parameters.CookieParameter;
+import io.swagger.oas.models.parameters.QueryParameter;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.oas.models.security.SecurityRequirement;
@@ -23,6 +25,7 @@ import io.swagger.oas.models.parameters.QueryParameter;
 import io.swagger.oas.models.parameters.HeaderParameter;
 import io.swagger.oas.models.parameters.PathParameter;
 import io.swagger.oas.models.media.EncodingProperty;
+import org.apache.commons.lang3.StringUtils;
 
 
 
@@ -35,7 +38,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 
 public class OpenAPIDeserializer {
@@ -55,6 +57,7 @@ public class OpenAPIDeserializer {
             ParseResult rootParse = new ParseResult();
             OpenAPI api = parseRoot(rootNode, rootParse);
             result.setOpenAPI(api);
+            result.setMessages(rootParse.getMessages());
         }
         catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
@@ -146,7 +149,7 @@ public class OpenAPIDeserializer {
         pathItem.setDescription(value);
 
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
-        pathItem.setParameters(parameters(parameters, location, result));
+        pathItem.setParameters(getParameterList(parameters, location, result));
 
         ArrayNode servers = getArray("servers", obj, false, location, result);
         //TODO: pathItem.setServers(servers(servers, location, result));
@@ -464,14 +467,14 @@ public class OpenAPIDeserializer {
 
 
 
-    public List<Parameter> parameters(ArrayNode obj, String location, ParseResult result) {
+    public List<Parameter> getParameterList(ArrayNode obj, String location, ParseResult result) {
         List<Parameter> output = new ArrayList<>();
         if(obj == null) {
             return output;
         }
         for(JsonNode item : obj) {
             if(item.getNodeType().equals(JsonNodeType.OBJECT)) {
-                Parameter param = parameter((ObjectNode) item, location, result);
+                Parameter param = getParameter((ObjectNode) item, location, result);
                 if(param != null) {
                     output.add(param);
                 }
@@ -481,12 +484,12 @@ public class OpenAPIDeserializer {
         return output;
     }
 
-    public Parameter parameter(ObjectNode obj, String location, ParseResult result) {
+    public Parameter getParameter(ObjectNode obj, String location, ParseResult result) {
         if(obj == null) {
             return null;
         }
 
-        Parameter output = null;
+        //Parameter output = null;
         JsonNode ref = obj.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
@@ -509,212 +512,73 @@ public class OpenAPIDeserializer {
         location += ".[" + l + "]";
 
         String value = getString("in", obj, true, location, result);
-        // Commented by GRACE
-        if(value != null) {
-            String type = getString("type", obj, false, location, result);
-            String format = getString("format", obj, false, location, result);
-            AbstractSerializableParameter<?> sp = null;
-
-            if("query".equals(value)) {
-                sp = new QueryParameter();
-            }
-            else if ("header".equals(value)) {
-                sp = new HeaderParameter();
-            }
-            else if ("pathItem".equals(value)) {
-                sp = new PathParameter();
-            }
-            else if ("formData".equals(value)) {
-                sp = new FormParameter();
-            }
-
-            if(sp != null) {
-                // type is mandatory when sp != null
-                getString("type", obj, true, location, result);
-                Map<PropertyBuilder.PropertyId, Object> map = new LinkedHashMap<PropertyBuilder.PropertyId, Object>();
-
-                map.put(TYPE, type);
-                map.put(FORMAT, format);
-                String defaultValue = getString("default", obj, false, location, result);
-                map.put(DEFAULT, defaultValue);
-                sp.setDefault(defaultValue);
-
-                BigDecimal bd = getBigDecimal("maximum", obj, false, location, result);
-                if(bd != null) {
-                    map.put(MAXIMUM, bd);
-                    sp.setMaximum(bd);
-                }
-
-                Boolean bl = getBoolean("exclusiveMaximum", obj, false, location, result);
-                if(bl != null) {
-                    map.put(EXCLUSIVE_MAXIMUM, bl);
-                    sp.setExclusiveMaximum(bl);
-                }
-
-                bd = getBigDecimal("minimum", obj, false, location, result);
-                if(bd != null) {
-                    map.put(MINIMUM, bd);
-                    sp.setMinimum(bd);
-                }
-
-                bl = getBoolean("exclusiveMinimum", obj, false, location, result);
-                if(bl != null) {
-                    map.put(EXCLUSIVE_MINIMUM, bl);
-                    sp.setExclusiveMinimum(bl);
-                }
-
-                Integer maxLength = getInteger("maxLength", obj, false, location, result);
-                map.put(MAX_LENGTH, maxLength);
-                sp.setMaxLength(maxLength);
-
-                Integer minLength = getInteger("minLength", obj, false, location, result);
-                map.put(MIN_LENGTH, minLength);
-                sp.setMinLength(minLength);
-
-                String pat = getString("pattern", obj, false, location, result);
-                map.put(PATTERN, pat);
-                sp.setPattern(pat);
-
-                Integer iv = getInteger("maxItems", obj, false, location, result);
-                map.put(MAX_ITEMS, iv);
-                sp.setMaxItems(iv);
-
-                iv = getInteger("minItems", obj, false, location, result);
-                map.put(MIN_ITEMS, iv);
-                sp.setMinItems(iv);
-
-                iv = getInteger("minLength", obj, false, location, result);
-                map.put(MIN_LENGTH, iv);
-                sp.setMinLength(iv);
-
-                iv = getInteger("maxLength", obj, false, location, result);
-                map.put(MAX_LENGTH, iv);
-                sp.setMaxLength(iv);
-
-                bd = getBigDecimal("multipleOf", obj, false, location, result);
-                if(bd != null) {
-                    map.put(MULTIPLE_OF, bd);
-                    sp.setMultipleOf(bd.doubleValue());
-                }
-
-                Boolean uniqueItems = getBoolean("uniqueItems", obj, false, location, result);
-                map.put(UNIQUE_ITEMS, uniqueItems);
-                sp.setUniqueItems(uniqueItems);
-
-                ArrayNode an = getArray("enum", obj, false, location, result);
-                if(an != null) {
-                    List<String> _enum = new ArrayList<String>();
-                    for(JsonNode n : an) {
-                        if(n.isValueNode()) {
-                            _enum.add(n.asText());
-                        }
-                        else {
-                            result.invalidType(location, "enum", "value", n);
-                        }
-                    }
-                    sp.setEnum(_enum);
-                    map.put(ENUM, _enum);
-                }
-
-                bl = getBoolean("readOnly", obj, false, location, result);
-                if(bl != null) {
-                    map.put(READ_ONLY, bl);
-                    sp.setReadOnly(bl);
-                }
-
-                bl = getBoolean("allowEmptyValue", obj, false, location, result);
-                if(bl != null) {
-                    map.put(ALLOW_EMPTY_VALUE, bl);
-                    sp.setAllowEmptyValue(bl);
-                }
-
-                EncodingProperty prop = PropertyBuilder.build(type, format, map);
-
-                if(prop != null) {
-                    sp.setProperty(prop);
-                    ObjectNode items = getObject("items", obj, false, location, result);
-                    if(items != null) {
-                        EncodingProperty inner = schema(null, items, location, result);
-                        sp.setItems(inner);
-                    }
-                }
-
-                Set<String> keys = getKeys(obj);
-                for(String key : keys) {
-                    if(key.startsWith("x-")) {
-                        sp.setVendorExtension(key, extension(obj.get(key)));
-                    }
-                    else if(!PARAMETER_KEYS.contains(key)) {
-                        result.extra(location, key, obj.get(key));
-                    }
-                }
-
-                String collectionFormat = getString("collectionFormat", obj, false, location, result);
-                sp.setCollectionFormat(collectionFormat);
-
-                output = sp;
-            }
-            else if ("body".equals(value)) {
-                BodyParameter bp = new BodyParameter();
-
-                JsonNode node = obj.get("schema");
-                if(node != null && node instanceof ObjectNode) {
-                    bp.setSchema(this.definition((ObjectNode)node, location, result));
-                }
-
-                // examples
-                ObjectNode examplesNode = getObject("examples", obj, false, location, result);
-                if(examplesNode != null) {
-                    Map<String, String> examples = Json.mapper().convertValue(examplesNode, Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, Object.class));
-                    bp.setExamples(examples);
-                }
-
-                // pattern
-                String pat = getString("pattern", obj, false, location, result);
-                if(pat != null) {
-                    bp.setPattern(pat);
-                }
-
-                // allowEmptyValue
-                Boolean bl = getBoolean("allowEmptyValue", obj, false, location, result);
-                if(bl != null) {
-                    bp.setAllowEmptyValue(bl);
-                }
-                // readOnly
-                bl = getBoolean("readOnly", obj, false, location, result);
-                if(bl != null) {
-                    bp.setReadOnly(bl);
-                }
-
-                // vendor extensions
-                Set<String> keys = getKeys(obj);
-                for(String key : keys) {
-                    if(key.startsWith("x-")) {
-                        bp.setVendorExtension(key, extension(obj.get(key)));
-                    }
-                    else if(!BODY_PARAMETER_KEYS.contains(key)) {
-                        result.extra(location, key, obj.get(key));
-                    }
-                }
-                output = bp;
-
-//                output = Json.mapper().convertValue(obj, Parameter.class);
-            }
-            if(output != null) {
-                value = getString("name", obj, true, location, result);
-                output.setName(value);
-
-                value = getString("description", obj, false, location, result);
-                output.setDescription(value);
-
-                Boolean required = getBoolean("required", obj, false, location, result);
-                if(required != null) {
-                    output.setRequired(required);
-                }
-            }
+        if(StringUtils.isBlank(value)) {
+            return null;
         }
 
-        return output;
+        Parameter parameter = null;
+
+        if("query".equals(value)) {
+            parameter = new QueryParameter();
+        }
+        else if ("header".equals(value)) {
+            parameter = new HeaderParameter();
+        }
+        else if ("path".equals(value)) {
+            parameter = new PathParameter();
+        }
+        else if ("cookie".equals(value)) {
+            parameter = new CookieParameter();
+        }
+
+        if(parameter == null) {
+            result.invalidType(location, "in", "string", obj);
+            return null;
+        }
+
+        parameter.setIn(value);
+        value = getString("name", obj, true, location, result);
+        parameter.setName(value);
+
+        value = getString("description", obj, false, location, result);
+        parameter.setDescription(value);
+
+        Boolean required = getBoolean("required", obj, false, location, result);
+        if(required != null) {
+            parameter.setRequired(required);
+        }
+
+        Boolean explode = getBoolean("explode", obj, false, location, result);
+        if(explode != null) {
+            parameter.setExplode(explode);
+        } else {
+            parameter.setExplode(Boolean.FALSE);
+        }
+
+        value = getString("style", obj, true, location, result);
+
+        if(StringUtils.isBlank(value)) {
+            // TODO, assign defaults based on in.
+        } else {
+            if(value.equals(Parameter.StyleEnum.FORM.toString())) {
+                parameter.setStyle(Parameter.StyleEnum.FORM);
+            } else if(value.equals(Parameter.StyleEnum.DEEPOBJECT.toString())) {
+                parameter.setStyle(Parameter.StyleEnum.DEEPOBJECT);
+            } else if(value.equals(Parameter.StyleEnum.LABEL.toString())) {
+                parameter.setStyle(Parameter.StyleEnum.LABEL);
+            } else if(value.equals(Parameter.StyleEnum.MATRIX.toString())) {
+                parameter.setStyle(Parameter.StyleEnum.MATRIX);
+            } else if(value.equals(Parameter.StyleEnum.PIPEDELIMITED.toString())) {
+                parameter.setStyle(Parameter.StyleEnum.PIPEDELIMITED);
+            } else if(value.equals(Parameter.StyleEnum.SIMPLE.toString())) {
+                parameter.setStyle(Parameter.StyleEnum.SIMPLE);
+            } else if(value.equals(Parameter.StyleEnum.SPACEDELIMITED.toString())) {
+                parameter.setStyle(Parameter.StyleEnum.SPACEDELIMITED);
+            } else {
+                result.invalidType(location, "style", "string", obj);
+            }
+        }
+        return parameter;
     }
 
 
@@ -831,7 +695,7 @@ public class OpenAPIDeserializer {
         value = getString("operationId", obj, false, location, result);
         operation.operationId(value);
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
-        operation.setParameters(parameters(parameters, location, result));
+        operation.setParameters(getParameterList(parameters, location, result));
 
         ObjectNode responsesNode = getObject("responses", obj, false, location, result);
 

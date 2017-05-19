@@ -80,7 +80,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(),5);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
 
         ApiResponses responses = petEndpoint.getPost().getResponses();
         Assert.assertNotNull(responses);
