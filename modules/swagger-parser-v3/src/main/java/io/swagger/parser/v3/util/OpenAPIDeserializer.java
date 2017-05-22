@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
@@ -88,15 +87,10 @@ public class OpenAPIDeserializer {
                 openAPI.setPaths(paths);
             }
 
-            obj = getObject("servers", on, false, location, result);
-            //System.out.println(on);
+            ArrayNode array = getArray("servers", on, false, location, result);
             if (obj != null) {
-                ArrayNode servers = getArray("servers", obj, false, location, result);
-                openAPI.setServers(getServersList(servers, location, result));
-
+                openAPI.setServers(getServersList(array, location, result));
             }
-
-
         }
 
         return openAPI;
@@ -204,6 +198,7 @@ public class OpenAPIDeserializer {
 
         ArrayNode servers = getArray("servers", obj, false, location, result);
         pathItem.setServers(getServersList(servers, location, result));
+        //System.out.println(pathItem.getServers());
 
         ObjectNode on = getObject("get", obj, false, location, result);
         if (on != null) {
@@ -346,6 +341,7 @@ public class OpenAPIDeserializer {
                 result.invalid();
             }
         } else if (!value.getNodeType().equals(JsonNodeType.OBJECT)) {
+            System.out.println("nodeType"+value.getNodeType());
             result.invalidType(location, key, "object", value);
             if (required) {
                 result.invalid();
@@ -757,7 +753,7 @@ public class OpenAPIDeserializer {
         if (node == null)
             return null;
 
-        List<SecurityRequirement> output = new ArrayList<SecurityRequirement>();
+        List<SecurityRequirement> output = new ArrayList<>();
 
         for (JsonNode item : node) {
             SecurityRequirement security = new SecurityRequirement();

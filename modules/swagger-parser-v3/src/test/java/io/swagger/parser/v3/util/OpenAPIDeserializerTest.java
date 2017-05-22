@@ -102,6 +102,10 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getPost().getSummary(), "Add a new pet to the store");
         Assert.assertEquals(petEndpoint.getPost().getDescription(),"");
         Assert.assertEquals(petEndpoint.getPost().getOperationId(), "addPet");
+        Assert.assertNotNull(petEndpoint.getServers());
+        Assert.assertEquals(petEndpoint.getServers().size(), 1);
+        Assert.assertNotNull(petEndpoint.getParameters());
+        Assert.assertEquals(petEndpoint.getParameters().size(), 1);
 
 
 

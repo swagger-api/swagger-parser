@@ -55,6 +55,22 @@ paths:
         - read:pets
       requestBody:
         "$ref": "#/components/requestBodies/requestBody1"
+    servers:
+    - url: http://petstore.swagger.io/v2
+    parameters:
+    - name: status
+      in: query
+      description: Status values that need to be considered for filter
+      required: true
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+          - available
+          - pending
+          - sold
+          default: available
     put:
       tags:
       - pet
