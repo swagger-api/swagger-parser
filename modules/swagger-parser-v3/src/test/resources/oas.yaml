@@ -1,3 +1,8 @@
+servers:
+  - url: https://api.pet.com/v3
+    description: description of the server
+  - url: https://api.pet.co/v3.0
+        description: description of the server3
 info:
   title: Sample Pet Store App
   description: This is a sample server for a pet store.
@@ -31,6 +36,7 @@ paths:
           - "read:pets"
       requestBody:
         "$ref": "#/components/requestBodies/requestBody1"
+      externalDocs:
     put:
       tags:
       - pet

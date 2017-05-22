@@ -12,11 +12,13 @@ import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.oas.models.servers.Server;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
+import java.util.List;
 
 public class OpenAPIDeserializerTest {
 
@@ -29,12 +31,13 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
+        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0-RC1");
 
         final Info info = openAPI.getInfo();
         Assert.assertNotNull(info);
         Assert.assertEquals(info.getTitle(), "Sample Pet Store App");
-        Assert.assertEquals(info.getDescription(), "This is a sample server for a pet store.");
-        Assert.assertEquals(info.getTermsOfService(), "http://example.com/terms/");
+        Assert.assertEquals(info.getDescription(), "This is a sample server Petstore");
+        Assert.assertEquals(info.getTermsOfService(), "http://swagger.io/terms/");
 
         final Contact contact = info.getContact();
         Assert.assertNotNull(contact);
@@ -52,6 +55,24 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test(dataProvider = "data")
+    public void readServerObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final List<Server> server = openAPI.getServers();
+        Assert.assertNotNull(server);
+        Assert.assertNotNull(server.get(0).getUrl());
+        Assert.assertEquals(server.get(0).getUrl(),"http://petstore.swagger.io/v2");
+
+
+    }
+
+    @Test(dataProvider = "data")
     public void readPathsObject(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
@@ -64,7 +85,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 2);
+        Assert.assertEquals(paths.size(), 14);
 
 
 
@@ -89,7 +110,7 @@ public class OpenAPIDeserializerTest {
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"cookie");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
         //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());
         //System.out.println("style: " + petByStatusEndpoint.getGet().getParameters().get(0).getStyle());
         ApiResponses responses = petEndpoint.getPost().getResponses();
@@ -103,7 +124,7 @@ public class OpenAPIDeserializerTest {
     @DataProvider(name="data")
     private Object[][] getRootNode() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas.yaml").toURI())));
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
         return new Object[][]{new Object[]{rootNode}};
     }
 
