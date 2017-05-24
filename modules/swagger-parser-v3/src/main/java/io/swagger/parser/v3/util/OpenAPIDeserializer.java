@@ -18,6 +18,7 @@ import io.swagger.oas.models.parameters.HeaderParameter;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.PathParameter;
 import io.swagger.oas.models.parameters.QueryParameter;
+import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.oas.models.security.SecurityRequirement;
@@ -748,6 +749,10 @@ public class OpenAPIDeserializer {
         operation.setResponses(responses);
 
 
+        final ObjectNode requestObjectNode = getObject("requestBody", obj, false, location, result);
+        operation.setRequestBody(getRequestBody(requestObjectNode, location, result));
+
+
         array = getArray("schemes", obj, false, location, result);
         if (array != null) {
             Iterator<JsonNode> it = array.iterator();
@@ -823,6 +828,21 @@ public class OpenAPIDeserializer {
 
         return output;
     }
+
+    protected RequestBody getRequestBody(ObjectNode node, String location, ParseResult result) {
+        final RequestBody body = new RequestBody();
+        final String description = getString("description", node, false, location, result);
+        final Boolean required = getBoolean("required", node, false, location, result);
+
+        body.setDescription(description);
+        body.setRequired(required);
+
+        final ObjectNode contentNode = getObject("content", node, false, location, result);
+        // TODO parse content and media type objects.
+        return body;
+    }
+
+
 
 
     protected static class ParseResult {
