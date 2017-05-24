@@ -40,6 +40,9 @@ paths:
     summary: summary
     description: description
     post:
+      externalDocs:
+        description: Find out more
+        url: http://swagger.io
       tags:
       - pet
       summary: Add a new pet to the store

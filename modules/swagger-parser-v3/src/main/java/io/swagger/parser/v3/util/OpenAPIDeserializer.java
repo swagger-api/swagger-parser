@@ -91,6 +91,12 @@ public class OpenAPIDeserializer {
             if (obj != null) {
                 openAPI.setServers(getServersList(array, location, result));
             }
+
+            obj = getObject("externalDocs", on, false, location, result);
+            if (obj != null) {
+                ExternalDocumentation externalDocs = getExternalDocs(obj, "externalDocs", result);
+                openAPI.setExternalDocs(externalDocs);
+            }
         }
 
         return openAPI;
@@ -198,7 +204,6 @@ public class OpenAPIDeserializer {
 
         ArrayNode servers = getArray("servers", obj, false, location, result);
         pathItem.setServers(getServersList(servers, location, result));
-        //System.out.println(pathItem.getServers());
 
         ObjectNode on = getObject("get", obj, false, location, result);
         if (on != null) {
@@ -264,17 +269,17 @@ public class OpenAPIDeserializer {
 
 
     public ExternalDocumentation getExternalDocs(ObjectNode node, String location, ParseResult result) {
-        ExternalDocumentation output = null;
+        ExternalDocumentation externalDocs = null;
 
         if (node != null) {
-            output = new ExternalDocumentation();
+            externalDocs = new ExternalDocumentation();
             Set<String> keys = getKeys(node);
 
             String value = getString("description", node, false, location, result);
-            output.description(value);
+            externalDocs.description(value);
 
             value = getString("url", node, true, location, result);
-            output.url(value);
+            externalDocs.url(value);
 
             // extra keys
             for (String key : keys) {
@@ -286,7 +291,7 @@ public class OpenAPIDeserializer {
             }
         }
 
-        return output;
+        return externalDocs;
     }
 
 
@@ -662,14 +667,14 @@ public class OpenAPIDeserializer {
         if (nodes == null)
             return null;
 
-        List<String> output = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
 
         for (JsonNode node : nodes) {
             if (node.getNodeType().equals(JsonNodeType.STRING)) {
-                output.add(node.textValue());
+                tags.add(node.textValue());
             }
         }
-        return output;
+        return tags;
     }
 
 
@@ -704,7 +709,6 @@ public class OpenAPIDeserializer {
         ApiResponses responses = getResponses(responsesNode, "responses", result);
         operation.setResponses(responses);
 
-        //output.setResponses(responsesObject);
 
         array = getArray("schemes", obj, false, location, result);
         if (array != null) {

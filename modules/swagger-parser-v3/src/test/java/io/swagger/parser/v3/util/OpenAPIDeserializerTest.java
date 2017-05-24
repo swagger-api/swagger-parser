@@ -3,6 +3,7 @@ package io.swagger.parser.v3.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
@@ -73,7 +74,28 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test(dataProvider = "data")
+    public void readExternalDocsObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final ExternalDocumentation externalDocumentation = openAPI.getExternalDocs();
+        Assert.assertNotNull(externalDocumentation);
+        Assert.assertNotNull(externalDocumentation.getUrl());
+        Assert.assertEquals(externalDocumentation.getUrl(),"http://swagger.io");
+
+        Assert.assertNotNull(externalDocumentation.getDescription());
+        Assert.assertEquals(externalDocumentation.getDescription(),"Find out more about Swagger");
+
+    }
+
+    @Test(dataProvider = "data")
     public void readPathsObject(JsonNode rootNode) throws Exception {
+
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -94,6 +116,11 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint);
         Assert.assertEquals(petEndpoint.getSummary(),"summary");
         Assert.assertEquals(petEndpoint.getDescription(),"description");
+        Assert.assertNotNull(petEndpoint.getPost().getExternalDocs());
+        Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
+        //System.out.println(petEndpoint.getPost().getExternalDocs().getUrl());
+        Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
+
 
         //Operation post
         Assert.assertNotNull(petEndpoint.getPost());
@@ -106,6 +133,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getServers().size(), 1);
         Assert.assertNotNull(petEndpoint.getParameters());
         Assert.assertEquals(petEndpoint.getParameters().size(), 1);
+
 
 
 
@@ -122,6 +150,10 @@ public class OpenAPIDeserializerTest {
         Assert.assertTrue(responses.containsKey("405"));
         ApiResponse response = responses.get("405");
         Assert.assertEquals(response.getDescription(), "Invalid input");
+
+
+
+
     }
 
 
