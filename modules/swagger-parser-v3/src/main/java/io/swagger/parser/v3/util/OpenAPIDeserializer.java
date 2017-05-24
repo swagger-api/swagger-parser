@@ -22,6 +22,8 @@ import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.servers.Server;
+import io.swagger.oas.models.servers.ServerVariable;
+import io.swagger.oas.models.servers.ServerVariables;
 import io.swagger.parser.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,7 +44,7 @@ public class OpenAPIDeserializer {
     protected static Set<String> INFO_KEYS = new LinkedHashSet<>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
     protected static Set<String> CONTACT_KEYS = new LinkedHashSet<>(Arrays.asList("name", "url", "email"));
     protected static Set<String> LICENSE_KEYS = new LinkedHashSet<>(Arrays.asList("name", "url"));
-    protected static Set<String> OPERATION_KEYS = new LinkedHashSet<>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "consumes", "produces", "parameters", "responses", "schemes", "deprecated", "security"));
+    protected static Set<String> OPERATION_KEYS = new LinkedHashSet<>(Arrays.asList("scheme", "tags", "summary", "description", "externalDocs", "operationId", "parameters", "responses", "schemes", "deprecated", "security"));
     protected static Set<String> PATH_KEYS = new LinkedHashSet<>(Arrays.asList("$ref", "get", "put", "post", "delete", "head", "patch", "options", "parameters"));
     protected static Set<String> EXTERNAL_DOCS_KEYS = new LinkedHashSet<>(Arrays.asList("description", "url"));
     protected static Set<String> RESPONSE_KEYS = new LinkedHashSet<>(Arrays.asList("description", "schema", "headers", "examples"));
@@ -102,28 +104,7 @@ public class OpenAPIDeserializer {
         return openAPI;
     }
 
-    //PathsObject
 
-    public Paths getPaths(ObjectNode obj, String location, ParseResult result) {
-        final Paths paths = new Paths();
-        if (obj == null) {
-            return null;
-        }
-
-        Set<String> pathKeys = getKeys(obj);
-        for (String pathName : pathKeys) {
-            JsonNode pathValue = obj.get(pathName);
-            if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, pathName, "object", pathValue);
-            } else {
-                ObjectNode path = (ObjectNode) pathValue;
-                PathItem pathObj = getPathItem(path, location + ".'" + pathName + "'", result);
-                paths.put(pathName, pathObj);
-            }
-        }
-
-        return paths;
-    }
 
     public List<Server> getServersList(ArrayNode obj, String location, ParseResult result) {
 
@@ -161,19 +142,76 @@ public class OpenAPIDeserializer {
         server.setDescription(value);
 
 
-        //TODO server.setVariables
+
+        server.setVariables(getServerVariables(obj,location,result));
 
 
 
         return server;
     }
 
+    public ServerVariables getServerVariables(ObjectNode obj, String location, ParseResult result){
+        final ServerVariables serverVariables = new ServerVariables();
+        if (obj == null) {
+            return null;
+        }
 
+        Set<String> serverKeys = getKeys(obj);
+        for (String serverName : serverKeys) {
+            JsonNode serverValue = obj.get(serverName);
+            if (!serverValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, serverName, "object", serverValue);
+            } else {
+                ObjectNode server = (ObjectNode) serverValue;
+                ServerVariable serverVariable = getServerVariable(server, location + ".'" + serverName + "'", result);
+                serverVariables.put(serverName, serverVariable);
+            }
+        }
+
+        return serverVariables;
+    }
+
+    public ServerVariable getServerVariable(ObjectNode obj, String location, ParseResult result){
+        ServerVariable serverVariable = new ServerVariable();
+
+        //serverVariable.setEnum(variableEnum);
+
+        String value = getString("default", obj, true, location, result);
+        serverVariable.setDefault(value);
+
+        value = getString("description", obj, false, location, result);
+        serverVariable.setDescription(value);
+
+
+
+        return serverVariable;
+    }
+
+    //PathsObject
+
+    public Paths getPaths(ObjectNode obj, String location, ParseResult result) {
+        final Paths paths = new Paths();
+        if (obj == null) {
+            return null;
+        }
+
+        Set<String> pathKeys = getKeys(obj);
+        for (String pathName : pathKeys) {
+            JsonNode pathValue = obj.get(pathName);
+            if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, pathName, "object", pathValue);
+            } else {
+                ObjectNode path = (ObjectNode) pathValue;
+                PathItem pathObj = getPathItem(path, location + ".'" + pathName + "'", result);
+                paths.put(pathName, pathObj);
+            }
+        }
+
+        return paths;
+    }
 
     public PathItem getPathItem(ObjectNode obj, String location, ParseResult result) {
         boolean hasRef = false;
-
-        //System.out.println("Location " + location);
 
         if (obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");

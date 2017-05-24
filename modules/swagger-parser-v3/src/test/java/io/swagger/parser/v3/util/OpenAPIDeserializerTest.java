@@ -67,9 +67,20 @@ public class OpenAPIDeserializerTest {
 
         final List<Server> server = openAPI.getServers();
         Assert.assertNotNull(server);
+        Assert.assertNotNull(server.get(0));
         Assert.assertNotNull(server.get(0).getUrl());
         Assert.assertEquals(server.get(0).getUrl(),"http://petstore.swagger.io/v2");
 
+        Assert.assertNotNull(server.get(1));
+        Assert.assertNotNull(server.get(1).getUrl());
+        Assert.assertNotNull(server.get(1).getDescription());
+        Assert.assertEquals(server.get(1).getUrl(),"https://development.gigantic-server.com/v1");
+        Assert.assertEquals(server.get(1).getDescription(),"Development server");
+
+        Assert.assertNotNull(server.get(2));
+        Assert.assertNotNull(server.get(2).getVariables());
+        Assert.assertNotNull(server.get(2).getVariables().values());
+        System.out.println(server.get(2).getDescription());
 
     }
 
