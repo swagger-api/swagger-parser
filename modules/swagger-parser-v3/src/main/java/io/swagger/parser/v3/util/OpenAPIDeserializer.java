@@ -78,6 +78,11 @@ public class OpenAPIDeserializer {
 
             // required
             String value = getString("openapi", on, true, location, result);
+
+            // we don't even try if the version isn't there
+            if(value == null || !value.startsWith("3.0")) {
+                return null;
+            }
             openAPI.setOpenapi(value);
 
             ObjectNode obj = getObject("info", on, true, "", result);
