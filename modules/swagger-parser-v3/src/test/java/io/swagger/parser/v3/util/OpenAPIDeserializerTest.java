@@ -84,7 +84,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(server.get(2));
         Assert.assertNotNull(server.get(2).getVariables());
         Assert.assertNotNull(server.get(2).getVariables().values());
-        System.out.println(server.get(2).getVariables());
+        //System.out.println(server.get(2).getVariables().values());
 
     }
 

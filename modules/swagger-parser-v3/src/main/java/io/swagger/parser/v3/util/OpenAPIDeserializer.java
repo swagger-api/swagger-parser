@@ -153,7 +153,7 @@ public class OpenAPIDeserializer {
     }
 
     public ServerVariables getServerVariables(ObjectNode obj, String location, ParseResult result){
-        final ServerVariables serverVariables = new ServerVariables();
+        ServerVariables serverVariables = new ServerVariables();
         if (obj == null) {
             return null;
         }
@@ -165,28 +165,29 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, serverName, "object", serverValue);
             } else {
                 ObjectNode server = (ObjectNode) serverValue;
-                ServerVariable serverVariable = getServerVariable(server, location + ".'" + serverName + "'", result);
-                serverVariables.put(serverName, serverVariable);
+                //ServerVariable serverVariable = getServerVariable(server, location + ".'" + serverName + "'", result);
+                serverVariables = getServerVariable(server, location + ".'" + serverName + "'", result);
             }
         }
 
         return serverVariables;
     }
 
-    public ServerVariable getServerVariable(ObjectNode obj, String location, ParseResult result){
+    public ServerVariables getServerVariable(ObjectNode obj, String location, ParseResult result){
         if(obj == null){
             return null;
         }
-        ServerVariable serverVariable = new ServerVariable();
+        final ServerVariables serverVariables = new ServerVariables();
+        ServerVariable serverVariable = null;
 
         Set<String> variableKeys = getKeys(obj);
-        for (String variableNames : variableKeys) {
-            JsonNode variableValue = obj.get(variableNames);
+        for (String variableName : variableKeys) {
+            JsonNode variableValue = obj.get(variableName);
             if (!variableValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, variableNames, "object", variableValue);
+                result.invalidType(location, variableName, "object", variableValue);
             } else {
-
-                ObjectNode objNode = getObject(variableNames, obj, false, location, result);
+                serverVariable = new ServerVariable();
+                ObjectNode objNode = getObject(variableName, obj, false, location, result);
 
                 ArrayNode an = getArray("enum",objNode,false,location,result);
                 if (an != null) {
@@ -194,24 +195,27 @@ public class OpenAPIDeserializer {
                     for(JsonNode n : an) {
                         if(n.isValueNode()) {
                             _enum.add(n.asText());
+                            serverVariable.setEnum(_enum);
                         }
                         else {
                             result.invalidType(location, "enum", "value", n);
                         }
                     }
-                    serverVariable.setEnum(_enum);
+
                 }
 
 
-                String value = getString("default", objNode, true, location + ".'" + variableNames + "'", result);
+                String value = getString("default", objNode, true, location + ".'" + variableName + "'", result);
                 serverVariable.setDefault(value);
 
-                value = getString("description", objNode, false, location + ".'" + variableNames + "'", result);
+                value = getString("description", objNode, false, location + ".'" + variableName + "'", result);
                 serverVariable.setDescription(value);
+                serverVariables.addServerVariable(variableName,serverVariable);
+
             }
         }
 
-        return serverVariable;
+        return serverVariables;
     }
 
     //PathsObject
