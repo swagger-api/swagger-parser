@@ -64,6 +64,7 @@ public class OpenAPIDeserializer {
             result.setMessages(rootParse.getMessages());
         } catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
+
         }
         return result;
     }
@@ -173,17 +174,42 @@ public class OpenAPIDeserializer {
     }
 
     public ServerVariable getServerVariable(ObjectNode obj, String location, ParseResult result){
+        if(obj == null){
+            return null;
+        }
         ServerVariable serverVariable = new ServerVariable();
 
-        //serverVariable.setEnum(variableEnum);
+        Set<String> variableKeys = getKeys(obj);
+        for (String variableNames : variableKeys) {
+            JsonNode variableValue = obj.get(variableNames);
+            if (!variableValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, variableNames, "object", variableValue);
+            } else {
 
-        String value = getString("default", obj, true, location, result);
-        serverVariable.setDefault(value);
+                ObjectNode objNode = getObject(variableNames, obj, false, location, result);
 
-        value = getString("description", obj, false, location, result);
-        serverVariable.setDescription(value);
+                ArrayNode an = getArray("enum",objNode,false,location,result);
+                if (an != null) {
+                    List<String> _enum = new ArrayList<>();
+                    for(JsonNode n : an) {
+                        if(n.isValueNode()) {
+                            _enum.add(n.asText());
+                        }
+                        else {
+                            result.invalidType(location, "enum", "value", n);
+                        }
+                    }
+                    serverVariable.setEnum(_enum);
+                }
 
 
+                String value = getString("default", objNode, true, location + ".'" + variableNames + "'", result);
+                serverVariable.setDefault(value);
+
+                value = getString("description", objNode, false, location + ".'" + variableNames + "'", result);
+                serverVariable.setDescription(value);
+            }
+        }
 
         return serverVariable;
     }
@@ -385,7 +411,7 @@ public class OpenAPIDeserializer {
                 result.invalid();
             }
         } else if (!value.getNodeType().equals(JsonNodeType.OBJECT)) {
-            System.out.println("nodeType"+value.getNodeType());
+            //System.out.println("nodeType"+value.getNodeType());
             result.invalidType(location, key, "object", value);
             if (required) {
                 result.invalid();
@@ -647,7 +673,7 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
 
         for (String key : keys) {
-            //System.out.println("KEY: " + key);
+            //S ystem.out.println("KEY: " + key);
             if (key.startsWith("x-")) {
                 // TODO: check the extension for this object.
             } else {
@@ -830,7 +856,11 @@ public class OpenAPIDeserializer {
     }
 
     protected RequestBody getRequestBody(ObjectNode node, String location, ParseResult result) {
+        if (node == null){
+            return null;
+        }
         final RequestBody body = new RequestBody();
+
         final String description = getString("description", node, false, location, result);
         final Boolean required = getBoolean("required", node, false, location, result);
 
@@ -855,10 +885,6 @@ public class OpenAPIDeserializer {
         public ParseResult() {
         }
 
-        public void unsupported(String location, String key, JsonNode value) {
-            unsupported.put(new Location(location, key), value);
-        }
-
         public void extra(String location, String key, JsonNode value) {
             extra.put(new Location(location, key), value);
         }
@@ -873,46 +899,6 @@ public class OpenAPIDeserializer {
 
         public void invalid() {
             this.valid = false;
-        }
-
-        public Map<Location, JsonNode> getUnsupported() {
-            return unsupported;
-        }
-
-        public void setUnsupported(Map<Location, JsonNode> unsupported) {
-            this.unsupported = unsupported;
-        }
-
-        public boolean isValid() {
-            return valid;
-        }
-
-        public void setValid(boolean valid) {
-            this.valid = valid;
-        }
-
-        public Map<Location, JsonNode> getExtra() {
-            return extra;
-        }
-
-        public void setExtra(Map<Location, JsonNode> extra) {
-            this.extra = extra;
-        }
-
-        public Map<Location, String> getInvalidType() {
-            return invalidType;
-        }
-
-        public void setInvalidType(Map<Location, String> invalidType) {
-            this.invalidType = invalidType;
-        }
-
-        public List<Location> getMissing() {
-            return missing;
-        }
-
-        public void setMissing(List<Location> missing) {
-            this.missing = missing;
         }
 
         public List<String> getMessages() {

@@ -19,6 +19,10 @@ servers:
       basePath:
         # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `v2`
         default: v2
+        description: testing overwriting
+        enum:
+          - 2222
+          - 333
 x-origin:
 - url: http://petstore.swagger.io/v2/swagger.json
   format: swagger
@@ -75,6 +79,33 @@ paths:
         - read:pets
       requestBody:
         "$ref": "#/components/requestBodies/requestBody1"
+        description: user to add to the system
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/User'
+            examples:
+              user:
+                summary: User Example
+                externalValue: 'http://foo.bar/examples/user-example.json'
+          'application/xml':
+            schema:
+              $ref: '#/components/schemas/User'
+            examples:
+              user:
+                summary: User Example in XML
+                externalValue: 'http://foo.bar/examples/user-example.xml'
+          'text/plain':
+            examples:
+              user:
+                summary: User example in text plain format
+                externalValue: 'http://foo.bar/examples/user-example.txt'
+          '*/*':
+            examples:
+              user:
+                summary: User example in other format
+                externalValue: 'http://foo.bar/examples/user-example.whatever'
     servers:
     - url: http://petstore.swagger.io/v2
     parameters:

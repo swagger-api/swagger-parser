@@ -25,6 +25,8 @@ public class OpenAPIDeserializerTest {
 
     @Test(dataProvider = "data")
     public void readInfoObject(JsonNode rootNode) throws Exception {
+
+
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -55,8 +57,10 @@ public class OpenAPIDeserializerTest {
 
     }
 
-    @Test(dataProvider = "data")
-    public void readServerObject(JsonNode rootNode) throws Exception {
+    @Test//@Test(dataProvider = "data")
+    public void readServerObject(/*JsonNode rootNode*/) throws Exception {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -80,7 +84,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(server.get(2));
         Assert.assertNotNull(server.get(2).getVariables());
         Assert.assertNotNull(server.get(2).getVariables().values());
-        System.out.println(server.get(2).getDescription());
+        System.out.println(server.get(2).getVariables());
 
     }
 
@@ -131,6 +135,8 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
         //System.out.println(petEndpoint.getPost().getExternalDocs().getUrl());
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
+        Assert.assertEquals(petEndpoint.getPost().getRequestBody().getDescription(),"user to add to the system");
+        Assert.assertTrue(petEndpoint.getPost().getRequestBody().getRequired(),"required");
 
 
         //Operation post
