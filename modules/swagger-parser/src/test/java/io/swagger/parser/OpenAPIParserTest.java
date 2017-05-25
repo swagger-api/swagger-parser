@@ -13,7 +13,7 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc0");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
     }
 
     @Test
@@ -24,14 +24,14 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc0");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
     }
 
     @Test
     public void test30() {
         String yaml =
             "{\n" +
-            "  \"openapi\": \"3.0.0-rc0\",\n" +
+            "  \"openapi\": \"3.0.0-rc1\",\n" +
             "  \"info\": {\n" +
             "    \"title\": \"Swagger Petstore\",\n" +
             "    \"description\": \"This is a sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key `special-key` to test the authorization filters.\",\n" +
@@ -51,6 +51,6 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc0");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
     }
 }
