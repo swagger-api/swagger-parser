@@ -7,6 +7,7 @@ import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
+import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.info.License;
 import io.swagger.oas.models.info.Contact;
@@ -57,10 +58,8 @@ public class OpenAPIDeserializerTest {
 
     }
 
-    @Test//@Test(dataProvider = "data")
-    public void readServerObject(/*JsonNode rootNode*/) throws Exception {
-        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
+    @Test(dataProvider = "data")
+    public void readServerObject(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -85,6 +84,40 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(server.get(2).getVariables());
         Assert.assertNotNull(server.get(2).getVariables().values());
         //System.out.println(server.get(2).getVariables().values());
+
+    }
+
+    @Test(dataProvider = "data")
+    public void readTagObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        //System.out.println(openAPI);
+
+        final List<Tag> Tag = openAPI.getTags();
+        Assert.assertNotNull(Tag);
+        Assert.assertNotNull(Tag.get(0));
+        Assert.assertNotNull(Tag.get(0).getName());
+        Assert.assertEquals(Tag.get(0).getName(),"pet");
+        Assert.assertNotNull(Tag.get(0).getDescription());
+        Assert.assertEquals(Tag.get(0).getDescription(),"Everything about your Pets");
+        Assert.assertNotNull(Tag.get(0).getExternalDocs());
+        //System.out.println(Tag);
+
+        Assert.assertNotNull(Tag.get(1));
+        Assert.assertNotNull(Tag.get(1).getName());
+        Assert.assertNotNull(Tag.get(1).getDescription());
+        Assert.assertEquals(Tag.get(1).getName(),"store");
+        Assert.assertEquals(Tag.get(1).getDescription(),"Access to Petstore orders");
+
+        /*Assert.assertNotNull(Tag.get(2));
+        Assert.assertNotNull(Tag.get(2).getVariables());
+        Assert.assertNotNull(Tag.get(2).getVariables().values());
+        //System.out.println(server.get(2).getVariables().values());*/
 
     }
 
@@ -158,6 +191,8 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getTags());
+        //System.out.println(petByStatusEndpoint.getGet().getTags());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
         //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());

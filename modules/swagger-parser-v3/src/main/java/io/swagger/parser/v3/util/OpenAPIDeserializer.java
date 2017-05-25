@@ -12,6 +12,7 @@ import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
+import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.License;
 import io.swagger.oas.models.parameters.CookieParameter;
 import io.swagger.oas.models.parameters.HeaderParameter;
@@ -101,9 +102,63 @@ public class OpenAPIDeserializer {
                 ExternalDocumentation externalDocs = getExternalDocs(obj, "externalDocs", result);
                 openAPI.setExternalDocs(externalDocs);
             }
+
+            array = getArray("tags", on, false, location, result);
+            if (obj != null) {
+                openAPI.setTags(getTagList(array, location, result));
+            }
         }
 
         return openAPI;
+    }
+
+    public List<Tag> getTagList(ArrayNode obj, String location, ParseResult result) {
+        if (obj == null)
+            return null;
+
+        List<Tag> tags = new ArrayList<>();
+        for (JsonNode item : obj) {
+            if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
+                Tag tag = getTag((ObjectNode) item, location, result);
+                if (tag != null) {
+                    tags.add(tag);
+                }
+            }
+        }
+        return tags;
+    }
+
+    public Tag getTag(ObjectNode obj, String location, ParseResult result) {
+        if (obj == null) {
+            return null;
+        }
+
+        Tag tag = new Tag();
+        if (tag == null) {
+            result.invalidType(location, "tag", "string", obj);
+            return null;
+        }
+
+        String value = getString("name", obj, true, location, result);
+        tag.setName(value);
+
+        value = getString("description", obj, false, location, result);
+        tag.setDescription(value);
+
+        Set<String> tagKeys = getKeys(obj);
+        for (String tagName : tagKeys) {
+            JsonNode tagValue = obj.get(tagName);
+            if (!tagValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, tagName, "object", tagValue);
+            } else {
+                ObjectNode tagObj = (ObjectNode) tagValue;
+                ExternalDocumentation externalDocs = getExternalDocs(tagObj, location + ".'" + tagName + "'", result);
+                tag.setExternalDocs(externalDocs);
+            }
+        }
+        //tag.setExternalDocs(getExternalDocs(obj,location,result));
+
+        return tag;
     }
 
 
@@ -165,7 +220,6 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, serverName, "object", serverValue);
             } else {
                 ObjectNode server = (ObjectNode) serverValue;
-                //ServerVariable serverVariable = getServerVariable(server, location + ".'" + serverName + "'", result);
                 serverVariables = getServerVariable(server, location + ".'" + serverName + "'", result);
             }
         }
@@ -732,7 +786,7 @@ public class OpenAPIDeserializer {
         return apiResponse;
     }
 
-    public List<String> tagStrings(ArrayNode nodes, String location, ParseResult result) {
+    public List<String> getTagsStrings(ArrayNode nodes, String location, ParseResult result) {
         if (nodes == null)
             return null;
 
@@ -747,13 +801,15 @@ public class OpenAPIDeserializer {
     }
 
 
+
+
     public Operation getOperation(ObjectNode obj, String location, ParseResult result) {
         if (obj == null) {
             return null;
         }
         Operation operation = new Operation();
         ArrayNode array = getArray("tags", obj, false, location, result);
-        List<String> tags = tagStrings(array, location, result);
+        List<String> tags = getTagsStrings(array, location, result);
         if (tags != null) {
             operation.setTags(tags);
         }
