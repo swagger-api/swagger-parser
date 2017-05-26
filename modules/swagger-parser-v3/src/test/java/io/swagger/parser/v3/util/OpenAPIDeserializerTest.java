@@ -7,6 +7,7 @@ import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
+import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.info.License;
@@ -21,6 +22,7 @@ import org.testng.annotations.Test;
 
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 
 public class OpenAPIDeserializerTest {
 
@@ -114,12 +116,78 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(Tag.get(1).getName(),"store");
         Assert.assertEquals(Tag.get(1).getDescription(),"Access to Petstore orders");
 
-        /*Assert.assertNotNull(Tag.get(2));
-        Assert.assertNotNull(Tag.get(2).getVariables());
-        Assert.assertNotNull(Tag.get(2).getVariables().values());
-        //System.out.println(server.get(2).getVariables().values());*/
+    }
+
+    @Test(dataProvider = "data")
+    public void readExamplesObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+
+        final Paths paths = openAPI.getPaths();
+        Assert.assertNotNull(paths);
+        Assert.assertEquals(paths.size(), 14);
+
+
+
+
+        //parameters operation get
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        Assert.assertNotNull(petByStatusEndpoint.getGet());
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
+        //System.out.println(petByStatusEndpoint.getGet().getTags());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getName(), "status");
+        //System.out.println(petByStatusEndpoint.getGet().getParameters());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
+        //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());
+        //System.out.println("style: " + petByStatusEndpoint.getGet().getParameters().get(0).getStyle());
+
+
 
     }
+
+    @Test(dataProvider = "data")
+    public void readSchemaObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+
+        final Paths paths = openAPI.getPaths();
+        Assert.assertNotNull(paths);
+        Assert.assertEquals(paths.size(), 14);
+
+
+
+
+        //parameters operation get
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        Assert.assertNotNull(petByStatusEndpoint.getGet());
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
+        //System.out.println(petByStatusEndpoint.getGet().getTags());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getFormat(), "int64");
+        System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getNot().getType());
+
+        //System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getFormat());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
+        //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());
+        //System.out.println("style: " + petByStatusEndpoint.getGet().getParameters().get(0).getStyle());
+
+
+
+    }
+
 
     @Test(dataProvider = "data")
     public void readExternalDocsObject(JsonNode rootNode) throws Exception {

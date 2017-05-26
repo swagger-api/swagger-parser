@@ -114,7 +114,10 @@ paths:
       description: Status values that need to be considered for filter
       required: true
       schema:
+        title: grace
         type: array
+        not:
+          type: array
         items:
           type: string
           enum:
@@ -154,8 +157,32 @@ paths:
         in: query
         description: Status values that need to be considered for filter
         required: true
+        example: "example"
         schema:
-          type: array
+          title: title test
+          format: int64
+          minimum: 1
+          maximum: 10
+          enum:
+          - available
+          - pending
+          - sold
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            name:
+              type: string
+          required:
+          - name
+          - pet
+          example:
+            name: Puma
+            id: 1
+          externalDocs:
+            description: External Docs Inside Schema
+            url: http://swagger.io inside Schema
           items:
             type: string
             enum:
