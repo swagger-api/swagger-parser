@@ -16,6 +16,9 @@ import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.License;
+import io.swagger.oas.models.media.EncodingProperty;
+import io.swagger.oas.models.headers.Header;
+import io.swagger.oas.models.headers.Headers;
 import io.swagger.oas.models.parameters.CookieParameter;
 import io.swagger.oas.models.parameters.HeaderParameter;
 import io.swagger.oas.models.parameters.Parameter;
@@ -522,6 +525,50 @@ public class OpenAPIDeserializer {
         return info;
     }
 
+    public EncodingProperty getEncodingProperty(ObjectNode node, String location, ParseResult result) {
+        if (node == null)
+            return null;
+
+        EncodingProperty encodingProperty = new EncodingProperty();
+
+        String value = getString("contentType", node, true, location, result);
+        encodingProperty.setContentType(value);
+
+        value = getString("style", node, true, location, result);
+
+        //TODO include this on the setStyle Method?
+
+        if (StringUtils.isBlank(value)) {
+            encodingProperty.setStyle(EncodingProperty.StyleEnum.FORM);
+        } else {
+            if (value.equals(Parameter.StyleEnum.FORM.toString())) {
+                encodingProperty.setStyle(EncodingProperty.StyleEnum.FORM);
+            } else if (value.equals(EncodingProperty.StyleEnum.DEEPOBJECT.toString())) {
+                encodingProperty.setStyle(EncodingProperty.StyleEnum.DEEPOBJECT);
+            } else if (value.equals(EncodingProperty.StyleEnum.PIPEDELIMITED.toString())) {
+                encodingProperty.setStyle(EncodingProperty.StyleEnum.PIPEDELIMITED);
+            } else if (value.equals(EncodingProperty.StyleEnum.SPACEDELIMITED.toString())) {
+                encodingProperty.setStyle(EncodingProperty.StyleEnum.SPACEDELIMITED);
+            } else {
+                result.invalidType(location, "style", "string", node);
+            }
+        }
+
+        Boolean explode = getBoolean("explode", node, false, location, result);
+        encodingProperty.setExplode(explode);
+
+        Boolean allowReserved = getBoolean("allowReserved", node, false, location, result);
+        encodingProperty.setAllowReserved(allowReserved);
+
+        /* ObjectNode obj = getObject("contact", node, false, "contact", result);
+        Map headersMap <String,Headers> = new LinkedHashMap<>;
+        TODO encodingProperty.setHeaders(headersMap);*/
+
+
+
+        return encodingProperty;
+    }
+
     public License getLicense(ObjectNode node, String location, ParseResult result) {
         if (node == null)
             return null;
@@ -626,23 +673,7 @@ public class OpenAPIDeserializer {
         return value;
     }
 
-    public Number getNumber(String key, ObjectNode node, boolean required, String location, ParseResult result) {
-        Number value = null;
-        JsonNode v = node.get(key);
-        if (v == null) {
-            if (required) {
-                result.missing(location, key);
-                result.invalid();
-            }
-        }
-        else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
-            value = v.numberValue();
-        }
-        else if(!v.isValueNode()) {
-            result.invalidType(location, key, "number", node);
-        }
-        return value;
-    }
+
 
     public Integer getInteger(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         Integer value = null;
