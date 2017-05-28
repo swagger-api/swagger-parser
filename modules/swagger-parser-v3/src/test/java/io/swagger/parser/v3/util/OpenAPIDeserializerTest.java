@@ -177,7 +177,9 @@ public class OpenAPIDeserializerTest {
         //System.out.println(petByStatusEndpoint.getGet().getTags());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getFormat(), "int64");
-        System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getNot().getType());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getNamespace(), "http://example.com/schema/sample");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getPrefix(), "sample");
+        System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getPrefix());
 
         //System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getFormat());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");

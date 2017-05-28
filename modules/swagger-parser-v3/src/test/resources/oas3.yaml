@@ -163,6 +163,9 @@ paths:
           format: int64
           minimum: 1
           maximum: 10
+          xml:
+            namespace: http://example.com/schema/sample
+            prefix: sample
           enum:
           - available
           - pending
@@ -174,6 +177,9 @@ paths:
               format: int64
             name:
               type: string
+              xml:
+                namespace: http://inside/properties/schema
+                prefix: inside properties schema
           required:
           - name
           - pet

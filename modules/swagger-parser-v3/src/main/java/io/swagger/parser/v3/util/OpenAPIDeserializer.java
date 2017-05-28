@@ -14,6 +14,7 @@ import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.media.XML;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.License;
 import io.swagger.oas.models.media.EncodingProperty;
@@ -32,6 +33,7 @@ import io.swagger.oas.models.servers.Server;
 import io.swagger.oas.models.servers.ServerVariable;
 import io.swagger.oas.models.servers.ServerVariables;
 import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -601,13 +603,13 @@ public class OpenAPIDeserializer {
         Contact contact = new Contact();
 
         String value = getString("name", node, false, location + ".name", result);
-        contact.name(value);
+        contact.setName(value);
 
         value = getString("url", node, false, location + ".url", result);
-        contact.url(value);
+        contact.setUrl(value);
 
         value = getString("email", node, false, location + ".email", result);
-        contact.email(value);
+        contact.setEmail(value);
 
         // extra keys
         Set<String> keys = getKeys(node);
@@ -618,6 +620,31 @@ public class OpenAPIDeserializer {
         }
 
         return contact;
+    }
+
+    public XML getXml(ObjectNode node, String location, ParseResult result){
+        if (node == null) {
+            return null;
+        }
+        XML xml = new XML();
+
+        String value = getString("name", node, false, location + ".name", result);
+        xml.setName(value);
+
+        value = getString("namespace", node, false, location + ".url", result);
+        xml.setNamespace(value);
+
+        value = getString("prefix", node, false, location + ".email", result);
+        xml.setPrefix(value);
+
+        Boolean attribute = getBoolean("attribute", node, false, location, result);
+        xml.setAttribute(attribute);
+
+        Boolean wrapped = getBoolean("wrapped", node, false, location, result);
+        xml.setWrapped(wrapped);
+
+        return xml;
+
     }
 
     public ArrayNode getArray(String key, ObjectNode node, boolean required, String location, ParseResult result) {
@@ -879,6 +906,8 @@ public class OpenAPIDeserializer {
 
                     // MISSING SCHEMA OBJECTS allOf oneOf anyOf items
 
+
+
                     //Schema not;
                     //ObjectNode notObj = getObject("not", node, false, location, result);
                     Schema not = getSchema(node, location, result);
@@ -907,6 +936,13 @@ public class OpenAPIDeserializer {
                     bool = getBoolean("writeOnly", node, false, location, result);
                     schema.setWriteOnly(bool);
 
+
+
+                    ObjectNode xmlNode = getObject("xml", node, false, location, result);
+                    XML xml = getXml(xmlNode, location, result);
+                    schema.setXml(xml);
+
+
                     ObjectNode externalDocs = getObject("externalDocs", node, false, location, result);
                     ExternalDocumentation docs = getExternalDocs(externalDocs, location, result);
                     schema.setExternalDocs(docs);
@@ -928,9 +964,9 @@ public class OpenAPIDeserializer {
 
 
     public Map<String, Example> getExamples(ObjectNode obj, String location, ParseResult result) {
-        if (obj == null)
+        if (obj == null) {
             return null;
-
+        }
         Map<String, Example> examples = new LinkedHashMap<>();
 
         Set<String> exampleKeys = getKeys(obj);
@@ -1013,7 +1049,7 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
 
         for (String key : keys) {
-            //S ystem.out.println("KEY: " + key);
+
             if (key.startsWith("x-")) {
                 // TODO: check the extension for this object.
             } else {
@@ -1050,9 +1086,6 @@ public class OpenAPIDeserializer {
         ObjectNode headersNode = getObject("headers", node, false, location, result);
         if (headersNode != null) {
             // TODO
-            /*Map<String, EncodingProperty> headers = Json.mapper().convertValue(headersNode,
-                    Json.mapper().getTypeFactory().constructMapType(Map.class, String.class, EncodingProperty.class));
-            output.headers(headers);*/
         }
 
 
