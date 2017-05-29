@@ -8,6 +8,7 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.examples.Example;
+import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.info.License;
@@ -86,6 +87,24 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(server.get(2).getVariables());
         Assert.assertNotNull(server.get(2).getVariables().values());
         //System.out.println(server.get(2).getVariables().values());
+
+    }
+
+    @Test(dataProvider = "data")
+    public void readSecurityRequirementsObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final List<SecurityRequirement> requirements = openAPI.getSecurity();
+        Assert.assertNotNull(requirements);
+        Assert.assertEquals(requirements.size(),2);
+        //Assert.assertEquals(requirements.get(0),"grace");
+        System.out.println("security:" + requirements);
 
     }
 

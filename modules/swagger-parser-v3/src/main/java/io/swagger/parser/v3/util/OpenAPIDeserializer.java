@@ -13,6 +13,7 @@ import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
+import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.XML;
 import io.swagger.oas.models.tags.Tag;
@@ -121,15 +122,20 @@ public class OpenAPIDeserializer {
             if (obj != null) {
                 openAPI.setTags(getTagList(array, location, result));
             }
+
+            array = getArray("security", on, false, location, result);
+            if (on != null) {
+                openAPI.setSecurity(getSecurityRequirementsList(array, "security", result));
+            }
         }
 
         return openAPI;
     }
 
     public List<Tag> getTagList(ArrayNode obj, String location, ParseResult result) {
-        if (obj == null)
+        if (obj == null) {
             return null;
-
+        }
         List<Tag> tags = new ArrayList<>();
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -906,10 +912,14 @@ public class OpenAPIDeserializer {
 
                     // MISSING SCHEMA OBJECTS allOf oneOf anyOf items
 
-
+                    String allOf = getString("allOf", node, false, location, result);
+                    if(allOf == null){
+                        AllOfSchema allOfSchema = new AllOfSchema();
+                        //System.out.println(node);
+                    }
 
                     //Schema not;
-                    //ObjectNode notObj = getObject("not", node, false, location, result);
+                    ObjectNode notObj = getObject("not", node, false, location, result);
                     Schema not = getSchema(node, location, result);
                     schema.setNot(not);
 
@@ -1157,17 +1167,6 @@ public class OpenAPIDeserializer {
         if (deprecated != null) {
             operation.setDeprecated(deprecated);
         }
-        array = getArray("security", obj, false, location, result);
-        List<SecurityRequirement> security = securityRequirements(array, location, result);
-        if (security != null) {
-            List<Map<String, List<String>>> ss = new ArrayList<>();
-            /*for(SecurityRequirement s : security) {
-                if(s.getRequirements() != null && s.getRequirements().size() > 0) {
-                    ss.add(s.getRequirements());
-                }
-            }*/
-            //output.setSecurity(ss);
-        }
 
         // extra keys
         Set<String> keys = getKeys(obj);
@@ -1182,38 +1181,44 @@ public class OpenAPIDeserializer {
         return operation;
     }
 
-    public List<SecurityRequirement> securityRequirements(ArrayNode node, String location, ParseResult result) {
-        if (node == null)
+    public List<SecurityRequirement> getSecurityRequirementsList(ArrayNode nodes, String location, ParseResult result) {
+        if (nodes == null)
             return null;
 
-        List<SecurityRequirement> output = new ArrayList<>();
+        List<SecurityRequirement> securityRequirements = new ArrayList<>();
 
-        for (JsonNode item : node) {
-            SecurityRequirement security = new SecurityRequirement();
-            if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode on = (ObjectNode) item;
-                Set<String> keys = getKeys(on);
-
-                for (String key : keys) {
-                    List<String> scopes = new ArrayList<>();
-                    ArrayNode obj = getArray(key, on, false, location + ".security", result);
-                    if (obj != null) {
-                        for (JsonNode n : obj) {
-                            if (n.getNodeType().equals(JsonNodeType.STRING)) {
-                                scopes.add(n.asText());
-                            } else {
-                                result.invalidType(location, key, "string", n);
-                            }
-                        }
-                    }
-                    // security.requirement(key, scopes);
-                }
+        for (JsonNode node : nodes) {
+            if (node.getNodeType().equals(JsonNodeType.STRING)) {
+                SecurityRequirement securityRequirement = new SecurityRequirement();
+                securityRequirement.addList(node.textValue());
+                securityRequirements.add(securityRequirement);
             }
-            output.add(security);
+        }
+        return securityRequirements;
+    }
+
+    /*public SecurityRequirement getSecurityRequirement(ObjectNode obj, String location, ParseResult result) {
+        if (obj == null) {
+            return null;
+        }
+        SecurityRequirement securityRequirement = new SecurityRequirement();
+
+        if (securityRequirement == null) {
+            result.invalidType(location, "security", "string", obj);
+            return null;
         }
 
-        return output;
-    }
+        Set<String> securityKeys = getKeys(obj);
+        for (String tagName : securityKeys) {
+            JsonNode securityValue = obj.get(tagName);
+            if (!securityValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, tagName, "object", securityValue);
+            } else {
+                securityRequirement.addList(tagName);
+            }
+        }
+        return securityRequirement;
+    }*/
 
     protected RequestBody getRequestBody(ObjectNode node, String location, ParseResult result) {
         if (node == null){

@@ -30,6 +30,9 @@ x-origin:
   converter:
     url: https://github.com/mermade/swagger2openapi
     version: 1.2.1
+security:
+- grace
+- karina
 info:
   description: 'This is a sample server Petstore'
   version: 1.0.0
@@ -163,6 +166,18 @@ paths:
           format: int64
           minimum: 1
           maximum: 10
+          allOf:
+          - $ref: '#/components/schemas/Pet'
+          - type: object
+            properties:
+              huntingSkill:
+                type: string
+                description: The measured skill for hunting
+                enum:
+                - clueless
+                - lazy
+                - adventurous
+                - aggressive
           xml:
             namespace: http://example.com/schema/sample
             prefix: sample
