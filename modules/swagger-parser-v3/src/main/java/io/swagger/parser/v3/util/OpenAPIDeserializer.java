@@ -120,12 +120,12 @@ public class OpenAPIDeserializer {
             }
 
             array = getArray("tags", on, false, location, result);
-            if (obj != null) {
+            if (array != null) {
                 openAPI.setTags(getTagList(array, location, result));
             }
 
             array = getArray("security", on, false, location, result);
-            if (on != null) {
+            if (array != null) {
                 openAPI.setSecurity(getSecurityRequirementsList(array, "security", result));
             }
 
@@ -573,8 +573,6 @@ public class OpenAPIDeserializer {
 
         value = getString("style", node, true, location, result);
 
-        //TODO include this on the setStyle Method?
-
         if (StringUtils.isBlank(value)) {
             encodingProperty.setStyle(EncodingProperty.StyleEnum.FORM);
         } else {
@@ -597,9 +595,9 @@ public class OpenAPIDeserializer {
         Boolean allowReserved = getBoolean("allowReserved", node, false, location, result);
         encodingProperty.setAllowReserved(allowReserved);
 
-        /* ObjectNode obj = getObject("contact", node, false, "contact", result);
-        Map headersMap <String,Headers> = new LinkedHashMap<>;
-        TODO encodingProperty.setHeaders(headersMap);*/
+        ObjectNode obj = getObject("headers", node, false, location, result);
+        encodingProperty.setHeaders(getHeaders(obj, location, result));
+
 
 
 
@@ -844,6 +842,74 @@ public class OpenAPIDeserializer {
         //TODO: content
 
         return parameter;
+    }
+
+    public Headers getHeaders(ObjectNode obj, String location, ParseResult result) {
+        if (obj == null) {
+            return null;
+        }
+
+        Headers headers = new Headers();
+
+        for (JsonNode item : obj) {
+            if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
+                Header header = getHeader((ObjectNode) item, location, result);
+                if (header != null) {
+                    headers.addHeader("aqui va el key",header);
+                }
+            }
+        }
+        return headers;
+    }
+
+    public Header getHeader(ObjectNode obj, String location, ParseResult result) {
+        if (obj == null) {
+            return null;
+        }
+
+        Header header = new Header();
+
+        if (header == null) {
+            result.invalidType(location, "in", "string", obj);
+            return null;
+        }
+
+        String value = getString("description", obj, false, location, result);
+        header.setDescription(value);
+
+        Boolean required = getBoolean("required", obj, false, location, result);
+        if (required != null) {
+            header.setRequired(required);
+        }
+
+        Boolean deprecated = getBoolean("deprecated", obj, false, location, result);
+        if (deprecated != null) {
+            header.setDeprecated(deprecated);
+        }
+
+        Boolean allowEmptyValue = getBoolean("allowEmptyValue", obj, false, location, result);
+        if (allowEmptyValue != null) {
+            header.setAllowEmptyValue(allowEmptyValue);
+        }
+
+        Boolean explode = getBoolean("explode", obj, false, location, result);
+        if (explode != null) {
+            header.setExplode(explode);
+        } else {
+            header.setExplode(Boolean.FALSE);
+        }
+
+        header.setStyle(Header.StyleEnum.SIMPLE);
+
+        header.setSchema(getSchema(obj,location,result));
+
+        //TODO: examples
+        value = getString("example", obj, false, location, result);
+        header.setExample(value);
+
+        //TODO: content
+
+        return header;
     }
 
     public Schema getSchema(ObjectNode obj, String location, ParseResult result){
@@ -1122,11 +1188,12 @@ public class OpenAPIDeserializer {
         apiResponse.description(value);
 
 
-        ObjectNode headersNode = getObject("headers", node, false, location, result);
-        if (headersNode != null) {
-            // TODO
+        ObjectNode obj = getObject("headers", node, true, location, result);
+        if (obj != null) {
+            apiResponse.setHeaders(getHeaders(obj, location, result));
         }
 
+        //TODO LinksObject and ContentObject
 
         // extra keys
         Set<String> keys = getKeys(node);
