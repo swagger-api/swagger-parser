@@ -830,55 +830,53 @@ public class OpenAPIDeserializer {
         return parameter;
     }
 
-    public Headers getHeaders(ObjectNode obj, String location, ParseResult result) {
-        if (obj == null) {
+    public Headers getHeaders(ObjectNode headersNode, String location, ParseResult result) {
+        if (headersNode == null) {
             return null;
         }
 
         Headers headers = new Headers();
-
-        for (JsonNode item : obj) {
-            if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
-                Header header = getHeader((ObjectNode) item, location, result);
-                if (header != null) {
-                    headers.addHeader("aqui va el key",header);
-                }
+        Set<String> keys = getKeys(headersNode);
+        for(String key : keys) {
+            Header header = getHeader((ObjectNode) headersNode.get(key), location, result);
+            if (header != null) {
+                headers.addHeader(key, header);
             }
         }
         return headers;
     }
 
-    public Header getHeader(ObjectNode obj, String location, ParseResult result) {
-        if (obj == null) {
+    public Header getHeader(ObjectNode headerNode, String location, ParseResult result) {
+        if (headerNode == null) {
             return null;
         }
 
         Header header = new Header();
 
         if (header == null) {
-            result.invalidType(location, "in", "string", obj);
+            result.invalidType(location, "in", "string", headerNode);
             return null;
         }
 
-        String value = getString("description", obj, false, location, result);
+        String value = getString("description", headerNode, false, location, result);
         header.setDescription(value);
 
-        Boolean required = getBoolean("required", obj, false, location, result);
+        Boolean required = getBoolean("required", headerNode, false, location, result);
         if (required != null) {
             header.setRequired(required);
         }
 
-        Boolean deprecated = getBoolean("deprecated", obj, false, location, result);
+        Boolean deprecated = getBoolean("deprecated", headerNode, false, location, result);
         if (deprecated != null) {
             header.setDeprecated(deprecated);
         }
 
-        Boolean allowEmptyValue = getBoolean("allowEmptyValue", obj, false, location, result);
+        Boolean allowEmptyValue = getBoolean("allowEmptyValue", headerNode, false, location, result);
         if (allowEmptyValue != null) {
             header.setAllowEmptyValue(allowEmptyValue);
         }
 
-        Boolean explode = getBoolean("explode", obj, false, location, result);
+        Boolean explode = getBoolean("explode", headerNode, false, location, result);
         if (explode != null) {
             header.setExplode(explode);
         } else {
@@ -887,10 +885,10 @@ public class OpenAPIDeserializer {
 
         header.setStyle(Header.StyleEnum.SIMPLE);
 
-        header.setSchema(getSchema(obj,location,result));
+        header.setSchema(getSchema(headerNode,location,result));
 
         //TODO: examples
-        value = getString("example", obj, false, location, result);
+        value = getString("example", headerNode, false, location, result);
         header.setExample(value);
 
         //TODO: content

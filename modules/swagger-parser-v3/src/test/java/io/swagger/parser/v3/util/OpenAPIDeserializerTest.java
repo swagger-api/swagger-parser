@@ -314,8 +314,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertTrue(responses.containsKey("405"));
         ApiResponse response = responses.get("405");
         Assert.assertEquals(response.getDescription(), "Invalid input");
-        System.out.println(response.getHeaders());
-        Assert.assertEquals(response.getHeaders().get(0).getDescription(), "calls per hour allowed by the user");
+        Assert.assertEquals(response.getHeaders().get("X-Rate-Limit").getDescription(), "calls per hour allowed by the user");
 
 
 
