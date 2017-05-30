@@ -14,6 +14,9 @@ import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.media.AllOfSchema;
+import io.swagger.oas.models.media.Content;
+import io.swagger.oas.models.media.Encoding;
+import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.XML;
 import io.swagger.oas.models.tags.Tag;
@@ -450,16 +453,6 @@ public class OpenAPIDeserializer {
     }
 
 
-    public String getString(JsonNode node, String location, ParseResult result) {
-        String output = null;
-        if (!node.getNodeType().equals(JsonNodeType.STRING)) {
-            result.invalidType(location, "", "string", node);
-        } else {
-            output = ((TextNode) node).asText();
-        }
-        return output;
-    }
-
     public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         String value = null;
         JsonNode v = node.get(key);
@@ -548,9 +541,62 @@ public class OpenAPIDeserializer {
         return info;
     }
 
-    public EncodingProperty getEncodingProperty(ObjectNode node, String location, ParseResult result) {
-        if (node == null)
+    public Content getContent(ObjectNode node, String location, ParseResult result){
+        if (node == null) {
             return null;
+        }
+        Content content = new Content();
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            MediaType mediaType = getMediaType((ObjectNode) node.get(key), location, result);
+            if (mediaType != null) {
+                content.addMediaType(key, mediaType);
+            }
+        }
+
+        return content;
+    }
+
+    public MediaType getMediaType(ObjectNode contentNode, String location, ParseResult result){
+        if (contentNode == null) {
+            return null;
+        }
+        MediaType mediaType = new MediaType();
+
+        /*ObjectNode schemaObject = getObject("schema",contentNode,false,location,result);
+        if(schemaObject!=null){
+            mediaType.setSchema(getSchema(schemaObject,location,result));
+        }*/
+
+        /*mediaType.setExample();
+        mediaType.setExamples();*/
+
+        ObjectNode encodingObject = getObject("encoding",contentNode,false,location,result);
+        if(encodingObject!=null) {
+            mediaType.setEncoding(getEncoding(encodingObject, location, result));
+        }
+        return mediaType;
+    }
+
+    public Encoding getEncoding(ObjectNode node, String location, ParseResult result){
+        if (node == null) {
+            return null;
+        }
+        Encoding encoding = new Encoding();
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            EncodingProperty encodingProperty = getEncodingProperty((ObjectNode) node.get(key), location, result);
+            if (encodingProperty != null) {
+                encoding.addEncodingProperty(key, encodingProperty);
+            }
+        }
+        return encoding;
+    }
+
+    public EncodingProperty getEncodingProperty(ObjectNode node, String location, ParseResult result) {
+        if (node == null) {
+            return null;
+        }
 
         EncodingProperty encodingProperty = new EncodingProperty();
 
@@ -581,11 +627,10 @@ public class OpenAPIDeserializer {
         Boolean allowReserved = getBoolean("allowReserved", node, false, location, result);
         encodingProperty.setAllowReserved(allowReserved);
 
-        ObjectNode obj = getObject("headers", node, false, location, result);
-        encodingProperty.setHeaders(getHeaders(obj, location, result));
-
-
-
+        ObjectNode headersObject = getObject("headers", node, false, location, result);
+        if (headersObject!= null){
+            encodingProperty.setHeaders(getHeaders(headersObject, location, result));
+        }
 
         return encodingProperty;
     }
@@ -814,10 +859,13 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("style", obj, true, location, result);
-
         setStyle(value, parameter, location, obj, result);
 
-        parameter.setSchema(getSchema(obj,location,result));
+        ObjectNode schemaNode = getObject("schema",obj,false,location,result);
+        if(schemaNode!= null) {
+            parameter.setSchema(getSchema(schemaNode,location,result));
+        }
+
 
         //TODO: examples
         value = getString("example", obj, false, location, result);
@@ -825,8 +873,11 @@ public class OpenAPIDeserializer {
 
         parameter.setExamples(getExamples(obj,location,result));
 
-        //TODO: content
 
+        ObjectNode contentNode = getObject("content",obj,false,location,result);
+        if(contentNode!= null) {
+            parameter.setContent(getContent(contentNode, location, result));
+        }
         return parameter;
     }
 
@@ -891,7 +942,11 @@ public class OpenAPIDeserializer {
         value = getString("example", headerNode, false, location, result);
         header.setExample(value);
 
-        //TODO: content
+        ObjectNode contentNode = getObject("content",headerNode,false,location,result);
+        if (contentNode!= null){
+            header.setContent(getContent(contentNode,location,result));
+        }
+
 
         return header;
     }
@@ -997,11 +1052,12 @@ public class OpenAPIDeserializer {
                     }
 
                     //Schema not;
-                    ObjectNode notObj = getObject("not", node, false, location, result);
-                    Schema not = getSchema(node, location, result);
-                    schema.setNot(not);
+                    /*ObjectNode notObj = getObject("not", node, false, location, result);
+                    Schema not = getSchema(notObj, location, result);
+                    schema.setNot(not);*/
 
                     //Map<String, Schema> properties = null;
+
                     //Schema additionalProperties = null;
 
                     value = getString("description",node,false,location,result);
@@ -1175,13 +1231,20 @@ public class OpenAPIDeserializer {
             apiResponse.setHeaders(getHeaders(obj, location, result));
         }
 
-        //TODO LinksObject and ContentObject
+        //TODO LinksObject
+
+        obj = getObject("content", node, true, location, result);
+        if (obj != null) {
+            apiResponse.setContent(getContent(obj, location, result));
+        }
 
         // extra keys
+        apiResponse.setExtensions(new LinkedHashMap<>());
+
         Set<String> keys = getKeys(node);
-        for (String key : keys) {
-            if (key.startsWith("x-")) {
-                //output.setVendorExtension(key, extension(node.get(key)));
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                apiResponse.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
             } else if (!RESPONSE_KEYS.contains(key)) {
                 result.extra(location, key, node.get(key));
             }
@@ -1280,10 +1343,17 @@ public class OpenAPIDeserializer {
         List<SecurityRequirement> securityRequirements = new ArrayList<>();
 
         for (JsonNode node : nodes) {
-            if (node.getNodeType().equals(JsonNodeType.STRING)) {
+            if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
                 SecurityRequirement securityRequirement = new SecurityRequirement();
-                securityRequirement.addList(node.textValue());
-                securityRequirements.add(securityRequirement);
+                Set<String> keys = getKeys((ObjectNode) node);
+                for (String key : keys) {
+                    if (key != null) {
+                        securityRequirement.addList(key,node.textValue());
+                        securityRequirements.add(securityRequirement);
+                    }
+                }
+
+
             }
         }
         return securityRequirements;
@@ -1297,13 +1367,15 @@ public class OpenAPIDeserializer {
         final RequestBody body = new RequestBody();
 
         final String description = getString("description", node, false, location, result);
-        final Boolean required = getBoolean("required", node, false, location, result);
-
         body.setDescription(description);
+        final Boolean required = getBoolean("required", node, false, location, result);
         body.setRequired(required);
 
         final ObjectNode contentNode = getObject("content", node, false, location, result);
-        // TODO parse content and media type objects.
+        if (contentNode != null) {
+            body.setContent(getContent(contentNode, location, result));
+        }
+
         return body;
     }
 
