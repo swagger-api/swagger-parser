@@ -22,6 +22,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -123,9 +124,24 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(openAPI);
         Assert.assertNotNull(openAPI.getExtensions());
         Assert.assertTrue(openAPI.getExtensions().containsKey("x-origin"));
+        Object object = openAPI.getExtensions().get("x-origin");
 
-       // System.out.println(openAPI.getExtensions());
+        Assert.assertTrue(object instanceof List);
+        List elements = (List) object;
+        Assert.assertEquals(elements.size(), 1);
+        Map<String, Object> map = (Map) elements.get(0);
+        Assert.assertEquals(map.get("url"), "http://petstore.swagger.io/v2/swagger.json");
+        Assert.assertEquals(map.get("format"), "swagger");
+        Assert.assertEquals(map.get("version"), "2.0");
 
+        Map<String, Object> converter = (Map<String, Object>) map.get("converter");
+        Assert.assertNotNull(converter);
+        Assert.assertEquals(converter.get("url"), "https://github.com/mermade/swagger2openapi");
+        Assert.assertEquals(converter.get("version"), "1.2.1");
+
+        object = openAPI.getExtensions().get("x-api-title");
+        Assert.assertTrue(object instanceof String);
+        Assert.assertEquals("pet store test api", object.toString());
     }
 
     @Test(dataProvider = "data")

@@ -53,6 +53,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <swagger-core-module-version>1.5.12</swagger-core-module-version>
+        <swagger-core-module-version>2.0.0-SNAPSHOT</swagger-core-module-version>
     </properties>
 </project>

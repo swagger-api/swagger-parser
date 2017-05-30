@@ -37,6 +37,7 @@ import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,10 +86,10 @@ public class OpenAPIDeserializer {
         String location = "";
         OpenAPI openAPI = new OpenAPI();
         if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
-            ObjectNode on = (ObjectNode) node;
+            ObjectNode rootNode = (ObjectNode) node;
 
             // required
-            String value = getString("openapi", on, true, location, result);
+            String value = getString("openapi", rootNode, true, location, result);
 
             // we don't even try if the version isn't there
             if(value == null || !value.startsWith("3.0")) {
@@ -96,46 +97,47 @@ public class OpenAPIDeserializer {
             }
             openAPI.setOpenapi(value);
 
-            ObjectNode obj = getObject("info", on, true, "", result);
+            ObjectNode obj = getObject("info", rootNode, true, "", result);
             if (obj != null) {
                 Info info = getInfo(obj, "info", result);
                 openAPI.setInfo(info);
             }
 
-            obj = getObject("paths", on, true, location, result);
+            obj = getObject("paths", rootNode, true, location, result);
             if (obj != null) {
                 Paths paths = getPaths(obj, "paths", result);
                 openAPI.setPaths(paths);
             }
 
-            ArrayNode array = getArray("servers", on, false, location, result);
+            ArrayNode array = getArray("servers", rootNode, false, location, result);
             if (obj != null) {
                 openAPI.setServers(getServersList(array, location, result));
             }
 
-            obj = getObject("externalDocs", on, false, location, result);
+            obj = getObject("externalDocs", rootNode, false, location, result);
             if (obj != null) {
                 ExternalDocumentation externalDocs = getExternalDocs(obj, "externalDocs", result);
                 openAPI.setExternalDocs(externalDocs);
             }
 
-            array = getArray("tags", on, false, location, result);
+            array = getArray("tags", rootNode, false, location, result);
             if (array != null) {
                 openAPI.setTags(getTagList(array, location, result));
             }
 
-            array = getArray("security", on, false, location, result);
+            array = getArray("security", rootNode, false, location, result);
             if (array != null) {
                 openAPI.setSecurity(getSecurityRequirementsList(array, "security", result));
             }
+            openAPI.setExtensions(new LinkedHashMap<>());
 
-            Set<String> keys = getKeys(on);
+            Set<String> keys = getKeys(rootNode);
             for(String key : keys) {
                 if(key.startsWith("x-")) {
-                    openAPI.setExtensions(getExtension(key,on, location,result));
+                    openAPI.getExtensions().put(key, Json.mapper().convertValue(rootNode.get(key), Object.class));
                 }
                 else if(!ROOT_KEYS.contains(key)) {
-                    result.extra(location, key, node.get(key));
+                    result.extra(location, key, rootNode.get(key));
                 }
             }
 
@@ -147,18 +149,6 @@ public class OpenAPIDeserializer {
 
 
         return openAPI;
-    }
-
-    public Map <String,Object> getExtension(String key,ObjectNode node, String location, ParseResult result) {
-        if (node == null){
-            return null;
-        }
-        Map <String,Object> extensions = new LinkedHashMap<>();
-        extensions.put(key,getObject(key, node, false, location, result));
-        /*Json.mapper().convertValue(jsonNode, Object.class));*/
-
-
-        return extensions;
     }
 
     public List<Tag> getTagList(ArrayNode obj, String location, ParseResult result) {
@@ -503,7 +493,6 @@ public class OpenAPIDeserializer {
 
     public ObjectNode getObject(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         JsonNode value = node.get(key);
-        //System.out.println(value);
         ObjectNode on = null;
         if (value == null) {
             if (required) {
@@ -511,7 +500,6 @@ public class OpenAPIDeserializer {
                 result.invalid();
             }
         } else if (!value.getNodeType().equals(JsonNodeType.OBJECT)) {
-            //System.out.println("nodeType"+value.getNodeType());
             result.invalidType(location, key, "object", value);
             if (required) {
                 result.invalid();
@@ -521,8 +509,6 @@ public class OpenAPIDeserializer {
         }
         return on;
     }
-
-    //Info Object
 
     public Info getInfo(ObjectNode node, String location, ParseResult result) {
         if (node == null)
@@ -1010,7 +996,6 @@ public class OpenAPIDeserializer {
                     String allOf = getString("allOf", node, false, location, result);
                     if(allOf == null){
                         AllOfSchema allOfSchema = new AllOfSchema();
-                        //System.out.println(node);
                     }
 
                     //Schema not;
@@ -1184,7 +1169,6 @@ public class OpenAPIDeserializer {
         }
 
         String value = getString("description", node, true, location, result);
-        //System.out.println("VALUE DESC: " + value);
         apiResponse.description(value);
 
 
