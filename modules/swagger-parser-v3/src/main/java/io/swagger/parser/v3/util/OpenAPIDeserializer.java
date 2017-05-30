@@ -53,6 +53,7 @@ import java.util.Set;
 
 public class OpenAPIDeserializer {
 
+    protected static Set<String> ROOT_KEYS = new LinkedHashSet<>(Arrays.asList("openapi", "info", "host", "paths", "parameters", "responses", "security", "tags", "externalDocs"));
     protected static Set<String> INFO_KEYS = new LinkedHashSet<>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
     protected static Set<String> CONTACT_KEYS = new LinkedHashSet<>(Arrays.asList("name", "url", "email"));
     protected static Set<String> LICENSE_KEYS = new LinkedHashSet<>(Arrays.asList("name", "url"));
@@ -127,9 +128,37 @@ public class OpenAPIDeserializer {
             if (on != null) {
                 openAPI.setSecurity(getSecurityRequirementsList(array, "security", result));
             }
+
+            Set<String> keys = getKeys(on);
+            for(String key : keys) {
+                if(key.startsWith("x-")) {
+                    openAPI.setExtensions(getExtension(key,on, location,result));
+                }
+                else if(!ROOT_KEYS.contains(key)) {
+                    result.extra(location, key, node.get(key));
+                }
+            }
+
+        } else {
+            result.invalidType("", "", "object", node);
+            result.invalid();
+            return null;
         }
 
+
         return openAPI;
+    }
+
+    public Map <String,Object> getExtension(String key,ObjectNode node, String location, ParseResult result) {
+        if (node == null){
+            return null;
+        }
+        Map <String,Object> extensions = new LinkedHashMap<>();
+        extensions.put(key,getObject(key, node, false, location, result));
+        /*Json.mapper().convertValue(jsonNode, Object.class));*/
+
+
+        return extensions;
     }
 
     public List<Tag> getTagList(ArrayNode obj, String location, ParseResult result) {
@@ -1133,6 +1162,7 @@ public class OpenAPIDeserializer {
             return null;
         }
         Operation operation = new Operation();
+
         ArrayNode array = getArray("tags", obj, false, location, result);
         List<String> tags = getTagsStrings(array, location, result);
         if (tags != null) {
@@ -1154,19 +1184,32 @@ public class OpenAPIDeserializer {
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
         operation.setParameters(getParameterList(parameters, location, result));
 
-        ObjectNode responsesNode = getObject("responses", obj, false, location, result);
+        final ObjectNode requestObjectNode = getObject("requestBody", obj, false, location, result);
+        operation.setRequestBody(getRequestBody(requestObjectNode, location, result));
 
+        ObjectNode responsesNode = getObject("responses", obj, false, location, result);
         ApiResponses responses = getResponses(responsesNode, "responses", result);
         operation.setResponses(responses);
 
-
-        final ObjectNode requestObjectNode = getObject("requestBody", obj, false, location, result);
-        operation.setRequestBody(getRequestBody(requestObjectNode, location, result));
+        //TODO Callbacks
 
         Boolean deprecated = getBoolean("deprecated", obj, false, location, result);
         if (deprecated != null) {
             operation.setDeprecated(deprecated);
         }
+
+        array = getArray("servers", obj, false, location, result);
+        if (obj != null) {
+            operation.setServers(getServersList(array, location, result));
+        }
+
+
+        array = getArray("security", obj, false, location, result);
+        if (obj != null) {
+            operation.setSecurity(getSecurityRequirementsList(array, "security", result));
+        }
+
+
 
         // extra keys
         Set<String> keys = getKeys(obj);
@@ -1197,28 +1240,6 @@ public class OpenAPIDeserializer {
         return securityRequirements;
     }
 
-    /*public SecurityRequirement getSecurityRequirement(ObjectNode obj, String location, ParseResult result) {
-        if (obj == null) {
-            return null;
-        }
-        SecurityRequirement securityRequirement = new SecurityRequirement();
-
-        if (securityRequirement == null) {
-            result.invalidType(location, "security", "string", obj);
-            return null;
-        }
-
-        Set<String> securityKeys = getKeys(obj);
-        for (String tagName : securityKeys) {
-            JsonNode securityValue = obj.get(tagName);
-            if (!securityValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, tagName, "object", securityValue);
-            } else {
-                securityRequirement.addList(tagName);
-            }
-        }
-        return securityRequirement;
-    }*/
 
     protected RequestBody getRequestBody(ObjectNode node, String location, ParseResult result) {
         if (node == null){
@@ -1236,8 +1257,6 @@ public class OpenAPIDeserializer {
         // TODO parse content and media type objects.
         return body;
     }
-
-
 
 
     protected static class ParseResult {

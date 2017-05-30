@@ -103,8 +103,26 @@ public class OpenAPIDeserializerTest {
         final List<SecurityRequirement> requirements = openAPI.getSecurity();
         Assert.assertNotNull(requirements);
         Assert.assertEquals(requirements.size(),2);
-        //Assert.assertEquals(requirements.get(0),"grace");
-        System.out.println("security:" + requirements);
+
+        SecurityRequirement requirement = requirements.get(0);
+        Assert.assertTrue(requirement.containsKey("api_key"));
+
+        /*requirement = requirements.get(1);
+        Assert.assertTrue(requirement.containsKey("tokenAuth"));*/
+
+    }
+
+    @Test(dataProvider = "data")
+    public void readExtensions(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        System.out.println(openAPI.getExtensions());
 
     }
 
