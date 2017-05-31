@@ -83,6 +83,7 @@ paths:
             X-Rate-Limit:
               description: calls per hour allowed by the user
               schema:
+                title: header schema
                 type: integer
                 format: int32
             X-Expires-After:
@@ -131,10 +132,7 @@ paths:
       description: Status values that need to be considered for filter
       required: true
       schema:
-        title: grace
         type: array
-        not:
-          type: array
         items:
           type: string
           enum:

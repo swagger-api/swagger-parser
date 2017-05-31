@@ -113,7 +113,7 @@ public class OpenAPIDeserializer {
             }
 
             ArrayNode array = getArray("servers", rootNode, false, location, result);
-            if (obj != null) {
+            if (array != null) {
                 openAPI.setServers(getServersList(array, location, result));
             }
 
@@ -339,12 +339,12 @@ public class OpenAPIDeserializer {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                 //return pathRef((TextNode)ref, location, result);
             } else if (ref.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode on = (ObjectNode) ref;
+                ObjectNode node = (ObjectNode) ref;
 
                 // extra keys
-                Set<String> keys = getKeys(on);
+                Set<String> keys = getKeys(node);
                 for (String key : keys) {
-                    result.extra(location, key, on.get(key));
+                    result.extra(location, key, node.get(key));
                 }
             }
             return null;
@@ -363,53 +363,53 @@ public class OpenAPIDeserializer {
         ArrayNode servers = getArray("servers", obj, false, location, result);
         pathItem.setServers(getServersList(servers, location, result));
 
-        ObjectNode on = getObject("get", obj, false, location, result);
-        if (on != null) {
-            Operation op = getOperation(on, location + "(get)", result);
-            if (op != null) {
-                pathItem.setGet(op);
+        ObjectNode node = getObject("get", obj, false, location, result);
+        if (node != null) {
+            Operation operation = getOperation(node, location + "(get)", result);
+            if (operation != null) {
+                pathItem.setGet(operation);
             }
         }
-        on = getObject("put", obj, false, location, result);
-        if (on != null) {
-            Operation op = getOperation(on, location + "(put)", result);
-            if (op != null) {
-                pathItem.setPut(op);
+        node = getObject("put", obj, false, location, result);
+        if (node != null) {
+            Operation operation = getOperation(node, location + "(put)", result);
+            if (operation != null) {
+                pathItem.setPut(operation);
             }
         }
-        on = getObject("post", obj, false, location, result);
-        if (on != null) {
-            Operation op = getOperation(on, location + "(post)", result);
-            if (op != null) {
-                pathItem.setPost(op);
+        node = getObject("post", obj, false, location, result);
+        if (node != null) {
+            Operation operation = getOperation(node, location + "(post)", result);
+            if (operation != null) {
+                pathItem.setPost(operation);
             }
         }
-        on = getObject("head", obj, false, location, result);
-        if (on != null) {
-            Operation op = getOperation(on, location + "(head)", result);
-            if (op != null) {
-                pathItem.setHead(op);
+        node = getObject("head", obj, false, location, result);
+        if (node != null) {
+            Operation operation = getOperation(node, location + "(head)", result);
+            if (operation != null) {
+                pathItem.setHead(operation);
             }
         }
-        on = getObject("delete", obj, false, location, result);
-        if (on != null) {
-            Operation op = getOperation(on, location + "(delete)", result);
-            if (op != null) {
-                pathItem.setDelete(op);
+        node = getObject("delete", obj, false, location, result);
+        if (node != null) {
+            Operation operation = getOperation(node, location + "(delete)", result);
+            if (operation != null) {
+                pathItem.setDelete(operation);
             }
         }
-        on = getObject("patch", obj, false, location, result);
-        if (on != null) {
-            Operation op = getOperation(on, location + "(patch)", result);
-            if (op != null) {
-                pathItem.setPatch(op);
+        node = getObject("patch", obj, false, location, result);
+        if (node != null) {
+            Operation operation = getOperation(node, location + "(patch)", result);
+            if (operation != null) {
+                pathItem.setPatch(operation);
             }
         }
-        on = getObject("options", obj, false, location, result);
-        if (on != null) {
-            Operation op = getOperation(on, location + "(options)", result);
-            if (op != null) {
-                pathItem.setOptions(op);
+        node = getObject("options", obj, false, location, result);
+        if (node != null) {
+            Operation operation = getOperation(node, location + "(options)", result);
+            if (operation != null) {
+                pathItem.setOptions(operation);
             }
         }
 
@@ -486,7 +486,7 @@ public class OpenAPIDeserializer {
 
     public ObjectNode getObject(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         JsonNode value = node.get(key);
-        ObjectNode on = null;
+        ObjectNode object = null;
         if (value == null) {
             if (required) {
                 result.missing(location, key);
@@ -498,9 +498,9 @@ public class OpenAPIDeserializer {
                 result.invalid();
             }
         } else {
-            on = (ObjectNode) value;
+            object = (ObjectNode) value;
         }
-        return on;
+        return object;
     }
 
     public Info getInfo(ObjectNode node, String location, ParseResult result) {
@@ -563,10 +563,10 @@ public class OpenAPIDeserializer {
         }
         MediaType mediaType = new MediaType();
 
-        /*ObjectNode schemaObject = getObject("schema",contentNode,false,location,result);
+        ObjectNode schemaObject = getObject("schema",contentNode,false,location,result);
         if(schemaObject!=null){
             mediaType.setSchema(getSchema(schemaObject,location,result));
-        }*/
+        }
 
         /*mediaType.setExample();
         mediaType.setExamples();*/
@@ -786,19 +786,19 @@ public class OpenAPIDeserializer {
 
 
     public List<Parameter> getParameterList(ArrayNode obj, String location, ParseResult result) {
-        List<Parameter> output = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         if (obj == null) {
-            return output;
+            return parameters;
         }
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
-                Parameter param = getParameter((ObjectNode) item, location, result);
-                if (param != null) {
-                    output.add(param);
+                Parameter parameter = getParameter((ObjectNode) item, location, result);
+                if (parameter != null) {
+                    parameters.add(parameter);
                 }
             }
         }
-        return output;
+        return parameters;
     }
 
     public Parameter getParameter(ObjectNode obj, String location, ParseResult result) {
@@ -861,11 +861,11 @@ public class OpenAPIDeserializer {
         value = getString("style", obj, true, location, result);
         setStyle(value, parameter, location, obj, result);
 
-        ObjectNode schemaNode = getObject("schema",obj,false,location,result);
-        if(schemaNode!= null) {
-            parameter.setSchema(getSchema(schemaNode,location,result));
-        }
 
+        ObjectNode parameterObject = getObject("schema",obj,false,location,result);
+        if (parameterObject!= null) {
+            parameter.setSchema(getSchema(parameterObject,location,result));
+        }
 
         //TODO: examples
         value = getString("example", obj, false, location, result);
@@ -936,8 +936,10 @@ public class OpenAPIDeserializer {
 
         header.setStyle(Header.StyleEnum.SIMPLE);
 
-        header.setSchema(getSchema(headerNode,location,result));
-
+        ObjectNode headerObject = getObject("schema",headerNode,false,location,result);
+        if (headerObject!= null) {
+            header.setSchema(getSchema(headerObject, location, result));
+        }
         //TODO: examples
         value = getString("example", headerNode, false, location, result);
         header.setExample(value);
@@ -951,155 +953,141 @@ public class OpenAPIDeserializer {
         return header;
     }
 
-    public Schema getSchema(ObjectNode obj, String location, ParseResult result){
-        if(obj== null){
+    public Schema getSchema(ObjectNode node, String location, ParseResult result){
+        if(node== null){
             return null;
         }
         Schema schema = new Schema();
 
-        Set<String> schemaKeys = getKeys(obj);
-        for(String schemaName : schemaKeys) {
-            JsonNode schemaValue = obj.get(schemaName);
-            if(schemaName.startsWith("x-")) {
-                //result.unsupported(location, pathName, pathValue);
-            }
-            else {
-                if (!schemaValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                    result.invalidType(location, schemaName, "object", schemaValue);
-                } else {
-                    ObjectNode node = (ObjectNode) schemaValue;
-                    String value = getString("title",node,false,location,result);
-                    schema.setTitle(value);
+            String value = getString("title",node,false,location,result);
+            schema.setTitle(value);
 
-                    BigDecimal bigDecimal = getBigDecimal("multipleOf",node,false,location,result);
-                    schema.setMultipleOf(bigDecimal);
+            BigDecimal bigDecimal = getBigDecimal("multipleOf",node,false,location,result);
+            schema.setMultipleOf(bigDecimal);
 
-                    bigDecimal = getBigDecimal("maximum", node, false, location, result);
-                    schema.setMaximum(bigDecimal);
+            bigDecimal = getBigDecimal("maximum", node, false, location, result);
+            schema.setMaximum(bigDecimal);
 
-                    Boolean bool = getBoolean("exclusiveMaximum", node, false, location, result);
-                    schema.setExclusiveMaximum(bool);
+            Boolean bool = getBoolean("exclusiveMaximum", node, false, location, result);
+            schema.setExclusiveMaximum(bool);
 
-                    bigDecimal = getBigDecimal("minimum", node, false, location, result);
-                    schema.setMinimum(bigDecimal);
+            bigDecimal = getBigDecimal("minimum", node, false, location, result);
+            schema.setMinimum(bigDecimal);
 
-                    bool = getBoolean("exclusiveMinimum", node, false, location, result);
-                    schema.setExclusiveMinimum(bool);
+            bool = getBoolean("exclusiveMinimum", node, false, location, result);
+            schema.setExclusiveMinimum(bool);
 
-                    Integer integer = getInteger("minLength", node, false, location, result);
-                    schema.setMinLength(integer);
+            Integer integer = getInteger("minLength", node, false, location, result);
+            schema.setMinLength(integer);
 
-                    integer = getInteger("maxLength", node, false, location, result);
-                    schema.setMaxLength(integer);
+            integer = getInteger("maxLength", node, false, location, result);
+            schema.setMaxLength(integer);
 
 
-                    String pattern = getString("pattern", node, false, location, result);
-                    schema.setPattern(pattern);
+            String pattern = getString("pattern", node, false, location, result);
+            schema.setPattern(pattern);
 
-                    integer = getInteger("maxItems", node, false, location, result);
-                    schema.setMaxItems(integer);
+            integer = getInteger("maxItems", node, false, location, result);
+            schema.setMaxItems(integer);
 
-                    integer = getInteger("minItems", node, false, location, result);
-                    schema.setMinItems(integer);
+            integer = getInteger("minItems", node, false, location, result);
+            schema.setMinItems(integer);
 
-                    bool = getBoolean("uniqueItems", node, false, location, result);
-                    schema.setUniqueItems(bool);
+            bool = getBoolean("uniqueItems", node, false, location, result);
+            schema.setUniqueItems(bool);
 
-                    integer = getInteger("maxProperties", node, false, location, result);
-                    schema.setMaxProperties(integer);
+            integer = getInteger("maxProperties", node, false, location, result);
+            schema.setMaxProperties(integer);
 
-                    integer = getInteger("minProperties", node, false, location, result);
-                    schema.setMinProperties(integer);
+            integer = getInteger("minProperties", node, false, location, result);
+            schema.setMinProperties(integer);
 
-                    ArrayNode required = getArray("required", node, false, location, result);
-                    if(required != null) {
-                        List<String> requiredList = new ArrayList<>();
-                        for (JsonNode n : required) {
-                            if(n.getNodeType().equals(JsonNodeType.STRING)) {
-                                requiredList.add(((TextNode) n).textValue());
-                            }
-                            else {
-                                result.invalidType(location, "required", "string", n);
-                            }
-                        }
-                        if(requiredList.size() > 0) {
-                            schema.setRequired(requiredList);
-                        }
+            ArrayNode required = getArray("required", node, false, location, result);
+            if(required != null) {
+                List<String> requiredList = new ArrayList<>();
+                for (JsonNode n : required) {
+                    if(n.getNodeType().equals(JsonNodeType.STRING)) {
+                        requiredList.add(((TextNode) n).textValue());
                     }
-
-                    ArrayNode an = getArray("enum", node, false, location, result);
-                    if(an != null) {
-                        List<String> _enum = new ArrayList<>();
-                        for(JsonNode n : an) {
-                            if(n.isValueNode()) {
-                                _enum.add(n.asText());
-                            }
-                            else {
-                                result.invalidType(location, "enum", "value", n);
-                            }
-                        }
-                        schema.setEnum(_enum);
+                    else {
+                        result.invalidType(location, "required", "string", n);
                     }
-
-                    value = getString("type",node,false,location,result);
-                    schema.setType(value);
-
-                    // MISSING SCHEMA OBJECTS allOf oneOf anyOf items
-
-                    String allOf = getString("allOf", node, false, location, result);
-                    if(allOf == null){
-                        AllOfSchema allOfSchema = new AllOfSchema();
-                    }
-
-                    //Schema not;
-                    /*ObjectNode notObj = getObject("not", node, false, location, result);
-                    Schema not = getSchema(notObj, location, result);
-                    schema.setNot(not);*/
-
-                    //Map<String, Schema> properties = null;
-
-                    //Schema additionalProperties = null;
-
-                    value = getString("description",node,false,location,result);
-                    schema.setDescription(value);
-
-                    value = getString("format", node, false, location, result);
-                    schema.setFormat(value);
-
-
-                    value = getString("default", node, false, location, result);
-
-                    //discriminator  xml
-
-                    bool = getBoolean("nullable", node, false, location, result);
-                    schema.setNullable(bool);
-
-                    bool = getBoolean("readOnly", node, false, location, result);
-                    schema.setReadOnly(bool);
-
-                    bool = getBoolean("writeOnly", node, false, location, result);
-                    schema.setWriteOnly(bool);
-
-
-
-                    ObjectNode xmlNode = getObject("xml", node, false, location, result);
-                    XML xml = getXml(xmlNode, location, result);
-                    schema.setXml(xml);
-
-
-                    ObjectNode externalDocs = getObject("externalDocs", node, false, location, result);
-                    ExternalDocumentation docs = getExternalDocs(externalDocs, location, result);
-                    schema.setExternalDocs(docs);
-
-                    value = getString("example",node,false,location,result);
-                    schema.setExample(value);
-
-                    bool = getBoolean("deprecated", node, false, location, result);
-                    schema.setDeprecated(bool);
-
+                }
+                if(requiredList.size() > 0) {
+                    schema.setRequired(requiredList);
                 }
             }
-        }
+
+            ArrayNode an = getArray("enum", node, false, location, result);
+            if(an != null) {
+                List<String> _enum = new ArrayList<>();
+                for(JsonNode n : an) {
+                    if(n.isValueNode()) {
+                        _enum.add(n.asText());
+                    }
+                    else {
+                        result.invalidType(location, "enum", "value", n);
+                    }
+                }
+                schema.setEnum(_enum);
+            }
+
+            value = getString("type",node,false,location,result);
+            schema.setType(value);
+
+            // MISSING SCHEMA OBJECTS allOf oneOf anyOf items
+
+            String allOf = getString("allOf", node, false, location, result);
+            if(allOf == null){
+                AllOfSchema allOfSchema = new AllOfSchema();
+            }
+
+            //Schema not;
+            /*ObjectNode notObj = getObject("not", node, false, location, result);
+            Schema not = getSchema(notObj, location, result);
+            schema.setNot(not);*/
+
+            //Map<String, Schema> properties = null;
+
+            //Schema additionalProperties = null;
+
+            value = getString("description",node,false,location,result);
+            schema.setDescription(value);
+
+            value = getString("format", node, false, location, result);
+            schema.setFormat(value);
+
+
+            value = getString("default", node, false, location, result);
+
+            //discriminator  xml
+
+            bool = getBoolean("nullable", node, false, location, result);
+            schema.setNullable(bool);
+
+            bool = getBoolean("readOnly", node, false, location, result);
+            schema.setReadOnly(bool);
+
+            bool = getBoolean("writeOnly", node, false, location, result);
+            schema.setWriteOnly(bool);
+
+
+
+            ObjectNode xmlNode = getObject("xml", node, false, location, result);
+            XML xml = getXml(xmlNode, location, result);
+            schema.setXml(xml);
+
+
+            ObjectNode externalDocs = getObject("externalDocs", node, false, location, result);
+            ExternalDocumentation docs = getExternalDocs(externalDocs, location, result);
+            schema.setExternalDocs(docs);
+
+            value = getString("example",node,false,location,result);
+            schema.setExample(value);
+
+            bool = getBoolean("deprecated", node, false, location, result);
+            schema.setDeprecated(bool);
+
 
         return schema;
 
