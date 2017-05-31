@@ -193,7 +193,7 @@ public class ResolverCache {
             // already an absolute ref
             return ref;
         }
-        if(!host.startsWith("http:") || !host.startsWith("https:")) {
+        if(!host.startsWith("http:") && !host.startsWith("https:")) {
             return ref;
         }
         if(ref.startsWith(".")) {
