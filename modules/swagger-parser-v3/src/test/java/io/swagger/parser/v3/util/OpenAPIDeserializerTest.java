@@ -101,7 +101,18 @@ public class OpenAPIDeserializerTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
 
+        final Paths paths = openAPI.getPaths();
+        Assert.assertNotNull(paths);
 
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        Assert.assertNotNull(petByStatusEndpoint.getGet());
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),3);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),"example string");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExamples().get("list").getSummary(),"List of Names");
 
 
     }

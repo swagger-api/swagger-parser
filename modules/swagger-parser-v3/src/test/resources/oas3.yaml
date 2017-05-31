@@ -229,6 +229,7 @@ paths:
               type: array
               items:
                 type: string
+            example: example string
             examples:
               list:
                 summary: List of Names

@@ -176,10 +176,6 @@ public class OpenAPIDeserializer {
         }
 
         Tag tag = new Tag();
-        if (tag == null) {
-            result.invalidType(location, "tag", "string", obj);
-            return null;
-        }
 
         String value = getString("name", obj, true, location, result);
         tag.setName(value);
@@ -229,10 +225,6 @@ public class OpenAPIDeserializer {
         }
 
         Server server = new Server();
-        if (server == null) {
-            result.invalidType(location, "servers", "string", obj);
-            return null;
-        }
 
         String value = getString("url", obj, true, location, result);
         server.setUrl(value);
@@ -568,8 +560,14 @@ public class OpenAPIDeserializer {
             mediaType.setSchema(getSchema(schemaObject,location,result));
         }
 
-        /*mediaType.setExample();
-        mediaType.setExamples();*/
+
+        String value = getString("example", contentNode, false, location, result);
+        mediaType.setExample(value);
+
+        ObjectNode examplesObject = getObject("examples",contentNode,false,location,result);
+        if(examplesObject!=null) {
+            mediaType.setExamples(getExamples(examplesObject, location, result));
+        }
 
         ObjectNode encodingObject = getObject("encoding",contentNode,false,location,result);
         if(encodingObject!=null) {
@@ -871,8 +869,10 @@ public class OpenAPIDeserializer {
         value = getString("example", obj, false, location, result);
         parameter.setExample(value);
 
-        parameter.setExamples(getExamples(obj,location,result));
-
+        ObjectNode examplesNode = getObject("examples",obj,false,location,result);
+        if(examplesNode!= null) {
+            parameter.setExamples(getExamples(examplesNode, location, result));
+        }
 
         ObjectNode contentNode = getObject("content",obj,false,location,result);
         if(contentNode!= null) {
@@ -903,11 +903,6 @@ public class OpenAPIDeserializer {
         }
 
         Header header = new Header();
-
-        if (header == null) {
-            result.invalidType(location, "in", "string", headerNode);
-            return null;
-        }
 
         String value = getString("description", headerNode, false, location, result);
         header.setDescription(value);
