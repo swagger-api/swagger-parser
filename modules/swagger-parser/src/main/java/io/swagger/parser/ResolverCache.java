@@ -159,6 +159,10 @@ public class ResolverCache {
             RefProperty prop = (RefProperty) result;
             updateLocalRefs(file, prop);
         }
+        else if(result instanceof Model) {
+            Model model = (Model) result;
+            updateLocalRefs(file, model);
+        }
     }
 
     protected <T> void updateLocalRefs(String file, Model schema) {
