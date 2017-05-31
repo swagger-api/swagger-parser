@@ -24,10 +24,12 @@ public final class ExternalRefProcessor {
 
     private final ResolverCache cache;
     private final Swagger swagger;
+    private VendorExtensionProcessor vendorExtensionProcessor;
 
     public ExternalRefProcessor(ResolverCache cache, Swagger swagger) {
         this.cache = cache;
         this.swagger = swagger;
+        this.vendorExtensionProcessor = new VendorExtensionProcessor(cache, this);
     }
 
     public String processRefToExternalDefinition(String $ref, RefFormat refFormat) {
@@ -100,6 +102,7 @@ public final class ExternalRefProcessor {
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
                 processRefProperty((RefProperty) ((ArrayModel) model).getItems(), file);
             }
+            vendorExtensionProcessor.processRefsFromVendorExtensions(model, file);
         }
 
         return newRef;
