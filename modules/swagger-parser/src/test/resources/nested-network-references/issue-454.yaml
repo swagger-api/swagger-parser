@@ -32,5 +32,3 @@ definitions:
     properties:
       remoteProperty:
         $ref: 'https://remote-components.com/issue-454-components#/definitions/RemoteComponent'
-
-# fernando: what is the list of features we want for virt server?
