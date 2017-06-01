@@ -1,6 +1,6 @@
 package io.swagger.parser.models;
 
-import io.swagger.models.OpenAPI;
+import io.swagger.oas.models.OpenAPI;
 import java.util.List;
 
 public class SwaggerParseResult {

@@ -13,7 +13,7 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc0");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
     }
 
     @Test
@@ -24,7 +24,7 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc0");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
     }
 
     @Test
