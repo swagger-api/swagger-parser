@@ -1,13 +1,17 @@
 package io.swagger.parser.test;
 
 
+import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.PathItem;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v2.SwaggerConverter;
 import org.testng.annotations.Test;
-import v2.io.swagger.util.Json;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class V2ConverterTest {
     @Test
@@ -16,6 +20,25 @@ public class V2ConverterTest {
         String swaggerAsString = new String(Files.readAllBytes(Paths.get("src/test/resources/petstore.yaml")));
         SwaggerParseResult result = converter.readContents(swaggerAsString, null, null);
 
-        Json.prettyPrint(result.getOpenAPI());
+        assertNotNull(result.getOpenAPI());
+    }
+
+    @Test
+    public void testIssue455() throws Exception {
+        SwaggerConverter converter = new SwaggerConverter();
+        String swaggerAsString = new String(Files.readAllBytes(Paths.get("src/test/resources/issue-455.json")));
+        SwaggerParseResult result = converter.readContents(swaggerAsString, null, null);
+
+        assertNotNull(result);
+
+        OpenAPI oas = result.getOpenAPI();
+
+        assertNotNull(oas);
+        assertTrue(oas.getPaths().size() == 1);
+
+        PathItem pathItem = oas.getPaths().get("/api/batch/");
+        assertNotNull(pathItem);
+
+        assertTrue(pathItem.getGet().getParameters().size() == 1);
     }
 }
