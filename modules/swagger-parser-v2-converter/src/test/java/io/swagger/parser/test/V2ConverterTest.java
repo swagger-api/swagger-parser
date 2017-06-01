@@ -17,7 +17,7 @@ public class V2ConverterTest {
     @Test
     public void testConvertPetstore() throws Exception {
         SwaggerConverter converter = new SwaggerConverter();
-        String swaggerAsString = new String(Files.readAllBytes(Paths.get("src/test/resources/petstore.yaml")));
+        String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource("petstore.yaml").toURI())));
         SwaggerParseResult result = converter.readContents(swaggerAsString, null, null);
 
         assertNotNull(result.getOpenAPI());
@@ -26,7 +26,8 @@ public class V2ConverterTest {
     @Test
     public void testIssue455() throws Exception {
         SwaggerConverter converter = new SwaggerConverter();
-        String swaggerAsString = new String(Files.readAllBytes(Paths.get("src/test/resources/issue-455.json")));
+        String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource("issue-455.json").toURI())));
+
         SwaggerParseResult result = converter.readContents(swaggerAsString, null, null);
 
         assertNotNull(result);
