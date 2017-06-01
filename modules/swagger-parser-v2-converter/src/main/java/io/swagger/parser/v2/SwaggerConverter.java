@@ -353,6 +353,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 mediaTypes.addAll(v2Operation.getProduces());
             }
 
+            if(mediaTypes.size() == 0) {
+                mediaTypes.add("*/*");
+            }
+
             for(String responseCode : v2Operation.getResponses().keySet()) {
                 v2.io.swagger.models.Response v2Response = v2Operation.getResponses().get(responseCode);
                 ApiResponse response = convert(v2Response, mediaTypes);
