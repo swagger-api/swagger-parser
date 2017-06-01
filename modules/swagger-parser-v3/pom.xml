@@ -51,11 +51,6 @@
             <version>6.9.10</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>RELEASE</version>
-        </dependency>
     </dependencies>
     <properties>
         <swagger-core-module-version>2.0.0-SNAPSHOT</swagger-core-module-version>

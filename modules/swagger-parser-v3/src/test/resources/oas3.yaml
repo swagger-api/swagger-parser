@@ -149,7 +149,13 @@ paths:
       parameters: []
       responses:
         '400':
-          description: Invalid ID supplied
+          description: A complex object array response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VeryComplexType'
         '404':
           description: Pet not found
         '405':
@@ -260,7 +266,7 @@ paths:
                 summary: List of names
                 value: "<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>"
               empty:
-                summmary: Empty list
+                summary: Empty list
                 value: "<Users/>"
           'text/plain':
             examples:
@@ -291,6 +297,8 @@ paths:
         - write:pets
         - read:pets
       requestBody:
+        description: pet store to add to the system
+        required: true
         content:
           multipart/mixed:
             schema:

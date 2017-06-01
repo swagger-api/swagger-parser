@@ -7,7 +7,7 @@ import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
-import io.swagger.oas.models.examples.Example;
+//import io.swagger.oas.models.headers.Headers;
 import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
@@ -22,7 +22,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,7 +86,18 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(server.get(2));
         Assert.assertNotNull(server.get(2).getVariables());
         Assert.assertNotNull(server.get(2).getVariables().values());
-        //System.out.println(server.get(2).getVariables().values());
+        Assert.assertNotNull(server.get(2).getVariables().get("username"));
+        Assert.assertEquals(server.get(2).getVariables().get("username").getDefault(),"demo");
+        Assert.assertEquals(server.get(2).getVariables().get("username").getDescription(),"this value is assigned by the service provider, in this example `gigantic-server.com`");
+        Assert.assertNotNull(server.get(2).getVariables().get("port").getEnum());
+        Assert.assertEquals(server.get(2).getVariables().get("port").getEnum().get(0),"8443");
+        Assert.assertEquals(server.get(2).getVariables().get("port").getEnum().get(1),"443");
+        Assert.assertEquals(server.get(2).getVariables().get("port").getDefault(),"8443");
+        Assert.assertNotNull(server.get(2).getVariables().get("port"));
+        Assert.assertNotNull(server.get(2).getVariables().get("basePath"));
+        Assert.assertEquals(server.get(2).getVariables().get("basePath").getDescription(),"testing overwriting");
+        Assert.assertEquals(server.get(2).getVariables().get("basePath").getDefault(),"v2");
+
 
     }
 
@@ -113,8 +123,28 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),"example string");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExamples().get("list").getSummary(),"List of Names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getEncoding().get("profileImage").getContentType(),"image/png, image/jpeg");
+        //Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getEncoding().get("profileImage").getHeaders());
+
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
+
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary(),"Empty list");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getValue(),"<Users/>");
 
 
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
+
+        PathItem petEndpoint = paths.get("/pet");
+        Assert.assertNotNull(petEndpoint.getPut());
+        Assert.assertNotNull(petEndpoint.getPut().getResponses().get("400").getContent().get("application/json"));
+        Assert.assertEquals(petEndpoint.getPut().getResponses().get("400").getContent().size(),1);
+        Assert.assertEquals(petEndpoint.getPut().getResponses().get("400").getContent().get("application/json").getSchema().getType(), "array");
     }
 
     @Test(dataProvider = "data")
@@ -127,9 +157,20 @@ public class OpenAPIDeserializerTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
 
+        final Paths paths = openAPI.getPaths();
+        Assert.assertNotNull(paths);
 
-
-
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getDescription(),"pet store to add to the system");
+        Assert.assertTrue(petByStatusEndpoint.getGet().getRequestBody().getRequired(),"true");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed"));
+        Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getType(),"object");
+        //TODO: Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("historyMetadata").getContentType(),"application/xml; charset=utf-8");
+        //Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders());
+        //Headers petHeader = (Headers)petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders();
+        //Assert.assertNotNull(petHeader.get("X-Rate-Limit"));
     }
 
     @Test(dataProvider = "data")
@@ -144,7 +185,7 @@ public class OpenAPIDeserializerTest {
 
         final List<SecurityRequirement> requirements = openAPI.getSecurity();
         Assert.assertNotNull(requirements);
-        //Assert.assertEquals(requirements.size(),2);
+        Assert.assertEquals(requirements.size(),2);
 
         SecurityRequirement requirement = requirements.get(0);
         Assert.assertTrue(requirement.containsKey("api_key"));
@@ -195,7 +236,6 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        //System.out.println(openAPI);
 
         final List<Tag> Tag = openAPI.getTags();
         Assert.assertNotNull(Tag);
@@ -205,7 +245,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(Tag.get(0).getDescription());
         Assert.assertEquals(Tag.get(0).getDescription(),"Everything about your Pets");
         Assert.assertNotNull(Tag.get(0).getExternalDocs());
-        //System.out.println(Tag);
 
         Assert.assertNotNull(Tag.get(1));
         Assert.assertNotNull(Tag.get(1).getName());
@@ -232,13 +271,10 @@ public class OpenAPIDeserializerTest {
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
-        //System.out.println(petByStatusEndpoint.getGet().getTags());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getName(), "status");
-        //System.out.println(petByStatusEndpoint.getGet().getParameters());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
-        //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());
-        //System.out.println("style: " + petByStatusEndpoint.getGet().getParameters().get(0).getStyle());
+
     }
 
     @Test(dataProvider = "data")
@@ -259,20 +295,12 @@ public class OpenAPIDeserializerTest {
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
-        //System.out.println(petByStatusEndpoint.getGet().getTags());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getSchema());
-        //System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getFormat(), "int64");
-        // System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getNamespace(), "http://example.com/schema/sample");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getPrefix(), "sample");
-        //System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getPrefix());
-
-        //System.out.println(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getFormat());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
-        //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());
-        //System.out.println("style: " + petByStatusEndpoint.getGet().getParameters().get(0).getStyle());
     }
 
 
@@ -321,7 +349,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getDescription(),"description");
         Assert.assertNotNull(petEndpoint.getPost().getExternalDocs());
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
-        //System.out.println(petEndpoint.getPost().getExternalDocs().getUrl());
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
         Assert.assertEquals(petEndpoint.getPost().getRequestBody().getDescription(),"user to add to the system");
         Assert.assertTrue(petEndpoint.getPost().getRequestBody().getRequired(),"required");
@@ -344,19 +371,17 @@ public class OpenAPIDeserializerTest {
         Assert.assertTrue(responses.containsKey("405"));
         ApiResponse response = responses.get("405");
         Assert.assertEquals(response.getDescription(), "Invalid input");
-        Assert.assertEquals(response.getHeaders().get("X-Rate-Limit").getDescription(), "calls per hour allowed by the user");
-        //System.out.println(response.getHeaders().get("X-Rate-Limit").getSchema());
+        //Assert.assertEquals(response.getHeaders().get("X-Rate-Limit").getDescription(), "calls per hour allowed by the user");
+
 
         //parameters operation get
 
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertNotNull(petByStatusEndpoint.getGet().getTags());
-        //System.out.println(petByStatusEndpoint.getGet().getTags());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
-        //System.out.println("in: " + petByStatusEndpoint.getGet().getParameters().get(0).getIn());
-        //System.out.println("style: " + petByStatusEndpoint.getGet().getParameters().get(0).getStyle());
+
     }
 
 

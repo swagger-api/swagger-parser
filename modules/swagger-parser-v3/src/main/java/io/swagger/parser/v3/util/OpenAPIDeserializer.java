@@ -11,6 +11,8 @@ import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.examples.Example;
+import io.swagger.oas.models.links.Link;
+import io.swagger.oas.models.headers.Headers;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.media.AllOfSchema;
@@ -23,7 +25,6 @@ import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.License;
 import io.swagger.oas.models.media.EncodingProperty;
 import io.swagger.oas.models.headers.Header;
-import io.swagger.oas.models.headers.Headers;
 import io.swagger.oas.models.parameters.CookieParameter;
 import io.swagger.oas.models.parameters.HeaderParameter;
 import io.swagger.oas.models.parameters.Parameter;
@@ -39,20 +40,15 @@ import io.swagger.oas.models.servers.ServerVariables;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
-
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-//import java.math.BigDecimal;
 
 
 public class OpenAPIDeserializer {
@@ -633,6 +629,8 @@ public class OpenAPIDeserializer {
         return encodingProperty;
     }
 
+
+
     public License getLicense(ObjectNode node, String location, ParseResult result) {
         if (node == null)
             return null;
@@ -866,6 +864,7 @@ public class OpenAPIDeserializer {
         }
 
         //TODO: examples
+
         value = getString("example", obj, false, location, result);
         parameter.setExample(value);
 
@@ -881,7 +880,7 @@ public class OpenAPIDeserializer {
         return parameter;
     }
 
-    public Headers getHeaders(ObjectNode headersNode, String location, ParseResult result) {
+    /*public Headers getHeaders(getHeadersObjectNode headersNode, String location, ParseResult result) {
         if (headersNode == null) {
             return null;
         }
@@ -894,6 +893,32 @@ public class OpenAPIDeserializer {
                 headers.addHeader(key, header);
             }
         }
+        return headers;
+    }*/
+
+    public Map<String, Header> getHeaders(ObjectNode obj, String location, ParseResult result) {
+        if (obj == null) {
+            return null;
+        }
+        Map<String, Header> headers = new LinkedHashMap<>();
+
+        Set<String> headerKeys = getKeys(obj);
+        for(String headerName : headerKeys) {
+            JsonNode headerValue = obj.get(headerName);
+            if(headerName.startsWith("x-")) {
+                //result.unsupported(location, pathName, pathValue);
+            }
+            else {
+                if (!headerValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                    result.invalidType(location, headerName, "object", headerValue);
+                } else {
+                    ObjectNode header = (ObjectNode) headerValue;
+                    Header headerObj = getHeader(header, location + ".'" + headerName + "'", result);
+                    headers.put(headerName, headerObj);
+                }
+            }
+        }
+
         return headers;
     }
 
@@ -1042,7 +1067,11 @@ public class OpenAPIDeserializer {
             Schema not = getSchema(notObj, location, result);
             schema.setNot(not);*/
 
-            //Map<String, Schema> properties = null;
+            //Map <String, Schema> properties = null;
+            /*ObjectNode propertiesObj = getObject("properties", node, false, location, result);
+            Schema property = getSchema(propertiesObj, location, result);
+            schema.setProperties(property);*/
+
 
             //Schema additionalProperties = null;
 
@@ -1053,7 +1082,8 @@ public class OpenAPIDeserializer {
             schema.setFormat(value);
 
 
-            value = getString("default", node, false, location, result);
+            ArrayNode array = getArray("default", node, false, location, result);
+            schema.setDefault(array);
 
             //discriminator  xml
 
@@ -1211,9 +1241,10 @@ public class OpenAPIDeserializer {
 
         ObjectNode obj = getObject("headers", node, true, location, result);
         if (obj != null) {
-            apiResponse.setHeaders(getHeaders(obj, location, result));
+            //apiResponse.setHeaders(new Headers());
+            //Map<String,Header> headers = getHeaders(obj, location, result);
+            //apiResponse.setHeaders(headers);
         }
-
         //TODO LinksObject
 
         obj = getObject("content", node, true, location, result);
