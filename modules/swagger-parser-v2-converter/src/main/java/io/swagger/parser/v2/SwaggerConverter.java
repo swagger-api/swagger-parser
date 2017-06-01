@@ -276,6 +276,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
                         mediaTypes.addAll(v2Operation.getConsumes());
                     }
 
+                    if(mediaTypes.size() == 0) {
+                        mediaTypes.add("*/*");
+                    }
+
                     if(StringUtils.isNotBlank(param.getDescription())) {
                         body.description(param.getDescription());
                     }
