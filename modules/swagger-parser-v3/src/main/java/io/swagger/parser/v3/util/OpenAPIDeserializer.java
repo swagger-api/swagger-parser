@@ -10,9 +10,10 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
+import io.swagger.oas.models.callbacks.Callback;
+import io.swagger.oas.models.callbacks.Callbacks;
 import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.links.Link;
-import io.swagger.oas.models.headers.Headers;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.media.AllOfSchema;
@@ -556,7 +557,6 @@ public class OpenAPIDeserializer {
             mediaType.setSchema(getSchema(schemaObject,location,result));
         }
 
-
         String value = getString("example", contentNode, false, location, result);
         mediaType.setExample(value);
 
@@ -569,6 +569,7 @@ public class OpenAPIDeserializer {
         if(encodingObject!=null) {
             mediaType.setEncoding(getEncoding(encodingObject, location, result));
         }
+
         return mediaType;
     }
 
@@ -629,6 +630,93 @@ public class OpenAPIDeserializer {
         return encodingProperty;
     }
 
+    public Map<String, Link> getLinks(ObjectNode obj, String location, ParseResult result) {
+        if (obj == null) {
+            return null;
+        }
+        Map<String, Link> links = new LinkedHashMap<>();
+
+        Set<String> linkKeys = getKeys(obj);
+        for(String linkName : linkKeys) {
+            JsonNode linkValue = obj.get(linkName);
+            if (!linkValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, linkName, "object", linkValue);
+            } else {
+                ObjectNode link = (ObjectNode) linkValue;
+                Link linkObj = getLink(link, location + ".'" + linkName + "'", result);
+                if(linkObj !=null) {
+                    links.put(linkName, linkObj);
+                }
+            }
+
+        }
+        return links;
+    }
+
+    public Link getLink(ObjectNode linkNode, String location, ParseResult result) {
+        if (linkNode == null) {
+            return null;
+        }
+
+        Link link = new Link();
+
+        String value = getString("operationRef", linkNode, false, location, result);
+        link.setOperationRef(value);
+
+        value = getString("operationId", linkNode, false, location, result);
+        link.setOperationId(value);
+
+        ObjectNode parametersObject = getObject("parameters",linkNode,false,location,result);
+        if (parametersObject!= null) {
+            //TODO link.setParameters(getLinkParameters(parametersObject, location, result));
+        }
+
+        ObjectNode headerObject = getObject("headers",linkNode,false,location,result);
+        if (headerObject!= null) {
+            link.setHeaders(getHeaders(headerObject, location, result));
+        }
+
+        ObjectNode serverObject = getObject("server",linkNode,false,location,result);
+        if (serverObject!= null) {
+            //TODO ask ron link.setServer(getSchema(headerObject, location, result));
+        }
+
+        value = getString("description", linkNode, false, location, result);
+        link.setDescription(value);
+
+        return link;
+    }
+
+    public Map <String,Callback> getCallbacks(ObjectNode node, String location, ParseResult result){
+        if (node == null) {
+            return null;
+        }
+        Callbacks callbacks = new Callbacks();
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            Callback callback = getCallback((ObjectNode) node.get(key), location, result);
+            if (callback != null) {
+                callbacks.addCallback(key, callback);
+            }
+        }
+        return callbacks;
+    }
+
+    public Callback getCallback(ObjectNode node, String location, ParseResult result) {
+        if (node == null) {
+            return null;
+        }
+
+        Callback callback = new Callback();
+
+
+        ObjectNode callbackObject = getObject("callback", node, false, location, result);
+        if (callbackObject!= null){
+            //callback.addPathItem(();
+        }
+
+        return callback;
+    }
 
 
     public License getLicense(ObjectNode node, String location, ParseResult result) {
@@ -880,21 +968,6 @@ public class OpenAPIDeserializer {
         return parameter;
     }
 
-    /*public Headers getHeaders(getHeadersObjectNode headersNode, String location, ParseResult result) {
-        if (headersNode == null) {
-            return null;
-        }
-
-        Headers headers = new Headers();
-        Set<String> keys = getKeys(headersNode);
-        for(String key : keys) {
-            Header header = getHeader((ObjectNode) headersNode.get(key), location, result);
-            if (header != null) {
-                headers.addHeader(key, header);
-            }
-        }
-        return headers;
-    }*/
 
     public Map<String, Header> getHeaders(ObjectNode obj, String location, ParseResult result) {
         if (obj == null) {
@@ -1239,17 +1312,21 @@ public class OpenAPIDeserializer {
         apiResponse.description(value);
 
 
-        ObjectNode obj = getObject("headers", node, true, location, result);
-        if (obj != null) {
-            //apiResponse.setHeaders(new Headers());
-            //Map<String,Header> headers = getHeaders(obj, location, result);
-            //apiResponse.setHeaders(headers);
+        ObjectNode headerObject = getObject("headers", node, true, location, result);
+        if (headerObject != null) {
+            Map<String,Header> headers = getHeaders(headerObject, location, result);
+            apiResponse.setHeaders(headers);
         }
-        //TODO LinksObject
+        
+        ObjectNode linksObj = getObject("links", node, true, location, result);
+        if (linksObj != null) {
+            //TODO ask tony Link links = getLinks(linksObj, location, result);
+            //TODO apiResponse.setLinks(links);
+        }
 
-        obj = getObject("content", node, true, location, result);
-        if (obj != null) {
-            apiResponse.setContent(getContent(obj, location, result));
+        ObjectNode contentObject = getObject("content", node, true, location, result);
+        if (contentObject != null) {
+            apiResponse.setContent(getContent(contentObject, location, result));
         }
 
         // extra keys
