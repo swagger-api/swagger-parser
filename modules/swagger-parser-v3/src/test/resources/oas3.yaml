@@ -30,9 +30,7 @@ x-origin:
   converter:
     url: https://github.com/mermade/swagger2openapi
     version: 1.2.1
-
 x-api-title: pet store test api
-
 security:
   - api_key: []
   - tokenAuth: []
@@ -339,7 +337,6 @@ paths:
                     schema:
                       type: string
                       format: date-time
-
   "/pet/findByTags":
     get:
       tags:
