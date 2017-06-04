@@ -939,3 +939,15 @@ components:
       description: The number of seconds left in the current period
       schema:
         type: integer
+  links:
+    unsubscribe:
+      operationId: cancelHookCallback
+      parameters:
+        id: $response.body#/hookId
+  callbacks:
+    mainHook:
+      '$request.body#/url':
+        post:
+          responses:
+            '200':
+              description: webhook successfully processed

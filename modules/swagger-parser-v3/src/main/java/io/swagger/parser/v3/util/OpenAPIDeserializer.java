@@ -79,7 +79,6 @@ public class OpenAPIDeserializer {
     public SwaggerParseResult deserialize(JsonNode rootNode) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            // TODO
             ParseResult rootParse = new ParseResult();
             OpenAPI api = parseRoot(rootNode, rootParse);
             result.setOpenAPI(api);
@@ -201,7 +200,7 @@ public class OpenAPIDeserializer {
             components.setHeaders(getHeaders(node,location,result));
         }
 
-        node = getObject("security",obj,false,location,result);
+        node = getObject("securitySchemes",obj,false,location,result);
         if(node != null) {
             components.setSecuritySchemes(getSecuritySchemes(node,location,result));
         }
@@ -786,9 +785,18 @@ public class OpenAPIDeserializer {
         Callback callback = new Callback();
 
 
-        ObjectNode callbackObject = getObject("callback", node, false, location, result);
-        if (callbackObject!= null){
-            //callback.addPathItem(();
+        Set<String> Keys = getKeys(node);
+        for(String name : Keys) {
+            JsonNode value = node.get(name);
+            if (!value.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, name, "object", value);
+            } else {
+                if (node!= null){
+
+                    callback.addPathItem(name,getPathItem((ObjectNode) value,location,result));
+                }
+            }
+
         }
 
         return callback;
@@ -873,7 +881,7 @@ public class OpenAPIDeserializer {
 
     public ArrayNode getArray(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         JsonNode value = node.get(key);
-        ArrayNode an = null;
+        ArrayNode arrayNode = null;
         if (value == null) {
             if (required) {
                 result.missing(location, key);
@@ -882,9 +890,9 @@ public class OpenAPIDeserializer {
         } else if (!value.getNodeType().equals(JsonNodeType.ARRAY)) {
             result.invalidType(location, key, "array", value);
         } else {
-            an = (ArrayNode) value;
+            arrayNode = (ArrayNode) value;
         }
-        return an;
+        return arrayNode;
     }
 
     public Boolean getBoolean(String key, ObjectNode node, boolean required, String location, ParseResult result) {
@@ -1181,13 +1189,13 @@ public class OpenAPIDeserializer {
 
         String value = getString("type", node, true, location, result);
 
-        if(SecurityScheme.Type.APIKEY.equals(value)){
+        if(SecurityScheme.Type.APIKEY.toString().equals(value)){
             securityScheme.setType(SecurityScheme.Type.APIKEY);
-        }else if(SecurityScheme.Type.HTTP.equals(value)) {
+        }else if(SecurityScheme.Type.HTTP.toString().equals(value)) {
             securityScheme.setType(SecurityScheme.Type.HTTP);
-        }else if(SecurityScheme.Type.OAUTH2.equals(value)) {
+        }else if(SecurityScheme.Type.OAUTH2.toString().equals(value)) {
             securityScheme.setType(SecurityScheme.Type.OAUTH2);
-        }else if(SecurityScheme.Type.OPENIDCONNECT.equals(value)) {
+        }else if(SecurityScheme.Type.OPENIDCONNECT.toString().equals(value)) {
             securityScheme.setType(SecurityScheme.Type.OPENIDCONNECT);
         }
 
@@ -1273,7 +1281,7 @@ public class OpenAPIDeserializer {
         ObjectNode scopesObject = getObject("scopes",node,true,location,result);
         Set<String> keys = getKeys(scopesObject);
         for(String name : keys) {
-            JsonNode scopeValue = node.get(name);
+            JsonNode scopeValue = scopesObject.get(name);
             if(name.startsWith("x-")) {
                 //result.unsupported(location, pathName, pathValue);
             }
@@ -1431,6 +1439,7 @@ public class OpenAPIDeserializer {
 
         Map <String, Schema> properties = new LinkedHashMap<>();
         ObjectNode propertiesObj = getObject("properties", node, false, location, result);
+
         Schema property = getSchema(propertiesObj, location, result);
         Set<String> keys = getKeys(propertiesObj);
         for(String key : keys) {
@@ -1438,9 +1447,9 @@ public class OpenAPIDeserializer {
             schema.setProperties(properties);
         }
 
-        ObjectNode aditionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
-        Schema aditionalProperties = getSchema(aditionalPropertiesObj, location, result);
-        schema.setAdditionalProperties(aditionalProperties);
+        ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
+        Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
+        schema.setAdditionalProperties(additionalProperties);
 
         value = getString("description",node,false,location,result);
         schema.setDescription(value);

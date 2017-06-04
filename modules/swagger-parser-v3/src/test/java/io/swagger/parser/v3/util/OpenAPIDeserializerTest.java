@@ -3,6 +3,7 @@ package io.swagger.parser.v3.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.swagger.oas.models.Components;
 import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
@@ -382,6 +383,34 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
 
+    }
+
+    @Test(dataProvider = "data")
+    public void readComponentsObject(JsonNode rootNode) throws Exception {
+
+
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0-RC1");
+
+        final Components component = openAPI.getComponents();
+        Assert.assertNotNull(component);
+        Assert.assertNotNull(component.getCallbacks());
+        Assert.assertNotNull(component.getCallbacks().get("mainHook").get("$request.body#/url").getPost().getResponses().get("200").getDescription(),"webhook successfully processed");
+        Assert.assertNotNull(component.getExamples());
+        Assert.assertNotNull(component.getHeaders());
+        Assert.assertNotNull(component.getLinks());
+        System.out.println(component.getLinks());
+        Assert.assertNotNull(component.getParameters());
+        Assert.assertNotNull(component.getRequestBodies());
+        Assert.assertNotNull(component.getResponses());
+        Assert.assertNotNull(component.getSchemas());
+        Assert.assertNotNull(component.getSecuritySchemes());
     }
 
 
