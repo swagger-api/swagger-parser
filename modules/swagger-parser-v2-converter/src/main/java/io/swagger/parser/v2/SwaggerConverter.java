@@ -27,6 +27,7 @@ import v2.io.swagger.models.Path;
 import v2.io.swagger.models.RefModel;
 import v2.io.swagger.models.Swagger;
 import v2.io.swagger.models.parameters.BodyParameter;
+import v2.io.swagger.models.parameters.RefParameter;
 import v2.io.swagger.models.parameters.SerializableParameter;
 import v2.io.swagger.models.properties.Property;
 import v2.io.swagger.models.properties.RefProperty;
@@ -403,48 +404,53 @@ public class SwaggerConverter implements SwaggerParserExtension {
         v3Parameter.setIn(v2Parameter.getIn());
         v3Parameter.setName(v2Parameter.getName());
 
-        SerializableParameter sp = (SerializableParameter) v2Parameter;
-
         Schema schema = null;
-        if("array".equals(sp.getType())) {
-            ArraySchema a = new ArraySchema();
-            // TODO: convert arrays to proper template format
-            sp.getCollectionFormat();
-            Property items = sp.getItems();
-            Schema itemsSchema = convert(items);
-            a.setItems(itemsSchema);
 
-            if(sp.getMaxItems() != null) {
-                a.setMaxItems(sp.getMaxItems());
-            }
-            if(sp.getMinItems() != null) {
-                a.setMinItems(sp.getMinItems());
-            }
-
-            schema = a;
+        if(v2Parameter instanceof RefParameter) {
+            schema = new Schema().ref(((RefParameter) v2Parameter).get$ref());
         }
-        else {
-            schema = new Schema();
-            schema.setType(sp.getType());
-            schema.setFormat(sp.getFormat());
+        else if(v2Parameter instanceof SerializableParameter) {
+            SerializableParameter sp = (SerializableParameter) v2Parameter;
 
-            if(sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
-                schema.setExtensions(sp.getVendorExtensions());
-            }
-            if(sp.getEnum() != null) {
-                for(String e : sp.getEnum()) {
-                    schema.addEnumItemObject(e);
+            if ("array".equals(sp.getType())) {
+                ArraySchema a = new ArraySchema();
+                // TODO: convert arrays to proper template format
+                sp.getCollectionFormat();
+                Property items = sp.getItems();
+                Schema itemsSchema = convert(items);
+                a.setItems(itemsSchema);
+
+                if (sp.getMaxItems() != null) {
+                    a.setMaxItems(sp.getMaxItems());
                 }
-            }
+                if (sp.getMinItems() != null) {
+                    a.setMinItems(sp.getMinItems());
+                }
 
-            schema.setMaximum(sp.getMaximum());
-            schema.setMinimum(sp.getMinimum());
-            schema.setMinLength(sp.getMinLength());
-            schema.setMaxLength(sp.getMaxLength());
-            if(sp.getMultipleOf() != null) {
-                schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
+                schema = a;
+            } else {
+                schema = new Schema();
+                schema.setType(sp.getType());
+                schema.setFormat(sp.getFormat());
+
+                if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
+                    schema.setExtensions(sp.getVendorExtensions());
+                }
+                if (sp.getEnum() != null) {
+                    for (String e : sp.getEnum()) {
+                        schema.addEnumItemObject(e);
+                    }
+                }
+
+                schema.setMaximum(sp.getMaximum());
+                schema.setMinimum(sp.getMinimum());
+                schema.setMinLength(sp.getMinLength());
+                schema.setMaxLength(sp.getMaxLength());
+                if (sp.getMultipleOf() != null) {
+                    schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
+                }
+                schema.setPattern(sp.getPattern());
             }
-            schema.setPattern(sp.getPattern());
         }
 
         if(v2Parameter.getRequired()) {
