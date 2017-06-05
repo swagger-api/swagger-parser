@@ -410,13 +410,15 @@ public class SwaggerConverter implements SwaggerParserExtension {
             ArraySchema a = new ArraySchema();
             // TODO: convert arrays to proper template format
             sp.getCollectionFormat();
-            sp.getItems();
+            Property items = sp.getItems();
+            Schema itemsSchema = convert(items);
+            a.setItems(itemsSchema);
 
             if(sp.getMaxItems() != null) {
-                schema.setMaxItems(sp.getMaxItems());
+                a.setMaxItems(sp.getMaxItems());
             }
             if(sp.getMinItems() != null) {
-                schema.setMinItems(sp.getMinItems());
+                a.setMinItems(sp.getMinItems());
             }
 
             schema = a;
