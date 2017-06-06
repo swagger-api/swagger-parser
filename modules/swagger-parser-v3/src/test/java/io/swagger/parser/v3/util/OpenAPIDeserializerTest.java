@@ -8,7 +8,8 @@ import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
-//import io.swagger.oas.models.headers.Headers;
+import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
@@ -23,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-//import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -43,22 +43,28 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(openAPI);
         Assert.assertEquals(openAPI.getOpenapi(),"3.0.0-RC1");
 
+
         final Info info = openAPI.getInfo();
         Assert.assertNotNull(info);
         Assert.assertEquals(info.getTitle(), "Sample Pet Store App");
         Assert.assertEquals(info.getDescription(), "This is a sample server Petstore");
         Assert.assertEquals(info.getTermsOfService(), "http://swagger.io/terms/");
+        Assert.assertNotNull(info.getExtensions().get("x-info"));
+        Assert.assertEquals(info.getExtensions().get("x-info").toString(),"info extension");
 
         final Contact contact = info.getContact();
         Assert.assertNotNull(contact);
         Assert.assertEquals(contact.getName(),"API Support");
         Assert.assertEquals(contact.getUrl(),"http://www.example.com/support");
         Assert.assertEquals(contact.getEmail(),"support@example.com");
+        Assert.assertNotNull(contact.getExtensions().get("x-contact"));
+        Assert.assertEquals(contact.getExtensions().get("x-contact").toString(),"contact extension");
 
         final License license = info.getLicense();
         Assert.assertNotNull(license);
         Assert.assertEquals(license.getName(), "Apache 2.0");
         Assert.assertEquals(license.getUrl(), "http://www.apache.org/licenses/LICENSE-2.0.html");
+        Assert.assertNotNull(license.getExtensions());
 
         Assert.assertEquals(info.getVersion(), "1.0.1");
 
@@ -98,6 +104,8 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(server.get(2).getVariables().get("port").getDefault(),"8443");
         Assert.assertNotNull(server.get(2).getVariables().get("port"));
         Assert.assertNotNull(server.get(2).getVariables().get("basePath"));
+        Assert.assertNotNull(server.get(2).getExtensions().get("x-server"));
+        Assert.assertEquals(server.get(2).getExtensions().get("x-server").toString(),"server extension");
         Assert.assertEquals(server.get(2).getVariables().get("basePath").getDescription(),"testing overwriting");
         Assert.assertEquals(server.get(2).getVariables().get("basePath").getDefault(),"v2");
 
@@ -419,8 +427,8 @@ public class OpenAPIDeserializerTest {
 
         Assert.assertNotNull(component.getLinks());
         Assert.assertEquals(component.getLinks().get("unsubscribe").getOperationId(),"cancelHookCallback");
-        Assert.assertNotNull(component.getLinks().get("unsubscribe").getParameters());//TODO 
-        //System.out.println(component.getLinks());
+        Assert.assertNotNull(component.getLinks().get("unsubscribe").getParameters());//TODO
+        Assert.assertEquals(component.getLinks().get("unsubscribe").getExtensions().get("x-link"), "link extension");
 
         Assert.assertNotNull(component.getParameters());
         Assert.assertEquals(component.getParameters().get("skipParam").getName(),"skip");
@@ -477,15 +485,73 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals("pet store test api in components", object.toString());
     }
 
+    @Test
+    public void readOAS(/*JsonNode rootNode*/) throws Exception {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas4.yaml").toURI())));
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final Paths paths = openAPI.getPaths();
+        Assert.assertNotNull(paths);
+        //System.out.println(openAPI.getExtensions());
+        //System.out.println(openAPI.getServers());
+        //System.out.println(openAPI.getExtensions());
+        //System.out.println(openAPI.getInfo());
+        Assert.assertNotNull(paths);
+        Assert.assertEquals(paths.size(), 114);
 
 
+
+        PathItem stripe = paths.get("/v1/3d_secure");
+
+        Assert.assertNotNull(stripe);
+
+
+        Assert.assertNotNull(stripe.getPost());
+        Assert.assertEquals(stripe.getPost().getDescription(),"");
+        Assert.assertEquals(stripe.getPost().getOperationId(), "Create3DSecure");
+        Assert.assertNotNull(stripe.getPost().getParameters());
+
+        ApiResponses responses = stripe.getPost().getResponses();
+        Assert.assertNotNull(responses);
+        Assert.assertTrue(responses.containsKey("200"));
+        ApiResponse response = responses.get("200");
+        Assert.assertEquals(response.getDescription(), "Successful response.");
+        Assert.assertEquals(response.getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/three_d_secure");
+        RequestBody body = stripe.getPost().getRequestBody();
+        //System.out.println(body.getContent().get("application/x-www-form-urlencoded"));
+
+
+        PathItem stripeGet = paths.get("/v1/account/external_accounts");
+
+        Assert.assertNotNull(stripeGet);
+
+
+        Assert.assertNotNull(stripeGet.getGet());
+        Assert.assertEquals(stripeGet.getGet().getDescription(),"");
+        Assert.assertEquals(stripeGet.getGet().getOperationId(), "AllAccountExternalAccounts");
+        Assert.assertNotNull(stripeGet.getGet().getParameters());
+
+        ApiResponses responsesGet = stripeGet.getGet().getResponses();
+        Assert.assertNotNull(responsesGet);
+        Assert.assertTrue(responsesGet.containsKey("200"));
+        ApiResponse responseGet = responsesGet.get("200");
+        Assert.assertEquals(responseGet.getDescription(), "Successful response.");
+        Schema schema = responseGet.getContent().get("application/json").getSchema();
+        System.out.println(schema);
+
+    }
+    
     @DataProvider(name="data")
     private Object[][] getRootNode() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
         return new Object[][]{new Object[]{rootNode}};
     }
-
-
-
 }

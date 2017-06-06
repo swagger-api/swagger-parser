@@ -5,6 +5,7 @@ servers:
 - url: https://development.gigantic-server.com/v1
   description: Development server
 - url: https://{username}.gigantic-server.com:{port}/{basePath}
+  x-server: server extension
   description: The production API server
   variables:
       username:
@@ -39,13 +40,16 @@ info:
   version: 1.0.0
   title: Sample Pet Store App
   termsOfService: http://swagger.io/terms/
+  x-info: info extension
   contact:
     name: API Support
     url: http://www.example.com/support
     email: support@example.com
+    x-contact: contact extension
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+    x-license: license extension
   version: 1.0.1
 tags:
 - name: pet
@@ -1001,6 +1005,7 @@ components:
       operationId: cancelHookCallback
       parameters:
         id: $response.body#/hookId
+      x-link: link extension
   callbacks:
     heartbeat:
       '$request.query.heartbeat-url':

@@ -304,10 +304,16 @@ public class OpenAPIDeserializer {
         value = getString("description", obj, false, location, result);
         server.setDescription(value);
 
-
-
         server.setVariables(getServerVariables(obj,location,result));
 
+        server.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                server.getExtensions().put(key, Json.mapper().convertValue(obj.get(key), Object.class));
+            }
+        }
 
 
         return server;
@@ -367,6 +373,16 @@ public class OpenAPIDeserializer {
 
                 value = getString("description", objNode, false, location + ".'" + variableName + "'", result);
                 serverVariable.setDescription(value);
+
+
+                serverVariable.setExtensions(new LinkedHashMap<>());
+
+                Set<String> keys = getKeys(objNode);
+                for(String key : keys) {
+                    if(key.startsWith("x-")) {
+                        serverVariable.getExtensions().put(key, Json.mapper().convertValue(objNode.get(key), Object.class));
+                    }
+                }
                 serverVariables.addServerVariable(variableName,serverVariable);
             }
         }
@@ -389,19 +405,23 @@ public class OpenAPIDeserializer {
                 ObjectNode path = (ObjectNode) pathValue;
                 PathItem pathObj = getPathItem(path, location + ".'" + pathName + "'", result);
                 paths.put(pathName, pathObj);
+
             }
         }
         return paths;
     }
 
     public PathItem getPathItem(ObjectNode obj, String location, ParseResult result) {
-        boolean hasRef = false;
+
+
+        PathItem pathItem = new PathItem();
 
         if (obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");
 
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                //return pathRef((TextNode)ref, location, result);
+                pathItem.set$ref(ref.asText());
+                return pathItem.ref(ref.asText());
             } else if (ref.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode node = (ObjectNode) ref;
 
@@ -413,7 +433,6 @@ public class OpenAPIDeserializer {
             }
             return null;
         }
-        PathItem pathItem = new PathItem();
 
         String value = getString("summary", obj, true, location, result);
         pathItem.setSummary(value);
@@ -477,11 +496,11 @@ public class OpenAPIDeserializer {
             }
         }
 
-        // extra keys
+        pathItem.setExtensions(new LinkedHashMap<>());
         Set<String> keys = getKeys(obj);
         for (String key : keys) {
             if (key.startsWith("x-")) {
-                //createPathItem.setVendorExtension(key, extension(obj.get(key)));
+                pathItem.getExtensions().put(key, Json.mapper().convertValue(obj.get(key), Object.class));
             } else if (!PATH_KEYS.contains(key)) {
                 result.extra(location, key, obj.get(key));
             }
@@ -503,10 +522,11 @@ public class OpenAPIDeserializer {
             value = getString("url", node, true, location, result);
             externalDocs.url(value);
 
-            // extra keys
+            externalDocs.setExtensions(new LinkedHashMap<>());
+
             for (String key : keys) {
                 if (key.startsWith("x-")) {
-                    //output.setVendorExtension(key, extension(node.get(key)));
+                    externalDocs.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
                 } else if (!EXTERNAL_DOCS_KEYS.contains(key)) {
                     result.extra(location + ".externalDocs", key, node.get(key));
                 }
@@ -592,17 +612,73 @@ public class OpenAPIDeserializer {
         value = getString("version", node, true, location, result);
         info.setVersion(value);
 
-        // extra keys
+        info.setExtensions(new LinkedHashMap<>());
+
         Set<String> keys = getKeys(node);
-        for (String key : keys) {
-            if (key.startsWith("x-")) {
-                //info.setVendorExtension(key, extension(node.get(key)));
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                info.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
             } else if (!INFO_KEYS.contains(key)) {
                 result.extra(location, key, node.get(key));
             }
         }
 
         return info;
+    }
+
+    public License getLicense(ObjectNode node, String location, ParseResult result) {
+        if (node == null)
+            return null;
+
+        License license = new License();
+
+        String value = getString("name", node, true, location, result);
+        license.setName(value);
+
+        value = getString("url", node, false, location, result);
+        license.setUrl(value);
+
+        license.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                license.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            }  else if (!LICENSE_KEYS.contains(key)) {
+                result.extra(location + ".license", key, node.get(key));
+            }
+        }
+
+        return license;
+    }
+
+    public Contact getContact(ObjectNode node, String location, ParseResult result) {
+        if (node == null)
+            return null;
+
+        Contact contact = new Contact();
+
+        String value = getString("name", node, false, location + ".name", result);
+        contact.setName(value);
+
+        value = getString("url", node, false, location + ".url", result);
+        contact.setUrl(value);
+
+        value = getString("email", node, false, location + ".email", result);
+        contact.setEmail(value);
+
+        contact.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                contact.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            } else if (!CONTACT_KEYS.contains(key)) {
+                result.extra(location + ".contact", key, node.get(key));
+            }
+        }
+
+        return contact;
     }
 
     public Content getContent(ObjectNode node, String location, ParseResult result){
@@ -644,6 +720,15 @@ public class OpenAPIDeserializer {
         if(encodingObject!=null) {
             mediaType.setEncoding(getEncoding(encodingObject, location, result));
         }
+        mediaType.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(contentNode);
+        for (String key : keys) {
+            if (key.startsWith("x-")) {
+                mediaType.getExtensions().put(key, Json.mapper().convertValue(contentNode.get(key), Object.class));
+            }
+        }
+
 
         return mediaType;
     }
@@ -702,6 +787,16 @@ public class OpenAPIDeserializer {
             encodingProperty.setHeaders(getHeaders(headersObject, location, result));
         }
 
+        encodingProperty.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(node);
+        for (String key : keys) {
+            if (key.startsWith("x-")) {
+                encodingProperty.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            }
+        }
+
+
         return encodingProperty;
     }
 
@@ -735,6 +830,17 @@ public class OpenAPIDeserializer {
 
         Link link = new Link();
 
+        JsonNode ref = linkNode.get("$ref");
+        if (ref != null) {
+            if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                //link.set$ref(ref.asText());
+                //return link.ref(ref.asText());
+            } else {
+                result.invalidType(location, "$ref", "string", linkNode);
+                return null;
+            }
+        }
+
         String value = getString("operationRef", linkNode, false, location, result);
         link.setOperationRef(value);
 
@@ -759,12 +865,23 @@ public class OpenAPIDeserializer {
         value = getString("description", linkNode, false, location, result);
         link.setDescription(value);
 
+        link.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(linkNode);
+        for (String key : keys) {
+            if (key.startsWith("x-")) {
+                link.getExtensions().put(key, Json.mapper().convertValue(linkNode.get(key), Object.class));
+            }
+        }
+
+
         return link;
     }
 
     private LinkParameters getLinkParameters(ObjectNode parametersObject, String location, ParseResult result) {
 
         LinkParameters linkParameters = new LinkParameters();
+        //TODO
 
 
         return linkParameters;
@@ -800,66 +917,20 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, name, "object", value);
             } else {
                 if (node!= null){
-
                     callback.addPathItem(name,getPathItem((ObjectNode) value,location,result));
+                    callback.setExtensions(new LinkedHashMap<>());
+
+                    keys = getKeys(node);
+                    for (String key : keys) {
+                        if (key.startsWith("x-")) {
+                            callback.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+                        }
+                    }
                 }
             }
-
         }
 
         return callback;
-    }
-
-
-    public License getLicense(ObjectNode node, String location, ParseResult result) {
-        if (node == null)
-            return null;
-
-        License license = new License();
-
-        String value = getString("name", node, true, location, result);
-        license.setName(value);
-
-        value = getString("url", node, false, location, result);
-        license.setUrl(value);
-
-        // extra keys
-        Set<String> keys = getKeys(node);
-        for (String key : keys) {
-            if (key.startsWith("x-")) {
-                //license.setVendorExtension(key, extension(node.get(key)));
-            } else if (!LICENSE_KEYS.contains(key)) {
-                result.extra(location + ".license", key, node.get(key));
-            }
-        }
-
-        return license;
-    }
-
-    public Contact getContact(ObjectNode node, String location, ParseResult result) {
-        if (node == null)
-            return null;
-
-        Contact contact = new Contact();
-
-        String value = getString("name", node, false, location + ".name", result);
-        contact.setName(value);
-
-        value = getString("url", node, false, location + ".url", result);
-        contact.setUrl(value);
-
-        value = getString("email", node, false, location + ".email", result);
-        contact.setEmail(value);
-
-        // extra keys
-        Set<String> keys = getKeys(node);
-        for (String key : keys) {
-            if (!CONTACT_KEYS.contains(key)) {
-                result.extra(location + ".contact", key, node.get(key));
-            }
-        }
-
-        return contact;
     }
 
     public XML getXml(ObjectNode node, String location, ParseResult result){
@@ -1031,6 +1102,7 @@ public class OpenAPIDeserializer {
             return null;
         }
 
+
         parameter.setIn(value);
         value = getString("name", obj, true, location, result);
         parameter.setName(value);
@@ -1081,6 +1153,16 @@ public class OpenAPIDeserializer {
         if(contentNode!= null) {
             parameter.setContent(getContent(contentNode, location, result));
         }
+
+        parameter.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                parameter.getExtensions().put(key, Json.mapper().convertValue(obj.get(key), Object.class));
+            }
+        }
+
         return parameter;
     }
 
@@ -1156,6 +1238,15 @@ public class OpenAPIDeserializer {
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
         if (contentNode!= null){
             header.setContent(getContent(contentNode,location,result));
+        }
+
+        header.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(headerNode);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                header.getExtensions().put(key, Json.mapper().convertValue(headerNode.get(key), Object.class));
+            }
         }
 
 
@@ -1235,6 +1326,14 @@ public class OpenAPIDeserializer {
         value = getString("openIdConnectUrl", node, true, location, result);
         securityScheme.setOpenIdConnectUrl(value);
 
+        securityScheme.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                securityScheme.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            }
+        }
 
         return securityScheme;
     }
@@ -1266,6 +1365,15 @@ public class OpenAPIDeserializer {
             oAuthFlows.setAuthorizationCode(getOAuthFlow(objectNode, location, result));
         }
 
+        oAuthFlows.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                oAuthFlows.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            }
+        }
+
 
         return oAuthFlows;
     }
@@ -1292,11 +1400,20 @@ public class OpenAPIDeserializer {
         for(String name : keys) {
             JsonNode scopeValue = scopesObject.get(name);
             if(name.startsWith("x-")) {
-                //result.unsupported(location, pathName, pathValue);
+                //result.unsupported(location, name, value);
             }
             else if (scopesObject!= null){
                 scope.addString(name,scopeValue.asText());
                 oAuthFlow.setScopes(scope);
+            }
+        }
+
+        oAuthFlow.setExtensions(new LinkedHashMap<>());
+
+        keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                oAuthFlow.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
             }
         }
 
@@ -1312,9 +1429,6 @@ public class OpenAPIDeserializer {
         Set<String> schemaKeys = getKeys(obj);
         for (String schemaName : schemaKeys) {
             JsonNode schemaValue = obj.get(schemaName);
-            if (schemaName.startsWith("x-")) {
-                //result.unsupported(location, pathName, pathValue);
-            } else {
                 if (!schemaValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                     result.invalidType(location, schemaName, "object", schemaValue);
                 } else {
@@ -1322,7 +1436,6 @@ public class OpenAPIDeserializer {
                     Schema schemaObj = getSchema(schema, location + ".'" + schemaName + "'", result);
                     schemas.put(schemaName, schemaObj);
                 }
-            }
         }
 
         return schemas;
@@ -1336,19 +1449,16 @@ public class OpenAPIDeserializer {
 
         Schema schema = null;
 
-        String allOf = getString("allOf", node, false, location, result);
-        String oneOf = getString("oneOf", node, false, location, result);
-        String anyOf = getString("anyOf", node, false, location, result);
-
-        if(allOf != null){
+        if(node.get("allOf") != null) {
             schema = new AllOfSchema();
-        }else if (oneOf != null) {
+        }else if(node.get("oneOf") != null) {
             schema = new OneOfSchema();
-        }else if (anyOf != null) {
+        }else if(node.get("anyOf") != null) {
             schema = new AnyOfSchema();
         }else {
             schema = new Schema();
         }
+
 
         JsonNode ref = node.get("$ref");
         if (ref != null) {
@@ -1521,10 +1631,19 @@ public class OpenAPIDeserializer {
         bool = getBoolean("deprecated", node, false, location, result);
         schema.setDeprecated(bool);
 
+        schema.setExtensions(new LinkedHashMap<>());
+
+        keys = getKeys(node);
+        for(String key : keys) {
+            if (key.startsWith("x-")) {
+                schema.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            }
+        }
 
         return schema;
 
     }
+
 
 
 
@@ -1537,20 +1656,14 @@ public class OpenAPIDeserializer {
         Set<String> exampleKeys = getKeys(obj);
         for(String exampleName : exampleKeys) {
             JsonNode exampleValue = obj.get(exampleName);
-            if(exampleName.startsWith("x-")) {
-                //result.unsupported(location, pathName, pathValue);
-            }
-            else {
-                if (!exampleValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                    result.invalidType(location, exampleName, "object", exampleValue);
-                } else {
-                    ObjectNode example = (ObjectNode) exampleValue;
-                    Example exampleObj = getExample(example, location + ".'" + exampleName + "'", result);
-                    examples.put(exampleName, exampleObj);
-                }
+            if (!exampleValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, exampleName, "object", exampleValue);
+            } else {
+                ObjectNode example = (ObjectNode) exampleValue;
+                Example exampleObj = getExample(example, location + ".'" + exampleName + "'", result);
+                examples.put(exampleName, exampleObj);
             }
         }
-
         return examples;
     }
 
@@ -1559,6 +1672,8 @@ public class OpenAPIDeserializer {
             return null;
 
         Example example = new Example();
+
+
         String value = getString("summary", node, false, location, result);
         example.setSummary(value);
 
@@ -1566,6 +1681,7 @@ public class OpenAPIDeserializer {
         example.setDescription(value);
 
 
+        //TODO
         value = getString("value", node, false, location, result);
         if (value == null){
             ObjectNode objectValue = getObject("value", node, false, location, result);
@@ -1578,7 +1694,14 @@ public class OpenAPIDeserializer {
         value = getString("externalValue", node, false, location, result);
         example.setExternalValue(value);
 
+        example.setExtensions(new LinkedHashMap<>());
 
+        Set<String> keys = getKeys(node);
+        for (String key : keys) {
+            if (key.startsWith("x-")) {
+                example.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            }
+        }
 
         return example;
     }
@@ -1621,14 +1744,9 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
 
         for (String key : keys) {
-
-            if (key.startsWith("x-")) {
-                // TODO: check the extension for this object.
-            } else {
-                ObjectNode obj = getObject(key, node, false, location + "responses", result);
-                ApiResponse response = getResponse(obj, location + "." + key, result);
-                apiResponses.put(key, response);
-            }
+            ObjectNode obj = getObject(key, node, false, location + "responses", result);
+            ApiResponse response = getResponse(obj, location + "." + key, result);
+            apiResponses.put(key, response);
         }
 
         return apiResponses;
@@ -1672,7 +1790,6 @@ public class OpenAPIDeserializer {
             apiResponse.setContent(getContent(contentObject, location, result));
         }
 
-        // extra keys
         apiResponse.setExtensions(new LinkedHashMap<>());
 
         Set<String> keys = getKeys(node);
@@ -1759,12 +1876,12 @@ public class OpenAPIDeserializer {
         }
 
 
+        operation.setExtensions(new LinkedHashMap<>());
 
-        // extra keys
         Set<String> keys = getKeys(obj);
         for (String key : keys) {
             if (key.startsWith("x-")) {
-                //output.setVendorExtension(key, extension(obj.get(key)));
+                operation.getExtensions().put(key, Json.mapper().convertValue(obj.get(key), Object.class));
             } else if (!OPERATION_KEYS.contains(key)) {
                 result.extra(location, key, obj.get(key));
             }
@@ -1789,8 +1906,6 @@ public class OpenAPIDeserializer {
                         securityRequirements.add(securityRequirement);
                     }
                 }
-
-
             }
         }
         return securityRequirements;
@@ -1837,6 +1952,15 @@ public class OpenAPIDeserializer {
         final ObjectNode contentNode = getObject("content", node, false, location, result);
         if (contentNode != null) {
             body.setContent(getContent(contentNode, location, result));
+        }
+
+        body.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(node);
+        for (String key : keys) {
+            if (key.startsWith("x-")) {
+                body.getExtensions().put(key, Json.mapper().convertValue(node.get(key), Object.class));
+            }
         }
 
         return body;
