@@ -214,6 +214,14 @@ public class OpenAPIDeserializer {
         if(node != null) {
             components.setCallbacks(getCallbacks(node,location,result));
         }
+        components.setExtensions(new LinkedHashMap<>());
+
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                components.getExtensions().put(key, Json.mapper().convertValue(obj.get(key), Object.class));
+            }
+        }
 
         return  components;
     }
@@ -745,7 +753,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode serverObject = getObject("server",linkNode,false,location,result);
         if (serverObject!= null) {
-            //TODO link.setServer(getSchema(serverObject, location, result));
+            //TODO link.setServer(getServer(serverObject, location, result));
         }
 
         value = getString("description", linkNode, false, location, result);
@@ -785,8 +793,8 @@ public class OpenAPIDeserializer {
         Callback callback = new Callback();
 
 
-        Set<String> Keys = getKeys(node);
-        for(String name : Keys) {
+        Set<String> keys = getKeys(node);
+        for(String name : keys) {
             JsonNode value = node.get(name);
             if (!value.getNodeType().equals(JsonNodeType.OBJECT)) {
                 result.invalidType(location, name, "object", value);
@@ -1087,7 +1095,7 @@ public class OpenAPIDeserializer {
         for(String headerName : headerKeys) {
             JsonNode headerValue = obj.get(headerName);
             if(headerName.startsWith("x-")) {
-                //result.unsupported(location, pathName, pathValue);
+                //result.unsupported(location, headerName, headerValue);
             }
             else {
                 if (!headerValue.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -1279,6 +1287,7 @@ public class OpenAPIDeserializer {
         oAuthFlow.setRefreshUrl(value);
 
         ObjectNode scopesObject = getObject("scopes",node,true,location,result);
+        Scopes scope = new Scopes();
         Set<String> keys = getKeys(scopesObject);
         for(String name : keys) {
             JsonNode scopeValue = scopesObject.get(name);
@@ -1286,7 +1295,6 @@ public class OpenAPIDeserializer {
                 //result.unsupported(location, pathName, pathValue);
             }
             else if (scopesObject!= null){
-                Scopes scope = new Scopes();
                 scope.addString(name,scopeValue.asText());
                 oAuthFlow.setScopes(scope);
             }
@@ -1324,6 +1332,8 @@ public class OpenAPIDeserializer {
         if(node== null){
             return null;
         }
+
+
         Schema schema = null;
 
         String allOf = getString("allOf", node, false, location, result);
@@ -1338,6 +1348,17 @@ public class OpenAPIDeserializer {
             schema = new AnyOfSchema();
         }else {
             schema = new Schema();
+        }
+
+        JsonNode ref = node.get("$ref");
+        if (ref != null) {
+            if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                schema.set$ref(ref.asText());
+                return schema.ref(ref.asText());
+            } else {
+                result.invalidType(location, "$ref", "string", node);
+                return null;
+            }
         }
 
         String value = getString("title",node,false,location,result);
@@ -1412,18 +1433,18 @@ public class OpenAPIDeserializer {
             schema.setEnum(_enum);
         }
 
-        ArrayNode itemsArray = getArray("items", node, false, location, result);
-        if(itemsArray != null) {
+        ObjectNode itemsNode = getObject("items", node, false, location, result);
+        if(itemsNode != null) {
             ArraySchema items = new ArraySchema();
-            for(JsonNode n : itemsArray) {
+            for(JsonNode n : itemsNode) {
                 if(n.isValueNode()) {
-                    //TODO items.addEnumItemObject(n);
+                    items.setItems(getSchema(itemsNode, location,result));
                 }
                 else {
                     result.invalidType(location, "items", "value", n);
                 }
             }
-            //schema.addEnumItemObject();
+            schema.addEnumItemObject(items);
         }
 
         value = getString("type",node,false,location,result);
@@ -1439,11 +1460,22 @@ public class OpenAPIDeserializer {
 
         Map <String, Schema> properties = new LinkedHashMap<>();
         ObjectNode propertiesObj = getObject("properties", node, false, location, result);
+        Schema property = null;
 
-        Schema property = getSchema(propertiesObj, location, result);
         Set<String> keys = getKeys(propertiesObj);
-        for(String key : keys) {
-            properties.put(key,property);
+        for(String name : keys) {
+            JsonNode propertyValue = propertiesObj.get(name);
+            if (!propertyValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                result.invalidType(location, name, "object", propertyValue);
+            } else {
+                if (propertiesObj!= null){
+                    property = getSchema((ObjectNode) propertyValue, location, result);
+                    properties.put(name,property);
+                }
+            }
+        }
+
+        if (property != null){
             schema.setProperties(properties);
         }
 
@@ -1533,9 +1565,16 @@ public class OpenAPIDeserializer {
         value = getString("description", node, false, location, result);
         example.setDescription(value);
 
-        value = getString("value", node, false, location, result);
-        example.setValue(value);
 
+        value = getString("value", node, false, location, result);
+        if (value == null){
+            ObjectNode objectValue = getObject("value", node, false, location, result);
+            if(objectValue != null) {
+                example.setValue(objectValue.toString());
+            }
+        }else {
+            example.setValue(value);
+        }
         value = getString("externalValue", node, false, location, result);
         example.setExternalValue(value);
 
@@ -1604,7 +1643,8 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                //return refResponse((TextNode) ref, location, result);
+                 apiResponse.set$ref(ref.asText());
+                 return apiResponse.ref(ref.asText());
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;

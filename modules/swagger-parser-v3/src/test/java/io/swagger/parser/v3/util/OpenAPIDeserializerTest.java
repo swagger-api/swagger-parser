@@ -13,6 +13,7 @@ import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.info.License;
+import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
@@ -22,6 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+//import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -367,6 +369,8 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getParameters());
         Assert.assertEquals(petEndpoint.getParameters().size(), 1);
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
+        Parameter parameter = petEndpoint.getParameters().get(0);
+        //System.out.println(parameter.getSchema());
         ApiResponses responses = petEndpoint.getPost().getResponses();
         Assert.assertNotNull(responses);
         Assert.assertTrue(responses.containsKey("405"));
@@ -382,6 +386,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petByStatusEndpoint.getGet().getTags());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getCallbacks().get("mainHook").get("$request.body#/url").getPost().getResponses().get("200").getDescription(),"webhook successfully processed operation");
 
     }
 
@@ -401,16 +406,75 @@ public class OpenAPIDeserializerTest {
         final Components component = openAPI.getComponents();
         Assert.assertNotNull(component);
         Assert.assertNotNull(component.getCallbacks());
-        Assert.assertNotNull(component.getCallbacks().get("mainHook").get("$request.body#/url").getPost().getResponses().get("200").getDescription(),"webhook successfully processed");
+        Assert.assertEquals(component.getCallbacks().get("heartbeat").get("$request.query.heartbeat-url").getPost().getResponses().get("200").getDescription(),"Consumer acknowledged the callback");
+        Assert.assertEquals(component.getCallbacks().get("failed").get("$response.body#/failedUrl").getPost().getResponses().get("200").getDescription(),"Consumer acknowledged the callback failed");
+
         Assert.assertNotNull(component.getExamples());
+        Assert.assertEquals(component.getExamples().get("cat").getSummary(),"An example of a cat");
+        Assert.assertNotNull(component.getExamples().get("cat").getValue());//TODO
+
         Assert.assertNotNull(component.getHeaders());
+        Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Limit").getDescription(),"The number of allowed requests in the current period");
+        Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Limit").getSchema().getType(),"integer");
+
         Assert.assertNotNull(component.getLinks());
-        System.out.println(component.getLinks());
+        Assert.assertEquals(component.getLinks().get("unsubscribe").getOperationId(),"cancelHookCallback");
+        Assert.assertNotNull(component.getLinks().get("unsubscribe").getParameters());//TODO 
+        //System.out.println(component.getLinks());
+
         Assert.assertNotNull(component.getParameters());
+        Assert.assertEquals(component.getParameters().get("skipParam").getName(),"skip");
+        Assert.assertEquals(component.getParameters().get("skipParam").getIn(),"query");
+        Assert.assertEquals(component.getParameters().get("skipParam").getDescription(),"number of items to skip");
+        Assert.assertTrue(component.getParameters().get("skipParam").getRequired());
+        Assert.assertEquals(component.getParameters().get("skipParam").getSchema().getType(),"integer");
+
         Assert.assertNotNull(component.getRequestBodies());
+        Assert.assertEquals(component.getRequestBodies().get("requestBody1").getDescription(),"request body in components");
+        Assert.assertEquals(component.getRequestBodies().get("requestBody1").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/Pet");
+        Assert.assertEquals(component.getRequestBodies().get("requestBody1").getContent().get("application/xml").getSchema().get$ref(),"#/components/schemas/Pet");
+        Assert.assertEquals(component.getRequestBodies().get("requestBody2").getContent().get("application/json").getSchema().getType().toString(),"array");
+        Assert.assertNotNull(component.getRequestBodies().get("requestBody2").getContent().get("application/json").getSchema());
+
         Assert.assertNotNull(component.getResponses());
+        Assert.assertEquals(component.getResponses().get("NotFound").getDescription(),"Entity not found.");
+        Assert.assertEquals(component.getResponses().get("IllegalInput").getDescription(),"Illegal input for operation.");
+        Assert.assertEquals(component.getResponses().get("GeneralError").getDescription(),"General Error");
+        Assert.assertEquals(component.getResponses().get("GeneralError").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/GeneralError");
+
+
         Assert.assertNotNull(component.getSchemas());
+        Assert.assertEquals(component.getSchemas().get("Pet").getType(),"object");
+        Assert.assertEquals(component.getSchemas().get("Pet").getRequired().get(0),"name");
+        Assert.assertEquals(component.getSchemas().get("Order").getType(),"object");
+        Assert.assertEquals(component.getSchemas().get("Order").getNot().getType(),"integer");
+        Assert.assertEquals(component.getSchemas().get("Order").getAdditionalProperties().getType(),"integer");
+
         Assert.assertNotNull(component.getSecuritySchemes());
+        Assert.assertEquals(component.getSecuritySchemes().get("petstore_auth").getType().toString(), "oauth2");
+        Assert.assertEquals(component.getSecuritySchemes().get("petstore_auth").getFlows().getImplicit().getAuthorizationUrl(), "http://petstore.swagger.io/oauth/dialog");
+        Assert.assertNotNull(component.getSecuritySchemes().get("petstore_auth").getFlows().getImplicit().getScopes());//TODO
+
+        Assert.assertNotNull(component.getExtensions());
+        Assert.assertTrue(component.getExtensions().containsKey("x-component"));
+        Object object = component.getExtensions().get("x-component");
+
+        Assert.assertTrue(object instanceof List);
+        List elements = (List) object;
+        Assert.assertEquals(elements.size(), 1);
+        Map<String, Object> map = (Map) elements.get(0);
+        Assert.assertEquals(map.get("url"), "http://component.swagger.io/v2/swagger.json");
+        Assert.assertEquals(map.get("format"), "OAS");
+        Assert.assertEquals(map.get("version"), "3.0");
+
+        Map<String, Object> converter = (Map<String, Object>) map.get("converter");
+        Assert.assertNotNull(converter);
+        Assert.assertEquals(converter.get("url"), "https://github.com/mermade/oas3");
+        Assert.assertEquals(converter.get("version"), "1.2.3");
+
+        object = component.getExtensions().get("x-api-title");
+        Assert.assertTrue(object instanceof String);
+        Assert.assertEquals("pet store test api in components", object.toString());
     }
 
 

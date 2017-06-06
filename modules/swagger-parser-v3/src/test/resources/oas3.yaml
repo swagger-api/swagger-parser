@@ -337,6 +337,13 @@ paths:
                     schema:
                       type: string
                       format: date-time
+      callbacks:
+        mainHook:
+          '$request.body#/url':
+            post:
+              responses:
+                '200':
+                  description: webhook successfully processed operation
   "/pet/findByTags":
     get:
       tags:
@@ -775,6 +782,11 @@ components:
   schemas:
     Order:
       type: object
+      not:
+        type: integer
+        format: int32
+      additionalProperties:
+        type: integer
       properties:
         id:
           type: integer
@@ -891,11 +903,56 @@ components:
           type: string
         message:
           type: string
-  responses: {}
-  parameters: {}
-  examples: {}
+  responses:
+    NotFound:
+      description: Entity not found.
+    IllegalInput:
+        description: Illegal input for operation.
+    GeneralError:
+      description: General Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeneralError'
+  parameters:
+    skipParam:
+      name: skip
+      in: query
+      description: number of items to skip
+      required: true
+      schema:
+        type: integer
+        format: int32
+    limitParam:
+      name: limit
+      in: query
+      description: max records to return
+      required: true
+      schema:
+        type: integer
+        format: int32
+  examples:
+    cat:
+      summary: An example of a cat
+      value:
+        name: Fluffy
+        petType: Cat
+        color: White
+        gender: male
+        breed: Persian
+    dog:
+      summary: An example of a dog with a cat's name
+      value:
+        name: Puma
+        petType: Dog
+        color: Black
+        gender: Female
+        breed: Mixed
+    frog:
+    $ref: "#/components/examples/frog-example"
   requestBodies:
     requestBody1:
+      description: request body in components
       content:
         application/json:
           description: Pet object that needs to be added to the store
@@ -945,9 +1002,35 @@ components:
       parameters:
         id: $response.body#/hookId
   callbacks:
-    mainHook:
-      '$request.body#/url':
+    heartbeat:
+      '$request.query.heartbeat-url':
         post:
+          requestBody:
+            $ref: '#/components/requestBodies/heartbeatMessage'
           responses:
             '200':
-              description: webhook successfully processed
+              description: Consumer acknowledged the callback
+    failed:
+      '$response.body#/failedUrl':
+        post:
+          requestBody:
+            $ref: '#/components/requestBodies/failedMessage'
+          responses:
+            '200':
+              description: Consumer acknowledged the callback failed
+    success:
+      '$response.body#/successUrl':
+        post:
+          requestBody:
+            $ref: '#/components/requestBodies/successMessage'
+          responses:
+            '200':
+              description: Consumer acknowledged the callback
+  x-component:
+  - url: http://component.swagger.io/v2/swagger.json
+    format: OAS
+    version: '3.0'
+    converter:
+      url: https://github.com/mermade/oas3
+      version: 1.2.3
+  x-api-title: pet store test api in components
