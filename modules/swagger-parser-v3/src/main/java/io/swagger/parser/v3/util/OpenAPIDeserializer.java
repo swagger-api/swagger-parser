@@ -1444,6 +1444,7 @@ public class OpenAPIDeserializer {
         return schemas;
     }
 
+
     public Schema getSchema(ObjectNode node, String location, ParseResult result){
         if(node== null){
             return null;
@@ -1451,13 +1452,16 @@ public class OpenAPIDeserializer {
 
 
         Schema schema = null;
+        ArrayNode oneOfArray = getArray("oneOf", node, false, location, result);
+        if(oneOfArray != null) {
 
-        if(node.get("allOf") != null) {
-            schema = new AllOfSchema();
-        }else if(node.get("oneOf") != null) {
-            schema = new OneOfSchema();
-        }else if(node.get("anyOf") != null) {
-            schema = new AnyOfSchema();
+            for(JsonNode n : oneOfArray) {
+                if(n.isObject()) {
+                    OneOfSchema oneOfList = new OneOfSchema();
+                    schema = getSchema((ObjectNode) n,location,result);
+                    oneOfList.addOneOfItem(schema);
+                }
+            }
         }else {
             schema = new Schema();
         }
@@ -1683,7 +1687,7 @@ public class OpenAPIDeserializer {
         value = getString("description", node, false, location, result);
         example.setDescription(value);
 
-        
+
         value = getString("value", node, false, location, result);
         if (value == null){
             ObjectNode objectValue = getObject("value", node, false, location, result);
