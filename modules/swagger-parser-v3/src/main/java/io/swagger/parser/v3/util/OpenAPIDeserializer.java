@@ -17,7 +17,6 @@ import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.links.Link;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
-import io.swagger.oas.models.links.LinkParameters;
 import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.AnyOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
@@ -859,7 +858,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode serverObject = getObject("server",linkNode,false,location,result);
         if (serverObject!= null) {
-            //TODO link.setServer(getServer(serverObject, location, result));
+             link.setServer(getServer(serverObject, location, result));
         }
 
         value = getString("description", linkNode, false, location, result);
@@ -878,11 +877,15 @@ public class OpenAPIDeserializer {
         return link;
     }
 
-    private LinkParameters getLinkParameters(ObjectNode parametersObject, String location, ParseResult result) {
+    private Map<String,String> getLinkParameters(ObjectNode parametersObject, String location, ParseResult result) {
 
-        LinkParameters linkParameters = new LinkParameters();
-        //TODO
+        Map <String,String> linkParameters = new LinkedHashMap<>();
 
+        Set<String> keys = getKeys(parametersObject);
+        for(String name : keys) {
+            JsonNode value = parametersObject.get(name);
+            linkParameters.put(name, value.asText());
+        }
 
         return linkParameters;
     }
@@ -1680,8 +1683,7 @@ public class OpenAPIDeserializer {
         value = getString("description", node, false, location, result);
         example.setDescription(value);
 
-
-        //TODO
+        
         value = getString("value", node, false, location, result);
         if (value == null){
             ObjectNode objectValue = getObject("value", node, false, location, result);

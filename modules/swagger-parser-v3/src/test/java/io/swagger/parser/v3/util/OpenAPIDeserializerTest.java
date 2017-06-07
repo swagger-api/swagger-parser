@@ -419,7 +419,8 @@ public class OpenAPIDeserializerTest {
 
         Assert.assertNotNull(component.getExamples());
         Assert.assertEquals(component.getExamples().get("cat").getSummary(),"An example of a cat");
-        Assert.assertNotNull(component.getExamples().get("cat").getValue());//TODO
+        Assert.assertNotNull(component.getExamples().get("cat").getValue());
+
 
         Assert.assertNotNull(component.getHeaders());
         Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Limit").getDescription(),"The number of allowed requests in the current period");
@@ -427,7 +428,7 @@ public class OpenAPIDeserializerTest {
 
         Assert.assertNotNull(component.getLinks());
         Assert.assertEquals(component.getLinks().get("unsubscribe").getOperationId(),"cancelHookCallback");
-        Assert.assertNotNull(component.getLinks().get("unsubscribe").getParameters());//TODO
+        Assert.assertNotNull(component.getLinks().get("unsubscribe").getParameters());
         Assert.assertEquals(component.getLinks().get("unsubscribe").getExtensions().get("x-link"), "link extension");
 
         Assert.assertNotNull(component.getParameters());
@@ -544,7 +545,7 @@ public class OpenAPIDeserializerTest {
         ApiResponse responseGet = responsesGet.get("200");
         Assert.assertEquals(responseGet.getDescription(), "Successful response.");
         Schema schema = responseGet.getContent().get("application/json").getSchema();
-        System.out.println(schema);
+        //System.out.println(schema);
 
     }
     
