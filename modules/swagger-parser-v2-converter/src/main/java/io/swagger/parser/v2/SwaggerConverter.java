@@ -361,7 +361,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
             for(String responseCode : v2Operation.getResponses().keySet()) {
                 v2.io.swagger.models.Response v2Response = v2Operation.getResponses().get(responseCode);
                 ApiResponse response = convert(v2Response, mediaTypes);
-
                 ApiResponses responses = operation.getResponses();
                 if(responses == null) {
                     responses = new ApiResponses();
@@ -412,6 +411,15 @@ public class SwaggerConverter implements SwaggerParserExtension {
         else if(v2Parameter instanceof SerializableParameter) {
             SerializableParameter sp = (SerializableParameter) v2Parameter;
 
+            if(sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
+                schema.setExtensions(sp.getVendorExtensions());
+            }
+            if(sp.getEnum() != null) {
+                for(String e : sp.getEnum()) {
+                    // TODO: use the proper method for enum items on schema
+                    //schema.addEnumItem(e);
+                }
+            }
             if ("array".equals(sp.getType())) {
                 ArraySchema a = new ArraySchema();
                 // TODO: convert arrays to proper template format

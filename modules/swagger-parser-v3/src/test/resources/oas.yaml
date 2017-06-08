@@ -1,0 +1,101 @@
+servers:
+  - url: https://api.pet.com/v3
+    description: description of the server
+  - url: https://api.pet.co/v3.0
+        description: description of the server3
+info:
+  title: Sample Pet Store App
+  description: This is a sample server for a pet store.
+  termsOfService: http://example.com/terms/
+  contact:
+    name: API Support
+    url: http://www.example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.1
+
+paths:
+  /pet:
+    summary: "summary"
+    description: "description"
+    post:
+      tags:
+        - pet
+      summary: "Add a new pet to the store"
+      description: ""
+      operationId: addPet
+      parameters:
+      responses:
+        405:
+          description: "Invalid input"
+      security:
+        - petstore_auth:
+          - "write:pets"
+          - "read:pets"
+      requestBody:
+        "$ref": "#/components/requestBodies/requestBody1"
+      externalDocs:
+    put:
+      tags:
+      - pet
+      summary: "Update an existing pet"
+      description: ""
+      operationId: updatePet
+      parameters:
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Pet not found"
+        405:
+          description: "Validation exception"
+        security:
+          - petstore_auth:
+            - "write:pets"
+            - "read:pets"
+        requestBody:
+          "$ref": "#/components/requestBodies/requestBody1"
+
+  /pet/findByStatus:
+    get:
+      tags:
+        - pet
+      summary: "Finds Pets by status"
+      description: "Multiple status values can be provided with comma separated strings"
+      operationId: findPetsByStatus
+      parameters:
+        - name: status
+          in: cookie
+          description: "Status values that need to be considered for filter"
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - available
+                - pending
+                - sold
+              default: available
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Pet"
+            application/json:
+              schema:
+                type: array
+                items:
+                "$ref": "#/components/schemas/Pet"
+        400:
+          description: "Invalid status value"
+      security:
+        - petstore_auth:
+          - "write:pets"
+          - "read:pets"
