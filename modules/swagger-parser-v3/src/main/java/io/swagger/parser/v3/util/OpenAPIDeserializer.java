@@ -261,7 +261,7 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, tagName, "object", tagValue);
             } else {
                 ObjectNode tagObj = (ObjectNode) tagValue;
-                ExternalDocumentation externalDocs = getExternalDocs(tagObj, location + ".'" + tagName + "'", result);
+                ExternalDocumentation externalDocs = getExternalDocs(tagObj, String.format("%s.%s'", location, tagName), result);
                 tag.setExternalDocs(externalDocs);
             }
         }
@@ -331,7 +331,7 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, serverName, "object", serverValue);
             } else {
                 ObjectNode server = (ObjectNode) serverValue;
-                serverVariables = getServerVariable(server, location + ".'" + serverName + "'", result);
+                serverVariables = getServerVariable(server, String.format("%s.%s'", location, serverName), result);
             }
         }
 
@@ -367,10 +367,10 @@ public class OpenAPIDeserializer {
                         }
                     }
                 }
-                String value = getString("default", objNode, true, location + ".'" + variableName + "'", result);
+                String value = getString("default", objNode, true, String.format("%s.%s'", location, variableName), result);
                 serverVariable.setDefault(value);
 
-                value = getString("description", objNode, false, location + ".'" + variableName + "'", result);
+                value = getString("description", objNode, false, String.format("%s.%s'", location, variableName), result);
                 serverVariable.setDescription(value);
 
 
@@ -402,7 +402,7 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, pathName, "object", pathValue);
             } else {
                 ObjectNode path = (ObjectNode) pathValue;
-                PathItem pathObj = getPathItem(path, location + ".'" + pathName + "'", result);
+                PathItem pathObj = getPathItem(path, String.format("%s.%s'", location, pathName), result);
                 paths.put(pathName, pathObj);
 
             }
@@ -812,7 +812,7 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, linkName, "object", linkValue);
             } else {
                 ObjectNode link = (ObjectNode) linkValue;
-                Link linkObj = getLink(link, location + ".'" + linkName + "'", result);
+                Link linkObj = getLink(link, String.format("%s.%s'", location, linkName), result);
                 if(linkObj !=null) {
                     links.put(linkName, linkObj);
                 }
@@ -1051,7 +1051,7 @@ public class OpenAPIDeserializer {
                     result.invalidType(location, parameterName, "object", parameterValue);
                 } else {
                     ObjectNode parameterObj = (ObjectNode) parameterValue;
-                    Parameter parameter = getParameter(parameterObj, location + ".'" + parameterName + "'", result);
+                    Parameter parameter = getParameter(parameterObj, String.format("%s.%s'", location, parameterName), result);
                     parameters.put(parameterName, parameter);
                 }
             }
@@ -1187,7 +1187,7 @@ public class OpenAPIDeserializer {
                     result.invalidType(location, headerName, "object", headerValue);
                 } else {
                     ObjectNode header = (ObjectNode) headerValue;
-                    Header headerObj = getHeader(header, location + ".'" + headerName + "'", result);
+                    Header headerObj = getHeader(header, String.format("%s.%s'", location, headerName), result);
                     headers.put(headerName, headerObj);
                 }
             }
@@ -1273,7 +1273,7 @@ public class OpenAPIDeserializer {
                     result.invalidType(location, securitySchemeName, "object", securitySchemeValue);
                 } else {
                     ObjectNode securityScheme = (ObjectNode) securitySchemeValue;
-                    SecurityScheme securitySchemeObj = getSecurityScheme(securityScheme, location + ".'" + securitySchemeName + "'", result);
+                    SecurityScheme securitySchemeObj = getSecurityScheme(securityScheme, String.format("%s.%s'", location, securitySchemeName), result);
                     securitySchemes.put(securitySchemeName, securitySchemeObj);
                 }
             }
@@ -1436,7 +1436,7 @@ public class OpenAPIDeserializer {
                     result.invalidType(location, schemaName, "object", schemaValue);
                 } else {
                     ObjectNode schema = (ObjectNode) schemaValue;
-                    Schema schemaObj = getSchema(schema, location + ".'" + schemaName + "'", result);
+                    Schema schemaObj = getSchema(schema, String.format("%s.%s'", location, schemaName), result);
                     schemas.put(schemaName, schemaObj);
                 }
         }
@@ -1453,19 +1453,54 @@ public class OpenAPIDeserializer {
 
         Schema schema = null;
         ArrayNode oneOfArray = getArray("oneOf", node, false, location, result);
-        if(oneOfArray != null) {
+        ArrayNode allOfArray = getArray("allOf", node, false, location, result);
+        ArrayNode anyOfArray = getArray("anyOf", node, false, location, result);
+        ObjectNode itemsNode = getObject("items", node, false, location, result);
+
+        if(allOfArray != null) {
+
+            for(JsonNode n : allOfArray) {
+                if(n.isObject()) {
+                    AllOfSchema allOfList = new AllOfSchema();
+                    schema = getSchema((ObjectNode) n,location,result);
+                    allOfList.addAllOfItem(schema);
+                    schema = allOfList;
+                }
+            }
+        } else if(anyOfArray != null) {
+
+            for(JsonNode n : anyOfArray) {
+                if(n.isObject()) {
+                    AnyOfSchema anyOfList = new AnyOfSchema();
+                    schema = getSchema((ObjectNode) n,location,result);
+                    anyOfList.addAnyOfItem(schema);
+                    schema = anyOfList;
+                }
+            }
+        } else if(oneOfArray != null) {
 
             for(JsonNode n : oneOfArray) {
                 if(n.isObject()) {
                     OneOfSchema oneOfList = new OneOfSchema();
                     schema = getSchema((ObjectNode) n,location,result);
                     oneOfList.addOneOfItem(schema);
+                    schema = oneOfList;
                 }
             }
-        }else {
+        } else if(itemsNode != null) {
+            ArraySchema items = new ArraySchema();
+            for(JsonNode n : itemsNode) {
+                if(n.isValueNode()) {
+                    items.setItems(getSchema(itemsNode, location,result));
+                }
+                else {
+                    result.invalidType(location, "items", "value", n);
+                }
+            }
+            schema = items;
+        } else {
             schema = new Schema();
         }
-
 
         JsonNode ref = node.get("$ref");
         if (ref != null) {
@@ -1548,20 +1583,6 @@ public class OpenAPIDeserializer {
                 }
             }
             schema.setEnum(_enum);
-        }
-
-        ObjectNode itemsNode = getObject("items", node, false, location, result);
-        if(itemsNode != null) {
-            ArraySchema items = new ArraySchema();
-            for(JsonNode n : itemsNode) {
-                if(n.isValueNode()) {
-                    items.setItems(getSchema(itemsNode, location,result));
-                }
-                else {
-                    result.invalidType(location, "items", "value", n);
-                }
-            }
-            schema.addEnumItemObject(items);
         }
 
         value = getString("type",node,false,location,result);
@@ -1667,7 +1688,7 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, exampleName, "object", exampleValue);
             } else {
                 ObjectNode example = (ObjectNode) exampleValue;
-                Example exampleObj = getExample(example, location + ".'" + exampleName + "'", result);
+                Example exampleObj = getExample(example, String.format("%s.%s'", location, exampleName), result);
                 examples.put(exampleName, exampleObj);
             }
         }
@@ -1934,7 +1955,7 @@ public class OpenAPIDeserializer {
                     result.invalidType(location, bodyName, "object", bodyValue);
                 } else {
                     ObjectNode bodyObj = (ObjectNode) bodyValue;
-                    RequestBody body = getRequestBody(bodyObj, location + ".'" + bodyName + "'", result);
+                    RequestBody body = getRequestBody(bodyObj, String.format("%s.%s'", location, bodyName), result);
                     Bodies.put(bodyName, body);
                 }
             }

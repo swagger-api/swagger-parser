@@ -784,6 +784,7 @@ externalDocs:
   url: http://swagger.io
 components:
   schemas:
+    ExtendedErrorModel:
     Order:
       type: object
       not:
