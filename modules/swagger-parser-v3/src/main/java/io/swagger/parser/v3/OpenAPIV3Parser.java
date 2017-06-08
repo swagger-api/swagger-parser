@@ -26,7 +26,12 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             // TODO
             JsonNode node = JSON_MAPPER.readValue(new URL(url), JsonNode.class);
-            result = new OpenAPIDeserializer().deserialize(node);
+            if(node != null && node.get("openapi") != null) {
+                JsonNode version = node.get("openapi");
+                if(version.asText() != null && version.asText().startsWith("3.0")) {
+                    result = new OpenAPIDeserializer().deserialize(node);
+                }
+            }
         }
         catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
