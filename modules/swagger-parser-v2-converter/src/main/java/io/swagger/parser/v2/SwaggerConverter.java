@@ -27,6 +27,7 @@ import v2.io.swagger.models.Path;
 import v2.io.swagger.models.RefModel;
 import v2.io.swagger.models.Swagger;
 import v2.io.swagger.models.parameters.BodyParameter;
+import v2.io.swagger.models.parameters.RefParameter;
 import v2.io.swagger.models.parameters.SerializableParameter;
 import v2.io.swagger.models.properties.Property;
 import v2.io.swagger.models.properties.RefProperty;
@@ -276,6 +277,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
                         mediaTypes.addAll(v2Operation.getConsumes());
                     }
 
+                    if(mediaTypes.size() == 0) {
+                        mediaTypes.add("*/*");
+                    }
+
                     if(StringUtils.isNotBlank(param.getDescription())) {
                         body.description(param.getDescription());
                     }
@@ -349,10 +354,19 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 mediaTypes.addAll(v2Operation.getProduces());
             }
 
+            if(mediaTypes.size() == 0) {
+                mediaTypes.add("*/*");
+            }
+
             for(String responseCode : v2Operation.getResponses().keySet()) {
                 v2.io.swagger.models.Response v2Response = v2Operation.getResponses().get(responseCode);
                 ApiResponse response = convert(v2Response, mediaTypes);
-                operation.responses(new ApiResponses().addApiResponse(responseCode, response));
+                ApiResponses responses = operation.getResponses();
+                if(responses == null) {
+                    responses = new ApiResponses();
+                }
+
+                operation.responses(responses.addApiResponse(responseCode, response));
             }
         }
 
@@ -370,6 +384,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 // TODO: examples
                 content.addMediaType(type, new MediaType().schema(schema));
             }
+            response.content(content);
         }
         return response;
     }
@@ -388,28 +403,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
         v3Parameter.setIn(v2Parameter.getIn());
         v3Parameter.setName(v2Parameter.getName());
 
-        SerializableParameter sp = (SerializableParameter) v2Parameter;
-
         Schema schema = null;
-        if("array".equals(sp.getType())) {
-            ArraySchema a = new ArraySchema();
-            // TODO: convert arrays to proper template format
-            sp.getCollectionFormat();
-            sp.getItems();
 
-            if(sp.getMaxItems() != null) {
-                schema.setMaxItems(sp.getMaxItems());
-            }
-            if(sp.getMinItems() != null) {
-                schema.setMinItems(sp.getMinItems());
-            }
-
-            schema = a;
+        if(v2Parameter instanceof RefParameter) {
+            schema = new Schema().ref(((RefParameter) v2Parameter).get$ref());
         }
-        else {
-            schema = new Schema();
-            schema.setType(sp.getType());
-            schema.setFormat(sp.getFormat());
+        else if(v2Parameter instanceof SerializableParameter) {
+            SerializableParameter sp = (SerializableParameter) v2Parameter;
 
             if(sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
                 schema.setExtensions(sp.getVendorExtensions());
@@ -420,15 +420,45 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     //schema.addEnumItem(e);
                 }
             }
+            if ("array".equals(sp.getType())) {
+                ArraySchema a = new ArraySchema();
+                // TODO: convert arrays to proper template format
+                sp.getCollectionFormat();
+                Property items = sp.getItems();
+                Schema itemsSchema = convert(items);
+                a.setItems(itemsSchema);
 
-            schema.setMaximum(sp.getMaximum());
-            schema.setMinimum(sp.getMinimum());
-            schema.setMinLength(sp.getMinLength());
-            schema.setMaxLength(sp.getMaxLength());
-            if(sp.getMultipleOf() != null) {
-                schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
+                if (sp.getMaxItems() != null) {
+                    a.setMaxItems(sp.getMaxItems());
+                }
+                if (sp.getMinItems() != null) {
+                    a.setMinItems(sp.getMinItems());
+                }
+
+                schema = a;
+            } else {
+                schema = new Schema();
+                schema.setType(sp.getType());
+                schema.setFormat(sp.getFormat());
+
+                if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
+                    schema.setExtensions(sp.getVendorExtensions());
+                }
+                if (sp.getEnum() != null) {
+                    for (String e : sp.getEnum()) {
+                        schema.addEnumItemObject(e);
+                    }
+                }
+
+                schema.setMaximum(sp.getMaximum());
+                schema.setMinimum(sp.getMinimum());
+                schema.setMinLength(sp.getMinLength());
+                schema.setMaxLength(sp.getMaxLength());
+                if (sp.getMultipleOf() != null) {
+                    schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
+                }
+                schema.setPattern(sp.getPattern());
             }
-            schema.setPattern(sp.getPattern());
         }
 
         if(v2Parameter.getRequired()) {
