@@ -785,6 +785,13 @@ externalDocs:
 components:
   schemas:
     ExtendedErrorModel:
+      allOf:
+      - type: object
+        required:
+        - rootCause
+        properties:
+          rootCause:
+            type: string
     Order:
       type: object
       not:

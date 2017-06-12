@@ -348,7 +348,7 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-
+        //System.out.println(openAPI);
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
@@ -357,7 +357,6 @@ public class OpenAPIDeserializerTest {
 
 
         PathItem petEndpoint = paths.get("/pet");
-        //System.out.println("$REF: "+ petEndpoint.getRef());
         Assert.assertNotNull(petEndpoint);
         Assert.assertEquals(petEndpoint.getSummary(),"summary");
         Assert.assertEquals(petEndpoint.getDescription(),"description");
@@ -373,7 +372,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getPost().getTags());
         Assert.assertEquals(petEndpoint.getPost().getTags().size(), 1);
         Assert.assertEquals(petEndpoint.getPost().getSummary(), "Add a new pet to the store");
-        Assert.assertEquals(petEndpoint.getPost().getDescription(),"");
+        Assert.assertNull(petEndpoint.getPost().getDescription());
         Assert.assertEquals(petEndpoint.getPost().getOperationId(), "addPet");
         Assert.assertNotNull(petEndpoint.getServers());
         Assert.assertEquals(petEndpoint.getServers().size(), 1);
@@ -461,6 +460,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(component.getSchemas().get("Order").getType(),"object");
         Assert.assertEquals(component.getSchemas().get("Order").getNot().getType(),"integer");
         Assert.assertEquals(component.getSchemas().get("Order").getAdditionalProperties().getType(),"integer");
+        //System.out.println(component.getSchemas().get("ExtendedErrorModel"));
         Schema schema = (Schema) component.getSchemas().get("Order").getProperties().get("status");
 
         Map<String, Schema> properties = (Map<String, Schema>) component.getSchemas().get("Order").getProperties();
@@ -470,7 +470,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(properties.get("status").getType(),"string");
         Assert.assertEquals(properties.get("status").getDescription(), "Order Status");
         Assert.assertEquals(properties.get("status").getEnum().get(0), "placed");
-        
+       // System.out.println(properties);
 
         Assert.assertNotNull(component.getSecuritySchemes());
         Assert.assertEquals(component.getSecuritySchemes().get("petstore_auth").getType().toString(), "oauth2");
@@ -528,7 +528,7 @@ public class OpenAPIDeserializerTest {
 
 
         Assert.assertNotNull(stripe.getPost());
-        Assert.assertEquals(stripe.getPost().getDescription(),"");
+        Assert.assertNull(stripe.getPost().getDescription());
         Assert.assertEquals(stripe.getPost().getOperationId(), "Create3DSecure");
         Assert.assertNotNull(stripe.getPost().getParameters());
 
@@ -548,7 +548,7 @@ public class OpenAPIDeserializerTest {
 
 
         Assert.assertNotNull(stripeGet.getGet());
-        Assert.assertEquals(stripeGet.getGet().getDescription(),"");
+        Assert.assertNull(stripeGet.getGet().getDescription());
         Assert.assertEquals(stripeGet.getGet().getOperationId(), "AllAccountExternalAccounts");
         Assert.assertNotNull(stripeGet.getGet().getParameters());
 
