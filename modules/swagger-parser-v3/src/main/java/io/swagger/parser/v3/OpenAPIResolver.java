@@ -2,14 +2,12 @@ package io.swagger.parser.v3;
 
 //package io.swagger.parser;
 
-import io.swagger.oas.models.Operation;
-import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.models.AuthorizationValue;
+import io.swagger.parser.v3.processors.ComponentsProcessor;
 /*import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.OperationProcessor;
 import io.swagger.parser.processors.PathsProcessor;*/
-import io.swagger.parser.v3.util.ComponentsProcessor;
 
 import java.util.List;
 

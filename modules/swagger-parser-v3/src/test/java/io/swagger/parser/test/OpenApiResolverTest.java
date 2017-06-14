@@ -1,7 +1,9 @@
-package io.swagger.parser;
+package io.swagger.parser.test;
 
 import io.swagger.parser.models.SwaggerParseResult;
-import org.junit.Test;
+//import org.junit.Test;
+import io.swagger.parser.v3.OpenAPIV3Parser;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -9,7 +11,7 @@ import static org.testng.Assert.assertNotNull;
 public class OpenApiResolverTest {
     @Test
     public void testSimple() {
-        SwaggerParseResult result = new OpenAPIParser().readLocation("oas3.yaml", null, null);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("oas3.yaml", null, null);
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
@@ -20,7 +22,7 @@ public class OpenApiResolverTest {
     public void test30Url() {
         String location = "http://petstore.swagger.io/v2/swagger.json";
 
-        SwaggerParseResult result = new OpenAPIParser().readLocation(location, null, null);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(location, null, null);
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
@@ -47,7 +49,7 @@ public class OpenApiResolverTest {
                         "  }\n" +
                         "}";
 
-        SwaggerParseResult result = new OpenAPIParser().readContents(yaml, null, null);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, null);
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
