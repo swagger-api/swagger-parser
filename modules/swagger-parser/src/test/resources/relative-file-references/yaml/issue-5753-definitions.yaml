@@ -1,0 +1,84 @@
+EmptyObject:
+  type: object
+  description: "Sample Description"
+Error:
+  type: object
+  description: "Sample Description"
+  required:
+    - type
+  properties:
+    type:
+      type: string
+      description: "Sample Description"
+      default: "GenericException"
+      example: "GenericException"
+    itemInfo:
+      type: object
+      description: "Sample Description"
+      items:
+        $ref: '#/ItemId'
+    details:
+      type: string
+      description: "Sample Description"
+      example: "Could not update that field"
+    exception:
+      type: string
+      description: "Sample Description"
+      example: "DBException + stack trace"
+ItemId:
+  type: object
+  description: "Sample Description"
+  required:
+    - id
+    - type
+  properties:
+    id:
+      type: string
+      description: "Sample Description"
+      example: "45"
+    type:
+      type: string
+      description: "playlist"
+      example: "5667"
+ResponseMeta:
+  type: object
+  description: "Sample Description"
+  required:
+    - code
+  properties:
+    code:
+      type: string
+      description: "Sample Description"
+      default: Ok
+      enum:
+      - Ok
+      example: Ok
+    detail:
+      type: string
+      description: "Sample Description"
+      example: "this is some detail about the error or the success"
+    exception:
+      type: string
+      description: "Sample Description"
+      example: "IOException + stack trace"
+    errors:
+      type: array
+      description: "Sample Description"
+      items:
+        $ref: '#/Error'
+ActorInfo:
+  type: object
+  description: "Sample Description"
+  required:
+    - actorPath
+  properties:
+    actorPath:
+      type: string
+      example: "/user/synchronizer"
+DefaultMetaOnlyResponse:
+  type: object
+  required:
+    - meta
+  properties:
+    meta:
+      $ref: '#/ResponseMeta'
