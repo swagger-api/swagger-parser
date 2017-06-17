@@ -5,7 +5,7 @@ import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.parser.ResolverCache;
+import io.swagger.parser.v3.ResolverCache;
 
 import java.util.List;
 import java.util.Map;

@@ -1,58 +1,49 @@
 package io.swagger.parser.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.swagger.model.ApiDescription;
+import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.responses.ApiResponse;
+import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.SwaggerParseResult;
-//import org.junit.Test;
-import io.swagger.parser.v3.OpenAPIV3Parser;
+import io.swagger.parser.v3.OpenAPIResolver;
+import io.swagger.parser.v3.util.OpenAPIDeserializer;
+import mockit.Injectable;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Map;
+
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
-public class OpenApiResolverTest {
-    @Test
-    public void testSimple() {
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("oas3.yaml", null, null);
-
-        assertNotNull(result);
-        assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
-    }
+public class OpenAPIResolverTest {
 
     @Test
-    public void test30Url() {
-        String location = "http://petstore.swagger.io/v2/swagger.json";
+    public void testOpenAPIResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(location, null, null);
+        Assert.assertNotNull(result);
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        //System.out.println(schemas.get("ExtendedErrorModel"));
 
-        assertNotNull(result);
-        assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
+        ArraySchema tagsProperty = (ArraySchema) schemas.get("Pet").getProperties().get("tags");
+        Schema name = (Schema)schemas.get("Pet").getProperties().get("user");
+        //System.out.println(schemas);
+
+        Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
+        System.out.println(responses);
     }
 
-    @Test
-    public void test30() {
-        String yaml =
-                "{\n" +
-                        "  \"openapi\": \"3.0.0-rc1\",\n" +
-                        "  \"info\": {\n" +
-                        "    \"title\": \"Swagger Petstore\",\n" +
-                        "    \"description\": \"This is a sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key `special-key` to test the authorization filters.\",\n" +
-                        "    \"termsOfService\": \"http://swagger.io/terms/\",\n" +
-                        "    \"contact\": {\n" +
-                        "      \"email\": \"apiteam@swagger.io\"\n" +
-                        "    },\n" +
-                        "    \"license\": {\n" +
-                        "      \"name\": \"Apache 2.0\",\n" +
-                        "      \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n" +
-                        "    },\n" +
-                        "    \"version\": \"1.0.0\"\n" +
-                        "  }\n" +
-                        "}";
-
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, null);
-
-        assertNotNull(result);
-        assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
-    }
 }

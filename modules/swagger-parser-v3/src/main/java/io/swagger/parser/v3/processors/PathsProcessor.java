@@ -12,8 +12,10 @@ import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
-import io.swagger.parser.ResolverCache;
+import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.OpenAPIResolver;
+import io.swagger.parser.v3.processors.OperationProcessor;
+import io.swagger.parser.v3.processors.ParameterProcessor;
 
 
 import java.util.ArrayList;

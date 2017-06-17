@@ -3,98 +3,103 @@ package io.swagger.parser.v3.processors;
 
 import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.Schema;
-import io.swagger.parser.ResolverCache;
-
+import io.swagger.parser.v3.ResolverCache;
+import io.swagger.parser.v3.models.RefFormat;
 
 import java.util.List;
 import java.util.Map;
 
-//import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
 
 public class SchemaProcessor {
-    //private final PropertyProcessor propertyProcessor;
-    //private final ExternalRefProcessor externalRefProcessor;
+    private final ResolverCache cache;
 
-    public SchemaProcessor(ResolverCache cache, OpenAPI openApi) {
-       // this.propertyProcessor = new PropertyProcessor(cache, openApi);
-        //this.externalRefProcessor = new ExternalRefProcessor(cache, openApi);
+
+    public SchemaProcessor(ResolverCache cache) {
+        this.cache = cache;
+
+
     }
 
     public void processSchemaType(Schema schema) {
         if (schema == null) {
             return;
         }
-
-        /*if (schema instanceof RefModel) {
-            processRefModel((RefModel) model);
-        } else */ if (schema instanceof ArraySchema) {
+        if(schema.get$ref() != null){
+            //TODO Find the way to managed the object to replace it on the response
+            processReferenceSchema(schema);
+        }else if (schema instanceof ArraySchema) {
             processArraySchema((ArraySchema) schema);
         } else if (schema instanceof AllOfSchema) {
             processAllOfSchema((AllOfSchema) schema);
-        } else if (schema instanceof AllOfSchema) {
-            processSchema(schema);
         }
     }
 
-    /*private*/ void processSchema(Schema schema) {
+    public void processSchema(Schema schema) {
+        processSchemaType(schema);
 
-        final Map<String, Schema> properties = schema.getProperties();
-
-        if (properties == null) {
-            return;
-        }
-
-        for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
-            final Schema property = propertyEntry.getValue();
-           // propertyProcessor.processProperty(property);
+        if(schema.getProperties()!= null){
+            processPropertySchema(schema);
         }
 
     }
 
-    /*private*/ void processAllOfSchema(AllOfSchema allOfSchema) {
+    public void processPropertySchema(Schema schema) {
 
-        processSchemaType(allOfSchema);
+        if(schema.get$ref() !=  null){
+            processReferenceSchema(schema);
+        }
 
+        Schema resolved = null;
+        String propertyName = null;
+         Map<String, Schema> properties = schema.getProperties();
+         if (properties != null) {
+             for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
+                 Schema property = propertyEntry.getValue();
+                 if (property instanceof ArraySchema) {
+                     processArraySchema((ArraySchema) property);
+                 }
+                 if(property.get$ref() != null) {
+                     propertyName = propertyEntry.getKey();
+                     resolved = processReferenceSchema(property);
+                     properties.replace(propertyName,resolved);
 
-        /*final List<RefModel> interfaces = AllOfSchema.getInterfaces();
-        if (interfaces != null) {
-            for (RefModel model : interfaces) {
-                processRefModel(model);
+                 }
+             }
+         }
+    }
+
+    public void processAllOfSchema(AllOfSchema allOfSchema) {
+
+        final List<Schema> schemas = allOfSchema.getAllOf();
+        if (schemas != null) {
+            for (Schema schema : schemas) {
+                Schema resolved = null;
+                if (schema.get$ref() != null) {
+                    resolved = processReferenceSchema(schema);
+                    schemas.add(resolved);
+                }
             }
-        }*/
+        }
 
     }
 
-    /*private*/ void processArraySchema(ArraySchema arraySchema) {
+    public void processArraySchema(ArraySchema arraySchema) {
 
         final Schema items = arraySchema.getItems();
-
-        // ArrayModel has a properties map, but my reading of the swagger spec makes me think it should be ignored
-
-        if (items != null) {
-            //propertyProcessor.processProperty(items);
+        Schema resolved = null;
+        if (items.get$ref() != null) {
+            resolved = processReferenceSchema(items);
+            arraySchema.setItems(resolved);
         }
     }
 
-
-    /*private void processRefModel(RefModel refModel) {
-    /* if this is a URL or relative ref:
-        1) we need to load it into memory.
-        2) shove it into the #/definitions
-        3) update the RefModel to point to its location in #/definitions
-     */
-
-        /*if (isAnExternalRefFormat(refModel.getRefFormat())) {
-            final String newRef = externalRefProcessor.processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat());
-
-            if (newRef != null) {
-                refModel.set$ref(newRef);
-            }
-        }
-    }*/
-
-
+    private Schema processReferenceSchema(Schema schema){
+        RefFormat refFormat = computeRefFormat(schema.get$ref());
+        String $ref = schema.get$ref();
+        Schema newSchema = cache.loadRef($ref, refFormat, Schema.class);
+        return newSchema;
+    }
 }

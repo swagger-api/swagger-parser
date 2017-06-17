@@ -1,11 +1,11 @@
 package io.swagger.parser.v3.util;
 
-/*import io.swagger.parser.models.AuthorizationValue;
-//import io.swagger.models.refs.RefFormat;
+import io.swagger.parser.models.AuthorizationValue;
+import io.swagger.parser.v3.models.RefFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import v2.io.swagger.parser.util.ClasspathHelper;
-import v2.io.swagger.parser.util.RemoteUrl;*/
+
+
 
 import java.io.FileInputStream;
 import java.nio.file.Files;
@@ -42,8 +42,21 @@ public class RefUtils {
         return plausibleName;
     }
 
-    /*public static boolean isAnExternalRefFormat(RefFormat refFormat) {
+    public static boolean isAnExternalRefFormat(RefFormat refFormat) {
         return refFormat == RefFormat.URL || refFormat == RefFormat.RELATIVE;
+    }
+
+    public static RefFormat computeRefFormat(String ref) {
+        RefFormat result = RefFormat.INTERNAL;
+        if(ref.startsWith("http")) {
+            result = RefFormat.URL;
+        } else if(ref.startsWith("#/")) {
+            result = RefFormat.INTERNAL;
+        } else if(ref.startsWith(".") || ref.startsWith("/")) {
+            result = RefFormat.RELATIVE;
+        }
+
+        return result;
     }
 
 
@@ -144,5 +157,5 @@ public class RefUtils {
 
         return result;
 
-    }*/
+    }
 }

@@ -1,13 +1,12 @@
-package io.swagger.parser;
+package io.swagger.parser.v3;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-//import io.swagger.models.Model;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.parser.models.AuthorizationValue;
-//import io.swagger.oas.models.refs.RefFormat;
-//import io.swagger.models.refs.RefType;
+import io.swagger.parser.v3.models.RefFormat;
+import io.swagger.parser.v3.models.RefType;
 import io.swagger.parser.v3.util.DeserializationUtils;
 import io.swagger.parser.v3.util.PathUtils;
 import io.swagger.parser.v3.util.RefUtils;
@@ -34,9 +33,9 @@ import java.util.regex.Pattern;
  */
 public class ResolverCache {
 
-    /*private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefType.PARAMETER.getInternalPrefix() + "(?<name>.+)");
-    private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefType.DEFINITION.getInternalPrefix() + "(?<name>.+)");
-    private static final Pattern RESPONSE_PATTERN = Pattern.compile("^" + RefType.RESPONSE.getInternalPrefix() + "(?<name>.+)");*/
+
+    private static final Pattern SCHEMAS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "(?<name>.+)");
+
 
     private final OpenAPI openApi;
     private final List<AuthorizationValue> auths;
@@ -69,7 +68,7 @@ public class ResolverCache {
 
     }
 
-    /*public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
+    public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
         if (refFormat == RefFormat.INTERNAL) {
             //we don't need to go get anything for internal refs
             Object loadedRef = loadInternalRef(ref);
@@ -147,10 +146,10 @@ public class ResolverCache {
     private Object loadInternalRef(String ref) {
         Object result = null;
 
-        if(ref.startsWith("#/definitions")) {
-            result = getFromMap(ref, openApi.getComponents().getParameters(), PARAMETER_PATTERN);
+        if(ref.startsWith("#/components")) {
+            result = getFromMap(ref, openApi.getComponents().getSchemas(), SCHEMAS_PATTERN);
         }
-        else if(ref.startsWith("#/responses")) {
+        /*else if(ref.startsWith("#/responses")) {
             result = getFromMap(ref, openApi.getComponents().getResponses(), RESPONSE_PATTERN);
         }
         else if(ref.startsWith("#/parameters")) {
@@ -158,11 +157,11 @@ public class ResolverCache {
         }
         if (result == null) {
             result = getFromMap(ref, openApi.getComponents().getSchemas(), DEFINITION_PATTERN);
-        }
+        }*/
 
         return result;
 
-    }*/
+    }
 
     private String unescapePointer(String jsonPathElement) {
         // Unescape the JSON Pointer segment using the algorithm described in RFC 6901, section 4:

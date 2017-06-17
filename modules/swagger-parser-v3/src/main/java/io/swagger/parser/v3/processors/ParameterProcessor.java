@@ -3,7 +3,7 @@ package io.swagger.parser.v3.processors;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.OpenAPI;
-import io.swagger.parser.ResolverCache;
+import io.swagger.parser.v3.ResolverCache;
 
 import java.util.ArrayList;
 import java.util.List;

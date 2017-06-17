@@ -10,8 +10,11 @@ import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v3.util.OpenAPIDeserializer;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceLoader;
 
 public class OpenAPIV3Parser implements SwaggerParserExtension {
     private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
@@ -25,7 +28,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
             // TODO
-            JsonNode node = JSON_MAPPER.readValue(new URL(url), JsonNode.class);
+            JsonNode node = YAML_MAPPER.readValue(new URL(url), JsonNode.class);
             if(node != null && node.get("openapi") != null) {
                 JsonNode version = node.get("openapi");
                 if(version.asText() != null && version.asText().startsWith("3.0")) {
@@ -33,6 +36,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 }
             }
         }
+        //TODO Call the OpenAPIResolver
         catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
         }
@@ -62,5 +66,44 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             result.setMessages(Arrays.asList("No swagger supplied"));
         }
         return result;
+    }
+
+    protected List<io.swagger.parser.extensions.SwaggerParserExtension> getExtensions() {
+        List<io.swagger.parser.extensions.SwaggerParserExtension> extensions = new ArrayList<>();
+
+        ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(io.swagger.parser.extensions.SwaggerParserExtension.class);
+        Iterator<SwaggerParserExtension> itr = loader.iterator();
+        while (itr.hasNext()) {
+            extensions.add(itr.next());
+        }
+        extensions.add(0, new OpenAPIV3Parser());
+        return extensions;
+    }
+
+    /**
+     * Transform the swagger-model version of AuthorizationValue into a parser-specific one, to avoid
+     * dependencies across extensions
+     *
+     * @param input
+     * @return
+     */
+    protected List<io.swagger.parser.models.AuthorizationValue> transform(List<AuthorizationValue> input) {
+        if(input == null) {
+            return null;
+        }
+
+        List<io.swagger.parser.models.AuthorizationValue> output = new ArrayList<>();
+
+        for(AuthorizationValue value : input) {
+            io.swagger.parser.models.AuthorizationValue v = new io.swagger.parser.models.AuthorizationValue();
+
+            v.setKeyName(value.getKeyName());
+            v.setValue(value.getValue());
+            v.setType(value.getType());
+
+            output.add(v);
+        }
+
+        return output;
     }
 }

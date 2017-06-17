@@ -879,9 +879,10 @@ components:
           format: int64
         category:
           "$ref": "#/components/schemas/Category"
-        name:
+        user:
           type: string
           example: doggie
+          "$ref": "https://pastebin.com/raw/TW5x4XSf#/components/schemas/User"
         photoUrls:
           type: array
           xml:
@@ -925,7 +926,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GeneralError'
+            $ref: '#/components/schemas/ExtendedErrorModel'
   parameters:
     skipParam:
       name: skip

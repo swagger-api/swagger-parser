@@ -3,21 +3,22 @@ package io.swagger.parser.v3;
 //package io.swagger.parser;
 
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.PathItem;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.v3.processors.ComponentsProcessor;
 /*import io.swagger.parser.processors.DefinitionsProcessor;
-import io.swagger.parser.processors.OperationProcessor;
-import io.swagger.parser.processors.PathsProcessor;*/
+import io.swagger.parser.processors.OperationProcessor;*/
+import io.swagger.parser.v3.processors.PathsProcessor;
 
 import java.util.List;
 
 public class OpenAPIResolver {
 
     private final OpenAPI openApi;
-    //private final ResolverCache cache;
+    private final ResolverCache cache;
     private final ComponentsProcessor componentsProcessor;
-    /*private final PathsProcessor pathProcessor;
-    private final DefinitionsProcessor definitionsProcessor;
+    private final PathsProcessor pathProcessor;
+    /*private final DefinitionsProcessor definitionsProcessor;
     private final OperationProcessor operationsProcessor;*/
     private Settings settings = new Settings();
 
@@ -36,22 +37,21 @@ public class OpenAPIResolver {
     public OpenAPIResolver(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Settings settings) {
         this.openApi = openApi;
         this.settings = settings != null ? settings : new Settings();
-        //this.cache = new ResolverCache(openApi, auths, parentFileLocation);
-        componentsProcessor = new ComponentsProcessor(openApi);
-        /*definitionsProcessor = new DefinitionsProcessor(cache, swagger);
-        pathProcessor = new PathsProcessor(cache, swagger, this.settings);
-        operationsProcessor = new OperationProcessor(cache, swagger);*/
+        this.cache = new ResolverCache(openApi, auths, parentFileLocation);
+        componentsProcessor = new ComponentsProcessor(openApi,this.cache);
+        pathProcessor = new PathsProcessor(cache, openApi,this.settings);
+        /*operationsProcessor = new OperationProcessor(cache, swagger);*/
     }
 
     public OpenAPI resolve() {
         if (openApi == null) {
             return null;
         }
+        componentsProcessor.processComponents();
+        pathProcessor.processPaths();
 
-        /*pathProcessor.processPaths();
-        definitionsProcessor.processDefinitions();
 
-        if(openApi.getPaths() != null) {
+        /*if(openApi.getPaths() != null) {
             for(String pathname : openApi.getPaths().keySet()) {
                 PathItem pathItem = openApi.getPaths().get(pathname);
                 if(pathItem.getOperations() != null) {
