@@ -23,21 +23,21 @@ public class ResponseProcessor {
             Map<String,MediaType> content = response.getContent();
             for( Map.Entry<String, MediaType> map : content.entrySet()) {
                 if(map.getValue().getSchema()!= null) {
-                    schema = map.getValue().getSchema();
+                    MediaType mediaType = map.getValue();
+                    schema = mediaType.getSchema();
+                    if (schema != null) {
+                        if(schema.get$ref() != null) {
+                            Schema resolved = schemaProcessor.processReferenceSchema(schema);
+                            mediaType.setSchema(resolved);
+                        }
+                    }
                 }
             }
-        }
-
-
-
-        if (schema != null) {
-            schemaProcessor.processSchema(schema);
         }
 
         /* intentionally ignoring the response headers, even those these were modelled as a
          Map<String, Property> they should never have a $ref because what does it mean to have a
          complex object in an HTTP header?
           */
-
     }
 }

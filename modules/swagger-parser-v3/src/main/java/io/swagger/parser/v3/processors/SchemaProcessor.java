@@ -23,7 +23,8 @@ public class SchemaProcessor {
 
     }
 
-    public void processSchemaType(Schema schema) {
+
+    public void processSchema(Schema schema) {
         if (schema == null) {
             return;
         }
@@ -35,10 +36,6 @@ public class SchemaProcessor {
         } else if (schema instanceof AllOfSchema) {
             processAllOfSchema((AllOfSchema) schema);
         }
-    }
-
-    public void processSchema(Schema schema) {
-        processSchemaType(schema);
 
         if(schema.getProperties()!= null){
             processPropertySchema(schema);
@@ -96,7 +93,7 @@ public class SchemaProcessor {
         }
     }
 
-    private Schema processReferenceSchema(Schema schema){
+    public Schema processReferenceSchema(Schema schema){
         RefFormat refFormat = computeRefFormat(schema.get$ref());
         String $ref = schema.get$ref();
         Schema newSchema = cache.loadRef($ref, refFormat, Schema.class);
