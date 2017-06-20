@@ -5,19 +5,31 @@ import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.v3.ResolverCache;
+import io.swagger.parser.v3.models.RefFormat;
 
+import javax.naming.spi.Resolver;
 import java.util.Map;
+
+import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
 public class ResponseProcessor {
 
     private final SchemaProcessor schemaProcessor;
+    private final ResolverCache cache;
+    private final OpenAPI openApi;
 
     public ResponseProcessor(ResolverCache cache, OpenAPI openApi) {
         schemaProcessor = new SchemaProcessor(cache);
+        this.cache = cache;
+        this.openApi = openApi;
     }
 
-    public void processResponse(ApiResponse response) {
-        //process the response body
+    public void processResponse(String name,ApiResponse response) {
+
+        if (response.get$ref() != null){
+            ApiResponse apiResponse = processReferenceResponse(response);
+            openApi.getComponents().getResponses().replace(name,response,apiResponse);
+        }
         Schema schema = null;
         if(response.getContent() != null){
             Map<String,MediaType> content = response.getContent();
@@ -34,10 +46,11 @@ public class ResponseProcessor {
                 }
             }
         }
-
-        /* intentionally ignoring the response headers, even those these were modelled as a
-         Map<String, Property> they should never have a $ref because what does it mean to have a
-         complex object in an HTTP header?
-          */
+    }
+    public ApiResponse processReferenceResponse(ApiResponse response){
+        RefFormat refFormat = computeRefFormat(response.get$ref());
+        String $ref = response.get$ref();
+        ApiResponse newResponse = cache.loadRef($ref, refFormat, ApiResponse.class);
+        return newResponse;
     }
 }

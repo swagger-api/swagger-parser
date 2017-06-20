@@ -23,7 +23,7 @@ public class ComponentsProcessor {
         this.cache = cache;
         this.openApi = openApi;
         this.schemaProcessor = new SchemaProcessor(cache);
-        this.responseProcessor = new ResponseProcessor(cache,openApi);
+        this.responseProcessor = new ResponseProcessor(cache, openApi);
 
     }
 
@@ -57,7 +57,7 @@ public class ComponentsProcessor {
 
         for (String responseName : responseKey) {
             final ApiResponse response = responses.get(responseName);
-            responseProcessor.processResponse(response);
+            responseProcessor.processResponse(responseName,response);
         }
     }
 

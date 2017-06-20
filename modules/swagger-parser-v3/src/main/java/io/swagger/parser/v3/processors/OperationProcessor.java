@@ -19,7 +19,7 @@ public class OperationProcessor {
     public OperationProcessor(ResolverCache cache, OpenAPI openApi) {
         this.cache = cache;
         parameterProcessor = new ParameterProcessor(cache, openApi);
-        responseProcessor = new ResponseProcessor(cache, openApi);
+        responseProcessor = new ResponseProcessor(cache,openApi);
     }
 
     public void processOperation(Operation operation) {
@@ -42,7 +42,7 @@ public class OperationProcessor {
                             responses.put(responseCode, resolvedResponse);
                         }
                     }*/
-                    responseProcessor.processResponse(response);
+                    responseProcessor.processResponse(responseCode,response);
                 }
             }
         }

@@ -65,6 +65,8 @@ tags:
     description: Find out more about our store
     url: http://swagger.io
 paths:
+  "/pathItemRef":
+    "ref": 'http://foo.bar/examples/user-example.json'
   "/pet":
     summary: summary
     description: description
@@ -919,6 +921,7 @@ components:
   responses:
     NotFound:
       description: Entity not found.
+      "$ref": "https://pastebin.com/raw/VmSvLjLb#/responses/NotFound"
     IllegalInput:
         description: Illegal input for operation.
     GeneralError:

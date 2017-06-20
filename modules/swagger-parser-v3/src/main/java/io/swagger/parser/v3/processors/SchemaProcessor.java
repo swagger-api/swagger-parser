@@ -29,7 +29,6 @@ public class SchemaProcessor {
             return;
         }
         if(schema.get$ref() != null){
-            //TODO Find the way to managed the object to replace it on the response
             processReferenceSchema(schema);
         }else if (schema instanceof ArraySchema) {
             processArraySchema((ArraySchema) schema);
@@ -44,7 +43,6 @@ public class SchemaProcessor {
     }
 
     public void processPropertySchema(Schema schema) {
-
         if(schema.get$ref() !=  null){
             processReferenceSchema(schema);
         }
