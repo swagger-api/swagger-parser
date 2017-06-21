@@ -66,7 +66,7 @@ tags:
     url: http://swagger.io
 paths:
   "/pathItemRef":
-    "ref": 'http://foo.bar/examples/user-example.json'
+    "ref": 'https://pastebin.com/UxYkws8C#/paths/pathItemRef'
   "/pet":
     summary: summary
     description: description
@@ -794,6 +794,7 @@ components:
         properties:
           rootCause:
             type: string
+            "$ref": "#/components/schemas/Category"
     Order:
       type: object
       not:
@@ -801,6 +802,40 @@ components:
         format: int32
       additionalProperties:
         type: integer
+      properties:
+        id:
+          type: integer
+          format: int64
+        petId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+        shipDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: Order Status
+          enum:
+          - placed
+          - approved
+          - delivered
+        complete:
+          type: boolean
+          default: false
+      xml:
+        name: Order
+    OrderRef:
+      type: object
+      not:
+        type: integer
+        format: int32
+        "$ref": "#/components/schemas/Category"
+      additionalProperties:
+        type: integer
+        "$ref": "https://pastebin.com/raw/TW5x4XSf#/components/schemas/User"
       properties:
         id:
           type: integer
@@ -910,6 +945,9 @@ components:
         name: Pet
     ApiResponse:
       type: object
+      required:
+      - name
+      - photoUrls
       properties:
         code:
           type: integer
@@ -919,9 +957,11 @@ components:
         message:
           type: string
   responses:
-    NotFound:
+    Found:
       description: Entity not found.
       "$ref": "https://pastebin.com/raw/VmSvLjLb#/responses/NotFound"
+    NotFound:
+      description: Entity not found.
     IllegalInput:
         description: Illegal input for operation.
     GeneralError:
@@ -931,6 +971,15 @@ components:
           schema:
             $ref: '#/components/schemas/ExtendedErrorModel'
   parameters:
+    newParam:
+      name: skip
+      in: query
+      description: number of items to skip
+      required: true
+      schema:
+        type: integer
+        format: int32
+        "$ref": "#/components/schemas/Tag"
     skipParam:
       name: skip
       in: query
@@ -1008,6 +1057,7 @@ components:
       description: The number of remaining requests in the current period
       schema:
         type: integer
+        "$ref": "https://pastebin.com/raw/TW5x4XSf#/components/schemas/User"
     X-Rate-Limit-Reset:
       description: The number of seconds left in the current period
       schema:

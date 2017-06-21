@@ -23,7 +23,7 @@ public class OperationProcessor {
     }
 
     public void processOperation(Operation operation) {
-        final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
+        /*final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
         operation.setParameters(processedOperationParameters);
 
         final Map<String, ApiResponse> responses = operation.getResponses();
@@ -41,10 +41,10 @@ public class OperationProcessor {
                             response = resolvedResponse;
                             responses.put(responseCode, resolvedResponse);
                         }
-                    }*/
+                    }
                     responseProcessor.processResponse(responseCode,response);
                 }
             }
-        }
+        }*/
     }
 }

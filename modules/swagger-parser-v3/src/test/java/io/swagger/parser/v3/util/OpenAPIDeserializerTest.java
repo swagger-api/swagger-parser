@@ -279,7 +279,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 14);
+        Assert.assertEquals(paths.size(), 15);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -303,7 +303,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 14);
+        Assert.assertEquals(paths.size(), 15);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -352,7 +352,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 14);
+        Assert.assertEquals(paths.size(), 15);
 
 
 
@@ -427,6 +427,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(component.getHeaders());
         Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Limit").getDescription(),"The number of allowed requests in the current period");
         Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Limit").getSchema().getType(),"integer");
+        Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Reset").getSchema().getType(),"integer");
 
         Assert.assertNotNull(component.getLinks());
         Assert.assertEquals(component.getLinks().get("unsubscribe").getOperationId(),"cancelHookCallback");
@@ -451,16 +452,16 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(component.getResponses().get("NotFound").getDescription(),"Entity not found.");
         Assert.assertEquals(component.getResponses().get("IllegalInput").getDescription(),"Illegal input for operation.");
         Assert.assertEquals(component.getResponses().get("GeneralError").getDescription(),"General Error");
-        Assert.assertEquals(component.getResponses().get("GeneralError").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/GeneralError");
+        Assert.assertEquals(component.getResponses().get("GeneralError").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/ExtendedErrorModel");
 
 
         Assert.assertNotNull(component.getSchemas());
-        Assert.assertEquals(component.getSchemas().get("Pet").getType(),"object");
-        Assert.assertEquals(component.getSchemas().get("Pet").getRequired().get(0),"name");
+        Assert.assertEquals(component.getSchemas().get("Category").getType(),"object");
+        Assert.assertEquals(component.getSchemas().get("ApiResponse").getRequired().get(0),"name");
         Assert.assertEquals(component.getSchemas().get("Order").getType(),"object");
         Assert.assertEquals(component.getSchemas().get("Order").getNot().getType(),"integer");
         Assert.assertEquals(component.getSchemas().get("Order").getAdditionalProperties().getType(),"integer");
-        //System.out.println(component.getSchemas().get("ExtendedErrorModel"));
+
         Schema schema = (Schema) component.getSchemas().get("Order").getProperties().get("status");
 
         Map<String, Schema> properties = (Map<String, Schema>) component.getSchemas().get("Order").getProperties();

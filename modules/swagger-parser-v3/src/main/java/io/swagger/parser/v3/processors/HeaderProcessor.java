@@ -1,8 +1,8 @@
 package io.swagger.parser.v3.processors;
 
 
+import io.swagger.oas.models.headers.Header;
 import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.v3.ResolverCache;
 
@@ -11,27 +11,27 @@ import java.util.List;
 import java.util.Map;
 
 
-public class ParameterProcessor {
+public class HeaderProcessor {
 
     private final ResolverCache cache;
     private final SchemaProcessor schemaProcessor;
     private final OpenAPI openApi;
 
 
-    public ParameterProcessor(ResolverCache cache, OpenAPI openApi) {
+    public HeaderProcessor(ResolverCache cache, OpenAPI openApi) {
         this.cache = cache;
         this.openApi = openApi;
         this.schemaProcessor = new SchemaProcessor(cache);
     }
 
-    public void processParameter(String name, Parameter parameter) {
-        /*if(parameter.get$ref() != null){
+    public void processHeader(String name, Header header) {
+        /*if(header.get$ref() != null){
 
         }*/
-        if (parameter.getSchema() != null){
-         Schema resolved = schemaProcessor.processSchema(parameter.getSchema());
-         //TODO what if the parameter is not in components?
-         openApi.getComponents().getParameters().get(name).setSchema(resolved);
+        if (header.getSchema() != null) {
+            Schema resolved = schemaProcessor.processSchema(header.getSchema());
+            //TODO what if the header is not in components?
+            openApi.getComponents().getHeaders().get(name).setSchema(resolved);
         }
     }
 
