@@ -14,14 +14,19 @@ import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.OpenAPIResolver;
+import io.swagger.parser.v3.models.HttpMethod;
+import io.swagger.parser.v3.models.RefFormat;
 import io.swagger.parser.v3.processors.OperationProcessor;
 import io.swagger.parser.v3.processors.ParameterProcessor;
 
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
 
 public class PathsProcessor {
@@ -110,13 +115,13 @@ public class PathsProcessor {
                 pathItem.setParameters(null);
             }
 
-           /*if (pathItem instanceof RefPath) {
-                RefPath refPath = (RefPath) pathItem;
-                PathItem resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), PathItem.class);
+           if (pathItem.get$ref() != null) {
+                RefFormat refFormat = computeRefFormat(pathItem.get$ref());
+                PathItem resolvedPath = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
 
                 // TODO: update references to the parent location
 
-                String pathRef = refPath.get$ref().split("#")[0];
+                String pathRef = pathItem.get$ref().split("#")[0];
                 updateLocalRefs(resolvedPath, pathRef);
 
                 if (resolvedPath != null) {
@@ -124,35 +129,68 @@ public class PathsProcessor {
                     openApi.path(pathStr, resolvedPath);
                     pathItem = resolvedPath;
                 }
-            }*/
+            }
 
             //at this point we can process this path
-            /*final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
+            final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
             pathItem.setParameters(processedPathParameters);
 
-            final Map<HttpMethod, Operation> operationMap = pathItem.getOperationMap();
+            final Map</*PathItem.*/HttpMethod, Operation> operationMap = new LinkedHashMap();//pathItem.readOperationMap();
+
+            if(pathItem.getGet() != null) {
+                operationMap.put(HttpMethod.GET, pathItem.getGet());
+            }
+
+            if(pathItem.getPut() != null) {
+                operationMap.put(HttpMethod.PUT, pathItem.getPut());
+            }
+
+            if(pathItem.getPost() != null) {
+                operationMap.put(HttpMethod.POST, pathItem.getPost());
+            }
+
+            if(pathItem.getDelete() != null) {
+                operationMap.put(HttpMethod.DELETE, pathItem.getDelete());
+            }
+
+            if(pathItem.getPatch() != null) {
+                operationMap.put(HttpMethod.PATCH, pathItem.getPatch());
+            }
+
+            if(pathItem.getHead() != null) {
+                operationMap.put(HttpMethod.HEAD, pathItem.getHead());
+            }
+
+            if(pathItem.getOptions() != null) {
+                operationMap.put(HttpMethod.OPTIONS, pathItem.getOptions());
+            }
+
 
             for (HttpMethod httpMethod : operationMap.keySet()) {
                 Operation operation = operationMap.get(httpMethod);
                 operationProcessor.processOperation(operation);
-            }*/
+            }
         }
     }
+
+
 
     protected void updateLocalRefs(PathItem pathItem, String pathRef) {
         if(pathItem.getParameters() != null) {
             List<Parameter> params = pathItem.getParameters();
             for(Parameter param : params) {
-                Map <String,MediaType> content = param.getContent();
-                for( Map.Entry<String, MediaType> map : content.entrySet()) {
-                    if(map.getValue().getSchema()!= null) {
-                        updateLocalRefs(map.getValue().getSchema(), pathRef);
+                if(param.getContent() != null) {
+                    Map<String, MediaType> content = param.getContent();
+                    for (Map.Entry<String, MediaType> map : content.entrySet()) {
+                        if (map.getValue().getSchema() != null) {
+                            updateLocalRefs(map.getValue().getSchema(), pathRef);
+                        }
                     }
                 }
             }
         }
-        //List<Operation> ops = pathItem.getOperations();
-        List<Operation> operations = null;//pathItem.getOperations();
+        //List<Operation> ops = pathItem.readOperations();
+        List<Operation> operations = null;//pathItem.readOperations();
         if(pathItem.getGet()!= null) {
             operations = new ArrayList<>();
             operations.add(pathItem.getGet());
@@ -191,46 +229,40 @@ public class PathsProcessor {
     }
 
     protected void updateLocalRefs(ApiResponse response, String pathRef) {
-        Map <String,MediaType> content = response.getContent();
-        for( Map.Entry<String, MediaType> map : content.entrySet()) {
-            if(map.getValue().getSchema()!= null) {
-                updateLocalRefs(map.getValue().getSchema(), pathRef);
+        if (response.getContent() != null) {
+            Map<String, MediaType> content = response.getContent();
+            for (Map.Entry<String, MediaType> map : content.entrySet()) {
+                if (map.getValue().getSchema() != null) {
+                    Schema schema = map.getValue().getSchema();
+                    updateLocalRefs(schema, pathRef);
+                }
             }
         }
-
     }
 
-    /*protected void updateLocalRefs(Parameter param, String pathRef) {
-        if(param instanceof BodyParameter) {
-            BodyParameter bp = (BodyParameter) param;
-            if(bp.getSchema() != null) {
-                updateLocalRefs(bp.getSchema(), pathRef);
-            }
-        }
-    }*/
 
     protected void updateLocalRefs(RequestBody requestBody, String pathRef) {
-        Map <String,MediaType> content = requestBody.getContent();;
-        for( Map.Entry<String, MediaType> map : content.entrySet()) {
-            if(map.getValue().getSchema()!= null) {
-                updateLocalRefs(map.getValue().getSchema(), pathRef);
+        Map <String,MediaType> content = requestBody.getContent();
+        if(content != null) {
+            for (Map.Entry<String, MediaType> map : content.entrySet()) {
+                if (map.getValue().getSchema() != null) {
+                    updateLocalRefs(map.getValue().getSchema(), pathRef);
+                }
             }
+        }else if (requestBody.get$ref() != null){
+            //requestBodyProcessor.process
         }
     }
 
     protected void updateLocalRefs(Schema schema, String pathRef) {
-        if(schema.get$ref()!= null){
-            //TODO Resolve the $ref
-        }
-        /*if(schema instanceof RefModel) {
-            RefModel refModel = (RefModel) schema;
-            if(isLocalRef(refModel.get$ref())) {
-                refModel.set$ref(computeLocalRef(refModel.get$ref(), pathRef));
+        if(schema.get$ref() != null) {
+            if(isLocalRef(schema.get$ref())) {
+                schema.set$ref(computeLocalRef(schema.get$ref(), pathRef));
             }
-        }*/
+        }
         else if(schema instanceof Schema) {
             // process properties
-            //Schema schema = (Schema) schema;
+
             if(schema.getProperties() != null) {
                 Collection<Schema> properties = schema.getProperties().values();
                 for( Schema property : properties) {
@@ -252,14 +284,7 @@ public class PathsProcessor {
         }
     }
 
-    /*protected void updateLocalRefs(Schema schema, String pathRef) {
-        if(schema instanceof RefProperty) {
-            RefProperty ref = (RefProperty) schema;
-            if(isLocalRef(ref.get$ref())) {
-                ref.set$ref(computeLocalRef(ref.get$ref(), pathRef));
-            }
-        }
-    }*/
+
 
     protected boolean isLocalRef(String ref) {
         if(ref.startsWith("#")) {

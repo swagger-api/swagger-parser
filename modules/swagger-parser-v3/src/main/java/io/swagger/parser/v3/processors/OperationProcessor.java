@@ -6,9 +6,12 @@ import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.parser.v3.ResolverCache;
+import io.swagger.parser.v3.models.RefFormat;
 
 import java.util.List;
 import java.util.Map;
+
+import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
 
 public class OperationProcessor {
@@ -23,7 +26,7 @@ public class OperationProcessor {
     }
 
     public void processOperation(Operation operation) {
-        /*final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
+        final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
         operation.setParameters(processedOperationParameters);
 
         final Map<String, ApiResponse> responses = operation.getResponses();
@@ -33,9 +36,9 @@ public class OperationProcessor {
                 ApiResponse response = responses.get(responseCode);
 
                 if(response != null) {
-                    /*if (response instanceof RefResponse) {
-                        RefResponse refResponse = (RefResponse) response;
-                        ApiResponse resolvedResponse = cache.loadRef(refResponse.get$ref(), refResponse.getRefFormat(), Response.class);
+                    if (response.get$ref() != null) {
+                        RefFormat refFormat = computeRefFormat(response.get$ref());
+                        ApiResponse resolvedResponse = cache.loadRef(response.get$ref(), refFormat, ApiResponse.class);
 
                         if (resolvedResponse != null) {
                             response = resolvedResponse;
@@ -45,6 +48,6 @@ public class OperationProcessor {
                     responseProcessor.processResponse(responseCode,response);
                 }
             }
-        }*/
+        }
     }
 }

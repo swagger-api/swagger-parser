@@ -83,7 +83,6 @@ public class OpenAPIResolverTest {
         MediaType generalError = responses.get("GeneralError").getContent().get("application/json");
         assertEquals(generalError.getSchema(),schemas.get("ExtendedErrorModel"));
 
-
         Map<String, RequestBody> requestBodies = openAPI.getComponents().getRequestBodies();
 
         //internal url requestBody schema
@@ -96,6 +95,8 @@ public class OpenAPIResolverTest {
         MediaType jsonMedia = requestBody2.getContent().get("application/json");
         ArraySchema items = (ArraySchema) jsonMedia.getSchema();
         assertEquals(items.getItems(),schemas.get("User"));
+
+        assertEquals(requestBody2,requestBodies.get("requestBody3"));
 
         //internal Schema Parameter
         Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
@@ -118,6 +119,8 @@ public class OpenAPIResolverTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
+
+        assertEquals(openAPI.getPaths().get("/pathItemRef2"),openAPI.getPaths().get("/pet"));
 
     }
 

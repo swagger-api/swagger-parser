@@ -12,7 +12,6 @@ import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.callbacks.Callback;
-import io.swagger.oas.models.callbacks.Callbacks;
 import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.links.Link;
 import io.swagger.oas.models.info.Contact;
@@ -32,7 +31,6 @@ import io.swagger.oas.models.security.Scopes;
 import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.License;
-import io.swagger.oas.models.media.EncodingProperty;
 import io.swagger.oas.models.headers.Header;
 import io.swagger.oas.models.parameters.CookieParameter;
 import io.swagger.oas.models.parameters.HeaderParameter;
@@ -46,7 +44,6 @@ import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.servers.Server;
 import io.swagger.oas.models.servers.ServerVariable;
 import io.swagger.oas.models.servers.ServerVariables;
-import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
@@ -430,7 +427,7 @@ public class OpenAPIDeserializer {
 
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                 pathItem.set$ref(ref.asText());
-                return pathItem.ref(ref.asText());
+                return pathItem.$ref((ref.asText()));
             } else if (ref.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode node = (ObjectNode) ref;
 
@@ -745,44 +742,44 @@ public class OpenAPIDeserializer {
         return mediaType;
     }
 
-    public Encoding getEncoding(ObjectNode node, String location, ParseResult result){
+    public Map<String,Encoding> getEncodings(ObjectNode node, String location, ParseResult result){
         if (node == null) {
             return null;
         }
-        Encoding encoding = new Encoding();
+        Map<String,Encoding> encodings = new LinkedHashMap<>();
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            EncodingProperty encodingProperty = getEncodingProperty((ObjectNode) node.get(key), location, result);
-            if (encodingProperty != null) {
-                encoding.addEncodingProperty(key, encodingProperty);
+            Encoding encoding = getEncoding((ObjectNode) node.get(key), location, result);
+            if (encoding != null) {
+                encodings.put(key, encoding);
             }
         }
-        return encoding;
+        return encodings;
     }
 
-    public EncodingProperty getEncodingProperty(ObjectNode node, String location, ParseResult result) {
+    public Encoding getEncoding(ObjectNode node, String location, ParseResult result) {
         if (node == null) {
             return null;
         }
 
-        EncodingProperty encodingProperty = new EncodingProperty();
+        Encoding encoding = new Encoding();
 
         String value = getString("contentType", node, true, location, result);
-        encodingProperty.setContentType(value);
+        encoding.setContentType(value);
 
         value = getString("style", node, true, location, result);
 
         if (StringUtils.isBlank(value)) {
-            encodingProperty.setStyle(EncodingProperty.StyleEnum.FORM);
+            encoding.setStyle(Encoding.StyleEnum.FORM.toString());
         } else {
-            if (value.equals(Parameter.StyleEnum.FORM.toString())) {
-                encodingProperty.setStyle(EncodingProperty.StyleEnum.FORM);
-            } else if (value.equals(EncodingProperty.StyleEnum.DEEPOBJECT.toString())) {
-                encodingProperty.setStyle(EncodingProperty.StyleEnum.DEEPOBJECT);
-            } else if (value.equals(EncodingProperty.StyleEnum.PIPEDELIMITED.toString())) {
-                encodingProperty.setStyle(EncodingProperty.StyleEnum.PIPEDELIMITED);
-            } else if (value.equals(EncodingProperty.StyleEnum.SPACEDELIMITED.toString())) {
-                encodingProperty.setStyle(EncodingProperty.StyleEnum.SPACEDELIMITED);
+            if (value.equals(Encoding.StyleEnum.FORM.toString())) {
+                encoding.setStyle(Encoding.StyleEnum.FORM.toString());
+            } else if (value.equals(Encoding.StyleEnum.DEEP_OBJECT.toString())) {
+                encoding.setStyle(Encoding.StyleEnum.DEEP_OBJECT.toString());
+            } else if (value.equals(Encoding.StyleEnum.PIPE_DELIMITED.toString())) {
+                encoding.setStyle(Encoding.StyleEnum.PIPE_DELIMITED.toString());
+            } else if (value.equals(Encoding.StyleEnum.SPACE_DELIMITED.toString())) {
+                encoding.setStyle(Encoding.StyleEnum.SPACE_DELIMITED.toString());
             } else {
                 result.invalidType(location, "style", "string", node);
             }
@@ -790,24 +787,19 @@ public class OpenAPIDeserializer {
 
         Boolean explode = getBoolean("explode", node, false, location, result);
         if (explode != null) {
-            encodingProperty.setExplode(explode);
+            encoding.setExplode(explode);
         }
 
         Boolean allowReserved = getBoolean("allowReserved", node, false, location, result);
         if (allowReserved != null) {
-            encodingProperty.setAllowReserved(allowReserved);
+            encoding.setAllowReserved(allowReserved);
         }
         ObjectNode headersObject = getObject("headers", node, false, location, result);
         if (headersObject!= null){
-            encodingProperty.setHeaders(getHeaders(headersObject, location, result));
+            encoding.setHeaders(getHeaders(headersObject, location, result));
         }
 
-        Map <String,Object> extensions = getExtensions(node,location,result);
-        if(extensions != null && extensions.size() > 0) {
-            encodingProperty.setExtensions(extensions);
-        }
-
-        return encodingProperty;
+        return encoding;
     }
 
     public Map<String, Link> getLinks(ObjectNode obj, String location, ParseResult result) {
@@ -902,16 +894,16 @@ public class OpenAPIDeserializer {
         return linkParameters;
     }
 
-    public /*Map <String,Callback>*/ Callbacks getCallbacks(ObjectNode node, String location, ParseResult result){
+    public Map <String,Callback> getCallbacks(ObjectNode node, String location, ParseResult result){
         if (node == null) {
             return null;
         }
-        Callbacks callbacks = new Callbacks();
+        Map<String, Callback> callbacks = new LinkedHashMap<>();
         Set<String> keys = getKeys(node);
         for(String key : keys) {
             Callback callback = getCallback((ObjectNode) node.get(key), location, result);
             if (callback != null) {
-                callbacks.addCallback(key, callback);
+                callbacks.put(key, callback);
             }
         }
         return callbacks;
@@ -1545,7 +1537,7 @@ public class OpenAPIDeserializer {
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                 schema.set$ref(ref.asText());
-                return schema.ref(ref.asText());
+                return schema.$ref(ref.asText());
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -1888,7 +1880,7 @@ public class OpenAPIDeserializer {
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                  apiResponse.set$ref(ref.asText());
-                 return apiResponse.ref(ref.asText());
+                 return apiResponse.$ref((ref.asText()));
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -2003,7 +1995,7 @@ public class OpenAPIDeserializer {
         }
 
         ObjectNode callbacksNode = getObject("callbacks", obj, false, location, result);
-        Callbacks callbacks = getCallbacks(callbacksNode, "callbacks", result);
+        Map<String,Callback> callbacks = getCallbacks(callbacksNode, "callbacks", result);
         if(callbacks != null){
             operation.setCallbacks(callbacks);
         }
@@ -2084,6 +2076,18 @@ public class OpenAPIDeserializer {
             return null;
         }
         final RequestBody body = new RequestBody();
+
+
+        JsonNode ref = node.get("$ref");
+        if (ref != null) {
+            if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                body.set$ref(ref.asText());
+                return body.$ref(ref.asText());
+            } else {
+                result.invalidType(location, "$ref", "string", node);
+                return null;
+            }
+        }
 
 
 

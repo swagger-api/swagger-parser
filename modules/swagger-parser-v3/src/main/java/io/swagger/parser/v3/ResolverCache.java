@@ -34,8 +34,11 @@ import java.util.regex.Pattern;
 public class ResolverCache {
 
 
-    private static final Pattern SCHEMAS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "(?<name>.+)");
-
+    private static final Pattern SCHEMAS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "schemas/(?<name>.+)");
+    private static final Pattern RESPONSE_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "responses/(?<name>.+)");
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "parameters/(?<name>.+)");
+    private static final Pattern REQUEST_BODY_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "requestBodies/(?<name>.+)");
+    private static final Pattern PATHS_PATTERN = Pattern.compile("^" + RefType.PATH.getInternalPrefix() +  "(?<name>.+)");
 
     private final OpenAPI openApi;
     private final List<AuthorizationValue> auths;
@@ -146,18 +149,22 @@ public class ResolverCache {
     private Object loadInternalRef(String ref) {
         Object result = null;
 
-        if(ref.startsWith("#/components")) {
+        if(ref.startsWith("#/components/schemas")) {
             result = getFromMap(ref, openApi.getComponents().getSchemas(), SCHEMAS_PATTERN);
         }
-        /*else if(ref.startsWith("#/responses")) {
+        else if(ref.startsWith("#/components/requestBodies")) {
+            result = getFromMap(ref, openApi.getComponents().getRequestBodies(), REQUEST_BODY_PATTERN);
+        }
+        else if(ref.startsWith("#/responses")) {
             result = getFromMap(ref, openApi.getComponents().getResponses(), RESPONSE_PATTERN);
         }
         else if(ref.startsWith("#/parameters")) {
             result = getFromMap(ref, openApi.getComponents().getParameters(), PARAMETER_PATTERN);
         }
-        if (result == null) {
-            result = getFromMap(ref, openApi.getComponents().getSchemas(), DEFINITION_PATTERN);
-        }*/
+        else if(ref.startsWith("#/paths")) {
+            result = getFromMap(ref, openApi.getPaths(), PATHS_PATTERN);
+        }
+
 
         return result;
 

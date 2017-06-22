@@ -27,10 +27,10 @@ public class RequestBodyProcessor {
 
     public void processRequestBody(String name,RequestBody requestBody) {
 
-        /*TODO Tony if (requestBody.get$ref() != null){
-            ApiResponse apiResponse = processReferenceRequestBody(requestBody);
-            openApi.getComponents().getResponses().replace(name,requestBody,apiResponse);
-        }*/
+        if (requestBody.get$ref() != null){
+            RequestBody body = processReferenceRequestBody(requestBody);
+            openApi.getComponents().getRequestBodies().replace(name,requestBody,body);
+        }
         Schema schema = null;
         if(requestBody.getContent() != null){
             Map<String,MediaType> content = requestBody.getContent();
@@ -50,11 +50,11 @@ public class RequestBodyProcessor {
             }
         }
     }
-    /* TODO Tony public RequestBody processReferenceRequestBody(RequestBody requestBody){
+        public RequestBody processReferenceRequestBody(RequestBody requestBody){
         RefFormat refFormat = computeRefFormat(requestBody.get$ref());
         String $ref = requestBody.get$ref();
         RequestBody newRequestBody = cache.loadRef($ref, refFormat, RequestBody.class);
         return newRequestBody;
-    }*/
+    }
 
 }

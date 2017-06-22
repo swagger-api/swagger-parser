@@ -5,10 +5,13 @@ import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.v3.ResolverCache;
+import io.swagger.parser.v3.models.RefFormat;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
 
 public class ParameterProcessor {
@@ -35,7 +38,7 @@ public class ParameterProcessor {
         }
     }
 
-   /* public List<Parameter> processParameters(List<Parameter> parameters) {
+   public List<Parameter> processParameters(List<Parameter> parameters) {
 
         if (parameters == null) {
             return null;
@@ -47,13 +50,13 @@ public class ParameterProcessor {
         final List<Parameter> refParameters = new ArrayList<>();
 
         for (Parameter parameter : parameters) {
-            if (parameter instanceof RefParameter) {
-                //RefParameter refParameter = (RefParameter) parameter;
-                //final Parameter resolvedParameter = cache.loadRef(refParameter.get$ref(), refParameter.getRefFormat(), Parameter.class);
+            if (parameter.get$ref() != null) {
+                RefFormat refFormat = computeRefFormat(parameter.get$ref());
+                final Parameter resolvedParameter = cache.loadRef(parameter.get$ref(), refFormat, Parameter.class);
 
                 if(resolvedParameter == null) {
                     // can't resolve it!
-                    processedPathLevelParameters.add(refParameter);
+                    processedPathLevelParameters.add(parameter);
                     continue;
                 }
                 // if the parameter exists, replace it
@@ -74,24 +77,9 @@ public class ParameterProcessor {
                         }
                     }
                 }
-                if (resolvedParameter instanceof RequestBody) {
-                    RequestBody body = (RequestBody) resolvedParameter;
-                    final Model schema = body.getSchema();
-                    modelProcessor.processModel(schema);
-                }
-                if(matched) {
-                    refParameters.add(resolvedParameter);
-                }
-                else {
-                    processedPathLevelParameters.add(resolvedParameter);
-                }
+                processedPathLevelParameters.add(resolvedParameter);
             }
             else {
-                if (parameter instanceof RequestBody) {
-                    RequestBody body = (RequestBody) parameter;
-                    final Model schema = body.getSchema();
-                    modelProcessor.processModel(schema);
-                }
                 processedPathLevelParameters.add(parameter);
             }
         }
@@ -109,6 +97,6 @@ public class ParameterProcessor {
 
         }
 
-        return null;//processedPathLevelParameters;
-    }*/
+        return processedPathLevelParameters;
+    }
 }
