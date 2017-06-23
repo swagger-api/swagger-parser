@@ -119,8 +119,9 @@ public class OpenAPIResolverTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
-
+        System.out.println(openAPI.getPaths().get("/pathItemRef2").getPost().getRequestBody());
         assertEquals(openAPI.getPaths().get("/pathItemRef2"),openAPI.getPaths().get("/pet"));
+
 
     }
 

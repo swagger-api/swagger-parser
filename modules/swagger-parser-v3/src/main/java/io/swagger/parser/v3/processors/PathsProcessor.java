@@ -36,6 +36,7 @@ public class PathsProcessor {
     private final OpenAPIResolver.Settings settings;
     private final ParameterProcessor parameterProcessor;
     private final OperationProcessor operationProcessor;
+    private final RequestBodyProcessor requestBodyProcessor;
 
     public PathsProcessor(ResolverCache cache, OpenAPI openApi) {
         this(cache, openApi, new OpenAPIResolver.Settings());
@@ -46,6 +47,7 @@ public class PathsProcessor {
         this.settings = settings;
         parameterProcessor = new ParameterProcessor(cache, openApi);
         operationProcessor = new OperationProcessor(cache, openApi);
+        requestBodyProcessor = new RequestBodyProcessor(cache, openApi);
     }
 
     public void processPaths() {
@@ -250,7 +252,9 @@ public class PathsProcessor {
                 }
             }
         }else if (requestBody.get$ref() != null){
-            //requestBodyProcessor.process
+            RequestBody resolved = requestBodyProcessor.processReferenceRequestBody(requestBody);
+            openApi.getPaths().get(pathRef).getPost().setRequestBody(resolved);
+            //System.out.println(resolved);
         }
     }
 

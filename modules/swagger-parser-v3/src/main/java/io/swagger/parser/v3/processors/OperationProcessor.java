@@ -2,6 +2,7 @@ package io.swagger.parser.v3.processors;
 
 import io.swagger.oas.models.Operation;
 //import io.swagger.models.RefResponse;
+import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.parameters.Parameter;
@@ -28,6 +29,10 @@ public class OperationProcessor {
     public void processOperation(Operation operation) {
         final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
         operation.setParameters(processedOperationParameters);
+
+        final RequestBody requestBody = operation.getRequestBody();
+
+
 
         final Map<String, ApiResponse> responses = operation.getResponses();
 
