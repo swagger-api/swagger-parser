@@ -35,9 +35,10 @@ public class ResolverCache {
 
 
     private static final Pattern SCHEMAS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "schemas/(?<name>.+)");
-    private static final Pattern RESPONSE_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "responses/(?<name>.+)");
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "parameters/(?<name>.+)");
-    private static final Pattern REQUEST_BODY_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "requestBodies/(?<name>.+)");
+    private static final Pattern RESPONSES_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "responses/(?<name>.+)");
+    private static final Pattern PARAMETERS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "parameters/(?<name>.+)");
+    private static final Pattern REQUEST_BODIES_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "requestBodies/(?<name>.+)");
+    private static final Pattern EXAMPLES_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "examples/(?<name>.+)");
     private static final Pattern PATHS_PATTERN = Pattern.compile("^" + RefType.PATH.getInternalPrefix() +  "(?<name>.+)");
 
     private final OpenAPI openApi;
@@ -153,13 +154,16 @@ public class ResolverCache {
             result = getFromMap(ref, openApi.getComponents().getSchemas(), SCHEMAS_PATTERN);
         }
         else if(ref.startsWith("#/components/requestBodies")) {
-            result = getFromMap(ref, openApi.getComponents().getRequestBodies(), REQUEST_BODY_PATTERN);
+            result = getFromMap(ref, openApi.getComponents().getRequestBodies(), REQUEST_BODIES_PATTERN);
         }
-        else if(ref.startsWith("#/responses")) {
-            result = getFromMap(ref, openApi.getComponents().getResponses(), RESPONSE_PATTERN);
+        else if(ref.startsWith("#/components/examples")) {
+            result = getFromMap(ref, openApi.getComponents().getExamples(), EXAMPLES_PATTERN);
         }
-        else if(ref.startsWith("#/parameters")) {
-            result = getFromMap(ref, openApi.getComponents().getParameters(), PARAMETER_PATTERN);
+        else if(ref.startsWith("#/components/responses")) {
+            result = getFromMap(ref, openApi.getComponents().getResponses(), RESPONSES_PATTERN);
+        }
+        else if(ref.startsWith("#/components/parameters")) {
+            result = getFromMap(ref, openApi.getComponents().getParameters(), PARAMETERS_PATTERN);
         }
         else if(ref.startsWith("#/paths")) {
             result = getFromMap(ref, openApi.getPaths(), PATHS_PATTERN);

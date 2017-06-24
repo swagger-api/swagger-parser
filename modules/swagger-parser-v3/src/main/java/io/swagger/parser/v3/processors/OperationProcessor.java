@@ -31,8 +31,16 @@ public class OperationProcessor {
         operation.setParameters(processedOperationParameters);
 
         final RequestBody requestBody = operation.getRequestBody();
+        if(requestBody != null) {
+            if (requestBody.get$ref() != null) {
+                RefFormat refFormat = computeRefFormat(requestBody.get$ref());
+                RequestBody resolvedBody = cache.loadRef(requestBody.get$ref(), refFormat, RequestBody.class);
 
-
+                if (resolvedBody != null) {
+                    operation.setRequestBody(resolvedBody);
+                }
+            }
+        }
 
         final Map<String, ApiResponse> responses = operation.getResponses();
 

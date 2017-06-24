@@ -182,8 +182,9 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getType(),"object");
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties());
         //System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties().get("id"));
-        //System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding());
-                /*get("historyMetadata").getContentType(),"application/xml; charset=utf-8");
+
+
+        /*TODO System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").get("historyMetadata").getContentType(),"application/xml; charset=utf-8");
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders());
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders().get("X-Rate-Limit"));*/
     }
@@ -365,6 +366,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getPost().getExternalDocs());
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
+        System.out.println(petEndpoint.getParameters());
         //Assert.assertEquals(petEndpoint.getPost().getRequestBody().getDescription(),"user to add to the system");
         //Assert.assertTrue(petEndpoint.getPost().getRequestBody().getRequired(),"required");
 
@@ -379,7 +381,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getServers());
         Assert.assertEquals(petEndpoint.getServers().size(), 1);
         Assert.assertNotNull(petEndpoint.getParameters());
-        Assert.assertEquals(petEndpoint.getParameters().size(), 1);
+        Assert.assertEquals(petEndpoint.getParameters().size(), 2);
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
         Parameter parameter = petEndpoint.getParameters().get(0);
         //System.out.println(parameter.getSchema());

@@ -42,6 +42,8 @@ public class ResponseProcessor {
                         if(schema.get$ref() != null) {
                             Schema resolved = schemaProcessor.processReferenceSchema(schema);
                             mediaType.setSchema(resolved);
+                        }else {
+                            schemaProcessor.processSchema(schema);
                         }
                     }
                 }

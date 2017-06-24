@@ -28,9 +28,13 @@ public class ParameterProcessor {
     }
 
     public void processParameter(String name, Parameter parameter) {
-        /*if(parameter.get$ref() != null){
-
-        }*/
+        String $ref = parameter.get$ref();
+        if($ref != null){
+            RefFormat refFormat = computeRefFormat($ref);
+            Parameter refParameter = cache.loadRef($ref, refFormat, Parameter.class);
+            //TODO what if the example is not in components?
+            openApi.getComponents().getParameters().replace(name,parameter,refParameter);
+        }
         if (parameter.getSchema() != null){
          Schema resolved = schemaProcessor.processSchema(parameter.getSchema());
          //TODO what if the parameter is not in components?

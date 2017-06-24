@@ -146,6 +146,7 @@ paths:
           - pending
           - sold
           default: available
+    - "$ref": "#/components/parameters/skipParam"
     put:
       tags:
       - pet
@@ -788,6 +789,9 @@ externalDocs:
   url: http://swagger.io
 components:
   schemas:
+    VeryComplexType:
+      type: integer
+      format: int32
     ExtendedErrorModel:
       allOf:
       - type: object
@@ -973,6 +977,8 @@ components:
           schema:
             $ref: '#/components/schemas/ExtendedErrorModel'
   parameters:
+    refParam:
+      "$ref": "#/components/parameters/limitParam/"
     newParam:
       name: skip
       in: query
@@ -1016,7 +1022,7 @@ components:
         gender: Female
         breed: Mixed
     frog:
-    $ref: "#/components/examples/frog-example"
+      $ref: "#/components/examples/cat"
   requestBodies:
     requestBody1:
       description: request body in components

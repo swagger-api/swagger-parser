@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.headers.Header;
 import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
@@ -106,6 +107,12 @@ public class OpenAPIResolverTest {
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
         assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema(),schemas.get("User"));
 
+        Map<String, Example> examples = openAPI.getComponents().getExamples();
+
+        //internal url example
+        Example frogExample = examples.get("frog");
+        assertEquals(frogExample.getSummary(),"An example of a cat");
+
     }
 
     @Test
@@ -119,8 +126,11 @@ public class OpenAPIResolverTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
-        System.out.println(openAPI.getPaths().get("/pathItemRef2").getPost().getRequestBody());
+        ArraySchema schema = (ArraySchema) openAPI.getPaths().get("/pet").getPut().getResponses().get("400").getContent().get("application/json").getSchema();
+        assertEquals(schema.getItems(),openAPI.getComponents().getSchemas().get("VeryComplexType"));
         assertEquals(openAPI.getPaths().get("/pathItemRef2"),openAPI.getPaths().get("/pet"));
+        //System.out.println(openAPI.getPaths().get("/pet").getPost().getParameters());
+        System.out.println(openAPI);
 
 
     }

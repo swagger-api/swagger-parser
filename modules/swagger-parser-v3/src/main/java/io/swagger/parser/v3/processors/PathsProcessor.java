@@ -65,32 +65,7 @@ public class PathsProcessor {
 
                 if (parameters != null) {
                     // add parameters to each operation
-                    List<Operation> operations = null;//pathItem.getOperations();
-                    if(pathItem.getGet()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getGet());
-                    }if(pathItem.getPost()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getPost());
-                    }if(pathItem.getDelete()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getDelete());
-                    }if(pathItem.getPatch()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getPatch());
-                    }if(pathItem.getPut()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getPut());
-                    }if(pathItem.getPatch()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getPatch());
-                    }if(pathItem.getHead()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getHead());
-                    }if(pathItem.getOptions()!= null) {
-                        operations = new ArrayList<>();
-                        operations.add(pathItem.getOptions());
-                    }
+                    List<Operation> operations = pathItem.readOperations();
                     if (operations != null) {
                         for (Operation operation : operations) {
                             List<Parameter> parametersToAdd = new ArrayList<>();
@@ -137,38 +112,11 @@ public class PathsProcessor {
             final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
             pathItem.setParameters(processedPathParameters);
 
-            final Map</*PathItem.*/HttpMethod, Operation> operationMap = new LinkedHashMap();//pathItem.readOperationMap();
-
-            if(pathItem.getGet() != null) {
-                operationMap.put(HttpMethod.GET, pathItem.getGet());
-            }
-
-            if(pathItem.getPut() != null) {
-                operationMap.put(HttpMethod.PUT, pathItem.getPut());
-            }
-
-            if(pathItem.getPost() != null) {
-                operationMap.put(HttpMethod.POST, pathItem.getPost());
-            }
-
-            if(pathItem.getDelete() != null) {
-                operationMap.put(HttpMethod.DELETE, pathItem.getDelete());
-            }
-
-            if(pathItem.getPatch() != null) {
-                operationMap.put(HttpMethod.PATCH, pathItem.getPatch());
-            }
-
-            if(pathItem.getHead() != null) {
-                operationMap.put(HttpMethod.HEAD, pathItem.getHead());
-            }
-
-            if(pathItem.getOptions() != null) {
-                operationMap.put(HttpMethod.OPTIONS, pathItem.getOptions());
-            }
+            final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
 
 
-            for (HttpMethod httpMethod : operationMap.keySet()) {
+
+            for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
                 Operation operation = operationMap.get(httpMethod);
                 operationProcessor.processOperation(operation);
             }
@@ -191,33 +139,8 @@ public class PathsProcessor {
                 }
             }
         }
-        //List<Operation> ops = pathItem.readOperations();
-        List<Operation> operations = null;//pathItem.readOperations();
-        if(pathItem.getGet()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getGet());
-        }if(pathItem.getPost()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getPost());
-        }if(pathItem.getDelete()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getDelete());
-        }if(pathItem.getPatch()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getPatch());
-        }if(pathItem.getPut()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getPut());
-        }if(pathItem.getPatch()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getPatch());
-        }if(pathItem.getHead()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getHead());
-        }if(pathItem.getOptions()!= null) {
-            operations = new ArrayList<>();
-            operations.add(pathItem.getOptions());
-        }
+
+        List<Operation> operations = pathItem.readOperations();
         for(Operation op : operations) {
             if(op.getRequestBody() != null) {
                 updateLocalRefs(op.getRequestBody(), pathRef);
@@ -253,7 +176,7 @@ public class PathsProcessor {
             }
         }else if (requestBody.get$ref() != null){
             RequestBody resolved = requestBodyProcessor.processReferenceRequestBody(requestBody);
-            openApi.getPaths().get(pathRef).getPost().setRequestBody(resolved);
+            //openApi.getPaths().get(pathRef).getPost().setRequestBody(resolved);
             //System.out.println(resolved);
         }
     }

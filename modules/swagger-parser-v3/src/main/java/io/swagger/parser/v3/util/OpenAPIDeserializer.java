@@ -808,6 +808,7 @@ public class OpenAPIDeserializer {
         }
         Map<String, Link> links = new LinkedHashMap<>();
 
+
         Set<String> linkKeys = getKeys(obj);
         for(String linkName : linkKeys) {
             JsonNode linkValue = obj.get(linkName);
@@ -835,8 +836,8 @@ public class OpenAPIDeserializer {
         JsonNode ref = linkNode.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                //link.set$ref(ref.asText());
-                //return link.ref(ref.asText());
+                link.set$ref(ref.asText());
+                return link.$ref(ref.asText());
             } else {
                 result.invalidType(location, "$ref", "string", linkNode);
                 return null;
@@ -909,13 +910,12 @@ public class OpenAPIDeserializer {
         return callbacks;
     }
 
-    public Callback getCallback(ObjectNode node, String location, ParseResult result) {
+    public Callback getCallback(ObjectNode node,String location, ParseResult result) {
         if (node == null) {
             return null;
         }
 
         Callback callback = new Callback();
-
 
         Set<String> keys = getKeys(node);
         for(String name : keys) {
@@ -924,6 +924,16 @@ public class OpenAPIDeserializer {
                 result.invalidType(location, name, "object", value);
             } else {
                 if (node!= null){
+                    JsonNode ref = node.get("$ref");
+                    if (ref != null) {
+                        if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                            PathItem pathItem = new PathItem();
+                            return callback.addPathItem(name,pathItem.$ref(ref.asText()));
+                        } else {
+                            result.invalidType(location, "$ref", "string", node);
+                            return null;
+                        }
+                    }
                     callback.addPathItem(name,getPathItem((ObjectNode) value,location,result));
                     Map <String,Object> extensions = getExtensions(node,location,result);
                     if(extensions != null && extensions.size() > 0) {
@@ -1100,13 +1110,27 @@ public class OpenAPIDeserializer {
             return null;
         }
 
+
+        Parameter parameter = null;
+
+        JsonNode ref = obj.get("$ref");
+        if (ref != null) {
+            if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                parameter = new Parameter();
+                parameter.set$ref(ref.asText());
+                return parameter.$ref(ref.asText());
+            } else {
+                result.invalidType(location, "$ref", "string", obj);
+                return null;
+            }
+        }
+
         String value = getString("in", obj, true, location, result);
 
         if (StringUtils.isBlank(value)) {
             return null;
         }
 
-        Parameter parameter = null;
 
         if (QUERY_PARAMETER.equals(value)) {
             parameter = new QueryParameter();
@@ -1227,6 +1251,19 @@ public class OpenAPIDeserializer {
 
         Header header = new Header();
 
+        JsonNode ref = headerNode.get("$ref");
+        if (ref != null) {
+            if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                header.set$ref(ref.asText());
+                return header.$ref(ref.asText());
+            } else {
+                result.invalidType(location, "$ref", "string", headerNode);
+                return null;
+            }
+        }
+
+
+
         String value = getString("description", headerNode, false, location, result);
         if (StringUtils.isNotBlank(value)) {
             header.setDescription(value);
@@ -1312,6 +1349,17 @@ public class OpenAPIDeserializer {
         }
 
         SecurityScheme securityScheme = new SecurityScheme();
+
+        JsonNode ref = node.get("$ref");
+        if (ref != null) {
+            if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                securityScheme.set$ref(ref.asText());
+                return securityScheme.$ref(ref.asText());
+            } else {
+                result.invalidType(location, "$ref", "string", node);
+                return null;
+            }
+        }
 
         String value = getString("type", node, true, location, result);
         if (StringUtils.isNotBlank(value)) {
@@ -1787,6 +1835,17 @@ public class OpenAPIDeserializer {
 
         Example example = new Example();
 
+        JsonNode ref = node.get("$ref");
+        if (ref != null) {
+            if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                example.set$ref(ref.asText());
+                return example.$ref((ref.asText()));
+            } else {
+                result.invalidType(location, "$ref", "string", node);
+                return null;
+            }
+        }
+
         String value = getString("summary", node, false, location, result);
         if (StringUtils.isNotBlank(value)) {
             example.setSummary(value);
@@ -1977,14 +2036,6 @@ public class OpenAPIDeserializer {
 
         final ObjectNode requestObjectNode = getObject("requestBody", obj, false, location, result);
         if (requestObjectNode != null){
-
-            if(requestObjectNode.get("$ref") != null) {
-                //System.out.println(requestObjectNode.get("$ref") + " " +location);
-                //Reference reference = new Reference();
-
-
-                //return refModel(node, location, result);
-            }
             operation.setRequestBody(getRequestBody(requestObjectNode, location, result));
         }
 
