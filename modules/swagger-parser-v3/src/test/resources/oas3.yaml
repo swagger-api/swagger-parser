@@ -1046,6 +1046,8 @@ components:
     requestBody3:
       "$ref": "#/components/requestBodies/requestBody2"
   securitySchemes:
+    reference:
+      "$ref": "#/components/securitySchemes/api_key"
     petstore_auth:
       type: oauth2
       flows:
@@ -1059,10 +1061,13 @@ components:
       name: api_key
       in: header
   headers:
+    X-Ref-Limit-Limit:
+      "$ref": "#/components/headers/X-Rate-Limit-Reset"
     X-Rate-Limit-Limit:
       description: The number of allowed requests in the current period
       schema:
         type: integer
+      example: "This is a header example"
     X-Rate-Limit-Remaining:
       description: The number of remaining requests in the current period
       schema:
@@ -1073,17 +1078,21 @@ components:
       schema:
         type: integer
   links:
+    referenced:
+      "$ref": "#/components/links/unsubscribe"
     unsubscribe:
       operationId: cancelHookCallback
       parameters:
         id: $response.body#/hookId
       x-link: link extension
   callbacks:
+    referenced:
+      "$ref": "#/components/callbacks/failed"
     heartbeat:
       '$request.query.heartbeat-url':
         post:
           requestBody:
-            $ref: '#/components/requestBodies/heartbeatMessage'
+            $ref: '#/components/requestBodies/requestBody3'
           responses:
             '200':
               description: Consumer acknowledged the callback
@@ -1091,7 +1100,7 @@ components:
       '$response.body#/failedUrl':
         post:
           requestBody:
-            $ref: '#/components/requestBodies/failedMessage'
+            $ref: '#/components/requestBodies/requestBody3'
           responses:
             '200':
               description: Consumer acknowledged the callback failed
@@ -1099,7 +1108,7 @@ components:
       '$response.body#/successUrl':
         post:
           requestBody:
-            $ref: '#/components/requestBodies/successMessage'
+            $ref: '#/components/requestBodies/requestBody1'
           responses:
             '200':
               description: Consumer acknowledged the callback

@@ -94,17 +94,15 @@ public class PathsProcessor {
 
            if (pathItem.get$ref() != null) {
                 RefFormat refFormat = computeRefFormat(pathItem.get$ref());
-                PathItem resolvedPath = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
+                PathItem resolvedPathItem = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
 
-                // TODO: update references to the parent location
+                //String pathRef = pathItem.get$ref().split("#")[0];
+                resolvePathItem(resolvedPathItem);
 
-                String pathRef = pathItem.get$ref().split("#")[0];
-                updateLocalRefs(resolvedPath, pathRef);
-
-                if (resolvedPath != null) {
+                if (resolvedPathItem != null) {
                     //we need to put the resolved path into swagger object
-                    openApi.path(pathStr, resolvedPath);
-                    pathItem = resolvedPath;
+                    openApi.path(pathStr, resolvedPathItem);
+                    pathItem = resolvedPathItem;
                 }
             }
 
@@ -114,46 +112,61 @@ public class PathsProcessor {
 
             final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
 
-
-
             for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
                 Operation operation = operationMap.get(httpMethod);
-                operationProcessor.processOperation(operation);
+                Operation resolvedOperation = operationProcessor.processOperation(operation);
+                if(PathItem.HttpMethod.GET.equals(httpMethod)) {
+                    pathItem.setGet(resolvedOperation);
+                }
+                else if(PathItem.HttpMethod.POST.equals(httpMethod)) {
+                    pathItem.setPost(resolvedOperation);
+                }
+                else if(PathItem.HttpMethod.PUT.equals(httpMethod)) {
+                    pathItem.setPut(resolvedOperation);
+                }
+                else if(PathItem.HttpMethod.DELETE.equals(httpMethod)) {
+                    pathItem.setDelete(resolvedOperation);
+                }
+                else if(PathItem.HttpMethod.TRACE.equals(httpMethod)) {
+                    pathItem.setTrace(resolvedOperation);
+                }
+                else if(PathItem.HttpMethod.OPTIONS.equals(httpMethod)) {
+                    pathItem.setOptions(resolvedOperation);
+                }
+                else if(PathItem.HttpMethod.HEAD.equals(httpMethod)) {
+                    pathItem.setHead(resolvedOperation);
+                }
+                else if(PathItem.HttpMethod.PATCH.equals(httpMethod)) {
+                    pathItem.setPatch(resolvedOperation);
+                }
             }
         }
     }
 
 
 
-    protected void updateLocalRefs(PathItem pathItem, String pathRef) {
+    protected void resolvePathItem(PathItem pathItem) {
         if(pathItem.getParameters() != null) {
+            List<Parameter> resolvedParameters = new ArrayList<>();
             List<Parameter> params = pathItem.getParameters();
             for(Parameter param : params) {
-                if(param.getContent() != null) {
-                    Map<String, MediaType> content = param.getContent();
-                    for (Map.Entry<String, MediaType> map : content.entrySet()) {
-                        if (map.getValue().getSchema() != null) {
-                            updateLocalRefs(map.getValue().getSchema(), pathRef);
-                        }
-                    }
-                }
+                Parameter resolvedParameter = parameterProcessor.processParameter(param);
+                resolvedParameters.add(resolvedParameter);
+                pathItem.setParameters(resolvedParameters);
+
             }
         }
 
-        List<Operation> operations = pathItem.readOperations();
+        /*List<Operation> operations = pathItem.readOperations();
+        List<Operation> resolvedOperations = new ArrayList<>();
         for(Operation op : operations) {
-            if(op.getRequestBody() != null) {
-                updateLocalRefs(op.getRequestBody(), pathRef);
-            }
-            if(op.getResponses() != null) {
-                for(ApiResponse response : op.getResponses().values()) {
-                    updateLocalRefs(response, pathRef);
-                }
-            }
-        }
+            Operation resolvedOperation = operationProcessor.processOperation(op);
+            resolvedOperations.add(resolvedOperation);
+
+        }*/
     }
 
-    protected void updateLocalRefs(ApiResponse response, String pathRef) {
+    /*protected void updateLocalRefs(ApiResponse response, String pathRef) {
         if (response.getContent() != null) {
             Map<String, MediaType> content = response.getContent();
             for (Map.Entry<String, MediaType> map : content.entrySet()) {
@@ -176,12 +189,11 @@ public class PathsProcessor {
             }
         }else if (requestBody.get$ref() != null){
             RequestBody resolved = requestBodyProcessor.processReferenceRequestBody(requestBody);
-            //openApi.getPaths().get(pathRef).getPost().setRequestBody(resolved);
             //System.out.println(resolved);
         }
-    }
+    }*/
 
-    protected void updateLocalRefs(Schema schema, String pathRef) {
+    /*protected void updateLocalRefs(Schema schema, String pathRef) {
         if(schema.get$ref() != null) {
             if(isLocalRef(schema.get$ref())) {
                 schema.set$ref(computeLocalRef(schema.get$ref(), pathRef));
@@ -210,7 +222,7 @@ public class PathsProcessor {
             }
         }
     }
-
+*/
 
 
     protected boolean isLocalRef(String ref) {

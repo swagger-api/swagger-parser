@@ -6,6 +6,9 @@ import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
 /**
@@ -20,14 +23,31 @@ public class ExampleProcessor {
         this.openApi = openApi;
     }
 
-    public void processExample(String name, Example example) {
+    public Example processExample(Example example) {
 
         if (example.get$ref() != null){
             RefFormat refFormat = computeRefFormat(example.get$ref());
             String $ref = example.get$ref();
             Example newExample = cache.loadRef($ref, refFormat, Example.class);
-            //TODO what if the example is not in components?
-            openApi.getComponents().getExamples().replace(name,example,newExample);
+            if(newExample != null) {
+                return newExample;
+            }
+            //openApi.getComponents().getExamples().replace(name,example,newExample);
         }
+        return example;
+    }
+
+    public List<Example> processExample(List<Example> examples) {
+        List<Example> newExampleList = new ArrayList<>();
+        for(Example example: examples){
+            if (example.get$ref() != null){
+                RefFormat refFormat = computeRefFormat(example.get$ref());
+                String ref = example.get$ref();
+                Example newExample = cache.loadRef(ref, refFormat, Example.class);
+                newExampleList.add(newExample);
+                //openApi.getComponents().getHeaders().get(name).setExamples(newExampleList);
+            }
+        }
+        return newExampleList;
     }
 }

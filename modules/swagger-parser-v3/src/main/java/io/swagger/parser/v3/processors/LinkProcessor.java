@@ -7,6 +7,7 @@ import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
@@ -27,25 +28,26 @@ public class LinkProcessor {
     }
 
 
-    public void processLink(String linkName, Link link) {
+    public Link processLink(Link link) {
         if(link.get$ref() != null){
             RefFormat refFormat = computeRefFormat(link.get$ref());
             String $ref = link.get$ref();
             Link resolved = cache.loadRef($ref, refFormat, Link.class);
             if (resolved != null) {
-               openApi.getComponents().getLinks().replace(linkName,link,resolved);
+                return resolved;
+               //openApi.getComponents().getLinks().replace(linkName,link,resolved);
             }
 
-        }else {
-            if(link.getHeaders() != null){
-                Set<String> keySet = new LinkedHashSet<>();
-                while(link.getHeaders().keySet().size() > keySet.size()) {
-                    for (String headerName : keySet) {
-                        final Header header = link.getHeaders().get(headerName);
-                        headerProcessor.processHeader(headerName,header);
-                    }
-                }
+        }else if (link.getHeaders() != null){
+            Map<String,Header> headers = link.getHeaders();
+            for(String headerName : headers.keySet()){
+                Header header = headers.get(headerName);
+                Header resolvedHeader = headerProcessor.processHeader(header);
+                headers.replace(headerName,header,resolvedHeader);
             }
+            link.setHeaders(headers);
+            return link;
         }
+        return link;
     }
 }

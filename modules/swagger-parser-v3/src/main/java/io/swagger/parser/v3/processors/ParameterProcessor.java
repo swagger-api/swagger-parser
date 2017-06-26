@@ -1,6 +1,8 @@
 package io.swagger.parser.v3.processors;
 
 
+import io.swagger.oas.models.examples.Example;
+import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.OpenAPI;
@@ -18,6 +20,7 @@ public class ParameterProcessor {
 
     private final ResolverCache cache;
     private final SchemaProcessor schemaProcessor;
+    private final ExampleProcessor exampleProcessor;
     private final OpenAPI openApi;
 
 
@@ -25,21 +28,57 @@ public class ParameterProcessor {
         this.cache = cache;
         this.openApi = openApi;
         this.schemaProcessor = new SchemaProcessor(cache);
+        this.exampleProcessor = new ExampleProcessor(cache,openApi);
     }
 
-    public void processParameter(String name, Parameter parameter) {
+    public Parameter processParameter(Parameter parameter) {
         String $ref = parameter.get$ref();
         if($ref != null){
             RefFormat refFormat = computeRefFormat($ref);
-            Parameter refParameter = cache.loadRef($ref, refFormat, Parameter.class);
-            //TODO what if the example is not in components?
-            openApi.getComponents().getParameters().replace(name,parameter,refParameter);
+            Parameter resolvedParameter = cache.loadRef($ref, refFormat, Parameter.class);
+            if(resolvedParameter != null) {
+                return resolvedParameter;
+            }//openApi.getComponents().getParameters().replace(name,parameter,refParameter);
         }
         if (parameter.getSchema() != null){
-         Schema resolved = schemaProcessor.processSchema(parameter.getSchema());
-         //TODO what if the parameter is not in components?
-         openApi.getComponents().getParameters().get(name).setSchema(resolved);
+            Schema resolved = schemaProcessor.processSchema(parameter.getSchema());
+            parameter.setSchema(resolved);
+            //return parameter;
+         //openApi.getComponents().getParameters().get(name).setSchema(resolved);
         }
+        if (parameter.getExamples() != null){
+            Map <String, Example> examples = parameter.getExamples();
+            for(String exampleName: examples.keySet()){
+                final Example example = examples.get(exampleName);
+                Example resolvedExample = exampleProcessor.processExample(example);
+                examples.replace(exampleName,example,resolvedExample);
+                parameter.setExamples(examples);
+            }
+        }
+        Schema schema = null;
+        MediaType resolvedMedia = null;
+        if(parameter.getContent() != null) {
+            Map<String,MediaType> content = parameter.getContent();
+            for( String mediaName : content.keySet()) {
+                MediaType mediaType = content.get(mediaName);
+                if(mediaType.getSchema()!= null) {
+                    schema = mediaType.getSchema();
+                    resolvedMedia = new MediaType();
+                    if (schema != null) {
+                        if(schema.get$ref() != null) {
+                            Schema resolved = schemaProcessor.processReferenceSchema(schema);
+                            resolvedMedia.setSchema(resolved);
+                            parameter.getContent().replace(mediaName,mediaType,resolvedMedia);
+                        }else {
+                            Schema resolved = schemaProcessor.processSchema(schema);
+                            resolvedMedia.setSchema(resolved);
+                            parameter.getContent().replace(mediaName,mediaType,resolvedMedia);
+                        }
+                    }
+                }
+            }
+        }
+        return parameter;
     }
 
    public List<Parameter> processParameters(List<Parameter> parameters) {
@@ -47,8 +86,6 @@ public class ParameterProcessor {
         if (parameters == null) {
             return null;
         }
-
-
 
         final List<Parameter> processedPathLevelParameters = new ArrayList<>();
         final List<Parameter> refParameters = new ArrayList<>();

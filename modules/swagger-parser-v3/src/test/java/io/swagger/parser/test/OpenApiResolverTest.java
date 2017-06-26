@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.callbacks.Callback;
 import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.headers.Header;
+import io.swagger.oas.models.links.Link;
 import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.MediaType;
@@ -24,11 +26,11 @@ import org.testng.annotations.Test;
 
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
+//import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class OpenAPIResolverTest {
 
@@ -105,6 +107,7 @@ public class OpenAPIResolverTest {
 
         //internal Schema header
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
+        //TODO header ref
         assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema(),schemas.get("User"));
 
         Map<String, Example> examples = openAPI.getComponents().getExamples();
@@ -112,6 +115,13 @@ public class OpenAPIResolverTest {
         //internal url example
         Example frogExample = examples.get("frog");
         assertEquals(frogExample.getSummary(),"An example of a cat");
+
+        Map<String, Link> links = openAPI.getComponents().getLinks();
+        assertEquals(openAPI.getComponents().getLinks().get("referenced"),links.get("unsubscribe"));
+
+
+        Map<String, Callback> callback = openAPI.getComponents().getCallbacks();
+        //System.out.println(openAPI.getComponents().getCallbacks());
 
     }
 
@@ -130,7 +140,7 @@ public class OpenAPIResolverTest {
         assertEquals(schema.getItems(),openAPI.getComponents().getSchemas().get("VeryComplexType"));
         assertEquals(openAPI.getPaths().get("/pathItemRef2"),openAPI.getPaths().get("/pet"));
         //System.out.println(openAPI.getPaths().get("/pet").getPost().getParameters());
-        System.out.println(openAPI);
+        System.out.println(openAPI.getPaths());
 
 
     }

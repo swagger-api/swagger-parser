@@ -39,6 +39,9 @@ public class ResolverCache {
     private static final Pattern PARAMETERS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "parameters/(?<name>.+)");
     private static final Pattern REQUEST_BODIES_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "requestBodies/(?<name>.+)");
     private static final Pattern EXAMPLES_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "examples/(?<name>.+)");
+    private static final Pattern LINKS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "links/(?<name>.+)");
+    private static final Pattern CALLBACKS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "callbacks/(?<name>.+)");
+    private static final Pattern HEADERS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "headers/(?<name>.+)");
     private static final Pattern PATHS_PATTERN = Pattern.compile("^" + RefType.PATH.getInternalPrefix() +  "(?<name>.+)");
 
     private final OpenAPI openApi;
@@ -164,6 +167,15 @@ public class ResolverCache {
         }
         else if(ref.startsWith("#/components/parameters")) {
             result = getFromMap(ref, openApi.getComponents().getParameters(), PARAMETERS_PATTERN);
+        }
+        else if(ref.startsWith("#/components/links")) {
+            result = getFromMap(ref, openApi.getComponents().getLinks(), LINKS_PATTERN);
+        }
+        else if(ref.startsWith("#/components/headers")) {
+            result = getFromMap(ref, openApi.getComponents().getHeaders(), HEADERS_PATTERN);
+        }
+        else if(ref.startsWith("#/components/callbacks")) {
+            result = getFromMap(ref, openApi.getComponents().getCallbacks(), CALLBACKS_PATTERN);
         }
         else if(ref.startsWith("#/paths")) {
             result = getFromMap(ref, openApi.getPaths(), PATHS_PATTERN);

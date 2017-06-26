@@ -11,6 +11,7 @@ import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.parser.v3.ResolverCache;
+import jdk.nashorn.internal.codegen.CompilerConstants;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -138,7 +139,8 @@ public class ComponentsProcessor {
 
         for (String securitySchemeName : securitySchemeKey) {
             final SecurityScheme securityScheme = securitySchemes.get(securitySchemeName);
-            securitySchemeProcessor.processSecurityScheme(securitySchemeName,securityScheme);
+            SecurityScheme resolvedSecurityScheme = securitySchemeProcessor.processSecurityScheme(securityScheme);
+            securitySchemes.replace(securitySchemeName,securityScheme,resolvedSecurityScheme);
         }
     }
 
@@ -147,7 +149,8 @@ public class ComponentsProcessor {
 
         for (String callbackName : callbackKey) {
             final Callback callback = callbacks.get(callbackName);
-            callbackProcessor.processCallback(callbackName,callback);
+            Callback resolvedCallback = callbackProcessor.processCallback(callback);
+            callbacks.replace(callbackName, callback, resolvedCallback);
         }
     }
 
@@ -156,8 +159,10 @@ public class ComponentsProcessor {
 
         for (String linkName : linkKey) {
             final Link link = links.get(linkName);
-            linkProcessor.processLink(linkName,link);
+            Link resolvedLink = linkProcessor.processLink(link);
+            links.replace(linkName,link,resolvedLink);
         }
+
     }
 
     private void processExamples(Set<String> exampleKey, Map<String, Example> examples) {
@@ -165,7 +170,8 @@ public class ComponentsProcessor {
 
         for (String exampleName : exampleKey) {
             final Example example = examples.get(exampleName);
-            exampleProcessor.processExample(exampleName,example);
+            Example resolvedExample = exampleProcessor.processExample(example);
+            examples.replace(exampleName,example,resolvedExample);
         }
     }
 
@@ -174,7 +180,8 @@ public class ComponentsProcessor {
 
         for (String headersName : HeaderKey) {
             final Header header = headers.get(headersName);
-            headerProcessor.processHeader(headersName,header);
+            Header resolvedHeader = headerProcessor.processHeader(header);
+            headers.replace(headersName,header,resolvedHeader);
         }
     }
 
@@ -183,7 +190,8 @@ public class ComponentsProcessor {
 
         for (String parametersName : ParametersKey) {
             final Parameter parameter = parameters.get(parametersName);
-            parameterProcessor.processParameter(parametersName,parameter);
+            Parameter resolvedParameter  = parameterProcessor.processParameter(parameter);
+            parameters.replace(parametersName,parameter,resolvedParameter);
         }
     }
 
@@ -192,7 +200,8 @@ public class ComponentsProcessor {
 
         for (String requestBodyName : requestBodyKey) {
             final RequestBody requestBody = requestBodies.get(requestBodyName);
-            requestBodyProcessor.processRequestBody(requestBodyName,requestBody);
+            RequestBody resolvedBody = requestBodyProcessor.processRequestBody(requestBody);
+            requestBodies.replace(requestBodyName,requestBody,resolvedBody);
         }
     }
 
@@ -201,7 +210,8 @@ public class ComponentsProcessor {
 
         for (String responseName : responseKey) {
             final ApiResponse response = responses.get(responseName);
-            responseProcessor.processResponse(responseName,response);
+            ApiResponse resolvedResponse = responseProcessor.processResponse(response);
+            responses.replace(responseName,response,resolvedResponse);
         }
     }
 

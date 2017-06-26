@@ -732,7 +732,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode encodingObject = getObject("encoding",contentNode,false,location,result);
         if(encodingObject!=null) {
-            mediaType.setEncoding(getEncoding(encodingObject, location, result));
+            //TODO mediaType.setEncoding(getEncodingMap(encodingObject, location, result));
         }
         Map <String,Object> extensions = getExtensions(contentNode,location,result);
         if(extensions != null && extensions.size() > 0) {
@@ -742,7 +742,7 @@ public class OpenAPIDeserializer {
         return mediaType;
     }
 
-    public Map<String,Encoding> getEncodings(ObjectNode node, String location, ParseResult result){
+    public Map<String,Encoding> getEncodingMap(ObjectNode node, String location, ParseResult result){
         if (node == null) {
             return null;
         }
@@ -920,27 +920,24 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
         for(String name : keys) {
             JsonNode value = node.get(name);
-            if (!value.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, name, "object", value);
-            } else {
-                if (node!= null){
-                    JsonNode ref = node.get("$ref");
-                    if (ref != null) {
-                        if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                            PathItem pathItem = new PathItem();
-                            return callback.addPathItem(name,pathItem.$ref(ref.asText()));
-                        } else {
-                            result.invalidType(location, "$ref", "string", node);
-                            return null;
-                        }
-                    }
-                    callback.addPathItem(name,getPathItem((ObjectNode) value,location,result));
-                    Map <String,Object> extensions = getExtensions(node,location,result);
-                    if(extensions != null && extensions.size() > 0) {
-                        callback.setExtensions(extensions);
+            if (node!= null){
+                JsonNode ref = node.get("$ref");
+                if (ref != null) {
+                    if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                        PathItem pathItem = new PathItem();
+                        return callback.addPathItem(name,pathItem.$ref(ref.asText()));
+                    } else {
+                        result.invalidType(location, "$ref", "string", node);
+                        return null;
                     }
                 }
+                callback.addPathItem(name,getPathItem((ObjectNode) value,location,result));
+                Map <String,Object> extensions = getExtensions(node,location,result);
+                if(extensions != null && extensions.size() > 0) {
+                    callback.setExtensions(extensions);
+                }
             }
+
         }
 
         return callback;

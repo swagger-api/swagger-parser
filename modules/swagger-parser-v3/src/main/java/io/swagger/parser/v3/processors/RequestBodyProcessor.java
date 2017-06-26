@@ -25,32 +25,42 @@ public class RequestBodyProcessor {
         this.openApi = openApi;
     }
 
-    public void processRequestBody(String name,RequestBody requestBody) {
+    public RequestBody processRequestBody(RequestBody requestBody) {
 
         if (requestBody.get$ref() != null){
             RequestBody body = processReferenceRequestBody(requestBody);
-            openApi.getComponents().getRequestBodies().replace(name,requestBody,body);
+            if(body != null) {
+                return body;
+            }//openApi.getComponents().getRequestBodies().replace(name,requestBody,body);
         }
         Schema schema = null;
+        MediaType resolvedMedia = null;
         if(requestBody.getContent() != null){
             Map<String,MediaType> content = requestBody.getContent();
-            for( Map.Entry<String, MediaType> map : content.entrySet()) {
-                if(map.getValue().getSchema()!= null) {
-                    MediaType mediaType = map.getValue();
+            for( String mediaName : content.keySet()) {
+                MediaType mediaType = content.get(mediaName);
+                if(mediaType.getSchema()!= null) {
                     schema = mediaType.getSchema();
+                    resolvedMedia = new MediaType();
                     if (schema != null) {
                         if(schema.get$ref() != null) {
                             Schema resolved = schemaProcessor.processReferenceSchema(schema);
-                            mediaType.setSchema(resolved);
+                            resolvedMedia.setSchema(resolved);
+                            requestBody.getContent().replace(mediaName,mediaType,resolvedMedia);
                         }else {
-                            schemaProcessor.processSchema(schema);
+                            Schema resolved = schemaProcessor.processSchema(schema);
+                            resolvedMedia.setSchema(resolved);
+                            requestBody.getContent().replace(mediaName,mediaType,resolvedMedia);
                         }
                     }
                 }
             }
         }
+        return requestBody;
     }
-        public RequestBody processReferenceRequestBody(RequestBody requestBody){
+
+
+    public RequestBody processReferenceRequestBody(RequestBody requestBody){
         RefFormat refFormat = computeRefFormat(requestBody.get$ref());
         String $ref = requestBody.get$ref();
         RequestBody newRequestBody = cache.loadRef($ref, refFormat, RequestBody.class);

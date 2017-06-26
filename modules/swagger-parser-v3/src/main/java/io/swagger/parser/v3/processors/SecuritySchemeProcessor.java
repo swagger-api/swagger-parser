@@ -21,14 +21,18 @@ public class SecuritySchemeProcessor {
         this.openApi = openApi;
     }
 
-    public void processSecurityScheme(String name, SecurityScheme securityScheme) {
+    public SecurityScheme processSecurityScheme(SecurityScheme securityScheme) {
 
         if (securityScheme.get$ref() != null){
             RefFormat refFormat = computeRefFormat(securityScheme.get$ref());
             String $ref = securityScheme.get$ref();
             SecurityScheme newSecurityScheme = cache.loadRef($ref, refFormat, SecurityScheme.class);
-            //TODO what if the example is not in components?
-            openApi.getComponents().getSecuritySchemes().replace(name,securityScheme,newSecurityScheme);
+            if (newSecurityScheme != null) {
+                return newSecurityScheme;
+            }
+            //openApi.getComponents().getSecuritySchemes().replace(name,securityScheme,newSecurityScheme);
         }
+        return securityScheme;
+
     }
 }

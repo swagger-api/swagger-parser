@@ -20,7 +20,7 @@ public class OpenAPIResolver {
     private final ResolverCache cache;
     private final ComponentsProcessor componentsProcessor;
     private final PathsProcessor pathProcessor;
-    private final OperationProcessor operationsProcessor;
+    //private final OperationProcessor operationsProcessor;
     private Settings settings = new Settings();
 
     public OpenAPIResolver(OpenAPI openApi) {
@@ -41,7 +41,7 @@ public class OpenAPIResolver {
         this.cache = new ResolverCache(openApi, auths, parentFileLocation);
         componentsProcessor = new ComponentsProcessor(openApi,this.cache);
         pathProcessor = new PathsProcessor(cache, openApi,this.settings);
-        operationsProcessor = new OperationProcessor(cache, openApi);
+        //operationsProcessor = new OperationProcessor(cache, openApi);
     }
 
     public OpenAPI resolve() {
@@ -52,7 +52,7 @@ public class OpenAPIResolver {
         pathProcessor.processPaths();
 
 
-        if(openApi.getPaths() != null) {
+        /*if(openApi.getPaths() != null) {
             for(String pathname : openApi.getPaths().keySet()) {
                 PathItem pathItem = openApi.getPaths().get(pathname);
                 if(pathItem.readOperations() != null) {
@@ -61,7 +61,7 @@ public class OpenAPIResolver {
                     }
                 }
             }
-        }
+        }*/
 
         return openApi;
     }

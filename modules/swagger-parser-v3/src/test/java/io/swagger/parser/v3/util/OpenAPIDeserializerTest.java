@@ -184,9 +184,9 @@ public class OpenAPIDeserializerTest {
         //System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties().get("id"));
 
 
-        /*TODO System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").get("historyMetadata").getContentType(),"application/xml; charset=utf-8");
-        Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders());
-        Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders().get("X-Rate-Limit"));*/
+        //TODO System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed"));//,"application/xml; charset=utf-8");
+        //Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders());
+        //Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders().get("X-Rate-Limit"));*/
     }
 
     @Test(dataProvider = "data")
@@ -421,6 +421,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(component);
         Assert.assertNotNull(component.getCallbacks());
         Assert.assertEquals(component.getCallbacks().get("heartbeat").get("$request.query.heartbeat-url").getPost().getResponses().get("200").getDescription(),"Consumer acknowledged the callback");
+        //System.out.println(component.getCallbacks().get("referenced"));
         Assert.assertEquals(component.getCallbacks().get("failed").get("$response.body#/failedUrl").getPost().getResponses().get("200").getDescription(),"Consumer acknowledged the callback failed");
 
         Assert.assertNotNull(component.getExamples());
