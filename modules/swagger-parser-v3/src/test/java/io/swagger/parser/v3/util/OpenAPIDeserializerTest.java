@@ -184,9 +184,9 @@ public class OpenAPIDeserializerTest {
         //System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties().get("id"));
 
 
-        //TODO System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed"));//,"application/xml; charset=utf-8");
-        //Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders());
-        //Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders().get("X-Rate-Limit"));*/
+        Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("historyMetadata").getContentType(),"application/xml; charset=utf-8");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders());
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("profileImage").getHeaders().get("X-Rate-Limit"));
     }
 
     @Test(dataProvider = "data")
@@ -366,7 +366,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getPost().getExternalDocs());
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
-        System.out.println(petEndpoint.getParameters());
+        //System.out.println(petEndpoint.getParameters());
         //Assert.assertEquals(petEndpoint.getPost().getRequestBody().getDescription(),"user to add to the system");
         //Assert.assertTrue(petEndpoint.getPost().getRequestBody().getRequired(),"required");
 

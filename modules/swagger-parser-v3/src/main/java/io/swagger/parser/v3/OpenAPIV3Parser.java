@@ -36,7 +36,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 }
             }
         }
-        //TODO Call the OpenAPIResolver
+
         catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
         }

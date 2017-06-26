@@ -19,20 +19,67 @@ import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v3.OpenAPIResolver;
 import io.swagger.parser.v3.util.OpenAPIDeserializer;
 import io.swagger.oas.models.parameters.Parameter;
+import io.swagger.parser.v3.util.RemoteUrl;
+import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import org.testng.Assert;
 
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
-//import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class OpenAPIResolverTest {
+
+   @Mocked
+    public RemoteUrl remoteUrl = new RemoteUrl();
+
+    private static String pathItemRef_yaml;
+
+    static {
+        try {
+            pathItemRef_yaml = readFile("src/test/resources/remote_references/remote_pathItem.yaml");
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static String readFile(String name) throws Exception {
+        return new String(Files.readAllBytes(new File(name).toPath()), Charset.forName("UTF-8"));
+    }
+
+    @Test
+    public void testRemotePathItem(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        new Expectations() {{
+            remoteUrl.urlToString("https://localhost:8080/remote_references/remote_pathItem", new ArrayList<>());
+            result = pathItemRef_yaml ;
+        }};
+
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
+
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
+
+
+        Assert.assertNotNull(openAPI.getPaths().get("/pathItemRef"));
+
+    }
 
     @Test
     public void componentsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {

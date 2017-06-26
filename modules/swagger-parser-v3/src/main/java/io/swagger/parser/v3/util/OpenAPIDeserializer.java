@@ -732,7 +732,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode encodingObject = getObject("encoding",contentNode,false,location,result);
         if(encodingObject!=null) {
-            //TODO mediaType.setEncoding(getEncodingMap(encodingObject, location, result));
+            mediaType.setEncoding(getEncodingMap(encodingObject, location, result));
         }
         Map <String,Object> extensions = getExtensions(contentNode,location,result);
         if(extensions != null && extensions.size() > 0) {
