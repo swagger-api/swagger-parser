@@ -140,7 +140,9 @@ public class OpenAPIResolverTest {
         assertEquals(schema.getItems(),openAPI.getComponents().getSchemas().get("VeryComplexType"));
         assertEquals(openAPI.getPaths().get("/pathItemRef2"),openAPI.getPaths().get("/pet"));
         //System.out.println(openAPI.getPaths().get("/pet").getPost().getParameters());
-        System.out.println(openAPI.getPaths());
+        System.out.println(openAPI.getPaths().get("/pet/{petId}").getGet().getResponses());
+        System.out.println(openAPI.getPaths().get("/pet/{petId}").getGet().getCallbacks());
+
 
 
     }

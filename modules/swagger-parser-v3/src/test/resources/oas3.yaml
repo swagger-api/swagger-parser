@@ -386,6 +386,9 @@ paths:
                   "$ref": "#/components/schemas/Pet"
         '400':
           description: Invalid tag value
+      callbacks:
+        mainHook:
+          '$ref': "#/components/callbacks/failed"
       security:
       - petstore_auth:
         - write:pets
@@ -420,6 +423,17 @@ paths:
           description: Invalid ID supplied
         '404':
           description: Pet not found
+      callbacks:
+        mainHook:
+          '$request.body#/url':
+            post:
+              responses:
+                '200':
+                  description: successful operation
+                  content:
+                    application/xml:
+                      schema:
+                        "$ref": "#/components/schemas/Pet"
       security:
       - api_key: []
     post:
