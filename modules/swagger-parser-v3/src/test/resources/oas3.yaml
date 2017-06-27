@@ -65,6 +65,10 @@ tags:
     description: Find out more about our store
     url: http://swagger.io
 paths:
+  "/pathItemRef":
+    "$ref": 'http://localhost:${dynamicPort}/remote/path'
+  "/pathItemRef2":
+      "$ref": '#/paths/~1pet'
   "/pet":
     summary: summary
     description: description
@@ -142,6 +146,7 @@ paths:
           - pending
           - sold
           default: available
+    - "$ref": "#/components/parameters/skipParam"
     put:
       tags:
       - pet
@@ -381,6 +386,9 @@ paths:
                   "$ref": "#/components/schemas/Pet"
         '400':
           description: Invalid tag value
+      callbacks:
+        mainHook:
+          '$ref': "#/components/callbacks/failed"
       security:
       - petstore_auth:
         - write:pets
@@ -415,6 +423,17 @@ paths:
           description: Invalid ID supplied
         '404':
           description: Pet not found
+      callbacks:
+        mainHook:
+          '$request.body#/url':
+            post:
+              responses:
+                '200':
+                  description: successful operation
+                  content:
+                    application/xml:
+                      schema:
+                        "$ref": "#/components/schemas/Pet"
       security:
       - api_key: []
     post:
@@ -784,6 +803,9 @@ externalDocs:
   url: http://swagger.io
 components:
   schemas:
+    VeryComplexType:
+      type: integer
+      format: int32
     ExtendedErrorModel:
       allOf:
       - type: object
@@ -792,6 +814,7 @@ components:
         properties:
           rootCause:
             type: string
+            "$ref": "#/components/schemas/Category"
     Order:
       type: object
       not:
@@ -799,6 +822,40 @@ components:
         format: int32
       additionalProperties:
         type: integer
+      properties:
+        id:
+          type: integer
+          format: int64
+        petId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+        shipDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: Order Status
+          enum:
+          - placed
+          - approved
+          - delivered
+        complete:
+          type: boolean
+          default: false
+      xml:
+        name: Order
+    OrderRef:
+      type: object
+      not:
+        type: integer
+        format: int32
+        "$ref": "#/components/schemas/Category"
+      additionalProperties:
+        type: integer
+        "$ref": "http://localhost:${dynamicPort}/remote/schema#/components/schemas/User"
       properties:
         id:
           type: integer
@@ -879,9 +936,10 @@ components:
           format: int64
         category:
           "$ref": "#/components/schemas/Category"
-        name:
+        user:
           type: string
           example: doggie
+          "$ref": "http://localhost:${dynamicPort}/remote/schema#/components/schemas/User"
         photoUrls:
           type: array
           xml:
@@ -907,6 +965,9 @@ components:
         name: Pet
     ApiResponse:
       type: object
+      required:
+      - name
+      - photoUrls
       properties:
         code:
           type: integer
@@ -916,6 +977,9 @@ components:
         message:
           type: string
   responses:
+    Found:
+      description: Entity not found.
+      "$ref": "http://localhost:${dynamicPort}/remote/response#/responses/NotFound"
     NotFound:
       description: Entity not found.
     IllegalInput:
@@ -925,8 +989,19 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GeneralError'
+            $ref: '#/components/schemas/ExtendedErrorModel'
   parameters:
+    refParam:
+      "$ref": "#/components/parameters/limitParam/"
+    newParam:
+      name: skip
+      in: query
+      description: number of items to skip
+      required: true
+      schema:
+        type: integer
+        format: int32
+        "$ref": "#/components/schemas/Tag"
     skipParam:
       name: skip
       in: query
@@ -961,7 +1036,7 @@ components:
         gender: Female
         breed: Mixed
     frog:
-    $ref: "#/components/examples/frog-example"
+      $ref: "#/components/examples/cat"
   requestBodies:
     requestBody1:
       description: request body in components
@@ -982,7 +1057,11 @@ components:
             type: array
             items:
               "$ref": "#/components/schemas/User"
+    requestBody3:
+      "$ref": "#/components/requestBodies/requestBody2"
   securitySchemes:
+    reference:
+      "$ref": "#/components/securitySchemes/api_key"
     petstore_auth:
       type: oauth2
       flows:
@@ -996,30 +1075,38 @@ components:
       name: api_key
       in: header
   headers:
+    X-Ref-Limit-Limit:
+      "$ref": "#/components/headers/X-Rate-Limit-Reset"
     X-Rate-Limit-Limit:
       description: The number of allowed requests in the current period
       schema:
         type: integer
+      example: "This is a header example"
     X-Rate-Limit-Remaining:
       description: The number of remaining requests in the current period
       schema:
         type: integer
+        "$ref": "http://localhost:${dynamicPort}/remote/schema#/components/schemas/User"
     X-Rate-Limit-Reset:
       description: The number of seconds left in the current period
       schema:
         type: integer
   links:
+    referenced:
+      "$ref": "#/components/links/unsubscribe"
     unsubscribe:
       operationId: cancelHookCallback
       parameters:
         id: $response.body#/hookId
       x-link: link extension
   callbacks:
+    referenced:
+      "$ref": "#/components/callbacks/failed"
     heartbeat:
       '$request.query.heartbeat-url':
         post:
           requestBody:
-            $ref: '#/components/requestBodies/heartbeatMessage'
+            $ref: '#/components/requestBodies/requestBody3'
           responses:
             '200':
               description: Consumer acknowledged the callback
@@ -1027,7 +1114,7 @@ components:
       '$response.body#/failedUrl':
         post:
           requestBody:
-            $ref: '#/components/requestBodies/failedMessage'
+            $ref: '#/components/requestBodies/requestBody3'
           responses:
             '200':
               description: Consumer acknowledged the callback failed
@@ -1035,7 +1122,7 @@ components:
       '$response.body#/successUrl':
         post:
           requestBody:
-            $ref: '#/components/requestBodies/successMessage'
+            $ref: '#/components/requestBodies/requestBody1'
           responses:
             '200':
               description: Consumer acknowledged the callback
