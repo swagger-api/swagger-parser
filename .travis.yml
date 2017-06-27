@@ -4,6 +4,9 @@ script: mvn verify
 jdk:
   - oraclejdk8
 after_success:
-  - if [ $SONATYPE_USERNAME ] && [ -z "$TRAVIS_TAG" ] && [ ! "$TRAVIS_PULL_REQUEST" ]; then
+  - echo "SONATYPE_USERNAME $SONATYPE_USERNAME"
+    echo "TRAVIS_TAG $TRAVIS_TAG"
+    echo "TRAVIS_PULL_REQUEST $TRAVIS_PULL_REQUEST"
+    if [ $SONATYPE_USERNAME ] && [ -z "$TRAVIS_TAG" ] && [ ! "$TRAVIS_PULL_REQUEST" ]; then
       mvn clean deploy --settings .travis/settings.xml;
     fi;
