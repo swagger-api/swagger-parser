@@ -406,7 +406,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         Schema schema = null;
 
         if(v2Parameter instanceof RefParameter) {
-            schema = new Schema().ref(((RefParameter) v2Parameter).get$ref());
+            schema = new Schema().$ref(((RefParameter) v2Parameter).get$ref());
         }
         else if(v2Parameter instanceof SerializableParameter) {
             SerializableParameter sp = (SerializableParameter) v2Parameter;
