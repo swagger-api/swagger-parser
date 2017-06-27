@@ -6,6 +6,6 @@ jdk:
 after_success:
   - if [ $SONATYPE_USERNAME ]; then
       if [ ! -z "$TRAVIS_TAG" ]; then
-        mvn clean deploy --settings .travis/settings.xml
+        mvn clean deploy --settings .travis/settings.xml;
       fi;
     fi;
