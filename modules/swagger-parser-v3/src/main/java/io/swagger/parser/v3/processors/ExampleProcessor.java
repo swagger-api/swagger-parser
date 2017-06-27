@@ -32,7 +32,6 @@ public class ExampleProcessor {
             if(newExample != null) {
                 return newExample;
             }
-            //openApi.getComponents().getExamples().replace(name,example,newExample);
         }
         return example;
     }
@@ -45,7 +44,6 @@ public class ExampleProcessor {
                 String ref = example.get$ref();
                 Example newExample = cache.loadRef(ref, refFormat, Example.class);
                 newExampleList.add(newExample);
-                //openApi.getComponents().getHeaders().get(name).setExamples(newExampleList);
             }
         }
         return newExampleList;

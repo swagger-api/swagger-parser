@@ -22,11 +22,9 @@ import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v3.OpenAPIResolver;
 import io.swagger.parser.v3.util.OpenAPIDeserializer;
 import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.parser.v3.util.RemoteUrl;
-import io.swagger.util.Json;
-import mockit.Expectations;
+
 import mockit.Injectable;
-import mockit.Mocked;
+
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 
@@ -37,10 +35,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -71,6 +66,24 @@ public class OpenApiResolverTest {
                         .withHeader("Content-type", "application/yaml")
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_schema_user.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/schema"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/responses_notFound.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/response"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
     }
 
     @AfterClass
@@ -79,33 +92,13 @@ public class OpenApiResolverTest {
     }
 
     @Test
-    public void testRemotePathItem(@Injectable final List<AuthorizationValue> auths) throws Exception {
-
+    public void componentsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         final JsonNode rootNode = mapper.readTree(pathFile.getBytes());
-
-        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-        final SwaggerParseResult result = deserializer.deserialize(rootNode);
-        Assert.assertNotNull(result);
-
-        final OpenAPI openAPI = result.getOpenAPI();
-        Assert.assertNotNull(openAPI);
-
-        assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
-
-
-        Assert.assertNotNull(openAPI.getPaths().get("/pathItemRef"));
-
-    }
-
-    @Test
-    public void componentsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
-        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -138,6 +131,7 @@ public class OpenApiResolverTest {
 
         //Schema additionalProperties
         assertEquals(schemas.get("OrderRef").getAdditionalProperties(), schemas.get("User"));
+        //System.out.println(schemas.get("OrderRef").getAdditionalProperties());
 
         //AllOfSchema
         AllOfSchema extended = (AllOfSchema) schemas.get("ExtendedErrorModel");
@@ -149,6 +143,7 @@ public class OpenApiResolverTest {
         //remote url response
         ApiResponse notFound = responses.get("Found");
         assertEquals(notFound.getDescription(),"Remote Description");
+       // System.out.println(notFound);
 
         //internal url response schema
         MediaType generalError = responses.get("GeneralError").getContent().get("application/json");
@@ -175,8 +170,9 @@ public class OpenApiResolverTest {
 
         //internal Schema header
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
-        //TODO header ref
+        //header remote ref
         assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema(),schemas.get("User"));
+        //System.out.println(headers.get("X-Rate-Limit-Remaining").getSchema());
 
         Map<String, Example> examples = openAPI.getComponents().getExamples();
 
@@ -196,7 +192,11 @@ public class OpenApiResolverTest {
     @Test
     public void pathsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas3.yaml").toURI())));
+
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        final JsonNode rootNode = mapper.readTree(pathFile.getBytes());
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
         final SwaggerParseResult result = deserializer.deserialize(rootNode);
 
@@ -204,12 +204,24 @@ public class OpenApiResolverTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
+
         ArraySchema schema = (ArraySchema) openAPI.getPaths().get("/pet").getPut().getResponses().get("400").getContent().get("application/json").getSchema();
         assertEquals(schema.getItems(),openAPI.getComponents().getSchemas().get("VeryComplexType"));
         assertEquals(openAPI.getPaths().get("/pathItemRef2"),openAPI.getPaths().get("/pet"));
-        //System.out.println(openAPI.getPaths().get("/pet").getPost().getParameters());
-        System.out.println(openAPI.getPaths().get("/pet/{petId}").getGet().getResponses());
-        System.out.println(openAPI.getPaths().get("/pet/{petId}").getGet().getCallbacks());
+
+        Assert.assertNotNull(openAPI.getPaths().get("/pet").getPost().getParameters());
+        Assert.assertNull(openAPI.getPaths().get("/pet").getParameters());
+        Assert.assertNull(openAPI.getPaths().get("/pathItemRef").getParameters());
+
+        assertEquals(openAPI.getPaths().get("/pathItemRef").getSummary(),"summary");
+        assertEquals(openAPI.getPaths().get("/pathItemRef").getPost().getResponses().get("405").getDescription(),"Invalid input");
+
+
+        Assert.assertNotNull(openAPI.getPaths().get("/pet/{petId}").getGet().getResponses());
+        assertEquals(openAPI.getPaths().get("/pet/{petId}").getGet().getResponses().get("200").getContent().get("application/xml").getSchema(),openAPI.getComponents().getSchemas().get("Pet"));
+
+
+        assertEquals(openAPI.getPaths().get("/pet/{petId}").getGet().getCallbacks().get("mainHook").get("$request.body#/url").getPost().getResponses().get("200").getContent().get("application/xml").getSchema(),openAPI.getComponents().getSchemas().get("Pet"));
 
 
 

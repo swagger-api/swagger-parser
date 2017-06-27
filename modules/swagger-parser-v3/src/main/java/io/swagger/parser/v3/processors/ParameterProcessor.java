@@ -38,13 +38,12 @@ public class ParameterProcessor {
             Parameter resolvedParameter = cache.loadRef($ref, refFormat, Parameter.class);
             if(resolvedParameter != null) {
                 return resolvedParameter;
-            }//openApi.getComponents().getParameters().replace(name,parameter,refParameter);
+            }
         }
         if (parameter.getSchema() != null){
             Schema resolved = schemaProcessor.processSchema(parameter.getSchema());
             parameter.setSchema(resolved);
-            //return parameter;
-         //openApi.getComponents().getParameters().get(name).setSchema(resolved);
+
         }
         if (parameter.getExamples() != null){
             Map <String, Example> examples = parameter.getExamples();

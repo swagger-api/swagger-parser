@@ -8,9 +8,9 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Map;
+
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
@@ -38,7 +38,6 @@ public class HeaderProcessor {
             Header resolved = cache.loadRef($ref, refFormat, Header.class);
             if (resolved != null) {
                 return resolved;
-                //openApi.getComponents().getHeaders().replace(name,header,resolved);
             }
 
         }
@@ -46,7 +45,6 @@ public class HeaderProcessor {
             Schema resolved = schemaProcessor.processSchema(header.getSchema());
             header.setSchema(resolved);
             return header;
-            //openApi.getComponents().getHeaders().get(name).setSchema(resolved);
         }
         if (header.getExamples() != null){
             List<Example> resolvedExamples = exampleProcessor.processExample(header.getExamples());

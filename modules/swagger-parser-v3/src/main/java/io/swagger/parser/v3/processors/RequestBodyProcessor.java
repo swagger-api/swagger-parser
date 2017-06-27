@@ -31,7 +31,7 @@ public class RequestBodyProcessor {
             RequestBody body = processReferenceRequestBody(requestBody);
             if(body != null) {
                 return body;
-            }//openApi.getComponents().getRequestBodies().replace(name,requestBody,body);
+            }
         }
         Schema schema = null;
         MediaType resolvedMedia = null;

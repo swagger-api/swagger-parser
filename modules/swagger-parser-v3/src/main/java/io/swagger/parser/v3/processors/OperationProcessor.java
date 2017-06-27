@@ -35,8 +35,9 @@ public class OperationProcessor {
 
     public Operation processOperation(Operation operation) {
         final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
-        operation.setParameters(processedOperationParameters);
-
+        if(processedOperationParameters != null) {
+            operation.setParameters(processedOperationParameters);
+        }
         final RequestBody requestBody = operation.getRequestBody();
         if(requestBody != null) {
             RequestBody resolvedBody = requestBodyProcessor.processRequestBody(requestBody);

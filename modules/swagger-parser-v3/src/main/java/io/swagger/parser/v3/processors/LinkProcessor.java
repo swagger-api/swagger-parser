@@ -6,9 +6,9 @@ import io.swagger.oas.models.links.Link;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
-import java.util.LinkedHashSet;
+
 import java.util.Map;
-import java.util.Set;
+
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
@@ -35,7 +35,7 @@ public class LinkProcessor {
             Link resolved = cache.loadRef($ref, refFormat, Link.class);
             if (resolved != null) {
                 return resolved;
-               //openApi.getComponents().getLinks().replace(linkName,link,resolved);
+
             }
 
         }else if (link.getHeaders() != null){

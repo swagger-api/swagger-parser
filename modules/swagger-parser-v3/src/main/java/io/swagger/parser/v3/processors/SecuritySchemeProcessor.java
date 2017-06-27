@@ -5,7 +5,6 @@ import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
-import java.util.Map;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
 
@@ -30,7 +29,6 @@ public class SecuritySchemeProcessor {
             if (newSecurityScheme != null) {
                 return newSecurityScheme;
             }
-            //openApi.getComponents().getSecuritySchemes().replace(name,securityScheme,newSecurityScheme);
         }
         return securityScheme;
 

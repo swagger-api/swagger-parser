@@ -9,7 +9,6 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
-import javax.naming.spi.Resolver;
 import java.util.Map;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
@@ -35,7 +34,6 @@ public class ResponseProcessor {
         if (response.get$ref() != null){
             ApiResponse resolvedResponse = processReferenceResponse(response);
             return resolvedResponse;
-            //openApi.getComponents().getResponses().replace(name,response,apiResponse);
         }
         Schema schema = null;
         MediaType resolvedMedia = null;
