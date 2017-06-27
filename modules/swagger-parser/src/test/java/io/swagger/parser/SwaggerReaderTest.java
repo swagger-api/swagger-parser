@@ -391,4 +391,25 @@ public class SwaggerReaderTest {
         assertEquals(objectNode.get("id").intValue(), 42);
         assertEquals(objectNode.get("name").textValue(), "Arthur Dent");
     }
+
+    @Test
+    public void testEmptySchema() {
+      String spec =
+              "swagger: '2.0'\n" +
+                      "info:\n" +
+                      "  title: nice\n" +
+                      "paths: {}\n" +
+                      "definitions:\n" +
+                      "  Empty:\n" +
+                      "    description: 'Expected empty response could be {}'";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        assertTrue(result.getMessages().size() == 0);
+
+        Swagger swagger = result.getSwagger();
+        Model definition = swagger.getDefinitions().get("Empty");
+        assertNotNull(definition);
+        assertTrue(definition instanceof ModelImpl);
+    }
+
 }
