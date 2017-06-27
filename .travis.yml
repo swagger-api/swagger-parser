@@ -6,7 +6,7 @@ jdk:
 after_success:
   - if [ $SONATYPE_USERNAME ]; then
       echo "pushing to sonatype with tag $TRAVIS_TAG";
-      if [ ! -z "$TRAVIS_TAG" ]; then
+      if [ -z "$TRAVIS_TAG" ]; then
         echo "building";
         mvn clean deploy --settings .travis/settings.xml;
       fi;
