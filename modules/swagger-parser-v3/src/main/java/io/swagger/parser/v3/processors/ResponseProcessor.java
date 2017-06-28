@@ -57,7 +57,6 @@ public class ResponseProcessor {
                     }
                 }
             }
-            return response;
         }
         if (response.getHeaders() != null){
             Map<String,Header> headers = response.getHeaders();
@@ -67,7 +66,7 @@ public class ResponseProcessor {
                 headers.replace(headerName,header,resolvedHeader);
             }
             response.setHeaders(headers);
-            return response;
+
         }
         if (response.getLinks() != null){
             Map<String,Link> links = response.getLinks();
@@ -77,8 +76,6 @@ public class ResponseProcessor {
                 links.replace(linkName,link,resolvedLink);
             }
             response.setLinks(links);
-            return response;
-
         }
 
         return response;

@@ -138,16 +138,24 @@ public class OpenApiResolverTest {
         Schema root = (Schema) extended.getAllOf().get(0).getProperties().get("rootCause");
         assertEquals(root, schemas.get("Category"));
 
+
         Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
 
         //remote url response
         ApiResponse notFound = responses.get("Found");
         assertEquals(notFound.getDescription(),"Remote Description");
-       // System.out.println(notFound);
+
+        //internal response headers
+        ApiResponse illegalInput = responses.get("IllegalInput");
+        assertEquals(illegalInput.getHeaders().get("X-Ref-Limit-Limit"),openAPI.getComponents().getHeaders().get("X-Rate-Limit-Reset"));
+
+        //internal response links
+        assertEquals(illegalInput.getLinks().get("address"),openAPI.getComponents().getLinks().get("unsubscribe"));
 
         //internal url response schema
         MediaType generalError = responses.get("GeneralError").getContent().get("application/json");
         assertEquals(generalError.getSchema(),schemas.get("ExtendedErrorModel"));
+
 
         Map<String, RequestBody> requestBodies = openAPI.getComponents().getRequestBodies();
 
@@ -162,30 +170,62 @@ public class OpenApiResolverTest {
         ArraySchema items = (ArraySchema) jsonMedia.getSchema();
         assertEquals(items.getItems(),schemas.get("User"));
 
+        //internal request body
         assertEquals(requestBody2,requestBodies.get("requestBody3"));
 
-        //internal Schema Parameter
+        //TODO remote request body url
+
+
+
         Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
+
+        //TODO remote url parameter
+
+        //internal Schema Parameter
         assertEquals(parameters.get("newParam").getSchema(),schemas.get("Tag"));
+
+        //parameter examples
+        assertEquals(parameters.get("contentParameter").getExamples().get("cat"),openAPI.getComponents().getExamples().get("cat"));
+
+        //parameter content schema
+
+        assertEquals(parameters.get("contentParameter").getContent().get("application/json").getSchema(),extended);
+
+
 
         //internal Schema header
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
-        //header remote ref
+        //header remote schema ref
         assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema(),schemas.get("User"));
-        //System.out.println(headers.get("X-Rate-Limit-Remaining").getSchema());
+        //header examples
+        assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get(0),openAPI.getComponents().getExamples().get("dog") );
+
+        //TODO remote header ref
+
+        //header content
+        assertEquals(headers.get("X-Rate-Limit-Reset").getContent().get("application/json").getSchema(),extended);
 
         Map<String, Example> examples = openAPI.getComponents().getExamples();
 
         //internal url example
         Example frogExample = examples.get("frog");
         assertEquals(frogExample.getSummary(),"An example of a cat");
+        //TODO remote example url
+
+
 
         Map<String, Link> links = openAPI.getComponents().getLinks();
+        //internal link
         assertEquals(openAPI.getComponents().getLinks().get("referenced"),links.get("unsubscribe"));
+        //TODO remote ref link
 
 
-        Map<String, Callback> callback = openAPI.getComponents().getCallbacks();
-        //System.out.println(openAPI.getComponents().getCallbacks());
+        Map<String, Callback> callbacks = openAPI.getComponents().getCallbacks();
+        // internal callback reference
+        assertEquals(callbacks.get("referenced"),callbacks.get("failed"));
+        //callback pathItem -> operation ->requestBody
+        assertEquals(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody(),requestBodies.get("requestBody3"));
+        //TODO remote callback ref
 
     }
 
@@ -205,26 +245,33 @@ public class OpenApiResolverTest {
         Assert.assertNotNull(openAPI);
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
 
-        ArraySchema schema = (ArraySchema) openAPI.getPaths().get("/pet").getPut().getResponses().get("400").getContent().get("application/json").getSchema();
-        assertEquals(schema.getItems(),openAPI.getComponents().getSchemas().get("VeryComplexType"));
+
+        //internal url pathItem
         assertEquals(openAPI.getPaths().get("/pathItemRef2"),openAPI.getPaths().get("/pet"));
 
+        //internal array schema inside operation -> responses -> content
+        ArraySchema schema = (ArraySchema) openAPI.getPaths().get("/pet").getPut().getResponses().get("400").getContent().get("application/json").getSchema();
+        assertEquals(schema.getItems(),openAPI.getComponents().getSchemas().get("VeryComplexType"));
+
+        //replace of parameters in operation and remove the ones from the pathItem
         Assert.assertNotNull(openAPI.getPaths().get("/pet").getPost().getParameters());
         Assert.assertNull(openAPI.getPaths().get("/pet").getParameters());
-        Assert.assertNull(openAPI.getPaths().get("/pathItemRef").getParameters());
 
+        //remote ref pathItem
+        Assert.assertNull(openAPI.getPaths().get("/pathItemRef").getParameters());
         assertEquals(openAPI.getPaths().get("/pathItemRef").getSummary(),"summary");
         assertEquals(openAPI.getPaths().get("/pathItemRef").getPost().getResponses().get("405").getDescription(),"Invalid input");
 
-
+        //internal pathItem operation -> response -> schema
         Assert.assertNotNull(openAPI.getPaths().get("/pet/{petId}").getGet().getResponses());
         assertEquals(openAPI.getPaths().get("/pet/{petId}").getGet().getResponses().get("200").getContent().get("application/xml").getSchema(),openAPI.getComponents().getSchemas().get("Pet"));
 
+        //internal pathItem -> operation -> callback -> pathItem -> operation -> response -> schema
+        assertEquals(openAPI.getPaths().get("/pet/{petId}").getGet().getCallbacks().get("mainHook").get("$request.body#/url").getPost().getResponses().get("200").getContent().get("application/xml").getSchema(),
+                     openAPI.getComponents().getSchemas().get("Pet"));
 
-        assertEquals(openAPI.getPaths().get("/pet/{petId}").getGet().getCallbacks().get("mainHook").get("$request.body#/url").getPost().getResponses().get("200").getContent().get("application/xml").getSchema(),openAPI.getComponents().getSchemas().get("Pet"));
-
-
-
+        //internal pathItem -> operation -> requestBody
+        assertEquals(openAPI.getPaths().get("/pet/findByStatus").getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties().get("id"),openAPI.getComponents().getSchemas().get("Pet"));
     }
 
     private static int getDynamicPort() {

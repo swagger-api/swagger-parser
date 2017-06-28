@@ -432,7 +432,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(component.getHeaders());
         Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Limit").getDescription(),"The number of allowed requests in the current period");
         Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Limit").getSchema().getType(),"integer");
-        Assert.assertEquals(component.getHeaders().get("X-Rate-Limit-Reset").getSchema().getType(),"integer");
+        
 
         Assert.assertNotNull(component.getLinks());
         Assert.assertEquals(component.getLinks().get("unsubscribe").getOperationId(),"cancelHookCallback");

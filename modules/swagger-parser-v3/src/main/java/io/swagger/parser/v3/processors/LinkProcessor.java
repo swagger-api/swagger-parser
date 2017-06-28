@@ -35,7 +35,6 @@ public class LinkProcessor {
             Link resolved = cache.loadRef($ref, refFormat, Link.class);
             if (resolved != null) {
                 return resolved;
-
             }
 
         }else if (link.getHeaders() != null){
@@ -46,7 +45,6 @@ public class LinkProcessor {
                 headers.replace(headerName,header,resolvedHeader);
             }
             link.setHeaders(headers);
-            return link;
         }
         return link;
     }
