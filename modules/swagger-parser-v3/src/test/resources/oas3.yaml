@@ -1011,7 +1011,9 @@ components:
             gender: male
             breed: Persian
     refParam:
-      "$ref": "#/components/parameters/limitParam/"
+      "$ref": "#/components/parameters/limitParam"
+    remoteParameter:
+      "$ref": "http://localhost:${dynamicPort}/remote/parameter"
     newParam:
       name: skip
       in: query
@@ -1038,6 +1040,8 @@ components:
         type: integer
         format: int32
   examples:
+    referenceCat:
+      "$ref": "http://localhost:${dynamicPort}/remote/example"
     cat:
       summary: An example of a cat
       value:
@@ -1057,6 +1061,8 @@ components:
     frog:
       $ref: "#/components/examples/cat"
   requestBodies:
+    reference:
+      "$ref": "http://localhost:${dynamicPort}/remote/requestBody"
     requestBody1:
       description: request body in components
       content:
@@ -1122,7 +1128,11 @@ components:
       parameters:
         id: $response.body#/hookId
       x-link: link extension
+    subscribe:
+      "$ref": "http://localhost:${dynamicPort}/remote/link"
   callbacks:
+    remoteCallback:
+      "$ref": "http://localhost:${dynamicPort}/remote/callback"
     referenced:
       "$ref": "#/components/callbacks/failed"
     heartbeat:

@@ -35,10 +35,8 @@ public class ParameterProcessor {
         String $ref = parameter.get$ref();
         if($ref != null){
             RefFormat refFormat = computeRefFormat($ref);
-            Parameter resolvedParameter = cache.loadRef($ref, refFormat, Parameter.class);
-            if(resolvedParameter != null) {
-                return resolvedParameter;
-            }
+            parameter = cache.loadRef($ref, refFormat, Parameter.class);
+
         }
         if (parameter.getSchema() != null){
             Schema resolved = schemaProcessor.processSchema(parameter.getSchema());

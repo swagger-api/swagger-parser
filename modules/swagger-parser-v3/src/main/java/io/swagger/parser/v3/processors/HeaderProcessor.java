@@ -37,9 +37,9 @@ public class HeaderProcessor {
         if(header.get$ref() != null){
             RefFormat refFormat = computeRefFormat(header.get$ref());
             String $ref = header.get$ref();
-            Header resolved = cache.loadRef($ref, refFormat, Header.class);
-            if (resolved != null) {
-                return resolved;
+            header = cache.loadRef($ref, refFormat, Header.class);
+            if(header != null){
+                return header;
             }
 
         }
@@ -51,7 +51,6 @@ public class HeaderProcessor {
         if (header.getExamples() != null){
             List<Example> resolvedExamples = exampleProcessor.processExample(header.getExamples());
             header.setExamples(resolvedExamples);
-
 
         }
         Schema schema = null;

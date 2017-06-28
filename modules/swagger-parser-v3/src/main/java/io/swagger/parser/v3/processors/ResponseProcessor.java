@@ -32,8 +32,7 @@ public class ResponseProcessor {
     public ApiResponse processResponse(ApiResponse response) {
 
         if (response.get$ref() != null){
-            ApiResponse resolvedResponse = processReferenceResponse(response);
-            return resolvedResponse;
+            response = processReferenceResponse(response);
         }
         Schema schema = null;
         MediaType resolvedMedia = null;

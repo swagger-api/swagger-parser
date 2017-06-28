@@ -84,6 +84,51 @@ public class OpenApiResolverTest {
                         .withHeader("Content-type", "application/yaml")
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/requestBody.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/requestBody"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_parameter.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/parameter"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_example.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/example"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_link.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/link"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_callback.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/callback"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
     }
 
     @AfterClass
@@ -142,8 +187,9 @@ public class OpenApiResolverTest {
         Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
 
         //remote url response
-        ApiResponse notFound = responses.get("Found");
-        assertEquals(notFound.getDescription(),"Remote Description");
+        ApiResponse found = responses.get("Found");
+        assertEquals(found.getDescription(),"Remote Description");
+        assertEquals(found.getContent().get("application/json").getSchema(), extended);
 
         //internal response headers
         ApiResponse illegalInput = responses.get("IllegalInput");
@@ -173,13 +219,13 @@ public class OpenApiResolverTest {
         //internal request body
         assertEquals(requestBody2,requestBodies.get("requestBody3"));
 
-        //TODO remote request body url
-
-
+        //remote request body url
+        assertEquals(requestBodies.get("reference").getContent().get("application/json").getSchema(),schemas.get("Pet"));
 
         Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
 
-        //TODO remote url parameter
+        //remote url parameter
+        assertEquals(parameters.get("remoteParameter").getSchema(),extended);
 
         //internal Schema Parameter
         assertEquals(parameters.get("newParam").getSchema(),schemas.get("Tag"));
@@ -191,8 +237,6 @@ public class OpenApiResolverTest {
 
         assertEquals(parameters.get("contentParameter").getContent().get("application/json").getSchema(),extended);
 
-
-
         //internal Schema header
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
         //header remote schema ref
@@ -200,7 +244,9 @@ public class OpenApiResolverTest {
         //header examples
         assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get(0),openAPI.getComponents().getExamples().get("dog") );
 
-        //TODO remote header ref
+        //remote header ref
+        assertEquals(headers.get("X-Ref-Limit-Limit").getExamples().get(0),openAPI.getComponents().getExamples().get("dog") );
+
 
         //header content
         assertEquals(headers.get("X-Rate-Limit-Reset").getContent().get("application/json").getSchema(),extended);
@@ -210,14 +256,16 @@ public class OpenApiResolverTest {
         //internal url example
         Example frogExample = examples.get("frog");
         assertEquals(frogExample.getSummary(),"An example of a cat");
-        //TODO remote example url
 
+        //remote example url
+        assertEquals(examples.get("referenceCat").getSummary(),"An example of a cat");
 
 
         Map<String, Link> links = openAPI.getComponents().getLinks();
         //internal link
         assertEquals(openAPI.getComponents().getLinks().get("referenced"),links.get("unsubscribe"));
-        //TODO remote ref link
+        //remote ref link
+        assertEquals(openAPI.getComponents().getLinks().get("subscribe").getOperationId(),"cancelHookCallback");
 
 
         Map<String, Callback> callbacks = openAPI.getComponents().getCallbacks();
@@ -225,7 +273,8 @@ public class OpenApiResolverTest {
         assertEquals(callbacks.get("referenced"),callbacks.get("failed"));
         //callback pathItem -> operation ->requestBody
         assertEquals(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody(),requestBodies.get("requestBody3"));
-        //TODO remote callback ref
+        //remote callback ref
+        assertEquals(callbacks.get("remoteCallback").get("$response.body#/successUrl").getPost().getRequestBody(),requestBodies.get("requestBody1"));
 
     }
 
