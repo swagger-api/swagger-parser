@@ -1300,6 +1300,11 @@ public class OpenAPIDeserializer {
             header.setExample(value);
         }
 
+        ArrayNode examplesObject = getArray("examples",headerNode,false,location,result);
+        if(examplesObject != null) {
+            header.setExamples(getExampleList(examplesObject, location, result));
+        }
+
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
         if (contentNode!= null){
             header.setContent(getContent(contentNode,location,result));
@@ -1820,6 +1825,22 @@ public class OpenAPIDeserializer {
                     if(exampleObj != null) {
                         examples.put(exampleName, exampleObj);
                     }
+                }
+            }
+        }
+        return examples;
+    }
+
+    public List<Example> getExampleList(ArrayNode obj, String location, ParseResult result) {
+        List<Example> examples = new ArrayList<>();
+        if (obj == null) {
+            return examples;
+        }
+        for (JsonNode item : obj) {
+            if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
+                Example example = getExample((ObjectNode) item, location, result);
+                if (example != null) {
+                    examples.add(example);
                 }
             }
         }

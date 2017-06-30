@@ -28,10 +28,7 @@ public class RequestBodyProcessor {
     public RequestBody processRequestBody(RequestBody requestBody) {
 
         if (requestBody.get$ref() != null){
-            RequestBody body = processReferenceRequestBody(requestBody);
-            if(body != null) {
-                return body;
-            }
+            requestBody = processReferenceRequestBody(requestBody);
         }
         Schema schema = null;
         MediaType resolvedMedia = null;

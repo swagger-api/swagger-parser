@@ -32,11 +32,7 @@ public class LinkProcessor {
         if(link.get$ref() != null){
             RefFormat refFormat = computeRefFormat(link.get$ref());
             String $ref = link.get$ref();
-            Link resolved = cache.loadRef($ref, refFormat, Link.class);
-            if (resolved != null) {
-                return resolved;
-
-            }
+            link = cache.loadRef($ref, refFormat, Link.class);
 
         }else if (link.getHeaders() != null){
             Map<String,Header> headers = link.getHeaders();
@@ -46,7 +42,6 @@ public class LinkProcessor {
                 headers.replace(headerName,header,resolvedHeader);
             }
             link.setHeaders(headers);
-            return link;
         }
         return link;
     }

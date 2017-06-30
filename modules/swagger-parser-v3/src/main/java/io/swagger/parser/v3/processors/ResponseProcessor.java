@@ -32,8 +32,7 @@ public class ResponseProcessor {
     public ApiResponse processResponse(ApiResponse response) {
 
         if (response.get$ref() != null){
-            ApiResponse resolvedResponse = processReferenceResponse(response);
-            return resolvedResponse;
+            response = processReferenceResponse(response);
         }
         Schema schema = null;
         MediaType resolvedMedia = null;
@@ -57,7 +56,6 @@ public class ResponseProcessor {
                     }
                 }
             }
-            return response;
         }
         if (response.getHeaders() != null){
             Map<String,Header> headers = response.getHeaders();
@@ -67,7 +65,7 @@ public class ResponseProcessor {
                 headers.replace(headerName,header,resolvedHeader);
             }
             response.setHeaders(headers);
-            return response;
+
         }
         if (response.getLinks() != null){
             Map<String,Link> links = response.getLinks();
@@ -77,8 +75,6 @@ public class ResponseProcessor {
                 links.replace(linkName,link,resolvedLink);
             }
             response.setLinks(links);
-            return response;
-
         }
 
         return response;

@@ -315,6 +315,7 @@ paths:
                   # default is text/plain
                   type: string
                   format: uuid
+                  "$ref": "#/components/schemas/Pet"
                 address:
                   # default is application/json
                   type: object
@@ -419,10 +420,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/Pet"
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Pet not found
       callbacks:
         mainHook:
           '$request.body#/url':
@@ -983,7 +980,13 @@ components:
     NotFound:
       description: Entity not found.
     IllegalInput:
-        description: Illegal input for operation.
+      description: Illegal input for operation.
+      headers:
+        X-Ref-Limit-Limit:
+          "$ref": "#/components/headers/X-Rate-Limit-Reset"
+      links:
+        address:
+          "$ref": "#/components/links/unsubscribe"
     GeneralError:
       description: General Error
       content:
@@ -991,8 +994,26 @@ components:
           schema:
             $ref: '#/components/schemas/ExtendedErrorModel'
   parameters:
+    contentParameter:
+      in: query
+      name: coordinates
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExtendedErrorModel'
+      examples:
+        cat:
+          summary: An example of a cat
+          value:
+            name: Fluffy
+            petType: Cat
+            color: White
+            gender: male
+            breed: Persian
     refParam:
-      "$ref": "#/components/parameters/limitParam/"
+      "$ref": "#/components/parameters/limitParam"
+    remoteParameter:
+      "$ref": "http://localhost:${dynamicPort}/remote/parameter"
     newParam:
       name: skip
       in: query
@@ -1019,6 +1040,8 @@ components:
         type: integer
         format: int32
   examples:
+    referenceCat:
+      "$ref": "http://localhost:${dynamicPort}/remote/example"
     cat:
       summary: An example of a cat
       value:
@@ -1038,6 +1061,8 @@ components:
     frog:
       $ref: "#/components/examples/cat"
   requestBodies:
+    reference:
+      "$ref": "http://localhost:${dynamicPort}/remote/requestBody"
     requestBody1:
       description: request body in components
       content:
@@ -1089,8 +1114,12 @@ components:
         "$ref": "http://localhost:${dynamicPort}/remote/schema#/components/schemas/User"
     X-Rate-Limit-Reset:
       description: The number of seconds left in the current period
-      schema:
-        type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExtendedErrorModel'
+      examples:
+      - $ref: "#/components/examples/dog"
   links:
     referenced:
       "$ref": "#/components/links/unsubscribe"
@@ -1099,7 +1128,11 @@ components:
       parameters:
         id: $response.body#/hookId
       x-link: link extension
+    subscribe:
+      "$ref": "http://localhost:${dynamicPort}/remote/link"
   callbacks:
+    remoteCallback:
+      "$ref": "http://localhost:${dynamicPort}/remote/callback"
     referenced:
       "$ref": "#/components/callbacks/failed"
     heartbeat:

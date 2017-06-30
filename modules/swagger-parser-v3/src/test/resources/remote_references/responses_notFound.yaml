@@ -1,6 +1,10 @@
 responses:
     NotFound:
       description: Remote Description
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExtendedErrorModel'
     IllegalInput:
         description: Illegal input for operation.
     GeneralError:

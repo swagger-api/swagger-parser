@@ -33,8 +33,7 @@ public class CallbackProcessor {
 
     public Callback processCallback(Callback callback) {
         if (callback.get("$ref") != null){
-            Callback resolvedCallback = processReferenceCallback(callback);
-            return resolvedCallback;
+            callback = processReferenceCallback(callback);
         }
         //Resolver PathItem
         for(String name : callback.keySet()){
