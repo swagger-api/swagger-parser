@@ -51,6 +51,9 @@ public class ComponentsProcessor {
 
 
     public void processComponents() {
+        if (openApi.getComponents() == null){
+            return;
+        }
         final Map<String, Schema> schemas = openApi.getComponents().getSchemas();
         final Map<String, ApiResponse> responses = openApi.getComponents().getResponses();
         final Map<String, RequestBody> requestBodies = openApi.getComponents().getRequestBodies();

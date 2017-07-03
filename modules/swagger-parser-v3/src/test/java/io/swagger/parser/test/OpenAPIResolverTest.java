@@ -46,7 +46,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.testng.Assert.assertEquals;
 
 
-public class OpenApiResolverTest {
+public class OpenAPIResolverTest {
 
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
@@ -129,6 +129,8 @@ public class OpenApiResolverTest {
                         .withHeader("Content-type", "application/yaml")
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
+
+
     }
 
     @AfterClass

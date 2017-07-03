@@ -27,12 +27,11 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            // TODO
             JsonNode node = YAML_MAPPER.readValue(new URL(url), JsonNode.class);
             if(node != null && node.get("openapi") != null) {
                 JsonNode version = node.get("openapi");
                 if(version.asText() != null && version.asText().startsWith("3.0")) {
-                    result = new OpenAPIDeserializer().deserialize(node);
+                    result.setOpenAPI(new OpenAPIResolver(new OpenAPIDeserializer().deserialize(node).getOpenAPI(),null,null).resolve());
                 }
             }
         }
@@ -55,8 +54,12 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 mapper = YAML_MAPPER;
             }
             try {
-                OpenAPI api = mapper.readValue(swaggerAsString, OpenAPI.class);
-                result.setOpenAPI(api);
+                OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+                JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
+                SwaggerParseResult  deserializeOpenAPI = deserializer.deserialize(rootNode);
+                OpenAPIResolver resolver = new OpenAPIResolver(deserializeOpenAPI.getOpenAPI(),null,null);
+                result.setOpenAPI(resolver.resolve());
+
             }
             catch (Exception e) {
                 result.setMessages(Arrays.asList(e.getMessage()));
