@@ -1,6 +1,7 @@
 package io.swagger.parser.test;
 
 
+import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v3.OpenAPIV3Parser;
 import org.testng.annotations.Test;
@@ -10,7 +11,7 @@ import static org.testng.Assert.assertNotNull;
 public class OAIDeserializationTest {
     @Test
     public void testDeserializeSimpleDefinition() throws Exception {
-        String yaml =
+        String json =
                 "{\n" +
                         "  \"openapi\": \"3.0.0-rc0\",\n" +
                         "  \"info\": {\n" +
@@ -27,8 +28,9 @@ public class OAIDeserializationTest {
                         "    \"version\": \"1.0.0\"\n" +
                         "  }\n" +
                         "}";
-
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, null);
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(json, null, options);
 
         assertNotNull(result.getOpenAPI());
     }

@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.parser.models.AuthorizationValue;
+import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v3.OpenAPIV3Parser;
 import mockit.Injectable;
@@ -27,7 +28,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 
 
-public class OpenAPIParserV3Test {
+public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
@@ -126,14 +127,31 @@ public class OpenAPIParserV3Test {
 
        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, null);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
+
+    @Test
+    public void test30NoOptions(@Injectable final List<AuthorizationValue> auths) throws Exception{
+
+
+
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths,null);
+
+        Assert.assertNotNull(result);
+        Assert.assertNull(result.getOpenAPI());
+    }
+
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();

@@ -30,8 +30,15 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             JsonNode node = YAML_MAPPER.readValue(new URL(url), JsonNode.class);
             if(node != null && node.get("openapi") != null) {
                 JsonNode version = node.get("openapi");
+                if(auth == null) {
+                    auth = new ArrayList<>();
+                }
                 if(version.asText() != null && version.asText().startsWith("3.0")) {
-                    result.setOpenAPI(new OpenAPIResolver(new OpenAPIDeserializer().deserialize(node).getOpenAPI(),null,null).resolve());
+                    if (options != null) {
+                        if (options.isResolve()) {
+                            result.setOpenAPI(new OpenAPIResolver(new OpenAPIDeserializer().deserialize(node).getOpenAPI(), auth, null).resolve());
+                        }
+                    }
                 }
             }
         }
@@ -53,16 +60,22 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             else {
                 mapper = YAML_MAPPER;
             }
-            try {
-                OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-                JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
-                SwaggerParseResult  deserializeOpenAPI = deserializer.deserialize(rootNode);
-                OpenAPIResolver resolver = new OpenAPIResolver(deserializeOpenAPI.getOpenAPI(),null,null);
-                result.setOpenAPI(resolver.resolve());
-
+            if(auth == null) {
+                auth = new ArrayList<>();
             }
-            catch (Exception e) {
-                result.setMessages(Arrays.asList(e.getMessage()));
+            if(options != null) {
+                if (options.isResolve()) {
+                    try {
+                        OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+                        JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
+                        SwaggerParseResult deserializeOpenAPI = deserializer.deserialize(rootNode);
+                        OpenAPIResolver resolver = new OpenAPIResolver(deserializeOpenAPI.getOpenAPI(), auth, null);
+                        result.setOpenAPI(resolver.resolve());
+
+                    } catch (Exception e) {
+                        result.setMessages(Arrays.asList(e.getMessage()));
+                    }
+                }
             }
         }
         else {

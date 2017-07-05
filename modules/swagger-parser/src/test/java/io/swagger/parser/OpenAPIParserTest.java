@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class OpenAPIParserTest {
 
     @Test
     public void test30() {
-        String yaml =
+        String json =
             "{\n" +
             "  \"openapi\": \"3.0.0-rc1\",\n" +
             "  \"info\": {\n" +
@@ -47,7 +48,9 @@ public class OpenAPIParserTest {
             "  }\n" +
             "}";
 
-        SwaggerParseResult result = new OpenAPIParser().readContents(yaml, null, null);
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readContents(json, null, options);
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
