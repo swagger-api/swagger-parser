@@ -149,7 +149,9 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths,null);
 
         Assert.assertNotNull(result);
-        Assert.assertNull(result.getOpenAPI());
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
+        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
 

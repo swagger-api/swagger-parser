@@ -37,7 +37,11 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     if (options != null) {
                         if (options.isResolve()) {
                             result.setOpenAPI(new OpenAPIResolver(new OpenAPIDeserializer().deserialize(node).getOpenAPI(), auth, null).resolve());
+                        }else{
+                            result = new OpenAPIDeserializer().deserialize(node);
                         }
+                    }else{
+                        result = new OpenAPIDeserializer().deserialize(node);
                     }
                 }
             }
@@ -75,6 +79,22 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     } catch (Exception e) {
                         result.setMessages(Arrays.asList(e.getMessage()));
                     }
+                }else{
+                    try {
+                        JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
+                        result = new OpenAPIDeserializer().deserialize(rootNode);
+
+                    } catch (Exception e) {
+                        result.setMessages(Arrays.asList(e.getMessage()));
+                    }
+                }
+            }else{
+                try {
+                    JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
+                    result = new OpenAPIDeserializer().deserialize(rootNode);
+
+                } catch (Exception e) {
+                    result.setMessages(Arrays.asList(e.getMessage()));
                 }
             }
         }
