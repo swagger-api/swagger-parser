@@ -31,7 +31,7 @@ public class SecuritySchemeProcessor {
             if (isAnExternalRefFormat(refFormat)){
                 final String newRef = externalRefProcessor.processRefToExternalSecurityScheme($ref, refFormat);
                 if (newRef != null) {
-                    securityScheme.set$ref("#/components/securitySchemes/"+newRef);
+                    securityScheme.set$ref(newRef);
                 }
             }
         }

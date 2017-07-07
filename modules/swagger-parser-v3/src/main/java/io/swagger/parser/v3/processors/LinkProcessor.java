@@ -39,7 +39,7 @@ public class LinkProcessor {
                 final String newRef = externalRefProcessor.processRefToExternalLink($ref, refFormat);
 
                 if (newRef != null) {
-                    link.set$ref("#/components/links/"+newRef);
+                    link.set$ref(newRef);
                 }
             }
 

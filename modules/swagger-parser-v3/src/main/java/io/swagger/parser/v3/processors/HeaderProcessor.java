@@ -43,7 +43,7 @@ public class HeaderProcessor {
             if (isAnExternalRefFormat(refFormat)){
                 final String newRef = externalRefProcessor.processRefToExternalHeader($ref, refFormat);
                 if (newRef != null) {
-                    header.set$ref("#/componentes/headers/"+newRef);
+                    header.set$ref(newRef);
                 }
             }
         }

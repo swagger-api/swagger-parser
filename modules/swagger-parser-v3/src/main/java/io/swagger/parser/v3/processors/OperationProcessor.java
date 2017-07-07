@@ -69,7 +69,7 @@ public class OperationProcessor {
                         if (isAnExternalRefFormat(refFormat)){
                             final String newRef = externalRefProcessor.processRefToExternalCallback($ref, refFormat);
                             if (newRef != null) {
-                                callback.get("$ref").set$ref("#/components/callbacks/"+newRef);
+                                callback.get("$ref").set$ref(newRef);
                             }
                         }
                     }

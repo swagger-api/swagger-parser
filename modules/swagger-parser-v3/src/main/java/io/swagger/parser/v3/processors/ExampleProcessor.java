@@ -46,7 +46,7 @@ public class ExampleProcessor {
         if (isAnExternalRefFormat(refFormat)){
             final String newRef = externalRefProcessor.processRefToExternalExample($ref, refFormat);
             if (newRef != null) {
-                example.set$ref("#/components/examples/"+newRef);
+                example.set$ref(newRef);
             }
         }
     }

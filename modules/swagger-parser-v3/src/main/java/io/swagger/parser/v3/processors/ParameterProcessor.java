@@ -41,7 +41,7 @@ public class ParameterProcessor {
             if (isAnExternalRefFormat(refFormat)){
                 final String newRef = externalRefProcessor.processRefToExternalParameter($ref, refFormat);
                 if (newRef != null) {
-                    parameter.set$ref("#/components/parameters/"+newRef);
+                    parameter.set$ref(newRef);
                 }
             }
         }

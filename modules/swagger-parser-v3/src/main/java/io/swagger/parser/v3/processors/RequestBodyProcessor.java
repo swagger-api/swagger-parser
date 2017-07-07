@@ -56,7 +56,7 @@ public class RequestBodyProcessor {
             final String newRef = externalRefProcessor.processRefToExternalRequestBody($ref, refFormat);
 
             if (newRef != null) {
-                requestBody.set$ref("#/components/requestBodies/"+newRef);
+                requestBody.set$ref(newRef);
             }
         }
     }
