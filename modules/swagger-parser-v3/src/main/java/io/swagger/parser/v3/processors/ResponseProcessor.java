@@ -12,47 +12,40 @@ import io.swagger.parser.v3.models.RefFormat;
 import java.util.Map;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 public class ResponseProcessor {
 
     private final SchemaProcessor schemaProcessor;
     private final HeaderProcessor headerProcessor;
     private final LinkProcessor linkProcessor;
+    private final ExternalRefProcessor externalRefProcessor;
     private final ResolverCache cache;
-    private final OpenAPI openApi;
+    private final OpenAPI openAPI;
 
-    public ResponseProcessor(ResolverCache cache, OpenAPI openApi) {
-        schemaProcessor = new SchemaProcessor(cache);
-        headerProcessor = new HeaderProcessor(cache,openApi);
-        linkProcessor = new LinkProcessor(cache,openApi);
+    public ResponseProcessor(ResolverCache cache, OpenAPI openAPI) {
+        schemaProcessor = new SchemaProcessor(cache,openAPI);
+        headerProcessor = new HeaderProcessor(cache,openAPI);
+        linkProcessor = new LinkProcessor(cache,openAPI);
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
         this.cache = cache;
-        this.openApi = openApi;
+        this.openAPI = openAPI;
     }
 
-    public ApiResponse processResponse(ApiResponse response) {
+    public void processResponse(ApiResponse response) {
 
         if (response.get$ref() != null){
-            response = processReferenceResponse(response);
+            processReferenceResponse(response);
         }
         Schema schema = null;
-        MediaType resolvedMedia = null;
         if(response.getContent() != null){
             Map<String,MediaType> content = response.getContent();
             for( String mediaName : content.keySet()) {
                 MediaType mediaType = content.get(mediaName);
                 if(mediaType.getSchema()!= null) {
                     schema = mediaType.getSchema();
-                    resolvedMedia = new MediaType();
                     if (schema != null) {
-                        if(schema.get$ref() != null) {
-                            Schema resolved = schemaProcessor.processReferenceSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            response.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }else {
-                            Schema resolved = schemaProcessor.processSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            response.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }
+                        schemaProcessor.processSchema(schema);
                     }
                 }
             }
@@ -61,29 +54,29 @@ public class ResponseProcessor {
             Map<String,Header> headers = response.getHeaders();
             for(String headerName : headers.keySet()){
                 Header header = headers.get(headerName);
-                Header resolvedHeader = headerProcessor.processHeader(header);
-                headers.replace(headerName,header,resolvedHeader);
+                headerProcessor.processHeader(header);
             }
-            response.setHeaders(headers);
+
 
         }
         if (response.getLinks() != null){
             Map<String,Link> links = response.getLinks();
             for(String linkName : links.keySet()){
                 Link link = links.get(linkName);
-                Link resolvedLink = linkProcessor.processLink(link);
-                links.replace(linkName,link,resolvedLink);
+                linkProcessor.processLink(link);
             }
-            response.setLinks(links);
         }
-
-        return response;
     }
 
-    public ApiResponse processReferenceResponse(ApiResponse response){
+    public void processReferenceResponse(ApiResponse response){
         RefFormat refFormat = computeRefFormat(response.get$ref());
         String $ref = response.get$ref();
-        ApiResponse newResponse = cache.loadRef($ref, refFormat, ApiResponse.class);
-        return newResponse;
+        if (isAnExternalRefFormat(refFormat)){
+            final String newRef = externalRefProcessor.processRefToExternalResponse($ref, refFormat);
+
+            if (newRef != null) {
+                response.set$ref(newRef);
+            }
+        }
     }
 }

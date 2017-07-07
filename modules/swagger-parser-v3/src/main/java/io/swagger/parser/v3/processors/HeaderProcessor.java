@@ -15,6 +15,7 @@ import java.util.Map;
 
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 
 public class HeaderProcessor {
@@ -22,61 +23,49 @@ public class HeaderProcessor {
     private final ResolverCache cache;
     private final SchemaProcessor schemaProcessor;
     private final ExampleProcessor exampleProcessor;
-    private final OpenAPI openApi;
+    private final ExternalRefProcessor externalRefProcessor;
+    private final OpenAPI openAPI;
 
 
-    public HeaderProcessor(ResolverCache cache, OpenAPI openApi) {
+    public HeaderProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
-        this.openApi = openApi;
-        this.schemaProcessor = new SchemaProcessor(cache);
-        this.exampleProcessor = new ExampleProcessor(cache,openApi);
+        this.openAPI = openAPI;
+        this.schemaProcessor = new SchemaProcessor(cache,openAPI);
+        this.exampleProcessor = new ExampleProcessor(cache,openAPI);
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
-    public Header processHeader(Header header) {
+    public void processHeader(Header header) {
 
         if(header.get$ref() != null){
             RefFormat refFormat = computeRefFormat(header.get$ref());
             String $ref = header.get$ref();
-            header = cache.loadRef($ref, refFormat, Header.class);
-            if(header != null){
-                return header;
+            if (isAnExternalRefFormat(refFormat)){
+                final String newRef = externalRefProcessor.processRefToExternalHeader($ref, refFormat);
+                if (newRef != null) {
+                    header.set$ref("#/componentes/headers/"+newRef);
+                }
             }
-
         }
         if (header.getSchema() != null) {
-            Schema resolved = schemaProcessor.processSchema(header.getSchema());
-            header.setSchema(resolved);
+            schemaProcessor.processSchema(header.getSchema());
 
         }
         if (header.getExamples() != null){
-            List<Example> resolvedExamples = exampleProcessor.processExample(header.getExamples());
-            header.setExamples(resolvedExamples);
-
+            exampleProcessor.processExample(header.getExamples());
         }
         Schema schema = null;
-        MediaType resolvedMedia = null;
         if(header.getContent() != null) {
             Map<String,MediaType> content = header.getContent();
             for( String mediaName : content.keySet()) {
                 MediaType mediaType = content.get(mediaName);
                 if(mediaType.getSchema()!= null) {
                     schema = mediaType.getSchema();
-                    resolvedMedia = new MediaType();
                     if (schema != null) {
-                        if(schema.get$ref() != null) {
-                            Schema resolved = schemaProcessor.processReferenceSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            header.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }else {
-                            Schema resolved = schemaProcessor.processSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            header.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }
+                        schemaProcessor.processSchema(schema);
                     }
                 }
             }
         }
-
-        return  header;
     }
 }

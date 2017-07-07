@@ -49,7 +49,7 @@ public class OpenAPIV3ParserTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
-        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_schema_user.yaml"));
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_schema.yaml"));
 
         WireMock.stubFor(get(urlPathMatching("/remote/schema"))
                 .willReturn(aResponse()
@@ -58,7 +58,7 @@ public class OpenAPIV3ParserTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
-        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/responses_notFound.yaml"));
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_responses.yaml"));
 
         WireMock.stubFor(get(urlPathMatching("/remote/response"))
                 .willReturn(aResponse()
@@ -67,7 +67,7 @@ public class OpenAPIV3ParserTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
-        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/requestBody.yaml"));
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_requestBody.yaml"));
 
         WireMock.stubFor(get(urlPathMatching("/remote/requestBody"))
                 .willReturn(aResponse()
@@ -106,6 +106,15 @@ public class OpenAPIV3ParserTest {
         pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_callback.yaml"));
 
         WireMock.stubFor(get(urlPathMatching("/remote/callback"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_securityScheme.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/security"))
                 .willReturn(aResponse()
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withHeader("Content-type", "application/yaml")

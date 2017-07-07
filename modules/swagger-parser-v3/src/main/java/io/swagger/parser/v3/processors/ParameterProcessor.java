@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 
 public class ParameterProcessor {
@@ -21,61 +22,52 @@ public class ParameterProcessor {
     private final ResolverCache cache;
     private final SchemaProcessor schemaProcessor;
     private final ExampleProcessor exampleProcessor;
-    private final OpenAPI openApi;
+    private final OpenAPI openAPI;
+    private final ExternalRefProcessor externalRefProcessor;
 
 
-    public ParameterProcessor(ResolverCache cache, OpenAPI openApi) {
+    public ParameterProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
-        this.openApi = openApi;
-        this.schemaProcessor = new SchemaProcessor(cache);
-        this.exampleProcessor = new ExampleProcessor(cache,openApi);
+        this.openAPI = openAPI;
+        this.schemaProcessor = new SchemaProcessor(cache,openAPI);
+        this.exampleProcessor = new ExampleProcessor(cache,openAPI);
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
-    public Parameter processParameter(Parameter parameter) {
+    public void processParameter(Parameter parameter) {
         String $ref = parameter.get$ref();
         if($ref != null){
-            RefFormat refFormat = computeRefFormat($ref);
-            parameter = cache.loadRef($ref, refFormat, Parameter.class);
-
+            RefFormat refFormat = computeRefFormat(parameter.get$ref());
+            if (isAnExternalRefFormat(refFormat)){
+                final String newRef = externalRefProcessor.processRefToExternalParameter($ref, refFormat);
+                if (newRef != null) {
+                    parameter.set$ref("#/components/parameters/"+newRef);
+                }
+            }
         }
         if (parameter.getSchema() != null){
-            Schema resolved = schemaProcessor.processSchema(parameter.getSchema());
-            parameter.setSchema(resolved);
-
+            schemaProcessor.processSchema(parameter.getSchema());
         }
         if (parameter.getExamples() != null){
             Map <String, Example> examples = parameter.getExamples();
             for(String exampleName: examples.keySet()){
                 final Example example = examples.get(exampleName);
-                Example resolvedExample = exampleProcessor.processExample(example);
-                examples.replace(exampleName,example,resolvedExample);
-                parameter.setExamples(examples);
+                exampleProcessor.processExample(example);
             }
         }
         Schema schema = null;
-        MediaType resolvedMedia = null;
         if(parameter.getContent() != null) {
             Map<String,MediaType> content = parameter.getContent();
             for( String mediaName : content.keySet()) {
                 MediaType mediaType = content.get(mediaName);
                 if(mediaType.getSchema()!= null) {
                     schema = mediaType.getSchema();
-                    resolvedMedia = new MediaType();
                     if (schema != null) {
-                        if(schema.get$ref() != null) {
-                            Schema resolved = schemaProcessor.processReferenceSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            parameter.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }else {
-                            Schema resolved = schemaProcessor.processSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            parameter.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }
+                        schemaProcessor.processSchema(schema);
                     }
                 }
             }
         }
-        return parameter;
     }
 
    public List<Parameter> processParameters(List<Parameter> parameters) {

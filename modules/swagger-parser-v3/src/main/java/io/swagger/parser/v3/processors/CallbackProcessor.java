@@ -14,6 +14,7 @@ import java.util.Map;
 
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 /**
  * Created by gracekarina on 23/06/17.
@@ -22,18 +23,20 @@ public class CallbackProcessor {
     private final ResolverCache cache;
     private final OperationProcessor operationProcessor;
     private final ParameterProcessor parameterProcessor;
-    private final OpenAPI openApi;
+    private final OpenAPI openAPI;
+    private final ExternalRefProcessor externalRefProcessor;
 
-    public CallbackProcessor(ResolverCache cache, OpenAPI openApi) {
+    public CallbackProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
-        this.operationProcessor = new OperationProcessor(cache, openApi);
-        this.parameterProcessor = new ParameterProcessor(cache,openApi);
-        this.openApi = openApi;
+        this.operationProcessor = new OperationProcessor(cache, openAPI);
+        this.parameterProcessor = new ParameterProcessor(cache,openAPI);
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
+        this.openAPI = openAPI;
     }
 
-    public Callback processCallback(Callback callback) {
+    public void processCallback(Callback callback) {
         if (callback.get("$ref") != null){
-            callback = processReferenceCallback(callback);
+            processReferenceCallback(callback);
         }
         //Resolver PathItem
         for(String name : callback.keySet()){
@@ -42,51 +45,26 @@ public class CallbackProcessor {
 
             for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
                 Operation operation = operationMap.get(httpMethod);
-                Operation resolvedOperation = operationProcessor.processOperation(operation);
-
-                if(PathItem.HttpMethod.GET.equals(httpMethod)) {
-                    pathItem.setGet(resolvedOperation);
-                }
-                else if(PathItem.HttpMethod.POST.equals(httpMethod)) {
-                    pathItem.setPost(resolvedOperation);
-                }
-                else if(PathItem.HttpMethod.PUT.equals(httpMethod)) {
-                    pathItem.setPut(resolvedOperation);
-                }
-                else if(PathItem.HttpMethod.DELETE.equals(httpMethod)) {
-                    pathItem.setDelete(resolvedOperation);
-                }
-                else if(PathItem.HttpMethod.TRACE.equals(httpMethod)) {
-                    pathItem.setTrace(resolvedOperation);
-                }
-                else if(PathItem.HttpMethod.OPTIONS.equals(httpMethod)) {
-                    pathItem.setOptions(resolvedOperation);
-                }
-                else if(PathItem.HttpMethod.HEAD.equals(httpMethod)) {
-                    pathItem.setHead(resolvedOperation);
-                }
-                else if(PathItem.HttpMethod.PATCH.equals(httpMethod)) {
-                    pathItem.setPatch(resolvedOperation);
-                }
+                operationProcessor.processOperation(operation);
             }
 
             List<Parameter> parameters = pathItem.getParameters();
-            List<Parameter> resolvedParameters = new ArrayList<>();
             if (parameters != null) {
                 for (Parameter parameter: parameters){
-                    Parameter resolvedParameter = parameterProcessor.processParameter(parameter);
-                    resolvedParameters.add(resolvedParameter);
-                    pathItem.setParameters(resolvedParameters);
+                    parameterProcessor.processParameter(parameter);
                 }
             }
         }
-        return callback;
     }
 
-    public Callback processReferenceCallback(Callback callback ){
+    public void processReferenceCallback(Callback callback ){
         String $ref = callback.get("$ref").get$ref();
         RefFormat refFormat = computeRefFormat($ref);
-        Callback resolvedCallback = cache.loadRef($ref, refFormat, Callback.class);
-        return resolvedCallback;
+        if (isAnExternalRefFormat(refFormat)){
+            final String newRef = externalRefProcessor.processRefToExternalCallback($ref, refFormat);
+            if (newRef != null) {
+                callback.get("$ref").set$ref("#/components/callbacks/"+newRef);
+            }
+        }
     }
 }

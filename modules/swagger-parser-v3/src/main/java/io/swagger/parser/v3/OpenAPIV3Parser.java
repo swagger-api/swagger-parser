@@ -2,7 +2,6 @@ package io.swagger.parser.v3;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
