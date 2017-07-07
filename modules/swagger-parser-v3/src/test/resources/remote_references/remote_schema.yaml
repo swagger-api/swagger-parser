@@ -1,5 +1,14 @@
 components:
   schemas:
+    RemoteSchema:
+      type: object
+      not:
+        type: integer
+        format: int32
+    ExampleSchema:
+      type: object
+      additionalProperties:
+        type: integer
     ExtendedErrorModel:
       allOf:
       - type: object

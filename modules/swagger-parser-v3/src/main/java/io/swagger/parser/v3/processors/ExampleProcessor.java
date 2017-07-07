@@ -10,42 +10,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 /**
  * Created by gracekarina on 23/06/17.
  */
 public class ExampleProcessor {
     private final ResolverCache cache;
-    private final OpenAPI openApi;
+    private final OpenAPI openAPI;
+    private final ExternalRefProcessor externalRefProcessor;
 
-    public ExampleProcessor(ResolverCache cache, OpenAPI openApi) {
+    public ExampleProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
-        this.openApi = openApi;
+        this.openAPI = openAPI;
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
-    public Example processExample(Example example) {
+    public void processExample(Example example) {
 
         if (example.get$ref() != null){
-            RefFormat refFormat = computeRefFormat(example.get$ref());
-            String $ref = example.get$ref();
-            Example newExample = cache.loadRef($ref, refFormat, Example.class);
-            if(newExample != null) {
-                return newExample;
-            }
+           processReferenceExample(example);
         }
-        return example;
     }
 
-    public List<Example> processExample(List<Example> examples) {
-        List<Example> newExampleList = new ArrayList<>();
+    public void processExample(List<Example> examples) {
         for(Example example: examples){
             if (example.get$ref() != null){
-                RefFormat refFormat = computeRefFormat(example.get$ref());
-                String ref = example.get$ref();
-                Example newExample = cache.loadRef(ref, refFormat, Example.class);
-                newExampleList.add(newExample);
+                processReferenceExample(example);
             }
         }
-        return newExampleList;
+    }
+    private void processReferenceExample(Example example){
+        RefFormat refFormat = computeRefFormat(example.get$ref());
+        String $ref = example.get$ref();
+        if (isAnExternalRefFormat(refFormat)){
+            final String newRef = externalRefProcessor.processRefToExternalExample($ref, refFormat);
+            if (newRef != null) {
+                example.set$ref(newRef);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package io.swagger.parser.v3.processors;
 
 
+import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.Schema;
@@ -11,26 +12,28 @@ import java.util.List;
 import java.util.Map;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 
 public class SchemaProcessor {
     private final ResolverCache cache;
+    private final ExternalRefProcessor externalRefProcessor;
 
 
-    public SchemaProcessor(ResolverCache cache) {
+    public SchemaProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
 
-    public Schema processSchema(Schema schema) {
+    public void processSchema(Schema schema) {
         if (schema != null) {
             if (schema.get$ref() != null) {
-                return processReferenceSchema(schema);
+                processReferenceSchema(schema);
             } else {
                 processSchemaType(schema);
             }
         }
-        return schema;
     }
 
     public void processSchemaType(Schema schema){
@@ -55,11 +58,10 @@ public class SchemaProcessor {
     }
 
     private void processAdditionalProperties(Schema schema) {
-        Schema resolved;
+
         if (schema.getAdditionalProperties() != null){
             if(schema.getAdditionalProperties().get$ref() != null){
-                resolved = processReferenceSchema(schema.getAdditionalProperties());
-                schema.setAdditionalProperties(resolved);
+                processReferenceSchema(schema.getAdditionalProperties());
             }else{
                 processSchemaType(schema.getAdditionalProperties());
             }
@@ -67,11 +69,10 @@ public class SchemaProcessor {
     }
 
     private void processNotSchema(Schema schema) {
-        Schema resolved;
+
         if (schema.getNot() != null){
             if(schema.getNot().get$ref() != null){
-                resolved = processReferenceSchema(schema.getNot());
-                schema.setNot(resolved);
+                processReferenceSchema(schema.getNot());
             }else{
                 processSchemaType(schema.getNot());
             }
@@ -83,8 +84,7 @@ public class SchemaProcessor {
             processReferenceSchema(schema);
         }
 
-        Schema resolved = null;
-        String propertyName = null;
+
          Map<String, Schema> properties = schema.getProperties();
          if (properties != null) {
              for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
@@ -93,10 +93,7 @@ public class SchemaProcessor {
                      processArraySchema((ArraySchema) property);
                  }
                  if(property.get$ref() != null) {
-                     propertyName = propertyEntry.getKey();
-                     resolved = processReferenceSchema(property);
-                     properties.replace(propertyName,resolved);
-
+                     processReferenceSchema(property);
                  }
              }
          }
@@ -107,10 +104,8 @@ public class SchemaProcessor {
         final List<Schema> schemas = allOfSchema.getAllOf();
         if (schemas != null) {
             for (Schema schema : schemas) {
-                Schema resolved = null;
                 if (schema.get$ref() != null) {
-                    resolved = processReferenceSchema(schema);
-                    schemas.add(resolved);
+                    processReferenceSchema(schema);
                 }else{
                     processSchemaType(schema);
                 }
@@ -122,19 +117,36 @@ public class SchemaProcessor {
     public void processArraySchema(ArraySchema arraySchema) {
 
         final Schema items = arraySchema.getItems();
-        Schema resolved = null;
         if (items.get$ref() != null) {
-            resolved = processReferenceSchema(items);
-            arraySchema.setItems(resolved);
+            processReferenceSchema(items);
         }else{
             processSchemaType(items);
         }
     }
 
-    public Schema processReferenceSchema(Schema schema){
+   /* public Schema processReferenceSchema(Schema schema){
         RefFormat refFormat = computeRefFormat(schema.get$ref());
         String $ref = schema.get$ref();
         Schema newSchema = cache.loadRef($ref, refFormat, Schema.class);
         return newSchema;
+    }*/
+
+    private void processReferenceSchema(Schema schema) {
+    /* if this is a URL or relative ref:
+        1) we need to load it into memory.
+        2) shove it into the #/definitions
+        3) update the RefModel to point to its location in #/definitions
+     */
+        RefFormat refFormat = computeRefFormat(schema.get$ref());
+        String $ref = schema.get$ref();
+
+        if (isAnExternalRefFormat(refFormat)){
+            final String newRef = externalRefProcessor.processRefToExternalSchema($ref, refFormat);
+
+            if (newRef != null) {
+                schema.set$ref(newRef);
+            }
+        }
     }
+
 }

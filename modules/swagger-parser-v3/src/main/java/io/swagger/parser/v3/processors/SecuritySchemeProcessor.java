@@ -7,30 +7,33 @@ import io.swagger.parser.v3.models.RefFormat;
 
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 /**
  * Created by gracekarina on 23/06/17.
  */
 public class SecuritySchemeProcessor {
     private final ResolverCache cache;
-    private final OpenAPI openApi;
+    private final OpenAPI openAPI;
+    private final ExternalRefProcessor externalRefProcessor;
 
-    public SecuritySchemeProcessor(ResolverCache cache, OpenAPI openApi) {
+    public SecuritySchemeProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
-        this.openApi = openApi;
+        this.openAPI = openAPI;
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
-    public SecurityScheme processSecurityScheme(SecurityScheme securityScheme) {
+    public void processSecurityScheme(SecurityScheme securityScheme) {
 
         if (securityScheme.get$ref() != null){
             RefFormat refFormat = computeRefFormat(securityScheme.get$ref());
             String $ref = securityScheme.get$ref();
-            SecurityScheme newSecurityScheme = cache.loadRef($ref, refFormat, SecurityScheme.class);
-            if (newSecurityScheme != null) {
-                return newSecurityScheme;
+            if (isAnExternalRefFormat(refFormat)){
+                final String newRef = externalRefProcessor.processRefToExternalSecurityScheme($ref, refFormat);
+                if (newRef != null) {
+                    securityScheme.set$ref(newRef);
+                }
             }
         }
-        return securityScheme;
-
     }
 }

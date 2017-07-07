@@ -2,7 +2,6 @@ package io.swagger.parser.v3;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
@@ -27,12 +26,22 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            // TODO
             JsonNode node = YAML_MAPPER.readValue(new URL(url), JsonNode.class);
             if(node != null && node.get("openapi") != null) {
                 JsonNode version = node.get("openapi");
+                if(auth == null) {
+                    auth = new ArrayList<>();
+                }
                 if(version.asText() != null && version.asText().startsWith("3.0")) {
-                    result = new OpenAPIDeserializer().deserialize(node);
+                    if (options != null) {
+                        if (options.isResolve()) {
+                            result.setOpenAPI(new OpenAPIResolver(new OpenAPIDeserializer().deserialize(node).getOpenAPI(), auth, null).resolve());
+                        }else{
+                            result = new OpenAPIDeserializer().deserialize(node);
+                        }
+                    }else{
+                        result = new OpenAPIDeserializer().deserialize(node);
+                    }
                 }
             }
         }
@@ -54,12 +63,38 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             else {
                 mapper = YAML_MAPPER;
             }
-            try {
-                OpenAPI api = mapper.readValue(swaggerAsString, OpenAPI.class);
-                result.setOpenAPI(api);
+            if(auth == null) {
+                auth = new ArrayList<>();
             }
-            catch (Exception e) {
-                result.setMessages(Arrays.asList(e.getMessage()));
+            if(options != null) {
+                if (options.isResolve()) {
+                    try {
+                        OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+                        JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
+                        SwaggerParseResult deserializeOpenAPI = deserializer.deserialize(rootNode);
+                        OpenAPIResolver resolver = new OpenAPIResolver(deserializeOpenAPI.getOpenAPI(), auth, null);
+                        result.setOpenAPI(resolver.resolve());
+
+                    } catch (Exception e) {
+                        result.setMessages(Arrays.asList(e.getMessage()));
+                    }
+                }else{
+                    try {
+                        JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
+                        result = new OpenAPIDeserializer().deserialize(rootNode);
+
+                    } catch (Exception e) {
+                        result.setMessages(Arrays.asList(e.getMessage()));
+                    }
+                }
+            }else{
+                try {
+                    JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
+                    result = new OpenAPIDeserializer().deserialize(rootNode);
+
+                } catch (Exception e) {
+                    result.setMessages(Arrays.asList(e.getMessage()));
+                }
             }
         }
         else {

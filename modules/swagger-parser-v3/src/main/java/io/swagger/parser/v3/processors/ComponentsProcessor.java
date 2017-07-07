@@ -37,7 +37,7 @@ public class ComponentsProcessor {
     public ComponentsProcessor(OpenAPI openApi,ResolverCache cache){
         this.cache = cache;
         this.openApi = openApi;
-        this.schemaProcessor = new SchemaProcessor(cache);
+        this.schemaProcessor = new SchemaProcessor(cache,openApi);
         this.responseProcessor = new ResponseProcessor(cache, openApi);
         this.requestBodyProcessor = new RequestBodyProcessor(cache, openApi);
         this.parameterProcessor = new ParameterProcessor(cache, openApi);
@@ -51,6 +51,9 @@ public class ComponentsProcessor {
 
 
     public void processComponents() {
+        if (openApi.getComponents() == null){
+            return;
+        }
         final Map<String, Schema> schemas = openApi.getComponents().getSchemas();
         final Map<String, ApiResponse> responses = openApi.getComponents().getResponses();
         final Map<String, RequestBody> requestBodies = openApi.getComponents().getRequestBodies();
@@ -139,8 +142,7 @@ public class ComponentsProcessor {
 
         for (String securitySchemeName : securitySchemeKey) {
             final SecurityScheme securityScheme = securitySchemes.get(securitySchemeName);
-            SecurityScheme resolvedSecurityScheme = securitySchemeProcessor.processSecurityScheme(securityScheme);
-            securitySchemes.replace(securitySchemeName,securityScheme,resolvedSecurityScheme);
+            securitySchemeProcessor.processSecurityScheme(securityScheme);
         }
     }
 
@@ -149,8 +151,7 @@ public class ComponentsProcessor {
 
         for (String callbackName : callbackKey) {
             final Callback callback = callbacks.get(callbackName);
-            Callback resolvedCallback = callbackProcessor.processCallback(callback);
-            callbacks.replace(callbackName, callback, resolvedCallback);
+            callbackProcessor.processCallback(callback);
         }
     }
 
@@ -159,10 +160,8 @@ public class ComponentsProcessor {
 
         for (String linkName : linkKey) {
             final Link link = links.get(linkName);
-            Link resolvedLink = linkProcessor.processLink(link);
-            links.replace(linkName,link,resolvedLink);
+            linkProcessor.processLink(link);
         }
-
     }
 
     private void processExamples(Set<String> exampleKey, Map<String, Example> examples) {
@@ -170,8 +169,7 @@ public class ComponentsProcessor {
 
         for (String exampleName : exampleKey) {
             final Example example = examples.get(exampleName);
-            Example resolvedExample = exampleProcessor.processExample(example);
-            examples.replace(exampleName,example,resolvedExample);
+            exampleProcessor.processExample(example);
         }
     }
 
@@ -180,8 +178,7 @@ public class ComponentsProcessor {
 
         for (String headersName : HeaderKey) {
             final Header header = headers.get(headersName);
-            Header resolvedHeader = headerProcessor.processHeader(header);
-            headers.replace(headersName,header,resolvedHeader);
+            headerProcessor.processHeader(header);
         }
     }
 
@@ -190,8 +187,7 @@ public class ComponentsProcessor {
 
         for (String parametersName : ParametersKey) {
             final Parameter parameter = parameters.get(parametersName);
-            Parameter resolvedParameter  = parameterProcessor.processParameter(parameter);
-            parameters.replace(parametersName,parameter,resolvedParameter);
+            parameterProcessor.processParameter(parameter);
         }
     }
 
@@ -200,8 +196,7 @@ public class ComponentsProcessor {
 
         for (String requestBodyName : requestBodyKey) {
             final RequestBody requestBody = requestBodies.get(requestBodyName);
-            RequestBody resolvedBody = requestBodyProcessor.processRequestBody(requestBody);
-            requestBodies.replace(requestBodyName,requestBody,resolvedBody);
+            requestBodyProcessor.processRequestBody(requestBody);
         }
     }
 
@@ -210,8 +205,7 @@ public class ComponentsProcessor {
 
         for (String responseName : responseKey) {
             final ApiResponse response = responses.get(responseName);
-            ApiResponse resolvedResponse = responseProcessor.processResponse(response);
-            responses.replace(responseName,response,resolvedResponse);
+            responseProcessor.processResponse(response);
         }
     }
 

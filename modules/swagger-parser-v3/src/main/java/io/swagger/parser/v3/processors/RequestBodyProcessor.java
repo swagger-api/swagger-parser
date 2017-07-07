@@ -10,58 +10,55 @@ import io.swagger.parser.v3.models.RefFormat;
 import java.util.Map;
 
 import static io.swagger.parser.v3.util.RefUtils.computeRefFormat;
+import static io.swagger.parser.v3.util.RefUtils.isAnExternalRefFormat;
 
 /**
  * Created by gracekarina on 20/06/17.
  */
 public class RequestBodyProcessor {
     private final SchemaProcessor schemaProcessor;
+    private final ExternalRefProcessor externalRefProcessor;
     private final ResolverCache cache;
-    private final OpenAPI openApi;
+    private final OpenAPI openAPI;
 
-    public RequestBodyProcessor(ResolverCache cache, OpenAPI openApi) {
-        schemaProcessor = new SchemaProcessor(cache);
+    public RequestBodyProcessor(ResolverCache cache, OpenAPI openAPI) {
+        schemaProcessor = new SchemaProcessor(cache,openAPI);
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
         this.cache = cache;
-        this.openApi = openApi;
+        this.openAPI = openAPI;
     }
 
-    public RequestBody processRequestBody(RequestBody requestBody) {
+    public void processRequestBody(RequestBody requestBody) {
 
         if (requestBody.get$ref() != null){
-            requestBody = processReferenceRequestBody(requestBody);
+            processReferenceRequestBody(requestBody);
         }
         Schema schema = null;
-        MediaType resolvedMedia = null;
         if(requestBody.getContent() != null){
             Map<String,MediaType> content = requestBody.getContent();
             for( String mediaName : content.keySet()) {
                 MediaType mediaType = content.get(mediaName);
                 if(mediaType.getSchema()!= null) {
                     schema = mediaType.getSchema();
-                    resolvedMedia = new MediaType();
                     if (schema != null) {
-                        if(schema.get$ref() != null) {
-                            Schema resolved = schemaProcessor.processReferenceSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            requestBody.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }else {
-                            Schema resolved = schemaProcessor.processSchema(schema);
-                            resolvedMedia.setSchema(resolved);
-                            requestBody.getContent().replace(mediaName,mediaType,resolvedMedia);
-                        }
+                        schemaProcessor.processSchema(schema);
                     }
                 }
             }
         }
-        return requestBody;
     }
 
 
-    public RequestBody processReferenceRequestBody(RequestBody requestBody){
+    public void processReferenceRequestBody(RequestBody requestBody){
         RefFormat refFormat = computeRefFormat(requestBody.get$ref());
         String $ref = requestBody.get$ref();
-        RequestBody newRequestBody = cache.loadRef($ref, refFormat, RequestBody.class);
-        return newRequestBody;
+        if (isAnExternalRefFormat(refFormat)){
+            final String newRef = externalRefProcessor.processRefToExternalRequestBody($ref, refFormat);
+
+            if (newRef != null) {
+                requestBody.set$ref(newRef);
+            }
+        }
     }
 
 }

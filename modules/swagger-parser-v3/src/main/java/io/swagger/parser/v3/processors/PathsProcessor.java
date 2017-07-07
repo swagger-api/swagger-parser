@@ -78,24 +78,7 @@ public class PathsProcessor {
             setParametersToEachOperation(pathItem,processedPathParameters);
             for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
                 Operation operation = operationMap.get(httpMethod);
-                Operation resolvedOperation = operationProcessor.processOperation(operation);
-                if (PathItem.HttpMethod.GET.equals(httpMethod)) {
-                    pathItem.setGet(resolvedOperation);
-                } else if (PathItem.HttpMethod.POST.equals(httpMethod)) {
-                    pathItem.setPost(resolvedOperation);
-                } else if (PathItem.HttpMethod.PUT.equals(httpMethod)) {
-                    pathItem.setPut(resolvedOperation);
-                } else if (PathItem.HttpMethod.DELETE.equals(httpMethod)) {
-                    pathItem.setDelete(resolvedOperation);
-                } else if (PathItem.HttpMethod.TRACE.equals(httpMethod)) {
-                    pathItem.setTrace(resolvedOperation);
-                } else if (PathItem.HttpMethod.OPTIONS.equals(httpMethod)) {
-                    pathItem.setOptions(resolvedOperation);
-                } else if (PathItem.HttpMethod.HEAD.equals(httpMethod)) {
-                    pathItem.setHead(resolvedOperation);
-                } else if (PathItem.HttpMethod.PATCH.equals(httpMethod)) {
-                    pathItem.setPatch(resolvedOperation);
-                }
+                operationProcessor.processOperation(operation);
             }
         }
     }
@@ -133,12 +116,9 @@ public class PathsProcessor {
 
     protected void resolvePathItem(PathItem pathItem) {
         if (pathItem.getParameters() != null) {
-            List<Parameter> resolvedParameters = new ArrayList<>();
             List<Parameter> params = pathItem.getParameters();
             for (Parameter param : params) {
-                Parameter resolvedParameter = parameterProcessor.processParameter(param);
-                resolvedParameters.add(resolvedParameter);
-                pathItem.setParameters(resolvedParameters);
+                parameterProcessor.processParameter(param);
             }
         }
     }
