@@ -310,10 +310,11 @@ public class OpenAPIDeserializer {
         if(StringUtils.isNotBlank(value)) {
             server.setDescription(value);
         }
-
-        ServerVariables serverVariables =  getServerVariables(obj,location,result);
-        if (serverVariables != null && serverVariables.size() > 0){
-            server.setVariables(serverVariables);
+        if (obj.get("variables") != null) {
+            ServerVariables serverVariables = getServerVariables(obj, location, result);
+            if (serverVariables != null && serverVariables.size() > 0) {
+                server.setVariables(serverVariables);
+            }
         }
 
 
@@ -405,13 +406,17 @@ public class OpenAPIDeserializer {
         Set<String> pathKeys = getKeys(obj);
         for (String pathName : pathKeys) {
             JsonNode pathValue = obj.get(pathName);
-            if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, pathName, "object", pathValue);
+            if(pathName.startsWith("x-")) {
+                result.unsupported(location, pathName, pathValue);
             } else {
-                ObjectNode path = (ObjectNode) pathValue;
-                PathItem pathObj = getPathItem(path, String.format("%s.%s'", location, pathName), result);
-                paths.put(pathName, pathObj);
+                if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                    result.invalidType(location, pathName, "object", pathValue);
+                } else {
+                    ObjectNode path = (ObjectNode) pathValue;
+                    PathItem pathObj = getPathItem(path, String.format("%s.%s'", location, pathName), result);
+                    paths.put(pathName, pathObj);
 
+                }
             }
         }
         return paths;
@@ -440,7 +445,7 @@ public class OpenAPIDeserializer {
             return null;
         }
 
-        String value = getString("summary", obj, true, location, result);
+        String value = getString("summary", obj, false, location, result);
         if(StringUtils.isNotBlank(value)) {
             pathItem.setSummary(value);
         }
@@ -720,15 +725,19 @@ public class OpenAPIDeserializer {
             mediaType.setSchema(getSchema(schemaObject,location,result));
         }
 
-        String value = getString("example", contentNode, false, location, result);
-        if(StringUtils.isNotBlank(value)) {
-            mediaType.setExample(value);
-        }
-
         ObjectNode examplesObject = getObject("examples",contentNode,false,location,result);
         if(examplesObject!=null) {
             mediaType.setExamples(getExamples(examplesObject, location, result));
         }
+
+        JsonNode exampleNode = contentNode.get("example");
+        if(exampleNode != null) {
+            String value = getString("example", contentNode, false, location, result);
+            if(StringUtils.isNotBlank(value)) {
+                mediaType.setExample(value);
+            }
+        }
+
 
         ObjectNode encodingObject = getObject("encoding",contentNode,false,location,result);
         if(encodingObject!=null) {
@@ -767,7 +776,7 @@ public class OpenAPIDeserializer {
         String value = getString("contentType", node, true, location, result);
         encoding.setContentType(value);
 
-        value = getString("style", node, true, location, result);
+        value = getString("style", node, false, location, result);
 
         if (StringUtils.isBlank(value)) {
             encoding.setStyle(Encoding.StyleEnum.FORM.toString());
@@ -1179,7 +1188,7 @@ public class OpenAPIDeserializer {
             parameter.setExplode(Boolean.FALSE);
         }
 
-        value = getString("style", obj, true, location, result);
+        value = getString("style", obj, false, location, result);
 
         setStyle(value, parameter, location, obj, result);
 
@@ -1189,14 +1198,17 @@ public class OpenAPIDeserializer {
             parameter.setSchema(getSchema(parameterObject,location,result));
         }
 
-        value = getString("example", obj, false, location, result);
-        if (StringUtils.isNotBlank(value)) {
-            parameter.setExample(value);
+        ObjectNode examplesObject = getObject("examples",obj,false,location,result);
+        if(examplesObject!=null) {
+            parameter.setExamples(getExamples(examplesObject, location, result));
         }
 
-        ObjectNode examplesNode = getObject("examples",obj,false,location,result);
-        if(examplesNode!= null) {
-            parameter.setExamples(getExamples(examplesNode, location, result));
+        JsonNode exampleNode = obj.get("example");
+        if(exampleNode != null) {
+            value = getString("example", obj, false, location, result);
+            if(StringUtils.isNotBlank(value)) {
+                parameter.setExample(value);
+            }
         }
 
         ObjectNode contentNode = getObject("content",obj,false,location,result);
@@ -1295,14 +1307,17 @@ public class OpenAPIDeserializer {
             header.setSchema(getSchema(headerObject, location, result));
         }
 
-        value = getString("example", headerNode, false, location, result);
-        if (StringUtils.isNotBlank(value)) {
-            header.setExample(value);
+        ArrayNode examplesObject = getArray("examples",headerNode,false,location,result);
+        if(examplesObject!=null) {
+            header.setExamples(getExampleList(examplesObject, location, result));
         }
 
-        ArrayNode examplesObject = getArray("examples",headerNode,false,location,result);
-        if(examplesObject != null) {
-            header.setExamples(getExampleList(examplesObject, location, result));
+        JsonNode exampleNode = headerNode.get("example");
+        if(exampleNode != null) {
+            value = getString("example", headerNode, false, location, result);
+            if(StringUtils.isNotBlank(value)) {
+                header.setExample(value);
+            }
         }
 
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
@@ -1429,22 +1444,22 @@ public class OpenAPIDeserializer {
 
         OAuthFlows oAuthFlows = new OAuthFlows();
 
-        ObjectNode objectNode = getObject("implicit", node, true, location, result);
+        ObjectNode objectNode = getObject("implicit", node, false, location, result);
         if(objectNode!= null) {
             oAuthFlows.setImplicit(getOAuthFlow(objectNode, location, result));
         }
 
-        objectNode = getObject("password", node, true, location, result);
+        objectNode = getObject("password", node, false, location, result);
         if(objectNode!= null) {
             oAuthFlows.setPassword(getOAuthFlow(objectNode, location, result));
         }
 
-        objectNode = getObject("clientCredentials", node, true, location, result);
+        objectNode = getObject("clientCredentials", node, false, location, result);
         if(objectNode!= null) {
             oAuthFlows.setClientCredentials(getOAuthFlow(objectNode, location, result));
         }
 
-        objectNode = getObject("authorizationCode", node, true, location, result);
+        objectNode = getObject("authorizationCode", node, false, location, result);
         if(objectNode!= null) {
             oAuthFlows.setAuthorizationCode(getOAuthFlow(objectNode, location, result));
         }
@@ -1475,7 +1490,7 @@ public class OpenAPIDeserializer {
             oAuthFlow.setTokenUrl(value);
         }
 
-        value = getString("refreshUrl", node, true, location, result);
+        value = getString("refreshUrl", node, false, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setRefreshUrl(value);
         }
@@ -1573,9 +1588,6 @@ public class OpenAPIDeserializer {
             for(JsonNode n : itemsNode) {
                 if(n.isValueNode()) {
                     items.setItems(getSchema(itemsNode, location,result));
-                }
-                else {
-                    result.invalidType(location, "items", "value", n);
                 }
             }
             schema = items;
@@ -1747,9 +1759,9 @@ public class OpenAPIDeserializer {
             schema.setFormat(value);
         }
 
-        ArrayNode array = getArray("default", node, false, location, result);
-        if(array != null && array.size() > 0) {
-            schema.setDefault(array);
+        value = getString("default", node, false, location, result);
+        if (StringUtils.isNotBlank(value)) {
+            schema.setDefault(value);
         }
 
         //discriminator
@@ -1785,9 +1797,9 @@ public class OpenAPIDeserializer {
             }
         }
 
-        value = getString("example",node,false,location,result);
-        if (StringUtils.isNotBlank(value)) {
-            schema.setExample(value);
+        ObjectNode exampleObj = getObject("example",node,false,location,result);
+        if (exampleObj != null) {
+            schema.setExample(exampleObj);
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
@@ -1970,7 +1982,7 @@ public class OpenAPIDeserializer {
         }
 
 
-        ObjectNode headerObject = getObject("headers", node, true, location, result);
+        ObjectNode headerObject = getObject("headers", node, false, location, result);
         if (headerObject != null) {
             Map<String, Header> headers = getHeaders(headerObject, location, result);
             if (headers != null &&  headers.size() > 0) {
@@ -1978,7 +1990,7 @@ public class OpenAPIDeserializer {
             }
         }
 
-        ObjectNode linksObj = getObject("links", node, true, location, result);
+        ObjectNode linksObj = getObject("links", node, false, location, result);
         if (linksObj != null) {
              Map<String,Link> links = getLinks(linksObj, location, result);
              if(links != null && links.size() > 0) {
@@ -1986,7 +1998,7 @@ public class OpenAPIDeserializer {
              }
         }
 
-        ObjectNode contentObject = getObject("content", node, true, location, result);
+        ObjectNode contentObject = getObject("content", node, false, location, result);
         if (contentObject != null) {
             apiResponse.setContent(getContent(contentObject, location, result));
         }
