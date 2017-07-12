@@ -47,6 +47,8 @@ import io.swagger.oas.models.servers.ServerVariables;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,10 +62,27 @@ import java.util.Set;
 
 public class OpenAPIDeserializer {
 
+    protected static Set<String> ROOT_KEYS = new LinkedHashSet<>(Arrays.asList("openapi", "info", "servers", "paths", "components", "security", "tags",  "externalDocs"));
+    protected static Set<String> INFO_KEYS = new LinkedHashSet<>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
+    protected static Set<String> CONTACT_KEYS = new LinkedHashSet<>(Arrays.asList("name", "url", "email"));
+    protected static Set<String> LICENSE_KEYS = new LinkedHashSet<>(Arrays.asList("name", "url"));
+    protected static Set<String> TAG_KEYS = new LinkedHashSet<>(Arrays.asList("description", "name", "externalDocs"));
+    protected static Set<String> RESPONSE_KEYS = new LinkedHashSet<>(Arrays.asList("description", "schema", "headers", "examples"));
+    protected static Set<String> SERVER_KEYS = new LinkedHashSet<>(Arrays.asList( "url", "description", "variables"));
+    protected static Set<String> REF_MODEL_KEYS = new LinkedHashSet<>(Arrays.asList("$ref"));
+    protected static Set<String> PATHITEM_KEYS = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description", "get", "put", "post", "delete", "head", "patch", "options", "trace", "servers", "parameters"));
+    protected static Set<String> OPERATION_KEYS = new LinkedHashSet<>(Arrays.asList("tags", "summary", "description", "externalDocs", "operationId", "parameters", "requestBody", "responses", "callbacks", "deprecated" ,  "security", "servers"));
+    protected static Set<String> PARAMETER_KEYS = new LinkedHashSet<>(Arrays.asList("name", "in", "description", "required", "deprecated", "allowEmptyValue", "style", "explode", "allowReserved", "schema", "example", "examples", "content"));
+    protected static Set<String> REQUEST_BODY_KEYS = new LinkedHashSet<>(Arrays.asList("description", "content", "required"));
+    protected static Set<String> SECURITY_SCHEME_KEYS = new LinkedHashSet<>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
+    protected static Set<String> EXTERNAL_DOCS_KEYS = new LinkedHashSet<>(Arrays.asList("description", "url"));
+    protected static Set<String> SCHEMA_KEYS = new LinkedHashSet<>(Arrays.asList("discriminator", "example", "$ref", "format", "title", "description", "default", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type", "items", "allOf", "properties", "additionalProperties", "xml", "readOnly", "allowEmptyValue"));
+
     private static final String QUERY_PARAMETER = "query";
     private static final String COOKIE_PARAMETER = "cookie";
     private static final String PATH_PARAMETER = "path";
     private static final String HEADER_PARAMETER = "header";
+
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
         SwaggerParseResult result = new SwaggerParseResult();
@@ -135,9 +154,17 @@ public class OpenAPIDeserializer {
                     openAPI.setSecurity(securityRequirements);
                 }
             }
+
             Map <String,Object> extensions = getExtensions(rootNode,location,result);
             if(extensions != null && extensions.size() > 0) {
                 openAPI.setExtensions(extensions);
+            }
+
+            Set<String> keys = getKeys(rootNode);
+            for(String key : keys) {
+                if(!ROOT_KEYS.contains(key) && !key.startsWith("x-")) {
+                    result.extra(location, key, node.get(key));
+                }
             }
 
         } else {
@@ -145,7 +172,6 @@ public class OpenAPIDeserializer {
             result.invalid();
             return null;
         }
-
 
         return openAPI;
     }
@@ -258,18 +284,11 @@ public class OpenAPIDeserializer {
             tag.setDescription(value);
         }
 
-        Set<String> tagKeys = getKeys(obj);
-        for (String tagName : tagKeys) {
-            JsonNode tagValue = obj.get(tagName);
-            if (!tagValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, tagName, "object", tagValue);
-            } else {
-                ObjectNode tagObj = (ObjectNode) tagValue;
-                ExternalDocumentation externalDocs = getExternalDocs(tagObj, String.format("%s.%s'", location, tagName), result);
-                tag.setExternalDocs(externalDocs);
-            }
+        ObjectNode docs = getObject("externalDocs",obj,false,location,result);
+        ExternalDocumentation externalDocs = getExternalDocs(docs, String.format("%s.%s'", location, "externalDocs"), result);
+        if (externalDocs != null) {
+            tag.setExternalDocs(externalDocs);
         }
-
 
         return tag;
     }
@@ -311,7 +330,8 @@ public class OpenAPIDeserializer {
             server.setDescription(value);
         }
         if (obj.get("variables") != null) {
-            ServerVariables serverVariables = getServerVariables(obj, location, result);
+            ObjectNode variables = getObject("variables", obj, false, location, result);
+            ServerVariables serverVariables = getServerVariables(variables, location, result);
             if (serverVariables != null && serverVariables.size() > 0) {
                 server.setVariables(serverVariables);
             }
@@ -336,64 +356,51 @@ public class OpenAPIDeserializer {
         Set<String> serverKeys = getKeys(obj);
         for (String serverName : serverKeys) {
             JsonNode serverValue = obj.get(serverName);
-            if (!serverValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, serverName, "object", serverValue);
-            } else {
-                ObjectNode server = (ObjectNode) serverValue;
-                serverVariables = getServerVariable(server, String.format("%s.%s'", location, serverName), result);
-            }
+            ObjectNode server = (ObjectNode) serverValue;
+            ServerVariable serverVariable = getServerVariable(server, String.format("%s.%s'", location, serverName), result);
+            serverVariables.addServerVariable(serverName,serverVariable);
         }
 
         return serverVariables;
     }
 
-    public ServerVariables getServerVariable(ObjectNode obj, String location, ParseResult result){
+    public ServerVariable getServerVariable(ObjectNode obj, String location, ParseResult result){
         if(obj == null){
             return null;
         }
-        final ServerVariables serverVariables = new ServerVariables();
-        ServerVariable serverVariable = null;
 
-        Set<String> variableKeys = getKeys(obj);
-        for (String variableName : variableKeys) {
-            JsonNode variableValue = obj.get(variableName);
-            if (!variableValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                result.invalidType(location, variableName, "object", variableValue);
-            } else {
-                serverVariable = new ServerVariable();
-                ObjectNode objNode = getObject(variableName, obj, false, location, result);
+        ServerVariable serverVariable = new ServerVariable();
 
-                ArrayNode arrayNode = getArray("enum",objNode,false,location,result);
-                if (arrayNode != null) {
-                    List<String> _enum = new ArrayList<>();
-                    for(JsonNode n : arrayNode) {
-                        if(n.isValueNode()) {
-                            _enum.add(n.asText());
-                            serverVariable.setEnum(_enum);
-                        }
-                        else {
-                            result.invalidType(location, "enum", "value", n);
-                        }
-                    }
+        ArrayNode arrayNode = getArray("enum",obj,false,location,result);
+        if (arrayNode != null) {
+            List<String> _enum = new ArrayList<>();
+            for(JsonNode n : arrayNode) {
+                if(n.isValueNode()) {
+                    _enum.add(n.asText());
+                    serverVariable.setEnum(_enum);
                 }
-                String value = getString("default", objNode, true, String.format("%s.%s'", location, variableName), result);
-                if(StringUtils.isNotBlank(value)) {
-                    serverVariable.setDefault(value);
+                else {
+                    result.invalidType(location, "enum", "value", n);
                 }
-
-                value = getString("description", objNode, false, String.format("%s.%s'", location, variableName), result);
-                if(StringUtils.isNotBlank(value)) {
-                    serverVariable.setDescription(value);
-                }
-
-                Map <String,Object> extensions = getExtensions(objNode,location,result);
-                if(extensions != null && extensions.size() > 0) {
-                    serverVariable.setExtensions(extensions);
-                }
-                serverVariables.addServerVariable(variableName,serverVariable);
             }
         }
-        return serverVariables;
+        String value = getString("default", obj, true, String.format("%s.%s'", location, "default"), result);
+        if(StringUtils.isNotBlank(value)) {
+            serverVariable.setDefault(value);
+        }
+
+        value = getString("description", obj, false, String.format("%s.%s'", location, "description"), result);
+        if(StringUtils.isNotBlank(value)) {
+            serverVariable.setDescription(value);
+        }
+
+        Map <String,Object> extensions = getExtensions(obj,location,result);
+        if(extensions != null && extensions.size() > 0) {
+            serverVariable.setExtensions(extensions);
+        }
+
+
+        return serverVariable;
     }
 
     //PathsObject
@@ -415,7 +422,6 @@ public class OpenAPIDeserializer {
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path, String.format("%s.%s'", location, pathName), result);
                     paths.put(pathName, pathObj);
-
                 }
             }
         }
@@ -519,6 +525,14 @@ public class OpenAPIDeserializer {
         if(extensions != null && extensions.size() > 0) {
             pathItem.setExtensions(extensions);
         }
+
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+            if(!PATHITEM_KEYS.contains(key) && !key.startsWith("x-")) {
+                result.extra(location, key, obj.get(key));
+            }
+        }
+
         return pathItem;
     }
 
@@ -721,12 +735,12 @@ public class OpenAPIDeserializer {
         MediaType mediaType = new MediaType();
 
         ObjectNode schemaObject = getObject("schema",contentNode,false,location,result);
-        if(schemaObject!=null){
+        if(schemaObject != null){
             mediaType.setSchema(getSchema(schemaObject,location,result));
         }
 
         ObjectNode examplesObject = getObject("examples",contentNode,false,location,result);
-        if(examplesObject!=null) {
+        if(examplesObject != null) {
             mediaType.setExamples(getExamples(examplesObject, location, result));
         }
 
@@ -1074,19 +1088,12 @@ public class OpenAPIDeserializer {
         Set<String> parameterKeys = getKeys(obj);
         for(String parameterName : parameterKeys) {
             JsonNode parameterValue = obj.get(parameterName);
-            if(parameterName.startsWith("x-")) {
-                //result.unsupported(location, pathName, pathValue);
-            }
-            else {
-                if (!parameterValue.getNodeType().equals(JsonNodeType.OBJECT)) {
-                    result.invalidType(location, parameterName, "object", parameterValue);
-                } else {
-                    ObjectNode parameterObj = (ObjectNode) parameterValue;
-                    if(parameterObj != null) {
-                        Parameter parameter = getParameter(parameterObj, String.format("%s.%s'", location, parameterName), result);
-                        if (parameter != null) {
-                            parameters.put(parameterName, parameter);
-                        }
+            if (parameterValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+                ObjectNode parameterObj = (ObjectNode) parameterValue;
+                if(parameterObj != null) {
+                    Parameter parameter = getParameter(parameterObj, String.format("%s.%s'", location, parameterName), result);
+                    if (parameter != null) {
+                        parameters.put(parameterName, parameter);
                     }
                 }
             }
@@ -1130,6 +1137,16 @@ public class OpenAPIDeserializer {
                 return null;
             }
         }
+
+        String l = null;
+        JsonNode ln = obj.get("name");
+        if(ln != null) {
+            l = ln.asText();
+        }
+        else {
+            l = "['unknown']";
+        }
+        location += ".[" + l + "]";
 
         String value = getString("in", obj, true, location, result);
 
@@ -1219,6 +1236,13 @@ public class OpenAPIDeserializer {
         Map <String,Object> extensions = getExtensions(obj,location,result);
         if(extensions != null && extensions.size() > 0) {
             parameter.setExtensions(extensions);
+        }
+
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+           if(!PARAMETER_KEYS.contains(key) && !key.startsWith("x-")) {
+                result.extra(location, key, obj.get(key));
+           }
         }
 
         return parameter;
@@ -1886,16 +1910,23 @@ public class OpenAPIDeserializer {
             example.setDescription(value);
         }
 
-
-        value = getString("value", node, false, location, result);
-        if (value == null){
+        JsonNode v = node.get("value");
+        if (v.getNodeType().equals(JsonNodeType.STRING)) {
+            value = getString("value", node, false, location, result);
+            example.setValue(value);
+        }else if (v.getNodeType().equals(JsonNodeType.OBJECT)) {
             ObjectNode objectValue = getObject("value", node, false, location, result);
             if(objectValue != null) {
                 example.setValue(objectValue.toString());
             }
-        }else {
-            example.setValue(value);
+        }else if (v.getNodeType().equals(JsonNodeType.ARRAY)) {
+            ArrayNode arrayValue = getArray("value", node, false, location, result);
+            if (arrayValue != null) {
+                example.setValue(arrayValue.toString());
+            }
         }
+
+
         value = getString("externalValue", node, false, location, result);
         if (StringUtils.isNotBlank(value)) {
             example.setExternalValue(value);
@@ -2069,7 +2100,7 @@ public class OpenAPIDeserializer {
             operation.setRequestBody(getRequestBody(requestObjectNode, location, result));
         }
 
-        ObjectNode responsesNode = getObject("responses", obj, false, location, result);
+        ObjectNode responsesNode = getObject("responses", obj, true, location, result);
         ApiResponses responses = getResponses(responsesNode, "responses", result);
         if(responses != null) {
             operation.setResponses(responses);
@@ -2102,6 +2133,14 @@ public class OpenAPIDeserializer {
         if(extensions != null && extensions.size() > 0) {
             operation.setExtensions(extensions);
         }
+
+        Set<String> keys = getKeys(obj);
+        for(String key : keys) {
+            if(!OPERATION_KEYS.contains(key) && !key.startsWith("x-")) {
+                result.extra(location, key, obj.get(key));
+            }
+        }
+
 
         return operation;
     }
@@ -2170,6 +2209,15 @@ public class OpenAPIDeserializer {
             }
         }
 
+        String l = null;
+        JsonNode ln = node.get("description");
+        if(ln != null) {
+            l = ln.asText();
+        }
+        else {
+            l = "'unknown'";
+        }
+        location += "." + l;
 
 
         final String description = getString("description", node, false, location, result);
@@ -2182,7 +2230,7 @@ public class OpenAPIDeserializer {
             body.setRequired(required);
         }
 
-        final ObjectNode contentNode = getObject("content", node, false, location, result);
+        final ObjectNode contentNode = getObject("content", node, true, location, result);
         if (contentNode != null) {
             body.setContent(getContent(contentNode, location, result));
         }
@@ -2190,6 +2238,13 @@ public class OpenAPIDeserializer {
         Map <String,Object> extensions = getExtensions(node,location,result);
         if(extensions != null && extensions.size() > 0) {
             body.setExtensions(extensions);
+        }
+
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(!REQUEST_BODY_KEYS.contains(key) && !key.startsWith("x-")) {
+                result.extra(location, key, node.get(key));
+            }
         }
 
         return body;

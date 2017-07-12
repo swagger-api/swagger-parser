@@ -71,8 +71,8 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     try {
                         OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
                         JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
-                        SwaggerParseResult deserializeOpenAPI = deserializer.deserialize(rootNode);
-                        OpenAPIResolver resolver = new OpenAPIResolver(deserializeOpenAPI.getOpenAPI(), auth, null);
+                        result = deserializer.deserialize(rootNode);
+                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, null);
                         result.setOpenAPI(resolver.resolve());
 
                     } catch (Exception e) {
