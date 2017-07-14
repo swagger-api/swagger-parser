@@ -1245,10 +1245,18 @@ public class SwaggerDeserializer {
                         output.setDescription(description);
                     }
                 }
+                JsonNode desc = node.get("description");
+                if(desc != null) {
+                    output.setDescription(desc.textValue());
+                }
             }
             else if (type.equals("oauth2")) {
                 // TODO: parse manually for better feedback
                 output = Json.mapper().convertValue(node, OAuth2Definition.class);
+                JsonNode desc = node.get("description");
+                if(desc != null) {
+                    output.setDescription(desc.textValue());
+                }
             }
             else {
                 result.invalidType(location + ".type", "type", "basic|apiKey|oauth2", node);
