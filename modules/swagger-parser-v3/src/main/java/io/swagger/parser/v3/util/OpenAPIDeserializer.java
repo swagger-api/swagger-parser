@@ -20,6 +20,7 @@ import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.AnyOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.Content;
+import io.swagger.oas.models.media.Discriminator;
 import io.swagger.oas.models.media.Encoding;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.OneOfSchema;
@@ -48,7 +49,6 @@ import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -900,7 +900,7 @@ public class OpenAPIDeserializer {
 
         Map <String,Object> extensions = getExtensions(node);
         if(extensions != null && extensions.size() > 0) {
-            //encoding.setExtensions(extensions);
+            encoding.setExtensions(extensions);
         }
 
         Set<String> keys = getKeys(node);
@@ -1688,6 +1688,28 @@ public class OpenAPIDeserializer {
         return schemas;
     }
 
+    public Discriminator getDiscriminator (ObjectNode node, String location, ParseResult result){
+        Discriminator discriminator = new Discriminator();
+
+        String value = getString("propertyName",node,true,location,result);
+        if (StringUtils.isNotBlank(value)){
+            discriminator.setPropertyName(value);
+        }
+
+        ObjectNode mappingNode = getObject("mapping", node,false, location, result);
+        if(mappingNode != null){
+            Map<String, String> mapping = new LinkedHashMap<>();
+            Set<String> keys = getKeys(mappingNode);
+            for(String key : keys) {
+                mapping.put(key, mappingNode.get(key).asText());
+            }
+            discriminator.setMapping(mapping);
+        }
+
+        return discriminator;
+
+    }
+
     public Schema getSchema(ObjectNode node, String location, ParseResult result){
         if(node== null){
             return null;
@@ -1753,9 +1775,15 @@ public class OpenAPIDeserializer {
             }
         }
 
+
         String value = getString("title",node,false,location,result);
         if (StringUtils.isNotBlank(value)) {
             schema.setTitle(value);
+        }
+
+        ObjectNode discriminatorNode = getObject("discriminator", node, false, location, result);
+        if (discriminatorNode != null) {
+            schema.setDiscriminator(getDiscriminator(discriminatorNode,location,result));
         }
 
         BigDecimal bigDecimal = getBigDecimal("multipleOf",node,false,location,result);
