@@ -36,9 +36,67 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.testng.Assert.assertEquals;
+
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIDeserializerTest {
+
+    @Test void testDiscriminatorObject(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: '3.0'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Pet:\n" +
+                "      type: object\n" +
+                "      required:\n" +
+                "      - pet_type\n" +
+                "      properties:\n" +
+                "        pet_type:\n" +
+                "          type: string\n" +
+                "      discriminator:\n" +
+                "        propertyName: pet_type\n" +
+                "        mapping:\n" +
+                "          cachorro: Dog\n" +
+                "    Cat:\n" +
+                "      allOf:\n" +
+                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - type: object\n" +
+                "        # all other properties specific to a `Cat`\n" +
+                "        properties:\n" +
+                "          name:\n" +
+                "            type: string\n" +
+                "    Dog:\n" +
+                "      allOf:\n" +
+                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - type: object\n" +
+                "        # all other properties specific to a `Dog`\n" +
+                "        properties:\n" +
+                "          bark:\n" +
+                "            type: string\n" +
+                "    Lizard:\n" +
+                "      allOf:\n" +
+                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - type: object\n" +
+                "        # all other properties specific to a `Lizard`\n" +
+                "        properties:\n" +
+                "          lovesRocks:\n" +
+                "            type: boolean";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Pet").getDiscriminator().getPropertyName(),"pet_type");
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Pet").getDiscriminator().getMapping().get("cachorro"),"Dog" );
+        assertTrue(messages.contains("attribute paths is missing"));
+        assertTrue(messages.contains("attribute info is missing"));
+
+    }
 
     @Test
     public void testEmpty(@Injectable List<AuthorizationValue> auths) {
