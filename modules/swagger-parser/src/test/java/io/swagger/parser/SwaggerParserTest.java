@@ -9,6 +9,9 @@ import io.swagger.models.Path;
 import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.HeaderParameter;
@@ -830,7 +833,6 @@ public class SwaggerParserTest {
     public void testIssue358() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue_358.yaml");
-        Json.prettyPrint(swagger);
         assertNotNull(swagger);
         List<Parameter> parms = swagger.getPath("/testApi").getGet().getParameters();
         assertEquals(1, parms.size());
@@ -931,4 +933,22 @@ public class SwaggerParserTest {
         assertEquals(petArray.getVendorExtensions().get(xTag),xVal);
     }
 
+    @Test
+    public void testIssue480() {
+        final Swagger swagger = new SwaggerParser().read("src/test/resources/issue-480.yaml");
+
+        for(String key : swagger.getSecurityDefinitions().keySet()) {
+            SecuritySchemeDefinition definition = swagger.getSecurityDefinitions().get(key);
+            if("petstore_auth".equals(key)) {
+                assertTrue(definition instanceof OAuth2Definition);
+                OAuth2Definition oauth = (OAuth2Definition) definition;
+                assertEquals("This is a description", oauth.getDescription());
+            }
+            if("api_key".equals(key)) {
+                assertTrue(definition instanceof ApiKeyAuthDefinition);
+                ApiKeyAuthDefinition auth = (ApiKeyAuthDefinition) definition;
+                assertEquals("This is another description", auth.getDescription());
+            }
+        }
+    }
 }
