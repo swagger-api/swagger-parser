@@ -21,16 +21,118 @@ import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.oas.models.servers.Server;
+import io.swagger.parser.models.AuthorizationValue;
+import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.parser.v3.OpenAPIV3Parser;
+import mockit.Injectable;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static org.testng.Assert.assertEquals;
+
+import static org.testng.Assert.assertTrue;
 
 public class OpenAPIDeserializerTest {
+
+    @Test void testDiscriminatorObject(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: '3.0'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Pet:\n" +
+                "      type: object\n" +
+                "      required:\n" +
+                "      - pet_type\n" +
+                "      properties:\n" +
+                "        pet_type:\n" +
+                "          type: string\n" +
+                "      discriminator:\n" +
+                "        propertyName: pet_type\n" +
+                "        mapping:\n" +
+                "          cachorro: Dog\n" +
+                "    Cat:\n" +
+                "      allOf:\n" +
+                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - type: object\n" +
+                "        # all other properties specific to a `Cat`\n" +
+                "        properties:\n" +
+                "          name:\n" +
+                "            type: string\n" +
+                "    Dog:\n" +
+                "      allOf:\n" +
+                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - type: object\n" +
+                "        # all other properties specific to a `Dog`\n" +
+                "        properties:\n" +
+                "          bark:\n" +
+                "            type: string\n" +
+                "    Lizard:\n" +
+                "      allOf:\n" +
+                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - type: object\n" +
+                "        # all other properties specific to a `Lizard`\n" +
+                "        properties:\n" +
+                "          lovesRocks:\n" +
+                "            type: boolean";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Pet").getDiscriminator().getPropertyName(),"pet_type");
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Pet").getDiscriminator().getMapping().get("cachorro"),"Dog" );
+        assertTrue(messages.contains("attribute paths is missing"));
+        assertTrue(messages.contains("attribute info is missing"));
+
+    }
+
+    @Test
+    public void testEmpty(@Injectable List<AuthorizationValue> auths) {
+        String json = "{}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(json,auths,options);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute openapi is missing"));
+    }
+
+    @Test
+    public void testAlmostEmpty(@Injectable List<AuthorizationValue> auths) {
+        String yaml = "openapi: '3.0'\n" +
+                      "new: extra";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute info is missing"));
+        assertTrue(messages.contains("attribute paths is missing"));
+        assertTrue(messages.contains("attribute components is missing"));
+        assertTrue(messages.contains("attribute new is unexpected"));
+    }
 
     @Test(dataProvider = "data")
     public void readInfoObject(JsonNode rootNode) throws Exception {
@@ -176,7 +278,7 @@ public class OpenAPIDeserializerTest {
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody());
         Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getDescription(),"pet store to add to the system");
-        Assert.assertTrue(petByStatusEndpoint.getGet().getRequestBody().getRequired(),"true");
+        assertTrue(petByStatusEndpoint.getGet().getRequestBody().getRequired(),"true");
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed"));
         Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getType(),"object");
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties());
@@ -203,10 +305,10 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(requirements.size(),2);
 
         SecurityRequirement requirement = requirements.get(0);
-        Assert.assertTrue(requirement.containsKey("api_key"));
+        assertTrue(requirement.containsKey("api_key"));
 
         requirement = requirements.get(1);
-        Assert.assertTrue(requirement.containsKey("tokenAuth"));
+        assertTrue(requirement.containsKey("tokenAuth"));
 
 
     }
@@ -221,10 +323,10 @@ public class OpenAPIDeserializerTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
         Assert.assertNotNull(openAPI.getExtensions());
-        Assert.assertTrue(openAPI.getExtensions().containsKey("x-origin"));
+        assertTrue(openAPI.getExtensions().containsKey("x-origin"));
         Object object = openAPI.getExtensions().get("x-origin");
 
-        Assert.assertTrue(object instanceof List);
+        assertTrue(object instanceof List);
         List elements = (List) object;
         Assert.assertEquals(elements.size(), 1);
         Map<String, Object> map = (Map) elements.get(0);
@@ -238,7 +340,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(converter.get("version"), "1.2.1");
 
         object = openAPI.getExtensions().get("x-api-title");
-        Assert.assertTrue(object instanceof String);
+        assertTrue(object instanceof String);
         Assert.assertEquals("pet store test api", object.toString());
     }
 
@@ -386,7 +488,7 @@ public class OpenAPIDeserializerTest {
         //System.out.println(parameter.getSchema());
         ApiResponses responses = petEndpoint.getPost().getResponses();
         Assert.assertNotNull(responses);
-        Assert.assertTrue(responses.containsKey("405"));
+        assertTrue(responses.containsKey("405"));
         ApiResponse response = responses.get("405");
         Assert.assertEquals(response.getDescription(), "Invalid input");
         Assert.assertEquals(response.getHeaders().get("X-Rate-Limit").getDescription(), "calls per hour allowed by the user");
@@ -442,7 +544,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(component.getParameters().get("skipParam").getName(),"skip");
         Assert.assertEquals(component.getParameters().get("skipParam").getIn(),"query");
         Assert.assertEquals(component.getParameters().get("skipParam").getDescription(),"number of items to skip");
-        Assert.assertTrue(component.getParameters().get("skipParam").getRequired());
+        assertTrue(component.getParameters().get("skipParam").getRequired());
         Assert.assertEquals(component.getParameters().get("skipParam").getSchema().getType(),"integer");
 
         Assert.assertNotNull(component.getRequestBodies());
@@ -483,10 +585,10 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(component.getSecuritySchemes().get("petstore_auth").getFlows().getImplicit().getScopes());//TODO
 
         Assert.assertNotNull(component.getExtensions());
-        Assert.assertTrue(component.getExtensions().containsKey("x-component"));
+        assertTrue(component.getExtensions().containsKey("x-component"));
         Object object = component.getExtensions().get("x-component");
 
-        Assert.assertTrue(object instanceof List);
+        assertTrue(object instanceof List);
         List elements = (List) object;
         Assert.assertEquals(elements.size(), 1);
         Map<String, Object> map = (Map) elements.get(0);
@@ -500,7 +602,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(converter.get("version"), "1.2.3");
 
         object = component.getExtensions().get("x-api-title");
-        Assert.assertTrue(object instanceof String);
+        assertTrue(object instanceof String);
         Assert.assertEquals("pet store test api in components", object.toString());
     }
 
@@ -539,7 +641,7 @@ public class OpenAPIDeserializerTest {
 
         ApiResponses responses = stripe.getPost().getResponses();
         Assert.assertNotNull(responses);
-        Assert.assertTrue(responses.containsKey("200"));
+        assertTrue(responses.containsKey("200"));
         ApiResponse response = responses.get("200");
         Assert.assertEquals(response.getDescription(), "Successful response.");
         Assert.assertEquals(response.getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/three_d_secure");
@@ -559,7 +661,7 @@ public class OpenAPIDeserializerTest {
 
         ApiResponses responsesGet = stripeGet.getGet().getResponses();
         Assert.assertNotNull(responsesGet);
-        Assert.assertTrue(responsesGet.containsKey("200"));
+        assertTrue(responsesGet.containsKey("200"));
         ApiResponse responseGet = responsesGet.get("200");
         Assert.assertEquals(responseGet.getDescription(), "Successful response.");
         Map<String, Schema> properties = (Map<String, Schema>) responseGet.getContent().get("application/json").getSchema().getProperties();
@@ -567,11 +669,11 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(properties);
         Assert.assertNull(properties.get("data").getType());
         Assert.assertEquals(properties.get("has_more").getDescription(), "True if this list has another page of items after this one that can be fetched.");
-        Assert.assertTrue(properties.get("data") instanceof OneOfSchema );
+        assertTrue(properties.get("data") instanceof OneOfSchema );
 
 
         OneOfSchema data =  (OneOfSchema) properties.get("data");
-        Assert.assertTrue(data.getOneOf().get(0) instanceof ArraySchema );
+        assertTrue(data.getOneOf().get(0) instanceof ArraySchema );
         ArraySchema items = (ArraySchema)data.getOneOf().get(0);
         Assert.assertEquals(items.getItems().get$ref(),"#/components/schemas/bank_account");
 

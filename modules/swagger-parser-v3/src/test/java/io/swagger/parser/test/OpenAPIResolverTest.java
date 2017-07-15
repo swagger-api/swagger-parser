@@ -96,6 +96,7 @@ public class OpenAPIResolverTest {
                                 .getBytes(StandardCharsets.UTF_8))));
 
         pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_parameter.yaml"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         WireMock.stubFor(get(urlPathMatching("/remote/parameter"))
                 .willReturn(aResponse()
