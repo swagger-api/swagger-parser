@@ -2,8 +2,11 @@ package io.swagger.parser.v3;
 
 
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.Operation;
+import io.swagger.oas.models.PathItem;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.v3.processors.ComponentsProcessor;
+import io.swagger.parser.v3.processors.OperationProcessor;
 import io.swagger.parser.v3.processors.PathsProcessor;
 
 import java.util.List;
@@ -14,6 +17,7 @@ public class OpenAPIResolver {
     private final ResolverCache cache;
     private final ComponentsProcessor componentsProcessor;
     private final PathsProcessor pathProcessor;
+    private final OperationProcessor operationsProcessor;
     private Settings settings = new Settings();
 
     public OpenAPIResolver(OpenAPI openApi) {
@@ -34,14 +38,27 @@ public class OpenAPIResolver {
         this.cache = new ResolverCache(openApi, auths, parentFileLocation);
         componentsProcessor = new ComponentsProcessor(openApi,this.cache);
         pathProcessor = new PathsProcessor(cache, openApi,this.settings);
+        operationsProcessor = new OperationProcessor(cache, openApi);
     }
 
     public OpenAPI resolve() {
         if (openApi == null) {
             return null;
         }
-        componentsProcessor.processComponents();
+
         pathProcessor.processPaths();
+        componentsProcessor.processComponents();
+
+        if(openApi.getPaths() != null) {
+            for(String pathname : openApi.getPaths().keySet()) {
+                PathItem pathItem = openApi.getPaths().get(pathname);
+                if(pathItem.readOperations() != null) {
+                    for(Operation operation : pathItem.readOperations()) {
+                        operationsProcessor.processOperation(operation);
+                    }
+                }
+            }
+        }
 
         return openApi;
     }

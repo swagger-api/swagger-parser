@@ -144,6 +144,12 @@ public class OpenAPIDeserializer {
             ArrayNode array = getArray("servers", rootNode, false, location, result);
             if (array != null && array.size() > 0) {
                 openAPI.setServers(getServersList(array, String.format("%s.%s'", location, "servers"), result));
+            }else {
+                Server defaultServer = new Server();
+                defaultServer.setUrl("/");
+                List<Server>  servers = new ArrayList<>();
+                servers.add(defaultServer);
+                openAPI.setServers(servers);
             }
 
             obj = getObject("externalDocs", rootNode, false, location, result);
@@ -335,6 +341,10 @@ public class OpenAPIDeserializer {
                 Server server = getServer((ObjectNode) item, location, result);
                 if (server != null) {
                     servers.add(server);
+                }else{
+                    Server defaultServer = new Server();
+                    defaultServer.setUrl("/");
+                    servers.add(defaultServer);
                 }
             }
         }

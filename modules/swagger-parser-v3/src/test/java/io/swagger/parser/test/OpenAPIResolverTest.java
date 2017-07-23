@@ -247,6 +247,7 @@ public class OpenAPIResolverTest {
         //remote url parameter
         assertEquals(parameters.get("remoteParameter").get$ref(),"#/components/parameters/parameter");
 
+
         //internal Schema Parameter
         assertEquals(parameters.get("newParam").getSchema().get$ref(),"#/components/schemas/Tag");
 
@@ -319,6 +320,7 @@ public class OpenAPIResolverTest {
         Assert.assertNotNull(result);
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
+        //System.out.println("Before Resolver: " + openAPI.getPaths().get("/store/inventory").getGet().getParameters());
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
 
 
@@ -334,7 +336,7 @@ public class OpenAPIResolverTest {
         Assert.assertNull(openAPI.getPaths().get("/pet").getParameters());
 
         //remote ref pathItem
-        Assert.assertNull(openAPI.getPaths().get("/pathItemRef").getParameters());
+        //Assert.assertNull(openAPI.getPaths().get("/pathItemRef").getParameters());
         assertEquals(openAPI.getPaths().get("/pathItemRef").getSummary(),"summary");
         assertEquals(openAPI.getPaths().get("/pathItemRef").getPost().getResponses().get("405").getDescription(),"Invalid input");
 
@@ -349,6 +351,10 @@ public class OpenAPIResolverTest {
         //internal pathItem -> operation -> requestBody
         Schema id = (Schema) openAPI.getPaths().get("/pet/findByStatus").getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties().get("id");
         assertEquals(id.get$ref(),"#/components/schemas/Pet");
+
+        //internal parameter url
+        //System.out.println("After Resolver: " + openAPI.getPaths().get("/store/inventory").getGet().getParameters());
+        assertEquals(openAPI.getPaths().get("/store/inventory").getGet().getParameters().get(0), openAPI.getComponents().getParameters().get("limitParam"));
     }
 
     private static int getDynamicPort() {
