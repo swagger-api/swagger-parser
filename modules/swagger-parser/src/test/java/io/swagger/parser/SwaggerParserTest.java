@@ -41,7 +41,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -931,6 +933,40 @@ public class SwaggerParserTest {
         assertNotNull(petArray.getVendorExtensions());
         assertNotNull(petArray.getVendorExtensions().get(xTag));
         assertEquals(petArray.getVendorExtensions().get(xTag),xVal);
+    }
+
+    @Test
+    public void testNoResponseForOperation() throws Exception {
+        String yaml =
+                "swagger: \"2.0\"\n" +
+                        "info:\n" +
+                        "  version: 0.0.0\n" +
+                        "  title: Simple API\n" +
+                        "paths:\n" +
+                        "  /:\n" +
+                        "    get:\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: OK\n" +
+                        "          schema:\n" +
+                        "            $ref: \"#/definitions/Simple\"\n";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertFalse(result.getMessages().size() == 0);
+    }
+
+    @Test
+    public void testDanglingReferences() throws Exception {
+        String yaml =
+                "swagger: \"2.0\"\n" +
+                        "info:\n" +
+                        "  version: 0.0.0\n" +
+                        "  title: Simple API\n" +
+                        "paths:\n" +
+                        "  /:\n" +
+                        "    get:\n" +
+                        "      responses:\n";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertFalse(result.getMessages().size() == 0);
     }
 
     @Test

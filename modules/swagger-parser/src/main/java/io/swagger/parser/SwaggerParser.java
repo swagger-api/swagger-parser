@@ -6,7 +6,10 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.validation.ReferencedDefinitionExistsValidator;
 import io.swagger.util.Json;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 public class SwaggerParser {
+    private static final Logger log = LoggerFactory.getLogger(SwaggerParser.class);
 
     public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths, boolean resolve) {
         if (location == null) {
@@ -101,7 +105,14 @@ public class SwaggerParser {
 
             SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);
             if (result != null) {
-                result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
+                List<String> validate = new ReferencedDefinitionExistsValidator().validate(result.getSwagger());
+                if (validate.isEmpty()) {
+                    result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
+                } else {
+                    for (String s : validate) {
+                        result.message(s);
+                    }
+                }
             }
             else {
             	result = new SwaggerDeserializationResult().message("Definition does not appear to be a valid Swagger format");
@@ -109,6 +120,7 @@ public class SwaggerParser {
             return result;
         }
         catch (Exception e) {
+            log.error("error" , e);
             return new SwaggerDeserializationResult().message("malformed or unreadable swagger supplied");
         }
     }

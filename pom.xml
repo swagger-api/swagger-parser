@@ -232,6 +232,7 @@
     <modules>
         <module>modules/swagger-parser</module>
         <module>modules/swagger-compat-spec-parser</module>
+        <module>modules/swagger-parser-maven-plugin</module>
     </modules>
     <properties>
         <commons-io-version>2.4</commons-io-version>
