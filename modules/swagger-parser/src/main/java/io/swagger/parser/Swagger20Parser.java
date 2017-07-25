@@ -74,7 +74,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
         }
         catch (Exception e) {
             SwaggerDeserializationResult output = new SwaggerDeserializationResult();
-            output.message("unable to read location `" + location + "`");
+            output.message("unable to read location `" + location + "`" + e);
             return output;
         }
     }

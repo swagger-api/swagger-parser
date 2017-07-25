@@ -3,7 +3,10 @@ package io.swagger.parser.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import org.yaml.snakeyaml.constructor.AbstractConstruct;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.IOException;
 
@@ -58,12 +61,25 @@ public class DeserializationUtils {
     }
 
     public static JsonNode readYamlTree(String contents) {
-        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
-        return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
+        return readYamlValue(contents, JsonNode.class);
     }
 
     public static <T> T readYamlValue(String contents, Class<T> expectedType) {
-        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new OverridenNullConstructor());
         return Json.mapper().convertValue(yaml.load(contents), expectedType);
+    }
+
+    private static class OverridenNullConstructor extends SafeConstructor {
+        public static final class SafeNullConstructor extends AbstractConstruct {
+            SafeNullConstructor() {
+            }
+
+            public Object construct(Node node) {
+                return "null";
+            }
+        }
+        OverridenNullConstructor() {
+            this.yamlConstructors.put(Tag.NULL, new SafeNullConstructor());
+        }
     }
 }
