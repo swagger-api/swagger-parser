@@ -331,7 +331,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 output = am;
             } else {
                 Property input = PropertyBuilder.build(type, format, null);
-                if (input == null && !"void".equals(type)) {
+                if (input != null) {
+                	output = PropertyBuilder.toModel(input);
+                } else if (!"void".equals(type)) {
                     //use ref model
                     output = new RefModel().asDefault(type);
                 }
