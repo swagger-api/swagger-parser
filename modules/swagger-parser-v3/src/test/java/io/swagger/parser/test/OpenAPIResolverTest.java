@@ -205,7 +205,6 @@ public class OpenAPIResolverTest {
         Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
 
         //remote url response
-        //System.out.println(responses);
         ApiResponse found = responses.get("Found");
         assertEquals(openAPI.getComponents().getResponses().get("RemoteResponse").getDescription(),"Remote Description");
         assertEquals(found.get$ref(), "#/components/responses/RemoteResponse");
@@ -239,7 +238,6 @@ public class OpenAPIResolverTest {
         assertEquals("#/components/requestBodies/requestBody2",requestBodies.get("requestBody3").get$ref());
 
         //remote request body url
-        //System.out.println(requestBodies);
         assertEquals(requestBodies.get("reference").get$ref(),"#/components/requestBodies/remote_requestBody");
 
         Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
@@ -320,7 +318,7 @@ public class OpenAPIResolverTest {
         Assert.assertNotNull(result);
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        //System.out.println("Before Resolver: " + openAPI.getPaths().get("/store/inventory").getGet().getParameters());
+
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
 
 
@@ -336,7 +334,6 @@ public class OpenAPIResolverTest {
         Assert.assertNull(openAPI.getPaths().get("/pet").getParameters());
 
         //remote ref pathItem
-        //Assert.assertNull(openAPI.getPaths().get("/pathItemRef").getParameters());
         assertEquals(openAPI.getPaths().get("/pathItemRef").getSummary(),"summary");
         assertEquals(openAPI.getPaths().get("/pathItemRef").getPost().getResponses().get("405").getDescription(),"Invalid input");
 
@@ -353,7 +350,6 @@ public class OpenAPIResolverTest {
         assertEquals(id.get$ref(),"#/components/schemas/Pet");
 
         //internal parameter url
-        //System.out.println("After Resolver: " + openAPI.getPaths().get("/store/inventory").getGet().getParameters());
         assertEquals(openAPI.getPaths().get("/store/inventory").getGet().getParameters().get(0), openAPI.getComponents().getParameters().get("limitParam"));
     }
 

@@ -11,7 +11,6 @@ import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.OneOfSchema;
 import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
@@ -271,8 +270,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),"example string");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExamples().get("list").getSummary(),"List of Names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
-        //Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getEncoding().getContentType(),"image/png, image/jpeg");
-        //Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getEncoding().get("profileImage").getHeaders());
 
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
@@ -314,7 +311,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed"));
         Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getType(),"object");
         Assert.assertNotNull(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties());
-        //System.out.println(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties().get("id"));
 
 
         Assert.assertEquals(petByStatusEndpoint.getGet().getRequestBody().getContent().get("multipart/mixed").getEncoding().get("historyMetadata").getContentType(),"application/xml; charset=utf-8");
@@ -491,7 +487,7 @@ public class OpenAPIDeserializerTest {
 
 
         PathItem petRef = paths.get("/pathItemRef");
-        //System.out.println(petRef);
+
         PathItem petEndpoint = paths.get("/pet");
         Assert.assertNotNull(petEndpoint);
         Assert.assertEquals(petEndpoint.getSummary(),"summary");
@@ -499,9 +495,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getPost().getExternalDocs());
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
-        //System.out.println(petEndpoint.getParameters());
-        //Assert.assertEquals(petEndpoint.getPost().getRequestBody().getDescription(),"user to add to the system");
-        //Assert.assertTrue(petEndpoint.getPost().getRequestBody().getRequired(),"required");
 
 
         //Operation post
@@ -517,7 +510,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getParameters().size(), 2);
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
         Parameter parameter = petEndpoint.getParameters().get(0);
-        //System.out.println(parameter.getSchema());
+
         ApiResponses responses = petEndpoint.getPost().getResponses();
         Assert.assertNotNull(responses);
         assertTrue(responses.containsKey("405"));
@@ -605,11 +598,11 @@ public class OpenAPIDeserializerTest {
         Map<String, Schema> properties = (Map<String, Schema>) component.getSchemas().get("Order").getProperties();
 
         Assert.assertNotNull(properties);
-        // System.out.println(properties);
+
         Assert.assertEquals(properties.get("status").getType(),"string");
         Assert.assertEquals(properties.get("status").getDescription(), "Order Status");
         Assert.assertEquals(properties.get("status").getEnum().get(0), "placed");
-       // System.out.println(properties);
+
 
         Assert.assertNotNull(component.getSecuritySchemes());
         Assert.assertEquals(component.getSecuritySchemes().get("petstore_auth").getType().toString(), "oauth2");
@@ -652,10 +645,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        //System.out.println(openAPI.getExtensions());
-        //System.out.println(openAPI.getServers());
-        //System.out.println(openAPI.getExtensions());
-        //System.out.println(openAPI.getInfo());
+
         Assert.assertNotNull(paths);
         Assert.assertEquals(paths.size(), 114);
 
@@ -677,8 +667,7 @@ public class OpenAPIDeserializerTest {
         ApiResponse response = responses.get("200");
         Assert.assertEquals(response.getDescription(), "Successful response.");
         Assert.assertEquals(response.getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/three_d_secure");
-        RequestBody body = stripe.getPost().getRequestBody();
-        //System.out.println(body.getContent().get("application/x-www-form-urlencoded"));
+
 
 
         PathItem stripeGet = paths.get("/v1/account/external_accounts");
