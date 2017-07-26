@@ -9,7 +9,7 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.media.OneOfSchema;
+import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.tags.Tag;
@@ -690,10 +690,10 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(properties);
         Assert.assertNull(properties.get("data").getType());
         Assert.assertEquals(properties.get("has_more").getDescription(), "True if this list has another page of items after this one that can be fetched.");
-        assertTrue(properties.get("data") instanceof OneOfSchema );
+        assertTrue(properties.get("data") instanceof ComposedSchema );
 
 
-        OneOfSchema data =  (OneOfSchema) properties.get("data");
+        ComposedSchema data =  (ComposedSchema) properties.get("data");
         assertTrue(data.getOneOf().get(0) instanceof ArraySchema );
         ArraySchema items = (ArraySchema)data.getOneOf().get(0);
         Assert.assertEquals(items.getItems().get$ref(),"#/components/schemas/bank_account");

@@ -6,11 +6,9 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.callbacks.Callback;
-import io.swagger.oas.models.media.AllOfSchema;
-import io.swagger.oas.models.media.AnyOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.MediaType;
-import io.swagger.oas.models.media.OneOfSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
@@ -216,22 +214,20 @@ public class PathsProcessor {
                 }
             }
         }
-        else if(model instanceof AllOfSchema) {
-            AllOfSchema allOfSchema = (AllOfSchema) model;
-            for(Schema innerModel : allOfSchema.getAllOf()) {
-                updateLocalRefs(innerModel, pathRef);
-            }
-        }
-        else if(model instanceof AnyOfSchema) {
-            AnyOfSchema anyOfSchema = (AnyOfSchema) model;
-            for(Schema innerModel : anyOfSchema.getAnyOf()) {
-                updateLocalRefs(innerModel, pathRef);
-            }
-        }
-        else if(model instanceof OneOfSchema) {
-            OneOfSchema oneOfSchema = (OneOfSchema) model;
-            for(Schema innerModel : oneOfSchema.getOneOf()) {
-                updateLocalRefs(innerModel, pathRef);
+        else if(model instanceof ComposedSchema) {
+            ComposedSchema composedSchema = (ComposedSchema) model;
+            if (composedSchema.getAllOf() != null) {
+                for (Schema innerModel : composedSchema.getAllOf()) {
+                    updateLocalRefs(innerModel, pathRef);
+                }
+            }if (composedSchema.getAnyOf() != null) {
+                for(Schema innerModel : composedSchema.getAnyOf()) {
+                    updateLocalRefs(innerModel, pathRef);
+                }
+            }if (composedSchema.getOneOf() != null) {
+                for (Schema innerModel : composedSchema.getOneOf()) {
+                    updateLocalRefs(innerModel, pathRef);
+                }
             }
         }
         else if(model instanceof ArraySchema) {
@@ -242,14 +238,6 @@ public class PathsProcessor {
         }
     }
 
-    /*protected void updateLocalRefs(Property property, String pathRef) {
-        if(property instanceof RefProperty) {
-            RefProperty ref = (RefProperty) property;
-            if(isLocalRef(ref.get$ref())) {
-                ref.set$ref(computeLocalRef(ref.get$ref(), pathRef));
-            }
-        }
-    }*/
 
     protected boolean isLocalRef(String ref) {
         if(ref.startsWith("#")) {

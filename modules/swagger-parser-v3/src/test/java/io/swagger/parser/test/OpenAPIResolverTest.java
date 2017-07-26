@@ -11,8 +11,8 @@ import io.swagger.oas.models.callbacks.Callback;
 import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.headers.Header;
 import io.swagger.oas.models.links.Link;
-import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.RequestBody;
@@ -197,7 +197,7 @@ public class OpenAPIResolverTest {
         assertEquals(schemas.get("OrderRef").getAdditionalProperties().get$ref(), "#/components/schemas/User");
 
         //AllOfSchema
-        AllOfSchema extended = (AllOfSchema) schemas.get("ExtendedErrorModel");
+        ComposedSchema extended = (ComposedSchema) schemas.get("ExtendedErrorModel");
         Schema root = (Schema) extended.getAllOf().get(0).getProperties().get("rootCause");
         assertEquals(root.get$ref(), "#/components/schemas/Category");
 
