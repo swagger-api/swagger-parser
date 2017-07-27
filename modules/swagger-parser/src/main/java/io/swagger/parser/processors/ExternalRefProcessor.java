@@ -1,9 +1,6 @@
 package io.swagger.parser.processors;
 
-import io.swagger.models.ArrayModel;
-import io.swagger.models.Model;
-import io.swagger.models.RefModel;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
@@ -14,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
@@ -73,6 +71,22 @@ public final class ExternalRefProcessor {
                     refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
                 } else {
                     processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                }
+
+            } else if (model instanceof ComposedModel){
+                
+                ComposedModel composedModel = (ComposedModel) model;
+                List<Model> listOfAllOF = composedModel.getAllOf();
+
+                for (Model allOfModel: listOfAllOF){
+                    if (allOfModel instanceof RefModel) {
+                        RefModel refModel = (RefModel) allOfModel;
+                        if (isAnExternalRefFormat(refModel.getRefFormat())) {
+                            refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
+                        } else {
+                            processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                        }
+                    }
                 }
             }
             //Loop the properties and recursively call this method;
