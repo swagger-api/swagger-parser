@@ -182,7 +182,7 @@ public class OpenAPIDeserializer {
             }
 
         } else {
-            result.invalidType(location, "openAPI", "object", node);
+            result.invalidType(location, "openapi", "object", node);
             result.invalid();
             return null;
         }

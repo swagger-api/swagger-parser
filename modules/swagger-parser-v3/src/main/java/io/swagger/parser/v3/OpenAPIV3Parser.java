@@ -6,9 +6,19 @@ import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.parser.v3.util.ClasspathHelper;
+import io.swagger.parser.v3.util.DeserializationUtils;
 import io.swagger.parser.v3.util.OpenAPIDeserializer;
+import io.swagger.parser.v3.util.RemoteUrl;
+import io.swagger.parser.v3.util.ResolverFully;
+import io.swagger.util.Json;
+import org.apache.commons.io.FileUtils;
 
-import java.net.URL;
+import javax.net.ssl.SSLHandshakeException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,30 +36,79 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            JsonNode node = YAML_MAPPER.readValue(new URL(url), JsonNode.class);
-            if(node != null && node.get("openapi") != null) {
-                JsonNode version = node.get("openapi");
-                if(auth == null) {
-                    auth = new ArrayList<>();
-                }
-                if(version.asText() != null && version.asText().startsWith("3.0")) {
-                    if (options != null) {
-                        if (options.isResolve()) {
-                            result.setOpenAPI(new OpenAPIResolver(new OpenAPIDeserializer().deserialize(node).getOpenAPI(), auth, null).resolve());
-                        }else{
-                            result = new OpenAPIDeserializer().deserialize(node);
-                        }
-                    }else{
-                        result = new OpenAPIDeserializer().deserialize(node);
+
+            result = readWithInfo(url,auth);
+
+            String version = result.getOpenAPI().getOpenapi();
+            if(auth == null) {
+                auth = new ArrayList<>();
+            }
+            if(version != null && version.startsWith("3.0")) {
+                if (options != null) {
+                    if (options.isResolve()) {
+                        result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                    }if(options.isResolveFully()){
+                        result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                        new ResolverFully().resolveFully(result.getOpenAPI());
                     }
                 }
             }
+
         }
 
         catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
         }
         return result;
+    }
+
+    public SwaggerParseResult readWithInfo(JsonNode node) {
+        OpenAPIDeserializer ser = new OpenAPIDeserializer();
+        return ser.deserialize(node);
+    }
+
+    public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
+        String data;
+
+        try {
+            location = location.replaceAll("\\\\","/");
+            if (location.toLowerCase().startsWith("http")) {
+                data = RemoteUrl.urlToString(location, auths);
+            } else {
+                final String fileScheme = "file:";
+                Path path;
+                if (location.toLowerCase().startsWith(fileScheme)) {
+                    path = Paths.get(URI.create(location));
+                } else {
+                    path = Paths.get(location);
+                }
+                if (Files.exists(path)) {
+                    data = FileUtils.readFileToString(path.toFile(), "UTF-8");
+                } else {
+                    data = ClasspathHelper.loadFileFromClasspath(location);
+                }
+            }
+            JsonNode rootNode;
+            if (data.trim().startsWith("{")) {
+                ObjectMapper mapper = Json.mapper();
+                rootNode = mapper.readTree(data);
+            } else {
+                rootNode = DeserializationUtils.readYamlTree(data);
+            }
+            return readWithInfo(rootNode);
+        }
+        catch (SSLHandshakeException e) {
+            SwaggerParseResult output = new SwaggerParseResult();
+            output.setMessages(Arrays.asList("unable to read location `" + location + "` due to a SSL configuration error.  " +
+                    "It is possible that the server SSL certificate is invalid, self-signed, or has an untrusted " +
+                    "Certificate Authority."));
+            return output;
+        }
+        catch (Exception e) {
+            SwaggerParseResult output = new SwaggerParseResult();
+            output.setMessages(Arrays.asList("unable to read location `" + location + "`"));
+            return output;
+        }
     }
 
     @Override
@@ -86,6 +145,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     } catch (Exception e) {
                         result.setMessages(Arrays.asList(e.getMessage()));
                     }
+                }if (options.isResolveFully()){
+                    result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                    new ResolverFully().resolveFully(result.getOpenAPI());
                 }
             }else{
                 try {
