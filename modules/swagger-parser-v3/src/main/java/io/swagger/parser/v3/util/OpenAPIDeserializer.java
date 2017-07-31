@@ -16,14 +16,12 @@ import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.links.Link;
 import io.swagger.oas.models.info.Contact;
 import io.swagger.oas.models.info.Info;
-import io.swagger.oas.models.media.AllOfSchema;
-import io.swagger.oas.models.media.AnyOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Content;
 import io.swagger.oas.models.media.Discriminator;
 import io.swagger.oas.models.media.Encoding;
 import io.swagger.oas.models.media.MediaType;
-import io.swagger.oas.models.media.OneOfSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.XML;
 import io.swagger.oas.models.security.OAuthFlow;
@@ -144,6 +142,12 @@ public class OpenAPIDeserializer {
             ArrayNode array = getArray("servers", rootNode, false, location, result);
             if (array != null && array.size() > 0) {
                 openAPI.setServers(getServersList(array, String.format("%s.%s'", location, "servers"), result));
+            }else {
+                Server defaultServer = new Server();
+                defaultServer.setUrl("/");
+                List<Server>  servers = new ArrayList<>();
+                servers.add(defaultServer);
+                openAPI.setServers(servers);
             }
 
             obj = getObject("externalDocs", rootNode, false, location, result);
@@ -178,7 +182,7 @@ public class OpenAPIDeserializer {
             }
 
         } else {
-            result.invalidType(location, "openAPI", "object", node);
+            result.invalidType(location, "openapi", "object", node);
             result.invalid();
             return null;
         }
@@ -335,6 +339,10 @@ public class OpenAPIDeserializer {
                 Server server = getServer((ObjectNode) item, location, result);
                 if (server != null) {
                     servers.add(server);
+                }else{
+                    Server defaultServer = new Server();
+                    defaultServer.setUrl("/");
+                    servers.add(defaultServer);
                 }
             }
         }
@@ -1726,7 +1734,7 @@ public class OpenAPIDeserializer {
 
             for(JsonNode n : allOfArray) {
                 if(n.isObject()) {
-                    AllOfSchema allOfList = new AllOfSchema();
+                    ComposedSchema allOfList = new ComposedSchema();
                     schema = getSchema((ObjectNode) n,location,result);
                     allOfList.addAllOfItem(schema);
                     schema = allOfList;
@@ -1736,7 +1744,7 @@ public class OpenAPIDeserializer {
 
             for(JsonNode n : anyOfArray) {
                 if(n.isObject()) {
-                    AnyOfSchema anyOfList = new AnyOfSchema();
+                    ComposedSchema anyOfList = new ComposedSchema();
                     schema = getSchema((ObjectNode) n,location,result);
                     anyOfList.addAnyOfItem(schema);
                     schema = anyOfList;
@@ -1746,7 +1754,7 @@ public class OpenAPIDeserializer {
 
             for(JsonNode n : oneOfArray) {
                 if(n.isObject()) {
-                    OneOfSchema oneOfList = new OneOfSchema();
+                    ComposedSchema oneOfList = new ComposedSchema();
                     schema = getSchema((ObjectNode) n,location,result);
                     oneOfList.addOneOfItem(schema);
                     schema = oneOfList;

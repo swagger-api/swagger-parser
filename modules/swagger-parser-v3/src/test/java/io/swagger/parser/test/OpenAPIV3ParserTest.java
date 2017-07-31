@@ -40,7 +40,7 @@ public class OpenAPIV3ParserTest {
         this.serverPort = wireMockServer.port();
         WireMock.configureFor(this.serverPort);
 
-        String pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_pathItem.yaml"));
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_pathItem.yaml.template"));
 
         WireMock.stubFor(get(urlPathMatching("/remote/path"))
                 .willReturn(aResponse()
@@ -76,7 +76,7 @@ public class OpenAPIV3ParserTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
-        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_parameter.yaml"));
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_parameter.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         WireMock.stubFor(get(urlPathMatching("/remote/parameter"))
@@ -135,10 +135,29 @@ public class OpenAPIV3ParserTest {
 
 
 
-       String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
+       String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
+        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+    }
+
+    @Test
+    public void testResolveFully(@Injectable final List<AuthorizationValue> auths) throws Exception{
+
+
+
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        ParseOptions options = new ParseOptions();
+        //options.setResolve(true);
+        options.setResolveFully(true);
 
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
 
@@ -153,7 +172,7 @@ public class OpenAPIV3ParserTest {
 
 
 
-        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths,null);

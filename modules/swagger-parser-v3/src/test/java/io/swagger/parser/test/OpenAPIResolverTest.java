@@ -11,19 +11,23 @@ import io.swagger.oas.models.callbacks.Callback;
 import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.headers.Header;
 import io.swagger.oas.models.links.Link;
-import io.swagger.oas.models.media.AllOfSchema;
 import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.parser.models.AuthorizationValue;
+import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v3.OpenAPIResolver;
+import io.swagger.parser.v3.OpenAPIV3Parser;
 import io.swagger.parser.v3.util.OpenAPIDeserializer;
 import io.swagger.oas.models.parameters.Parameter;
 
+import io.swagger.parser.v3.util.ResolverFully;
+import io.swagger.util.Json;
 import mockit.Injectable;
 
 import org.apache.commons.io.FileUtils;
@@ -45,6 +49,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 
 public class OpenAPIResolverTest {
@@ -59,7 +65,7 @@ public class OpenAPIResolverTest {
         this.serverPort = wireMockServer.port();
         WireMock.configureFor(this.serverPort);
 
-        String pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_pathItem.yaml"));
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_pathItem.yaml.template"));
 
         WireMock.stubFor(get(urlPathMatching("/remote/path"))
                 .willReturn(aResponse()
@@ -95,7 +101,7 @@ public class OpenAPIResolverTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
-        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_parameter.yaml"));
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_parameter.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         WireMock.stubFor(get(urlPathMatching("/remote/parameter"))
@@ -160,7 +166,7 @@ public class OpenAPIResolverTest {
     public void componentsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         final JsonNode rootNode = mapper.readTree(pathFile.getBytes());
@@ -197,7 +203,7 @@ public class OpenAPIResolverTest {
         assertEquals(schemas.get("OrderRef").getAdditionalProperties().get$ref(), "#/components/schemas/User");
 
         //AllOfSchema
-        AllOfSchema extended = (AllOfSchema) schemas.get("ExtendedErrorModel");
+        ComposedSchema extended = (ComposedSchema) schemas.get("ExtendedErrorModel");
         Schema root = (Schema) extended.getAllOf().get(0).getProperties().get("rootCause");
         assertEquals(root.get$ref(), "#/components/schemas/Category");
 
@@ -205,7 +211,6 @@ public class OpenAPIResolverTest {
         Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
 
         //remote url response
-        //System.out.println(responses);
         ApiResponse found = responses.get("Found");
         assertEquals(openAPI.getComponents().getResponses().get("RemoteResponse").getDescription(),"Remote Description");
         assertEquals(found.get$ref(), "#/components/responses/RemoteResponse");
@@ -239,13 +244,13 @@ public class OpenAPIResolverTest {
         assertEquals("#/components/requestBodies/requestBody2",requestBodies.get("requestBody3").get$ref());
 
         //remote request body url
-        //System.out.println(requestBodies);
         assertEquals(requestBodies.get("reference").get$ref(),"#/components/requestBodies/remote_requestBody");
 
         Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
 
         //remote url parameter
         assertEquals(parameters.get("remoteParameter").get$ref(),"#/components/parameters/parameter");
+
 
         //internal Schema Parameter
         assertEquals(parameters.get("newParam").getSchema().get$ref(),"#/components/schemas/Tag");
@@ -309,7 +314,7 @@ public class OpenAPIResolverTest {
     public void pathsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml"));
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         final JsonNode rootNode = mapper.readTree(pathFile.getBytes());
@@ -319,6 +324,7 @@ public class OpenAPIResolverTest {
         Assert.assertNotNull(result);
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
+
         assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
 
 
@@ -334,7 +340,6 @@ public class OpenAPIResolverTest {
         Assert.assertNull(openAPI.getPaths().get("/pet").getParameters());
 
         //remote ref pathItem
-        Assert.assertNull(openAPI.getPaths().get("/pathItemRef").getParameters());
         assertEquals(openAPI.getPaths().get("/pathItemRef").getSummary(),"summary");
         assertEquals(openAPI.getPaths().get("/pathItemRef").getPost().getResponses().get("405").getDescription(),"Invalid input");
 
@@ -349,6 +354,184 @@ public class OpenAPIResolverTest {
         //internal pathItem -> operation -> requestBody
         Schema id = (Schema) openAPI.getPaths().get("/pet/findByStatus").getGet().getRequestBody().getContent().get("multipart/mixed").getSchema().getProperties().get("id");
         assertEquals(id.get$ref(),"#/components/schemas/Pet");
+
+        //internal parameter url
+        assertEquals(openAPI.getPaths().get("/store/inventory").getGet().getParameters().get(0), openAPI.getComponents().getParameters().get("limitParam"));
+    }
+
+    @Test
+    public void testSelfReferenceResolution(@Injectable final List<AuthorizationValue> auths)throws Exception {
+
+        String yaml = "" +
+                "openapi: 3.0.0\n" +
+                "paths:\n" +
+                "  \"/selfRefB\":\n" +
+                "    get:\n" +
+                "      requestBody:\n" +
+                "        description: user to add to the system\\n\"+\n" +
+                "        content:\n" +
+                "         'application/json':\n" +
+                "             schema:\n" +
+                "                $ref: '#/components/schemas/SchemaB'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    SchemaA:\n" +
+                "      properties:\n" +
+                "        name:\n" +
+                "          type: string\n" +
+                "        modelB:\n" +
+                "          $ref: '#/components/schemas/SchemaB'\n" +
+                "    SchemaB:\n" +
+                "      properties:\n" +
+                "        modelB:\n" +
+                "          $ref: '#/components/schemas/SchemaB'";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+        System.out.println(openAPI.getPaths().get("/selfRefB").getGet().getRequestBody().getContent().get("application/json"));
+
+        RequestBody body = openAPI.getPaths().get("/selfRefB").getGet().getRequestBody();
+        Schema schema = body.getContent().get("application/json").getSchema();
+
+        assertEquals(schema,openAPI.getComponents().getSchemas().get("SchemaB"));
+    }
+
+    @Test
+    public void testIssue85(@Injectable final List<AuthorizationValue> auths) {
+        String yaml =
+                "openapi: '3.0'\n" +
+                        "paths: \n" +
+                        "  /test/method: \n" +
+                        "    post: \n" +
+                        "      parameters: \n" +
+                        "        - \n" +
+                        "          in: \"path\"\n" +
+                        "          name: \"body\"\n" +
+                        "          required: false\n" +
+                        "          schema: \n" +
+                        "            $ref: '#/components/Schemas/StructureA'\n" +
+                        "components: \n" +
+                        "   schemas:\n" +
+                        "       StructureA: \n" +
+                        "           type: object\n" +
+                        "           properties: \n" +
+                        "               someProperty: \n" +
+                        "                   type: string\n" +
+                        "               arrayOfOtherType: \n" +
+                        "                   type: array\n" +
+                        "                   items: \n" +
+                        "                       $ref: '#/definitions/StructureB'\n" +
+                        "       StructureB: \n" +
+                        "           type: object\n" +
+                        "           properties: \n" +
+                        "               someProperty: \n" +
+                        "                   type: string\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+        Parameter param = openAPI.getPaths().get("/test/method").getPost().getParameters().get(0);
+
+        Schema schema = param.getSchema();
+        assertNotNull(schema.getProperties().get("someProperty"));
+
+        ArraySchema am = (ArraySchema) schema.getProperties().get("arrayOfOtherType");
+        assertNotNull(am);
+        Schema prop = am.getItems();
+        assertTrue(prop instanceof Schema);
+    }
+
+    @Test
+    public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
+        String yaml = "" +
+                "openapi: '3.0'\n" +
+                "paths:\n" +
+                "  /selfRefA:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - in: query\n" +
+                "          name: body\n" +
+                "          schema:\n" +
+                "            $ref: '#/components/Schemas/SchemaA'\n" +
+                "  /selfRefB:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - in: query\n" +
+                "          name: body\n" +
+                "          schema:\n" +
+                "            $ref: '#/components/Schemas/SchemaB'\n" +
+                "  /selfRefC:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - in: query\n" +
+                "          name: body\n" +
+                "          schema:\n" +
+                "            $ref: '#/components/Schemas/SchemaC'\n" +
+                "  /selfRefD:\n" +
+                "    get:\n" +
+                "      parameters: []\n" +
+                "      responses:\n" +
+                "           default:\n"+
+                "               content:\n"+
+                "                'application/json':\n"+
+                "                     schema:\n"+
+                "                        type: array\n" +
+                "                        items:\n" +
+                "                           $ref: '#/components/Schemas/SchemaA'\n" +
+                "  /selfRefE:\n" +
+                "    get:\n" +
+                "      parameters: []\n" +
+                "      responses:\n" +
+                "           default:\n"+
+                "               content:\n"+
+                "                'application/json':\n"+
+                "                     schema:\n"+
+                "                        type: array\n" +
+                "                        items:\n" +
+                "                           $ref: '#/components/Schemas/SchemaA'\n" +
+
+                "components:\n" +
+                "   schemas:\n" +
+                "       SchemaA:\n" +
+                "           properties:\n" +
+                "               modelB:\n" +
+                "                   $ref: '#/components/Schemas/SchemaB'\n" +
+                "       SchemaB:\n" +
+                "           properties:\n" +
+                "                modelB:\n" +
+                "                    $ref: '#/components/Schemas/SchemaB'\n" +
+                "       SchemaC:\n" +
+                "            properties:\n" +
+                "               modelA:\n" +
+                "                   $ref: '#/components/Schemas/SchemaA'";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+
+        Schema schemaB = openAPI.getPaths().get("/selfRefB").getGet().getParameters().get(0).getSchema();
+        assertTrue(schemaB instanceof Schema);
+
+        assertEquals(schemaB, openAPI.getComponents().getSchemas().get("SchemaB"));
+
+        Schema schema = openAPI.getPaths().get("/selfRefE").getGet().getResponses().get("default").getContent().get("application/json").getSchema();
+        assertTrue(schema instanceof ArraySchema);
+        ArraySchema arraySchema = (ArraySchema) schema;
+        assertEquals(arraySchema.getItems(), openAPI.getComponents().getSchemas().get("SchemaA"));
+
     }
 
     private static int getDynamicPort() {

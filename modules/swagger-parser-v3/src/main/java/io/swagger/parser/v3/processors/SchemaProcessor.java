@@ -2,11 +2,13 @@ package io.swagger.parser.v3.processors;
 
 
 import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.media.AllOfSchema;
+
 import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
+
 
 import java.util.List;
 import java.util.Map;
@@ -40,8 +42,8 @@ public class SchemaProcessor {
 
         if (schema instanceof ArraySchema) {
             processArraySchema((ArraySchema) schema);
-        } else if (schema instanceof AllOfSchema) {
-            processAllOfSchema((AllOfSchema) schema);
+        } else if (schema instanceof ComposedSchema) {
+            processComposedSchema((ComposedSchema) schema);
         }
 
         if(schema.getProperties()!= null){
@@ -99,15 +101,38 @@ public class SchemaProcessor {
          }
     }
 
-    public void processAllOfSchema(AllOfSchema allOfSchema) {
-
-        final List<Schema> schemas = allOfSchema.getAllOf();
-        if (schemas != null) {
-            for (Schema schema : schemas) {
-                if (schema.get$ref() != null) {
-                    processReferenceSchema(schema);
-                }else{
-                    processSchemaType(schema);
+    public void processComposedSchema(ComposedSchema composedSchema) {
+        if(composedSchema.getAllOf() != null) {
+            final List<Schema> schemas = composedSchema.getAllOf();
+            if (schemas != null) {
+                for (Schema schema : schemas) {
+                    if (schema.get$ref() != null) {
+                        processReferenceSchema(schema);
+                    } else {
+                        processSchemaType(schema);
+                    }
+                }
+            }
+        }if(composedSchema.getOneOf() != null){
+            final List<Schema> schemas = composedSchema.getOneOf();
+            if (schemas != null) {
+                for (Schema schema : schemas) {
+                    if (schema.get$ref() != null) {
+                        processReferenceSchema(schema);
+                    } else {
+                        processSchemaType(schema);
+                    }
+                }
+            }
+        }if(composedSchema.getAnyOf() != null){
+            final List<Schema> schemas = composedSchema.getAnyOf();
+            if (schemas != null) {
+                for (Schema schema : schemas) {
+                    if (schema.get$ref() != null) {
+                        processReferenceSchema(schema);
+                    } else {
+                        processSchemaType(schema);
+                    }
                 }
             }
         }
