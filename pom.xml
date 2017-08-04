@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>5</version>
-    </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.32</version>
+    <version>1.0.32.1-restlet-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
+
+
+    <scm>
+        <connection>scm:git:git@github.com:restlet/swagger-parser.git</connection>
+        <developerConnection>scm:git:git@github.com:restlet/swagger-parser.git</developerConnection>
+        <url>https://github.com/restlet/swagger-parser</url>
+      <tag>HEAD</tag>
+  </scm>
+
+
     <developers>
         <developer>
             <id>fehguy</id>
@@ -177,7 +181,7 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
-                        <configuration></configuration>
+                        <configuration />
                     </execution>
                 </executions>
                 <configuration>
@@ -186,6 +190,14 @@
                             <element>BUNDLE</element>
                         </rule>
                     </rules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
         </plugins>
@@ -243,4 +255,17 @@
         <wiremock-version>2.4.1</wiremock-version>
         <surefire-version>2.18.1</surefire-version>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>Nexus Release Repository</name>
+            <url>https://nexus.rest-let.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>https://nexus.rest-let.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

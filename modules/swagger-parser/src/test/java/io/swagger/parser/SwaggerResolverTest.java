@@ -10,7 +10,10 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.*;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.PathsProcessor;
+import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.util.SwaggerDeserializer;
+import io.swagger.parser.util.TestUtils;
 import io.swagger.util.Json;
 import mockit.Injectable;
 import mockit.Mocked;
@@ -178,7 +181,7 @@ public class SwaggerResolverTest {
         assertEquals(param.getName(), "skip");
     }
 
-    @org.junit.Test//(description = "resolve operation body parameter remote refs")
+    @Test//(description = "resolve operation body parameter remote refs")
     public void testOperationBodyParameterRemoteRefs() {
         final ModelImpl schema = new ModelImpl();
 
@@ -371,12 +374,11 @@ public class SwaggerResolverTest {
                         "        default:\n" +
                         "          description: test response\n";
 
-        SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
 
-        Swagger swagger = result.getSwagger();
+        SwaggerDeserializationResult swaggerDeserializationResult = new SwaggerDeserializer().deserialize(DeserializationUtils.readYamlTree(yaml));
+        Swagger swaggerParsed = swaggerDeserializationResult.getSwagger();
 
-        final Swagger resolved = new SwaggerResolver(swagger, null, null,
+        final Swagger resolved = new SwaggerResolver(swaggerParsed, null, null,
                 new SwaggerResolver.Settings().addParametersToEachOperation(false))
                 .resolve();
 
@@ -390,9 +392,13 @@ public class SwaggerResolverTest {
         assertEquals(qp.getName(), "page");
     }
 
-    @Test
+    // TODO Test disabled due to 3 issues:
+    // TODO 1) File "issue-5753.yaml" has been removed but the test is still there (see this commit https://github.com/swagger-api/swagger-parser/commit/787653823cb4ffc29fb7def8cbd37a40ddf10915#diff-4425c140708d0df4418b4c6740709d08)
+    // TODO 2) Definition "issue-5753.yaml" uses relative paths that are not relative to the main file. To make it working, the SwaggerParser.read method should take the directory to use as an argument.
+    // TODO 3) Unable to find issue 5753
+    @Test(enabled = false)
     public void testCodegenIssue5753() {
-        Swagger swagger = new SwaggerParser().read("./relative-file-references/yaml/issue-5753.yaml");
+        Swagger swagger = new SwaggerParser().read(TestUtils.getResourceAbsolutePath("/relative-file-references/yaml/issue-5753.yaml"));
 
         Json.prettyPrint(swagger);
     }

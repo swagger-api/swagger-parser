@@ -1,0 +1,57 @@
+---
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Pets Store
+paths: {}
+definitions:
+
+  NumberType:
+    type: number
+    example: 2.0
+
+  IntegerType:
+    type: integer
+    example: 2
+
+  StringType:
+    type: string
+    example: "2"
+
+  ObjectType:
+    type: object
+    example:
+      propertyA: valueA
+      propertyB: 123
+
+  ArrayType:
+    type: array
+    items:
+      type: object
+    example:
+    -  propertyA: valueA1
+       propertyB: 123
+    -  propertyA: valueA2
+       propertyB: 456
+
+  NumberTypeStringExample:
+    type: number
+    example: "2.0"
+
+  IntegerTypeStringExample:
+    type: integer
+    example: "2"
+
+  StringTypeStringExample:
+    type: string
+    example: "2"
+
+  ObjectTypeStringExample:
+    type: object
+    example: "{\"propertyA\": \"valueA\", \"propertyB\": 123}"
+
+  ArrayTypeStringExample:
+    type: array
+    items:
+      type: object
+    example: "[{\"propertyA\": \"valueA1\", \"propertyB\": 123}, {\"propertyA\": \"valueA2\", \"propertyB\": 456}]"

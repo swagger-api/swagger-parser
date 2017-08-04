@@ -10,6 +10,7 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.util.TestUtils;
 import io.swagger.util.ResourceUtils;
 import org.testng.annotations.Test;
 
@@ -21,28 +22,27 @@ import java.util.List;
 import static org.testng.Assert.*;
 
 public class SwaggerReaderTest {
+
+    String uberFileAbsolutePath = TestUtils.getResourceAbsolutePath("/uber.json");
+
     @Test(description = "it should read the uber api with file scheme")
     public void readUberApiFromFile() {
         final SwaggerParser parser = new SwaggerParser();
-        java.nio.file.Path currentRelativePath = Paths.get("");
-        String curPath = currentRelativePath.toAbsolutePath().toString();
-        final Swagger swagger = parser.read("file:///" + curPath + "/src/test/resources/uber.json");
+        final Swagger swagger = parser.read(uberFileAbsolutePath);
         assertNotNull(swagger);
     }
 
     @Test(description = "it should read the uber api with file scheme and spaces")
     public void readUberApiFromFileWithSpaces() {
         final SwaggerParser parser = new SwaggerParser();
-        java.nio.file.Path currentRelativePath = Paths.get("");
-        String curPath = currentRelativePath.toAbsolutePath().toString();
-        final Swagger swagger = parser.read("file:///" + curPath + "/src/test/resources/s%20p%20a%20c%20e%20s/uber.json");
+        final Swagger swagger = parser.read("file://" + getClass().getResource("/s p a c e s/uber.json").getFile());
         assertNotNull(swagger);
     }
 
     @Test(description = "it should read the uber api from Path URI")
     public void readUberApiFromPathUri() {
         final SwaggerParser parser = new SwaggerParser();
-        java.nio.file.Path uberPath = Paths.get("src/test/resources/uber.json");
+        java.nio.file.Path uberPath = Paths.get(uberFileAbsolutePath);
         final Swagger swagger = parser.read(uberPath.toUri().toString());
         assertNotNull(swagger);
     }
@@ -50,7 +50,7 @@ public class SwaggerReaderTest {
     @Test(description = "it should read the uber api from File URI")
     public void readUberApiFromFileUri() {
         final SwaggerParser parser = new SwaggerParser();
-        java.io.File uberFile = new java.io.File("src/test/resources/uber.json");
+        java.io.File uberFile = new java.io.File(uberFileAbsolutePath);
         final Swagger swagger = parser.read(uberFile.toURI().toString());
         assertNotNull(swagger);
     }
@@ -58,21 +58,21 @@ public class SwaggerReaderTest {
     @Test(description = "it should read the uber api with url string without file scheme")
     public void readUberApiFromFileNoScheme() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/uber.json");
+        final Swagger swagger = parser.read(uberFileAbsolutePath);
         assertNotNull(swagger);
     }
 
     @Test(description = "it should read the uber api")
     public void readUberApi() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("uber.json");
+        final Swagger swagger = parser.read(uberFileAbsolutePath);
         assertNotNull(swagger);
     }
 
     @Test(description = "it should read the simple example with minimum values")
     public void readSimpleExampleWithMinimumValues() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("sampleWithMinimumValues.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/sampleWithMinimumValues.yaml"));
         final QueryParameter qp = (QueryParameter) swagger.getPaths().get("/pets").getGet().getParameters().get(0);
         assertEquals(qp.getMinimum(), new BigDecimal("0.0"));
     }
@@ -80,7 +80,7 @@ public class SwaggerReaderTest {
     @Test(description = "it should read the simple example with model extensions")
     public void readSimpleExampleWithModelExtensions() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("sampleWithMinimumValues.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/sampleWithMinimumValues.yaml"));
         final Model model = swagger.getDefinitions().get("Cat");
         assertNotNull(model.getVendorExtensions().get("x-extension-here"));
     }
@@ -88,28 +88,28 @@ public class SwaggerReaderTest {
     @Test(description = "it should detect yaml")
     public void detectYaml() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("minimal_y");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/minimal_y"));
         assertEquals(swagger.getSwagger(), "2.0");
     }
 
     @Test(description = "it should detect json")
     public void detectJson() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("minimal_j");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/minimal_j"));
         assertEquals(swagger.getSwagger(), "2.0");
     }
 
     @Test(description = "it should read the issue 16 resource")
     public void testIssue16() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("issue_16.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_16.yaml"));
         assertNotNull(swagger);
     }
 
     @Test(description = "it should test https://github.com/swagger-api/swagger-codegen/issues/469")
     public void testIssue469() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("issue_469.json");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_469.json"));
         final String expectedJson = "{" +
                 "  \"id\" : 12345," +
                 "  \"name\" : \"Gorilla\"" +
@@ -329,7 +329,7 @@ public class SwaggerReaderTest {
     @Test
     public void testIssue277() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("issue_277.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue_277.yaml"));
 
         Path path = swagger.getPath("/buckets/{bucketKey}/details");
         assertNotNull(path);
@@ -375,7 +375,7 @@ public class SwaggerReaderTest {
     @Test(description = "it should read an example within an inlined schema")
     public void testIssue1261InlineSchemaExample() {
         final SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("issue-1261.yaml");
+        final Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/issue-1261.yaml"));
 
         Path path = swagger.getPath("/user");
         assertNotNull(path);
