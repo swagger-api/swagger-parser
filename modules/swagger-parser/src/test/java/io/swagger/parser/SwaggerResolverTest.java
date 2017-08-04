@@ -392,7 +392,11 @@ public class SwaggerResolverTest {
         assertEquals(qp.getName(), "page");
     }
 
-    @Test
+    // TODO Test disabled due to 3 issues:
+    // TODO 1) File "issue-5753.yaml" has been removed but the test is still there (see this commit https://github.com/swagger-api/swagger-parser/commit/787653823cb4ffc29fb7def8cbd37a40ddf10915#diff-4425c140708d0df4418b4c6740709d08)
+    // TODO 2) Definition "issue-5753.yaml" uses relative paths that are not relative to the main file. To make it working, the SwaggerParser.read method should take the directory to use as an argument.
+    // TODO 3) Unable to find issue 5753
+    @Test(enabled = false)
     public void testCodegenIssue5753() {
         Swagger swagger = new SwaggerParser().read(TestUtils.getResourceAbsolutePath("/relative-file-references/yaml/issue-5753.yaml"));
 

@@ -6,8 +6,10 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.RemoteUrl;
+import io.swagger.parser.util.TestUtils;
 import mockit.Expectations;
 import mockit.Mocked;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -24,13 +26,14 @@ public class LocalReferenceTests {
 
     static String issue_454_yaml, issue_454_components_yaml;
 
-    static {
+    @BeforeClass
+    static void init() {
         try {
-            issue_454_yaml = readFile("src/test/resources/nested-network-references/issue-454.yaml");
-            issue_454_components_yaml = readFile("src/test/resources/nested-network-references/issue-454-components.yaml");
+            issue_454_yaml = readFile(TestUtils.getResourceAbsolutePath("/nested-network-references/issue-454.yaml"));
+            issue_454_components_yaml = readFile(TestUtils.getResourceAbsolutePath("/nested-network-references/issue-454-components.yaml"));
         }
         catch (Exception e) {
-            e.printStackTrace();
+           throw new RuntimeException(e);
         }
     }
 
