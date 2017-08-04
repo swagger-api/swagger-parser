@@ -731,6 +731,14 @@ public class SwaggerDeserializer {
                 am.items(items);
             }
 
+            // extra keys
+            Set<String> keys = getKeys(node);
+            for(String key : keys) {
+                if(key.startsWith("x-")) {
+                    am.setVendorExtension(key, extension(node.get(key)));
+                }
+            }
+
             model = am;
         }
         else {
@@ -1235,10 +1243,18 @@ public class SwaggerDeserializer {
                         output.setDescription(description);
                     }
                 }
+                JsonNode desc = node.get("description");
+                if(desc != null) {
+                    output.setDescription(desc.textValue());
+                }
             }
             else if (type.equals("oauth2")) {
                 // TODO: parse manually for better feedback
                 output = Json.mapper().convertValue(node, OAuth2Definition.class);
+                JsonNode desc = node.get("description");
+                if(desc != null) {
+                    output.setDescription(desc.textValue());
+                }
             }
             else {
                 result.invalidType(location + ".type", "type", "basic|apiKey|oauth2", node);

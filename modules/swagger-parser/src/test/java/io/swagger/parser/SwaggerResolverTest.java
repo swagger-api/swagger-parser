@@ -13,6 +13,8 @@ import io.swagger.parser.processors.PathsProcessor;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.parser.util.SwaggerDeserializer;
+import io.swagger.parser.util.TestUtils;
+import io.swagger.util.Json;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
@@ -388,5 +390,12 @@ public class SwaggerResolverTest {
         assertEquals(resolved.getPaths().get("/test/{id}").getGet().getParameters().size(), 1);
         QueryParameter qp = (QueryParameter)resolved.getPaths().get("/test/{id}").getGet().getParameters().get(0);
         assertEquals(qp.getName(), "page");
+    }
+
+    @Test
+    public void testCodegenIssue5753() {
+        Swagger swagger = new SwaggerParser().read(TestUtils.getResourceAbsolutePath("/relative-file-references/yaml/issue-5753.yaml"));
+
+        Json.prettyPrint(swagger);
     }
 }
