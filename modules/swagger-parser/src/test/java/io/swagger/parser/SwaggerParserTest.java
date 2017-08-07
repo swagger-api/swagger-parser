@@ -951,4 +951,11 @@ public class SwaggerParserTest {
             }
         }
     }
+
+    @Test
+    public void checkAllOfAreTaken() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/allOf-example/allOf.json");
+        assertEquals(2, swagger.getDefinitions().size());
+
+    }
 }
