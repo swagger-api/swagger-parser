@@ -1299,7 +1299,10 @@ public class OpenAPIDeserializer {
         Boolean required = getBoolean("required", obj, false, location, result);
         if (required != null) {
             parameter.setRequired(required);
+        }else {
+            parameter.setRequired(false);
         }
+
 
         Boolean deprecated = getBoolean("deprecated", obj, false, location, result);
         if (deprecated != null) {

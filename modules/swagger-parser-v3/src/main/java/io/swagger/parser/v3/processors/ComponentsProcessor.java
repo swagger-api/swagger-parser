@@ -142,7 +142,8 @@ public class ComponentsProcessor {
 
         for (String securitySchemeName : securitySchemeKey) {
             final SecurityScheme securityScheme = securitySchemes.get(securitySchemeName);
-            securitySchemeProcessor.processSecurityScheme(securityScheme);
+            SecurityScheme resolvedSecurityScheme = securitySchemeProcessor.processSecurityScheme(securityScheme);
+            securitySchemes.replace(securitySchemeName,securityScheme,resolvedSecurityScheme);
         }
     }
 

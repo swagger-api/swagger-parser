@@ -11,6 +11,8 @@ import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.media.StringSchema;
+import io.swagger.oas.models.parameters.QueryParameter;
 import io.swagger.oas.models.security.SecurityRequirement;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
@@ -40,6 +42,42 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIDeserializerTest {
+
+    @Test
+    public void testOptionalParameter(@Injectable List<AuthorizationValue> auths) {
+        String yaml = "openapi: 3.0.0\n" +
+                "paths:\n" +
+                "  \"/pet\":\n" +
+                "    summary: summary\n" +
+                "    description: description\n" +
+                "    post:\n" +
+                "      summary: Add a new pet to the store\n" +
+                "      description: ''\n" +
+                "      operationId: addPet\n" +
+                "      parameters:\n" +
+                "      - name: status\n" +
+                "        in: query\n" +
+                "        description: Status values that need to be considered for filter\n" +
+                "        schema:\n" +
+                "          type: array\n" +
+                "          items:\n" +
+                "            type: string\n" +
+                "            enum:\n" +
+                "            - available\n" +
+                "            - pending\n" +
+                "            - sold\n" +
+                "          default: available";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Parameter parameter = openAPI.getPaths().get("/pet").getPost().getParameters().get(0);
+
+        Assert.assertFalse(parameter.getRequired());
+    }
 
     @Test void testDiscriminatorObject(@Injectable List<AuthorizationValue> auths){
         String yaml = "openapi: '3.0'\n" +

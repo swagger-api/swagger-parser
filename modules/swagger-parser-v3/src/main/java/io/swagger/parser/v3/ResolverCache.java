@@ -42,6 +42,7 @@ public class ResolverCache {
     private static final Pattern LINKS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "links/(?<name>.+)");
     private static final Pattern CALLBACKS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "callbacks/(?<name>.+)");
     private static final Pattern HEADERS_PATTERN = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "headers/(?<name>.+)");
+    private static final Pattern SECURITY_SCHEMES = Pattern.compile("^" + RefType.COMPONENTS.getInternalPrefix() + "securitySchemes/(?<name>.+)");
     private static final Pattern PATHS_PATTERN = Pattern.compile("^" + RefType.PATH.getInternalPrefix() +  "(?<name>.+)");
 
     private final OpenAPI openApi;
@@ -176,6 +177,9 @@ public class ResolverCache {
         }
         else if(ref.startsWith("#/components/callbacks")) {
             result = getFromMap(ref, openApi.getComponents().getCallbacks(), CALLBACKS_PATTERN);
+        }
+        else if(ref.startsWith("#/components/securitySchemes")) {
+            result = getFromMap(ref, openApi.getComponents().getSecuritySchemes(), SECURITY_SCHEMES);
         }
         else if(ref.startsWith("#/paths")) {
             result = getFromMap(ref, openApi.getPaths(), PATHS_PATTERN);

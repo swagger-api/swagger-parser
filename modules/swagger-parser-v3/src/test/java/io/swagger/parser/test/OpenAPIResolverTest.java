@@ -287,10 +287,10 @@ public class OpenAPIResolverTest {
 
         //internal url securityScheme
         SecurityScheme scheme = openAPI.getComponents().getSecuritySchemes().get("reference");
-        assertEquals(scheme.get$ref(),"#/components/securitySchemes/api_key");
+        assertEquals(scheme.getType(),SecurityScheme.Type.APIKEY);
 
         SecurityScheme remoteScheme = openAPI.getComponents().getSecuritySchemes().get("remote_reference");
-        assertEquals(remoteScheme.get$ref(),"#/components/securitySchemes/petstore_remote");
+        assertEquals(remoteScheme.getType(), SecurityScheme.Type.OAUTH2);
 
 
         Map<String, Link> links = openAPI.getComponents().getLinks();

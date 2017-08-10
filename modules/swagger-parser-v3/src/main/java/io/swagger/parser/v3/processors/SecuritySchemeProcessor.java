@@ -23,17 +23,17 @@ public class SecuritySchemeProcessor {
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
-    public void processSecurityScheme(SecurityScheme securityScheme) {
+    public SecurityScheme processSecurityScheme(SecurityScheme securityScheme) {
 
         if (securityScheme.get$ref() != null){
             RefFormat refFormat = computeRefFormat(securityScheme.get$ref());
             String $ref = securityScheme.get$ref();
-            if (isAnExternalRefFormat(refFormat)){
-                final String newRef = externalRefProcessor.processRefToExternalSecurityScheme($ref, refFormat);
-                if (newRef != null) {
-                    securityScheme.set$ref(newRef);
-                }
+            SecurityScheme newSecurityScheme = cache.loadRef($ref, refFormat, SecurityScheme.class);
+            if (newSecurityScheme != null) {
+                return newSecurityScheme;
             }
         }
+        return securityScheme;
+
     }
 }

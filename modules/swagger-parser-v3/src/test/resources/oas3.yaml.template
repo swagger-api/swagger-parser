@@ -1064,7 +1064,7 @@ components:
     reference:
       "$ref": "#/components/securitySchemes/api_key"
     remote_reference:
-      "$ref": 'http://localhost:${dynamicPort}/remote/security/petstore_remote'
+      "$ref": "http://localhost:${dynamicPort}/remote/security#/petstore_remote"
     petstore_auth:
       type: oauth2
       flows:
