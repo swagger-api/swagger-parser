@@ -1,4 +1,4 @@
-# Swagger Parser
+# OpenAPI Parser
 
 [![Build Status](https://travis-ci.org/swagger-api/swagger-parser.svg)](https://travis-ci.org/swagger-api/swagger-parser)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser)
