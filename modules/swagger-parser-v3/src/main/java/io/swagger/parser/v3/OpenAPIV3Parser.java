@@ -47,11 +47,12 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 }
                 if (version != null && version.startsWith("3.0")) {
                     if (options != null) {
+                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, null);
                         if (options.isResolve()) {
-                            result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                            result.setOpenAPI(resolver.resolve());
                         }
                         if (options.isResolveFully()) {
-                            result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                            result.setOpenAPI(resolver.resolve());
                             new ResolverFully().resolveFully(result.getOpenAPI());
                         }
                     }

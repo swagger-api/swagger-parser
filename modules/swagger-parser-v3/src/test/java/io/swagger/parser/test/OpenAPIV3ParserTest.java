@@ -122,6 +122,7 @@ public class OpenAPIV3ParserTest {
                         .withHeader("Content-type", "application/yaml")
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
+
     }
 
     @AfterClass
