@@ -3,9 +3,12 @@ package io.swagger.parser;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 import org.junit.Test;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class OpenAPIParserTest {
     @Test
@@ -55,5 +58,16 @@ public class OpenAPIParserTest {
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
+    }
+
+    @Test
+    public void allowBooleanAdditionalPropertiesIssue499() {
+        SwaggerParseResult result = new OpenAPIParser().readLocation("booleanAdditonalProperties.json", null, null);
+
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+        List<String> messages = result.getMessages();
+        assertTrue(messages.isEmpty(), messages.stream().collect(Collectors.joining("\n")));
     }
 }
