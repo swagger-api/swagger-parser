@@ -4,6 +4,7 @@ package io.swagger.parser.test;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
@@ -181,6 +182,12 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+    }
+
+    @Test
+    public void testShellMethod(){
+        OpenAPI openAPI = new OpenAPIV3Parser().read("https://gist.githubusercontent.com/webron/e3b0650dfcc06fe8236841fe599c287f/raw/12512eb5343dd56ce79369d7ff58072584bd0dc7/openapi.yaml");
+        Assert.assertNotNull(openAPI);
     }
 
 

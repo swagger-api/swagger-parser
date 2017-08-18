@@ -2,6 +2,7 @@ package io.swagger.parser.v3;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
@@ -13,8 +14,8 @@ import io.swagger.parser.v3.util.RemoteUrl;
 import io.swagger.parser.v3.util.ResolverFully;
 import io.swagger.util.Json;
 import org.apache.commons.io.FileUtils;
-
 import javax.net.ssl.SSLHandshakeException;
+
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,17 +40,20 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
 
             result = readWithInfo(url,auth);
 
-            String version = result.getOpenAPI().getOpenapi();
-            if(auth == null) {
-                auth = new ArrayList<>();
-            }
-            if(version != null && version.startsWith("3.0")) {
-                if (options != null) {
-                    if (options.isResolve()) {
-                        result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
-                    }if(options.isResolveFully()){
-                        result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
-                        new ResolverFully().resolveFully(result.getOpenAPI());
+            if (result.getOpenAPI() != null) {
+                String version = result.getOpenAPI().getOpenapi();
+                if (auth == null) {
+                    auth = new ArrayList<>();
+                }
+                if (version != null && version.startsWith("3.0")) {
+                    if (options != null) {
+                        if (options.isResolve()) {
+                            result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                        }
+                        if (options.isResolveFully()) {
+                            result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                            new ResolverFully().resolveFully(result.getOpenAPI());
+                        }
                     }
                 }
             }
@@ -60,6 +64,28 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             result.setMessages(Arrays.asList(e.getMessage()));
         }
         return result;
+    }
+
+    public OpenAPI read(String location) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        return read(location, null, options);
+    }
+    public OpenAPI read(String location, List<AuthorizationValue> auths, ParseOptions resolve) {
+        if (location == null) {
+            return null;
+        }
+        location = location.replaceAll("\\\\","/");
+        OpenAPI output;
+
+        List<SwaggerParserExtension> parserExtensions = getExtensions();
+        for (SwaggerParserExtension extension : parserExtensions) {
+            output = extension.readLocation(location, auths,resolve).getOpenAPI();
+            if (output != null) {
+                return output;
+            }
+        }
+        return null;
     }
 
     public SwaggerParseResult readWithInfo(JsonNode node) {
