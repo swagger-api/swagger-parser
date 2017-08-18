@@ -42,7 +42,7 @@ You can read from a file location as well:
 
 If your swagger resource is protected, you can pass headers in the request:
 ```java
-import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.parser.models.AuthorizationValue;
 
 // ... your code
 
@@ -54,7 +54,7 @@ import io.swagger.models.auth.AuthorizationValue;
 
   // or in a single constructor
   AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
-  Swagger swagger = new SwaggerParser().read(
+  OpenAPI openAPI = new OpenAPIV3Parser().read(
     "http://petstore.swagger.io/v2/swagger.json",
     Arrays.asList(mySpecialHeader, apiKey)
   );
@@ -88,8 +88,8 @@ But... this is all standard SSL configuration stuff and is well documented acros
 ### Prerequisites
 You need the following installed and available in your $PATH:
 
-* [Java 1.7](http://java.oracle.com)
-* [Apache maven 3.0.3 or greater](http://maven.apache.org/)
+* [Java 1.8](http://java.oracle.com)
+* [Apache maven 3.x](http://maven.apache.org/)
 
 After cloning the project, you can build it from source with this command:
 
@@ -109,7 +109,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>X.X.X</version>
+  <version>2.0.0-SNAPSHOT</version>
 </dependency>
 
 ```
