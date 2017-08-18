@@ -54,7 +54,7 @@ import io.swagger.parser.models.AuthorizationValue;
 
   // or in a single constructor
   AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
-  OpenAPI openAPI = new OpenAPIV3Parser().read(
+  OpenAPI openAPI = new OpenAPIV3Parser().readWithInfo(
     "http://petstore.swagger.io/v2/swagger.json",
     Arrays.asList(mySpecialHeader, apiKey)
   );
