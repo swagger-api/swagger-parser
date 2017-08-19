@@ -4,6 +4,7 @@ package io.swagger.parser.test;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
@@ -121,6 +122,16 @@ public class OpenAPIV3ParserTest {
                         .withHeader("Content-type", "application/yaml")
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/oas4.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/spec"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
     }
 
     @AfterClass
@@ -181,6 +192,17 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+    }
+
+    @Test
+    public void testShellMethod(@Injectable final List<AuthorizationValue> auths){
+
+        String url = "http://localhost:${dynamicPort}/remote/spec";
+        url = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        OpenAPI openAPI = new OpenAPIV3Parser().read(url);
+        Assert.assertNotNull(openAPI);
+        Assert.assertEquals(openAPI.getOpenapi(), "3.0.0-RC1");
     }
 
 
