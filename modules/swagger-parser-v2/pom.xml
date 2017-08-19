@@ -37,6 +37,24 @@
                                 </relocation>
                             </relocations>
                             <createSourcesJar>true</createSourcesJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <executions>
+                    <execution>
+                        <id>javadoc-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <!-- switch on dependency-driven aggregation -->
+                            <includeDependencySources>true</includeDependencySources>
                         </configuration>
                     </execution>
                 </executions>
