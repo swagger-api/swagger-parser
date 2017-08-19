@@ -9,13 +9,6 @@
 ## Overview 
 This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
-## What's Swagger?
-
-The goal of Swagger™ is to define a standard, language-agnostic interface to REST APIs which allows both humans and computers to discover and understand the capabilities of the service without access to source code, documentation, or through network traffic inspection. When properly defined via Swagger, a consumer can understand and interact with the remote service with a minimal amount of implementation logic. Similar to what interfaces have done for lower-level programming, Swagger removes the guesswork in calling the service.
-
-
-Check out [Swagger-Spec](https://github.com/OAI/OpenAPI-Specification) for additional information about the Swagger project, including additional libraries with support for other languages and more. 
-
 
 ### Usage
 Using the swagger-parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
@@ -29,18 +22,18 @@ import io.swagger.oas.models.OpenAPI;
   // read a swagger description from the petstore
   
   
-  OpenAPI openAPI = new OpenAPIV3Parser().read("https://gist.githubusercontent.com/webron/e3b0650dfcc06fe8236841fe599c287f/raw/12512eb5343dd56ce79369d7ff58072584bd0dc7/openapi.yaml");
+  OpenAPI openAPI = new OpenAPIV3Parser().read("http://petstore.swagger.io/v3/openapi.json");
 
 ```
 
 You can read from a file location as well:
 ```java
-  OpenAPI openAPI = new OpenAPIV3Parser().read("./path/to/swagger.yaml");
+  OpenAPI openAPI = new OpenAPIV3Parser().read("./path/to/openapi.yaml");
 
 ```
 
 
-If your swagger resource is protected, you can pass headers in the request:
+If your OpenAPI definition is protected, you can pass headers in the request:
 ```java
 import io.swagger.parser.models.AuthorizationValue;
 
@@ -72,8 +65,7 @@ And then the swagger-parser will _ignore_ invalid certificates.  Of course this 
 working inside a firewall or really know what you're doing, well, there's your rope.
 
 ### Dealing with Let's Encrypt
-Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_
-by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
+Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_ by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
 JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
 not accepting Let's Encrypt signed certificates.
 
