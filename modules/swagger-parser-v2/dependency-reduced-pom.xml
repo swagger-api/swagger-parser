@@ -33,6 +33,7 @@
                   <shadedPattern>v2.io.swagger</shadedPattern>
                 </relocation>
               </relocations>
+              <createSourcesJar>true</createSourcesJar>
             </configuration>
           </execution>
         </executions>
