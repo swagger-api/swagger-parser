@@ -123,6 +123,15 @@ public class OpenAPIV3ParserTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/oas4.yaml"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/spec"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
     }
 
     @AfterClass
@@ -186,9 +195,14 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testShellMethod(){
-        OpenAPI openAPI = new OpenAPIV3Parser().read("https://gist.githubusercontent.com/webron/e3b0650dfcc06fe8236841fe599c287f/raw/12512eb5343dd56ce79369d7ff58072584bd0dc7/openapi.yaml");
+    public void testShellMethod(@Injectable final List<AuthorizationValue> auths){
+
+        String url = "http://localhost:${dynamicPort}/remote/spec";
+        url = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        OpenAPI openAPI = new OpenAPIV3Parser().read(url);
         Assert.assertNotNull(openAPI);
+        Assert.assertEquals(openAPI.getOpenapi(), "3.0.0-RC1");
     }
 
 
