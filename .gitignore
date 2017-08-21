@@ -4,7 +4,7 @@
 atlassian-ide-plugin.xml
 .idea/
 target/
-
+.DS_Store
 .classpath
 .project
 .settings/
