@@ -1,20 +1,20 @@
 package io.swagger.parser.v2;
 
-import v2.io.swagger.models.ArrayModel;
-import v2.io.swagger.models.ComposedModel;
-import v2.io.swagger.models.Model;
-import v2.io.swagger.models.ModelImpl;
-import v2.io.swagger.models.Operation;
-import v2.io.swagger.models.Path;
-import v2.io.swagger.models.Response;
-import v2.io.swagger.models.Swagger;
-import v2.io.swagger.models.Tag;
-import v2.io.swagger.models.parameters.BodyParameter;
-import v2.io.swagger.models.parameters.Parameter;
-import v2.io.swagger.models.properties.ArrayProperty;
-import v2.io.swagger.models.properties.MapProperty;
-import v2.io.swagger.models.properties.ObjectProperty;
-import v2.io.swagger.models.properties.Property;
+import io.swagger.models.ArrayModel;
+import io.swagger.models.ComposedModel;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Response;
+import io.swagger.models.Swagger;
+import io.swagger.models.Tag;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
 
 import java.util.ArrayList;
 import java.util.Iterator;
