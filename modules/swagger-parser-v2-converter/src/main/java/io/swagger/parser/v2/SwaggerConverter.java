@@ -2,41 +2,36 @@ package io.swagger.parser.v2;
 
 import io.swagger.models.*;
 import io.swagger.models.parameters.AbstractSerializableParameter;
-import io.swagger.oas.models.Components;
-import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.Operation;
-import io.swagger.oas.models.PathItem;
-import io.swagger.oas.models.Paths;
-import io.swagger.oas.models.info.Contact;
-import io.swagger.oas.models.info.Info;
-import io.swagger.oas.models.info.License;
-import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.media.Content;
-import io.swagger.oas.models.media.FileSchema;
-import io.swagger.oas.models.media.MediaType;
-import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.oas.models.parameters.RequestBody;
-import io.swagger.oas.models.responses.ApiResponse;
-import io.swagger.oas.models.responses.ApiResponses;
-import io.swagger.oas.models.servers.Server;
-import io.swagger.parser.extensions.SwaggerParserExtension;
-import io.swagger.parser.models.AuthorizationValue;
-import io.swagger.parser.models.ParseOptions;
-import io.swagger.parser.models.SwaggerParseResult;
-import org.apache.commons.lang3.StringUtils;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.oas.models.*;
+import io.swagger.oas.models.Operation;
+import io.swagger.oas.models.info.Contact;
+import io.swagger.oas.models.info.Info;
+import io.swagger.oas.models.info.License;
+import io.swagger.oas.models.media.*;
+import io.swagger.oas.models.parameters.Parameter;
+import io.swagger.oas.models.parameters.RequestBody;
+import io.swagger.oas.models.responses.ApiResponse;
+import io.swagger.oas.models.responses.ApiResponses;
+import io.swagger.oas.models.servers.Server;
+import io.swagger.oas.models.tags.Tag;
 import io.swagger.parser.SwaggerResolver;
+import io.swagger.parser.extensions.SwaggerParserExtension;
+import io.swagger.parser.models.AuthorizationValue;
+import io.swagger.parser.models.ParseOptions;
+import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SwaggerConverter implements SwaggerParserExtension {
     private List<String> globalConsumes = new ArrayList<>();
@@ -102,6 +97,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         openAPI.setServers(convert(swagger.getSchemes(), swagger.getHost(), swagger.getBasePath()));
 
+        openAPI.setTags(convert(swagger.getTags()));
+
         if(swagger.getConsumes() != null) {
             this.globalConsumes.addAll(swagger.getConsumes());
         }
@@ -163,6 +160,33 @@ public class SwaggerConverter implements SwaggerParserExtension {
         output.setOpenAPI(openAPI);
 
         return output;
+    }
+
+    private List<Tag> convert(List<io.swagger.models.Tag> tags) {
+        List<Tag> v3tags = new ArrayList<>();
+
+        for (io.swagger.models.Tag tag : tags) {
+            Tag v3tag = new Tag();
+
+            v3tag.setDescription(tag.getDescription());
+            v3tag.setName(tag.getName());
+            v3tag.setExternalDocs(convert(tag.getExternalDocs()));
+            v3tag.setExtensions(tag.getVendorExtensions());
+
+            v3tags.add(v3tag);
+        }
+
+        return v3tags;
+    }
+
+    private ExternalDocumentation convert(ExternalDocs externalDocs) {
+        ExternalDocumentation externalDocumentation = new ExternalDocumentation();
+
+        externalDocumentation.setUrl(externalDocs.getUrl());
+        externalDocumentation.setDescription(externalDocs.getDescription());
+        externalDocumentation.setExtensions(externalDocs.getVendorExtensions());
+
+        return externalDocumentation;
     }
 
     private List<Server> convert(List<Scheme> schemes, String host, String basePath) {
@@ -291,6 +315,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
         operation.setDeprecated(v2Operation.isDeprecated());
         operation.setOperationId(v2Operation.getOperationId());
+
+        operation.setTags(v2Operation.getTags());   
 
         if(v2Operation.getParameters() != null) {
             List<io.swagger.models.parameters.Parameter> formParams = new ArrayList<>();
