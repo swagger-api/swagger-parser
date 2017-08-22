@@ -1,5 +1,6 @@
 package io.swagger.parser.v2;
 
+import io.swagger.models.*;
 import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
@@ -17,15 +18,12 @@ import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
+import io.swagger.oas.models.servers.Server;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
-import io.swagger.models.Model;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.Swagger;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
@@ -101,7 +99,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         openAPI.setInfo(convert(swagger.getInfo()));
 
-
+        openAPI.setServers(convert(swagger.getSchemes(), swagger.getHost(), swagger.getBasePath()));
 
         if(swagger.getConsumes() != null) {
             this.globalConsumes.addAll(swagger.getConsumes());
@@ -164,6 +162,37 @@ public class SwaggerConverter implements SwaggerParserExtension {
         output.setOpenAPI(openAPI);
 
         return output;
+    }
+
+    private List<Server> convert(List<Scheme> schemes, String host, String basePath) {
+        List<Server> servers = new ArrayList<>();
+        String baseUrl;
+
+        if (StringUtils.isNotEmpty(basePath)) {
+            baseUrl = basePath;
+        } else {
+            baseUrl = "/";
+        }
+
+        if (StringUtils.isNotEmpty(host)) {
+            baseUrl = host + baseUrl;
+        }
+
+        if (!StringUtils.startsWith(baseUrl, "/") && !schemes.isEmpty()) {
+            for (Scheme scheme : schemes) {
+                Server server = new Server();
+                server.setUrl(scheme.toValue() + baseUrl);
+
+                servers.add(server);
+            }
+        } else {
+            Server server = new Server();
+            server.setUrl(baseUrl);
+
+            servers.add(server);
+        }
+
+        return servers;
     }
 
     public Info convert(io.swagger.models.Info v2Info) {
