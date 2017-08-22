@@ -1,6 +1,7 @@
 package io.swagger.parser.v2;
 
 import io.swagger.models.*;
+import io.swagger.models.parameters.AbstractSerializableParameter;
 import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
@@ -489,6 +490,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
                 }
                 schema.setPattern(sp.getPattern());
+            }
+
+            if(sp instanceof AbstractSerializableParameter) {
+                AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
+                schema.setDefault(ap.getDefault());
             }
         }
 
