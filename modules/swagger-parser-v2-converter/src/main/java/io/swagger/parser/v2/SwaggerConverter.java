@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class SwaggerConverter implements SwaggerParserExtension {
     private List<String> globalConsumes = new ArrayList<>();
@@ -97,7 +96,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         openAPI.setServers(convert(swagger.getSchemes(), swagger.getHost(), swagger.getBasePath()));
 
-        openAPI.setTags(convert(swagger.getTags()));
+        if (swagger.getTags() != null) {
+            openAPI.setTags(convertTags(swagger.getTags()));
+        }
 
         if(swagger.getConsumes() != null) {
             this.globalConsumes.addAll(swagger.getConsumes());
@@ -162,16 +163,22 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return output;
     }
 
-    private List<Tag> convert(List<io.swagger.models.Tag> tags) {
+    private List<Tag> convertTags(List<io.swagger.models.Tag> v2tags) {
         List<Tag> v3tags = new ArrayList<>();
 
-        for (io.swagger.models.Tag tag : tags) {
+        for (io.swagger.models.Tag v2tag : v2tags) {
             Tag v3tag = new Tag();
 
-            v3tag.setDescription(tag.getDescription());
-            v3tag.setName(tag.getName());
-            v3tag.setExternalDocs(convert(tag.getExternalDocs()));
-            v3tag.setExtensions(tag.getVendorExtensions());
+            v3tag.setDescription(v2tag.getDescription());
+            v3tag.setName(v2tag.getName());
+
+            if (v2tag.getExternalDocs() != null) {
+                v3tag.setExternalDocs(convert(v2tag.getExternalDocs()));
+            }
+
+            if (v2tag.getVendorExtensions() != null && v2tag.getVendorExtensions().size() > 0) {
+                v3tag.setExtensions(v2tag.getVendorExtensions());
+            }
 
             v3tags.add(v3tag);
         }
@@ -316,7 +323,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         operation.setDeprecated(v2Operation.isDeprecated());
         operation.setOperationId(v2Operation.getOperationId());
 
-        operation.setTags(v2Operation.getTags());   
+        operation.setTags(v2Operation.getTags());
 
         if(v2Operation.getParameters() != null) {
             List<io.swagger.models.parameters.Parameter> formParams = new ArrayList<>();
