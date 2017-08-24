@@ -6,10 +6,14 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.oas.models.Components;
 import io.swagger.oas.models.ExternalDocumentation;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
+import io.swagger.oas.models.media.Content;
+import io.swagger.oas.models.media.MediaType;
+import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.StringSchema;
 import io.swagger.oas.models.parameters.QueryParameter;
@@ -448,7 +452,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 16);
+        Assert.assertEquals(paths.size(), 17);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -472,7 +476,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 16);
+        Assert.assertEquals(paths.size(), 17);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -484,6 +488,51 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getNamespace(), "http://example.com/schema/sample");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getXml().getPrefix(), "sample");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
+    }
+
+    @Test(dataProvider = "data")
+    public void readProducesTestEndpoint(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final Paths paths = openAPI.getPaths();
+        Assert.assertNotNull(paths);
+        Assert.assertEquals(paths.size(), 17);
+
+        //parameters operation get
+        PathItem producesTestEndpoint = paths.get("/producesTest");
+        Assert.assertNotNull(producesTestEndpoint.getGet());
+        Assert.assertNotNull(producesTestEndpoint.getGet().getParameters());
+        Assert.assertTrue(producesTestEndpoint.getGet().getParameters().isEmpty());
+
+        Operation operation = producesTestEndpoint.getGet();
+        ApiResponses responses = operation.getResponses();
+        Assert.assertNotNull(responses);
+        Assert.assertFalse(responses.isEmpty());
+
+        ApiResponse response = responses.get("200");
+        Assert.assertNotNull(response);
+        Assert.assertEquals("it works", response.getDescription());
+
+        Content content = response.getContent();
+        Assert.assertNotNull(content);
+        MediaType mediaType = content.get("application/json");
+        Assert.assertNotNull(mediaType);
+
+        Schema schema = mediaType.getSchema();
+        Assert.assertNotNull(schema);
+        Assert.assertTrue(schema instanceof ObjectSchema);
+
+        ObjectSchema objectSchema = (ObjectSchema) schema;
+        schema = objectSchema.getProperties().get("name");
+        Assert.assertNotNull(schema);
+
+        Assert.assertTrue(schema instanceof StringSchema);
     }
 
 
@@ -521,7 +570,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 16);
+        Assert.assertEquals(paths.size(), 17);
 
 
         PathItem petRef = paths.get("/pathItemRef");
