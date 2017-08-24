@@ -727,6 +727,19 @@ paths:
           description: Invalid username supplied
         '404':
           description: User not found
+  "/producesTest":
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: it works
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
     put:
       tags:
       - user

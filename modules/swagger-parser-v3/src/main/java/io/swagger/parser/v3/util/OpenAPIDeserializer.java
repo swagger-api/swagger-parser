@@ -1772,7 +1772,7 @@ public class OpenAPIDeserializer {
             }
             schema = items;
         } else {
-            schema = new Schema();
+            schema = SchemaTypeUtil.createSchemaByType(node);
         }
 
         JsonNode ref = node.get("$ref");
