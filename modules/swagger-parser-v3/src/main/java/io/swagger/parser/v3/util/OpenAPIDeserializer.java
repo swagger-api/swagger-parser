@@ -1983,9 +1983,9 @@ public class OpenAPIDeserializer {
             }
         }
 
-        ObjectNode exampleObj = getObject("example",node,false,location,result);
-        if (exampleObj != null) {
-            schema.setExample(exampleObj);
+        String example = getString("example",node,false,location,result);
+        if (StringUtils.isNotBlank(example)) {
+            schema.setExample(example);
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
