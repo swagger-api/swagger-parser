@@ -48,6 +48,43 @@ import static org.testng.Assert.assertTrue;
 public class OpenAPIDeserializerTest {
 
     @Test
+    public void testSchemaExample(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: '3.0'\n" +
+                "components:\n" +
+                "  schemas:\n"+
+                "    Address:\n" +
+                "      required:\n" +
+                "      - street\n" +
+                "      type: object\n" +
+                "      x-swagger-router-model: io.swagger.oas.test.models.Address\n" +
+                "      properties:\n" +
+                "        street:\n" +
+                "          type: string\n" +
+                "          example: 12345 El Monte Road\n" +
+                "        city:\n" +
+                "          type: string\n" +
+                "          example: Los Altos Hills\n" +
+                "        state:\n" +
+                "          type: string\n" +
+                "          example: CA\n" +
+                "        zip:\n" +
+                "          type: string\n" +
+                "          example: '94022'";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Schema stateSchemaProperty = (Schema)openAPI.getComponents().getSchemas().get("Address").getProperties().get("state");
+
+        Assert.assertNotNull(stateSchemaProperty.getExample());
+        Assert.assertEquals(stateSchemaProperty.getExample(),"CA" );
+    }
+
+    @Test
     public void testOptionalParameter(@Injectable List<AuthorizationValue> auths) {
         String yaml = "openapi: 3.0.0\n" +
                 "paths:\n" +
