@@ -176,8 +176,8 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(mediaTypeJson.getExamples());
         Assert.assertEquals(mediaTypeJson.getExamples().get("AnObject").get$ref(),"#/components/examples/AnObject");
 
-        //TODO Assert.assertNotNull(header1.getExamples()); uncoment when model of header is the same as parameter for examples
-        //Assert.assertEquals(header1.getExamples().get(0).getValue(),"httpbin");
+        Assert.assertNotNull(header1.getExamples());
+        Assert.assertEquals(header1.getExamples().get("httpbin").getValue(),"httpbin");
 
         Assert.assertNotNull(header2.getExample());
         Assert.assertEquals(header2.getExample(),"37");

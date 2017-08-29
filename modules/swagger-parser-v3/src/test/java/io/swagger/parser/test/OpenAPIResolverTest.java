@@ -267,8 +267,8 @@ public class OpenAPIResolverTest {
         //header remote schema ref
         assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User");
 
-        //TODO header examples
-        assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get(0).get$ref(), "#/components/examples/dog" );
+        //header examples
+        assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get("headerExample").get$ref(), "#/components/examples/dog" );
         //remote header ref
         assertEquals(headers.get("X-Ref-Limit-Limit").get$ref(),"#/components/headers/X-Rate-Limit-Reset" );
 

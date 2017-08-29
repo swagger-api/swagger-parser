@@ -52,7 +52,13 @@ public class HeaderProcessor {
 
         }
         if (header.getExamples() != null){
-            exampleProcessor.processExample(header.getExamples());
+            if (header.getExamples() != null) {
+                Map<String,Example> examples = header.getExamples();
+                for (String key : examples.keySet()){
+                    exampleProcessor.processExample(header.getExamples().get(key));
+                }
+
+            }
         }
         Schema schema = null;
         if(header.getContent() != null) {

@@ -1110,7 +1110,8 @@ components:
           schema:
             $ref: '#/components/schemas/ExtendedErrorModel'
       examples:
-      - $ref: "#/components/examples/dog"
+        headerExample:
+            $ref: "#/components/examples/dog"
   links:
     referenced:
       "$ref": "#/components/links/unsubscribe"

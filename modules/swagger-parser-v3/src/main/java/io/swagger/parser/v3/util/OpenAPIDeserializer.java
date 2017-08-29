@@ -1438,9 +1438,9 @@ public class OpenAPIDeserializer {
             header.setSchema(getSchema(headerObject, location, result));
         }
 
-        ArrayNode examplesObject = getArray("examples",headerNode,false,location,result);
+        ObjectNode examplesObject = getObject("examples",headerNode,false,location,result);
         if(examplesObject!=null) {
-            header.setExamples(getExampleList(examplesObject, location, result));
+            header.setExamples(getExamples(examplesObject, location, result));
         }
 
         value = getAnyExample(headerNode, location,result);
