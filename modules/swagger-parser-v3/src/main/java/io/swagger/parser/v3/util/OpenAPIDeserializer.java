@@ -831,31 +831,10 @@ public class OpenAPIDeserializer {
             mediaType.setExamples(getExamples(examplesObject, String.format("%s.%s'", location, "examples"), result));
         }
 
-        JsonNode example = contentNode.get("example");
-        if (example != null) {
-            if (example.getNodeType().equals(JsonNodeType.STRING)) {
-                String value = getString("example", contentNode, false, location, result);
-                if (StringUtils.isNotBlank(value)) {
-                    mediaType.setExample(value);
-                }
-            }else if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
-                Integer integerExample = getInteger("example", contentNode, false, location, result);
-                if (integerExample != null) {
-                    mediaType.setExample(integerExample.toString());
-                }
-            }else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode objectValue = getObject("example", contentNode, false, location, result);
-                if (objectValue != null) {
-                    mediaType.setExample(objectValue.toString());
-                }
-            } else if (example.getNodeType().equals(JsonNodeType.ARRAY)) {
-                ArrayNode arrayValue = getArray("example", contentNode, false, location, result);
-                if (arrayValue != null) {
-                    mediaType.setExample(arrayValue.toString());
-                }
-            }
+        String value = getAnyExample(contentNode, location,result);
+        if (StringUtils.isNotBlank(value)){
+            mediaType.setExample(value);
         }
-
 
 
         Set<String> keys = getKeys(contentNode);
@@ -1355,29 +1334,9 @@ public class OpenAPIDeserializer {
             parameter.setExamples(getExamples(examplesObject, String.format("%s.%s'", location, "examples"), result));
         }
 
-        JsonNode example = obj.get("example");
-        if (example != null) {
-            if (example.getNodeType().equals(JsonNodeType.STRING)) {
-                value = getString("example", obj, false, location, result);
-                if (StringUtils.isNotBlank(value)) {
-                    parameter.setExample(value);
-                }
-            } else if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
-                Integer integerExample = getInteger("example", obj, false, location, result);
-                if (integerExample != null) {
-                    parameter.setExample(integerExample.toString());
-                }
-            } else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode objectValue = getObject("example", obj, false, location, result);
-                if (objectValue != null) {
-                    parameter.setExample(objectValue.toString());
-                }
-            } else if (example.getNodeType().equals(JsonNodeType.ARRAY)) {
-                ArrayNode arrayValue = getArray("example", obj, false, location, result);
-                if (arrayValue != null) {
-                    parameter.setExample(arrayValue.toString());
-                }
-            }
+        value = getAnyExample(obj, location,result);
+        if (StringUtils.isNotBlank(value)){
+            parameter.setExample(value);
         }
 
         ObjectNode contentNode = getObject("content",obj,false,location,result);
@@ -1484,29 +1443,9 @@ public class OpenAPIDeserializer {
             header.setExamples(getExampleList(examplesObject, location, result));
         }
 
-        JsonNode example = headerNode.get("example");
-        if (example != null) {
-            if (example.getNodeType().equals(JsonNodeType.STRING)) {
-                value = getString("example", headerNode, false, location, result);
-                if (StringUtils.isNotBlank(value)) {
-                    header.setExample(value);
-                }
-            } if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
-                Integer integerExample = getInteger("example", headerNode, false, location, result);
-                if (integerExample != null) {
-                    header.setExample(integerExample.toString());
-                }
-            } else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode objectValue = getObject("example", headerNode, false, location, result);
-                if (objectValue != null) {
-                    header.setExample(objectValue.toString());
-                }
-            } else if (example.getNodeType().equals(JsonNodeType.ARRAY)) {
-                ArrayNode arrayValue = getArray("example", headerNode, false, location, result);
-                if (arrayValue != null) {
-                    header.setExample(arrayValue.toString());
-                }
-            }
+        value = getAnyExample(headerNode, location,result);
+        if (StringUtils.isNotBlank(value)){
+            header.setExample(value);
         }
 
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
@@ -1527,6 +1466,40 @@ public class OpenAPIDeserializer {
         }
 
         return header;
+    }
+
+    public String getAnyExample(ObjectNode node, String location, ParseResult result ){
+        JsonNode example = node.get("example");
+        if (example != null) {
+            if (example.getNodeType().equals(JsonNodeType.STRING)) {
+                String value = getString("example", node, false, location, result);
+                if (StringUtils.isNotBlank(value)) {
+                    return value;
+                }
+            } if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
+                Integer integerExample = getInteger("example", node, false, location, result);
+                if (integerExample != null) {
+                    return integerExample.toString();
+                }else {
+                    BigDecimal bigDecimalExample = getBigDecimal("example", node, false, location, result);
+                    if (bigDecimalExample != null) {
+                        return bigDecimalExample.toString();
+
+                    }
+                }
+            } else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
+                ObjectNode objectValue = getObject("example", node, false, location, result);
+                if (objectValue != null) {
+                   return objectValue.toString();
+                }
+            } else if (example.getNodeType().equals(JsonNodeType.ARRAY)) {
+                ArrayNode arrayValue = getArray("example", node, false, location, result);
+                if (arrayValue != null) {
+                    return arrayValue.toString();
+                }
+            }
+        }
+        return null;
     }
 
     public Map<String, SecurityScheme> getSecuritySchemes(ObjectNode obj, String location, ParseResult result) {
@@ -2036,29 +2009,9 @@ public class OpenAPIDeserializer {
             }
         }
 
-        JsonNode example = node.get("example");
-        if (example != null) {
-            if (example.getNodeType().equals(JsonNodeType.STRING)) {
-                value = getString("example", node, false, location, result);
-                if (StringUtils.isNotBlank(value)) {
-                    schema.setExample(value);
-                }
-            }else    if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
-                Integer integerExample = getInteger("example", node, false, location, result);
-                if (integerExample != null) {
-                    schema.setExample(integerExample.toString());
-                }
-            }else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode objectValue = getObject("example", node, false, location, result);
-                if (objectValue != null) {
-                    schema.setExample(objectValue);
-                }
-            } else if (example.getNodeType().equals(JsonNodeType.ARRAY)) {
-                ArrayNode arrayValue = getArray("example", node, false, location, result);
-                if (arrayValue != null) {
-                    schema.setExample(arrayValue);
-                }
-            }
+        value = getAnyExample(node, location,result);
+        if (StringUtils.isNotBlank(value)){
+            schema.setExample(value);
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
