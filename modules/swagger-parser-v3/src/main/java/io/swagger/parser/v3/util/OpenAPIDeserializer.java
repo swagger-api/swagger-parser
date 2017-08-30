@@ -1516,31 +1516,38 @@ public class OpenAPIDeserializer {
             }
         }
 
+        boolean descriptionRequired, bearerFormatRequired, nameRequired, inRequired, schemeRequired, flowsRequired, openIdConnectRequired;
+        descriptionRequired = bearerFormatRequired = nameRequired = inRequired = schemeRequired = flowsRequired = openIdConnectRequired = false;
+        
         String value = getString("type", node, true, location, result);
         if (StringUtils.isNotBlank(value)) {
             if (SecurityScheme.Type.APIKEY.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.APIKEY);
+                nameRequired = inRequired = true;
             } else if (SecurityScheme.Type.HTTP.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.HTTP);
+                schemeRequired = true;
             } else if (SecurityScheme.Type.OAUTH2.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.OAUTH2);
+                flowsRequired = true;
             } else if (SecurityScheme.Type.OPENIDCONNECT.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.OPENIDCONNECT);
+                openIdConnectRequired = true;
             }else{
                 result.invalidType(location + ".type", "type", "http|apiKey|oauth2|openIdConnect ", node);
             }
         }
-        value = getString("description", node, false, location, result);
+        value = getString("description", node, descriptionRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setDescription(value);
         }
 
-        value = getString("name", node, true, location, result);
+        value = getString("name", node, nameRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setName(value);
         }
 
-        value = getString("in", node, true, location, result);
+        value = getString("in", node, inRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             if (QUERY_PARAMETER.equals(value)) {
                 securityScheme.setIn(SecurityScheme.In.QUERY);
@@ -1549,22 +1556,22 @@ public class OpenAPIDeserializer {
             }
         }
 
-        value = getString("scheme", node, true, location, result);
+        value = getString("scheme", node, schemeRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setScheme(value);
         }
 
-        value = getString("bearerFormat", node, false, location, result);
+        value = getString("bearerFormat", node, bearerFormatRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setBearerFormat(value);
         }
 
-        ObjectNode flowsObject = getObject("flows",node,true,location,result);
+        ObjectNode flowsObject = getObject("flows", node, flowsRequired, location, result);
         if (flowsObject!= null) {
             securityScheme.setFlows(getOAuthFlows(flowsObject, location, result));
         }
 
-        value = getString("openIdConnectUrl", node, true, location, result);
+        value = getString("openIdConnectUrl", node, openIdConnectRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setOpenIdConnectUrl(value);
         }
