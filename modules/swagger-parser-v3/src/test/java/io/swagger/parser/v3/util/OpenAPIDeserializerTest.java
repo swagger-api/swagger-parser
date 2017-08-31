@@ -18,6 +18,7 @@ import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.StringSchema;
 import io.swagger.oas.models.parameters.QueryParameter;
 import io.swagger.oas.models.security.SecurityRequirement;
+import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.info.License;
@@ -420,6 +421,35 @@ public class OpenAPIDeserializerTest {
 
     }
 
+    @Test(dataProvider = "data")
+    public void readSecuritySchemesObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+        Assert.assertNotNull(securitySchemes);
+        Assert.assertEquals(securitySchemes.size(),4);
+
+        SecurityScheme securityScheme = securitySchemes.get("reference");
+        assertTrue(securityScheme.get$ref().equals("#/components/securitySchemes/api_key"));
+
+        securityScheme = securitySchemes.get("remote_reference");
+        assertTrue(securityScheme.get$ref().equals("http://localhost:${dynamicPort}/remote/security#/petstore_remote"));
+        
+        securityScheme = securitySchemes.get("petstore_auth");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
+        
+        securityScheme = securitySchemes.get("api_key");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
+
+
+    }
+    
     @Test(dataProvider = "data")
     public void readExtensions(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
