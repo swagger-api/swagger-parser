@@ -9,6 +9,7 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.Paths;
+import io.swagger.oas.models.headers.Header;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Content;
@@ -48,8 +49,151 @@ import static org.testng.Assert.assertTrue;
 public class OpenAPIDeserializerTest {
 
     @Test
+    public void testExamples(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: 3.0.0\n"+
+                        "info:\n"+
+                        "  title: httpbin\n"+
+                        "  version: 0.0.0\n"+
+                        "servers:\n"+
+                        "  - url: http://httpbin.org\n"+
+                        "paths:\n"+
+                        "  /post:\n"+
+                        "    post:\n"+
+                        "      summary: Returns the POSTed data\n"+
+                        "      requestBody:\n"+
+                        "        content:\n"+
+                        "          application/json:\n"+
+                        "            schema:\n"+
+                        "              $ref: '#/components/schemas/AnyValue'\n"+
+                        "            examples:\n"+
+                        "              AnObject:\n"+
+                        "                $ref: '#/components/examples/AnObject'\n"+
+                        "              ANull:\n"+
+                        "                $ref: '#/components/examples/ANull'\n"+
+                        "          application/yaml:\n"+
+                        "            schema:\n"+
+                        "              $ref: '#/components/schemas/AnyValue'\n"+
+                        "            examples:\n"+
+                        "              AString:\n"+
+                        "                $ref: '#/components/examples/AString'\n"+
+                        "              AnArray:\n"+
+                        "                $ref: '#/components/examples/AnArray'\n"+
+                        "          text/plain:\n"+
+                        "            schema:\n"+
+                        "              type: string\n"+
+                        "              example: Hi there\n"+
+                        "          application/x-www-form-urlencoded:\n"+
+                        "            schema:\n"+
+                        "              type: object\n"+
+                        "              properties:\n"+
+                        "                id:\n"+
+                        "                  type: integer\n"+
+                        "                name:\n"+
+                        "                  type: string\n"+
+                        "            example:\n"+
+                        "              id: 42\n"+
+                        "              name: Arthur Dent\n"+
+                        "      responses:\n"+
+                        "        '200':\n"+
+                        "          description: OK\n"+
+                        "          content:\n"+
+                        "            application/json:\n"+
+                        "              schema:\n"+
+                        "                type: object\n"+
+                        "\n"+
+                        "  #/response-headers:\n"+
+                        "  /:\n"+
+                        "    get:\n"+
+                        "      summary: Returns a response with the specified headers\n"+
+                        "      parameters:\n"+
+                        "        - in: header\n"+
+                        "          name: Server\n"+
+                        "          required: true\n"+
+                        "          schema:\n"+
+                        "            type: string\n"+
+                        "          examples:\n"+
+                        "            httpbin:\n"+
+                        "              value: httpbin\n"+
+                        "            unicorn:\n"+
+                        "              value: unicorn\n"+
+                        "        - in: header\n"+
+                        "          name: X-Request-Id\n"+
+                        "          required: true\n"+
+                        "          schema:\n"+
+                        "            type: integer\n"+
+                        "          example: 37\n"+
+                        "      responses:\n"+
+                        "        '200':\n"+
+                        "          description: A response with the specified headers\n"+
+                        "          headers:\n"+
+                        "            Server:\n"+
+                        "              schema:\n"+
+                        "                type: string\n"+
+                        "              examples:\n"+
+                        "                httpbin:\n"+
+                        "                  value: httpbin\n"+
+                        "                unicorn:\n"+
+                        "                  value: unicorn\n"+
+                        "            X-Request-Id:\n"+
+                        "              schema:\n"+
+                        "                type: integer\n"+
+                        "              example: 37\n"+
+                        "\n"+
+                        "components:\n"+
+                        "  schemas:\n"+
+                        "    AnyValue:\n"+
+                        "      nullable: true\n"+
+                        "      description: Can be anything - string, object, array, null, etc.\n"+
+                        "\n"+
+                        "  examples:\n"+
+                        "    AString:\n"+
+                        "      value: Hi there\n"+
+                        "    ANumber:\n"+
+                        "      value: 42\n"+
+                        "    ANull:\n"+
+                        "      value: null\n"+
+                        "    AnArray:\n"+
+                        "      value: [1, 2, 3]\n"+
+                        "    AnObject:\n"+
+                        "      value:\n"+
+                        "        id:  42\n"+
+                        "        name: Arthur Dent";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        OpenAPI openAPI = result.getOpenAPI();
+        MediaType mediaTypeJson = openAPI.getPaths().get("/post").getPost().getRequestBody().getContent().get("application/json");
+        Header header1 = openAPI.getPaths().get("/").getGet().getResponses().get("200").getHeaders().get("Server");
+        Header header2 = openAPI.getPaths().get("/").getGet().getResponses().get("200").getHeaders().get("X-Request-Id");
+        Parameter parameter1 = openAPI.getPaths().get("/").getGet().getParameters().get(0);
+        Parameter parameter2 = openAPI.getPaths().get("/").getGet().getParameters().get(1);
+
+
+        Assert.assertNotNull(mediaTypeJson.getExamples());
+        Assert.assertEquals(mediaTypeJson.getExamples().get("AnObject").get$ref(),"#/components/examples/AnObject");
+
+        Assert.assertNotNull(header1.getExamples());
+        Assert.assertEquals(header1.getExamples().get("httpbin").getValue(),"httpbin");
+
+        Assert.assertNotNull(header2.getExample());
+        Assert.assertEquals(header2.getExample(),"37");
+
+        Assert.assertNotNull(parameter1.getExamples());
+        Assert.assertEquals(parameter1.getExamples().get("unicorn").getValue(),"unicorn");
+
+        Assert.assertNotNull(parameter2.getExample());
+        Assert.assertEquals(parameter2.getExample(),"37");
+    }
+
+
+
+    @Test
     public void testSchemaExample(@Injectable List<AuthorizationValue> auths){
-        String yaml = "openapi: '3.0'\n" +
+        String yaml = "openapi: '3.0.0'\n" +
                 "components:\n" +
                 "  schemas:\n"+
                 "    Address:\n" +
@@ -121,7 +265,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test void testDiscriminatorObject(@Injectable List<AuthorizationValue> auths){
-        String yaml = "openapi: '3.0'\n" +
+        String yaml = "openapi: '3.0.0'\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    Pet:\n" +
@@ -194,7 +338,7 @@ public class OpenAPIDeserializerTest {
 
     @Test
     public void testAlmostEmpty(@Injectable List<AuthorizationValue> auths) {
-        String yaml = "openapi: '3.0'\n" +
+        String yaml = "openapi: '3.0.0'\n" +
                       "new: extra";
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -223,7 +367,7 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0-RC1");
+        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0");
 
 
         final Info info = openAPI.getInfo();
@@ -665,7 +809,7 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0-RC1");
+        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0");
 
         final Components component = openAPI.getComponents();
         Assert.assertNotNull(component);
