@@ -50,7 +50,7 @@ public class OpenAPIDeserializerTest {
 
     @Test
     public void testExamples(@Injectable List<AuthorizationValue> auths){
-        String yaml = "openapi: 3.0\n"+
+        String yaml = "openapi: 3.0.0\n"+
                         "info:\n"+
                         "  title: httpbin\n"+
                         "  version: 0.0.0\n"+
@@ -193,7 +193,7 @@ public class OpenAPIDeserializerTest {
 
     @Test
     public void testSchemaExample(@Injectable List<AuthorizationValue> auths){
-        String yaml = "openapi: '3.0'\n" +
+        String yaml = "openapi: '3.0.0'\n" +
                 "components:\n" +
                 "  schemas:\n"+
                 "    Address:\n" +
@@ -265,7 +265,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test void testDiscriminatorObject(@Injectable List<AuthorizationValue> auths){
-        String yaml = "openapi: '3.0'\n" +
+        String yaml = "openapi: '3.0.0'\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    Pet:\n" +
@@ -338,7 +338,7 @@ public class OpenAPIDeserializerTest {
 
     @Test
     public void testAlmostEmpty(@Injectable List<AuthorizationValue> auths) {
-        String yaml = "openapi: '3.0'\n" +
+        String yaml = "openapi: '3.0.0'\n" +
                       "new: extra";
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -367,7 +367,7 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        Assert.assertEquals(openAPI.getOpenapi(),"3.0");
+        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0");
 
 
         final Info info = openAPI.getInfo();
@@ -809,7 +809,7 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        Assert.assertEquals(openAPI.getOpenapi(),"3.0");
+        Assert.assertEquals(openAPI.getOpenapi(),"3.0.0");
 
         final Components component = openAPI.getComponents();
         Assert.assertNotNull(component);

@@ -155,7 +155,7 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0");
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
@@ -173,7 +173,7 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0");
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
@@ -189,7 +189,7 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0");
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
@@ -201,7 +201,7 @@ public class OpenAPIV3ParserTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().read(url);
         Assert.assertNotNull(openAPI);
-        Assert.assertEquals(openAPI.getOpenapi(), "3.0");
+        Assert.assertEquals(openAPI.getOpenapi(), "3.0.0");
     }
 
 
