@@ -1600,22 +1600,22 @@ public class OpenAPIDeserializer {
 
         ObjectNode objectNode = getObject("implicit", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setImplicit(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setImplicit(getOAuthFlow("implicit", objectNode, location, result));
         }
 
         objectNode = getObject("password", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setPassword(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setPassword(getOAuthFlow("password", objectNode, location, result));
         }
 
         objectNode = getObject("clientCredentials", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setClientCredentials(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setClientCredentials(getOAuthFlow("clientCredentials", objectNode, location, result));
         }
 
         objectNode = getObject("authorizationCode", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setAuthorizationCode(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setAuthorizationCode(getOAuthFlow("authorizationCode", objectNode, location, result));
         }
 
         Map <String,Object> extensions = getExtensions(node);
@@ -1634,29 +1634,47 @@ public class OpenAPIDeserializer {
         return oAuthFlows;
     }
 
-    public OAuthFlow getOAuthFlow(ObjectNode node, String location, ParseResult result) {
+    public OAuthFlow getOAuthFlow(String oAuthFlowType, ObjectNode node, String location, ParseResult result) {
         if (node == null) {
             return null;
         }
 
         OAuthFlow oAuthFlow = new OAuthFlow();
 
-        String value = getString("authorizationUrl", node, true, location, result);
+        boolean authorizationUrlRequired, tokenUrlRequired, refreshUrlRequired, scopesRequired;
+        authorizationUrlRequired = tokenUrlRequired = refreshUrlRequired = false;
+        scopesRequired = true;
+        switch (oAuthFlowType) {
+          case "implicit":
+            authorizationUrlRequired=true;
+            break;
+          case "password":
+            tokenUrlRequired=true;
+            break;
+          case "clientCredentials":
+            tokenUrlRequired=true;
+            break;
+          case "authorizationCode":
+            authorizationUrlRequired = tokenUrlRequired=true;
+            break;
+        }
+        
+        String value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setAuthorizationUrl(value);
         }
 
-        value = getString("tokenUrl", node, true, location, result);
+        value = getString("tokenUrl", node, tokenUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setTokenUrl(value);
         }
 
-        value = getString("refreshUrl", node, false, location, result);
+        value = getString("refreshUrl", node, refreshUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setRefreshUrl(value);
         }
 
-        ObjectNode scopesObject = getObject("scopes",node,true,location,result);
+        ObjectNode scopesObject = getObject("scopes",node, scopesRequired,location,result);
 
         Scopes scope = new Scopes();
         Set<String> keys = getKeys(scopesObject);
