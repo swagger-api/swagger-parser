@@ -1581,8 +1581,8 @@ public class OpenAPIDeserializer {
             securityScheme.setExtensions(extensions);
         }
 
-        Set<String> oAuthFlowKeys = getKeys(node);
-        for(String key : oAuthFlowKeys) {
+        Set<String> securitySchemeKeys = getKeys(node);
+        for(String key : securitySchemeKeys) {
             if(!SECURITY_SCHEME_KEYS.contains(key) && !key.startsWith("x-")) {
                 result.extra(location, key, node.get(key));
             }
