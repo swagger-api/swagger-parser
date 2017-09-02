@@ -82,7 +82,7 @@ public class OpenAPIDeserializer {
     protected static Set<String> MEDIATYPE_KEYS = new LinkedHashSet<>(Arrays.asList("schema", "example", "examples", "encoding"));
     protected static Set<String> XML_KEYS = new LinkedHashSet<>(Arrays.asList("name", "namespace", "prefix", "attribute", "wrapped"));
     protected static Set<String> OAUTHFLOW_KEYS = new LinkedHashSet<>(Arrays.asList("authorizationUrl", "tokenUrl", "refreshUrl", "scopes"));
-    protected static Set<String> OAUTHFLOWS_KEYS = new LinkedHashSet<>(Arrays.asList("implicit", "password", "clientCredential", "authorizationCode"));
+    protected static Set<String> OAUTHFLOWS_KEYS = new LinkedHashSet<>(Arrays.asList("implicit", "password", "clientCredentials", "authorizationCode"));
     protected static Set<String> ENCODING_KEYS = new LinkedHashSet<>(Arrays.asList("contentType", "headers", "style", "explode", "allowReserved"));
 
 
