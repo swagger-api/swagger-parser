@@ -49,6 +49,45 @@ import static org.testng.Assert.assertTrue;
 public class OpenAPIDeserializerTest {
 
     @Test
+    public void propertyTest(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: 3.0.0\n"+
+                        "paths:\n"+
+                        "  /primitiveBody/inline:\n" +
+                        "    post:\n" +
+                        "      x-swagger-router-controller: TestController\n" +
+                        "      operationId: inlineRequiredBody\n" +
+                        "      requestBody:\n" +
+                        "        content:\n" +
+                        "          application/json:\n" +
+                        "            schema:\n" +
+                        "              type: object\n" +
+                        "              properties:\n" +
+                        "                name:\n" +
+                        "                  type: string\n" +
+                        "        required: true\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: ok!";
+
+
+
+
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Map<String,Schema> properties = openAPI.getPaths().get("/primitiveBody/inline").getPost().getRequestBody().getContent().get("application/json").getSchema().getProperties();
+
+        assertTrue(properties.get("name") instanceof StringSchema);
+
+
+    }
+
+    @Test
     public void testExamples(@Injectable List<AuthorizationValue> auths){
         String yaml = "openapi: 3.0.0\n"+
                         "info:\n"+
