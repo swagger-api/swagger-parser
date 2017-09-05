@@ -19,6 +19,7 @@ import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.StringSchema;
 import io.swagger.oas.models.parameters.QueryParameter;
 import io.swagger.oas.models.security.SecurityRequirement;
+import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.info.License;
@@ -603,6 +604,74 @@ public class OpenAPIDeserializerTest {
 
     }
 
+    @Test(dataProvider = "data")
+    public void readSecuritySchemesObject(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        List<String> messages = result.getMessages();
+        assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.name is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.in is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.scheme is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.openIdConnectUrl is missing"));
+        
+        assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.tokenUrl is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth_password'.authorizationUrl is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth_clientCredentials'.authorizationUrl is missing"));
+        
+        assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.scheme is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.flows is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.openIdConnectUrl is missing"));
+        
+        assertTrue(!messages.contains("attribute components.securitySchemes'.http'.name is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.http'.in is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.http'.flows is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.http'.openIdConnectUrl is missing"));
+        
+        assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.name is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.in is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.scheme is missing"));
+        assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.flows is missing"));
+        
+        
+        
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+        Assert.assertNotNull(securitySchemes);
+        Assert.assertEquals(securitySchemes.size(),9);
+
+        SecurityScheme securityScheme = securitySchemes.get("reference");
+        assertTrue(securityScheme.get$ref().equals("#/components/securitySchemes/api_key"));
+
+        securityScheme = securitySchemes.get("remote_reference");
+        assertTrue(securityScheme.get$ref().equals("http://localhost:${dynamicPort}/remote/security#/petstore_remote"));
+        
+        securityScheme = securitySchemes.get("petstore_auth");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
+        
+        securityScheme = securitySchemes.get("petstore_auth_password");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
+        
+        securityScheme = securitySchemes.get("petstore_auth_clientCredentials");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
+        
+        securityScheme = securitySchemes.get("petstore_auth_authorizationCode");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
+        
+        securityScheme = securitySchemes.get("api_key");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
+        
+        securityScheme = securitySchemes.get("http");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.HTTP);
+
+        securityScheme = securitySchemes.get("openID");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.OPENIDCONNECT);
+    }
+    
     @Test(dataProvider = "data")
     public void readExtensions(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
