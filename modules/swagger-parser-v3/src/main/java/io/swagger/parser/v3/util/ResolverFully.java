@@ -173,38 +173,38 @@ public class ResolverFully {
                     Schema resolved = resolveSchema(innerModel);
                     Map<String, Schema> properties = resolved.getProperties();
                     if (resolved.getProperties() != null) {
-                        int count = 0;
+
                         for (String key : properties.keySet()) {
                             Schema prop = (Schema) resolved.getProperties().get(key);
-                            if (prop.getRequired() != null) {
-                                if (prop.getRequired().get(count) != null) {
-                                    requiredProperties.add(key);
-                                }
-                            }
-                            count++;
                             model.addProperties(key, resolveSchema(prop));
                         }
+                        if (resolved.getRequired() != null) {
+                            for(int i =0;i<resolved.getRequired().size();i++){
+                                if (resolved.getRequired().get(i) != null) {
+                                    requiredProperties.add(resolved.getRequired().get(i).toString());
+                                }
+                            }
+                        }
                     }
-
                 }
             }else if(composedSchema.getOneOf() != null){
                 for(Schema innerModel : composedSchema.getOneOf()) {
                     Schema resolved = resolveSchema(innerModel);
                     Map<String, Schema> properties = resolved.getProperties();
                     if (resolved.getProperties() != null) {
-                        int count = 0;
+
                         for (String key : properties.keySet()) {
                             Schema prop = (Schema) resolved.getProperties().get(key);
-                            if (prop.getRequired() != null) {
-                                if (prop.getRequired().get(count) != null) {
-                                    requiredProperties.add(key);
-                                }
-                            }
-                            count++;
                             model.addProperties(key, resolveSchema(prop));
                         }
+                        if (resolved.getRequired() != null) {
+                            for(int i =0;i<resolved.getRequired().size();i++){
+                                if (resolved.getRequired().get(i) != null) {
+                                    requiredProperties.add(resolved.getRequired().get(i).toString());
+                                }
+                            }
+                        }
                     }
-
                 }
 
             }else if(composedSchema.getAnyOf() != null){
@@ -212,16 +212,17 @@ public class ResolverFully {
                     Schema resolved = resolveSchema(innerModel);
                     Map<String, Schema> properties = resolved.getProperties();
                     if (resolved.getProperties() != null) {
-                        int count = 0;
+
                         for (String key : properties.keySet()) {
                             Schema prop = (Schema) resolved.getProperties().get(key);
-                            if (prop.getRequired() != null) {
-                                if (prop.getRequired().get(count) != null) {
-                                    requiredProperties.add(key);
+                            model.addProperties(key, resolveSchema(prop));
+                        }
+                        if (resolved.getRequired() != null) {
+                            for(int i =0;i<resolved.getRequired().size();i++){
+                                if (resolved.getRequired().get(i) != null) {
+                                    requiredProperties.add(resolved.getRequired().get(i).toString());
                                 }
                             }
-                            count++;
-                            model.addProperties(key, resolveSchema(prop));
                         }
                     }
 

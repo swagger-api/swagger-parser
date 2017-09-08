@@ -545,6 +545,7 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+        openAPI.getPaths();
         ResolverFully resolverUtil = new ResolverFully();
         resolverUtil.resolveFully(openAPI);
 
