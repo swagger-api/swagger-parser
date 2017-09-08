@@ -1,4 +1,4 @@
-openapi: 3.0.0-RC1
+openapi: 3.0.0
 servers:
   - url: 'https://api.stripe.com/'
 x-origin:

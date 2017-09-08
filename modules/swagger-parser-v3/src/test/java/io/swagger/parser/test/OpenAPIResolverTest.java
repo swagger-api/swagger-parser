@@ -267,8 +267,8 @@ public class OpenAPIResolverTest {
         //header remote schema ref
         assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User");
 
-        //TODO header examples
-        assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get(0).get$ref(), "#/components/examples/dog" );
+        //header examples
+        assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get("headerExample").get$ref(), "#/components/examples/dog" );
         //remote header ref
         assertEquals(headers.get("X-Ref-Limit-Limit").get$ref(),"#/components/headers/X-Rate-Limit-Reset" );
 
@@ -404,7 +404,7 @@ public class OpenAPIResolverTest {
     @Test
     public void testIssue85(@Injectable final List<AuthorizationValue> auths) {
         String yaml =
-                "openapi: '3.0'\n" +
+                "openapi: '3.0.0'\n" +
                         "paths: \n" +
                         "  /test/method: \n" +
                         "    post: \n" +
@@ -453,7 +453,7 @@ public class OpenAPIResolverTest {
     @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
         String yaml = "" +
-                "openapi: '3.0'\n" +
+                "openapi: '3.0.0'\n" +
                 "paths:\n" +
                 "  /selfRefA:\n" +
                 "    get:\n" +
