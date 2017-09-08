@@ -40,7 +40,7 @@ public class SchemaTypeUtil {
     public static final String EMAIL_FORMAT = "email";
     public static final String UUID_FORMAT = "uuid";
 
-    public static Schema createSchemaByType(ObjectNode node) {
+    public static Schema createSchemaByType(ObjectNode node){
         if(node == null) {
             return new Schema();
         }
@@ -49,6 +49,12 @@ public class SchemaTypeUtil {
             return new Schema();
         }
         final String format = getNodeValue(node, FORMAT);
+
+        return createSchema(type, format);
+    }
+
+    public static Schema createSchema(String type, String format) {
+
         if(INTEGER_TYPE.equals(type)) {
             if(INTEGER64_FORMAT.equals(format)) {
                 return new IntegerSchema().format(INTEGER64_FORMAT);
