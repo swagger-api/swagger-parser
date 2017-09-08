@@ -1790,28 +1790,28 @@ public class OpenAPIDeserializer {
                 if(n.isObject()) {
                     schema = getSchema((ObjectNode) n,location,result);
                     allOfList.addAllOfItem(schema);
-                    schema = allOfList;
                 }
             }
+            schema = allOfList;
         } else if(anyOfArray != null) {
             ComposedSchema anyOfList = new ComposedSchema();
             for(JsonNode n : anyOfArray) {
                 if(n.isObject()) {
                     schema = getSchema((ObjectNode) n,location,result);
                     anyOfList.addAnyOfItem(schema);
-                    schema = anyOfList;
+
                 }
             }
+            schema = anyOfList;
         } else if(oneOfArray != null) {
-
+            ComposedSchema oneOfList = new ComposedSchema();
             for(JsonNode n : oneOfArray) {
                 if(n.isObject()) {
-                    ComposedSchema oneOfList = new ComposedSchema();
-                    schema = getSchema((ObjectNode) n,location,result);
+                    schema = getSchema((ObjectNode) n, location, result);
                     oneOfList.addOneOfItem(schema);
-                    schema = oneOfList;
                 }
             }
+            schema = oneOfList;
         } else if(itemsNode != null) {
             ArraySchema items = new ArraySchema();
             for(JsonNode n : itemsNode) {
