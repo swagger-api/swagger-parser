@@ -14,6 +14,7 @@ import io.swagger.oas.models.links.Link;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.MediaType;
+import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
@@ -531,6 +532,25 @@ public class OpenAPIResolverTest {
         assertTrue(schema instanceof ArraySchema);
         ArraySchema arraySchema = (ArraySchema) schema;
         assertEquals(arraySchema.getItems(), openAPI.getComponents().getSchemas().get("SchemaA"));
+
+    }
+
+    @Test
+    public void resolveComposedReferenceSchema(@Injectable final List<AuthorizationValue> auths){
+
+
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+
+        assertTrue(openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ArraySchema);
+        ArraySchema arraySchema = (ArraySchema) openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertTrue(arraySchema.getItems() instanceof ObjectSchema);
 
     }
 

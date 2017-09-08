@@ -7,6 +7,7 @@ import io.swagger.oas.models.callbacks.Callback;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.MediaType;
+import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.responses.ApiResponse;
@@ -30,7 +31,6 @@ public class ResolverFully {
 
 
     public void resolveFully(OpenAPI openAPI) {
-
         if (openAPI.getComponents().getSchemas() != null) {
             schemas = openAPI.getComponents().getSchemas();
             if (schemas == null) {
@@ -138,48 +138,35 @@ public class ResolverFully {
             this.resolvedModels.put(ref, model);
             return model;
         }
+
         if(schema instanceof ArraySchema) {
             ArraySchema arrayModel = (ArraySchema) schema;
-            Schema items = arrayModel.getItems();
-            if(items.get$ref() != null) {
-                Schema resolved = resolveSchema(items);
-                arrayModel.setItems(resolved);
+            if(arrayModel.getItems().get$ref() != null) {
+                arrayModel.setItems(resolveSchema(arrayModel.getItems()));
             }
             return arrayModel;
         }
-
-        if (schema.getProperties() != null) {
-            Schema model = schema;
-            Map<String, Schema> updated = new LinkedHashMap<>();
-            Map<String, Schema> properties = model.getProperties();
-            for (String propertyName : properties.keySet()) {
-                Schema property = (Schema) model.getProperties().get(propertyName);
-                Schema resolved = resolveSchema(property);
-                updated.put(propertyName, resolved);
-            }
-
-            for (String key : updated.keySet()) {
-                Schema property = updated.get(key);
-
-                if (property.getProperties() != model.getProperties()) {
-                    if(property.getType() == null) {
-                        property.setType("object");
+        if (schema instanceof ObjectSchema) {
+            ObjectSchema obj = (ObjectSchema) schema;
+            if(obj.getProperties() != null) {
+                Map<String, Schema> updated = new LinkedHashMap<>();
+                for(String propertyName : obj.getProperties().keySet()) {
+                    Schema innerProperty = obj.getProperties().get(propertyName);
+                    // reference check
+                    if(schema != innerProperty) {
+                        Schema resolved = resolveSchema(innerProperty);
+                        updated.put(propertyName, resolved);
                     }
-                    model.addProperties(key, property);
-                } else {
-                    LOGGER.debug("not adding recursive properties, using generic object");
-                    Schema newSchema = new Schema();
-                    newSchema.setType("object");
-                    model.addProperties(key, newSchema);
                 }
-
+                obj.setProperties(updated);
             }
-            return model;
+            return obj;
         }
+
 
         if(schema instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schema;
-            Schema model = new Schema();
+            Schema model = SchemaTypeUtil.createSchema(composedSchema.getType(),composedSchema.getFormat());
             Set<String> requiredProperties = new HashSet<>();
             if(composedSchema.getAllOf() != null){
                 for(Schema innerModel : composedSchema.getAllOf()) {
@@ -251,7 +238,40 @@ public class ResolverFully {
             }
             return model;
         }
-        LOGGER.error("no type match for " + schema);
+
+        if (schema.getProperties() != null) {
+            Schema model = schema;
+            Map<String, Schema> updated = new LinkedHashMap<>();
+            Map<String, Schema> properties = model.getProperties();
+            for (String propertyName : properties.keySet()) {
+                Schema property = (Schema) model.getProperties().get(propertyName);
+                Schema resolved = resolveSchema(property);
+                updated.put(propertyName, resolved);
+            }
+
+            for (String key : updated.keySet()) {
+                Schema property = updated.get(key);
+
+                if(property instanceof ObjectSchema) {
+                    ObjectSchema op = (ObjectSchema) property;
+                    if (op.getProperties() != model.getProperties()) {
+                        if (property.getType() == null) {
+                            property.setType("object");
+                        }
+                        model.addProperties(key, property);
+                    } else {
+                        LOGGER.debug("not adding recursive properties, using generic object");
+                        ObjectSchema newSchema = new ObjectSchema();
+                        model.addProperties(key, newSchema);
+                    }
+                }
+
+            }
+            return model;
+        }
+
+
+        //LOGGER.error("no type match for " + schema);
         return schema;
     }
 }
