@@ -50,6 +50,157 @@ import static org.testng.Assert.assertTrue;
 public class OpenAPIDeserializerTest {
 
     @Test
+    public void testAllOfSchema(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: '3.0'\n" +
+            "components:\n" +
+            "  schemas:\n" +
+            "    Pet:\n" +
+            "      type: object\n" +
+            "      required:\n" +
+            "      - pet_type\n" +
+            "      properties:\n" +
+            "        pet_type:\n" +
+            "          type: string\n" +
+            "    Cat:\n" +
+            "      allOf:\n" +
+            "      - $ref: '#/components/schemas/Pet'\n" +
+            "      - type: object\n" +
+            "        # all other properties specific to a `Cat`\n" +
+            "        properties:\n" +
+            "          name:\n" +
+            "            type: string\n";
+  
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+  
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+  
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+  
+        Schema catSchema = result.getOpenAPI().getComponents().getSchemas().get("Cat");
+        assertTrue(catSchema != null);
+        assertTrue(catSchema instanceof ComposedSchema);
+        
+        ComposedSchema catCompSchema = (ComposedSchema) catSchema;
+        List<Schema> allOfSchemas = catCompSchema.getAllOf();
+        assertTrue(allOfSchemas != null);
+        assertEquals(allOfSchemas.size(), 2);
+        
+        Schema refPetSchema = allOfSchemas.get(0);
+        assertTrue(refPetSchema != null);
+        assertEquals(refPetSchema.get$ref(), "#/components/schemas/Pet");
+  
+        Schema otherSchema = allOfSchemas.get(1);
+        assertTrue(otherSchema != null);
+        assertTrue(otherSchema.getProperties() != null);
+        Schema nameProp = (Schema) otherSchema.getProperties().get("name");
+        assertTrue(nameProp != null);
+        assertEquals(nameProp.getType(), "string");
+        
+    }  
+  
+    @Test
+    public void testOneOfSchema(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: '3.0'\n" +
+            "components:\n" +
+            "  schemas:\n" +
+            "    Cat:\n" +
+            "      type: object\n" +
+            "      # all properties specific to a `Cat`\n" +
+            "      properties:\n" +
+            "        purring:\n" +
+            "          type: string\n" +
+            "    Dog:\n" +
+            "      type: object\n" +
+            "      # all properties specific to a `Dog`\n" +
+            "      properties:\n" +
+            "        bark:\n" +
+            "          type: string\n" +
+            "    Pet:\n" +
+            "      oneOf: \n" +
+            "       - $ref: '#/components/schemas/Cat'\n" +      
+            "       - $ref: '#/components/schemas/Dog'\n" +
+            "       - type: object\n" +
+            "         # neither a `Cat` nor a `Dog`\n" +
+            "         properties:\n" +
+            "           name:\n" +
+            "             type: string\n" ;
+  
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+  
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+  
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+  
+        Schema petSchema = result.getOpenAPI().getComponents().getSchemas().get("Pet");
+        assertTrue(petSchema != null);
+        assertTrue(petSchema instanceof ComposedSchema);
+        
+        ComposedSchema petCompSchema = (ComposedSchema) petSchema;
+        List<Schema> oneOfSchemas = petCompSchema.getOneOf();
+        assertTrue(oneOfSchemas != null);
+        assertEquals(oneOfSchemas.size(), 3);
+        
+        Schema refCatSchema = oneOfSchemas.get(0);
+        assertTrue(refCatSchema != null);
+        assertEquals(refCatSchema.get$ref(), "#/components/schemas/Cat");
+  
+        Schema refDogSchema = oneOfSchemas.get(1);
+        assertTrue(refDogSchema != null);
+        assertEquals(refDogSchema.get$ref(), "#/components/schemas/Dog");
+        
+        Schema otherSchema = oneOfSchemas.get(2);
+        assertTrue(otherSchema != null);
+        Schema nameProp = (Schema) otherSchema.getProperties().get("name");
+        assertTrue(nameProp != null);
+        assertEquals(nameProp.getType(), "string");
+        
+    }  
+
+    @Test
+    public void testAnyOfSchema(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: '3.0'\n" +
+            "components:\n" +
+            "  schemas:\n" +
+            "    id:\n" +
+            "      anyOf: \n" +
+            "       - type: string\n" +      
+            "       - type: number\n" ;
+  
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+  
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+  
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+  
+        Schema idSchema = result.getOpenAPI().getComponents().getSchemas().get("id");
+        assertTrue(idSchema != null);
+        assertTrue(idSchema instanceof ComposedSchema);
+        
+        ComposedSchema idCompSchema = (ComposedSchema) idSchema;
+        List<Schema> anyOfSchemas = idCompSchema.getAnyOf();
+        assertTrue(anyOfSchemas != null);
+        assertEquals(anyOfSchemas.size(), 2);
+        
+        Schema stringSchema = anyOfSchemas.get(0);
+        assertTrue(stringSchema != null);
+        assertEquals(stringSchema.getType(), "string");
+  
+        Schema numberSchema = anyOfSchemas.get(1);
+        assertTrue(numberSchema != null);
+        assertEquals(numberSchema.getType(), "number");
+        
+    }  
+    
+    @Test
     public void propertyTest(@Injectable List<AuthorizationValue> auths){
         String yaml = "openapi: 3.0.0\n"+
                         "paths:\n"+
@@ -228,7 +379,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(parameter2.getExample());
         Assert.assertEquals(parameter2.getExample(),"37");
     }
-
 
 
     @Test
