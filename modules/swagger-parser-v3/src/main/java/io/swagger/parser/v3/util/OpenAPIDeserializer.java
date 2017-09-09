@@ -82,7 +82,7 @@ public class OpenAPIDeserializer {
     protected static Set<String> MEDIATYPE_KEYS = new LinkedHashSet<>(Arrays.asList("schema", "example", "examples", "encoding"));
     protected static Set<String> XML_KEYS = new LinkedHashSet<>(Arrays.asList("name", "namespace", "prefix", "attribute", "wrapped"));
     protected static Set<String> OAUTHFLOW_KEYS = new LinkedHashSet<>(Arrays.asList("authorizationUrl", "tokenUrl", "refreshUrl", "scopes"));
-    protected static Set<String> OAUTHFLOWS_KEYS = new LinkedHashSet<>(Arrays.asList("implicit", "password", "clientCredential", "authorizationCode"));
+    protected static Set<String> OAUTHFLOWS_KEYS = new LinkedHashSet<>(Arrays.asList("implicit", "password", "clientCredentials", "authorizationCode"));
     protected static Set<String> ENCODING_KEYS = new LinkedHashSet<>(Arrays.asList("contentType", "headers", "style", "explode", "allowReserved"));
 
 
@@ -1516,31 +1516,38 @@ public class OpenAPIDeserializer {
             }
         }
 
+        boolean descriptionRequired, bearerFormatRequired, nameRequired, inRequired, schemeRequired, flowsRequired, openIdConnectRequired;
+        descriptionRequired = bearerFormatRequired = nameRequired = inRequired = schemeRequired = flowsRequired = openIdConnectRequired = false;
+        
         String value = getString("type", node, true, location, result);
         if (StringUtils.isNotBlank(value)) {
             if (SecurityScheme.Type.APIKEY.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.APIKEY);
+                nameRequired = inRequired = true;
             } else if (SecurityScheme.Type.HTTP.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.HTTP);
+                schemeRequired = true;
             } else if (SecurityScheme.Type.OAUTH2.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.OAUTH2);
+                flowsRequired = true;
             } else if (SecurityScheme.Type.OPENIDCONNECT.toString().equals(value)) {
                 securityScheme.setType(SecurityScheme.Type.OPENIDCONNECT);
+                openIdConnectRequired = true;
             }else{
                 result.invalidType(location + ".type", "type", "http|apiKey|oauth2|openIdConnect ", node);
             }
         }
-        value = getString("description", node, false, location, result);
+        value = getString("description", node, descriptionRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setDescription(value);
         }
 
-        value = getString("name", node, true, location, result);
+        value = getString("name", node, nameRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setName(value);
         }
 
-        value = getString("in", node, true, location, result);
+        value = getString("in", node, inRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             if (QUERY_PARAMETER.equals(value)) {
                 securityScheme.setIn(SecurityScheme.In.QUERY);
@@ -1549,22 +1556,22 @@ public class OpenAPIDeserializer {
             }
         }
 
-        value = getString("scheme", node, true, location, result);
+        value = getString("scheme", node, schemeRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setScheme(value);
         }
 
-        value = getString("bearerFormat", node, false, location, result);
+        value = getString("bearerFormat", node, bearerFormatRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setBearerFormat(value);
         }
 
-        ObjectNode flowsObject = getObject("flows",node,true,location,result);
+        ObjectNode flowsObject = getObject("flows", node, flowsRequired, location, result);
         if (flowsObject!= null) {
             securityScheme.setFlows(getOAuthFlows(flowsObject, location, result));
         }
 
-        value = getString("openIdConnectUrl", node, true, location, result);
+        value = getString("openIdConnectUrl", node, openIdConnectRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             securityScheme.setOpenIdConnectUrl(value);
         }
@@ -1574,8 +1581,8 @@ public class OpenAPIDeserializer {
             securityScheme.setExtensions(extensions);
         }
 
-        Set<String> oAuthFlowKeys = getKeys(node);
-        for(String key : oAuthFlowKeys) {
+        Set<String> securitySchemeKeys = getKeys(node);
+        for(String key : securitySchemeKeys) {
             if(!SECURITY_SCHEME_KEYS.contains(key) && !key.startsWith("x-")) {
                 result.extra(location, key, node.get(key));
             }
@@ -1593,22 +1600,22 @@ public class OpenAPIDeserializer {
 
         ObjectNode objectNode = getObject("implicit", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setImplicit(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setImplicit(getOAuthFlow("implicit", objectNode, location, result));
         }
 
         objectNode = getObject("password", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setPassword(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setPassword(getOAuthFlow("password", objectNode, location, result));
         }
 
         objectNode = getObject("clientCredentials", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setClientCredentials(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setClientCredentials(getOAuthFlow("clientCredentials", objectNode, location, result));
         }
 
         objectNode = getObject("authorizationCode", node, false, location, result);
         if(objectNode!= null) {
-            oAuthFlows.setAuthorizationCode(getOAuthFlow(objectNode, location, result));
+            oAuthFlows.setAuthorizationCode(getOAuthFlow("authorizationCode", objectNode, location, result));
         }
 
         Map <String,Object> extensions = getExtensions(node);
@@ -1627,29 +1634,47 @@ public class OpenAPIDeserializer {
         return oAuthFlows;
     }
 
-    public OAuthFlow getOAuthFlow(ObjectNode node, String location, ParseResult result) {
+    public OAuthFlow getOAuthFlow(String oAuthFlowType, ObjectNode node, String location, ParseResult result) {
         if (node == null) {
             return null;
         }
 
         OAuthFlow oAuthFlow = new OAuthFlow();
 
-        String value = getString("authorizationUrl", node, true, location, result);
+        boolean authorizationUrlRequired, tokenUrlRequired, refreshUrlRequired, scopesRequired;
+        authorizationUrlRequired = tokenUrlRequired = refreshUrlRequired = false;
+        scopesRequired = true;
+        switch (oAuthFlowType) {
+          case "implicit":
+            authorizationUrlRequired=true;
+            break;
+          case "password":
+            tokenUrlRequired=true;
+            break;
+          case "clientCredentials":
+            tokenUrlRequired=true;
+            break;
+          case "authorizationCode":
+            authorizationUrlRequired = tokenUrlRequired=true;
+            break;
+        }
+        
+        String value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setAuthorizationUrl(value);
         }
 
-        value = getString("tokenUrl", node, true, location, result);
+        value = getString("tokenUrl", node, tokenUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setTokenUrl(value);
         }
 
-        value = getString("refreshUrl", node, false, location, result);
+        value = getString("refreshUrl", node, refreshUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setRefreshUrl(value);
         }
 
-        ObjectNode scopesObject = getObject("scopes",node,true,location,result);
+        ObjectNode scopesObject = getObject("scopes",node, scopesRequired,location,result);
 
         Scopes scope = new Scopes();
         Set<String> keys = getKeys(scopesObject);
