@@ -200,7 +200,7 @@ public class OpenAPIV3ParserTest {
         String url = "http://localhost:${dynamicPort}/remote/spec";
         url = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
-        OpenAPI openAPI = new OpenAPIV3Parser().read(url);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(url, null, null).getOpenAPI();
         Assert.assertNotNull(openAPI);
         Assert.assertEquals(openAPI.getOpenapi(), "3.0.0-RC1");
     }
