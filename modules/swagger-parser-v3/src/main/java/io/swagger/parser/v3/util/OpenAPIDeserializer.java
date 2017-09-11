@@ -1797,9 +1797,8 @@ public class OpenAPIDeserializer {
             ComposedSchema anyOfList = new ComposedSchema();
             for(JsonNode n : anyOfArray) {
                 if(n.isObject()) {
-                    schema = getSchema((ObjectNode) n,location,result);
+                    schema = getSchema((ObjectNode) n, location, result);
                     anyOfList.addAnyOfItem(schema);
-
                 }
             }
             schema = anyOfList;
@@ -1816,7 +1815,7 @@ public class OpenAPIDeserializer {
             ArraySchema items = new ArraySchema();
             for(JsonNode n : itemsNode) {
                 if(n.isValueNode()) {
-                    items.setItems(getSchema(itemsNode, location,result));
+                    items.setItems(getSchema(itemsNode, location, result));
                 }
             }
             schema = items;
