@@ -14,6 +14,7 @@ import io.swagger.oas.models.links.Link;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.MediaType;
+import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
@@ -267,8 +268,8 @@ public class OpenAPIResolverTest {
         //header remote schema ref
         assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User");
 
-        //TODO header examples
-        assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get(0).get$ref(), "#/components/examples/dog" );
+        //header examples
+        assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get("headerExample").get$ref(), "#/components/examples/dog" );
         //remote header ref
         assertEquals(headers.get("X-Ref-Limit-Limit").get$ref(),"#/components/headers/X-Rate-Limit-Reset" );
 
@@ -404,7 +405,7 @@ public class OpenAPIResolverTest {
     @Test
     public void testIssue85(@Injectable final List<AuthorizationValue> auths) {
         String yaml =
-                "openapi: '3.0'\n" +
+                "openapi: '3.0.0'\n" +
                         "paths: \n" +
                         "  /test/method: \n" +
                         "    post: \n" +
@@ -453,7 +454,7 @@ public class OpenAPIResolverTest {
     @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
         String yaml = "" +
-                "openapi: '3.0'\n" +
+                "openapi: '3.0.0'\n" +
                 "paths:\n" +
                 "  /selfRefA:\n" +
                 "    get:\n" +
@@ -531,6 +532,26 @@ public class OpenAPIResolverTest {
         assertTrue(schema instanceof ArraySchema);
         ArraySchema arraySchema = (ArraySchema) schema;
         assertEquals(arraySchema.getItems(), openAPI.getComponents().getSchemas().get("SchemaA"));
+
+    }
+
+    @Test
+    public void resolveComposedReferenceSchema(@Injectable final List<AuthorizationValue> auths){
+
+
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+        openAPI.getPaths();
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+
+        assertTrue(openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ArraySchema);
+        ArraySchema arraySchema = (ArraySchema) openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertTrue(arraySchema.getItems() instanceof ObjectSchema);
 
     }
 

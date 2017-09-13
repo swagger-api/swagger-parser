@@ -1,5 +1,5 @@
 ---
-openapi: 3.0.0-RC1
+openapi: 3.0.0
 servers:
 - url: http://petstore.swagger.io/v2
 - url: https://development.gigantic-server.com/v1
@@ -1086,10 +1086,41 @@ components:
           scopes:
             write:pets: modify pets in your account
             read:pets: read your pets
+    petstore_auth_password:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: http://petstore.swagger.io/oauth/dialog
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    petstore_auth_clientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: http://petstore.swagger.io/oauth/dialog
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    petstore_auth_authorizationCode:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: http://petstore.swagger.io/oauth/dialog
+          tokenUrl: http://petstore.swagger.io/oauth/dialog
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
     api_key:
       type: apiKey
       name: api_key
       in: header
+    http:
+      type: http
+      scheme: Basic
+    openID:
+      type: openIdConnect
+      openIdConnectUrl : http://openIdConnect.example.com
   headers:
     X-Ref-Limit-Limit:
       "$ref": "#/components/headers/X-Rate-Limit-Reset"
@@ -1110,7 +1141,8 @@ components:
           schema:
             $ref: '#/components/schemas/ExtendedErrorModel'
       examples:
-      - $ref: "#/components/examples/dog"
+        headerExample:
+            $ref: "#/components/examples/dog"
   links:
     referenced:
       "$ref": "#/components/links/unsubscribe"

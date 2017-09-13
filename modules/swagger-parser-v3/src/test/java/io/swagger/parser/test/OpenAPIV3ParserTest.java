@@ -155,13 +155,12 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
     @Test
     public void testResolveFully(@Injectable final List<AuthorizationValue> auths) throws Exception{
-
 
 
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
@@ -174,7 +173,7 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
@@ -190,7 +189,7 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-RC1");
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
@@ -202,7 +201,7 @@ public class OpenAPIV3ParserTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().read(url);
         Assert.assertNotNull(openAPI);
-        Assert.assertEquals(openAPI.getOpenapi(), "3.0.0-RC1");
+        Assert.assertEquals(openAPI.getOpenapi(), "3.0.0");
     }
 
 
