@@ -1,9 +1,6 @@
 sudo: false
 language: java
-install: /bin/true
-script:
- - mvn -f modules/swagger-parser-v2-converter validate -D copy-dependencies
- - mvn verify
+script: mvn verify
 jdk:
   - oraclejdk8
 after_success:
