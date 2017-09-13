@@ -1,12 +1,12 @@
 package io.swagger.parser.v2;
 
-import io.swagger.models.*;
-import io.swagger.models.parameters.AbstractSerializableParameter;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.RefParameter;
-import io.swagger.models.parameters.SerializableParameter;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.RefProperty;
+import v2.io.swagger.models.*;
+import v2.io.swagger.models.parameters.AbstractSerializableParameter;
+import v2.io.swagger.models.parameters.BodyParameter;
+import v2.io.swagger.models.parameters.RefParameter;
+import v2.io.swagger.models.parameters.SerializableParameter;
+import v2.io.swagger.models.properties.Property;
+import v2.io.swagger.models.properties.RefProperty;
 import io.swagger.oas.models.*;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.info.Contact;
@@ -19,13 +19,13 @@ import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.oas.models.servers.Server;
 import io.swagger.oas.models.tags.Tag;
-import io.swagger.parser.SwaggerResolver;
+import v2.io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
-import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
+import v2.io.swagger.parser.util.SwaggerDeserializationResult;
+import v2.io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -43,14 +43,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
             resolve = options.isResolve();
         }
 
-        SwaggerDeserializationResult result = new io.swagger.parser.SwaggerParser().readWithInfo(url, convert(auths), resolve);
+        SwaggerDeserializationResult result = new v2.io.swagger.parser.SwaggerParser().readWithInfo(url, convert(auths), resolve);
 
         return convert(result);
     }
 
     @Override
     public SwaggerParseResult readContents(String swaggerAsString, List<io.swagger.parser.models.AuthorizationValue> auth, ParseOptions options) {
-        SwaggerDeserializationResult result = new io.swagger.parser.SwaggerParser().readWithInfo(swaggerAsString);
+        SwaggerDeserializationResult result = new v2.io.swagger.parser.SwaggerParser().readWithInfo(swaggerAsString);
 
         if(options != null) {
             if(options.isResolve()) {
@@ -61,11 +61,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return convert(result);
     }
 
-    public List<io.swagger.models.auth.AuthorizationValue> convert(List<AuthorizationValue> auths) {
-        List<io.swagger.models.auth.AuthorizationValue> convertedAuth = new ArrayList<>();
+    public List<v2.io.swagger.models.auth.AuthorizationValue> convert(List<AuthorizationValue> auths) {
+        List<v2.io.swagger.models.auth.AuthorizationValue> convertedAuth = new ArrayList<>();
         if(auths != null) {
             for (AuthorizationValue auth : auths) {
-                io.swagger.models.auth.AuthorizationValue v = new io.swagger.models.auth.AuthorizationValue();
+                v2.io.swagger.models.auth.AuthorizationValue v = new v2.io.swagger.models.auth.AuthorizationValue();
                 v.setType(auth.getType());
                 v.setValue(auth.getValue());
                 v.setKeyName(auth.getKeyName());
@@ -136,7 +136,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
         Paths v3Paths = new Paths();
         for(String pathname : swagger.getPaths().keySet()) {
-            io.swagger.models.Path v2Path = swagger.getPath(pathname);
+            v2.io.swagger.models.Path v2Path = swagger.getPath(pathname);
             PathItem v3Path = convert(v2Path);
             v3Paths.put(pathname, v3Path);
         }
@@ -144,7 +144,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         Components components = new Components();
         if(swagger.getParameters() != null) {
             for(String name : swagger.getParameters().keySet()) {
-                io.swagger.models.parameters.Parameter param = swagger.getParameters().get(name);
+                v2.io.swagger.models.parameters.Parameter param = swagger.getParameters().get(name);
                 components.addParameters(name, convert(param));
             }
         }
@@ -163,10 +163,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return output;
     }
 
-    private List<Tag> convertTags(List<io.swagger.models.Tag> v2tags) {
+    private List<Tag> convertTags(List<v2.io.swagger.models.Tag> v2tags) {
         List<Tag> v3tags = new ArrayList<>();
 
-        for (io.swagger.models.Tag v2tag : v2tags) {
+        for (v2.io.swagger.models.Tag v2tag : v2tags) {
             Tag v3tag = new Tag();
 
             v3tag.setDescription(v2tag.getDescription());
@@ -227,7 +227,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return servers;
     }
 
-    public Info convert(io.swagger.models.Info v2Info) {
+    public Info convert(v2.io.swagger.models.Info v2Info) {
         Info info = new Info();
 
         info.setContact(convert(v2Info.getContact()));
@@ -244,7 +244,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return info;
     }
 
-    private License convert(io.swagger.models.License v2License) {
+    private License convert(v2.io.swagger.models.License v2License) {
         if(v2License == null) {
             return null;
         }
@@ -260,7 +260,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return license;
     }
 
-    public Contact convert(io.swagger.models.Contact v2Contact) {
+    public Contact convert(v2.io.swagger.models.Contact v2Contact) {
         if(v2Contact == null) {
             return null;
         }
@@ -278,12 +278,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
         PathItem v3Path = new PathItem();
 
         if(v2Path.getParameters() != null) {
-            for(io.swagger.models.parameters.Parameter param : v2Path.getParameters()) {
+            for(v2.io.swagger.models.parameters.Parameter param : v2Path.getParameters()) {
                 v3Path.addParametersItem(convert(param));
             }
         }
 
-        io.swagger.models.Operation v2Operation;
+        v2.io.swagger.models.Operation v2Operation;
 
         v2Operation = v2Path.getGet();
         if(v2Operation != null) {
@@ -312,7 +312,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return v3Path;
     }
 
-    public Operation convert(io.swagger.models.Operation v2Operation) {
+    public Operation convert(v2.io.swagger.models.Operation v2Operation) {
         Operation operation = new Operation();
         if(StringUtils.isNotBlank(v2Operation.getDescription())) {
             operation.setDescription(v2Operation.getDescription());
@@ -326,8 +326,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
         operation.setTags(v2Operation.getTags());
 
         if(v2Operation.getParameters() != null) {
-            List<io.swagger.models.parameters.Parameter> formParams = new ArrayList<>();
-            for(io.swagger.models.parameters.Parameter param : v2Operation.getParameters()) {
+            List<v2.io.swagger.models.parameters.Parameter> formParams = new ArrayList<>();
+            for(v2.io.swagger.models.parameters.Parameter param : v2Operation.getParameters()) {
 
                 if("formData".equals(param.getIn())) {
                     formParams.add(param);
@@ -373,7 +373,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 Schema formSchema = new Schema();
 
-                for(io.swagger.models.parameters.Parameter param : formParams) {
+                for(v2.io.swagger.models.parameters.Parameter param : formParams) {
                     SerializableParameter sp = (SerializableParameter) param;
 
                     Schema schema = null;
@@ -424,7 +424,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
 
             for(String responseCode : v2Operation.getResponses().keySet()) {
-                io.swagger.models.Response v2Response = v2Operation.getResponses().get(responseCode);
+                v2.io.swagger.models.Response v2Response = v2Operation.getResponses().get(responseCode);
                 ApiResponse response = convert(v2Response, mediaTypes);
                 ApiResponses responses = operation.getResponses();
                 if(responses == null) {
@@ -438,7 +438,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return operation;
     }
 
-    public ApiResponse convert(io.swagger.models.Response v2Response, List<String> mediaTypes) {
+    public ApiResponse convert(v2.io.swagger.models.Response v2Response, List<String> mediaTypes) {
         ApiResponse response = new ApiResponse();
         Content content = new Content();
 
@@ -458,7 +458,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return Json.mapper().convertValue(schema, Schema.class);
     }
 
-    public Parameter convert(io.swagger.models.parameters.Parameter v2Parameter) {
+    public Parameter convert(v2.io.swagger.models.parameters.Parameter v2Parameter) {
         Parameter v3Parameter = new Parameter();
 
         if(StringUtils.isNotBlank(v2Parameter.getDescription())) {
@@ -541,7 +541,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return v3Parameter;
     }
 
-    public Schema convert(io.swagger.models.Model v2Model) {
+    public Schema convert(v2.io.swagger.models.Model v2Model) {
         return Json.mapper().convertValue(v2Model, Schema.class);
     }
 }
