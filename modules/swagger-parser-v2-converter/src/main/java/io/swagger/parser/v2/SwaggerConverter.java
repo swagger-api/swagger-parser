@@ -149,11 +149,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
 
-        for(String key : swagger.getDefinitions().keySet()) {
-            Model model = swagger.getDefinitions().get(key);
-            Schema schema = Json.mapper().convertValue(model, Schema.class);
+        if (swagger.getDefinitions() != null) {
+            for (String key : swagger.getDefinitions().keySet()) {
+                Model model = swagger.getDefinitions().get(key);
+                Schema schema = Json.mapper().convertValue(model, Schema.class);
 
-            components.addSchemas(key, schema);
+                components.addSchemas(key, schema);
+            }
         }
 
         openAPI.setComponents(components);
