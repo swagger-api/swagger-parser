@@ -92,6 +92,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         Swagger swagger = parse.getSwagger();
 
+
+        if (swagger.getExternalDocs() != null) {
+            openAPI.setExternalDocs(convert(swagger.getExternalDocs()));
+        }
+
         openAPI.setInfo(convert(swagger.getInfo()));
 
         openAPI.setServers(convert(swagger.getSchemes(), swagger.getHost(), swagger.getBasePath()));
