@@ -193,7 +193,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         externalDocumentation.setUrl(externalDocs.getUrl());
         externalDocumentation.setDescription(externalDocs.getDescription());
-        externalDocumentation.setExtensions(externalDocs.getVendorExtensions());
+        if (externalDocs.getVendorExtensions() != null && externalDocs.getVendorExtensions().size() > 0) {
+            externalDocumentation.setExtensions(externalDocs.getVendorExtensions());
+        }
 
         return externalDocumentation;
     }
