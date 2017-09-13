@@ -213,7 +213,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (!StringUtils.startsWith(baseUrl, "/") && !schemes.isEmpty()) {
             for (Scheme scheme : schemes) {
                 Server server = new Server();
-                server.setUrl(scheme.toValue() + baseUrl);
+                server.setUrl(scheme.toValue() + "://" + baseUrl);
 
                 servers.add(server);
             }
