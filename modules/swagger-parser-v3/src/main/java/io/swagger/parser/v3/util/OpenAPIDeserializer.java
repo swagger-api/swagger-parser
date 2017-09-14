@@ -2505,6 +2505,10 @@ public class OpenAPIDeserializer {
         public void invalid() {
             this.valid = false;
         }
+        
+        public boolean isValid() {
+          return this.valid;
+        }
 
         public List<String> getMessages() {
             List<String> messages = new ArrayList<String>();
