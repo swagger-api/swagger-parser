@@ -556,9 +556,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
         else if(v2Parameter instanceof SerializableParameter) {
             SerializableParameter sp = (SerializableParameter) v2Parameter;
 
-            if(sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
-                schema.setExtensions(sp.getVendorExtensions());
-            }
             if(sp.getEnum() != null) {
                 for(String e : sp.getEnum()) {
                     // TODO: use the proper method for enum items on schema
@@ -603,6 +600,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
                 }
                 schema.setPattern(sp.getPattern());
+            }
+
+            if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
+                schema.setExtensions(sp.getVendorExtensions());
             }
 
             if(sp instanceof AbstractSerializableParameter) {
