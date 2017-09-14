@@ -6,10 +6,7 @@ import v2.io.swagger.models.parameters.AbstractSerializableParameter;
 import v2.io.swagger.models.parameters.BodyParameter;
 import v2.io.swagger.models.parameters.RefParameter;
 import v2.io.swagger.models.parameters.SerializableParameter;
-import v2.io.swagger.models.properties.ArrayProperty;
-import v2.io.swagger.models.properties.ObjectProperty;
-import v2.io.swagger.models.properties.Property;
-import v2.io.swagger.models.properties.RefProperty;
+import v2.io.swagger.models.properties.*;
 import io.swagger.oas.models.*;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.info.Contact;
@@ -562,6 +559,18 @@ public class SwaggerConverter implements SwaggerParserExtension {
     private Schema convert(Property schema) {
         Schema result;
 
+
+        if(schema instanceof RefProperty) {
+            RefProperty ref = (RefProperty) schema;
+            if(ref.get$ref().indexOf("#/definitions") == 0) {
+                String updatedRef = "#/components/schemas" + ref.get$ref().substring("#/definitions".length());
+                ref.set$ref(updatedRef);
+            }
+
+            result = new Schema();
+            result.set$ref(ref.get$ref());
+        } else
+
         if (schema instanceof  ArrayProperty) {
             ArraySchema arraySchema = Json.mapper().convertValue(schema, ArraySchema.class);
 
@@ -591,6 +600,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     }
                 });
 
+            }
+
+            if (schema instanceof MapProperty) {
+                MapProperty map = (MapProperty) schema;
+
+                result.setAdditionalProperties(convert(map.getAdditionalProperties()));
+                result.setMinProperties(map.getMinProperties());
+                result.setMaxProperties(map.getMaxProperties());
             }
         }
 
@@ -712,6 +729,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             }
 
+            if (v2Model instanceof ModelImpl) {
+                ModelImpl model = (ModelImpl) v2Model;
+
+                if (model.getAdditionalProperties() != null) {
+                    result.setAdditionalProperties(convert(model.getAdditionalProperties()));
+                }
+            }
         }
 
         return result;
