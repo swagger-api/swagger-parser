@@ -385,6 +385,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
 
+        if (v2Operation.getExternalDocs() != null) {
+            operation.setExternalDocs(convert(v2Operation.getExternalDocs()));
+        }
+
         return operation;
     }
 
