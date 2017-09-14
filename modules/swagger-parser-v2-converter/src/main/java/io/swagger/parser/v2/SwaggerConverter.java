@@ -5,6 +5,8 @@ import v2.io.swagger.models.parameters.AbstractSerializableParameter;
 import v2.io.swagger.models.parameters.BodyParameter;
 import v2.io.swagger.models.parameters.RefParameter;
 import v2.io.swagger.models.parameters.SerializableParameter;
+import v2.io.swagger.models.properties.ArrayProperty;
+import v2.io.swagger.models.properties.ObjectProperty;
 import v2.io.swagger.models.properties.Property;
 import v2.io.swagger.models.properties.RefProperty;
 import io.swagger.oas.models.*;
@@ -31,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SwaggerConverter implements SwaggerParserExtension {
     private List<String> globalConsumes = new ArrayList<>();
@@ -127,6 +130,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 }
             }
         }
+
         for(Property property : inventory.getProperties()) {
             if(property.getExample() != null) {
                 property.setExample(null);
@@ -139,6 +143,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 }
             }
         }
+
         Paths v3Paths = new Paths();
         for(String pathname : swagger.getPaths().keySet()) {
             v2.io.swagger.models.Path v2Path = swagger.getPath(pathname);
@@ -146,7 +151,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
             v3Paths.put(pathname, v3Path);
         }
         openAPI.setPaths(v3Paths);
+
         Components components = new Components();
+
         if(swagger.getParameters() != null) {
             for(String name : swagger.getParameters().keySet()) {
                 v2.io.swagger.models.parameters.Parameter param = swagger.getParameters().get(name);
@@ -157,7 +164,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (swagger.getDefinitions() != null) {
             for (String key : swagger.getDefinitions().keySet()) {
                 Model model = swagger.getDefinitions().get(key);
-                Schema schema = Json.mapper().convertValue(model, Schema.class);
+                Schema schema = convert(model);
 
                 components.addSchemas(key, schema);
             }
@@ -464,7 +471,41 @@ public class SwaggerConverter implements SwaggerParserExtension {
     }
 
     private Schema convert(Property schema) {
-        return Json.mapper().convertValue(schema, Schema.class);
+        Schema result;
+
+        if (schema instanceof  ArrayProperty) {
+            ArraySchema arraySchema = Json.mapper().convertValue(schema, ArraySchema.class);
+
+            Property items = ((ArrayProperty) schema).getItems();
+            Schema itemsSchema = convert(items);
+            arraySchema.setItems(itemsSchema);
+
+            if (((ArrayProperty) schema).getMaxItems() != null) {
+                arraySchema.setMaxItems(((ArrayProperty) schema).getMaxItems());
+            }
+            if (((ArrayProperty) schema).getMinItems() != null) {
+                arraySchema.setMinItems(((ArrayProperty) schema).getMinItems());
+            }
+
+            result = arraySchema;
+
+        } else {
+
+            result = Json.mapper().convertValue(schema, Schema.class);
+
+            if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
+                Map<String, Schema> properties = result.getProperties();
+
+                properties.forEach((k, v) -> {
+                    if ("array".equals(v.getType())) {
+                        ((ArraySchema) v).setItems(convert(((ArrayProperty)((ObjectProperty)schema).getProperties().get(k)).getItems()));
+                    }
+                });
+
+            }
+        }
+
+        return result;
     }
 
     public Parameter convert(v2.io.swagger.models.parameters.Parameter v2Parameter) {
@@ -551,6 +592,29 @@ public class SwaggerConverter implements SwaggerParserExtension {
     }
 
     public Schema convert(v2.io.swagger.models.Model v2Model) {
-        return Json.mapper().convertValue(v2Model, Schema.class);
+        Schema result;
+
+        if (v2Model instanceof  ArrayModel) {
+            ArraySchema arraySchema = Json.mapper().convertValue(v2Model, ArraySchema.class);
+
+            arraySchema.setItems(convert(((ArrayModel) v2Model).getItems()));
+
+            result = arraySchema;
+
+        } else {
+            result = Json.mapper().convertValue(v2Model, Schema.class);
+
+            if ((v2Model.getProperties() != null) && (v2Model.getProperties().size() > 0)) {
+                Map<String, Property> properties = v2Model.getProperties();
+
+                properties.forEach((k, v) -> {
+                    result.addProperties(k, convert(v));
+                });
+
+            }
+
+        }
+
+        return result;
     }
 }
