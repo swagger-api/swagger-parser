@@ -1,7 +1,6 @@
 package io.swagger.parser.v2;
 
 import io.swagger.oas.models.headers.Header;
-import org.apache.commons.lang3.ArrayUtils;
 import v2.io.swagger.models.*;
 import v2.io.swagger.models.parameters.AbstractSerializableParameter;
 import v2.io.swagger.models.parameters.BodyParameter;
@@ -163,6 +162,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 } else {
                     components.addParameters(k, convert(v));
                 }
+            });
+        }
+
+        if (swagger.getResponses() != null) {
+            swagger.getResponses().forEach((k, v) -> {
+                components.addResponses(k, convert(v));
             });
         }
 
@@ -368,20 +373,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         if(v2Operation.getResponses() != null) {
-            List<String> mediaTypes = new ArrayList<>(globalProduces);
-            if(v2Operation.getProduces() != null) {
-                // use this for media type
-                mediaTypes.clear();
-                mediaTypes.addAll(v2Operation.getProduces());
-            }
-
-            if(mediaTypes.size() == 0) {
-                mediaTypes.add("*/*");
-            }
-
             for(String responseCode : v2Operation.getResponses().keySet()) {
                 v2.io.swagger.models.Response v2Response = v2Operation.getResponses().get(responseCode);
-                ApiResponse response = convert(v2Response, mediaTypes);
+                ApiResponse response = convert(v2Response, v2Operation.getProduces());
                 ApiResponses responses = operation.getResponses();
                 if(responses == null) {
                     responses = new ApiResponses();
@@ -482,23 +476,50 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return body;
     }
 
-    public ApiResponse convert(v2.io.swagger.models.Response v2Response, List<String> mediaTypes) {
+    public ApiResponse convert(Response response) {
+        return convert(response, null);
+    }
+
+    public ApiResponse convert(v2.io.swagger.models.Response v2Response, List<String> produces) {
         ApiResponse response = new ApiResponse();
         Content content = new Content();
 
-        response.setDescription(v2Response.getDescription());
+        if (v2Response instanceof RefResponse) {
 
-        if(v2Response.getSchema() != null) {
-            Schema schema = convert(v2Response.getSchema());
-            for(String type: mediaTypes) {
-                // TODO: examples
-                content.addMediaType(type, new MediaType().schema(schema));
+            RefResponse ref = (RefResponse) v2Response;
+            if(ref.get$ref().indexOf("#/responses") == 0) {
+                String updatedRef = "#/components/responses" + ref.get$ref().substring("#/responses".length());
+                ref.set$ref(updatedRef);
             }
-            response.content(content);
-        }
 
-        if (v2Response.getHeaders() != null && v2Response.getHeaders().size() > 0) {
-            response.setHeaders(convertHeaders(v2Response.getHeaders()));
+            response.set$ref(ref.get$ref());
+        } else {
+
+            List<String> mediaTypes = new ArrayList<>(globalProduces);
+            if (produces != null) {
+                // use this for media type
+                mediaTypes.clear();
+                mediaTypes.addAll(produces);
+            }
+
+            if (mediaTypes.size() == 0) {
+                mediaTypes.add("*/*");
+            }
+
+            response.setDescription(v2Response.getDescription());
+
+            if (v2Response.getSchema() != null) {
+                Schema schema = convert(v2Response.getSchema());
+                for (String type : mediaTypes) {
+                    // TODO: examples
+                    content.addMediaType(type, new MediaType().schema(schema));
+                }
+                response.content(content);
+            }
+
+            if (v2Response.getHeaders() != null && v2Response.getHeaders().size() > 0) {
+                response.setHeaders(convertHeaders(v2Response.getHeaders()));
+            }
         }
 
         return response;
@@ -580,6 +601,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             RefParameter ref = (RefParameter) v2Parameter;
             if(ref.get$ref().indexOf("#/parameters") == 0) {
+
+
                 String updatedRef = "#/components/parameters" + ref.get$ref().substring("#/parameters".length());
                 ref.set$ref(updatedRef);
             }
