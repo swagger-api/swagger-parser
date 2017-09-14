@@ -303,38 +303,46 @@ public class SwaggerConverter implements SwaggerParserExtension {
     public PathItem convert(Path v2Path) {
         PathItem v3Path = new PathItem();
 
-        if(v2Path.getParameters() != null) {
-            for(v2.io.swagger.models.parameters.Parameter param : v2Path.getParameters()) {
-                v3Path.addParametersItem(convert(param));
+        if(v2Path instanceof RefPath) {
+
+            v3Path.set$ref(((RefPath) v2Path).get$ref());
+        } else {
+
+
+            if (v2Path.getParameters() != null) {
+                for (v2.io.swagger.models.parameters.Parameter param : v2Path.getParameters()) {
+                    v3Path.addParametersItem(convert(param));
+                }
+            }
+
+            v2.io.swagger.models.Operation v2Operation;
+
+            v2Operation = v2Path.getGet();
+            if (v2Operation != null) {
+                v3Path.setGet(convert(v2Operation));
+            }
+            v2Operation = v2Path.getPut();
+            if (v2Operation != null) {
+                v3Path.setPut(convert(v2Operation));
+            }
+            v2Operation = v2Path.getPost();
+            if (v2Operation != null) {
+                v3Path.setPost(convert(v2Operation));
+            }
+            v2Operation = v2Path.getPatch();
+            if (v2Operation != null) {
+                v3Path.setPatch(convert(v2Operation));
+            }
+            v2Operation = v2Path.getDelete();
+            if (v2Operation != null) {
+                v3Path.setDelete(convert(v2Operation));
+            }
+
+            if (v2Path.getVendorExtensions() != null && v2Path.getVendorExtensions().size() > 0) {
+                v3Path.setExtensions(v2Path.getVendorExtensions());
             }
         }
-
-        v2.io.swagger.models.Operation v2Operation;
-
-        v2Operation = v2Path.getGet();
-        if(v2Operation != null) {
-            v3Path.setGet(convert(v2Operation));
-        }
-        v2Operation = v2Path.getPut();
-        if(v2Operation != null) {
-            v3Path.setPut(convert(v2Operation));
-        }
-        v2Operation = v2Path.getPost();
-        if(v2Operation != null) {
-            v3Path.setPost(convert(v2Operation));
-        }
-        v2Operation = v2Path.getPatch();
-        if(v2Operation != null) {
-            v3Path.setPatch(convert(v2Operation));
-        }
-        v2Operation = v2Path.getDelete();
-        if(v2Operation != null) {
-            v3Path.setDelete(convert(v2Operation));
-        }
-
-        if(v2Path.getVendorExtensions() != null && v2Path.getVendorExtensions().size() > 0) {
-            v3Path.setExtensions(v2Path.getVendorExtensions());
-        }
+        
         return v3Path;
     }
 
