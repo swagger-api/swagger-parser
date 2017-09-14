@@ -875,16 +875,16 @@ public class OpenAPIDeserializer {
         value = getString("style", node, false, location, result);
 
         if (StringUtils.isBlank(value)) {
-            encoding.setStyle(Encoding.StyleEnum.FORM.toString());
+            encoding.setStyle(Encoding.StyleEnum.FORM);
         } else {
             if (value.equals(Encoding.StyleEnum.FORM.toString())) {
-                encoding.setStyle(Encoding.StyleEnum.FORM.toString());
+                encoding.setStyle(Encoding.StyleEnum.FORM);
             } else if (value.equals(Encoding.StyleEnum.DEEP_OBJECT.toString())) {
-                encoding.setStyle(Encoding.StyleEnum.DEEP_OBJECT.toString());
+                encoding.setStyle(Encoding.StyleEnum.DEEP_OBJECT);
             } else if (value.equals(Encoding.StyleEnum.PIPE_DELIMITED.toString())) {
-                encoding.setStyle(Encoding.StyleEnum.PIPE_DELIMITED.toString());
+                encoding.setStyle(Encoding.StyleEnum.PIPE_DELIMITED);
             } else if (value.equals(Encoding.StyleEnum.SPACE_DELIMITED.toString())) {
-                encoding.setStyle(Encoding.StyleEnum.SPACE_DELIMITED.toString());
+                encoding.setStyle(Encoding.StyleEnum.SPACE_DELIMITED);
             } else {
                 result.invalidType(location, "style", "string", node);
             }
