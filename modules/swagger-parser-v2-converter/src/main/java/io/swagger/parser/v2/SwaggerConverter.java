@@ -425,11 +425,49 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema.setType(sp.getType());
                 schema.setFormat(sp.getFormat());
             }
+
             schema.setDescription(sp.getDescription());
             schema.setReadOnly(sp.isReadOnly());
+            schema.setEnum(sp.getEnum());
+
+
+            if (sp.getMaxItems() != null) {
+                schema.setMaxItems(sp.getMaxItems());
+            }
+            if (sp.getMinItems() != null) {
+                schema.setMinItems(sp.getMinItems());
+            }
+
+            if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
+                schema.setExtensions(sp.getVendorExtensions());
+            }
+
+            schema.setMaximum(sp.getMaximum());
+            schema.setExclusiveMaximum(sp.isExclusiveMaximum());
+            schema.setMinimum(sp.getMinimum());
+            schema.setExclusiveMinimum(sp.isExclusiveMinimum());
+            schema.setMinLength(sp.getMinLength());
+            schema.setMaxLength(sp.getMaxLength());
+
+            if (sp.getMultipleOf() != null) {
+                schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
+            }
+
+            schema.setPattern(sp.getPattern());
+
+
+            if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
+                schema.setExtensions(sp.getVendorExtensions());
+            }
+
+            if(sp instanceof AbstractSerializableParameter) {
+                AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
+                schema.setDefault(ap.getDefault());
+            }
 
             formSchema.addProperties(param.getName(), schema);
         }
+
         List<String> mediaTypes = new ArrayList<>(globalConsumes);
         if(consumes != null && consumes.size() > 0) {
             mediaTypes.clear();
@@ -609,6 +647,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 result.setMinProperties(map.getMinProperties());
                 result.setMaxProperties(map.getMaxProperties());
             }
+
+            if (schema instanceof AbstractNumericProperty) {
+                AbstractNumericProperty np = (AbstractNumericProperty) schema;
+
+                result.setExclusiveMaximum(np.getExclusiveMaximum());
+                result.setExclusiveMinimum(np.getExclusiveMinimum());
+            }
         }
 
         return result;
@@ -641,12 +686,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
         else if(v2Parameter instanceof SerializableParameter) {
             SerializableParameter sp = (SerializableParameter) v2Parameter;
 
-            if(sp.getEnum() != null) {
-                for(String e : sp.getEnum()) {
-                    // TODO: use the proper method for enum items on schema
-                    //schema.addEnumItem(e);
-                }
-            }
             if ("array".equals(sp.getType())) {
                 ArraySchema a = new ArraySchema();
                 // TODO: convert arrays to proper template format
@@ -678,7 +717,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 }
 
                 schema.setMaximum(sp.getMaximum());
+                schema.setExclusiveMaximum(sp.isExclusiveMaximum());
                 schema.setMinimum(sp.getMinimum());
+                schema.setExclusiveMinimum(sp.isExclusiveMinimum());
                 schema.setMinLength(sp.getMinLength());
                 schema.setMaxLength(sp.getMaxLength());
                 if (sp.getMultipleOf() != null) {
