@@ -1,6 +1,7 @@
 package io.swagger.parser.v2;
 
 import io.swagger.oas.models.headers.Header;
+import org.apache.commons.lang3.ArrayUtils;
 import v2.io.swagger.models.*;
 import v2.io.swagger.models.parameters.AbstractSerializableParameter;
 import v2.io.swagger.models.parameters.BodyParameter;
@@ -32,10 +33,7 @@ import v2.io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SwaggerConverter implements SwaggerParserExtension {
     private List<String> globalConsumes = new ArrayList<>();
@@ -156,11 +154,16 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         Components components = new Components();
 
-        if(swagger.getParameters() != null) {
-            for(String name : swagger.getParameters().keySet()) {
-                v2.io.swagger.models.parameters.Parameter param = swagger.getParameters().get(name);
-                components.addParameters(name, convert(param));
-            }
+        if (swagger.getParameters() != null) {
+            swagger.getParameters().forEach((k, v) -> {
+                if ("body".equals(v.getIn())) {
+                    components.addRequestBodies(k, convertParameterToRequestBody(v));
+                } else if ("formData".equals(v.getIn())) {
+                    components.addRequestBodies(k, convertFormDataToRequestBody(v));
+                } else {
+                    components.addParameters(k, convert(v));
+                }
+            });
         }
 
         if (swagger.getDefinitions() != null) {
@@ -351,35 +354,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     formParams.add(param);
                 }
                 else if("body".equals(param.getIn())) {
-                    RequestBody body = new RequestBody();
-                    BodyParameter bp = (BodyParameter) param;
-
-                    List<String> mediaTypes = new ArrayList<>(globalConsumes);
-                    if(v2Operation.getConsumes() != null && v2Operation.getConsumes().size() > 0) {
-                        mediaTypes.clear();
-                        mediaTypes.addAll(v2Operation.getConsumes());
-                    }
-
-                    if(mediaTypes.size() == 0) {
-                        mediaTypes.add("*/*");
-                    }
-
-                    if(StringUtils.isNotBlank(param.getDescription())) {
-                        body.description(param.getDescription());
-                    }
-                    body.required(param.getRequired());
-
-                    Content content = new Content();
-                    for(String type: mediaTypes) {
-                        content.addMediaType(type,
-                            new MediaType().schema(
-                                convert(bp.getSchema())));
-                        if(StringUtils.isNotBlank(bp.getDescription())) {
-                            body.setDescription(bp.getDescription());
-                        }
-                        operation.setRequestBody(body);
-                    }
-                    body.content(content);
+                    operation.setRequestBody(convertParameterToRequestBody(param, v2Operation.getConsumes()));
                 }
                 else {
                     operation.addParametersItem(convert(param));
@@ -387,44 +362,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
 
             if(formParams.size() > 0) {
-                RequestBody body = new RequestBody();
-
-                Schema formSchema = new Schema();
-
-                for(v2.io.swagger.models.parameters.Parameter param : formParams) {
-                    SerializableParameter sp = (SerializableParameter) param;
-
-                    Schema schema = null;
-                    if("file".equals(sp.getType())) {
-                        schema = new FileSchema();
-                    }
-                    else if ("array".equals(sp.getType())) {
-                        ArraySchema as = new ArraySchema();
-                        if(sp.getItems() != null) {
-                            as.setItems(convert(sp.getItems()));
-                        }
-                        schema = as;
-                    }
-                    else {
-                        schema = new Schema();
-                        schema.setType(sp.getType());
-                        schema.setFormat(sp.getFormat());
-                    }
-                    schema.setDescription(sp.getDescription());
-                    schema.setReadOnly(sp.isReadOnly());
-
-                    formSchema.addProperties(param.getName(), schema);
-                }
-                List<String> mediaTypes = new ArrayList<>(globalConsumes);
-                if(v2Operation.getConsumes() != null && v2Operation.getConsumes().size() > 0) {
-                    mediaTypes.clear();
-                    mediaTypes.addAll(v2Operation.getConsumes());
-                }
-                Content content = new Content();
-                for(String type: mediaTypes) {
-                    content.addMediaType(type, new MediaType().schema(formSchema));
-                }
-                body.content(content);
+                RequestBody body = convertFormDataToRequestBody(formParams, v2Operation.getConsumes());
                 operation.requestBody(body);
             }
         }
@@ -454,6 +392,94 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         return operation;
+    }
+
+    private RequestBody convertFormDataToRequestBody(v2.io.swagger.models.parameters.Parameter formParam) {
+        return convertFormDataToRequestBody(Arrays.asList(formParam), null);
+    }
+
+    private RequestBody convertFormDataToRequestBody(List<v2.io.swagger.models.parameters.Parameter> formParams, List<String> consumes) {
+        RequestBody body = new RequestBody();
+
+        Schema formSchema = new Schema();
+
+        for(v2.io.swagger.models.parameters.Parameter param : formParams) {
+            SerializableParameter sp = (SerializableParameter) param;
+
+            Schema schema;
+            if("file".equals(sp.getType())) {
+                schema = new FileSchema();
+            }
+            else if ("array".equals(sp.getType())) {
+                ArraySchema as = new ArraySchema();
+                if(sp.getItems() != null) {
+                    as.setItems(convert(sp.getItems()));
+                }
+                schema = as;
+            }
+            else {
+                schema = new Schema();
+                schema.setType(sp.getType());
+                schema.setFormat(sp.getFormat());
+            }
+            schema.setDescription(sp.getDescription());
+            schema.setReadOnly(sp.isReadOnly());
+
+            formSchema.addProperties(param.getName(), schema);
+        }
+        List<String> mediaTypes = new ArrayList<>(globalConsumes);
+        if(consumes != null && consumes.size() > 0) {
+            mediaTypes.clear();
+            mediaTypes.addAll(consumes);
+        }
+
+        // Assume multipart/form-data if nothing is specified
+        if (mediaTypes.size() == 0) {
+            mediaTypes.add("multipart/form-data");
+        }
+
+        Content content = new Content();
+        for(String type: mediaTypes) {
+            content.addMediaType(type, new MediaType().schema(formSchema));
+        }
+        body.content(content);
+        return body;
+    }
+
+    private RequestBody convertParameterToRequestBody(v2.io.swagger.models.parameters.Parameter param) {
+        return convertParameterToRequestBody(param, null);
+    }
+
+    private RequestBody convertParameterToRequestBody(v2.io.swagger.models.parameters.Parameter param, List<String> consumes) {
+        RequestBody body = new RequestBody();
+        BodyParameter bp = (BodyParameter) param;
+
+        List<String> mediaTypes = new ArrayList<>(globalConsumes);
+        if (consumes != null && consumes.size() > 0) {
+            mediaTypes.clear();
+            mediaTypes.addAll(consumes);
+        }
+
+        if(mediaTypes.size() == 0) {
+            mediaTypes.add("*/*");
+        }
+
+        if(StringUtils.isNotBlank(param.getDescription())) {
+            body.description(param.getDescription());
+        }
+        body.required(param.getRequired());
+
+        Content content = new Content();
+        for(String type: mediaTypes) {
+            content.addMediaType(type,
+                new MediaType().schema(
+                    convert(bp.getSchema())));
+            if(StringUtils.isNotBlank(bp.getDescription())) {
+                body.setDescription(bp.getDescription());
+            }
+        }
+        body.content(content);
+        return body;
     }
 
     public ApiResponse convert(v2.io.swagger.models.Response v2Response, List<String> mediaTypes) {
