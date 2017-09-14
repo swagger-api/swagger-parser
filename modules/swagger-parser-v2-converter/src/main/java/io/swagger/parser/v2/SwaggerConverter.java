@@ -1,5 +1,6 @@
 package io.swagger.parser.v2;
 
+import io.swagger.oas.models.headers.Header;
 import v2.io.swagger.models.*;
 import v2.io.swagger.models.parameters.AbstractSerializableParameter;
 import v2.io.swagger.models.parameters.BodyParameter;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -459,6 +461,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         Content content = new Content();
 
         response.setDescription(v2Response.getDescription());
+
         if(v2Response.getSchema() != null) {
             Schema schema = convert(v2Response.getSchema());
             for(String type: mediaTypes) {
@@ -467,7 +470,34 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
             response.content(content);
         }
+
+        if (v2Response.getHeaders() != null && v2Response.getHeaders().size() > 0) {
+            response.setHeaders(convertHeaders(v2Response.getHeaders()));
+        }
+
         return response;
+    }
+
+    private Map<String, Header> convertHeaders(Map<String, Property> headers) {
+        Map<String, Header> result = new HashMap<>();
+
+        headers.forEach((k, v) -> {
+            result.put(k, convertHeader(v));
+        });
+
+
+        return result;
+    }
+
+    private Header convertHeader(Property property) {
+        Schema schema = convert(property);
+        schema.setDescription(null);
+
+        Header header = new Header();
+        header.setDescription(property.getDescription());
+        header.setSchema(schema);
+
+        return header;
     }
 
     private Schema convert(Property schema) {
