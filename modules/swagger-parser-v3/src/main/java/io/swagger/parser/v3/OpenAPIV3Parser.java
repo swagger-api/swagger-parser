@@ -94,6 +94,16 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return ser.deserialize(node);
     }
 
+    private ObjectMapper getRightMapper(String data) {
+      ObjectMapper mapper;
+      if(data.trim().startsWith("{")) {
+          mapper = JSON_MAPPER;
+      } else {
+          mapper = YAML_MAPPER;
+      }
+      return mapper;
+    }
+    
     public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
         String data;
 
@@ -115,13 +125,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     data = ClasspathHelper.loadFileFromClasspath(location);
                 }
             }
-            JsonNode rootNode;
-            if (data.trim().startsWith("{")) {
-                ObjectMapper mapper = Json.mapper();
-                rootNode = mapper.readTree(data);
-            } else {
-                rootNode = DeserializationUtils.readYamlTree(data);
-            }
+            
+            ObjectMapper mapper = getRightMapper(data);
+            JsonNode rootNode = mapper.readTree(data);
+            
             return readWithInfo(rootNode);
         }
         catch (SSLHandshakeException e) {
@@ -142,13 +149,8 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         if(swaggerAsString != null && !"".equals(swaggerAsString.trim())) {
-            ObjectMapper mapper;
-            if(swaggerAsString.trim().startsWith("{")) {
-                mapper = JSON_MAPPER;
-            }
-            else {
-                mapper = YAML_MAPPER;
-            }
+            ObjectMapper mapper = getRightMapper(swaggerAsString);
+            
             if(auth == null) {
                 auth = new ArrayList<>();
             }
