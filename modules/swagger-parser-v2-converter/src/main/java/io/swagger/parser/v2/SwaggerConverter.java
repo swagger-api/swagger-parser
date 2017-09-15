@@ -1,7 +1,12 @@
 package io.swagger.parser.v2;
 
 import io.swagger.oas.models.headers.Header;
+import io.swagger.oas.models.security.*;
 import v2.io.swagger.models.*;
+import v2.io.swagger.models.SecurityRequirement;
+import v2.io.swagger.models.auth.ApiKeyAuthDefinition;
+import v2.io.swagger.models.auth.OAuth2Definition;
+import v2.io.swagger.models.auth.SecuritySchemeDefinition;
 import v2.io.swagger.models.parameters.AbstractSerializableParameter;
 import v2.io.swagger.models.parameters.BodyParameter;
 import v2.io.swagger.models.parameters.RefParameter;
@@ -104,11 +109,16 @@ public class SwaggerConverter implements SwaggerParserExtension {
             openAPI.setTags(convertTags(swagger.getTags()));
         }
 
-        if(swagger.getConsumes() != null) {
+        if (swagger.getConsumes() != null) {
             this.globalConsumes.addAll(swagger.getConsumes());
         }
-        if(swagger.getProduces() != null) {
+
+        if (swagger.getProduces() != null) {
             this.globalProduces.addAll(swagger.getProduces());
+        }
+
+        if (swagger.getSecurity() != null && swagger.getSecurity().size() > 0) {
+            openAPI.setSecurity(convertSecurityRequirements(swagger.getSecurity()));
         }
 
         List<Model> models = inventory.getModels();
@@ -163,9 +173,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         if (swagger.getResponses() != null) {
-            swagger.getResponses().forEach((k, v) -> {
-                components.addResponses(k, convert(v));
-            });
+            swagger.getResponses().forEach((k, v) -> components.addResponses(k, convert(v)));
         }
 
         if (swagger.getDefinitions() != null) {
@@ -177,11 +185,133 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
 
+        if (swagger.getSecurityDefinitions() != null) {
+            swagger.getSecurityDefinitions().forEach((k, v) -> components.addSecuritySchemes(k, convert(v)));
+        }
+
         openAPI.setComponents(components);
 
         output.setOpenAPI(openAPI);
 
         return output;
+    }
+
+    private List<io.swagger.oas.models.security.SecurityRequirement> convertSecurityRequirements(List<SecurityRequirement> security) {
+        List<io.swagger.oas.models.security.SecurityRequirement> securityRequirements = new ArrayList<>();
+
+        for (SecurityRequirement requirement : security) {
+            io.swagger.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.oas.models.security.SecurityRequirement();
+
+            requirement.getRequirements().forEach((k,v) -> securityRequirement.addList(k, v));
+
+            securityRequirements.add(securityRequirement);
+        }
+
+        return securityRequirements;
+    }
+
+    private List<io.swagger.oas.models.security.SecurityRequirement> convertSecurityRequirementsMap(List<Map<String, List<String>>> security) {
+        List<io.swagger.oas.models.security.SecurityRequirement> securityRequirements = new ArrayList<>();
+
+//        for (SecurityRequirement requirement : security) {
+//            io.swagger.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.oas.models.security.SecurityRequirement();
+//
+//            requirement.getRequirements().forEach((k,v) -> securityRequirement.addList(k, v));
+//
+//            securityRequirements.add(securityRequirement);
+//        }
+
+        for (Map<String, List<String>> map : security) {
+            io.swagger.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.oas.models.security.SecurityRequirement();
+
+            map.forEach((k,v) -> securityRequirement.addList(k, v));
+
+            securityRequirements.add(securityRequirement);
+        }
+
+        return securityRequirements;
+    }
+
+    private SecurityScheme convert(SecuritySchemeDefinition definition) {
+        SecurityScheme securityScheme;
+
+        switch (definition.getType()) {
+            case "basic":
+                securityScheme = createBasicSecurityScheme();
+                break;
+            case "apiKey":
+                securityScheme = convertApiKeySecurityScheme(definition);
+                break;
+            case "oauth2":
+                securityScheme = convertOauth2SecurityScheme(definition);
+                break;
+            default:
+                securityScheme = new SecurityScheme();
+        }
+
+        securityScheme.setDescription(definition.getDescription());
+
+        if (definition.getVendorExtensions() != null && definition.getVendorExtensions().size() > 0) {
+            securityScheme.setExtensions(definition.getVendorExtensions());
+        }
+
+
+        return securityScheme;
+    }
+
+    private SecurityScheme convertOauth2SecurityScheme(SecuritySchemeDefinition definition) {
+        SecurityScheme securityScheme = new SecurityScheme();
+        OAuth2Definition oAuth2Definition = (OAuth2Definition) definition;
+        OAuthFlows oAuthFlows = new OAuthFlows();
+        OAuthFlow oAuthFlow = new OAuthFlow();
+
+        securityScheme.setType(SecurityScheme.Type.OAUTH2);
+
+        switch (oAuth2Definition.getFlow()) {
+            case "implicit":
+                oAuthFlow.setAuthorizationUrl(oAuth2Definition.getAuthorizationUrl());
+                oAuthFlows.setImplicit(oAuthFlow);
+                break;
+            case "password":
+                oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
+                oAuthFlows.setPassword(oAuthFlow);
+                break;
+            case "application":
+                oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
+                oAuthFlows.setClientCredentials(oAuthFlow);
+                break;
+            case "accessCode":
+                oAuthFlow.setAuthorizationUrl(oAuth2Definition.getAuthorizationUrl());
+                oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
+                oAuthFlows.setAuthorizationCode(oAuthFlow);
+                break;
+        }
+
+        Scopes scopes = new Scopes();
+        oAuth2Definition.getScopes().forEach((k,v) -> scopes.addString(k,v));
+        oAuthFlow.setScopes(scopes);
+
+        return securityScheme;
+    }
+
+    private SecurityScheme convertApiKeySecurityScheme(SecuritySchemeDefinition definition) {
+        SecurityScheme securityScheme = new SecurityScheme();
+        ApiKeyAuthDefinition apiKeyAuthDefinition = (ApiKeyAuthDefinition) definition;
+
+        securityScheme.setType(SecurityScheme.Type.APIKEY);
+        securityScheme.setName(apiKeyAuthDefinition.getName());
+        securityScheme.setIn(SecurityScheme.In.valueOf(apiKeyAuthDefinition.getIn().toString()));
+
+        return securityScheme;
+    }
+
+    private SecurityScheme createBasicSecurityScheme() {
+        SecurityScheme securityScheme = new SecurityScheme();
+
+        securityScheme.setType(SecurityScheme.Type.HTTP);
+        securityScheme.setScheme("basic");
+
+        return securityScheme;
     }
 
     private List<Tag> convertTags(List<v2.io.swagger.models.Tag> v2tags) {
@@ -394,8 +524,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
             operation.setExternalDocs(convert(v2Operation.getExternalDocs()));
         }
 
+        if (v2Operation.getSecurity() != null && v2Operation.getSecurity().size() > 0) {
+            operation.setSecurity(convertSecurityRequirementsMap(v2Operation.getSecurity()));
+        }
+
         return operation;
     }
+
 
     private RequestBody convertFormDataToRequestBody(v2.io.swagger.models.parameters.Parameter formParam) {
         return convertFormDataToRequestBody(Arrays.asList(formParam), null);
