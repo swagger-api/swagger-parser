@@ -913,6 +913,15 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             result = composed;
         } else {
+            String v2discriminator = null;
+
+            if (v2Model instanceof ModelImpl) {
+                ModelImpl model = (ModelImpl) v2Model;
+
+                v2discriminator = model.getDiscriminator();
+                model.setDiscriminator(null);
+            }
+
             result = Json.mapper().convertValue(v2Model, Schema.class);
 
             if ((v2Model.getProperties() != null) && (v2Model.getProperties().size() > 0)) {
@@ -930,6 +939,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 if (model.getAdditionalProperties() != null) {
                     result.setAdditionalProperties(convert(model.getAdditionalProperties()));
                 }
+            }
+
+            if (v2discriminator != null) {
+                Discriminator discriminator = new Discriminator();
+
+                discriminator.setPropertyName(v2discriminator);
+                result.setDiscriminator(discriminator);
             }
         }
 
