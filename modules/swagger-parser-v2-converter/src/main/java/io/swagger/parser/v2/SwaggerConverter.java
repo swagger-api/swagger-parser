@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SwaggerConverter implements SwaggerParserExtension {
     private List<String> globalConsumes = new ArrayList<>();
@@ -903,7 +904,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
             arraySchema.setItems(convert(((ArrayModel) v2Model).getItems()));
 
             result = arraySchema;
+        } else if (v2Model instanceof ComposedModel) {
+            ComposedModel composedModel = (ComposedModel) v2Model;
 
+            ComposedSchema composed = Json.mapper().convertValue(v2Model, ComposedSchema.class);
+
+            composed.setAllOf(composedModel.getAllOf().stream().map(this::convert).collect(Collectors.toList()));
+
+            result = composed;
         } else {
             result = Json.mapper().convertValue(v2Model, Schema.class);
 
