@@ -693,7 +693,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             response.setDescription(v2Response.getDescription());
 
             if (v2Response.getSchema() != null) {
-                Schema schema = convert(v2Response.getSchema());
+                Schema schema = convertFileSchema(convert(v2Response.getSchema()));
                 for (String type : mediaTypes) {
                     // TODO: examples
                     content.addMediaType(type, new MediaType().schema(schema));
@@ -707,6 +707,15 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         return response;
+    }
+
+    private Schema convertFileSchema(Schema schema) {
+        if ("file".equals(schema.getType())) {
+            schema.setType("string");
+            schema.setFormat("binary");
+        }
+
+        return schema;
     }
 
     private Map<String, Header> convertHeaders(Map<String, Property> headers) {
