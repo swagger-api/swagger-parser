@@ -777,14 +777,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
             result = Json.mapper().convertValue(schema, Schema.class);
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
-                Map<String, Schema> properties = result.getProperties();
+                Map<String, Schema> properties = new HashMap<>();
 
-                properties.forEach((k, v) -> {
-                    if ("array".equals(v.getType())) {
-                        ((ArraySchema) v).setItems(convert(((ArrayProperty)((ObjectProperty)schema).getProperties().get(k)).getItems()));
-                    }
-                });
+                ((ObjectProperty) schema).getProperties().forEach((k, v) -> properties.put(k, convert(v)));
 
+                result.setProperties(properties);
             }
 
             if (schema instanceof MapProperty) {
