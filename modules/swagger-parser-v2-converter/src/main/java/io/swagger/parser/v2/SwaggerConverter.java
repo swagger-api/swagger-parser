@@ -379,6 +379,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 server.setUrl(baseUrl);
 
                 servers.add(server);
+            } else {
+                return null;
             }
         }
 
