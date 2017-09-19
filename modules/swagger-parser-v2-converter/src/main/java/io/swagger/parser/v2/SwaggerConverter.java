@@ -838,23 +838,35 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 ArraySchema a = new ArraySchema();
                 // TODO: convert arrays to proper template format
 
-                if ("query".equals(v2Parameter.getIn())) {
-                    String cf = sp.getCollectionFormat();
 
-                    switch (cf) {
-                        case "ssv":
-                            v3Parameter.setStyle(Parameter.StyleEnum.SPACEDELIMITED);
-                            break;
-                        case "pipes":
-                            v3Parameter.setStyle((Parameter.StyleEnum.PIPEDELIMITED));
-                            break;
-                        case "multi":
-                            break;
-                        case "csv":
-                        default:
-                            v3Parameter.setExplode(true);
-                    }
+                String cf = sp.getCollectionFormat();
+
+                if (StringUtils.isEmpty(cf)) {
+                    cf = "csv";
                 }
+
+                switch (cf) {
+                    case "ssv":
+                        if ("query".equals(v2Parameter.getIn())) {
+                            v3Parameter.setStyle(Parameter.StyleEnum.SPACEDELIMITED);
+                        }
+                        break;
+                    case "pipes":
+                        if ("query".equals(v2Parameter.getIn())) {
+                            v3Parameter.setStyle((Parameter.StyleEnum.PIPEDELIMITED));
+                        }
+                        break;
+                    case "tsv":
+                        break;
+                    case "multi":
+                        break;
+                    case "csv":
+                    default:
+                        if ("query".equals(v2Parameter.getIn())) {
+                            v3Parameter.setExplode(false);
+                        }
+                }
+
 
 
                 Property items = sp.getItems();
