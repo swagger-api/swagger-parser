@@ -2134,12 +2134,12 @@ public class OpenAPIDeserializer {
         }else if (v.getNodeType().equals(JsonNodeType.OBJECT)) {
             ObjectNode objectValue = getObject("value", node, false, location, result);
             if(objectValue != null) {
-                example.setValue(objectValue.toString());
+                example.setValue(objectValue);
             }
         }else if (v.getNodeType().equals(JsonNodeType.ARRAY)) {
             ArrayNode arrayValue = getArray("value", node, false, location, result);
             if (arrayValue != null) {
-                example.setValue(arrayValue.toString());
+                example.setValue(arrayValue);
             }
         }
 
