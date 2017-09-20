@@ -183,6 +183,26 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson-version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng-version}</version>
@@ -241,8 +261,7 @@
         <wiremock-version>2.4.1</wiremock-version>
         <surefire-version>2.18.1</surefire-version>
         <commons-lang-version>3.2.1</commons-lang-version>
-        <jackson-version>2.8.9</jackson-version>
-        <jackson-annotations-version>2.8.0</jackson-annotations-version>
+        <jackson-version>2.9.1</jackson-version>
     </properties>
 
 
