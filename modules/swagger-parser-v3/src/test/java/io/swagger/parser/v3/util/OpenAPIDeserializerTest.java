@@ -371,13 +371,13 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(header1.getExamples().get("httpbin").getValue(),"httpbin");
 
         Assert.assertNotNull(header2.getExample());
-        Assert.assertEquals(header2.getExample(),"37");
+        Assert.assertEquals(header2.getExample(),37);
 
         Assert.assertNotNull(parameter1.getExamples());
         Assert.assertEquals(parameter1.getExamples().get("unicorn").getValue(),"unicorn");
 
         Assert.assertNotNull(parameter2.getExample());
-        Assert.assertEquals(parameter2.getExample(),"37");
+        Assert.assertEquals(parameter2.getExample(),37);
     }
 
 
@@ -695,7 +695,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
+        Assert.assertNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue());
 
         PathItem petEndpoint = paths.get("/pet");
         Assert.assertNotNull(petEndpoint.getPut());
