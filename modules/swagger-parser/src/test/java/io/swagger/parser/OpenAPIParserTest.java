@@ -1,7 +1,9 @@
 package io.swagger.parser;
 
+import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.util.Json;
 import org.junit.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -55,5 +57,30 @@ public class OpenAPIParserTest {
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
+    }
+
+    @Test
+    public void testParsingPrettifiedExtensions() throws Exception {
+        String json =
+                "{\n" +
+                        "  \"openapi\": \"3.0.0\",\n" +
+                        "  \"x-some-extension\": \"some-value\"\n" +
+                        "}";
+
+        SwaggerParseResult result = new OpenAPIParser().readContents(json, null, null);
+        assertNotNull(result);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getExtensions());
+        assertEquals(openAPI.getExtensions().get("x-some-extension"), "some-value");
+
+        String prettyJson = Json.pretty(openAPI);
+
+        SwaggerParseResult prettyResult = new OpenAPIParser().readContents(prettyJson, null, null);
+        assertNotNull(prettyResult);
+        OpenAPI prettyOpenAPI = prettyResult.getOpenAPI();
+        assertNotNull(prettyOpenAPI);
+        assertNotNull(prettyOpenAPI.getExtensions());
+        assertEquals(prettyOpenAPI.getExtensions().get("x-some-extension"), "some-value");
     }
 }
