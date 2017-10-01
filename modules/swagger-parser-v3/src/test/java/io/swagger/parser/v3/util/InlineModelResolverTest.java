@@ -195,6 +195,7 @@ public class InlineModelResolverTest {
         addressSchema.setName("name");
         addressSchema.addProperties("street", new StringSchema());
         addressSchema.addProperties("city", new StringSchema());
+        addressSchema.addProperties("apartment", new StringSchema());
 
 
         Schema anotherSchema =  new Schema();
@@ -206,7 +207,7 @@ public class InlineModelResolverTest {
         anotherSchema.addProperties("name", new StringSchema());
         anotherSchema.addProperties("lastName", new StringSchema());
         anotherSchema.addProperties("address", addressSchema);
-        anotherSchema.addProperties("apartment", new StringSchema());
+
 
         openAPI.getComponents().addSchemas("AnotherUser", anotherSchema);
 
