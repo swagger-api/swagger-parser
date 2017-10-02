@@ -4,17 +4,21 @@ import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
+import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.Content;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.StringSchema;
+import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.util.Json;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -224,7 +228,7 @@ public class InlineModelResolverTest {
         assertNotNull(user);
         Schema userAddress = (Schema) user.getProperties().get("address");
         assertTrue( userAddress.get$ref()!= null);
-        System.out.println(Json.pretty(openAPI));
+
         Schema address = openAPI.getComponents().getSchemas().get("UserAddressTitle");
         assertNotNull(address);
         assertNotNull(address.getProperties().get("city"));
@@ -243,10 +247,10 @@ public class InlineModelResolverTest {
 
 
         StringSchema stringSchema1 = new StringSchema();
-        stringSchema1.addExtension("x-ext", "ext-prop");
 
         ObjectSchema objectSchema1 = new ObjectSchema();
         objectSchema1.addProperties("name", stringSchema1);
+        objectSchema1.addExtension("x-ext", "ext-prop");
 
         MediaType mediaType1 = new MediaType();
         mediaType1.setSchema(objectSchema1);
@@ -271,11 +275,10 @@ public class InlineModelResolverTest {
 
 
         StringSchema stringSchema2 = new StringSchema();
-        stringSchema1.addExtension("x-ext", "ext-prop");
 
         ObjectSchema objectSchema2 = new ObjectSchema();
         objectSchema2.addProperties("name", stringSchema2);
-
+        objectSchema2.addExtension("x-ext", "ext-prop");
         MediaType mediaType2 = new MediaType();
         mediaType2.setSchema(objectSchema2);
 
@@ -297,13 +300,14 @@ public class InlineModelResolverTest {
         pathItem2.setGet(operation2);
         openAPI.path("/foo/baz",pathItem2);
 
+
         new InlineModelResolver().flatten(openAPI);
 
         Map<String, ApiResponse> responses = openAPI.getPaths().get("/foo/bar").getGet().getResponses();
 
         ApiResponse response = responses.get("200");
         assertNotNull(response);
-        System.out.println(response);
+
         Schema schema = response.getContent().get("*/*").getSchema();
         assertTrue(schema.get$ref() != null);
         assertEquals(1, schema.getExtensions().size());
@@ -316,86 +320,147 @@ public class InlineModelResolverTest {
     }
 
 
-    /*@Test
+    @Test
     public void testInlineResponseModelWithTitle() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
         String responseTitle = "GetBarResponse";
-        swagger.path("/foo/bar", new Path()
-                .get(new Operation()
-                        .response(200, new Response()
-                                .description("it works!")
-                                .schema(new ObjectProperty().title(responseTitle)
-                                        .property("name", new StringProperty())))))
-                .path("/foo/baz", new Path()
-                        .get(new Operation()
-                                .response(200, new Response()
-                                        .vendorExtension("x-foo", "bar")
-                                        .description("it works!")
-                                        .schema(new ObjectProperty()
-                                                .property("name", new StringProperty())))));
-        new InlineModelResolver().flatten(swagger);
 
-        Map<String, Response> responses = swagger.getPaths().get("/foo/bar").getGet().getResponses();
+        StringSchema stringSchema1 = new StringSchema();
 
-        Response response = responses.get("200");
+        ObjectSchema objectSchema1 = new ObjectSchema();
+        objectSchema1.setTitle(responseTitle);
+        objectSchema1.addProperties("name", stringSchema1);
+
+
+        MediaType mediaType1 = new MediaType();
+        mediaType1.setSchema(objectSchema1);
+
+        Content content1 = new Content();
+        content1.addMediaType("*/*", mediaType1 );
+
+        ApiResponse response1= new ApiResponse();
+        response1.setDescription("it works!");
+        response1.setContent(content1);
+
+        ApiResponses responses1 = new ApiResponses();
+        responses1.addApiResponse("200",response1);
+
+        Operation operation1 = new Operation();
+        operation1.setResponses(responses1);
+
+        PathItem pathItem1 = new PathItem();
+        pathItem1.setGet(operation1);
+        openAPI.path("/foo/bar",pathItem1);
+
+
+
+        StringSchema stringSchema2 = new StringSchema();
+
+        ObjectSchema objectSchema2 = new ObjectSchema();
+        objectSchema2.addProperties("name", stringSchema2);
+        objectSchema2.addExtension("x-foo", "bar");
+
+        MediaType mediaType2 = new MediaType();
+        mediaType2.setSchema(objectSchema2);
+
+        Content content2 = new Content();
+        content2.addMediaType("*/*", mediaType2 );
+
+        ApiResponse response2 = new ApiResponse();
+        response2.setDescription("it works!");
+
+        response2.setContent(content2);
+
+        ApiResponses responses2 = new ApiResponses();
+        responses2.addApiResponse("200",response2);
+
+        Operation operation2 = new Operation();
+        operation2.setResponses(responses2);
+
+        PathItem pathItem2 = new PathItem();
+        pathItem2.setGet(operation2);
+        openAPI.path("/foo/baz",pathItem2);
+
+
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Map<String, ApiResponse> responses = openAPI.getPaths().get("/foo/bar").getGet().getResponses();
+
+        ApiResponse response = responses.get("200");
         assertNotNull(response);
-        assertTrue(response.getSchema() instanceof RefProperty);
+        assertTrue(response.getContent().get("*/*").getSchema().get$ref() != null );
 
-        ModelImpl model = (ModelImpl)swagger.getDefinitions().get(responseTitle);
+        Schema model = openAPI.getComponents().getSchemas().get(responseTitle);
         assertTrue(model.getProperties().size() == 1);
         assertNotNull(model.getProperties().get("name"));
-        assertTrue(model.getProperties().get("name") instanceof StringProperty);
+        assertTrue(model.getProperties().get("name") instanceof StringSchema);
     }
 
 
     @Test
     public void resolveInlineArrayModelWithTitle() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
 
-        swagger.addDefinition("User", new ArrayModel()
-                .items(new ObjectProperty()
-                        .title("InnerUserTitle")
-                        ._default("default")
-                        .access("access")
-                        .readOnly(false)
-                        .required(true)
-                        .description("description")
-                        .name("name")
-                        .property("street", new StringProperty())
-                        .property("city", new StringProperty())));
+        Schema objectSchema = new ObjectSchema();
+        objectSchema.setTitle("InnerUserTitle");
+        objectSchema.setDefault("default");
+        objectSchema.setReadOnly(false);
+        objectSchema.setDescription("description");
+        objectSchema.setName("name");
+        objectSchema.addProperties("street", new StringSchema());
+        objectSchema.addProperties("city", new StringSchema());
 
-        new InlineModelResolver().flatten(swagger);
+        ArraySchema arraySchema =  new ArraySchema();
+        List<String> required = new LinkedList<>();
+        required.add("name");
+        arraySchema.setRequired(required);
+        arraySchema.setItems(objectSchema);
 
-        Model model = swagger.getDefinitions().get("User");
-        assertTrue(model instanceof ArrayModel);
 
-        Model user = swagger.getDefinitions().get("InnerUserTitle");
+        openAPI.getComponents().addSchemas("User", arraySchema);
+
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Schema model = openAPI.getComponents().getSchemas().get("User");
+        assertTrue(model instanceof ArraySchema);
+
+        Schema user = openAPI.getComponents().getSchemas().get("InnerUserTitle");
         assertNotNull(user);
         assertEquals("description", user.getDescription());
     }
 
     @Test
     public void resolveInlineArrayModelWithoutTitle() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
 
-        swagger.addDefinition("User", new ArrayModel()
-                .items(new ObjectProperty()
-                        ._default("default")
-                        .access("access")
-                        .readOnly(false)
-                        .required(true)
-                        .description("description")
-                        .name("name")
-                        .property("street", new StringProperty())
-                        .property("city", new StringProperty())));
+        Schema objectSchema = new ObjectSchema();
+        objectSchema.setDefault("default");
+        objectSchema.setReadOnly(false);
+        objectSchema.setDescription("description");
+        objectSchema.setName("name");
+        objectSchema.addProperties("street", new StringSchema());
+        objectSchema.addProperties("city", new StringSchema());
 
-        new InlineModelResolver().flatten(swagger);
+        ArraySchema arraySchema =  new ArraySchema();
+        List<String> required = new LinkedList<>();
+        required.add("name");
+        arraySchema.setRequired(required);
+        arraySchema.setItems(objectSchema);
 
-        Model model = swagger.getDefinitions().get("User");
-        assertTrue(model instanceof ArrayModel);
+        openAPI.getComponents().addSchemas("User", arraySchema);
 
-        Model user = swagger.getDefinitions().get("User_inner");
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Schema model = openAPI.getComponents().getSchemas().get("User");
+        assertTrue(model instanceof ArraySchema);
+
+        Schema user = openAPI.getComponents().getSchemas().get("User_inner");
         assertNotNull(user);
         assertEquals("description", user.getDescription());
     }
@@ -405,31 +470,45 @@ public class InlineModelResolverTest {
 
     @Test
     public void resolveInlineBodyParameter() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/hello", new Path()
-                .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(new ModelImpl()
-                                        .property("address", new ObjectProperty()
-                                                .property("street", new StringProperty()))
-                                        .property("name", new StringProperty())))));
 
-        new InlineModelResolver().flatten(swagger);
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.addProperties("street", new StringSchema());
 
-        Operation operation = swagger.getPaths().get("/hello").getGet();
-        BodyParameter bp = (BodyParameter)operation.getParameters().get(0);
-        assertTrue(bp.getSchema() instanceof RefModel);
+        Schema schema = new Schema();
+        schema.addProperties("address", objectSchema);
+        schema.addProperties("name", new StringSchema());
 
-        Model body = swagger.getDefinitions().get("body");
-        assertTrue(body instanceof ModelImpl);
+        MediaType mediaType = new MediaType();
+        mediaType.setSchema(schema);
 
-        ModelImpl impl = (ModelImpl) body;
-        assertNotNull(impl.getProperties().get("address"));
+        Content content = new Content();
+        content.addMediaType("*/*", mediaType );
+
+        RequestBody requestBody = new RequestBody();
+        requestBody.setContent(content);
+
+        Operation operation = new Operation();
+        operation.setRequestBody(requestBody);
+
+        PathItem pathItem = new PathItem();
+        pathItem.setGet(operation);
+        openAPI.path("/hello",pathItem);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Operation getOperation = openAPI.getPaths().get("/hello").getGet();
+        RequestBody body = getOperation.getRequestBody();
+        assertTrue(body.getContent().get("*/*").getSchema().get$ref() != null);
+
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("body");
+        assertTrue(bodySchema instanceof Schema);
+
+        assertNotNull(bodySchema.getProperties().get("address"));
     }
 
-    @Test
+   /* @Test
     public void resolveInlineBodyParameterWithTitle() throws Exception {
         Swagger swagger = new Swagger();
 
