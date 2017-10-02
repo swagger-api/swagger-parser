@@ -1,5 +1,6 @@
 package io.swagger.parser.v3.util;
 
+import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
@@ -41,6 +42,9 @@ public class InlineModelResolver {
 
         // operations
         Map<String, PathItem> paths = openAPI.getPaths();
+        if(openAPI.getComponents()== null){
+            openAPI.setComponents(new Components());
+        }
         Map<String, Schema> models = openAPI.getComponents().getSchemas();
 
         if (paths != null) {
@@ -441,9 +445,11 @@ public class InlineModelResolver {
      * @param target target property
      */
     public void copyVendorExtensions(Schema source, Schema target) {
-        Map<String, Object> vendorExtensions = source.getExtensions();
-        for (String extName : vendorExtensions.keySet()) {
-            target.addExtension(extName, vendorExtensions.get(extName));
+        if(source.getExtensions() != null) {
+            Map<String, Object> vendorExtensions = source.getExtensions();
+            for (String extName : vendorExtensions.keySet()) {
+                target.addExtension(extName, vendorExtensions.get(extName));
+            }
         }
     }
 

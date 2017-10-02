@@ -2,9 +2,15 @@ package io.swagger.parser.v3.util;
 
 import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.Operation;
+import io.swagger.oas.models.PathItem;
+import io.swagger.oas.models.media.Content;
+import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.StringSchema;
+import io.swagger.oas.models.responses.ApiResponse;
+import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.util.Json;
 import org.testng.annotations.Test;
 
@@ -231,42 +237,86 @@ public class InlineModelResolverTest {
     }
 
 
-    /*@Test
+    @Test
     public void testInlineResponseModel() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/foo/bar", new Path()
-                .get(new Operation()
-                        .response(200, new Response()
-                                .description("it works!")
-                                .schema(new ObjectProperty()
-                                        .property("name", new StringProperty()).vendorExtension("x-ext", "ext-prop")))))
-                .path("/foo/baz", new Path()
-                        .get(new Operation()
-                                .response(200, new Response()
-                                        .vendorExtension("x-foo", "bar")
-                                        .description("it works!")
-                                        .schema(new ObjectProperty()
-                                                .property("name", new StringProperty()).vendorExtension("x-ext", "ext-prop")))));
-        new InlineModelResolver().flatten(swagger);
 
-        Map<String, Response> responses = swagger.getPaths().get("/foo/bar").getGet().getResponses();
+        StringSchema stringSchema1 = new StringSchema();
+        stringSchema1.addExtension("x-ext", "ext-prop");
 
-        Response response = responses.get("200");
+        ObjectSchema objectSchema1 = new ObjectSchema();
+        objectSchema1.addProperties("name", stringSchema1);
+
+        MediaType mediaType1 = new MediaType();
+        mediaType1.setSchema(objectSchema1);
+
+        Content content1 = new Content();
+        content1.addMediaType("*/*", mediaType1 );
+
+        ApiResponse response1= new ApiResponse();
+        response1.setDescription("it works!");
+        response1.setContent(content1);
+
+        ApiResponses responses1 = new ApiResponses();
+        responses1.addApiResponse("200",response1);
+
+        Operation operation1 = new Operation();
+        operation1.setResponses(responses1);
+
+        PathItem pathItem1 = new PathItem();
+        pathItem1.setGet(operation1);
+        openAPI.path("/foo/bar",pathItem1);
+
+
+
+        StringSchema stringSchema2 = new StringSchema();
+        stringSchema1.addExtension("x-ext", "ext-prop");
+
+        ObjectSchema objectSchema2 = new ObjectSchema();
+        objectSchema2.addProperties("name", stringSchema2);
+
+        MediaType mediaType2 = new MediaType();
+        mediaType2.setSchema(objectSchema2);
+
+        Content content2 = new Content();
+        content2.addMediaType("*/*", mediaType2 );
+
+        ApiResponse response2 = new ApiResponse();
+        response2.setDescription("it works!");
+        response2.addExtension("x-foo","bar");
+        response2.setContent(content2);
+
+        ApiResponses responses2 = new ApiResponses();
+        responses2.addApiResponse("200",response2);
+
+        Operation operation2 = new Operation();
+        operation2.setResponses(responses2);
+
+        PathItem pathItem2 = new PathItem();
+        pathItem2.setGet(operation2);
+        openAPI.path("/foo/baz",pathItem2);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Map<String, ApiResponse> responses = openAPI.getPaths().get("/foo/bar").getGet().getResponses();
+
+        ApiResponse response = responses.get("200");
         assertNotNull(response);
-        Property schema = response.getSchema();
-        assertTrue(schema instanceof RefProperty);
-        assertEquals(1, schema.getVendorExtensions().size());
-        assertEquals("ext-prop", schema.getVendorExtensions().get("x-ext"));
+        System.out.println(response);
+        Schema schema = response.getContent().get("*/*").getSchema();
+        assertTrue(schema.get$ref() != null);
+        assertEquals(1, schema.getExtensions().size());
+        assertEquals("ext-prop", schema.getExtensions().get("x-ext"));
 
-        ModelImpl model = (ModelImpl)swagger.getDefinitions().get("inline_response_200");
+        Schema model = openAPI.getComponents().getSchemas().get("inline_response_200");
         assertTrue(model.getProperties().size() == 1);
         assertNotNull(model.getProperties().get("name"));
-        assertTrue(model.getProperties().get("name") instanceof StringProperty);
+        assertTrue(model.getProperties().get("name") instanceof StringSchema);
     }
 
 
-    @Test
+    /*@Test
     public void testInlineResponseModelWithTitle() throws Exception {
         Swagger swagger = new Swagger();
 
