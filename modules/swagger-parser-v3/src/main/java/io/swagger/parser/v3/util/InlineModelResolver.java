@@ -64,7 +64,7 @@ public class InlineModelResolver {
                                         Schema model = mediaType.getSchema();
                                         if (model.getProperties() != null && model.getProperties().size() > 0) {
                                             flattenProperties(model.getProperties(), pathname);
-                                            String modelName = resolveModelName(model.getTitle(), model.getName());
+                                            String modelName = resolveModelName(model.getTitle(), "body");
                                             mediaType.setSchema(new Schema().$ref(modelName));
                                             addGenerated(modelName, model);
                                             openAPI.getComponents().addSchemas(modelName, model);

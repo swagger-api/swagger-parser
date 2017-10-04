@@ -469,7 +469,7 @@ public class InlineModelResolverTest {
 
 
     @Test
-    public void resolveInlineBodyParameter() throws Exception {
+    public void resolveInlineRequestBody() throws Exception {
         OpenAPI openAPI = new OpenAPI();
 
 
@@ -508,36 +508,37 @@ public class InlineModelResolverTest {
         assertNotNull(bodySchema.getProperties().get("address"));
     }
 
-   /* @Test
+   @Test
     public void resolveInlineBodyParameterWithTitle() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        ModelImpl addressModelItem = new ModelImpl();
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.addProperties("street", new StringSchema());
+        objectSchema.addProperties("name", new StringSchema());
+        Schema addressModelItem = new Schema();
         String addressModelName = "DetailedAddress";
         addressModelItem.setTitle(addressModelName);
-        swagger.path("/hello", new Path()
+        addressModelItem.addProperties("address", objectSchema);
+
+        openAPI.path("/hello", new PathItem()
                 .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(addressModelItem
-                                        .property("address", new ObjectProperty()
-                                                .property("street", new StringProperty()))
-                                        .property("name", new StringProperty())))));
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                .schema(addressModelItem))))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Operation operation = swagger.getPaths().get("/hello").getGet();
-        BodyParameter bp = (BodyParameter)operation.getParameters().get(0);
-        assertTrue(bp.getSchema() instanceof RefModel);
+        Operation operation = openAPI.getPaths().get("/hello").getGet();
+        RequestBody bp = operation.getRequestBody();
+        assertTrue(bp.getContent().get("*/*").getSchema().get$ref() != null);
 
-        Model body = swagger.getDefinitions().get(addressModelName);
-        assertTrue(body instanceof ModelImpl);
+        Schema body = openAPI.getComponents().getSchemas().get(addressModelName);
+        assertTrue(body instanceof Schema);
 
-        ModelImpl impl = (ModelImpl) body;
-        assertNotNull(impl.getProperties().get("address"));
+        assertNotNull(body.getProperties().get("address"));
     }
 
-    @Test
+    /*@Test
     public void notResolveNonModelBodyParameter() throws Exception {
         Swagger swagger = new Swagger();
 
