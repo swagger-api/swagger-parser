@@ -1927,12 +1927,13 @@ public class OpenAPIDeserializer {
 
         ArrayNode enumArray = getArray("enum", node, false, location, result);
         if(enumArray != null) {
-            List<String> _enum = new ArrayList<>();
-            for(JsonNode n : enumArray) {
-                if(n.isValueNode()) {
+            List _enum = new ArrayList<>();
+            for (JsonNode n : enumArray) {
+                if (n.isNumber()) {
+                    _enum.add(n.numberValue());
+                }else if (n.isValueNode()) {
                     _enum.add(n.asText());
-                }
-                else {
+                } else {
                     result.invalidType(location, "enum", "value", n);
                 }
             }
