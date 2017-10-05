@@ -77,7 +77,7 @@ public class InlineModelResolver {
                                                 ObjectSchema op = (ObjectSchema) inner;
                                                 if (op.getProperties() != null && op.getProperties().size() > 0) {
                                                     flattenProperties(op.getProperties(), pathname);
-                                                    String modelName = resolveModelName(op.getTitle(), model.getName());
+                                                    String modelName = resolveModelName(op.getTitle(), "body");
                                                     Schema innerModel = modelFromProperty(op, modelName);
                                                     String existing = matchGenerated(innerModel);
                                                     if (existing != null) {

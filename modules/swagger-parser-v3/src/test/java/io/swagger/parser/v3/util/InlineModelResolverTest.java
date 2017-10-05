@@ -1,5 +1,6 @@
 package io.swagger.parser.v3.util;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
@@ -15,6 +16,7 @@ import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.util.Json;
 import org.testng.annotations.Test;
+import sun.jvm.hotspot.ui.action.HSDBActionManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -509,7 +511,7 @@ public class InlineModelResolverTest {
     }
 
    @Test
-    public void resolveInlineBodyParameterWithTitle() throws Exception {
+    public void resolveInlineRequestBodyWithTitle() throws Exception {
         OpenAPI openAPI = new OpenAPI();
 
         ObjectSchema objectSchema = new ObjectSchema();
@@ -529,8 +531,8 @@ public class InlineModelResolverTest {
         new InlineModelResolver().flatten(openAPI);
 
         Operation operation = openAPI.getPaths().get("/hello").getGet();
-        RequestBody bp = operation.getRequestBody();
-        assertTrue(bp.getContent().get("*/*").getSchema().get$ref() != null);
+        RequestBody requestBody = operation.getRequestBody();
+        assertTrue(requestBody.getContent().get("*/*").getSchema().get$ref() != null);
 
         Schema body = openAPI.getComponents().getSchemas().get(addressModelName);
         assertTrue(body instanceof Schema);
@@ -538,359 +540,388 @@ public class InlineModelResolverTest {
         assertNotNull(body.getProperties().get("address"));
     }
 
-    /*@Test
-    public void notResolveNonModelBodyParameter() throws Exception {
-        Swagger swagger = new Swagger();
+    @Test
+    public void notResolveNonModelRequestBody() throws Exception {
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/hello", new Path()
+        openAPI.path("/hello", new PathItem()
                 .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(new ModelImpl()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType().schema(new Schema()
                                         .type("string")
-                                        .format("binary")))));
+                                        .format("binary")))))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Operation operation = swagger.getPaths().get("/hello").getGet();
-        BodyParameter bp = (BodyParameter)operation.getParameters().get(0);
-        assertTrue(bp.getSchema() instanceof ModelImpl);
-        ModelImpl m = (ModelImpl) bp.getSchema();
-        assertEquals("string", m.getType());
-        assertEquals("binary", m.getFormat());
+        Operation operation = openAPI.getPaths().get("/hello").getGet();
+        RequestBody body = operation.getRequestBody();
+        assertTrue(body.getContent().get("*/*").getSchema() instanceof Schema);
+        Schema schema = body.getContent().get("*/*").getSchema();
+        assertEquals("string", schema.getType());
+        assertEquals("binary", schema.getFormat());
     }
 
     @Test
-    public void resolveInlineArrayBodyParameter() throws Exception {
-        Swagger swagger = new Swagger();
+    public void resolveInlineArrayRequestBody() throws Exception {
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/hello", new Path()
+        ObjectSchema addressSchema = new ObjectSchema();
+        addressSchema.addProperties("street",new StringSchema());
+
+        ObjectSchema objectSchema =new ObjectSchema();
+        objectSchema.addProperties("address", addressSchema);
+
+        ArraySchema arraySchema = new ArraySchema();
+        arraySchema.items(objectSchema);
+
+
+        openAPI.path("/hello", new PathItem()
                 .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(new ArrayModel()
-                                        .items(new ObjectProperty()
-                                                .property("address", new ObjectProperty()
-                                                        .property("street", new StringProperty())))))));
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*",new MediaType()
+                                .schema(arraySchema))))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Parameter param = swagger.getPaths().get("/hello").getGet().getParameters().get(0);
-        assertTrue(param instanceof BodyParameter);
+        RequestBody body = openAPI.getPaths().get("/hello").getGet().getRequestBody();
+        Schema schema = body.getContent().get("*/*").getSchema();
 
-        BodyParameter bp = (BodyParameter) param;
-        Model schema = bp.getSchema();
+        assertTrue(schema instanceof ArraySchema);
 
-        assertTrue(schema instanceof ArrayModel);
+        ArraySchema am = (ArraySchema) schema;
+        Schema inner = am.getItems();
+        assertTrue(inner.get$ref() != null);
 
-        ArrayModel am = (ArrayModel) schema;
-        Property inner = am.getItems();
-        assertTrue(inner instanceof RefProperty);
+        assertEquals( "#/components/schemas/body",inner.get$ref());
 
-        RefProperty rp = (RefProperty) inner;
-
-        assertEquals(rp.getType(), "ref");
-        assertEquals(rp.get$ref(), "#/definitions/body");
-        assertEquals(rp.getSimpleRef(), "body");
-
-        Model inline = swagger.getDefinitions().get("body");
+        Schema inline = openAPI.getComponents().getSchemas().get("body");
         assertNotNull(inline);
-        assertTrue(inline instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) inline;
-        RefProperty rpAddress = (RefProperty) impl.getProperties().get("address");
-        assertNotNull(rpAddress);
-        assertEquals(rpAddress.getType(), "ref");
-        assertEquals(rpAddress.get$ref(), "#/definitions/hello_address");
-        assertEquals(rpAddress.getSimpleRef(), "hello_address");
+        assertTrue(inline instanceof Schema);
 
-        Model inlineProp = swagger.getDefinitions().get("hello_address");
+        Schema address = (Schema) inline.getProperties().get("address");
+        assertNotNull(address);
+
+        assertEquals( "#/components/schemas/hello_address",address.get$ref());
+
+
+        Schema inlineProp = openAPI.getComponents().getSchemas().get("hello_address");
         assertNotNull(inlineProp);
-        assertTrue(inlineProp instanceof ModelImpl);
-        ModelImpl implProp = (ModelImpl) inlineProp;
-        assertNotNull(implProp.getProperties().get("street"));
-        assertTrue(implProp.getProperties().get("street") instanceof StringProperty);
+        assertTrue(inlineProp instanceof Schema);
+
+        assertNotNull(inlineProp.getProperties().get("street"));
+        assertTrue(inlineProp.getProperties().get("street") instanceof StringSchema);
     }
 
     @Test
     public void resolveInlineArrayResponse() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        ArrayProperty schema = new ArrayProperty()
-                .items(new ObjectProperty()
-                        .property("name", new StringProperty())
-                        .vendorExtension("x-ext", "ext-items"))
-                .vendorExtension("x-ext", "ext-prop");
-        swagger.path("/foo/baz", new Path()
+        ObjectSchema items = new ObjectSchema();
+        items.addExtension("x-ext", "ext-items");
+        items.addProperties("name", new StringSchema());
+
+
+        ArraySchema schema = new ArraySchema()
+                .items(items);
+        schema.addExtension("x-ext", "ext-prop");
+
+        ApiResponse response  = new ApiResponse();
+        response.addExtension("x-foo", "bar");
+        response.description("it works!");
+        response.content(new Content().addMediaType("*/*", new MediaType().schema(schema)));
+
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
-                                .vendorExtension("x-foo", "bar")
-                                .description("it works!")
-                                .schema(schema))));
+                        .responses(new ApiResponses().addApiResponse("200",response))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
-        assertNotNull(response);
+        ApiResponse apiResponse = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+        assertNotNull(apiResponse);
 
-        assertNotNull(response.getSchema());
-        Property responseProperty = response.getSchema();
+        assertNotNull(apiResponse.getContent().get("*/*").getSchema());
+        Schema responseProperty = apiResponse.getContent().get("*/*").getSchema();
 
         // no need to flatten more
-        assertTrue(responseProperty instanceof ArrayProperty);
+        assertTrue(responseProperty instanceof ArraySchema);
 
-        ArrayProperty ap = (ArrayProperty) responseProperty;
-        assertEquals(1, ap.getVendorExtensions().size());
-        assertEquals("ext-prop", ap.getVendorExtensions().get("x-ext"));
+        ArraySchema ap = (ArraySchema) responseProperty;
+        assertEquals(1, ap.getExtensions().size());
+        assertEquals("ext-prop", ap.getExtensions().get("x-ext"));
 
-        Property p = ap.getItems();
+        Schema p = ap.getItems();
 
         assertNotNull(p);
 
-        RefProperty rp = (RefProperty) p;
-        assertEquals(rp.getType(), "ref");
-        assertEquals(rp.get$ref(), "#/definitions/inline_response_200");
-        assertEquals(rp.getSimpleRef(), "inline_response_200");
-        assertEquals(1, rp.getVendorExtensions().size());
-        assertEquals("ext-items", rp.getVendorExtensions().get("x-ext"));
+        assertEquals("#/components/schemas/inline_response_200", p.get$ref());
 
-        Model inline = swagger.getDefinitions().get("inline_response_200");
+        assertEquals(1, p.getExtensions().size());
+        assertEquals("ext-items", p.getExtensions().get("x-ext"));
+
+        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_200");
         assertNotNull(inline);
-        assertTrue(inline instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) inline;
-        assertNotNull(impl.getProperties().get("name"));
-        assertTrue(impl.getProperties().get("name") instanceof StringProperty);
+        assertTrue(inline instanceof Schema);
+
+        assertNotNull(inline.getProperties().get("name"));
+        assertTrue(inline.getProperties().get("name") instanceof StringSchema);
     }
 
     @Test
     public void resolveInlineArrayResponseWithTitle() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/foo/baz", new Path()
+        ApiResponse apiResponse  = new ApiResponse();
+        apiResponse.addExtension("x-foo", "bar");
+        apiResponse.description("it works!");
+
+        Map<String,Schema> properties = new HashMap<>();
+        properties.put("name", new StringSchema());
+
+        apiResponse.content(new Content().addMediaType("*/*", new MediaType().schema(new ArraySchema()
+                        .items(new ObjectSchema()
+                                .title("FooBar")
+                                .properties(properties)))));
+
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
-                                .vendorExtension("x-foo", "bar")
-                                .description("it works!")
-                                .schema(new ArrayProperty()
-                                        .items(new ObjectProperty()
-                                                .title("FooBar")
-                                                .property("name", new StringProperty()))))));
+                        .responses(new ApiResponses().addApiResponse("200",apiResponse))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+        ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
         assertNotNull(response);
 
-        assertNotNull(response.getSchema());
-        Property responseProperty = response.getSchema();
+        assertNotNull(response.getContent().get("*/*").getSchema());
+        Schema responseProperty = response.getContent().get("*/*").getSchema();
 
         // no need to flatten more
-        assertTrue(responseProperty instanceof ArrayProperty);
+        assertTrue(responseProperty instanceof ArraySchema);
 
-        ArrayProperty ap = (ArrayProperty) responseProperty;
-        Property p = ap.getItems();
+        ArraySchema ap = (ArraySchema) responseProperty;
+        Schema p = ap.getItems();
 
         assertNotNull(p);
 
-        RefProperty rp = (RefProperty) p;
-        assertEquals(rp.getType(), "ref");
-        assertEquals(rp.get$ref(), "#/definitions/"+ "FooBar");
-        assertEquals(rp.getSimpleRef(), "FooBar");
+        assertEquals(p.get$ref(), "#/components/schemas/"+ "FooBar");
 
-        Model inline = swagger.getDefinitions().get("FooBar");
+
+        Schema inline = openAPI.getComponents().getSchemas().get("FooBar");
         assertNotNull(inline);
-        assertTrue(inline instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) inline;
-        assertNotNull(impl.getProperties().get("name"));
-        assertTrue(impl.getProperties().get("name") instanceof StringProperty);
+        assertTrue(inline instanceof Schema);
+        assertNotNull(inline.getProperties().get("name"));
+        assertTrue(inline.getProperties().get("name") instanceof StringSchema);
     }
 
     @Test
     public void testInlineMapResponse() throws Exception {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        MapProperty schema = new MapProperty();
-        schema.setAdditionalProperties(new StringProperty());
-        schema.setVendorExtension("x-ext", "ext-prop");
+        Schema schema = new Schema();
+        schema.setAdditionalProperties(new StringSchema());
+        schema.addExtension("x-ext", "ext-prop");
 
-        swagger.path("/foo/baz", new Path()
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.description("it works!");
+        MediaType mediaType = new MediaType();
+        mediaType.setSchema(schema);
+
+        Content content = new Content();
+        content.addMediaType("*/*",mediaType);
+
+        apiResponse.setContent(content);
+        apiResponse.addExtension("x-foo", "bar");
+
+        ApiResponses apiResponses = new ApiResponses();
+        apiResponses.addApiResponse("200",apiResponse);
+
+
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
-                                .vendorExtension("x-foo", "bar")
-                                .description("it works!")
-                                .schema(schema))));
-        new InlineModelResolver().flatten(swagger);
-        Json.prettyPrint(swagger);
+                        .responses(apiResponses)));
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
 
-        Property property = response.getSchema();
-        assertTrue(property instanceof MapProperty);
-        assertTrue(swagger.getDefinitions().size() == 0);
-        assertEquals(1, property.getVendorExtensions().size());
-        assertEquals("ext-prop", property.getVendorExtensions().get("x-ext"));
+        new InlineModelResolver().flatten(openAPI);
+        Json.prettyPrint(openAPI);
+
+        ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+
+        Schema property = response.getContent().get("*/*").getSchema();
+        assertTrue(property.getAdditionalProperties() != null);
+        assertTrue(openAPI.getComponents().getSchemas() == null);
+        assertEquals(1, property.getExtensions().size());
+        assertEquals("ext-prop", property.getExtensions().get("x-ext"));
     }
 
     @Test
-    public void testInlineMapResponseWithObjectProperty() throws Exception {
-        Swagger swagger = new Swagger();
+    public void testInlineMapResponseWithObjectSchema() throws Exception {
+        OpenAPI openAPI = new OpenAPI();
 
-        MapProperty schema = new MapProperty();
-        schema.setAdditionalProperties(new ObjectProperty()
-                .property("name", new StringProperty()));
-        schema.setVendorExtension("x-ext", "ext-prop");
+        Schema schema = new Schema();
+        schema.setAdditionalProperties(new ObjectSchema()
+                .addProperties("name", new StringSchema()));
+        schema.addExtension("x-ext", "ext-prop");
 
-        swagger.path("/foo/baz", new Path()
+        ApiResponse apiResponse = new ApiResponse()
+                .description("it works!")
+                .content(new Content().addMediaType("*/*",new MediaType().schema(schema)));
+        apiResponse.addExtension("x-foo", "bar");
+
+        ApiResponses apiResponses = new ApiResponses().addApiResponse("200",apiResponse);
+
+
+
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
-                                .vendorExtension("x-foo", "bar")
-                                .description("it works!")
-                                .schema(schema))));
-        new InlineModelResolver().flatten(swagger);
+                        .responses(apiResponses)));
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
-        Property property = response.getSchema();
-        assertTrue(property instanceof MapProperty);
-        assertEquals(1, property.getVendorExtensions().size());
-        assertEquals("ext-prop", property.getVendorExtensions().get("x-ext"));
-        assertTrue(swagger.getDefinitions().size() == 1);
 
-        Model inline = swagger.getDefinitions().get("inline_response_200");
-        assertTrue(inline instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) inline;
-        assertNotNull(impl.getProperties().get("name"));
-        assertTrue(impl.getProperties().get("name") instanceof StringProperty);
+        new InlineModelResolver().flatten(openAPI);
+
+        ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+        Schema property = response.getContent().get("*/*").getSchema();
+        assertTrue(property.getAdditionalProperties() != null);
+        assertEquals(1, property.getExtensions().size());
+        assertEquals("ext-prop", property.getExtensions().get("x-ext"));
+        assertTrue(openAPI.getComponents().getSchemas().size() == 1);
+
+        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_200");
+        assertTrue(inline instanceof Schema);
+        assertNotNull(inline.getProperties().get("name"));
+        assertTrue(inline.getProperties().get("name") instanceof StringSchema);
     }
 
     @Test
     public void testArrayResponse() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        ArrayProperty schema = new ArrayProperty();
-        schema.setItems(new ObjectProperty()
-                .property("name", new StringProperty()));
 
-        swagger.path("/foo/baz", new Path()
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.addProperties("name", new StringSchema());
+        ArraySchema schema = new ArraySchema();
+        schema.setItems(objectSchema);
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.addExtension("x-foo", "bar");
+        apiResponse.setDescription("it works!");
+        apiResponse.setContent(new Content().addMediaType("*/*", new MediaType().schema(schema)));
+
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
-                                .vendorExtension("x-foo", "bar")
-                                .description("it works!")
-                                .schema(schema))));
-        new InlineModelResolver().flatten(swagger);
+                        .responses(new ApiResponses().addApiResponse("200", apiResponse))));
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
-        assertTrue(response.getSchema() instanceof ArrayProperty);
+        new InlineModelResolver().flatten(openAPI);
 
-        ArrayProperty am = (ArrayProperty) response.getSchema();
-        Property items = am.getItems();
-        assertTrue(items instanceof RefProperty);
-        RefProperty rp = (RefProperty) items;
-        assertEquals(rp.getType(), "ref");
-        assertEquals(rp.get$ref(), "#/definitions/inline_response_200");
-        assertEquals(rp.getSimpleRef(), "inline_response_200");
+        ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+        assertTrue(response.getContent().get("*/*").getSchema() instanceof ArraySchema);
 
-        Model inline = swagger.getDefinitions().get("inline_response_200");
-        assertTrue(inline instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) inline;
-        assertNotNull(impl.getProperties().get("name"));
-        assertTrue(impl.getProperties().get("name") instanceof StringProperty);
+        ArraySchema am = (ArraySchema) response.getContent().get("*/*").getSchema();
+        Schema items = am.getItems();
+        assertTrue(items.get$ref() != null);
+
+        assertEquals(items.get$ref(), "#/components/schemas/inline_response_200");
+
+
+        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_200");
+        assertTrue(inline instanceof Schema);
+
+        assertNotNull(inline.getProperties().get("name"));
+        assertTrue(inline.getProperties().get("name") instanceof StringSchema);
     }
 
     @Test
     public void testBasicInput() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
 
-        ModelImpl user = new ModelImpl()
-                .property("name", new StringProperty());
+        Schema user = new Schema();
+        user.addProperties("name", new StringSchema());
 
-        swagger.path("/foo/baz", new Path()
+        openAPI.path("/foo/baz", new PathItem()
                 .post(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("myBody")
-                                .schema(new RefModel("User")))));
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*",new MediaType().schema(new Schema().$ref("User")))))));
 
-        swagger.addDefinition("User", user);
+        openAPI.getComponents().addSchemas("User", user);
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Json.prettyPrint(swagger);
+        Json.prettyPrint(openAPI);
     }
 
     @Test
-    public void testArbitraryObjectBodyParam() {
-        Swagger swagger = new Swagger();
+    public void testArbitraryRequestBody() {
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/hello", new Path()
+        openAPI.path("/hello", new PathItem()
                 .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(new ModelImpl()))));
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*",new MediaType().schema(new Schema()))))));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Operation operation = openAPI.getPaths().get("/hello").getGet();
+        RequestBody requestBody = operation.getRequestBody();
+        assertTrue(requestBody.getContent().get("*/*").getSchema() instanceof Schema);
+        Schema schema = requestBody.getContent().get("*/*").getSchema();
+        assertNull(schema.getType());
+    }
+
+    @Test
+    public void testArbitraryObjectRequestBodyInline() {
+        OpenAPI swagger = new OpenAPI();
+
+        Schema schema = new Schema();
+        schema.addProperties("arbitrary", new ObjectSchema());
+
+        swagger.path("/hello", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*",new MediaType().schema(schema))))));
 
         new InlineModelResolver().flatten(swagger);
 
         Operation operation = swagger.getPaths().get("/hello").getGet();
-        BodyParameter bp = (BodyParameter)operation.getParameters().get(0);
-        assertTrue(bp.getSchema() instanceof ModelImpl);
-        ModelImpl m = (ModelImpl) bp.getSchema();
-        assertNull(m.getType());
-    }
+        RequestBody requestBody = operation.getRequestBody();
+        assertTrue(requestBody.getContent().get("*/*").getSchema().get$ref() != null);
 
-    @Test
-    public void testArbitraryObjectBodyParamInline() {
-        Swagger swagger = new Swagger();
+        Schema body = swagger.getComponents().getSchemas().get("body");
+        assertTrue(body instanceof Schema);
 
-        swagger.path("/hello", new Path()
-                .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(new ModelImpl()
-                                        .property("arbitrary", new ObjectProperty())))));
 
-        new InlineModelResolver().flatten(swagger);
-
-        Operation operation = swagger.getPaths().get("/hello").getGet();
-        BodyParameter bp = (BodyParameter)operation.getParameters().get(0);
-        assertTrue(bp.getSchema() instanceof RefModel);
-
-        Model body = swagger.getDefinitions().get("body");
-        assertTrue(body instanceof ModelImpl);
-
-        ModelImpl impl = (ModelImpl) body;
-        Property p = impl.getProperties().get("arbitrary");
-        assertNotNull(p);
-        assertTrue(p instanceof ObjectProperty);
+        Schema property = (Schema) body.getProperties().get("arbitrary");
+        assertNotNull(property);
+        assertTrue(property instanceof ObjectSchema);
     }
 
     @Test
     public void testArbitraryObjectBodyParamWithArray() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/hello", new Path()
+        openAPI.path("/hello", new PathItem()
                 .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(new ArrayModel()
-                                        .items(new ObjectProperty())))));
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*",new MediaType().schema(new ArraySchema()
+                                        .items(new ObjectSchema())))))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Parameter param = swagger.getPaths().get("/hello").getGet().getParameters().get(0);
-        assertTrue(param instanceof BodyParameter);
+        RequestBody requestBody = openAPI.getPaths().get("/hello").getGet().getRequestBody();
 
-        BodyParameter bp = (BodyParameter) param;
-        Model schema = bp.getSchema();
 
-        assertTrue(schema instanceof ArrayModel);
+        Schema schema = requestBody.getContent().get("*/*").getSchema();
 
-        ArrayModel am = (ArrayModel) schema;
-        Property inner = am.getItems();
-        assertTrue(inner instanceof ObjectProperty);
+        assertTrue(schema instanceof ArraySchema);
 
-        ObjectProperty op = (ObjectProperty) inner;
-        assertNotNull(op);
-        assertNull(op.getProperties());
+        ArraySchema arraySchema = (ArraySchema) schema;
+        Schema inner = arraySchema.getItems();
+        assertTrue(inner instanceof ObjectSchema);
+
+        ObjectSchema property = (ObjectSchema) inner;
+        assertNotNull(property);
+        assertNull(property.getProperties());
     }
 
-    @Test
+    /*@Test
     public void testArbitraryObjectBodyParamArrayInline() {
         Swagger swagger = new Swagger();
 
@@ -931,7 +962,7 @@ public class InlineModelResolverTest {
         assertTrue(p instanceof ObjectProperty);
     }
 
-    @Test
+    /*@Test
     public void testArbitraryObjectResponse() {
         Swagger swagger = new Swagger();
 
