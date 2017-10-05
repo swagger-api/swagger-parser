@@ -1,6 +1,7 @@
 package io.swagger.parser.v3.util;
 
-import com.sun.org.apache.regexp.internal.RE;
+
+
 import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
@@ -16,7 +17,7 @@ import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import io.swagger.util.Json;
 import org.testng.annotations.Test;
-import sun.jvm.hotspot.ui.action.HSDBActionManager;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -921,241 +922,249 @@ public class InlineModelResolverTest {
         assertNull(property.getProperties());
     }
 
-    /*@Test
+    @Test
     public void testArbitraryObjectBodyParamArrayInline() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/hello", new Path()
+        ObjectSchema items = new ObjectSchema();
+        items.addProperties("arbitrary", new ObjectSchema());
+
+        openAPI.path("/hello", new PathItem()
                 .get(new Operation()
-                        .parameter(new BodyParameter()
-                                .name("body")
-                                .schema(new ArrayModel()
-                                        .items(new ObjectProperty()
-                                                .property("arbitrary", new ObjectProperty()))))));
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*",new MediaType().schema(new ArraySchema().items(items)))))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Parameter param = swagger.getPaths().get("/hello").getGet().getParameters().get(0);
-        assertTrue(param instanceof BodyParameter);
+        RequestBody requestBody = openAPI.getPaths().get("/hello").getGet().getRequestBody();
 
-        BodyParameter bp = (BodyParameter) param;
-        Model schema = bp.getSchema();
+        Schema schema = requestBody.getContent().get("*/*").getSchema();
 
-        assertTrue(schema instanceof ArrayModel);
+        assertTrue(schema instanceof ArraySchema);
 
-        ArrayModel am = (ArrayModel) schema;
-        Property inner = am.getItems();
-        assertTrue(inner instanceof RefProperty);
+        ArraySchema arraySchema = (ArraySchema) schema;
+        Schema inner = arraySchema.getItems();
+        assertTrue(inner.get$ref() != null);
 
-        RefProperty rp = (RefProperty) inner;
 
-        assertEquals(rp.getType(), "ref");
-        assertEquals(rp.get$ref(), "#/definitions/body");
-        assertEquals(rp.getSimpleRef(), "body");
+        assertEquals(inner.get$ref(), "#/components/schemas/body");
 
-        Model inline = swagger.getDefinitions().get("body");
+        Schema inline = openAPI.getComponents().getSchemas().get("body");
         assertNotNull(inline);
-        assertTrue(inline instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) inline;
-        Property p = impl.getProperties().get("arbitrary");
+
+        Schema p = (Schema)inline.getProperties().get("arbitrary");
         assertNotNull(p);
-        assertTrue(p instanceof ObjectProperty);
+        assertTrue(p instanceof ObjectSchema);
     }
 
-    /*@Test
+    @Test
     public void testArbitraryObjectResponse() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/foo/bar", new Path()
+        openAPI.path("/foo/bar", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
+                        .responses(new ApiResponses().addApiResponse("200", new ApiResponse()
                                 .description("it works!")
-                                .schema(new ObjectProperty()))));
-        new InlineModelResolver().flatten(swagger);
+                                .content(new Content().addMediaType("*/*", new MediaType().schema(new ObjectSchema())))))));
 
-        Map<String, Response> responses = swagger.getPaths().get("/foo/bar").getGet().getResponses();
+        new InlineModelResolver().flatten(openAPI);
 
-        Response response = responses.get("200");
+        Map<String, ApiResponse> responses = openAPI.getPaths().get("/foo/bar").getGet().getResponses();
+
+        ApiResponse response = responses.get("200");
         assertNotNull(response);
-        assertTrue(response.getSchema() instanceof ObjectProperty);
-        ObjectProperty op = (ObjectProperty) response.getSchema();
+        assertTrue(response.getContent().get("*/*").getSchema() instanceof ObjectSchema);
+        ObjectSchema op = (ObjectSchema) response.getContent().get("*/*").getSchema();
         assertNull(op.getProperties());
     }
 
     @Test
     public void testArbitraryObjectResponseArray() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/foo/baz", new Path()
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
+                        .responses(new ApiResponses().addApiResponse("200", new ApiResponse()
                                 .description("it works!")
-                                .schema(new ArrayProperty()
-                                        .items(new ObjectProperty())))));
-        new InlineModelResolver().flatten(swagger);
+                                .content(new Content().addMediaType("*/*", new MediaType().schema(new ArraySchema()
+                                        .items(new ObjectSchema()))))))));
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
-        assertTrue(response.getSchema() instanceof ArrayProperty);
+        new InlineModelResolver().flatten(openAPI);
 
-        ArrayProperty am = (ArrayProperty) response.getSchema();
-        Property items = am.getItems();
-        assertTrue(items instanceof ObjectProperty);
-        ObjectProperty op = (ObjectProperty) items;
+        ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+        assertTrue(response.getContent().get("*/*").getSchema() instanceof ArraySchema);
+
+        ArraySchema arraySchema = (ArraySchema) response.getContent().get("*/*").getSchema();
+        Schema items = arraySchema.getItems();
+        assertTrue(items instanceof ObjectSchema);
+        ObjectSchema op = (ObjectSchema) items;
         assertNull(op.getProperties());
     }
 
     @Test
     public void testArbitraryObjectResponseArrayInline() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        swagger.path("/foo/baz", new Path()
+        ArraySchema arraySchema = new ArraySchema();
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.addProperties("arbitrary", new ObjectSchema());
+        arraySchema.items(objectSchema);
+
+
+        ApiResponse apiResponse =  new ApiResponse();
+        apiResponse.addExtension("x-foo", "bar");
+        apiResponse.description("it works!");
+        apiResponse.content(new Content().addMediaType("*/*", new MediaType().schema(arraySchema)));
+
+
+
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
-                                .vendorExtension("x-foo", "bar")
-                                .description("it works!")
-                                .schema(new ArrayProperty()
-                                        .items(new ObjectProperty()
-                                                .property("arbitrary", new ObjectProperty()))))));
+                        .responses(new ApiResponses().addApiResponse("200",apiResponse))));
 
-        new InlineModelResolver().flatten(swagger);
+        new InlineModelResolver().flatten(openAPI);
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+        ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
         assertNotNull(response);
 
-        assertNotNull(response.getSchema());
-        Property responseProperty = response.getSchema();
-        assertTrue(responseProperty instanceof ArrayProperty);
+        assertNotNull(response.getContent().get("*/*").getSchema());
+        Schema responseProperty = response.getContent().get("*/*").getSchema();
+        assertTrue(responseProperty instanceof ArraySchema);
 
-        ArrayProperty ap = (ArrayProperty) responseProperty;
-        Property p = ap.getItems();
-        assertNotNull(p);
+        ArraySchema arraySchema1 = (ArraySchema) responseProperty;
+        Schema items = arraySchema1.getItems();
+        assertNotNull(items);
 
-        RefProperty rp = (RefProperty) p;
-        assertEquals(rp.getType(), "ref");
-        assertEquals(rp.get$ref(), "#/definitions/inline_response_200");
-        assertEquals(rp.getSimpleRef(), "inline_response_200");
+        assertEquals( "#/components/schemas/inline_response_200",items.get$ref());
 
-        Model inline = swagger.getDefinitions().get("inline_response_200");
+        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_200");
         assertNotNull(inline);
-        assertTrue(inline instanceof ModelImpl);
-        ModelImpl impl = (ModelImpl) inline;
-        Property inlineProp = impl.getProperties().get("arbitrary");
+        assertTrue(inline instanceof Schema);
+
+        Schema inlineProp = (Schema) inline.getProperties().get("arbitrary");
         assertNotNull(inlineProp);
-        assertTrue(inlineProp instanceof ObjectProperty);
-        ObjectProperty op = (ObjectProperty) inlineProp;
-        assertNull(op.getProperties());
+        assertTrue(inlineProp instanceof ObjectSchema);
+        assertNull(inlineProp.getProperties());
     }
 
     @Test
     public void testArbitraryObjectResponseMapInline() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
 
-        MapProperty schema = new MapProperty();
-        schema.setAdditionalProperties(new ObjectProperty());
+        Schema schema = new Schema();
+        schema.setAdditionalProperties(new ObjectSchema());
 
-        swagger.path("/foo/baz", new Path()
+        openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
-                        .response(200, new Response()
+                        .responses(new ApiResponses().addApiResponse("200", new ApiResponse()
                                 .description("it works!")
-                                .schema(schema))));
-        new InlineModelResolver().flatten(swagger);
+                                .content(new Content().addMediaType("*/*", new MediaType().schema(schema)))))));
 
-        Response response = swagger.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+        new InlineModelResolver().flatten(openAPI);
 
-        Property property = response.getSchema();
-        assertTrue(property instanceof MapProperty);
-        assertTrue(swagger.getDefinitions().size() == 0);
-        Property inlineProp = ((MapProperty) property).getAdditionalProperties();
-        assertTrue(inlineProp instanceof ObjectProperty);
-        ObjectProperty op = (ObjectProperty) inlineProp;
+        ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
+
+        Schema property = response.getContent().get("*/*").getSchema();
+        assertTrue(property.getAdditionalProperties() != null);
+        assertTrue(openAPI.getComponents().getSchemas() == null);
+        Schema inlineProp = property.getAdditionalProperties();
+        assertTrue(inlineProp instanceof ObjectSchema);
+        ObjectSchema op = (ObjectSchema) inlineProp;
         assertNull(op.getProperties());
     }
 
     @Test
     public void testArbitraryObjectModelInline() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
 
-        swagger.addDefinition("User", new ModelImpl()
-                .name("user")
-                .description("a common user")
-                .property("name", new StringProperty())
-                .property("arbitrary", new ObjectProperty()
-                        .title("title")
-                        ._default("default")
-                        .access("access")
-                        .readOnly(false)
-                        .required(true)
-                        .description("description")
-                        .name("name")));
+        Schema userSchema = new Schema();
+        userSchema.setName("user");
+        userSchema.setDescription("a common user");
+        userSchema.addProperties("name", new StringSchema());
 
-        new InlineModelResolver().flatten(swagger);
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.setTitle("title");
+        objectSchema.setDefault("default");
+        objectSchema.setReadOnly(false);
+        objectSchema.setDescription("description");
+        objectSchema.setName("name");
 
-        ModelImpl user = (ModelImpl)swagger.getDefinitions().get("User");
+        userSchema.addProperties("arbitrary", objectSchema);
+        List required = new ArrayList();
+        required.add("arbitrary");
+        userSchema.setRequired(required);
+
+
+        openAPI.getComponents().addSchemas("User", userSchema);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Schema user = openAPI.getComponents().getSchemas().get("User");
         assertNotNull(user);
-        Property inlineProp = user.getProperties().get("arbitrary");
-        assertTrue(inlineProp instanceof ObjectProperty);
-        ObjectProperty op = (ObjectProperty) inlineProp;
-        assertNull(op.getProperties());
+        Schema inlineProp = (Schema) user.getProperties().get("arbitrary");
+        assertTrue(inlineProp instanceof ObjectSchema);
+        assertNull(inlineProp.getProperties());
     }
 
     @Test
     public void testArbitraryObjectModelWithArrayInlineWithoutTitle() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
 
-        swagger.addDefinition("User", new ArrayModel()
-                .items(new ObjectProperty()
-                        ._default("default")
-                        .access("access")
-                        .readOnly(false)
-                        .required(true)
-                        .description("description")
-                        .name("name")
-                        .property("arbitrary", new ObjectProperty())));
+        Schema items = new ObjectSchema();
+        items.setDefault("default");
+        items.setReadOnly(false);
+        items.setDescription("description");
+        items.setName("name");
+        items.addProperties("arbitrary", new ObjectSchema());
 
-        new InlineModelResolver().flatten(swagger);
+        openAPI.getComponents().addSchemas("User", new ArraySchema().items(items).addRequiredItem("name"));
 
-        Model model = swagger.getDefinitions().get("User");
-        assertTrue(model instanceof ArrayModel);
-        ArrayModel am = (ArrayModel) model;
-        Property inner = am.getItems();
-        assertTrue(inner instanceof RefProperty);
+        new InlineModelResolver().flatten(openAPI);
 
-        ModelImpl userInner = (ModelImpl)swagger.getDefinitions().get("User_inner");
+        Schema model = openAPI.getComponents().getSchemas().get("User");
+        assertTrue(model instanceof ArraySchema);
+        ArraySchema am = (ArraySchema) model;
+        Schema inner = am.getItems();
+        assertTrue(inner.get$ref() != null);
+
+        Schema userInner = openAPI.getComponents().getSchemas().get("User_inner");
         assertNotNull(userInner);
-        Property inlineProp = userInner.getProperties().get("arbitrary");
-        assertTrue(inlineProp instanceof ObjectProperty);
-        ObjectProperty op = (ObjectProperty) inlineProp;
+        Schema inlineProp = (Schema)userInner.getProperties().get("arbitrary");
+        assertTrue(inlineProp instanceof ObjectSchema);
+        ObjectSchema op = (ObjectSchema) inlineProp;
         assertNull(op.getProperties());
     }
 
     @Test
     public void testArbitraryObjectModelWithArrayInlineWithTitle() {
-        Swagger swagger = new Swagger();
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
 
-        swagger.addDefinition("User", new ArrayModel()
-                .items(new ObjectProperty()
-                        .title("InnerUserTitle")
-                        ._default("default")
-                        .access("access")
-                        .readOnly(false)
-                        .required(true)
-                        .description("description")
-                        .name("name")
-                        .property("arbitrary", new ObjectProperty())));
+        Schema items = new ObjectSchema();
+        items.setTitle("InnerUserTitle");
+        items.setDefault("default");
+        items.setReadOnly(false);
+        items.setDescription("description");
+        items.setName("name");
+        items.addProperties("arbitrary", new ObjectSchema());
 
-        new InlineModelResolver().flatten(swagger);
+        openAPI.getComponents().addSchemas("User", new ArraySchema().items(items).addRequiredItem("name"));
 
-        Model model = swagger.getDefinitions().get("User");
-        assertTrue(model instanceof ArrayModel);
-        ArrayModel am = (ArrayModel) model;
-        Property inner = am.getItems();
-        assertTrue(inner instanceof RefProperty);
+        new InlineModelResolver().flatten(openAPI);
 
-        ModelImpl userInner = (ModelImpl)swagger.getDefinitions().get("InnerUserTitle");
+        Schema model = openAPI.getComponents().getSchemas().get("User");
+        assertTrue(model instanceof ArraySchema);
+        ArraySchema am = (ArraySchema) model;
+        Schema inner = am.getItems();
+        assertTrue(inner.get$ref() != null);
+
+        Schema userInner = openAPI.getComponents().getSchemas().get("InnerUserTitle");
         assertNotNull(userInner);
-        Property inlineProp = userInner.getProperties().get("arbitrary");
-        assertTrue(inlineProp instanceof ObjectProperty);
-        ObjectProperty op = (ObjectProperty) inlineProp;
+        Schema inlineProp = (Schema) userInner.getProperties().get("arbitrary");
+        assertTrue(inlineProp instanceof ObjectSchema);
+        ObjectSchema op = (ObjectSchema) inlineProp;
         assertNull(op.getProperties());
-    }*/
+    }
 }
