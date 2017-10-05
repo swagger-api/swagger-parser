@@ -9,6 +9,7 @@ import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v3.util.ClasspathHelper;
 import io.swagger.parser.v3.util.DeserializationUtils;
+import io.swagger.parser.v3.util.InlineModelResolver;
 import io.swagger.parser.v3.util.OpenAPIDeserializer;
 import io.swagger.parser.v3.util.RemoteUrl;
 import io.swagger.parser.v3.util.ResolverFully;
@@ -54,6 +55,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         if (options.isResolveFully()) {
                             result.setOpenAPI(resolver.resolve());
                             new ResolverFully().resolveFully(result.getOpenAPI());
+                        }else if (options.isFlatten()){
+                            InlineModelResolver inlineResolver = new InlineModelResolver();
+                            inlineResolver.flatten(result.getOpenAPI());
                         }
                     }
                 }
@@ -177,6 +181,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 }if (options.isResolveFully()){
                     result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
                     new ResolverFully().resolveFully(result.getOpenAPI());
+
+                }if (options.isFlatten()){
+                    new InlineModelResolver().flatten(result.getOpenAPI());
                 }
             }else{
                 try {
