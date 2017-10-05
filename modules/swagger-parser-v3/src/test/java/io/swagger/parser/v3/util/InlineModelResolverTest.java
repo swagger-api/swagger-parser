@@ -12,6 +12,7 @@ import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.media.StringSchema;
+import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
@@ -506,6 +507,47 @@ public class InlineModelResolverTest {
         assertTrue(body.getContent().get("*/*").getSchema().get$ref() != null);
 
         Schema bodySchema = openAPI.getComponents().getSchemas().get("body");
+        assertTrue(bodySchema instanceof Schema);
+
+        assertNotNull(bodySchema.getProperties().get("address"));
+    }
+
+    @Test
+    public void resolveInlineParameter() throws Exception {
+        OpenAPI openAPI = new OpenAPI();
+
+
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.addProperties("street", new StringSchema());
+
+        Schema schema = new Schema();
+        schema.addProperties("address", objectSchema);
+        schema.addProperties("name", new StringSchema());
+
+        Parameter parameter = new Parameter();
+        parameter.setName("name");
+        parameter.setSchema(schema);
+
+        List parameters = new ArrayList();
+        parameters.add(parameter);
+
+
+        Operation operation = new Operation();
+        operation.setParameters(parameters);
+
+        PathItem pathItem = new PathItem();
+        pathItem.setGet(operation);
+        openAPI.path("/hello",pathItem);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Operation getOperation = openAPI.getPaths().get("/hello").getGet();
+        Parameter param = getOperation.getParameters().get(0);
+        assertTrue(param.getSchema().get$ref() != null);
+
+
+
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("name");
         assertTrue(bodySchema instanceof Schema);
 
         assertNotNull(bodySchema.getProperties().get("address"));

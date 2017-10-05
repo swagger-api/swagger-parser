@@ -95,6 +95,45 @@ public class InlineModelResolver {
                             }
                         }
                     }
+                    List<Parameter> parameters = operation.getParameters();
+                    if (parameters != null){
+                        for (Parameter parameter : parameters) {
+                            if (parameter.getSchema() != null) {
+                                Schema model = parameter.getSchema();
+                                if (model.getProperties() != null) {
+                                    if (model.getType() == null || "object".equals(model.getType())) {
+                                        if (model.getProperties() != null && model.getProperties().size() > 0) {
+                                            flattenProperties(model.getProperties(), pathname);
+                                            String modelName = resolveModelName(model.getTitle(), parameter.getName());
+                                            parameter.setSchema(new Schema().$ref(modelName));
+                                            addGenerated(modelName, model);
+                                            openAPI.getComponents().addSchemas(modelName, model);
+                                        }
+                                    }
+                                } else if (model instanceof ArraySchema) {
+                                    ArraySchema am = (ArraySchema) model;
+                                    Schema inner = am.getItems();
+
+                                    if (inner instanceof ObjectSchema) {
+                                        ObjectSchema op = (ObjectSchema) inner;
+                                        if (op.getProperties() != null && op.getProperties().size() > 0) {
+                                            flattenProperties(op.getProperties(), pathname);
+                                            String modelName = resolveModelName(op.getTitle(), parameter.getName());
+                                            Schema innerModel = modelFromProperty(op, modelName);
+                                            String existing = matchGenerated(innerModel);
+                                            if (existing != null) {
+                                                am.setItems(new Schema().$ref(existing));
+                                            } else {
+                                                am.setItems(new Schema().$ref(modelName));
+                                                addGenerated(modelName, innerModel);
+                                                openAPI.getComponents().addSchemas(modelName, innerModel);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     Map<String, ApiResponse> responses = operation.getResponses();
                     if (responses != null) {
                         for (String key : responses.keySet()) {
