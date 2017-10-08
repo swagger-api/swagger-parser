@@ -1,0 +1,13 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "test",
+        "version": "0.0.0"
+    },
+    "host": "petstore.swagger.io",
+    "basePath": "/api",
+    "schemes": [
+        "http"
+    ],
+    "paths": {}
+}
