@@ -1,0 +1,28 @@
+{
+    "swagger": 2,
+    "info": {
+        "title": "Josh",
+        "version": "josh"
+    },
+    "paths": {
+        "/pets": {
+            "get": {
+                "description": "yolo",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    }
+                }
+            }
+        }
+    }
+}

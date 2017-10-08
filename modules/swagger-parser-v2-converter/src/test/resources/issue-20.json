@@ -1,0 +1,35 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Response references"
+    },
+    "paths": {
+        "/something": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/responses/200OK"
+                    },
+                    "default": {
+                        "$ref": "#/responses/DefaultResponse"
+                    }
+                }
+            }
+        }
+    },
+    "responses": {
+        "200OK": {
+            "description": "OK",
+            "schema": {
+                "type": "object"
+            }
+        },
+        "DefaultResponse": {
+            "description": "Not OK"
+        }
+    }
+}

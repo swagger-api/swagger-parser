@@ -2,21 +2,20 @@
     "swagger": "2.0",
     "info": {
         "version": "1.0",
-        "title": "Operation with externalDocs"
+        "title": "test"
     },
     "paths": {
-        "/pets": {
+        "/foo": {
             "get": {
-                "externalDocs": {
-                    "description": "Learn more about `GET /something`",
-                    "url": "http://docs.example.com"
-                },
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
                 }
             }
+        },
+        "/foo2": {
+            "$ref": "#/paths/~1foo"
         }
     }
 }
