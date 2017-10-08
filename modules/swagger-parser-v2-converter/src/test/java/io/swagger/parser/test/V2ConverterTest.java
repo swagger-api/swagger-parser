@@ -28,8 +28,6 @@ import static org.testng.Assert.assertNull;
 
 public class V2ConverterTest {
 
-    public static final int MAX_LENGTH = 60;
-    public static final String MONTUE_VALUE = "montue";
     private static final String PET_STORE_JSON = "petstore.json";
     private static final String PET_STORE_YAML = "petstore.yaml";
     private static final String ISSUE_2_JSON = "issue-2.json";
@@ -87,9 +85,11 @@ public class V2ConverterTest {
     private static final String X_EXPIRES_AFTER_DESCRIPTION = "date in UTC when token expires";
     private static final String URLENCODED_CONTENT = "application/x-www-form-urlencoded";
     private static final String PATTERN = "^[a-zA-Z0-9]+$";
+    private static final String MONTUE_VALUE = "montue";
     private static final String TUEWED_VALUE = "tuewed";
     private static final String WEDTHU_VALUE = "wedthu";
 
+    private static final int MAX_LENGTH = 60;
     private static final int REQUIRED_SIZE = 2;
     private static final int MIN_ITEMS = 1;
     private static final int PARAMETERS_SIZE = 1;
@@ -243,7 +243,7 @@ public class V2ConverterTest {
         assertEquals(new BigDecimal(MAXIMUM), favNumber.getMaximum());
         assertEquals(Boolean.TRUE, favNumber.getExclusiveMinimum());
         assertEquals(Boolean.TRUE, favNumber.getExclusiveMaximum());
-        //assertEquals(new BigDecimal(MULTIPLE_OF_VALUE).doubleValue(), favNumber.getMultipleOf());
+        assertEquals(new BigDecimal(MULTIPLE_OF_VALUE), new BigDecimal(favNumber.getMultipleOf().doubleValue()));
 
         Schema dayOfWeek = (Schema) properties.get("dayOfWeek");
         assertEquals(MONTUE_VALUE, dayOfWeek.getDefault());
