@@ -28,6 +28,8 @@ import static org.testng.Assert.assertNull;
 
 public class V2ConverterTest {
 
+    public static final int MAX_LENGTH = 60;
+    public static final String MONTUE_VALUE = "montue";
     private static final String PET_STORE_JSON = "petstore.json";
     private static final String PET_STORE_YAML = "petstore.yaml";
     private static final String ISSUE_2_JSON = "issue-2.json";
@@ -85,10 +87,17 @@ public class V2ConverterTest {
     private static final String X_EXPIRES_AFTER_DESCRIPTION = "date in UTC when token expires";
     private static final String URLENCODED_CONTENT = "application/x-www-form-urlencoded";
     private static final String PATTERN = "^[a-zA-Z0-9]+$";
+    private static final String TUEWED_VALUE = "tuewed";
+    private static final String WEDTHU_VALUE = "wedthu";
 
-    private static final long DEFAULT_VALUE = 11L;
     private static final int REQUIRED_SIZE = 2;
+    private static final int MIN_ITEMS = 1;
     private static final int PARAMETERS_SIZE = 1;
+    private static final int PROPERTIES_SIZE = 4;
+    private static final int MAXIMUM = 100;
+    private static final int MIN_LENGTH = 3;
+    private static final long DEFAULT_VALUE = 11L;
+    private static final double MULTIPLE_OF_VALUE = 0.01D;
 
     @Test
     public void testConvertPetstore() throws Exception {
@@ -218,29 +227,29 @@ public class V2ConverterTest {
         Schema schema = requestBody.getContent().get(URLENCODED_CONTENT).getSchema();
         assertNotNull(schema);
         Map properties = schema.getProperties();
-        assertEquals(4, properties.size());
+        assertEquals(PROPERTIES_SIZE, properties.size());
         ArraySchema ids = (ArraySchema) properties.get("ids");
-        assertEquals(new Integer(1), ids.getMinItems());
-        assertEquals(new Integer(100), ids.getMaxItems());
+        assertEquals(new Integer(MIN_ITEMS), ids.getMinItems());
+        assertEquals(new Integer(MAXIMUM), ids.getMaxItems());
         //TODO - Review error
         //assertEquals(Boolean.TRUE, ids.getUniqueItems());
 
         Schema login = (Schema) properties.get("login");
-        assertEquals(new Integer(3), login.getMinLength());
-        assertEquals(new Integer(60), login.getMaxLength());
+        assertEquals(new Integer(MIN_LENGTH), login.getMinLength());
+        assertEquals(new Integer(MAX_LENGTH), login.getMaxLength());
         assertEquals(PATTERN, login.getPattern());
         Schema favNumber = (Schema) properties.get("favNumber");
-        assertEquals(new BigDecimal(100), favNumber.getMinimum());
-        assertEquals(new BigDecimal(100), favNumber.getMaximum());
+        assertEquals(new BigDecimal(MAXIMUM), favNumber.getMinimum());
+        assertEquals(new BigDecimal(MAXIMUM), favNumber.getMaximum());
         assertEquals(Boolean.TRUE, favNumber.getExclusiveMinimum());
         assertEquals(Boolean.TRUE, favNumber.getExclusiveMaximum());
-        // assertEquals(new BigDecimal(0.01), favNumber.getMultipleOf());
+        //assertEquals(new BigDecimal(MULTIPLE_OF_VALUE).doubleValue(), favNumber.getMultipleOf());
 
         Schema dayOfWeek = (Schema) properties.get("dayOfWeek");
-        assertEquals("montue", dayOfWeek.getDefault());
-        assertEquals("montue", dayOfWeek.getEnum().get(0));
-        assertEquals("tuewed", dayOfWeek.getEnum().get(1));
-        assertEquals("wedthu", dayOfWeek.getEnum().get(2));
+        assertEquals(MONTUE_VALUE, dayOfWeek.getDefault());
+        assertEquals(MONTUE_VALUE, dayOfWeek.getEnum().get(0));
+        assertEquals(TUEWED_VALUE, dayOfWeek.getEnum().get(1));
+        assertEquals(WEDTHU_VALUE, dayOfWeek.getEnum().get(2));
     }
 
     @Test(description = "Response $ref's ")
