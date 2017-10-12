@@ -1823,6 +1823,12 @@ public class OpenAPIDeserializer {
             schema = SchemaTypeUtil.createSchemaByType(node);
         }
 
+        // Set description for inline or ref schemas
+        String value = getString("description",node,false,location,result);
+        if (StringUtils.isNotBlank(value)) {
+            schema.setDescription(value);
+        }
+
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
@@ -1835,7 +1841,7 @@ public class OpenAPIDeserializer {
         }
 
 
-        String value = getString("title",node,false,location,result);
+        value = getString("title",node,false,location,result);
         if (StringUtils.isNotBlank(value)) {
             schema.setTitle(value);
         }
@@ -1983,10 +1989,6 @@ public class OpenAPIDeserializer {
             if(additionalProperties != null) {
                 schema.setAdditionalProperties(additionalProperties);
             }
-        }
-        value = getString("description",node,false,location,result);
-        if (StringUtils.isNotBlank(value)) {
-            schema.setDescription(value);
         }
 
         value = getString("format", node, false, location, result);

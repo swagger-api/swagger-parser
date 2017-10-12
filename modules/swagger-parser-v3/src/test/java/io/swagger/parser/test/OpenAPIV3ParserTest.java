@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.media.StringSchema;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
@@ -157,6 +158,35 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+    }
+
+    /**
+     * Tests that will verify that description of properties with inline or ref schema is retained.
+     */
+    @Test
+    public void testDescription(@Injectable final List<AuthorizationValue> auths) throws Exception{
+       String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+
+        // Verify that property with ref schema still retains its description
+        Object userProperty = result.getOpenAPI().getComponents().getSchemas().get("Pet").getProperties().get("user");
+        Assert.assertNotNull(userProperty);
+        Assert.assertEquals(userProperty.getClass(), StringSchema.class);
+        Assert.assertEquals(((StringSchema)userProperty).getDescription(),"This is the owner of the pet");
+
+        // Verify that property with inline schema still retains its description
+        Object statusProperty = result.getOpenAPI().getComponents().getSchemas().get("Pet").getProperties().get("status");
+        Assert.assertNotNull(statusProperty);
+        Assert.assertEquals(statusProperty.getClass(), StringSchema.class);
+        Assert.assertEquals(((StringSchema)statusProperty).getDescription(),"pet status in the store");
     }
 
     @Test
