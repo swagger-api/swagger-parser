@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.media.Schema;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
@@ -27,6 +28,8 @@ import java.util.Random;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 
 public class OpenAPIV3ParserTest {
@@ -132,6 +135,15 @@ public class OpenAPIV3ParserTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/flatten.json"));
+
+        WireMock.stubFor(get(urlPathMatching("/remote/json"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/json")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
     }
 
     @AfterClass
@@ -178,6 +190,33 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testInlineModelResolver(@Injectable final List<AuthorizationValue> auths) throws Exception{
+
+
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/flatten.json"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options);
+
+        Assert.assertNotNull(result);
+        OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Schema user = openAPI.getComponents().getSchemas().get("User");
+
+        assertNotNull(user);
+        Schema address = (Schema)user.getProperties().get("address");
+
+        assertTrue((address.get$ref()!= null));
+
+        Schema userAddress = openAPI.getComponents().getSchemas().get("User_address");
+        assertNotNull(userAddress);
+        assertNotNull(userAddress.getProperties().get("city"));
+        assertNotNull(userAddress.getProperties().get("street"));
+    }
+
+    @Test
     public void test30NoOptions(@Injectable final List<AuthorizationValue> auths) throws Exception{
 
 
@@ -202,6 +241,32 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = new OpenAPIV3Parser().read(url);
         Assert.assertNotNull(openAPI);
         Assert.assertEquals(openAPI.getOpenapi(), "3.0.0");
+    }
+
+    @Test
+    public void testInlineModelResolverByUrl(@Injectable final List<AuthorizationValue> auths){
+
+        String url = "http://localhost:${dynamicPort}/remote/json";
+        url = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url,auths,options);
+        Assert.assertNotNull(result);
+        OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Schema user = openAPI.getComponents().getSchemas().get("User");
+
+        assertNotNull(user);
+        Schema address = (Schema)user.getProperties().get("address");
+
+        assertTrue((address.get$ref()!= null));
+
+        Schema userAddress = openAPI.getComponents().getSchemas().get("User_address");
+        assertNotNull(userAddress);
+        assertNotNull(userAddress.getProperties().get("city"));
+        assertNotNull(userAddress.getProperties().get("street"));
     }
 
 
