@@ -1,0 +1,242 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "collectionFormat example"
+    },
+    "externalDocs": {
+        "url": "https://swagger.io/docs/specification/serialization"
+    },
+    "paths": {
+        "/csv_omitted/{ids}": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "ids",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "description": "CSV is the default style for path params. Any of the following will be valid:\n * no `style` or `explode`\n * `style: simple`\n * `explode: false`\n * `style: simple` + `explode: false`\n"
+                    },
+                    {
+                        "in": "query",
+                        "name": "idsQ",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "description": "Should have `explode: false` and, optionally, `style: form`.\n"
+                    },
+                    {
+                        "in": "header",
+                        "name": "idsH",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "description": "CSV is the default style for header params. Any of the following will be valid:\n * no `style` or `explode`\n * `style: simple`\n * `explode: false`\n * `style: simple` + `explode: false`\n"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/csv_explicit/{ids}": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "ids",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "CSV is the default style for path params. Any of the following will be valid:\n * no `style` or `explode`\n * `style: simple`\n * `explode: false`\n * `style: simple` + `explode: false`\n"
+                    },
+                    {
+                        "in": "query",
+                        "name": "idsQ",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Should have `explode: false` and, optionally, `style: form`.\n"
+                    },
+                    {
+                        "in": "header",
+                        "name": "idsH",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "CSV is the default style for header params. Any of the following will be valid:\n * no `style` or `explode`\n * `style: simple`\n * `explode: false`\n * `style: simple` + `explode: false`\n"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/ssv/{ids}": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "ids",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "3.0 path params don't support space-separated format, so no `style`/`explode` needed.\n"
+                    },
+                    {
+                        "in": "query",
+                        "name": "idsQ",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "Should have `style: spaceDelimited`, with optional `explode: false`\n"
+                    },
+                    {
+                        "in": "header",
+                        "name": "idsH",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "3.0 header params don't support space-separated format, so no `style`/`explode` needed.\n"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/tsv/{ids}": {
+            "get": {
+                "summary": "tsv should be ignored",
+                "description": "3.0 does not have `tsv`-like style, so `tsv` should be ignored.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "ids",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "tsv",
+                        "description": "No `style`/`explode` needed."
+                    },
+                    {
+                        "in": "query",
+                        "name": "idsQ",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "tsv",
+                        "description": "No `style`/`explode` needed."
+                    },
+                    {
+                        "in": "header",
+                        "name": "idsH",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "tsv",
+                        "description": "No `style`/`explode` needed."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/pipes/{ids}": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "ids",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "pipes",
+                        "description": "3.0 path params don't support pipe-separated format, so no `style`/`explode` needed.\n"
+                    },
+                    {
+                        "in": "query",
+                        "name": "idsQ",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "pipes",
+                        "description": "Should be `style: pipeDelimited`, with optional `explode: false`\n"
+                    },
+                    {
+                        "in": "header",
+                        "name": "idsH",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "pipes",
+                        "description": "3.0 header params don't support pipe-separated format, so no `style`/`explode` needed.\n"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/multi": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "ids",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Multi is the default style for query params in 3.0. Any of the following will be valid:\n * no `style` or `explode`\n * `style: form`\n * `explode: true`\n * `style: form` + `explode: true`\n"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

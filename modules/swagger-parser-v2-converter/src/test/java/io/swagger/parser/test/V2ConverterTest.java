@@ -7,6 +7,7 @@ import io.swagger.oas.models.headers.Header;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.security.OAuthFlow;
 import io.swagger.oas.models.tags.Tag;
@@ -25,6 +26,7 @@ import java.util.Map;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class V2ConverterTest {
 
@@ -38,6 +40,7 @@ public class V2ConverterTest {
     private static final String ISSUE_11_JSON = "issue-11.json";
     private static final String ISSUE_13_JSON = "issue-13.json";
     private static final String ISSUE_14_JSON = "issue-14.json";
+    private static final String ISSUE_15_JSON = "issue-15.json";
     private static final String ISSUE_16_JSON = "issue-16.json";
     private static final String ISSUE_18_JSON = "issue-18.json";
     private static final String ISSUE_19_JSON = "issue-19.json";
@@ -49,11 +52,13 @@ public class V2ConverterTest {
     private static final String ISSUE_26_JSON = "issue-26.json";
     private static final String ISSUE_27_JSON = "issue-27.json";
     private static final String ISSUE_28_JSON = "issue-28.json";
+    private static final String ISSUE_30_JSON = "issue-30.json";
     private static final String ISSUE_31_JSON = "issue-31.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
+    private static final String PET_FIND_BY_STATUS_PATH = "/pet/findByStatus";
     private static final String PET_PATH = "/pet";
     private static final String FILE_PATH = "/file";
     private static final String POST_PATH = "/post";
@@ -62,6 +67,7 @@ public class V2ConverterTest {
     private static final String VALUE = "value";
     private static final String APPLICATION_PDF = "application/pdf";
     private static final String BINARY_FORMAT = "binary";
+    private static final String ARRAY_TYPE = "array";
     private static final String X_EXAMPLE = "x-example";
     private static final String PET_SCHEMA = "Pet";
     private static final String PET_TAG = "pet";
@@ -94,6 +100,7 @@ public class V2ConverterTest {
     private static final int MIN_ITEMS = 1;
     private static final int PARAMETERS_SIZE = 1;
     private static final int PROPERTIES_SIZE = 4;
+    private static final int ENUM_SIZE = 3;
     private static final int MAXIMUM = 100;
     private static final int MIN_LENGTH = 3;
     private static final long DEFAULT_VALUE = 11L;
@@ -120,6 +127,17 @@ public class V2ConverterTest {
         assertNotNull(pathItem);
 
         assertEquals(PARAMETERS_SIZE, pathItem.getGet().getParameters().size());
+    }
+
+    @Test(description = "Missing array item type in parameters")
+    public void testIssue1() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(PET_STORE_JSON);
+        Parameter statusParameter = oas.getPaths().get(PET_FIND_BY_STATUS_PATH).getGet().getParameters().get(0);
+        assertNotNull(statusParameter);
+        assertTrue(statusParameter.getSchema() instanceof ArraySchema);
+        ArraySchema arraySchema = (ArraySchema) statusParameter.getSchema();
+        assertEquals(ARRAY_TYPE, arraySchema.getType());
+        assertEquals(ENUM_SIZE, arraySchema.getItems().getEnum().size());
     }
 
     @Test(description = "Response Codes")
@@ -206,6 +224,12 @@ public class V2ConverterTest {
                 .getParameters().get(0).getExtensions().get(X_EXAMPLE));
     }
 
+    @Test(description = "Convert extensions everywhere applicable #15")
+    public void testIssue15() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_15_JSON);
+        assertNotNull(oas);
+    }
+
     @Test(description = "Security missing")
     public void testIssue16() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_16_JSON);
@@ -231,8 +255,8 @@ public class V2ConverterTest {
         ArraySchema ids = (ArraySchema) properties.get("ids");
         assertEquals(new Integer(MIN_ITEMS), ids.getMinItems());
         assertEquals(new Integer(MAXIMUM), ids.getMaxItems());
-        //TODO - Review error
-        //assertEquals(Boolean.TRUE, ids.getUniqueItems());
+        //Fixed from Issue 19
+        assertEquals(Boolean.TRUE, ids.getUniqueItems());
 
         Schema login = (Schema) properties.get("login");
         assertEquals(new Integer(MIN_LENGTH), login.getMinLength());
@@ -308,6 +332,12 @@ public class V2ConverterTest {
         assertEquals(AUTHORIZATION_URL, oAuth2Implicit.getAuthorizationUrl());
         assertEquals(WRITE_PETS_VALUE, oAuth2Implicit.getScopes().get(SCOPE_WRITE_PETS));
         assertEquals(READ_PETS_VALUE, oAuth2Implicit.getScopes().get(SCOPE_READ_PETS));
+    }
+
+    @Test(description = "Convert collectionFormat #1 - path, query, header parameters")
+    public void testIssue30() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_30_JSON);
+        assertNotNull(oas);
     }
 
     @Test(description = "No Servers - without host, basePath, scheme")
