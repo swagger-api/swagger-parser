@@ -1,0 +1,26 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Model with discriminator"
+    },
+    "paths": {},
+    "definitions": {
+        "Pet": {
+            "type": "object",
+            "discriminator": "petType",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "petType": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "petType"
+            ]
+        }
+    }
+}

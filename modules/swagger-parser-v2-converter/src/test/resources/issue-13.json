@@ -1,0 +1,16 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Minimal Example"
+    },
+    "externalDocs": {
+        "description": "Learn more about this API",
+        "url": "http://docs.example.com"
+    },
+    "host": "api.example.com",
+    "schemes": [
+        "http"
+    ],
+    "paths": {}
+}
