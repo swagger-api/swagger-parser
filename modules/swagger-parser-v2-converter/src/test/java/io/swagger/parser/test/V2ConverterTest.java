@@ -42,6 +42,7 @@ public class V2ConverterTest {
     private static final String ISSUE_14_JSON = "issue-14.json";
     private static final String ISSUE_15_JSON = "issue-15.json";
     private static final String ISSUE_16_JSON = "issue-16.json";
+    private static final String ISSUE_17_JSON = "issue-17.json";
     private static final String ISSUE_18_JSON = "issue-18.json";
     private static final String ISSUE_19_JSON = "issue-19.json";
     private static final String ISSUE_20_JSON = "issue-20.json";
@@ -54,6 +55,7 @@ public class V2ConverterTest {
     private static final String ISSUE_28_JSON = "issue-28.json";
     private static final String ISSUE_30_JSON = "issue-30.json";
     private static final String ISSUE_31_JSON = "issue-31.json";
+    private static final String ISSUE_36_JSON = "issue-36.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
@@ -62,6 +64,8 @@ public class V2ConverterTest {
     private static final String PET_PATH = "/pet";
     private static final String FILE_PATH = "/file";
     private static final String POST_PATH = "/post";
+    private static final String LOGIN_PATH = "/login";
+    private static final String PASSWORD_VALUE = "p@55w0rd";
     private static final String PETSTORE_URL = "http://petstore.swagger.io/api";
     private static final String STATUS_200 = "200";
     private static final String VALUE = "value";
@@ -89,8 +93,15 @@ public class V2ConverterTest {
     private static final String X_EXPIRES_AFTER = "X-Expires-After";
     private static final String X_RATE_LIMIT_DESCRIPTION = "calls per hour allowed by the user";
     private static final String X_EXPIRES_AFTER_DESCRIPTION = "date in UTC when token expires";
+    private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String URLENCODED_CONTENT = "application/x-www-form-urlencoded";
     private static final String PATTERN = "^[a-zA-Z0-9]+$";
+    private static final String FOO_PATH = "/{foo}";
+    private static final String FOO_VALUE = "foooooo";
+    private static final String CODE_EXAMPLE = "2866bbb7-ba38-4da3-b6b6-25d1ec6c161f";
+    private static final String EMAIL = "email";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL_VALUE = "bob@example.com";
     private static final String MONTUE_VALUE = "montue";
     private static final String TUEWED_VALUE = "tuewed";
     private static final String WEDTHU_VALUE = "wedthu";
@@ -103,6 +114,7 @@ public class V2ConverterTest {
     private static final int ENUM_SIZE = 3;
     private static final int MAXIMUM = 100;
     private static final int MIN_LENGTH = 3;
+    private static final int NUMBER_VALUE_TWENTY = 20;
     private static final long DEFAULT_VALUE = 11L;
     private static final double MULTIPLE_OF_VALUE = 0.01D;
 
@@ -237,6 +249,12 @@ public class V2ConverterTest {
         assertNotNull(oas.getComponents().getSecuritySchemes());
     }
 
+    @Test(description = "Referenced parameters are converted incorrectly")
+    public void testIssue17() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_17_JSON);
+        assertNotNull(oas);
+    }
+
     @Test(description = "External Docs in Operations")
     public void testIssue18() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_18_JSON);
@@ -344,6 +362,23 @@ public class V2ConverterTest {
     public void testIssue31() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_31_JSON);
         assertNull(oas.getServers());
+    }
+
+    @Test(description = "Nice to have: Convert x-example to example")
+    public void testIssue36() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_36_JSON);
+        List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
+        assertNotNull(parameters);
+        assertEquals(parameters.get(0).getExample(), FOO_VALUE);
+        assertEquals(parameters.get(1).getExample(), NUMBER_VALUE_TWENTY);
+        assertEquals(parameters.get(2).getExample(), CODE_EXAMPLE);
+
+        RequestBody requestBody = oas.getPaths().get(LOGIN_PATH).getPost().getRequestBody();
+        assertNotNull(requestBody);
+        Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
+        assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
+        assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
+
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {

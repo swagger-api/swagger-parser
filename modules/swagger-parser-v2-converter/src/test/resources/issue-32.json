@@ -1,0 +1,63 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Examples"
+    },
+    "paths": {},
+    "definitions": {
+        "User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "readOnly": true,
+                    "example": 42
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Arthur Dent"
+                },
+                "friend_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "example": 8
+                    },
+                    "example": [
+                        3,
+                        4,
+                        5
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "name"
+            ],
+            "example": {
+                "id": 1,
+                "name": "Trillian"
+            }
+        },
+        "ArrayOfUsers": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/User"
+            },
+            "example": [
+                {
+                    "id": -1,
+                    "name": "Marvin the Paranoid Android"
+                },
+                {
+                    "id": 1000000,
+                    "name": "Zaphod Beeblebrox",
+                    "friends": [
+                        15
+                    ]
+                }
+            ]
+        }
+    }
+}
