@@ -618,6 +618,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
             schema.setMinLength(sp.getMinLength());
             schema.setMaxLength(sp.getMaxLength());
 
+            Object exampleExtension = sp.getVendorExtensions().get("x-example");
+            if (exampleExtension != null) {
+                schema.setExample(exampleExtension);
+            }
+
             if (sp.getMultipleOf() != null) {
                 schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
             }
@@ -841,6 +846,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
         v3Parameter.setAllowEmptyValue(v2Parameter.getAllowEmptyValue());
         v3Parameter.setIn(v2Parameter.getIn());
         v3Parameter.setName(v2Parameter.getName());
+
+        Object exampleExtension = v2Parameter.getVendorExtensions().get("x-example");
+        if (exampleExtension != null) {
+            v3Parameter.setExample(exampleExtension);
+        }
 
         Schema schema = null;
 
