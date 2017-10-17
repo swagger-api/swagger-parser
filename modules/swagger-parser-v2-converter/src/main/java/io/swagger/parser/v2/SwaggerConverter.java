@@ -62,7 +62,6 @@ import v2.io.swagger.parser.SwaggerResolver;
 import v2.io.swagger.parser.util.SwaggerDeserializationResult;
 import v2.io.swagger.util.Json;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
