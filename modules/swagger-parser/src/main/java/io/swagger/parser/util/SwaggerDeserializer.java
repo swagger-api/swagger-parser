@@ -831,8 +831,6 @@ public class SwaggerDeserializer {
                     result.extra(location, key, node.get(key));
                 }
             }
-            /*if("{ }".equals(Json.pretty(impl)))
-                return null;*/
             model = impl;
         }
         JsonNode exampleNode = node.get("example");
