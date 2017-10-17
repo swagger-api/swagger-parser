@@ -24,6 +24,8 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 public class SwaggerDeserializerTest {
+
+    
     @Test
     public void testSecurityDeserialization() throws Exception {
         String json = "{\n" +
