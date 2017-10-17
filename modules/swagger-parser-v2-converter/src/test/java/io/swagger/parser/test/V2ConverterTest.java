@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +56,7 @@ public class V2ConverterTest {
     private static final String ISSUE_28_JSON = "issue-28.json";
     private static final String ISSUE_30_JSON = "issue-30.json";
     private static final String ISSUE_31_JSON = "issue-31.json";
+    private static final String ISSUE_32_JSON = "issue-32.json";
     private static final String ISSUE_36_JSON = "issue-36.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
@@ -105,6 +107,14 @@ public class V2ConverterTest {
     private static final String MONTUE_VALUE = "montue";
     private static final String TUEWED_VALUE = "tuewed";
     private static final String WEDTHU_VALUE = "wedthu";
+    private static final String ARTHUR_DENT_NAME = "Arthur Dent";
+    private static final String NAME = "name";
+    private static final String USER_MODEL = "User";
+    private static final String ID = "id";
+    private static final String FRIEND_IDS = "friend_ids";
+    private static final String ARRAY_OF_USERS_MODEL = "ArrayOfUsers";
+    private static final String ARRAY_VALUES = "[{\"id\":-1,\"name\":\"Marvin the Paranoid Android\"}," +
+            "{\"id\":1000000,\"name\":\"Zaphod Beeblebrox\",\"friends\":[15]}]";
 
     private static final int MAX_LENGTH = 60;
     private static final int REQUIRED_SIZE = 2;
@@ -115,8 +125,10 @@ public class V2ConverterTest {
     private static final int MAXIMUM = 100;
     private static final int MIN_LENGTH = 3;
     private static final int NUMBER_VALUE_TWENTY = 20;
-    private static final long DEFAULT_VALUE = 11L;
     private static final double MULTIPLE_OF_VALUE = 0.01D;
+    private static final long DEFAULT_VALUE = 11L;
+    private static final long EXAMPLE_8_NUMBER = 8L;
+    private static final long EXAMPLE_42_NUMBER = 42L;
 
     @Test
     public void testConvertPetstore() throws Exception {
@@ -362,6 +374,24 @@ public class V2ConverterTest {
     public void testIssue31() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_31_JSON);
         assertNull(oas.getServers());
+    }
+
+    @Test(description = "Convert schema, property and array examples")
+    public void testIssue32() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_32_JSON);
+        Map<String, Schema> schemas = oas.getComponents().getSchemas();
+        assertNotNull(schemas);
+        Map properties = schemas.get(USER_MODEL).getProperties();
+        assertNotNull(properties);
+        assertEquals(((Schema) properties.get(ID)).getExample(), EXAMPLE_42_NUMBER);
+        assertEquals(((Schema) properties.get(NAME)).getExample(), ARTHUR_DENT_NAME);
+        assertEquals(((ArraySchema) properties.get(FRIEND_IDS)).getItems().getExample(), EXAMPLE_8_NUMBER);
+        final List<Integer> numbers = new ArrayList<>();
+        numbers.add(3);
+        numbers.add(4);
+        numbers.add(5);
+        assertEquals(((ArraySchema) properties.get(FRIEND_IDS)).getExample(), numbers);
+        assertEquals(schemas.get(ARRAY_OF_USERS_MODEL).getExample(), ARRAY_VALUES);
     }
 
     @Test(description = "Nice to have: Convert x-example to example")

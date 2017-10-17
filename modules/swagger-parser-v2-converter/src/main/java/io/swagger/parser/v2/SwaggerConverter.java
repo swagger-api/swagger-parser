@@ -158,9 +158,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         // TODO until we have the example object working correctly in v3 pojos...
         for (Model model : models) {
-            if (model.getExample() != null) {
-                model.setExample(null);
-            }
             if (model instanceof RefModel) {
                 RefModel ref = (RefModel) model;
                 if (ref.get$ref().indexOf("#/definitions") == 0) {
@@ -171,9 +168,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         for (Property property : inventory.getProperties()) {
-            if (property.getExample() != null) {
-                property.setExample(null);
-            }
             if (property instanceof RefProperty) {
                 RefProperty ref = (RefProperty) property;
                 if (ref.get$ref().indexOf("#/definitions") == 0) {
@@ -809,6 +803,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         } else {
 
             result = Json.mapper().convertValue(schema, Schema.class);
+            result.setExample(schema.getExample());
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
                 Map<String, Schema> properties = new HashMap<>();
