@@ -2496,6 +2496,10 @@ public class OpenAPIDeserializer {
             this.valid = false;
         }
 
+        public boolean isValid() {
+          return this.valid;
+        }
+
         public List<String> getMessages() {
             List<String> messages = new ArrayList<String>();
             for (Location l : extra.keySet()) {
