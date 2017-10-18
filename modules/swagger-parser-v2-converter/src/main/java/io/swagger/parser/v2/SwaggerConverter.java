@@ -617,6 +617,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema.setExample(exampleExtension);
             }
 
+            Object nullableExtension = sp.getVendorExtensions().get("x-nullable");
+            if (nullableExtension != null) {
+                schema.setNullable((Boolean) nullableExtension);
+            }
+
             if (sp.getMultipleOf() != null) {
                 schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
             }
@@ -933,6 +938,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
                 }
                 schema.setPattern(sp.getPattern());
+            }
+
+            Object nullableExtension = sp.getVendorExtensions().get("x-nullable");
+            if (nullableExtension != null) {
+                schema.setNullable((Boolean) nullableExtension);
             }
 
             if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
