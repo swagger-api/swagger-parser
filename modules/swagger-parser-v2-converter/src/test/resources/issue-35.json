@@ -36,7 +36,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "string",
+                            "name": "nullable",
+                            "in": "header",
+                            "x-nullable": true
+                        }
                     }
                 }
             }

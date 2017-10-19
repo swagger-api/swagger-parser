@@ -398,11 +398,15 @@ public class V2ConverterTest {
     @Test(description = "Nice to have: Convert x-nullable to nullable")
     public void testIssue35() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_35_JSON);
-        List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
+        Operation getOperation = oas.getPaths().get(FOO_PATH).getGet();
+        assertNotNull(getOperation);
+        List<Parameter> parameters = getOperation.getParameters();
         assertNotNull(parameters);
         assertEquals(parameters.get(0).getSchema().getNullable(), Boolean.TRUE);
         assertEquals(parameters.get(1).getSchema().getNullable(), Boolean.FALSE);
         assertEquals(parameters.get(2).getSchema().getNullable(), Boolean.TRUE);
+        assertEquals(getOperation.getResponses().get(STATUS_200).getContent().get("*/*").getSchema().getNullable(),
+                Boolean.TRUE);
     }
 
     @Test(description = "Nice to have: Convert x-example to example")

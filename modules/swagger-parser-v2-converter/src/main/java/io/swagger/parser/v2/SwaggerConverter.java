@@ -617,11 +617,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema.setExample(exampleExtension);
             }
 
-            Object nullableExtension = sp.getVendorExtensions().get("x-nullable");
-            if (nullableExtension != null) {
-                schema.setNullable((Boolean) nullableExtension);
-            }
-
             if (sp.getMultipleOf() != null) {
                 schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
             }
@@ -832,6 +827,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 result.setExclusiveMaximum(np.getExclusiveMaximum());
                 result.setExclusiveMinimum(np.getExclusiveMinimum());
             }
+        }
+
+        Object nullableExtension = schema.getVendorExtensions().get("x-nullable");
+        if (nullableExtension != null) {
+            result.setNullable((Boolean) nullableExtension);
         }
 
         return result;
