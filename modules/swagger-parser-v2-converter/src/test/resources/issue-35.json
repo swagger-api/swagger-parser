@@ -47,5 +47,19 @@
                 }
             }
         }
+    },
+    "definitions": {
+        "User": {
+            "type": "object",
+            "x-nullable": true,
+            "name": "user",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "readOnly": true,
+                    "x-nullable": true
+                }
+            }
+        }
     }
 }

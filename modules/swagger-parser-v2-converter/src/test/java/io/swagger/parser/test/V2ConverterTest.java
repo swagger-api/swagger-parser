@@ -407,6 +407,10 @@ public class V2ConverterTest {
         assertEquals(parameters.get(2).getSchema().getNullable(), Boolean.TRUE);
         assertEquals(getOperation.getResponses().get(STATUS_200).getContent().get("*/*").getSchema().getNullable(),
                 Boolean.TRUE);
+        Schema user = oas.getComponents().getSchemas().get(USER_MODEL);
+        assertNotNull(user);
+        assertEquals(user.getNullable(), Boolean.TRUE);
+        assertEquals(((Schema) user.getProperties().get(ID)).getNullable(), Boolean.TRUE);
     }
 
     @Test(description = "Nice to have: Convert x-example to example")
