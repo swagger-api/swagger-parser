@@ -1,0 +1,65 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "x-example"
+    },
+    "host": "httpbin.org",
+    "basePath": "/anything",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/{foo}": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "foo",
+                        "required": true,
+                        "type": "string",
+                        "x-nullable": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "integer",
+                        "x-nullable": false
+                    },
+                    {
+                        "in": "header",
+                        "name": "X-Request-Id",
+                        "type": "string",
+                        "format": "uuid",
+                        "x-nullable": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string",
+                            "name": "nullable",
+                            "in": "header",
+                            "x-nullable": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "User": {
+            "type": "object",
+            "x-nullable": true,
+            "name": "user",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "readOnly": true,
+                    "x-nullable": true
+                }
+            }
+        }
+    }
+}

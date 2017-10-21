@@ -1,0 +1,68 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Examples"
+    },
+    "paths": {
+        "/users": {
+            "get": {
+                "produces": [
+                    "application/json",
+                    "text/csv"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/User"
+                            }
+                        },
+                        "examples": {
+                            "application/json": [
+                                {
+                                    "id": 5,
+                                    "name": "Ford Prefect",
+                                    "friends": [
+                                        42
+                                    ]
+                                },
+                                {
+                                    "id": 17,
+                                    "name": "Slartibartfast"
+                                }
+                            ],
+                            "text/csv": "5,Ford Prefect,5\n17,Slartibartfast\n",
+                            "application/yaml": {
+                                "foo": "bar",
+                                "random": "example"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string"
+                },
+                "friends": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}

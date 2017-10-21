@@ -829,6 +829,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
 
+        if (schema.getVendorExtensions() != null) {
+            Object nullableExtension = schema.getVendorExtensions().get("x-nullable");
+            if (nullableExtension != null) {
+                result.setNullable((Boolean) nullableExtension);
+            }
+        }
+
         return result;
     }
 
@@ -935,6 +942,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema.setPattern(sp.getPattern());
             }
 
+            if (sp.getVendorExtensions() != null) {
+                Object nullableExtension = sp.getVendorExtensions().get("x-nullable");
+                if (nullableExtension != null) {
+                    schema.setNullable((Boolean) nullableExtension);
+                }
+            }
+
             if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
                 schema.setExtensions(sp.getVendorExtensions());
             }
@@ -1006,6 +1020,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 discriminator.setPropertyName(v2discriminator);
                 result.setDiscriminator(discriminator);
+            }
+        }
+
+        if (v2Model.getVendorExtensions() != null) {
+            Object nullableExtension = v2Model.getVendorExtensions().get("x-nullable");
+            if (nullableExtension != null) {
+                result.setNullable((Boolean) nullableExtension);
             }
         }
 

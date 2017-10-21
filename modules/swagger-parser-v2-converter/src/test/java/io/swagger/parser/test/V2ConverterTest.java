@@ -57,6 +57,7 @@ public class V2ConverterTest {
     private static final String ISSUE_30_JSON = "issue-30.json";
     private static final String ISSUE_31_JSON = "issue-31.json";
     private static final String ISSUE_32_JSON = "issue-32.json";
+    private static final String ISSUE_35_JSON = "issue-35.json";
     private static final String ISSUE_36_JSON = "issue-36.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
@@ -392,6 +393,24 @@ public class V2ConverterTest {
         numbers.add(5);
         assertEquals(((ArraySchema) properties.get(FRIEND_IDS)).getExample(), numbers);
         assertEquals(schemas.get(ARRAY_OF_USERS_MODEL).getExample(), ARRAY_VALUES);
+    }
+
+    @Test(description = "Nice to have: Convert x-nullable to nullable")
+    public void testIssue35() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_35_JSON);
+        Operation getOperation = oas.getPaths().get(FOO_PATH).getGet();
+        assertNotNull(getOperation);
+        List<Parameter> parameters = getOperation.getParameters();
+        assertNotNull(parameters);
+        assertEquals(parameters.get(0).getSchema().getNullable(), Boolean.TRUE);
+        assertEquals(parameters.get(1).getSchema().getNullable(), Boolean.FALSE);
+        assertEquals(parameters.get(2).getSchema().getNullable(), Boolean.TRUE);
+        assertEquals(getOperation.getResponses().get(STATUS_200).getContent().get("*/*").getSchema().getNullable(),
+                Boolean.TRUE);
+        Schema user = oas.getComponents().getSchemas().get(USER_MODEL);
+        assertNotNull(user);
+        assertEquals(user.getNullable(), Boolean.TRUE);
+        assertEquals(((Schema) user.getProperties().get(ID)).getNullable(), Boolean.TRUE);
     }
 
     @Test(description = "Nice to have: Convert x-example to example")
