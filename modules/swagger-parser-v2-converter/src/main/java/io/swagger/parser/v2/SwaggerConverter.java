@@ -456,6 +456,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
         contact.setName(v2Contact.getName());
         contact.setEmail(v2Contact.getEmail());
 
+        // TODO - uncomment this code after adding extensions to v2Contact object
+        /*if (v2Contact.getVendorExtensions() != null && v2Contact.getVendorExtensions().size() > 0) {
+            contact.setExtensions(v2Contact.getVendorExtensions());
+        }*/
+
         return contact;
     }
 
@@ -555,6 +560,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         if (v2Operation.getSecurity() != null && v2Operation.getSecurity().size() > 0) {
             operation.setSecurity(convertSecurityRequirementsMap(v2Operation.getSecurity()));
+        }
+
+        if (v2Operation.getVendorExtensions() != null && v2Operation.getVendorExtensions().size() > 0) {
+            operation.setExtensions(v2Operation.getVendorExtensions());
         }
 
         return operation;
@@ -731,6 +740,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 response.content(content);
             }
 
+            if (v2Response.getVendorExtensions() != null && v2Response.getVendorExtensions().size() > 0) {
+                response.setExtensions(v2Response.getVendorExtensions());
+            }
+
             if (v2Response.getHeaders() != null && v2Response.getHeaders().size() > 0) {
                 response.setHeaders(convertHeaders(v2Response.getHeaders()));
             }
@@ -833,6 +846,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
             Object nullableExtension = schema.getVendorExtensions().get("x-nullable");
             if (nullableExtension != null) {
                 result.setNullable((Boolean) nullableExtension);
+            }
+
+            if (schema.getVendorExtensions().size() > 0) {
+                result.setExtensions(schema.getVendorExtensions());
             }
         }
 
