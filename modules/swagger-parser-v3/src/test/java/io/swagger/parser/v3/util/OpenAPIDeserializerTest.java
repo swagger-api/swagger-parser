@@ -891,7 +891,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 17);
+        Assert.assertEquals(paths.size(), 18);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -915,7 +915,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 17);
+        Assert.assertEquals(paths.size(), 18);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -941,7 +941,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 17);
+        Assert.assertEquals(paths.size(), 18);
 
         //parameters operation get
         PathItem producesTestEndpoint = paths.get("/producesTest");
@@ -1009,7 +1009,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 17);
+        Assert.assertEquals(paths.size(), 18);
 
 
         PathItem petRef = paths.get("/pathItemRef");

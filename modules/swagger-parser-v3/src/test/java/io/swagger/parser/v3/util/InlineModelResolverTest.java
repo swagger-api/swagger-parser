@@ -63,7 +63,6 @@ public class InlineModelResolverTest {
         assertNotNull(user);
         Schema address = (Schema)user.getProperties().get("address");
         assertTrue((address.get$ref()!= null));
-
         Schema userAddress = openAPI.getComponents().getSchemas().get("User_address");
         assertNotNull(userAddress);
         assertNotNull(userAddress.getProperties().get("city"));
