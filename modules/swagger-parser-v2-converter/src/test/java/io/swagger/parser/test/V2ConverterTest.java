@@ -4,12 +4,14 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.headers.Header;
+import io.swagger.oas.models.info.Info;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.security.OAuthFlow;
+import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.oas.models.tags.Tag;
 import io.swagger.parser.models.SwaggerParseResult;
 import io.swagger.parser.v2.SwaggerConverter;
@@ -246,13 +248,35 @@ public class V2ConverterTest {
     public void testIssue14() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_14_JSON);
         assertEquals(VALUE, oas.getPaths().get(PETS_PATH).getGet()
-                .getParameters().get(0).getExtensions().get(X_EXAMPLE));
+                .getParameters().get(0).getExample());
     }
 
     @Test(description = "Convert extensions everywhere applicable #15")
     public void testIssue15() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_15_JSON);
         assertNotNull(oas);
+
+        Info info = oas.getInfo();
+        assertNotNull(info.getExtensions().get("x-apis-json"));
+        assertNotNull(info.getLicense().getExtensions().get("x-notes"));
+        assertNotNull(oas.getExternalDocs().getExtensions().get("x-docs-extension"));
+        assertNotNull(oas.getTags().get(0).getExtensions().get("x-tag-extension"));
+        assertNotNull(oas.getTags().get(0).getExternalDocs().getExtensions().get("x-tag-docs-extension"));
+
+        PathItem pathItem = oas.getPaths().get("/something");
+        assertNotNull(pathItem.getExtensions().get("x-path-item-extension"));
+
+        Operation get = pathItem.getGet();
+        assertNotNull(get.getExtensions().get("x-version"));
+        assertNotNull(get.getExternalDocs().getExtensions().get("x-operation-docs-extension"));
+        assertNotNull(get.getResponses().get("200").getExtensions().get("x-response-extension"));
+
+        ArraySchema schema = (ArraySchema) get.getParameters().get(0).getSchema();
+        assertNull(schema.getItems().getExtensions().get("x-example"));
+
+        Map<String, SecurityScheme> securitySchemes = oas.getComponents().getSecuritySchemes();
+        assertNotNull(securitySchemes);
+        assertNotNull(securitySchemes.get("OAuth2Implicit").getExtensions().get("x-auth-extension"));
     }
 
     @Test(description = "Security missing")

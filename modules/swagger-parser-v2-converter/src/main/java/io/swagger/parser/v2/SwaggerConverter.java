@@ -277,10 +277,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         securityScheme.setDescription(definition.getDescription());
-
-        if (definition.getVendorExtensions() != null && definition.getVendorExtensions().size() > 0) {
-            securityScheme.setExtensions(definition.getVendorExtensions());
-        }
+        securityScheme.setExtensions(convert(definition.getVendorExtensions()));
 
         return securityScheme;
     }
@@ -355,10 +352,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 v3tag.setExternalDocs(convert(v2tag.getExternalDocs()));
             }
 
-            if (v2tag.getVendorExtensions() != null && v2tag.getVendorExtensions().size() > 0) {
-                v3tag.setExtensions(v2tag.getVendorExtensions());
+            Map<String, Object> extensions = convert(v2tag.getVendorExtensions());
+            if (extensions != null) {
+                v3tag.setExtensions(extensions);
             }
-
             v3tags.add(v3tag);
         }
 
@@ -370,8 +367,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         externalDocumentation.setUrl(externalDocs.getUrl());
         externalDocumentation.setDescription(externalDocs.getDescription());
-        if (externalDocs.getVendorExtensions() != null && externalDocs.getVendorExtensions().size() > 0) {
-            externalDocumentation.setExtensions(externalDocs.getVendorExtensions());
+        Map<String, Object> extensions = convert(externalDocs.getVendorExtensions());
+        if (extensions != null && extensions.size() > 0) {
+            externalDocumentation.setExtensions(extensions);
         }
 
         return externalDocumentation;
@@ -421,10 +419,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         info.setTermsOfService(v2Info.getTermsOfService());
         info.setTitle(v2Info.getTitle());
         info.setVersion(v2Info.getVersion());
-
-        if (v2Info.getVendorExtensions() != null && v2Info.getVendorExtensions().size() > 0) {
-            info.setExtensions(v2Info.getVendorExtensions());
-        }
+        info.setExtensions(convert(v2Info.getVendorExtensions()));
 
         return info;
     }
@@ -435,10 +430,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         License license = new License();
-
-        if (v2License.getVendorExtensions() != null && v2License.getVendorExtensions().size() > 0) {
-            license.setExtensions(v2License.getVendorExtensions());
-        }
+        license.setExtensions(convert(v2License.getVendorExtensions()));
         license.setName(v2License.getName());
         license.setUrl(v2License.getUrl());
 
@@ -455,6 +447,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
         contact.setUrl(v2Contact.getUrl());
         contact.setName(v2Contact.getName());
         contact.setEmail(v2Contact.getEmail());
+
+        // TODO - treat this process after adding extensions to v2Contact object
 
         return contact;
     }
@@ -496,9 +490,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 v3Path.setDelete(convert(v2Operation));
             }
 
-            if (v2Path.getVendorExtensions() != null && v2Path.getVendorExtensions().size() > 0) {
-                v3Path.setExtensions(v2Path.getVendorExtensions());
-            }
+            v3Path.setExtensions(convert(v2Path.getVendorExtensions()));
         }
 
         return v3Path;
@@ -557,7 +549,20 @@ public class SwaggerConverter implements SwaggerParserExtension {
             operation.setSecurity(convertSecurityRequirementsMap(v2Operation.getSecurity()));
         }
 
+        operation.setExtensions(convert(v2Operation.getVendorExtensions()));
+
         return operation;
+    }
+
+    private Map<String, Object> convert(Map<String, Object> vendorExtensions) {
+        if (vendorExtensions != null && vendorExtensions.size() > 0) {
+            vendorExtensions.entrySet().removeIf(extension -> (
+                    extension.getKey().equals("x-example")) ||
+                    extension.getKey().equals("x-examples") ||
+                    extension.getKey().equals("x-nullable"));
+        }
+
+        return vendorExtensions;
     }
 
     private RequestBody convertFormDataToRequestBody(v2.io.swagger.models.parameters.Parameter formParam) {
@@ -601,10 +606,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema.setUniqueItems(sp.isUniqueItems());
             }
 
-            if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
-                schema.setExtensions(sp.getVendorExtensions());
-            }
-
             schema.setMaximum(sp.getMaximum());
             schema.setExclusiveMaximum(sp.isExclusiveMaximum());
             schema.setMinimum(sp.getMinimum());
@@ -616,16 +617,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
             if (exampleExtension != null) {
                 schema.setExample(exampleExtension);
             }
+            schema.setExtensions(convert(sp.getVendorExtensions()));
 
             if (sp.getMultipleOf() != null) {
                 schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
             }
 
             schema.setPattern(sp.getPattern());
-
-            if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
-                schema.setExtensions(sp.getVendorExtensions());
-            }
+            schema.setExtensions(convert(sp.getVendorExtensions()));
 
             if (sp instanceof AbstractSerializableParameter) {
                 AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
@@ -731,6 +730,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 response.content(content);
             }
 
+            response.setExtensions(convert(v2Response.getVendorExtensions()));
+
             if (v2Response.getHeaders() != null && v2Response.getHeaders().size() > 0) {
                 response.setHeaders(convertHeaders(v2Response.getHeaders()));
             }
@@ -834,6 +835,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
             if (nullableExtension != null) {
                 result.setNullable((Boolean) nullableExtension);
             }
+
+            result.setExtensions(convert(schema.getVendorExtensions()));
         }
 
         return result;
@@ -920,10 +923,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema = new Schema();
                 schema.setType(sp.getType());
                 schema.setFormat(sp.getFormat());
-
-                if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
-                    schema.setExtensions(sp.getVendorExtensions());
-                }
                 if (sp.getEnum() != null) {
                     for (String e : sp.getEnum()) {
                         schema.addEnumItemObject(e);
@@ -949,9 +948,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 }
             }
 
-            if (sp.getVendorExtensions() != null && sp.getVendorExtensions().size() > 0) {
-                schema.setExtensions(sp.getVendorExtensions());
-            }
+            schema.setExtensions(convert(sp.getVendorExtensions()));
 
             if (sp instanceof AbstractSerializableParameter) {
                 AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
@@ -963,9 +960,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             v3Parameter.setRequired(v2Parameter.getRequired());
         }
         v3Parameter.setSchema(schema);
-        if (v2Parameter.getVendorExtensions() != null && v2Parameter.getVendorExtensions().size() > 0) {
-            v3Parameter.setExtensions(v2Parameter.getVendorExtensions());
-        }
+        v3Parameter.setExtensions(convert(v2Parameter.getVendorExtensions()));
         return v3Parameter;
     }
 
