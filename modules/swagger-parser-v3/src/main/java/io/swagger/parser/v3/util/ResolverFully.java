@@ -4,6 +4,7 @@ import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.callbacks.Callback;
+import io.swagger.oas.models.examples.Example;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.MediaType;
@@ -26,7 +27,7 @@ public class ResolverFully {
 
     private Map<String, Schema> schemas;
     private Map<String, Schema> resolvedModels = new HashMap<>();
-
+    private Map<String, Example> examples;
 
 
 
@@ -35,6 +36,13 @@ public class ResolverFully {
             schemas = openAPI.getComponents().getSchemas();
             if (schemas == null) {
                 schemas = new HashMap<>();
+            }
+        }
+
+        if (openAPI.getComponents().getExamples() != null) {
+            examples = openAPI.getComponents().getExamples();
+            if (examples == null) {
+                examples = new HashMap<>();
             }
         }
 
@@ -108,6 +116,11 @@ public class ResolverFully {
                             if(content.get(mediaType).getSchema() != null) {
                                 Schema resolved = resolveSchema(content.get(mediaType).getSchema());
                                 response.getContent().get(mediaType).setSchema(resolved);
+                            }
+                            if(content.get(mediaType).getExamples() != null) {
+                                Map<String,Example> resolved = resolveExample(content.get(mediaType).getExamples());
+                                response.getContent().get(mediaType).setExamples(resolved);
+
                             }
                         }
                     }
@@ -271,8 +284,26 @@ public class ResolverFully {
             return model;
         }
 
-
-        //LOGGER.error("no type match for " + schema);
         return schema;
+    }
+
+    public Map<String,Example> resolveExample(Map<String,Example> examples){
+
+        Map<String,Example> resolveExamples = examples;
+
+        if (examples != null) {
+
+            for (String name : examples.keySet()) {
+                if (examples.get(name).get$ref() != null) {
+                    String ref = examples.get(name).get$ref();
+                    ref = ref.substring(ref.lastIndexOf("/") + 1);
+                    Example sample = this.examples.get(ref);
+                    resolveExamples.replace(name, sample);
+                }
+            }
+        }
+
+        return resolveExamples;
+
     }
 }

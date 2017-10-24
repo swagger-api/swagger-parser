@@ -4,8 +4,11 @@ package io.swagger.parser.test;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.swagger.oas.models.Components;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
 import io.swagger.parser.models.SwaggerParseResult;
@@ -187,6 +190,26 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
         Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+    }
+
+    @Test
+    public void testResolveFullyExample(@Injectable final List<AuthorizationValue> auths) throws Exception{
+
+
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        ParseOptions options = new ParseOptions();
+        //options.setResolve(true);
+        options.setResolveFully(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Components components = result.getOpenAPI().getComponents();
+        ApiResponse response = result.getOpenAPI().getPaths().get("/mockResponses/objectMultipleExamples").getGet().getResponses().get("200");
+        Assert.assertEquals(response.getContent().get("application/json").getExamples().get("ArthurDent"), components.getExamples().get("Arthur"));
+        Assert.assertEquals(response.getContent().get("application/xml").getExamples().get("Trillian"), components.getExamples().get("Trillian"));
     }
 
     @Test
