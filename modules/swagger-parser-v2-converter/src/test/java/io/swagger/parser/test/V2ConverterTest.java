@@ -248,7 +248,7 @@ public class V2ConverterTest {
     public void testIssue14() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_14_JSON);
         assertEquals(VALUE, oas.getPaths().get(PETS_PATH).getGet()
-                .getParameters().get(0).getExtensions().get(X_EXAMPLE));
+                .getParameters().get(0).getExample());
     }
 
     @Test(description = "Convert extensions everywhere applicable #15")
@@ -272,7 +272,7 @@ public class V2ConverterTest {
         assertNotNull(get.getResponses().get("200").getExtensions().get("x-response-extension"));
 
         ArraySchema schema = (ArraySchema) get.getParameters().get(0).getSchema();
-        assertNotNull(schema.getItems().getExtensions().get("x-example"));
+        assertNull(schema.getItems().getExtensions().get("x-example"));
 
         Map<String, SecurityScheme> securitySchemes = oas.getComponents().getSecuritySchemes();
         assertNotNull(securitySchemes);
