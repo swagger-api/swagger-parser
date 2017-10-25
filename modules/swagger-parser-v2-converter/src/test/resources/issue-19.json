@@ -51,11 +51,11 @@
                         "name": "dayOfWeek",
                         "type": "string",
                         "enum": [
-                            "montue",
-                            "tuewed",
-                            "wedthu"
+                            "monday_tuesday",
+                            "tuesday_wednesday",
+                            "wednesday_thursday"
                         ],
-                        "default": "montue"
+                        "default": "monday_tuesday"
                     }
                 ],
                 "responses": {
