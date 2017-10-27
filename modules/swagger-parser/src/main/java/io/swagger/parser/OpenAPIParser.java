@@ -1,9 +1,10 @@
 package io.swagger.parser;
 
-import io.swagger.parser.models.AuthorizationValue;
-import io.swagger.parser.models.ParseOptions;
-import io.swagger.parser.models.SwaggerParseResult;
-import io.swagger.parser.v3.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,8 +15,8 @@ public class OpenAPIParser {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult output = null;
 
-        for(io.swagger.parser.extensions.SwaggerParserExtension extension : getExtensions()) {
-            output = extension.readLocation(url, transform(auth), options);
+        for(SwaggerParserExtension extension : getExtensions()) {
+            output = extension.readLocation(url, auth, options);
             if(output != null && output.getOpenAPI() != null) {
                 return output;
             }
@@ -27,8 +28,8 @@ public class OpenAPIParser {
     public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult output = null;
 
-        for(io.swagger.parser.extensions.SwaggerParserExtension extension : getExtensions()) {
-            output = extension.readContents(swaggerAsString, transform(auth), options);
+        for(SwaggerParserExtension extension : getExtensions()) {
+            output = extension.readContents(swaggerAsString, auth, options);
             if(output != null && output.getOpenAPI() != null) {
                 return output;
             }
@@ -37,42 +38,15 @@ public class OpenAPIParser {
         return output;
     }
 
-    protected List<io.swagger.parser.extensions.SwaggerParserExtension> getExtensions() {
-        List<io.swagger.parser.extensions.SwaggerParserExtension> extensions = new ArrayList<>();
+    protected List<SwaggerParserExtension> getExtensions() {
+        List<SwaggerParserExtension> extensions = new ArrayList<>();
 
-        ServiceLoader<io.swagger.parser.extensions.SwaggerParserExtension> loader = ServiceLoader.load(io.swagger.parser.extensions.SwaggerParserExtension.class);
-        Iterator<io.swagger.parser.extensions.SwaggerParserExtension> itr = loader.iterator();
+        ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class);
+        Iterator<SwaggerParserExtension> itr = loader.iterator();
         while (itr.hasNext()) {
             extensions.add(itr.next());
         }
         extensions.add(0, new OpenAPIV3Parser());
         return extensions;
-    }
-
-    /**
-     * Transform the swagger-model version of AuthorizationValue into a parser-specific one, to avoid
-     * dependencies across extensions
-     *
-     * @param input
-     * @return
-     */
-    protected List<io.swagger.parser.models.AuthorizationValue> transform(List<AuthorizationValue> input) {
-        if(input == null) {
-            return null;
-        }
-
-        List<io.swagger.parser.models.AuthorizationValue> output = new ArrayList<>();
-
-        for(AuthorizationValue value : input) {
-            io.swagger.parser.models.AuthorizationValue v = new io.swagger.parser.models.AuthorizationValue();
-
-            v.setKeyName(value.getKeyName());
-            v.setValue(value.getValue());
-            v.setType(value.getType());
-
-            output.add(v);
-        }
-
-        return output;
     }
 }
