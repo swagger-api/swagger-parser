@@ -9,7 +9,7 @@ Using the swagger-parser is simple.  Once included in your project, you can read
 
 ```java
 import io.swagger.parser.v3.OpenAPIV3Parser;
-import io.swagger.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.OpenAPI;
 
 // ... your code
 

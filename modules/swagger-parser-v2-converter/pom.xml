@@ -23,7 +23,7 @@
             <version>${parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-models</artifactId>
             <version>${swagger-core-version}</version>
         </dependency>

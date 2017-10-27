@@ -1,9 +1,9 @@
 package io.swagger.parser.v3;
 
 
-import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.Operation;
-import io.swagger.oas.models.PathItem;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.v3.processors.ComponentsProcessor;
 import io.swagger.parser.v3.processors.OperationProcessor;

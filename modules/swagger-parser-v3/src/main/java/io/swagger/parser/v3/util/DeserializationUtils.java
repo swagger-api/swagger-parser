@@ -1,8 +1,8 @@
 package io.swagger.parser.v3.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
+import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.core.util.Json;
 
 import java.io.IOException;
 

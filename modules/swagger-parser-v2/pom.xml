@@ -41,6 +41,7 @@
                     </execution>
                 </executions>
             </plugin>
+<!--
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.0-M1</version>
@@ -52,12 +53,13 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <!-- switch on dependency-driven aggregation -->
+                            &lt;!&ndash; switch on dependency-driven aggregation &ndash;&gt;
                             <includeDependencySources>true</includeDependencySources>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+-->
         </plugins>
     </build>
     <dependencies>

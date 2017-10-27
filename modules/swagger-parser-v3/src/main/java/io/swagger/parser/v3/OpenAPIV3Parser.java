@@ -2,7 +2,7 @@ package io.swagger.parser.v3;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
@@ -13,7 +13,7 @@ import io.swagger.parser.v3.util.InlineModelResolver;
 import io.swagger.parser.v3.util.OpenAPIDeserializer;
 import io.swagger.parser.v3.util.RemoteUrl;
 import io.swagger.parser.v3.util.ResolverFully;
-import io.swagger.util.Json;
+import io.swagger.v3.core.util.Json;
 import org.apache.commons.io.FileUtils;
 import javax.net.ssl.SSLHandshakeException;
 

@@ -1,4 +1,4 @@
-package io.swagger.util;
+package io.swagger.v3.core.util;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;

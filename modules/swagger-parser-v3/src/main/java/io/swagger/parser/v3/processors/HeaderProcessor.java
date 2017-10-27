@@ -1,11 +1,11 @@
 package io.swagger.parser.v3.processors;
 
 
-import io.swagger.oas.models.examples.Example;
-import io.swagger.oas.models.headers.Header;
-import io.swagger.oas.models.media.MediaType;
-import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
