@@ -1,32 +1,32 @@
 package io.swagger.parser.v2;
 
-import io.swagger.oas.models.Components;
-import io.swagger.oas.models.ExternalDocumentation;
-import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.Operation;
-import io.swagger.oas.models.PathItem;
-import io.swagger.oas.models.Paths;
-import io.swagger.oas.models.headers.Header;
-import io.swagger.oas.models.info.Contact;
-import io.swagger.oas.models.info.Info;
-import io.swagger.oas.models.info.License;
-import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.media.ComposedSchema;
-import io.swagger.oas.models.media.Content;
-import io.swagger.oas.models.media.Discriminator;
-import io.swagger.oas.models.media.FileSchema;
-import io.swagger.oas.models.media.MediaType;
-import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.oas.models.parameters.RequestBody;
-import io.swagger.oas.models.responses.ApiResponse;
-import io.swagger.oas.models.responses.ApiResponses;
-import io.swagger.oas.models.security.OAuthFlow;
-import io.swagger.oas.models.security.OAuthFlows;
-import io.swagger.oas.models.security.Scopes;
-import io.swagger.oas.models.security.SecurityScheme;
-import io.swagger.oas.models.servers.Server;
-import io.swagger.oas.models.tags.Tag;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.Discriminator;
+import io.swagger.v3.oas.models.media.FileSchema;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.Scopes;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.parser.extensions.SwaggerParserExtension;
 import io.swagger.parser.models.AuthorizationValue;
 import io.swagger.parser.models.ParseOptions;
@@ -223,11 +223,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return output;
     }
 
-    private List<io.swagger.oas.models.security.SecurityRequirement> convertSecurityRequirements(List<SecurityRequirement> security) {
-        List<io.swagger.oas.models.security.SecurityRequirement> securityRequirements = new ArrayList<>();
+    private List<io.swagger.v3.oas.models.security.SecurityRequirement> convertSecurityRequirements(List<SecurityRequirement> security) {
+        List<io.swagger.v3.oas.models.security.SecurityRequirement> securityRequirements = new ArrayList<>();
 
         for (SecurityRequirement requirement : security) {
-            io.swagger.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.oas.models.security.SecurityRequirement();
+            io.swagger.v3.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.v3.oas.models.security.SecurityRequirement();
 
             requirement.getRequirements().forEach((k, v) -> securityRequirement.addList(k, v));
 
@@ -237,11 +237,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return securityRequirements;
     }
 
-    private List<io.swagger.oas.models.security.SecurityRequirement> convertSecurityRequirementsMap(List<Map<String, List<String>>> security) {
-        List<io.swagger.oas.models.security.SecurityRequirement> securityRequirements = new ArrayList<>();
+    private List<io.swagger.v3.oas.models.security.SecurityRequirement> convertSecurityRequirementsMap(List<Map<String, List<String>>> security) {
+        List<io.swagger.v3.oas.models.security.SecurityRequirement> securityRequirements = new ArrayList<>();
 
 //        for (SecurityRequirement requirement : security) {
-//            io.swagger.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.oas.models.security.SecurityRequirement();
+//            io.swagger.v3.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.v3.oas.models.security.SecurityRequirement();
 //
 //            requirement.getRequirements().forEach((k,v) -> securityRequirement.addList(k, v));
 //
@@ -249,7 +249,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 //        }
 
         for (Map<String, List<String>> map : security) {
-            io.swagger.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.oas.models.security.SecurityRequirement();
+            io.swagger.v3.oas.models.security.SecurityRequirement securityRequirement = new io.swagger.v3.oas.models.security.SecurityRequirement();
 
             map.forEach((k, v) -> securityRequirement.addList(k, v));
 

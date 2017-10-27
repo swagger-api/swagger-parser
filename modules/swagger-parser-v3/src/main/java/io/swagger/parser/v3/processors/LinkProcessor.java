@@ -1,8 +1,8 @@
 package io.swagger.parser.v3.processors;
 
-import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.headers.Header;
-import io.swagger.oas.models.links.Link;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.links.Link;
 import io.swagger.parser.v3.ResolverCache;
 import io.swagger.parser.v3.models.RefFormat;
 
