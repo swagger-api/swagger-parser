@@ -6,7 +6,7 @@
         <version>5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.swagger</groupId>
+    <groupId>io.swagger.parser.v3</groupId>
     <artifactId>swagger-parser-project</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -236,7 +236,6 @@
     <modules>
         <module>modules/swagger-parser-core</module>
         <module>modules/swagger-parser-v3</module>
-        <module>modules/swagger-parser-v2</module>
         <module>modules/swagger-parser-v2-converter</module>
         <module>modules/swagger-parser</module>
     </modules>

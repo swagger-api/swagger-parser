@@ -13,8 +13,8 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
-import io.swagger.parser.models.SwaggerParseResult;
-import io.swagger.parser.v2.SwaggerConverter;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.converter.SwaggerConverter;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

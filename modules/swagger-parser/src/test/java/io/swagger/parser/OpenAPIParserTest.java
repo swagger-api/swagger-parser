@@ -1,8 +1,8 @@
 package io.swagger.parser;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.parser.models.ParseOptions;
-import io.swagger.parser.models.SwaggerParseResult;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import org.junit.Test;
 
