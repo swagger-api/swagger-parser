@@ -2368,30 +2368,42 @@ public class OpenAPIDeserializer {
         return operation;
     }
 
-    public List<SecurityRequirement> getSecurityRequirementsList(ArrayNode nodes, String location, ParseResult result) {
-        if (nodes == null)
+    public List<SecurityRequirement> getSecurityRequirementsList(ArrayNode node, String location, ParseResult result) {
+        if (node == null)
             return null;
 
-        List<SecurityRequirement> securityRequirements = new ArrayList<>();
+        List<SecurityRequirement> output = new ArrayList<>();
 
-        for (JsonNode node : nodes) {
-            if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
-                SecurityRequirement securityRequirement = new SecurityRequirement();
-                Set<String> keys = getKeys((ObjectNode) node);
+        for (JsonNode item : node) {
+            SecurityRequirement security = new SecurityRequirement();
+            if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
+                ObjectNode on = (ObjectNode) item;
+                Set<String> keys = getKeys(on);
+
                 for (String key : keys) {
-                    if (key != null) {
-                        securityRequirement.addList(key,node.textValue());
-                        if (securityRequirement != null && securityRequirement.size() > 0){
-                            securityRequirements.add(securityRequirement);
+                    List<String> scopes = new ArrayList<>();
+                    ArrayNode obj = getArray(key, on, false, location + ".security", result);
+                    if (obj != null) {
+                        for (JsonNode n : obj) {
+                            if (n.getNodeType().equals(JsonNodeType.STRING)) {
+                                scopes.add(n.asText());
+                            } else {
+                                result.invalidType(location, key, "string", n);
+                            }
                         }
                     }
+                    security.addList(key, scopes);
                 }
             }
+            output.add(security);
         }
-        return securityRequirements;
+
+        return output;
+
     }
 
-    public Map<String, RequestBody> getRequestBodies(ObjectNode obj, String location, ParseResult result) {
+
+        public Map<String, RequestBody> getRequestBodies(ObjectNode obj, String location, ParseResult result) {
         if (obj == null) {
             return null;
         }

@@ -49,6 +49,47 @@ import static org.testng.Assert.assertTrue;
 public class OpenAPIDeserializerTest {
 
     @Test
+    public void securityTest(@Injectable List<AuthorizationValue> auths){
+        String yaml = "openapi: \"3.0.0\"\n" +
+                "info:\n" +
+                "  title: Test OpenApi Specification\n" +
+                "  version: 1.0.0\n" +
+                "paths:\n" +
+                "  /test:\n" +
+                "    get:\n" +
+                "      operationId: testGet\n" +
+                "      security:\n" +
+                "      - openId:\n" +
+                "        - https://scopes.example.com/myScope\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: get response.\n" +
+                "          content:\n" +
+                "            \"application/json\":\n" +
+                "              schema:\n" +
+                "                type: object\n" +
+                "components:\n" +
+                "  security:\n" +
+                "    securitySchemes:\n" +
+                "        openId:\n" +
+                "          type: openIdConnect\n" +
+                "          openIdConnectUrl: https://....";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = parser.readContents(yaml,auths,options);
+
+
+        Operation operation = result.getOpenAPI().getPaths().get("/test").getGet();
+        Assert.assertEquals(operation.getSecurity().get(0).get("openId").get(0), "https://scopes.example.com/myScope");
+
+
+    }
+
+    @Test
     public void testAllOfSchema(@Injectable List<AuthorizationValue> auths){
         String yaml = "openapi: '3.0'\n" +
             "components:\n" +
@@ -1034,6 +1075,8 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getParameters());
         Assert.assertEquals(petEndpoint.getParameters().size(), 2);
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
+        Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(0),"write:pets");
+        Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(1),"read:pets");
         Parameter parameter = petEndpoint.getParameters().get(0);
 
         ApiResponses responses = petEndpoint.getPost().getResponses();
@@ -1052,6 +1095,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
         Assert.assertEquals(petByStatusEndpoint.getGet().getCallbacks().get("mainHook").get("$request.body#/url").getPost().getResponses().get("200").getDescription(),"webhook successfully processed operation");
+
 
     }
 
