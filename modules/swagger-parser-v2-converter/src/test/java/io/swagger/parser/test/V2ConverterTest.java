@@ -76,7 +76,6 @@ public class V2ConverterTest {
     private static final String APPLICATION_JSON = "application/json";
     private static final String PASSWORD_VALUE = "p@55w0rd";
     private static final String PETSTORE_URL = "http://petstore.swagger.io/api";
-    private static final String STATUS_200 = "200";
     private static final String VALUE = "value";
     private static final String APPLICATION_PDF = "application/pdf";
     private static final String BINARY_FORMAT = "binary";
@@ -188,7 +187,7 @@ public class V2ConverterTest {
     @Test(description = "Contents in Responses")
     public void testIssue4() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_4_JSON);
-        assertNotNull(oas.getPaths().get(PETS_PATH).getGet().getResponses().get(STATUS_200).getContent());
+        assertNotNull(oas.getPaths().get(PETS_PATH).getGet().getResponses().get("200").getContent());
     }
 
     @Test(description = "Tags are missing in the converted spec")
@@ -221,7 +220,7 @@ public class V2ConverterTest {
     public void testIssue10() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(PET_STORE_JSON);
         Map<String, Header> headers = oas.getPaths().get(USER_LOGIN_PATH).getGet().getResponses().
-                get(STATUS_200).getHeaders();
+                get("200").getHeaders();
         assertEquals(X_RATE_LIMIT_DESCRIPTION, headers.get(X_RATE_LIMIT).getDescription());
         assertEquals(X_EXPIRES_AFTER_DESCRIPTION, headers.get(X_EXPIRES_AFTER).getDescription());
     }
@@ -273,7 +272,7 @@ public class V2ConverterTest {
         Operation get = pathItem.getGet();
         assertNotNull(get.getExtensions().get("x-version"));
         assertNotNull(get.getExternalDocs().getExtensions().get("x-operation-docs-extension"));
-        assertNotNull(get.getResponses().get(STATUS_200).getExtensions().get("x-response-extension"));
+        assertNotNull(get.getResponses().get("200").getExtensions().get("x-response-extension"));
 
         ArraySchema schema = (ArraySchema) get.getParameters().get(0).getSchema();
         assertNull(schema.getItems().getExtensions().get(X_EXAMPLE));
@@ -346,7 +345,7 @@ public class V2ConverterTest {
     public void testIssue21() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_21_JSON);
         assertEquals(BINARY_FORMAT, oas.getPaths().get(FILE_PATH).getGet()
-                .getResponses().get(STATUS_200).getContent().get(APPLICATION_PDF).getSchema().getFormat());
+                .getResponses().get("200").getContent().get(APPLICATION_PDF).getSchema().getFormat());
     }
 
     @Test(description = "Converting Hosts Without Schema")
@@ -426,7 +425,7 @@ public class V2ConverterTest {
     @Test(description = "Convert response examples")
     public void testIssue33() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_33_JSON);
-        ApiResponse apiResponse = oas.getPaths().get(USERS_PATH).getGet().getResponses().get(STATUS_200);
+        ApiResponse apiResponse = oas.getPaths().get(USERS_PATH).getGet().getResponses().get("200");
         assertNotNull(apiResponse);
         assertNull(apiResponse.getContent().get(APPLICATION_YAML));
         assertNotNull(apiResponse.getContent().get(APPLICATION_JSON));
@@ -442,7 +441,7 @@ public class V2ConverterTest {
         assertEquals(parameters.get(0).getSchema().getNullable(), Boolean.TRUE);
         assertEquals(parameters.get(1).getSchema().getNullable(), Boolean.FALSE);
         assertEquals(parameters.get(2).getSchema().getNullable(), Boolean.TRUE);
-        assertEquals(getOperation.getResponses().get(STATUS_200).getContent().get("*/*").getSchema().getNullable(),
+        assertEquals(getOperation.getResponses().get("200").getContent().get("*/*").getSchema().getNullable(),
                 Boolean.TRUE);
         Schema user = oas.getComponents().getSchemas().get(USER_MODEL);
         assertNotNull(user);
