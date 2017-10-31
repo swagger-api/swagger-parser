@@ -10,6 +10,7 @@ import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
+import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.security.OAuthFlow;
 import io.swagger.oas.models.security.SecurityScheme;
 import io.swagger.oas.models.tags.Tag;
@@ -32,7 +33,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class V2ConverterTest {
-
     private static final String PET_STORE_JSON = "petstore.json";
     private static final String PET_STORE_YAML = "petstore.yaml";
     private static final String ISSUE_2_JSON = "issue-2.json";
@@ -59,6 +59,7 @@ public class V2ConverterTest {
     private static final String ISSUE_30_JSON = "issue-30.json";
     private static final String ISSUE_31_JSON = "issue-31.json";
     private static final String ISSUE_32_JSON = "issue-32.json";
+    private static final String ISSUE_33_JSON = "issue-33.json";
     private static final String ISSUE_35_JSON = "issue-35.json";
     private static final String ISSUE_36_JSON = "issue-36.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
@@ -70,14 +71,15 @@ public class V2ConverterTest {
     private static final String FILE_PATH = "/file";
     private static final String POST_PATH = "/post";
     private static final String LOGIN_PATH = "/login";
+    private static final String USERS_PATH = "/users";
+    private static final String APPLICATION_YAML = "application/yaml";
+    private static final String APPLICATION_JSON = "application/json";
     private static final String PASSWORD_VALUE = "p@55w0rd";
     private static final String PETSTORE_URL = "http://petstore.swagger.io/api";
-    private static final String STATUS_200 = "200";
     private static final String VALUE = "value";
     private static final String APPLICATION_PDF = "application/pdf";
     private static final String BINARY_FORMAT = "binary";
     private static final String ARRAY_TYPE = "array";
-    private static final String X_EXAMPLE = "x-example";
     private static final String PET_SCHEMA = "Pet";
     private static final String PET_TAG = "pet";
     private static final String RESPONSE_200OK_COMPONENT = "200OK";
@@ -98,6 +100,7 @@ public class V2ConverterTest {
     private static final String X_EXPIRES_AFTER = "X-Expires-After";
     private static final String X_RATE_LIMIT_DESCRIPTION = "calls per hour allowed by the user";
     private static final String X_EXPIRES_AFTER_DESCRIPTION = "date in UTC when token expires";
+    private static final String X_EXAMPLE = "x-example";
     private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String URLENCODED_CONTENT = "application/x-www-form-urlencoded";
     private static final String PATTERN = "^[a-zA-Z0-9]+$";
@@ -107,9 +110,9 @@ public class V2ConverterTest {
     private static final String EMAIL = "email";
     private static final String PASSWORD = "password";
     private static final String EMAIL_VALUE = "bob@example.com";
-    private static final String MONTUE_VALUE = "montue";
-    private static final String TUEWED_VALUE = "tuewed";
-    private static final String WEDTHU_VALUE = "wedthu";
+    private static final String MONDAY_TUESDAY_VALUE = "monday_tuesday";
+    private static final String TUESDAY_WEDNESDAY_VALUE = "tuesday_wednesday";
+    private static final String WEDNESDAY_THURSDAY_VALUE = "wednesday_thursday";
     private static final String ARTHUR_DENT_NAME = "Arthur Dent";
     private static final String NAME = "name";
     private static final String USER_MODEL = "User";
@@ -184,7 +187,7 @@ public class V2ConverterTest {
     @Test(description = "Contents in Responses")
     public void testIssue4() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_4_JSON);
-        assertNotNull(oas.getPaths().get(PETS_PATH).getGet().getResponses().get(STATUS_200).getContent());
+        assertNotNull(oas.getPaths().get(PETS_PATH).getGet().getResponses().get("200").getContent());
     }
 
     @Test(description = "Tags are missing in the converted spec")
@@ -217,7 +220,7 @@ public class V2ConverterTest {
     public void testIssue10() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(PET_STORE_JSON);
         Map<String, Header> headers = oas.getPaths().get(USER_LOGIN_PATH).getGet().getResponses().
-                get(STATUS_200).getHeaders();
+                get("200").getHeaders();
         assertEquals(X_RATE_LIMIT_DESCRIPTION, headers.get(X_RATE_LIMIT).getDescription());
         assertEquals(X_EXPIRES_AFTER_DESCRIPTION, headers.get(X_EXPIRES_AFTER).getDescription());
     }
@@ -272,7 +275,7 @@ public class V2ConverterTest {
         assertNotNull(get.getResponses().get("200").getExtensions().get("x-response-extension"));
 
         ArraySchema schema = (ArraySchema) get.getParameters().get(0).getSchema();
-        assertNull(schema.getItems().getExtensions().get("x-example"));
+        assertNull(schema.getItems().getExtensions().get(X_EXAMPLE));
 
         Map<String, SecurityScheme> securitySchemes = oas.getComponents().getSecuritySchemes();
         assertNotNull(securitySchemes);
@@ -325,10 +328,10 @@ public class V2ConverterTest {
         assertEquals(new BigDecimal(MULTIPLE_OF_VALUE), new BigDecimal(favNumber.getMultipleOf().doubleValue()));
 
         Schema dayOfWeek = (Schema) properties.get("dayOfWeek");
-        assertEquals(MONTUE_VALUE, dayOfWeek.getDefault());
-        assertEquals(MONTUE_VALUE, dayOfWeek.getEnum().get(0));
-        assertEquals(TUEWED_VALUE, dayOfWeek.getEnum().get(1));
-        assertEquals(WEDTHU_VALUE, dayOfWeek.getEnum().get(2));
+        assertEquals(MONDAY_TUESDAY_VALUE, dayOfWeek.getDefault());
+        assertEquals(MONDAY_TUESDAY_VALUE, dayOfWeek.getEnum().get(0));
+        assertEquals(TUESDAY_WEDNESDAY_VALUE, dayOfWeek.getEnum().get(1));
+        assertEquals(WEDNESDAY_THURSDAY_VALUE, dayOfWeek.getEnum().get(2));
     }
 
     @Test(description = "Response $ref's ")
@@ -342,7 +345,7 @@ public class V2ConverterTest {
     public void testIssue21() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_21_JSON);
         assertEquals(BINARY_FORMAT, oas.getPaths().get(FILE_PATH).getGet()
-                .getResponses().get(STATUS_200).getContent().get(APPLICATION_PDF).getSchema().getFormat());
+                .getResponses().get("200").getContent().get(APPLICATION_PDF).getSchema().getFormat());
     }
 
     @Test(description = "Converting Hosts Without Schema")
@@ -361,7 +364,7 @@ public class V2ConverterTest {
     @Test(description = "Covert path item $refs")
     public void testIssue25() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_25_JSON);
-        //assertNotNull(oas);
+        assertNull(oas);
     }
 
     @Test(description = "Convert allOff")
@@ -419,6 +422,15 @@ public class V2ConverterTest {
         assertEquals(schemas.get(ARRAY_OF_USERS_MODEL).getExample(), ARRAY_VALUES);
     }
 
+    @Test(description = "Convert response examples")
+    public void testIssue33() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_33_JSON);
+        ApiResponse apiResponse = oas.getPaths().get(USERS_PATH).getGet().getResponses().get("200");
+        assertNotNull(apiResponse);
+        assertNull(apiResponse.getContent().get(APPLICATION_YAML));
+        assertNotNull(apiResponse.getContent().get(APPLICATION_JSON));
+    }
+
     @Test(description = "Nice to have: Convert x-nullable to nullable")
     public void testIssue35() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_35_JSON);
@@ -429,7 +441,7 @@ public class V2ConverterTest {
         assertEquals(parameters.get(0).getSchema().getNullable(), Boolean.TRUE);
         assertEquals(parameters.get(1).getSchema().getNullable(), Boolean.FALSE);
         assertEquals(parameters.get(2).getSchema().getNullable(), Boolean.TRUE);
-        assertEquals(getOperation.getResponses().get(STATUS_200).getContent().get("*/*").getSchema().getNullable(),
+        assertEquals(getOperation.getResponses().get("200").getContent().get("*/*").getSchema().getNullable(),
                 Boolean.TRUE);
         Schema user = oas.getComponents().getSchemas().get(USER_MODEL);
         assertNotNull(user);
@@ -451,7 +463,6 @@ public class V2ConverterTest {
         Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
         assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
         assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
-
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
