@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.swagger</groupId>
+        <groupId>io.swagger.parser.v3</groupId>
         <artifactId>swagger-parser-project</artifactId>
         <version>2.0.0-SNAPSHOT</version>
         <relativePath>../..</relativePath>
@@ -13,8 +13,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-v2-converter</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser-v3</artifactId>
             <version>${parent.version}</version>
         </dependency>
         <dependency>
@@ -23,12 +28,6 @@
             <version>${jmockit-version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-models</artifactId>
-            <version>${swagger-core-version}</version>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -50,7 +49,6 @@
             <artifactId>commons-io</artifactId>
             <version>${commons-io-version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -78,7 +76,6 @@
             <version>${slf4j-version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
@@ -96,11 +93,6 @@
             <artifactId>testng</artifactId>
             <version>6.9.10</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-parser-v3</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

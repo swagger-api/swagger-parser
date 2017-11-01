@@ -8,8 +8,8 @@ This is the swagger parser project, which reads OpenAPI Specifications into curr
 Using the swagger-parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
 
 ```java
-import io.swagger.parser.v3.OpenAPIV3Parser;
-import io.swagger.oas.models.OpenAPI;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.oas.models.OpenAPI;
 
 // ... your code
 
@@ -29,7 +29,7 @@ You can read from a file location as well:
 
 If your OpenAPI definition is protected, you can pass headers in the request:
 ```java
-import io.swagger.parser.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 
 // ... your code
 
@@ -93,7 +93,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 
 ```xml
 <dependency>
-  <groupId>io.swagger</groupId>
+  <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
   <version>2.0.0-SNAPSHOT</version>
 </dependency>

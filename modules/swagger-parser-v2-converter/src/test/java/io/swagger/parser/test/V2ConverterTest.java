@@ -1,21 +1,21 @@
 package io.swagger.parser.test;
 
-import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.Operation;
-import io.swagger.oas.models.PathItem;
-import io.swagger.oas.models.headers.Header;
-import io.swagger.oas.models.info.Info;
-import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.media.ComposedSchema;
-import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.oas.models.parameters.RequestBody;
-import io.swagger.oas.models.responses.ApiResponse;
-import io.swagger.oas.models.security.OAuthFlow;
-import io.swagger.oas.models.security.SecurityScheme;
-import io.swagger.oas.models.tags.Tag;
-import io.swagger.parser.models.SwaggerParseResult;
-import io.swagger.parser.v2.SwaggerConverter;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.converter.SwaggerConverter;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
