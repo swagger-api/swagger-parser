@@ -32,14 +32,14 @@ public class ResolverFully {
 
 
     public void resolveFully(OpenAPI openAPI) {
-        if (openAPI.getComponents().getSchemas() != null) {
+        if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
             schemas = openAPI.getComponents().getSchemas();
             if (schemas == null) {
                 schemas = new HashMap<>();
             }
         }
 
-        if (openAPI.getComponents().getExamples() != null) {
+        if (openAPI.getComponents() != null && openAPI.getComponents().getExamples() != null) {
             examples = openAPI.getComponents().getExamples();
             if (examples == null) {
                 examples = new HashMap<>();
