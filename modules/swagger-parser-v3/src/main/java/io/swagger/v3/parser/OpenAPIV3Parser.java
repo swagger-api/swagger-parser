@@ -52,7 +52,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         }
                         if (options.isResolveFully()) {
                             result.setOpenAPI(resolver.resolve());
-                            new ResolverFully().resolveFully(result.getOpenAPI());
+                            new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                         }else if (options.isFlatten()){
                             InlineModelResolver inlineResolver = new InlineModelResolver();
                             inlineResolver.flatten(result.getOpenAPI());
@@ -178,7 +178,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     }
                 }if (options.isResolveFully()){
                     result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
-                    new ResolverFully().resolveFully(result.getOpenAPI());
+                    new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
 
                 }if (options.isFlatten()){
                     new InlineModelResolver().flatten(result.getOpenAPI());

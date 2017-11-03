@@ -535,6 +535,22 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void resolveAllOfWithoutAggregatingParameters(@Injectable final List<AuthorizationValue> auths) {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(false);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+
+        ComposedSchema allOf = (ComposedSchema) openAPI.getComponents().getSchemas().get("ExtendedAddress");
+        assertEquals(allOf.getAllOf().size(), 2);
+
+        assertTrue(allOf.getAllOf().get(0).getProperties().containsKey("street"));
+        assertTrue(allOf.getAllOf().get(1).getProperties().containsKey("gps"));
+
+    }
+
+    @Test
     public void resolveComposedReferenceSchema(@Injectable final List<AuthorizationValue> auths){
 
 
