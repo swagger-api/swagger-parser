@@ -14,8 +14,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -292,7 +292,10 @@ public class V2ConverterTest {
     @Test(description = "Referenced parameters are converted incorrectly")
     public void testIssue17() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_17_JSON);
-        assertNotNull(oas);
+        Map<String, RequestBody> requestBodies = oas.getComponents().getRequestBodies();
+        assertNotNull(requestBodies.get("formEmail").getContent().get("multipart/form-data"));
+        assertNotNull(requestBodies.get("formPassword").getContent().get("multipart/form-data"));
+        assertNotNull(requestBodies.get("bodyParam").getContent().get("*/*"));
     }
 
     @Test(description = "External Docs in Operations")
