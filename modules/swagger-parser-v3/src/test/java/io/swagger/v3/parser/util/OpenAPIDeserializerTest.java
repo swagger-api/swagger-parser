@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.Parameter.StyleEnum;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -928,6 +929,33 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getIn(),"query");
     }
 
+    @Test(dataProvider = "data")
+    public void readSchemaArray(JsonNode rootNode) throws Exception {
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        final Paths paths = openAPI.getPaths();
+        Assert.assertNotNull(paths);
+        Assert.assertEquals(paths.size(), 18);
+
+        //parameters operation get
+        PathItem petByStatusEndpoint = paths.get("/pet/findByTags");
+        Assert.assertNotNull(petByStatusEndpoint.getGet());
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getSchema());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getSchema().getType(), "array");
+        Assert.assertEquals(((ArraySchema)(petByStatusEndpoint.getGet().getParameters().get(0).getSchema())).getItems().getType(), "string");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getName(),"tags");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getExplode(), Boolean.TRUE);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getStyle(), StyleEnum.FORM);
+    }
+    
     @Test(dataProvider = "data")
     public void readProducesTestEndpoint(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
