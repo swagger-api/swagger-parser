@@ -56,6 +56,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class OpenAPIDeserializer {
@@ -2368,37 +2370,39 @@ public class OpenAPIDeserializer {
         return operation;
     }
 
-    public List<SecurityRequirement> getSecurityRequirementsList(ArrayNode node, String location, ParseResult result) {
-        if (node == null)
+    public List<SecurityRequirement> getSecurityRequirementsList(ArrayNode nodes, String location, ParseResult result) {
+        if (nodes == null)
             return null;
 
-        List<SecurityRequirement> output = new ArrayList<>();
+        List<SecurityRequirement> securityRequirements = new ArrayList<>();
 
-        for (JsonNode item : node) {
-            SecurityRequirement security = new SecurityRequirement();
-            if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode on = (ObjectNode) item;
-                Set<String> keys = getKeys(on);
-
+        for (JsonNode node : nodes) {
+            if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
+                SecurityRequirement securityRequirement = new SecurityRequirement();
+                Set<String> keys = getKeys((ObjectNode) node);
                 for (String key : keys) {
-                    List<String> scopes = new ArrayList<>();
-                    ArrayNode obj = getArray(key, on, false, location + ".security", result);
-                    if (obj != null) {
-                        for (JsonNode n : obj) {
-                            if (n.getNodeType().equals(JsonNodeType.STRING)) {
-                                scopes.add(n.asText());
-                            } else {
-                                result.invalidType(location, key, "string", n);
+                    if (key != null) {
+                        JsonNode value = node.get(key);
+                        if (key != null && JsonNodeType.ARRAY.equals(value.getNodeType())) {
+                            ArrayNode arrayNode = (ArrayNode)value;
+                            List<String> scopes = Stream
+                                    .generate(arrayNode.elements()::next)
+                                    .map((n) -> n.asText())
+                                    .limit(arrayNode.size())
+                                    .collect(Collectors.toList());
+                            securityRequirement.addList(key,scopes);
+                            if (securityRequirement.size() > 0){
+                                securityRequirements.add(securityRequirement);
                             }
                         }
                     }
-                    security.addList(key, scopes);
                 }
             }
-            output.add(security);
         }
 
-        return output;
+
+
+        return securityRequirements;
 
     }
 
