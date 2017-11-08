@@ -1929,17 +1929,15 @@ public class OpenAPIDeserializer {
 
         ArrayNode enumArray = getArray("enum", node, false, location, result);
         if(enumArray != null) {
-            List _enum = new ArrayList<>();
             for (JsonNode n : enumArray) {
                 if (n.isNumber()) {
-                    _enum.add(n.numberValue());
+                    schema.addEnumItemObject(String.valueOf(n.numberValue()));
                 }else if (n.isValueNode()) {
-                    _enum.add(n.asText());
+                    schema.addEnumItemObject(n.asText());
                 } else {
                     result.invalidType(location, "enum", "value", n);
                 }
             }
-            schema.setEnum(_enum);
         }
 
         value = getString("type",node,false,location,result);
