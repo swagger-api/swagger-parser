@@ -87,7 +87,7 @@ public class SwaggerParser {
     }
 
     public SwaggerDeserializationResult readWithInfo(String swaggerAsString) {
-        if(swaggerAsString == null) {
+        if (swaggerAsString == null) {
             return new SwaggerDeserializationResult().message("empty or null swagger supplied");
         }
         try {
@@ -102,13 +102,38 @@ public class SwaggerParser {
             SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);
             if (result != null) {
                 result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
-            }
-            else {
-            	result = new SwaggerDeserializationResult().message("Definition does not appear to be a valid Swagger format");
+            } else {
+                result = new SwaggerDeserializationResult().message("Definition does not appear to be a valid Swagger format");
             }
             return result;
+        } catch (Exception e) {
+            return new SwaggerDeserializationResult().message("malformed or unreadable swagger supplied");
         }
-        catch (Exception e) {
+    }
+
+    public SwaggerDeserializationResult readWithInfo(String swaggerAsString, boolean resolve) {
+        if (swaggerAsString == null) {
+            return new SwaggerDeserializationResult().message("empty or null swagger supplied");
+        }
+        try {
+            JsonNode node;
+            if (swaggerAsString.trim().startsWith("{")) {
+                ObjectMapper mapper = Json.mapper();
+                node = mapper.readTree(swaggerAsString);
+            } else {
+                node = DeserializationUtils.readYamlTree(swaggerAsString);
+            }
+
+            SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);
+            if (result != null) {
+                if (resolve) {
+                    result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
+                }
+            } else {
+                result = new SwaggerDeserializationResult().message("Definition does not appear to be a valid Swagger format");
+            }
+            return result;
+        } catch (Exception e) {
             return new SwaggerDeserializationResult().message("malformed or unreadable swagger supplied");
         }
     }
