@@ -1,5 +1,35 @@
 package io.swagger.v3.parser.converter;
 
+import io.swagger.models.ArrayModel;
+import io.swagger.models.ComposedModel;
+import io.swagger.models.ExternalDocs;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.RefPath;
+import io.swagger.models.RefResponse;
+import io.swagger.models.Response;
+import io.swagger.models.Scheme;
+import io.swagger.models.SecurityRequirement;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.AbstractSerializableParameter;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.parameters.SerializableParameter;
+import io.swagger.models.properties.AbstractNumericProperty;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.SwaggerResolver;
+import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -32,36 +62,7 @@ import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
-import io.swagger.models.ArrayModel;
-import io.swagger.models.ComposedModel;
-import io.swagger.models.ExternalDocs;
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.RefPath;
-import io.swagger.models.RefResponse;
-import io.swagger.models.Response;
-import io.swagger.models.Scheme;
-import io.swagger.models.SecurityRequirement;
-import io.swagger.models.Swagger;
-import io.swagger.models.auth.ApiKeyAuthDefinition;
-import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.AbstractSerializableParameter;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.RefParameter;
-import io.swagger.models.parameters.SerializableParameter;
-import io.swagger.models.properties.AbstractNumericProperty;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.parser.SwaggerResolver;
-import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +74,7 @@ import java.util.stream.Collectors;
 public class SwaggerConverter implements SwaggerParserExtension {
     private List<String> globalConsumes = new ArrayList<>();
     private List<String> globalProduces = new ArrayList<>();
+    private Components components = new Components();
 
     @Override
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auths, ParseOptions options) {
@@ -88,7 +90,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
     @Override
     public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options) {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(swaggerAsString);
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(swaggerAsString, options == null ?
+                true : options.isResolve());
 
         if (options != null) {
             if (options.isResolve()) {
@@ -177,16 +180,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
 
-        Paths v3Paths = new Paths();
-        for (String pathname : swagger.getPaths().keySet()) {
-            io.swagger.models.Path v2Path = swagger.getPath(pathname);
-            PathItem v3Path = convert(v2Path);
-            v3Paths.put(pathname, v3Path);
-        }
-        openAPI.setPaths(v3Paths);
-
-        Components components = new Components();
-
         if (swagger.getParameters() != null) {
             swagger.getParameters().forEach((k, v) -> {
                 if ("body".equals(v.getIn())) {
@@ -198,6 +191,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 }
             });
         }
+
+        Paths v3Paths = new Paths();
+        for (String pathname : swagger.getPaths().keySet()) {
+            io.swagger.models.Path v2Path = swagger.getPath(pathname);
+            PathItem v3Path = convert(v2Path);
+            v3Paths.put(pathname, v3Path);
+        }
+        openAPI.setPaths(v3Paths);
 
         if (swagger.getResponses() != null) {
             swagger.getResponses().forEach((k, v) -> components.addResponses(k, convert(v)));
@@ -863,8 +864,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             RefParameter ref = (RefParameter) v2Parameter;
             if (ref.get$ref().indexOf("#/parameters") == 0) {
-
-                String updatedRef = "#/components/parameters" + ref.get$ref().substring("#/parameters".length());
+                String updatedRef = "#/components/";
+                if (components.getRequestBodies() != null &&
+                        components.getRequestBodies().get(ref.getSimpleRef()) != null) {
+                    updatedRef += "requestBodies";
+                } else {
+                    updatedRef += "parameters";
+                }
+                updatedRef += ref.get$ref().substring("#/parameters".length());
                 ref.set$ref(updatedRef);
             }
 

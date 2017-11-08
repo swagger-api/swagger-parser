@@ -13,6 +13,22 @@
                     },
                     {
                         "$ref": "#/parameters/dateRangeParam"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "number of pets to return",
+                        "type": "string",
+                        "x-example": "value"
+                    },
+                    {
+
+                        "name": "limitForm",
+                        "in": "formData",
+                        "type": "string",
+                        "format": "email",
+                        "required": true
+
                     }
                 ],
                 "responses": {

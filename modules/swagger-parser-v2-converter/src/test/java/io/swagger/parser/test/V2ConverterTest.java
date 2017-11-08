@@ -15,6 +15,7 @@ import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
 
@@ -135,6 +136,7 @@ public class V2ConverterTest {
     private static final long DEFAULT_VALUE = 11L;
     private static final long EXAMPLE_8_NUMBER = 8L;
     private static final long EXAMPLE_42_NUMBER = 42L;
+    public static final String REQUEST_BODY_FORMEMAIL = "#/components/requestBodies/formEmail";
 
     @Test
     public void testConvertPetstore() throws Exception {
@@ -296,6 +298,10 @@ public class V2ConverterTest {
         assertNotNull(requestBodies.get("formEmail").getContent().get("multipart/form-data"));
         assertNotNull(requestBodies.get("formPassword").getContent().get("multipart/form-data"));
         assertNotNull(requestBodies.get("bodyParam").getContent().get("*/*"));
+        assertEquals(oas.getPaths().get("/formPost").getPost().getParameters().get(0).get$ref(),
+                REQUEST_BODY_FORMEMAIL);
+        assertNotNull(oas.getPaths().get("/report/{userId}").getGet().getRequestBody().
+                getContent().get("multipart/form-data").getSchema().getProperties().get("limitForm"));
     }
 
     @Test(description = "External Docs in Operations")
@@ -367,7 +373,8 @@ public class V2ConverterTest {
     @Test(description = "Covert path item $refs")
     public void testIssue25() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_25_JSON);
-        assertNull(oas);
+        assertNotNull(oas);
+        assertEquals(oas.getPaths().get("/foo2").get$ref(), "#/paths/~1foo");
     }
 
     @Test(description = "Convert allOff")
@@ -471,8 +478,9 @@ public class V2ConverterTest {
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
         SwaggerConverter converter = new SwaggerConverter();
         String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(file).toURI())));
-
-        SwaggerParseResult result = converter.readContents(swaggerAsString, null, null);
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(false);
+        SwaggerParseResult result = converter.readContents(swaggerAsString, null, parseOptions);
         assertNotNull(result);
         return result.getOpenAPI();
     }
