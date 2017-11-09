@@ -34,6 +34,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.Parameter.StyleEnum;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -1312,17 +1313,18 @@ public class OpenAPIDeserializer {
             parameter.setAllowEmptyValue(allowEmptyValue);
         }
 
+        value = getString("style", obj, false, location, result);
+        setStyle(value, parameter, location, obj, result);
+
         Boolean explode = getBoolean("explode", obj, false, location, result);
         if (explode != null) {
             parameter.setExplode(explode);
+        } else if(parameter.getStyle().equals(StyleEnum.FORM)){
+            parameter.setExplode(Boolean.TRUE);
         } else {
             parameter.setExplode(Boolean.FALSE);
         }
-
-        value = getString("style", obj, false, location, result);
-
-        setStyle(value, parameter, location, obj, result);
-
+        
 
         ObjectNode parameterObject = getObject("schema",obj,false,location,result);
         if (parameterObject!= null) {
@@ -1927,17 +1929,15 @@ public class OpenAPIDeserializer {
 
         ArrayNode enumArray = getArray("enum", node, false, location, result);
         if(enumArray != null) {
-            List _enum = new ArrayList<>();
             for (JsonNode n : enumArray) {
                 if (n.isNumber()) {
-                    _enum.add(n.numberValue());
+                    schema.addEnumItemObject(String.valueOf(n.numberValue()));
                 }else if (n.isValueNode()) {
-                    _enum.add(n.asText());
+                    schema.addEnumItemObject(n.asText());
                 } else {
                     result.invalidType(location, "enum", "value", n);
                 }
             }
-            schema.setEnum(_enum);
         }
 
         value = getString("type",node,false,location,result);
