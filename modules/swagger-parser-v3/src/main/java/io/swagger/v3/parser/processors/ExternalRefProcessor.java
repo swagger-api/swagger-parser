@@ -1,6 +1,7 @@
 package io.swagger.v3.parser.processors;
 
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
@@ -46,6 +47,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
 
         if (schemas == null) {

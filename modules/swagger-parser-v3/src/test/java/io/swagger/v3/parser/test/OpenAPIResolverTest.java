@@ -603,6 +603,17 @@ public class OpenAPIResolverTest {
 
     }
 
+    @Test
+    public void referringSpecWithoutComponentsTag() throws Exception {
+        ParseOptions resolve = new ParseOptions();
+        resolve.setResolveFully(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/ref-without-component/a.yaml", null, resolve);
+
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
+    }
+
+
     private static int getDynamicPort() {
         return new Random().ints(50000, 60000).findFirst().getAsInt();
     }
