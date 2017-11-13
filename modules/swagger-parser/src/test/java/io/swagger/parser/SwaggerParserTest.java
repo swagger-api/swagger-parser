@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
 import io.swagger.models.Model;
@@ -31,7 +32,9 @@ import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.testng.reporters.Files;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -957,5 +960,25 @@ public class SwaggerParserTest {
         Swagger swagger = new SwaggerParser().read("src/test/resources/allOf-example/allOf.json");
         assertEquals(2, swagger.getDefinitions().size());
 
+    }
+
+    @Test(description = "A string example should not be over quoted when parsing a yaml string")
+    public void readingSpecStringShouldNotOverQuotingStringExample() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/over-quoted-example.yaml", null, false);
+
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
+    }
+
+    @Test(description = "A string example should not be over quoted when parsing a yaml node")
+    public void readingSpecNodeShouldNotOverQuotingStringExample() throws Exception {
+        String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
+        JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.read(rootNode,true);
+
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
     }
 }
