@@ -172,7 +172,7 @@ public class V2ConverterTest {
         assertEquals(ENUM_SIZE, arraySchema.getItems().getEnum().size());
     }
 
-    @Test(description = "Response Codes")
+    @Test(description = "Response Code")
     public void testIssue2() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_2_JSON);
         assertEquals(REQUIRED_SIZE, oas.getPaths().get(API_BATCH_PATH).getGet().getResponses().size());
