@@ -1063,6 +1063,8 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getParameters().size(), 2);
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
         Parameter parameter = petEndpoint.getParameters().get(0);
+        Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(0), "write:pets");
+        Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(1), "read:pets");
 
         ApiResponses responses = petEndpoint.getPost().getResponses();
         Assert.assertNotNull(responses);
