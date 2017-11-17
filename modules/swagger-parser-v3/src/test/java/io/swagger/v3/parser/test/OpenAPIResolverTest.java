@@ -540,9 +540,21 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
         options.setResolveCombinators(false);
 
+        // Testing components/schemas
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
 
         ComposedSchema allOf = (ComposedSchema) openAPI.getComponents().getSchemas().get("ExtendedAddress");
+        assertEquals(allOf.getAllOf().size(), 2);
+
+        assertTrue(allOf.getAllOf().get(0).getProperties().containsKey("street"));
+        assertTrue(allOf.getAllOf().get(1).getProperties().containsKey("gps"));
+
+        // Testing path item
+        ComposedSchema schema = (ComposedSchema) openAPI.getPaths().get("/withInvalidComposedModel").getPost().getRequestBody().getContent().get("application/json").getSchema();
+
+        // In fact the schema resolved previously is the same of /withInvalidComposedModel
+        assertEquals(schema, allOf);
+
         assertEquals(allOf.getAllOf().size(), 2);
 
         assertTrue(allOf.getAllOf().get(0).getProperties().containsKey("street"));
