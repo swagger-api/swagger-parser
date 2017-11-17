@@ -555,10 +555,10 @@ public class OpenAPIResolverTest {
         // In fact the schema resolved previously is the same of /withInvalidComposedModel
         assertEquals(schema, allOf);
 
-        assertEquals(allOf.getAllOf().size(), 2);
+        assertEquals(schema.getAllOf().size(), 2);
 
-        assertTrue(allOf.getAllOf().get(0).getProperties().containsKey("street"));
-        assertTrue(allOf.getAllOf().get(1).getProperties().containsKey("gps"));
+        assertTrue(schema.getAllOf().get(0).getProperties().containsKey("street"));
+        assertTrue(schema.getAllOf().get(1).getProperties().containsKey("gps"));
 
     }
 
