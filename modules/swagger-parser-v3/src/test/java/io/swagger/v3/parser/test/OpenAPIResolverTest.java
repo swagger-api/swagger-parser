@@ -572,13 +572,34 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
-        openAPI.getPaths();
         ResolverFully resolverUtil = new ResolverFully();
         resolverUtil.resolveFully(openAPI);
 
         assertTrue(openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ArraySchema);
         ArraySchema arraySchema = (ArraySchema) openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema();
         assertTrue(arraySchema.getItems() instanceof ObjectSchema);
+
+    }
+
+    @Test
+    public void resolveComposedSchema(@Injectable final List<AuthorizationValue> auths){
+
+
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/oneof-anyof.yaml",auths,options).getOpenAPI();
+
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+
+        assertTrue(openAPI.getPaths().get("/mixed-array").getGet().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ArraySchema);
+        ArraySchema arraySchema = (ArraySchema) openAPI.getPaths().get("/mixed-array").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(arraySchema.getItems() instanceof ComposedSchema);
+        ComposedSchema oneOf = (ComposedSchema) arraySchema.getItems();
+        assertEquals(oneOf.getOneOf().get(0).getType(), "string");
 
     }
 

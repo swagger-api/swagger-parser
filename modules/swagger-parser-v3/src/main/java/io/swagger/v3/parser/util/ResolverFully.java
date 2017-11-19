@@ -165,8 +165,11 @@ public class ResolverFully {
 
         if(schema instanceof ArraySchema) {
             ArraySchema arrayModel = (ArraySchema) schema;
-            if(arrayModel.getItems().get$ref() != null) {
-                arrayModel.setItems(resolveSchema(arrayModel.getItems()));
+            if(arrayModel.getItems() != null){
+                arrayModel.setItems(arrayModel.getItems());
+                if(arrayModel.getItems().get$ref() != null) {
+                    arrayModel.setItems(resolveSchema(arrayModel.getItems()));
+                }
             }
             return arrayModel;
         }

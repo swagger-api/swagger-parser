@@ -1817,10 +1817,16 @@ public class OpenAPIDeserializer {
             schema = oneOfList;
         } else if(itemsNode != null) {
             ArraySchema items = new ArraySchema();
-            for(JsonNode n : itemsNode) {
-                if(n.isValueNode()) {
-                    items.setItems(getSchema(itemsNode, location, result));
+            if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)){
+                items.setItems(getSchema(itemsNode, location, result));
+            }else if (itemsNode.getNodeType().equals(JsonNodeType.ARRAY)){
+                for (JsonNode n : itemsNode) {
+                    if (n.isValueNode()) {
+                        items.setItems(getSchema(itemsNode, location, result));
+                    }
                 }
+
+
             }
             schema = items;
         } else {
