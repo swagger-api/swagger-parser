@@ -2,6 +2,7 @@ package io.swagger.v3.parser.core.models;
 
 public class ParseOptions {
     private boolean resolve;
+    private boolean resolveCombinators = true;
     private boolean resolveFully;
     private boolean flatten;
 
@@ -11,6 +12,14 @@ public class ParseOptions {
 
     public void setResolve(boolean resolve) {
         this.resolve = resolve;
+    }
+
+    public boolean isResolveCombinators() {
+        return resolveCombinators;
+    }
+
+    public void setResolveCombinators(boolean resolveCombinators) {
+        this.resolveCombinators = resolveCombinators;
     }
 
     public boolean isResolveFully() {

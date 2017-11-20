@@ -57,6 +57,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class OpenAPIDeserializer {
@@ -2380,15 +2382,28 @@ public class OpenAPIDeserializer {
                 Set<String> keys = getKeys((ObjectNode) node);
                 for (String key : keys) {
                     if (key != null) {
-                        securityRequirement.addList(key,node.textValue());
-                        if (securityRequirement != null && securityRequirement.size() > 0){
-                            securityRequirements.add(securityRequirement);
+                        JsonNode value = node.get(key);
+                        if (key != null && JsonNodeType.ARRAY.equals(value.getNodeType())) {
+                            ArrayNode arrayNode = (ArrayNode)value;
+                            List<String> scopes = Stream
+                                    .generate(arrayNode.elements()::next)
+                                    .map((n) -> n.asText())
+                                    .limit(arrayNode.size())
+                                    .collect(Collectors.toList());
+                            securityRequirement.addList(key,scopes);
+                            if (securityRequirement.size() > 0){
+                                securityRequirements.add(securityRequirement);
+                            }
                         }
                     }
                 }
             }
         }
+
+
+
         return securityRequirements;
+
     }
 
     public Map<String, RequestBody> getRequestBodies(ObjectNode obj, String location, ParseResult result) {
