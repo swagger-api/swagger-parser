@@ -1825,8 +1825,6 @@ public class OpenAPIDeserializer {
                         items.setItems(getSchema(itemsNode, location, result));
                     }
                 }
-
-
             }
             schema = items;
         } else {
