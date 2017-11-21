@@ -29,6 +29,11 @@ public final class ExternalRefProcessor {
     }
 
     public String processRefToExternalDefinition(String $ref, RefFormat refFormat) {
+        String renamedRef = cache.getRenamedRef($ref);
+        if(renamedRef != null) {
+            return renamedRef;
+        }
+
         final Model model = cache.loadRef($ref, refFormat, Model.class);
 
         if(model == null) {
@@ -45,7 +50,7 @@ public final class ExternalRefProcessor {
             definitions = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, definitions.keySet());
 
         Model existingModel = definitions.get(possiblyConflictingDefinitionName);
 

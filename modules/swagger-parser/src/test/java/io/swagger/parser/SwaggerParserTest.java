@@ -1013,4 +1013,15 @@ public class SwaggerParserTest {
         Map<String, Model> definitions = swagger.getDefinitions();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
     }
+
+    @Test
+    public void testRefNameConflicts() throws Exception {
+        Swagger swagger = new SwaggerParser().read("./refs-name-conflict/a.yaml");
+
+        assertEquals("#/definitions/PersonObj", ((RefProperty) swagger.getPath("/newPerson").getPost().getResponses().get("200").getSchema()).get$ref());
+        assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/oldPerson").getPost().getResponses().get("200").getSchema()).get$ref());
+        assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/yetAnotherPerson").getPost().getResponses().get("200").getSchema()).get$ref());
+        assertEquals("local", swagger.getDefinitions().get("PersonObj").getProperties().get("location").getExample());
+        assertEquals("referred", swagger.getDefinitions().get("PersonObj_2").getProperties().get("location").getExample());
+    }
 }
