@@ -563,7 +563,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void resolveComposedReferenceSchema(@Injectable final List<AuthorizationValue> auths){
+    public void resolveComposedReferenceAllOfSchema(@Injectable final List<AuthorizationValue> auths){
 
 
 
@@ -572,13 +572,34 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
-        openAPI.getPaths();
-        ResolverFully resolverUtil = new ResolverFully();
-        resolverUtil.resolveFully(openAPI);
+
 
         assertTrue(openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ArraySchema);
         ArraySchema arraySchema = (ArraySchema) openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        System.out.println(arraySchema);
         assertTrue(arraySchema.getItems() instanceof ObjectSchema);
+
+    }
+
+    @Test
+    public void resolveComposedSchema(@Injectable final List<AuthorizationValue> auths){
+
+        ParseOptions options = new ParseOptions();
+        //options.setResolveCombinators(false);
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/oneof-anyof.yaml",auths,options).getOpenAPI();
+
+
+        assertTrue(openAPI.getPaths().get("/mixed-array").getGet().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ArraySchema);
+        ArraySchema arraySchema = (ArraySchema) openAPI.getPaths().get("/mixed-array").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(arraySchema.getItems() instanceof ComposedSchema);
+        ComposedSchema oneOf = (ComposedSchema) arraySchema.getItems();
+        assertEquals(oneOf.getOneOf().get(0).getType(), "string");
+
+        //System.out.println(openAPI.getPaths().get("/oneOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema() );
+        assertTrue(openAPI.getPaths().get("/oneOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ComposedSchema);
+        ComposedSchema oneOfSchema = (ComposedSchema) openAPI.getPaths().get("/oneOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertEquals(oneOfSchema.getOneOf().get(0).getType(), "object");
 
     }
 
