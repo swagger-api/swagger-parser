@@ -220,7 +220,9 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
-        assertEquals(((RefModel) definitions.get("i")).get$ref(), "#/definitions/k");
+        assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
+        assertEquals("k-definition", definitions.get("k").getTitle());
+        assertEquals("k-definition", definitions.get("k_2").getTitle());
     }
 
     @Test
@@ -613,7 +615,7 @@ public class SwaggerParserTest {
 
         assertEquals(composedCat.getInterfaces().size(), 2);
         assertEquals(composedCat.getInterfaces().get(0).get$ref(), "#/definitions/pet");
-        assertEquals(composedCat.getInterfaces().get(1).get$ref(), "#/definitions/foo");
+        assertEquals(composedCat.getInterfaces().get(1).get$ref(), "#/definitions/foo_2");
 
         return swagger;
     }
