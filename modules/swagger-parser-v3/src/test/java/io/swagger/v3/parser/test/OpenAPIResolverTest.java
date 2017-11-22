@@ -33,6 +33,7 @@ import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 
+import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -601,6 +602,19 @@ public class OpenAPIResolverTest {
         ComposedSchema oneOfSchema = (ComposedSchema) openAPI.getPaths().get("/oneOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
         assertEquals(oneOfSchema.getOneOf().get(0).getType(), "object");
 
+    }
+
+    @Test
+    public void testRefNameConflicts() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/refs-name-conflict/a.yaml",null, options).getOpenAPI();
+
+        AssertJUnit.assertEquals("local", ((Schema) openAPI.getPaths().get("/newPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("referred", ((Schema)openAPI.getPaths().get("/oldPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("referred", ((Schema)openAPI.getPaths().get("/yetAnotherPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("local", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj").getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("referred", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj_2").getProperties().get("location")).getExample());
     }
 
     private static int getDynamicPort() {
