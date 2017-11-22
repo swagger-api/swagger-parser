@@ -154,37 +154,37 @@ public class ResolverCache {
     private Object loadInternalRef(String ref) {
         Object result = null;
 
-        if(ref.startsWith("#/components/schemas")) {
-            result = getFromMap(ref, openApi.getComponents().getSchemas(), SCHEMAS_PATTERN);
-        }
-        else if(ref.startsWith("#/components/requestBodies")) {
-            result = getFromMap(ref, openApi.getComponents().getRequestBodies(), REQUEST_BODIES_PATTERN);
-        }
-        else if(ref.startsWith("#/components/examples")) {
-            result = getFromMap(ref, openApi.getComponents().getExamples(), EXAMPLES_PATTERN);
-        }
-        else if(ref.startsWith("#/components/responses")) {
-            result = getFromMap(ref, openApi.getComponents().getResponses(), RESPONSES_PATTERN);
-        }
-        else if(ref.startsWith("#/components/parameters")) {
-            result = getFromMap(ref, openApi.getComponents().getParameters(), PARAMETERS_PATTERN);
-        }
-        else if(ref.startsWith("#/components/links")) {
-            result = getFromMap(ref, openApi.getComponents().getLinks(), LINKS_PATTERN);
-        }
-        else if(ref.startsWith("#/components/headers")) {
-            result = getFromMap(ref, openApi.getComponents().getHeaders(), HEADERS_PATTERN);
-        }
-        else if(ref.startsWith("#/components/callbacks")) {
-            result = getFromMap(ref, openApi.getComponents().getCallbacks(), CALLBACKS_PATTERN);
-        }
-        else if(ref.startsWith("#/components/securitySchemes")) {
-            result = getFromMap(ref, openApi.getComponents().getSecuritySchemes(), SECURITY_SCHEMES);
-        }
-        else if(ref.startsWith("#/paths")) {
+        if (ref.startsWith("#/paths")) {
             result = getFromMap(ref, openApi.getPaths(), PATHS_PATTERN);
+        } else if (openApi.getComponents() != null){
+            if(ref.startsWith("#/components/schemas")) {
+                result = getFromMap(ref, openApi.getComponents().getSchemas(), SCHEMAS_PATTERN);
+            }
+            else if(ref.startsWith("#/components/requestBodies")) {
+                result = getFromMap(ref, openApi.getComponents().getRequestBodies(), REQUEST_BODIES_PATTERN);
+            }
+            else if(ref.startsWith("#/components/examples")) {
+                result = getFromMap(ref, openApi.getComponents().getExamples(), EXAMPLES_PATTERN);
+            }
+            else if(ref.startsWith("#/components/responses")) {
+                result = getFromMap(ref, openApi.getComponents().getResponses(), RESPONSES_PATTERN);
+            }
+            else if(ref.startsWith("#/components/parameters")) {
+                result = getFromMap(ref, openApi.getComponents().getParameters(), PARAMETERS_PATTERN);
+            }
+            else if(ref.startsWith("#/components/links")) {
+                result = getFromMap(ref, openApi.getComponents().getLinks(), LINKS_PATTERN);
+            }
+            else if(ref.startsWith("#/components/headers")) {
+                result = getFromMap(ref, openApi.getComponents().getHeaders(), HEADERS_PATTERN);
+            }
+            else if(ref.startsWith("#/components/callbacks")) {
+                result = getFromMap(ref, openApi.getComponents().getCallbacks(), CALLBACKS_PATTERN);
+            }
+            else if(ref.startsWith("#/components/securitySchemes")) {
+                result = getFromMap(ref, openApi.getComponents().getSecuritySchemes(), SECURITY_SCHEMES);
+            }
         }
-
 
         return result;
 

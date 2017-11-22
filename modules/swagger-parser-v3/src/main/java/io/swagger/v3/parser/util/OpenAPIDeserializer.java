@@ -136,7 +136,7 @@ public class OpenAPIDeserializer {
                 openAPI.setPaths(paths);
             }
 
-            obj = getObject("components", rootNode, true, location, result);
+            obj = getObject("components", rootNode, false, location, result);
             if (obj != null) {
                 Components components = getComponents(obj, "components", result);
                 openAPI.setComponents(components);
