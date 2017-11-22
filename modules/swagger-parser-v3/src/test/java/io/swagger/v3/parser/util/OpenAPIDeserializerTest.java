@@ -542,7 +542,6 @@ public class OpenAPIDeserializerTest {
 
         assertTrue(messages.contains("attribute info is missing"));
         assertTrue(messages.contains("attribute paths is missing"));
-        assertTrue(messages.contains("attribute components is missing"));
         assertTrue(messages.contains("attribute new is unexpected"));
     }
 

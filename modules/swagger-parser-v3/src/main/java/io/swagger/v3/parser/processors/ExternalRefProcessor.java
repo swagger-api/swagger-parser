@@ -1,6 +1,7 @@
 package io.swagger.v3.parser.processors;
 
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
@@ -51,6 +52,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
 
         if (schemas == null) {
@@ -131,6 +135,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
 
         if (responses == null) {
@@ -186,6 +193,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, RequestBody> bodies = openAPI.getComponents().getRequestBodies();
 
         if (bodies == null) {
@@ -241,6 +251,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
 
         if (headers == null) {
@@ -296,6 +309,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
 
         if (securitySchemeMap == null) {
@@ -351,6 +367,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, Link> links = openAPI.getComponents().getLinks();
 
         if (links == null) {
@@ -406,6 +425,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, Example> examples = openAPI.getComponents().getExamples();
 
         if (examples == null) {
@@ -461,6 +483,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
 
         if (parameters == null) {
@@ -516,6 +541,9 @@ public final class ExternalRefProcessor {
         }
         String newRef;
 
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
         Map<String, Callback> callbacks = openAPI.getComponents().getCallbacks();
 
         if (callbacks == null) {

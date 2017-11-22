@@ -604,7 +604,17 @@ public class OpenAPIResolverTest {
 
     }
 
-    @Test
+    public void referringSpecWithoutComponentsTag() throws Exception {
+        ParseOptions resolve = new ParseOptions();
+        resolve.setResolveFully(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/ref-without-component/a.yaml", null, resolve);
+
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
+    }
+
+
+
     public void testRefNameConflicts() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
@@ -616,6 +626,7 @@ public class OpenAPIResolverTest {
         AssertJUnit.assertEquals("local", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj").getProperties().get("location")).getExample());
         AssertJUnit.assertEquals("referred", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj_2").getProperties().get("location")).getExample());
     }
+
 
     private static int getDynamicPort() {
         return new Random().ints(50000, 60000).findFirst().getAsInt();
