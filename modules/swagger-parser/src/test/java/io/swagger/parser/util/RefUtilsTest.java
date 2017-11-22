@@ -16,10 +16,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -61,10 +65,13 @@ public class RefUtilsTest {
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar", "bar");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar/hello", "hello");
 
+        // Name conflicts resolved by adding _number
+        assertEquals("file_2", RefUtils.computeDefinitionName("http://my.company.com/path/to/file.json", singleton("file")));
+        assertEquals("file_3", RefUtils.computeDefinitionName("http://my.company.com/path/to/file.json", new HashSet<>(asList("file", "file_2"))));
     }
 
     private void doComputeDefinitionNameTestCase(String ref, String expectedDefinitionName) {
-        assertEquals(expectedDefinitionName, RefUtils.computeDefinitionName(ref));
+        assertEquals(expectedDefinitionName, RefUtils.computeDefinitionName(ref, Collections.<String>emptySet()));
     }
 
     private Map<String, Model> createMap(String... keys) {

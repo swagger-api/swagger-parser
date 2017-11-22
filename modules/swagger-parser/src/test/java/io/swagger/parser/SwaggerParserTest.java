@@ -220,7 +220,9 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
-        assertEquals(((RefModel) definitions.get("i")).get$ref(), "#/definitions/k");
+        assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
+        assertEquals("k-definition", definitions.get("k").getTitle());
+        assertEquals("k-definition", definitions.get("k_2").getTitle());
     }
 
     @Test
@@ -613,7 +615,7 @@ public class SwaggerParserTest {
 
         assertEquals(composedCat.getInterfaces().size(), 2);
         assertEquals(composedCat.getInterfaces().get(0).get$ref(), "#/definitions/pet");
-        assertEquals(composedCat.getInterfaces().get(1).get$ref(), "#/definitions/foo");
+        assertEquals(composedCat.getInterfaces().get(1).get$ref(), "#/definitions/foo_2");
 
         return swagger;
     }
@@ -1012,5 +1014,16 @@ public class SwaggerParserTest {
 
         Map<String, Model> definitions = swagger.getDefinitions();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
+    }
+
+    @Test
+    public void testRefNameConflicts() throws Exception {
+        Swagger swagger = new SwaggerParser().read("./refs-name-conflict/a.yaml");
+
+        assertEquals("#/definitions/PersonObj", ((RefProperty) swagger.getPath("/newPerson").getPost().getResponses().get("200").getSchema()).get$ref());
+        assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/oldPerson").getPost().getResponses().get("200").getSchema()).get$ref());
+        assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/yetAnotherPerson").getPost().getResponses().get("200").getSchema()).get$ref());
+        assertEquals("local", swagger.getDefinitions().get("PersonObj").getProperties().get("location").getExample());
+        assertEquals("referred", swagger.getDefinitions().get("PersonObj_2").getProperties().get("location").getExample());
     }
 }
