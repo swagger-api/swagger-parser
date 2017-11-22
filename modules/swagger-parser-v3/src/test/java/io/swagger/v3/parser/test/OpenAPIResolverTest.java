@@ -33,6 +33,7 @@ import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 
+import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -187,7 +188,7 @@ public class OpenAPIResolverTest {
 
         //remote url schema
         Schema user = (Schema) pet.getProperties().get("user");
-        assertEquals(user.get$ref(),"#/components/schemas/User");
+        assertEquals(user.get$ref(),"#/components/schemas/User_3");
 
 
         //ArraySchema items
@@ -200,7 +201,7 @@ public class OpenAPIResolverTest {
         assertEquals(schemas.get("OrderRef").getNot().get$ref(), "#/components/schemas/Category");
 
         //Schema additionalProperties
-        assertEquals(schemas.get("OrderRef").getAdditionalProperties().get$ref(), "#/components/schemas/User");
+        assertEquals(schemas.get("OrderRef").getAdditionalProperties().get$ref(), "#/components/schemas/User_3");
 
         //AllOfSchema
         ComposedSchema extended = (ComposedSchema) schemas.get("ExtendedErrorModel");
@@ -265,7 +266,7 @@ public class OpenAPIResolverTest {
         //internal Schema header
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
         //header remote schema ref
-        assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User");
+        assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User_3");
 
         //header examples
         assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get("headerExample").get$ref(), "#/components/examples/dog" );
@@ -603,7 +604,6 @@ public class OpenAPIResolverTest {
 
     }
 
-    @Test
     public void referringSpecWithoutComponentsTag() throws Exception {
         ParseOptions resolve = new ParseOptions();
         resolve.setResolveFully(true);
@@ -611,6 +611,20 @@ public class OpenAPIResolverTest {
 
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
         Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
+    }
+
+
+
+    public void testRefNameConflicts() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/refs-name-conflict/a.yaml",null, options).getOpenAPI();
+
+        AssertJUnit.assertEquals("local", ((Schema) openAPI.getPaths().get("/newPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("referred", ((Schema)openAPI.getPaths().get("/oldPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("referred", ((Schema)openAPI.getPaths().get("/yetAnotherPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("local", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj").getProperties().get("location")).getExample());
+        AssertJUnit.assertEquals("referred", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj_2").getProperties().get("location")).getExample());
     }
 
 

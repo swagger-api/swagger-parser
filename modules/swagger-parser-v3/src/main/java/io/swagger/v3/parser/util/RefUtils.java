@@ -11,10 +11,11 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public class RefUtils {
 
-    public static String computeDefinitionName(String ref) {
+    public static String computeDefinitionName(String ref, Set<String> reserved) {
 
         final String[] refParts = ref.split("#/");
 
@@ -38,8 +39,13 @@ public class RefUtils {
             final String[] split = plausibleName.split("\\.");
             plausibleName = split[0];
         }
+        String tryName = plausibleName;
 
-        return plausibleName;
+        for (int i = 2; reserved.contains(tryName); i++) {
+            tryName = plausibleName + "_" + i;
+        }
+
+        return tryName;
     }
 
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
