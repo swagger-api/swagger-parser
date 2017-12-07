@@ -43,6 +43,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import io.swagger.models.properties.UntypedProperty;
 import io.swagger.models.resourcelisting.ApiInfo;
 import io.swagger.models.resourcelisting.ApiKeyAuthorization;
 import io.swagger.models.resourcelisting.ApiListingReference;
@@ -369,7 +370,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 args.put(PropertyBuilder.PropertyId.ENUM, enumValues);
             }
             Property innerType = PropertyBuilder.build(type, format, args);
-            if (innerType != null) {
+            if (innerType != null && !(innerType instanceof UntypedProperty)) {
                 am.setItems(innerType);
             } else if (items.getRef() != null) {
                 am.setItems(new RefProperty(items.getRef()));
@@ -390,7 +391,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
 
             Property i = PropertyBuilder.build(type, format, args);
-            if (i != null) {
+            if (i != null && !(i instanceof UntypedProperty)) {
                 output = i;
             } else {
                 if (obj.getRef() != null) {
