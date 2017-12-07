@@ -140,16 +140,14 @@ public class SwaggerDeserializerTest {
         String json = "{\n" +
                 "  \"properties\": {\n" +
                 "    \"data\": {\n" +
-                "      \"properties\": {\n" +
-                "        \"description\": \"the array type\",\n" +
-                "        \"type\": \"array\",\n" +
-                "        \"items\": {\n" +
-                "          \"properties\": {\n" +
-                "            \"name\": {\n" +
-                "              \"description\": \"the inner type\",\n" +
-                "              \"type\": \"string\",\n" +
-                "              \"minLength\": 1\n" +
-                "            }\n" +
+                "      \"description\": \"the array type\",\n" +
+                "      \"type\": \"array\",\n" +
+                "      \"items\": {\n" +
+                "        \"properties\": {\n" +
+                "          \"name\": {\n" +
+                "            \"description\": \"the inner type\",\n" +
+                "            \"type\": \"string\",\n" +
+                "            \"minLength\": 1\n" +
                 "          }\n" +
                 "        }\n" +
                 "      }\n" +
