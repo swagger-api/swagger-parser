@@ -16,7 +16,7 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
     }
 
     @Test
@@ -27,14 +27,14 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
     }
 
     @Test
     public void test30() {
         String json =
             "{\n" +
-            "  \"openapi\": \"3.0.0-rc1\",\n" +
+            "  \"openapi\": \"3.0.1\",\n" +
             "  \"info\": {\n" +
             "    \"title\": \"Swagger Petstore\",\n" +
             "    \"description\": \"This is a sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key `special-key` to test the authorization filters.\",\n" +
@@ -56,14 +56,14 @@ public class OpenAPIParserTest {
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0-rc1");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
     }
 
     @Test
     public void testParsingPrettifiedExtensions() throws Exception {
         String json =
                 "{\n" +
-                        "  \"openapi\": \"3.0.0\",\n" +
+                        "  \"openapi\": \"3.0.1\",\n" +
                         "  \"x-some-extension\": \"some-value\"\n" +
                         "}";
 

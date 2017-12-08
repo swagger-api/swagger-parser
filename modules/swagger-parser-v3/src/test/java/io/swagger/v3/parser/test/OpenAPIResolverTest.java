@@ -364,7 +364,7 @@ public class OpenAPIResolverTest {
     public void testSelfReferenceResolution(@Injectable final List<AuthorizationValue> auths)throws Exception {
 
         String yaml = "" +
-                "openapi: 3.0.0\n" +
+                "openapi: 3.0.1\n" +
                 "paths:\n" +
                 "  \"/selfRefB\":\n" +
                 "    get:\n" +
@@ -405,7 +405,7 @@ public class OpenAPIResolverTest {
     @Test
     public void testIssue85(@Injectable final List<AuthorizationValue> auths) {
         String yaml =
-                "openapi: '3.0.0'\n" +
+                "openapi: '3.0.1'\n" +
                         "paths: \n" +
                         "  /test/method: \n" +
                         "    post: \n" +
@@ -454,7 +454,7 @@ public class OpenAPIResolverTest {
     @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
         String yaml = "" +
-                "openapi: '3.0.0'\n" +
+                "openapi: '3.0.1'\n" +
                 "paths:\n" +
                 "  /selfRefA:\n" +
                 "    get:\n" +
