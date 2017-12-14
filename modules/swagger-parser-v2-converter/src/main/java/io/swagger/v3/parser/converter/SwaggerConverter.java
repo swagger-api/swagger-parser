@@ -490,6 +490,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
             if (v2Operation != null) {
                 v3Path.setDelete(convert(v2Operation));
             }
+            v2Operation = v2Path.getHead();
+            if (v2Operation != null) {
+                v3Path.setHead(convert(v2Operation));
+            }
+            v2Operation = v2Path.getOptions();
+            if (v2Operation != null) {
+                v3Path.setOptions(convert(v2Operation));
+            }
 
             v3Path.setExtensions(convert(v2Path.getVendorExtensions()));
         }

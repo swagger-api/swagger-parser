@@ -63,6 +63,7 @@ public class V2ConverterTest {
     private static final String ISSUE_33_JSON = "issue-33.json";
     private static final String ISSUE_35_JSON = "issue-35.json";
     private static final String ISSUE_36_JSON = "issue-36.json";
+    private static final String ISSUE_599_JSON = "issue-599.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
@@ -136,7 +137,9 @@ public class V2ConverterTest {
     private static final long DEFAULT_VALUE = 11L;
     private static final long EXAMPLE_8_NUMBER = 8L;
     private static final long EXAMPLE_42_NUMBER = 42L;
-    public static final String REQUEST_BODY_FORMEMAIL = "#/components/requestBodies/formEmail";
+    private static final String REQUEST_BODY_FORMEMAIL = "#/components/requestBodies/formEmail";
+    private static final String HEAD_OPERATION = "Head Operation";
+    private static final String OPTIONS_OPERATION = "Options Operation";
 
     @Test
     public void testConvertPetstore() throws Exception {
@@ -473,6 +476,18 @@ public class V2ConverterTest {
         Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
         assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
         assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
+    }
+
+    @Test(description = "Parser Issue: OpenAPI v2 converter - HEAD and OPTIONS operations are lost")
+    public void testIssue599() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_599_JSON);
+        Operation operation = oas.getPaths().get(FOO_PATH).getHead();
+        assertNotNull(operation);
+        assertEquals(operation.getDescription(), HEAD_OPERATION);
+
+        operation = oas.getPaths().get(FOO_PATH).getOptions();
+        assertNotNull(operation);
+        assertEquals(operation.getDescription(), OPTIONS_OPERATION);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
