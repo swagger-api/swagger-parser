@@ -64,6 +64,7 @@ public class V2ConverterTest {
     private static final String ISSUE_35_JSON = "issue-35.json";
     private static final String ISSUE_36_JSON = "issue-36.json";
     private static final String ISSUE_599_JSON = "issue-599.json";
+    private static final String ISSUE_600_JSON = "issue-600.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
@@ -488,6 +489,17 @@ public class V2ConverterTest {
         operation = oas.getPaths().get(FOO_PATH).getOptions();
         assertNotNull(operation);
         assertEquals(operation.getDescription(), OPTIONS_OPERATION);
+    }
+
+    @Test(description = "OpenAPI v2 converter - required Form parameters are converted as optional ")
+    public void testIssue600() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_600_JSON);
+
+        RequestBody requestBody = oas.getPaths().get(LOGIN_PATH).getPost().getRequestBody();
+        assertNotNull(requestBody);
+        Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
+        assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
+        assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
