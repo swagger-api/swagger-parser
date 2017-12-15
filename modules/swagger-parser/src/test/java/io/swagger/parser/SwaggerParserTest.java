@@ -495,6 +495,17 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
     }
 
+    /* @Test
+    public void testIssue286() {
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.read("issue_286.yaml");
+        Model response = swagger.getPath("/").getGet().getResponses().get("200").getResponseSchema();
+        assertTrue(response instanceof RefModel);
+        assertEquals( "issue_286_PetList", ((RefModel) response).getSimpleRef());
+        assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
+    }*/
+
     @Test
     public void testIssue360() {
         SwaggerParser parser = new SwaggerParser();
