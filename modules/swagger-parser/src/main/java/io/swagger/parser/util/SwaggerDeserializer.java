@@ -1079,7 +1079,7 @@ public class SwaggerDeserializer {
 
         ObjectNode schema = getObject("schema", node, false, location, result);
         if(schema != null) {
-            output.schema(Json.mapper().convertValue(schema, Property.class));
+            output.responseSchema(Json.mapper().convertValue(schema, Model.class));
         }
         ObjectNode headersNode = getObject("headers", node, false, location, result);
         if(headersNode != null) {
