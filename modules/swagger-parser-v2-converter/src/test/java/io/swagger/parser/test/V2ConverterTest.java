@@ -63,6 +63,7 @@ public class V2ConverterTest {
     private static final String ISSUE_33_JSON = "issue-33.json";
     private static final String ISSUE_35_JSON = "issue-35.json";
     private static final String ISSUE_36_JSON = "issue-36.json";
+    private static final String ISSUE_597_JSON = "issue-597.json";
     private static final String ISSUE_599_JSON = "issue-599.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
@@ -476,6 +477,16 @@ public class V2ConverterTest {
         Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
         assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
         assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
+    }
+
+    @Test(description = "OpenAPI v2 converter - enum values for array parameters are lost ")
+    public void testIssue597() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_597_JSON);
+        List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
+        assertNotNull(parameters);
+        assertEquals(parameters.get(0).getExample(), FOO_VALUE);
+        assertEquals(parameters.get(1).getExample(), NUMBER_VALUE_TWENTY);
+        assertEquals(parameters.get(2).getExample(), CODE_EXAMPLE);
     }
 
     @Test(description = "Parser Issue: OpenAPI v2 converter - HEAD and OPTIONS operations are lost")

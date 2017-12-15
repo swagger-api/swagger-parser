@@ -1,0 +1,39 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "x-example"
+    },
+    "host": "httpbin.org",
+    "basePath": "/anything",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/{foo}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "description": "Status values that need to be considered for filter",
+                        "defaultValue": "available",
+                        "required": true,
+                        "type": "string",
+                        "paramType": "query",
+                        "allowMultiple": true,
+                        "enum": [
+                            "available",
+                            "pending",
+                            "sold"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
