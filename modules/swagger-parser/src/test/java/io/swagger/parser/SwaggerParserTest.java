@@ -1029,7 +1029,7 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testRefAditionalProperties() throws Exception {
+    public void testRefAdditionalProperties() throws Exception {
         Swagger swagger = new SwaggerParser().read("src/test/resources/additionalProperties.yaml");
 
         Assert.assertNotNull(swagger);
