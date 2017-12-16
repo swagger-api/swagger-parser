@@ -303,6 +303,17 @@ public class OpenAPIV3ParserTest {
         assertNotNull(userAddress.getProperties().get("street"));
     }
 
+    @Test
+    public void testRefAdditionalProperties() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/additionalProperties.yaml");
+
+        Assert.assertNotNull(openAPI);
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 3);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("link-object"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("rel-data"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("result"));
+    }
+
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();

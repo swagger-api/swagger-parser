@@ -111,6 +111,26 @@ public final class ExternalRefProcessor {
                     }
                 }
             }
+            if(schema.getAdditionalProperties() != null){
+                Schema additionalProperty = schema.getAdditionalProperties();
+                if (additionalProperty.get$ref() != null) {
+                    processRefProperty(additionalProperty, file);
+                } else if (additionalProperty instanceof ArraySchema) {
+                    ArraySchema arrayProp = (ArraySchema) additionalProperty;
+                    if (arrayProp.getItems().get$ref() != null) {
+                        processRefProperty(arrayProp.getItems(), file);
+                    }
+                } else if (additionalProperty.getAdditionalProperties() != null) {
+                    Schema mapProp =  additionalProperty;
+                    if (mapProp.getAdditionalProperties().get$ref() != null) {
+                        processRefProperty(mapProp.getAdditionalProperties(), file);
+                    } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
+                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
+                        processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
+                    }
+                }
+
+            }
             if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems().get$ref() != null) {
                 processRefProperty(((ArraySchema) schema).getItems(), file);
             }
