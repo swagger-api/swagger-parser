@@ -484,9 +484,11 @@ public class V2ConverterTest {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_597_JSON);
         List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
         assertNotNull(parameters);
-        assertEquals(parameters.get(0).getExample(), FOO_VALUE);
-        assertEquals(parameters.get(1).getExample(), NUMBER_VALUE_TWENTY);
-        assertEquals(parameters.get(2).getExample(), CODE_EXAMPLE);
+        List anEnum = parameters.get(0).getSchema().getEnum();
+        assertNotNull(anEnum);
+        assertEquals(anEnum.get(0), "available");
+        assertEquals(anEnum.get(1), "pending");
+        assertEquals(anEnum.get(2), "sold");
     }
 
     @Test(description = "Parser Issue: OpenAPI v2 converter - HEAD and OPTIONS operations are lost")

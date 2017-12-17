@@ -15,17 +15,31 @@
                 "parameters": [
                     {
                         "name": "status",
+                        "in": "query",
                         "description": "Status values that need to be considered for filter",
-                        "defaultValue": "available",
                         "required": true,
-                        "type": "string",
-                        "paramType": "query",
-                        "allowMultiple": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "default": "available",
                         "enum": [
                             "available",
                             "pending",
                             "sold"
                         ]
+                    },
+                    {
+                        "in": "formData",
+                        "name": "dayOfWeek",
+                        "type": "string",
+                        "enum": [
+                            "monday_tuesday",
+                            "tuesday_wednesday",
+                            "wednesday_thursday"
+                        ],
+                        "default": "monday_tuesday"
                     }
                 ],
                 "responses": {
