@@ -1,0 +1,43 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "x-example"
+    },
+    "host": "httpbin.org",
+    "basePath": "/anything",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/login": {
+            "post": {
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "email",
+                        "type": "string",
+                        "required": true,
+                        "x-example": "bob@example.com"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "password",
+                        "type": "string",
+                        "format": "password",
+                        "required": true,
+                        "x-example": "p@55w0rd"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
