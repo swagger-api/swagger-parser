@@ -63,6 +63,7 @@ public class V2ConverterTest {
     private static final String ISSUE_33_JSON = "issue-33.json";
     private static final String ISSUE_35_JSON = "issue-35.json";
     private static final String ISSUE_36_JSON = "issue-36.json";
+    private static final String ISSUE_597_JSON = "issue-597.json";
     private static final String ISSUE_599_JSON = "issue-599.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
 
@@ -121,6 +122,12 @@ public class V2ConverterTest {
     private static final String ID = "id";
     private static final String FRIEND_IDS = "friend_ids";
     private static final String ARRAY_OF_USERS_MODEL = "ArrayOfUsers";
+    private static final String REQUEST_BODY_FORMEMAIL = "#/components/requestBodies/formEmail";
+    private static final String HEAD_OPERATION = "Head Operation";
+    private static final String OPTIONS_OPERATION = "Options Operation";
+    private static final String AVAILABLE = "available";
+    private static final String PENDING = "pending";
+    private static final String SOLD = "sold";
     private static final String ARRAY_VALUES = "[{\"id\":-1,\"name\":\"Marvin the Paranoid Android\"}," +
             "{\"id\":1000000,\"name\":\"Zaphod Beeblebrox\",\"friends\":[15]}]";
 
@@ -137,9 +144,6 @@ public class V2ConverterTest {
     private static final long DEFAULT_VALUE = 11L;
     private static final long EXAMPLE_8_NUMBER = 8L;
     private static final long EXAMPLE_42_NUMBER = 42L;
-    private static final String REQUEST_BODY_FORMEMAIL = "#/components/requestBodies/formEmail";
-    private static final String HEAD_OPERATION = "Head Operation";
-    private static final String OPTIONS_OPERATION = "Options Operation";
 
     @Test
     public void testConvertPetstore() throws Exception {
@@ -476,6 +480,18 @@ public class V2ConverterTest {
         Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
         assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
         assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
+    }
+
+    @Test(description = "OpenAPI v2 converter - enum values for array parameters are lost ")
+    public void testIssue597() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_597_JSON);
+        List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
+        assertNotNull(parameters);
+        List anEnum = parameters.get(0).getSchema().getEnum();
+        assertNotNull(anEnum);
+        assertEquals(anEnum.get(0), AVAILABLE);
+        assertEquals(anEnum.get(1), PENDING);
+        assertEquals(anEnum.get(2), SOLD);
     }
 
     @Test(description = "Parser Issue: OpenAPI v2 converter - HEAD and OPTIONS operations are lost")

@@ -938,11 +938,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema = new Schema();
                 schema.setType(sp.getType());
                 schema.setFormat(sp.getFormat());
-                if (sp.getEnum() != null) {
-                    for (String e : sp.getEnum()) {
-                        schema.addEnumItemObject(e);
-                    }
-                }
 
                 schema.setMaximum(sp.getMaximum());
                 schema.setExclusiveMaximum(sp.isExclusiveMaximum());
@@ -954,6 +949,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
                 }
                 schema.setPattern(sp.getPattern());
+            }
+
+            if (sp.getEnum() != null) {
+                for (String e : sp.getEnum()) {
+                    schema.addEnumItemObject(e);
+                }
             }
 
             if (sp.getVendorExtensions() != null) {
