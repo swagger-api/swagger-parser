@@ -734,7 +734,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 Schema schema = convertFileSchema(convert(v2Response.getSchema()));
                 for (String type : mediaTypes) {
                     // TODO: examples
-                    content.addMediaType(type, new MediaType().schema(schema));
+                    MediaType mediaType = new MediaType();
+                    content.addMediaType(type, mediaType.schema(schema));
                 }
                 response.content(content);
             }

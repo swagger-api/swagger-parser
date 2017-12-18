@@ -65,6 +65,7 @@ public class V2ConverterTest {
     private static final String ISSUE_36_JSON = "issue-36.json";
     private static final String ISSUE_599_JSON = "issue-599.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
+    private static final String ISSUE_540_JSON = "issue-540.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -460,6 +461,17 @@ public class V2ConverterTest {
         assertNotNull(user);
         assertEquals(user.getNullable(), Boolean.TRUE);
         assertEquals(((Schema) user.getProperties().get(ID)).getNullable(), Boolean.TRUE);
+    }
+
+    @Test(description = "OpenAPI v2 converter - examples are lost")
+    public void testIssue540() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_540_JSON);
+        Operation operation = oas.getPaths().get(FOO_PATH).getHead();
+        assertEquals(operation.getDescription(), HEAD_OPERATION);
+
+        operation = oas.getPaths().get(FOO_PATH).getOptions();
+        assertNotNull(operation);
+        assertEquals(operation.getDescription(), OPTIONS_OPERATION);
     }
 
     @Test(description = "Nice to have: Convert x-example to example")
