@@ -1,0 +1,53 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "x-example"
+    },
+    "host": "httpbin.org",
+    "basePath": "/anything",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/{foo}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Status values that need to be considered for filter",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "default": "available",
+                        "enum": [
+                            "available",
+                            "pending",
+                            "sold"
+                        ]
+                    },
+                    {
+                        "in": "formData",
+                        "name": "dayOfWeek",
+                        "type": "string",
+                        "enum": [
+                            "monday_tuesday",
+                            "tuesday_wednesday",
+                            "wednesday_thursday"
+                        ],
+                        "default": "monday_tuesday"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

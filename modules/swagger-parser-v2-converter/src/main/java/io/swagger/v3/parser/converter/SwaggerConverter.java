@@ -533,6 +533,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             if (formParams.size() > 0) {
                 RequestBody body = convertFormDataToRequestBody(formParams, v2Operation.getConsumes());
+                body.getContent().forEach((key, content) -> {
+                    Schema schema = content.getSchema();
+                    if (schema != null && schema.getRequired() != null && schema.getRequired().size() > 0) {
+                        body.setRequired(Boolean.TRUE);
+                    }
+                });
                 operation.requestBody(body);
             }
         }
@@ -638,6 +644,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
             if (sp instanceof AbstractSerializableParameter) {
                 AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
                 schema.setDefault(ap.getDefault());
+            }
+
+            if (sp.getRequired()) {
+                formSchema.addRequiredItem(sp.getName());
             }
 
             formSchema.addProperties(param.getName(), schema);
@@ -939,11 +949,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 schema = new Schema();
                 schema.setType(sp.getType());
                 schema.setFormat(sp.getFormat());
-                if (sp.getEnum() != null) {
-                    for (String e : sp.getEnum()) {
-                        schema.addEnumItemObject(e);
-                    }
-                }
 
                 schema.setMaximum(sp.getMaximum());
                 schema.setExclusiveMaximum(sp.isExclusiveMaximum());
@@ -955,6 +960,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
                 }
                 schema.setPattern(sp.getPattern());
+            }
+
+            if (sp.getEnum() != null) {
+                for (String e : sp.getEnum()) {
+                    schema.addEnumItemObject(e);
+                }
             }
 
             if (sp.getVendorExtensions() != null) {
