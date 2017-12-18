@@ -497,9 +497,11 @@ public class V2ConverterTest {
 
         RequestBody requestBody = oas.getPaths().get(LOGIN_PATH).getPost().getRequestBody();
         assertNotNull(requestBody);
-        Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
-        assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
-        assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
+        assertTrue(requestBody.getRequired());
+        Schema schema = requestBody.getContent().get(CONTENT_TYPE).getSchema();
+        List required = schema.getRequired();
+        assertNotNull(required);
+        assertEquals(required.size(), REQUIRED_SIZE);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
