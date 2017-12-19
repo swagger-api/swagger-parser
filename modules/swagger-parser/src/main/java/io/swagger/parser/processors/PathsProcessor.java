@@ -126,8 +126,8 @@ public class PathsProcessor {
     }
 
     protected void updateLocalRefs(Response response, String pathRef) {
-        if(response.getSchema() != null) {
-            updateLocalRefs(response.getSchema(), pathRef);
+        if(response.getResponseSchema() != null) {
+            updateLocalRefs(response.getResponseSchema(), pathRef);
         }
     }
 
