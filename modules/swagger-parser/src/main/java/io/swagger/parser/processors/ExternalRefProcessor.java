@@ -116,6 +116,29 @@ public final class ExternalRefProcessor {
                     }
                 }
             }
+            if (model instanceof  ModelImpl) {
+                ModelImpl modelImpl = (ModelImpl) model;
+                Property additionalProperties = modelImpl.getAdditionalProperties();
+                if (additionalProperties != null) {
+                    if (additionalProperties instanceof RefProperty) {
+                        processRefProperty(((RefProperty) additionalProperties), file);
+                    } else if (additionalProperties instanceof ArrayProperty) {
+                        ArrayProperty arrayProp = (ArrayProperty) additionalProperties;
+                        if (arrayProp.getItems() instanceof RefProperty) {
+                            processRefProperty((RefProperty) arrayProp.getItems(), file);
+                        }
+                    } else if (additionalProperties instanceof MapProperty) {
+                        MapProperty mapProp = (MapProperty) additionalProperties;
+                        if (mapProp.getAdditionalProperties() instanceof RefProperty) {
+                            processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
+                        } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
+                                ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
+                            processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(), file);
+                        }
+                    }
+
+                }
+            }
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
                 processRefProperty((RefProperty) ((ArrayModel) model).getItems(), file);
             }

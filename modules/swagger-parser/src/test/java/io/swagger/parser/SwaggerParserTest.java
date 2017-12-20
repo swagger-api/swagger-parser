@@ -50,6 +50,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SwaggerParserTest {
+
     @Test
     public void testModelParameters() throws Exception {
         String yaml = "swagger: '2.0'\n" +
@@ -1026,4 +1027,20 @@ public class SwaggerParserTest {
         assertEquals("local", swagger.getDefinitions().get("PersonObj").getProperties().get("location").getExample());
         assertEquals("referred", swagger.getDefinitions().get("PersonObj_2").getProperties().get("location").getExample());
     }
+
+    @Test
+    public void testRefAdditionalProperties() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/additionalProperties.yaml");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 3);
+        
+        Assert.assertNotNull(swagger.getDefinitions().get("link-object"));
+        Assert.assertNotNull(swagger.getDefinitions().get("rel-data"));
+        Assert.assertNotNull(swagger.getDefinitions().get("result"));
+    }
+
+
+
 }
