@@ -97,7 +97,7 @@ public final class ExternalRefProcessor {
                         processRefProperty(prop.getValue(), file);
                     } else if (prop.getValue() instanceof ArraySchema) {
                         ArraySchema arrayProp = (ArraySchema) prop.getValue();
-                        if (arrayProp.getItems().get$ref() != null) {
+                        if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null) {
                             processRefProperty(arrayProp.getItems(), file);
                         }
                     } else if (prop.getValue().getAdditionalProperties() != null) {
@@ -105,6 +105,7 @@ public final class ExternalRefProcessor {
                         if (mapProp.getAdditionalProperties().get$ref() != null) {
                             processRefProperty(mapProp.getAdditionalProperties(), file);
                         } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
+                                ((ArraySchema) mapProp.getAdditionalProperties()).getItems()!= null &&
                                 ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
                             processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                         }
@@ -117,7 +118,7 @@ public final class ExternalRefProcessor {
                     processRefProperty(additionalProperty, file);
                 } else if (additionalProperty instanceof ArraySchema) {
                     ArraySchema arrayProp = (ArraySchema) additionalProperty;
-                    if (arrayProp.getItems().get$ref() != null) {
+                    if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null) {
                         processRefProperty(arrayProp.getItems(), file);
                     }
                 } else if (additionalProperty.getAdditionalProperties() != null) {
@@ -125,13 +126,14 @@ public final class ExternalRefProcessor {
                     if (mapProp.getAdditionalProperties().get$ref() != null) {
                         processRefProperty(mapProp.getAdditionalProperties(), file);
                     } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
+                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems() != null &&
                             ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
                         processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                     }
                 }
 
             }
-            if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems().get$ref() != null) {
+            if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null && ((ArraySchema) schema).getItems().get$ref() != null) {
                 processRefProperty(((ArraySchema) schema).getItems(), file);
             }
         }
