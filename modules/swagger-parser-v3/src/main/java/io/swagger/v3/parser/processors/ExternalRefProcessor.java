@@ -105,8 +105,8 @@ public final class ExternalRefProcessor {
                         if (mapProp.getAdditionalProperties().get$ref() != null) {
                             processRefProperty(mapProp.getAdditionalProperties(), file);
                         } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                                ((ArraySchema) mapProp.getAdditionalProperties()).getItems()!= null &&
-                                ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
+                                    ((ArraySchema) mapProp.getAdditionalProperties()).getItems()!= null &&
+                                        ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
                             processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                         }
                     }
@@ -126,8 +126,8 @@ public final class ExternalRefProcessor {
                     if (mapProp.getAdditionalProperties().get$ref() != null) {
                         processRefProperty(mapProp.getAdditionalProperties(), file);
                     } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems() != null &&
-                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
+                                ((ArraySchema) mapProp.getAdditionalProperties()).getItems() != null &&
+                                    ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
                         processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                     }
                 }
