@@ -15,6 +15,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
@@ -97,7 +98,8 @@ public final class ExternalRefProcessor {
                         processRefProperty(prop.getValue(), file);
                     } else if (prop.getValue() instanceof ArraySchema) {
                         ArraySchema arrayProp = (ArraySchema) prop.getValue();
-                        if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null) {
+                        if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
+                                StringUtils.isNotBlank(arrayProp.get$ref())) {
                             processRefProperty(arrayProp.getItems(), file);
                         }
                     } else if (prop.getValue().getAdditionalProperties() != null) {
@@ -106,7 +108,8 @@ public final class ExternalRefProcessor {
                             processRefProperty(mapProp.getAdditionalProperties(), file);
                         } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
                                     ((ArraySchema) mapProp.getAdditionalProperties()).getItems()!= null &&
-                                        ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
+                                        ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null
+                                        && StringUtils.isNotBlank(((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref())) {
                             processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                         }
                     }
@@ -118,7 +121,8 @@ public final class ExternalRefProcessor {
                     processRefProperty(additionalProperty, file);
                 } else if (additionalProperty instanceof ArraySchema) {
                     ArraySchema arrayProp = (ArraySchema) additionalProperty;
-                    if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null) {
+                    if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
+                            StringUtils.isNotBlank(arrayProp.get$ref())) {
                         processRefProperty(arrayProp.getItems(), file);
                     }
                 } else if (additionalProperty.getAdditionalProperties() != null) {
@@ -127,13 +131,15 @@ public final class ExternalRefProcessor {
                         processRefProperty(mapProp.getAdditionalProperties(), file);
                     } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
                                 ((ArraySchema) mapProp.getAdditionalProperties()).getItems() != null &&
-                                    ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null) {
+                                    ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null
+                                    && StringUtils.isNotBlank(((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref()))  {
                         processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                     }
                 }
 
             }
-            if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null && ((ArraySchema) schema).getItems().get$ref() != null) {
+            if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null && ((ArraySchema) schema).getItems().get$ref() != null
+                    && StringUtils.isNotBlank(((ArraySchema) schema).getItems().get$ref())) {
                 processRefProperty(((ArraySchema) schema).getItems(), file);
             }
         }
