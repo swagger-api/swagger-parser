@@ -59,13 +59,17 @@ public class SchemaProcessor {
 
     }
 
-    private void processAdditionalProperties(Schema schema) {
+    private void processAdditionalProperties(Object additionalProperties) {
 
-        if (schema.getAdditionalProperties() != null){
-            if(schema.getAdditionalProperties().get$ref() != null){
-                processReferenceSchema(schema.getAdditionalProperties());
-            }else{
-                processSchemaType(schema.getAdditionalProperties());
+        if (additionalProperties instanceof Schema) {
+            Schema schema = (Schema) additionalProperties;
+            if (schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema) {
+                Schema additionalPropertiesSchema = (Schema) schema.getAdditionalProperties();
+                if (additionalPropertiesSchema.get$ref() != null) {
+                    processReferenceSchema(additionalPropertiesSchema);
+                } else {
+                    processSchemaType(additionalPropertiesSchema);
+                }
             }
         }
     }

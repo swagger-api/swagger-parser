@@ -201,7 +201,9 @@ public class OpenAPIResolverTest {
         assertEquals(schemas.get("OrderRef").getNot().get$ref(), "#/components/schemas/Category");
 
         //Schema additionalProperties
-        assertEquals(schemas.get("OrderRef").getAdditionalProperties().get$ref(), "#/components/schemas/User_3");
+        assertTrue(schemas.get("OrderRef").getAdditionalProperties() instanceof Schema);
+        Schema additionalProperties = (Schema) schemas.get("OrderRef").getAdditionalProperties();
+        assertEquals(additionalProperties.get$ref(), "#/components/schemas/User_3");
 
         //AllOfSchema
         ComposedSchema extended = (ComposedSchema) schemas.get("ExtendedErrorModel");

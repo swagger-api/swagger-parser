@@ -180,9 +180,9 @@ public class InlineModelResolver {
                                                         }
                                                     }
                                                 }
-                                            } else if (property.getAdditionalProperties() != null) {
+                                            } else if (property.getAdditionalProperties() != null && property.getAdditionalProperties() instanceof Schema) {
 
-                                                Schema innerProperty = property.getAdditionalProperties();
+                                                Schema innerProperty = (Schema) property.getAdditionalProperties();
                                                 if (innerProperty instanceof ObjectSchema) {
                                                     ObjectSchema op = (ObjectSchema) innerProperty;
                                                     if (op.getProperties() != null && op.getProperties().size() > 0) {
@@ -365,8 +365,8 @@ public class InlineModelResolver {
                         }
                     }
                 }
-            } else if (property.getAdditionalProperties() != null) {
-                Schema inner = property.getAdditionalProperties();
+            } else if (property.getAdditionalProperties() != null && property.getAdditionalProperties() instanceof Schema) {
+                Schema inner = (Schema) property.getAdditionalProperties();
 
                 if (inner instanceof ObjectSchema) {
                     ObjectSchema op = (ObjectSchema) inner;
@@ -454,11 +454,15 @@ public class InlineModelResolver {
         if (obj != null) {
             example = obj.toString();
         }
-
+        Schema items;
         ArraySchema model = new ArraySchema();
         model.setDescription(description);
         model.setExample(example);
-        model.setItems(object.getAdditionalProperties());
+        if (object.getAdditionalProperties() != null && object.getAdditionalProperties() instanceof Schema) {
+            items = (Schema)  object.getAdditionalProperties();
+            model.setItems(items);
+        }
+
 
         return model;
     }

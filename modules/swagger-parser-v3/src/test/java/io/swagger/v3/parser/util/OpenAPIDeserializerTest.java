@@ -1145,7 +1145,9 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(component.getSchemas().get("ApiResponse").getRequired().get(0),"name");
         Assert.assertEquals(component.getSchemas().get("Order").getType(),"object");
         Assert.assertEquals(component.getSchemas().get("Order").getNot().getType(),"integer");
-        Assert.assertEquals(component.getSchemas().get("Order").getAdditionalProperties().getType(),"integer");
+        assertTrue(component.getSchemas().get("Order").getAdditionalProperties() instanceof Schema);
+        Schema additionalProperties = (Schema) component.getSchemas().get("Order").getAdditionalProperties();
+        Assert.assertEquals(additionalProperties.getType(),"integer");
 
         Schema schema = (Schema) component.getSchemas().get("Order").getProperties().get("status");
 

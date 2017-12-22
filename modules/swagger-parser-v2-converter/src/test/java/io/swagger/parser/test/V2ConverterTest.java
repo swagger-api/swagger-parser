@@ -371,11 +371,12 @@ public class V2ConverterTest {
         assertNotNull(oas);
     }
 
-    @Test(description = "$ref not updated in components (aditional properties)")
+    @Test(description = "$ref not updated in components (additional properties)")
     public void testIssue23() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_23_JSON);
-        assertEquals(OBJECT_REF, oas.getComponents().getSchemas()
-                .get(MAP_OBJECTS_MODEL).getAdditionalProperties().get$ref());
+        assertTrue(oas.getComponents().getSchemas().get(MAP_OBJECTS_MODEL).getAdditionalProperties() instanceof Schema);
+        Schema additionalProperties = (Schema) oas.getComponents().getSchemas().get(MAP_OBJECTS_MODEL).getAdditionalProperties();
+        assertEquals(OBJECT_REF,additionalProperties.get$ref());
     }
 
     @Test(description = "Covert path item $refs")

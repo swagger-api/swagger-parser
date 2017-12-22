@@ -1107,8 +1107,9 @@ public class InlineModelResolverTest {
 
         Schema property = response.getContent().get("*/*").getSchema();
         assertTrue(property.getAdditionalProperties() != null);
+        assertTrue(property.getAdditionalProperties() instanceof  Schema);
         assertTrue(openAPI.getComponents().getSchemas() == null);
-        Schema inlineProp = property.getAdditionalProperties();
+        Schema inlineProp = (Schema)property.getAdditionalProperties();
         assertTrue(inlineProp instanceof ObjectSchema);
         ObjectSchema op = (ObjectSchema) inlineProp;
         assertNull(op.getProperties());
