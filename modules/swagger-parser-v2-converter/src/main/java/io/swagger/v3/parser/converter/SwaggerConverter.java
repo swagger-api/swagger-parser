@@ -823,6 +823,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         } else {
 
             result = Json.mapper().convertValue(schema, Schema.class);
+
             result.setExample(schema.getExample());
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
