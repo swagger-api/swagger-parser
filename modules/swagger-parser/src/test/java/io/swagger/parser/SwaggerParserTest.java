@@ -52,6 +52,29 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testRefPaths() throws Exception {
+        String yaml = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: Path item $ref test\n" +
+                "paths:\n" +
+                "  /foo:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: OK\n" +
+                "  /foo2:\n" +
+                "    $ref: '#/paths/~1foo'";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.parse(yaml);
+
+        assertEquals(swagger.getPaths().get("foo"),swagger.getPaths().get("foo2"));
+        
+
+    }
+    @Test
     public void testModelParameters() throws Exception {
         String yaml = "swagger: '2.0'\n" +
                 "info:\n" +

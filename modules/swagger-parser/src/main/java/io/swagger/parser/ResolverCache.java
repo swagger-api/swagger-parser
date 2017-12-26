@@ -42,6 +42,7 @@ public class ResolverCache {
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefType.PARAMETER.getInternalPrefix() + "(?<name>.+)");
     private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefType.DEFINITION.getInternalPrefix() + "(?<name>.+)");
     private static final Pattern RESPONSE_PATTERN = Pattern.compile("^" + RefType.RESPONSE.getInternalPrefix() + "(?<name>.+)");
+    private static final Pattern PATHS_PATTERN = Pattern.compile("^" + RefType.PATH.getInternalPrefix() + "(?<name>.+)");
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
@@ -230,6 +231,9 @@ public class ResolverCache {
         }
         else if(ref.startsWith("#/parameters")) {
             result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
+        }
+        else if(ref.startsWith("#/paths")) {
+            result = getFromMap(ref, swagger.getPaths(), PATHS_PATTERN);
         }
         if (result == null) {
             result = getFromMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
