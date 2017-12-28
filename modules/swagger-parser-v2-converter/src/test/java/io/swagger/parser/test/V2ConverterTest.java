@@ -143,8 +143,8 @@ public class V2ConverterTest {
     private static final int NUMBER_VALUE_TWENTY = 20;
     private static final double MULTIPLE_OF_VALUE = 0.01D;
     private static final long DEFAULT_VALUE = 11L;
-    private static final long EXAMPLE_8_NUMBER = 8L;
-    private static final long EXAMPLE_42_NUMBER = 42L;
+    private static final int EXAMPLE_8_NUMBER = 8;
+    private static final int EXAMPLE_42_NUMBER = 42;
 
     @Test
     public void testConvertPetstore() throws Exception {
