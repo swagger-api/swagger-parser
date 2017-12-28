@@ -1027,6 +1027,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         } else if (v2Model instanceof ModelImpl) {
                 String v2discriminator = null;
+                
                 ModelImpl model = (ModelImpl) v2Model;
 
                 result =  new SchemaTypeUtil().createSchema(model.getType(),model.getFormat());
