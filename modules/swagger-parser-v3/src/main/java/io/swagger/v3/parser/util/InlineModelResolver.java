@@ -366,7 +366,7 @@ public class InlineModelResolver {
                     }
                 }
             } else if (property.getAdditionalProperties() != null && property.getAdditionalProperties() instanceof Schema) {
-                Schema inner = (Schema) property.getAdditionalProperties();
+                Schema inner = property.getAdditionalProperties();
 
                 if (inner instanceof ObjectSchema) {
                     ObjectSchema op = (ObjectSchema) inner;
@@ -454,13 +454,11 @@ public class InlineModelResolver {
         if (obj != null) {
             example = obj.toString();
         }
-        Schema items;
         ArraySchema model = new ArraySchema();
         model.setDescription(description);
         model.setExample(example);
         if (object.getAdditionalProperties() != null && object.getAdditionalProperties() instanceof Schema) {
-            items = (Schema)  object.getAdditionalProperties();
-            model.setItems(items);
+            model.setItems((Schema)  object.getAdditionalProperties());
         }
 
 
