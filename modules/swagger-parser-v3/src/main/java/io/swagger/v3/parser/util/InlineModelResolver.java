@@ -366,7 +366,7 @@ public class InlineModelResolver {
                     }
                 }
             } else if (property.getAdditionalProperties() != null && property.getAdditionalProperties() instanceof Schema) {
-                Schema inner = property.getAdditionalProperties();
+                Schema inner = (Schema) property.getAdditionalProperties();
 
                 if (inner instanceof ObjectSchema) {
                     ObjectSchema op = (ObjectSchema) inner;
