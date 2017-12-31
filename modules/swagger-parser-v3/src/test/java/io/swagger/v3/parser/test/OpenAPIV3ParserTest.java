@@ -314,6 +314,16 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("result"));
     }
 
+    @Test
+    public void testOneOfExternalRefConflictName() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/oneof_name_conflict/oneOf-external-ref-name-conflict.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema pet = openAPI.getComponents().getSchemas().get("Pet");
+        Assert.assertNotNull(pet);
+        Assert.assertTrue(pet.getDiscriminator().getMapping().containsKey("Cat"));
+        Assert.assertTrue(pet.getDiscriminator().getMapping().get("Cat").equals("#/components/schemas/Cat_2"));
+    }
+
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
