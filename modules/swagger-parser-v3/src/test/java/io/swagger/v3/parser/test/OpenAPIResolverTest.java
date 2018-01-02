@@ -604,6 +604,7 @@ public class OpenAPIResolverTest {
 
     }
 
+    @Test
     public void referringSpecWithoutComponentsTag() throws Exception {
         ParseOptions resolve = new ParseOptions();
         resolve.setResolveFully(true);
@@ -614,7 +615,7 @@ public class OpenAPIResolverTest {
     }
 
 
-
+    @Test
     public void testRefNameConflicts() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
