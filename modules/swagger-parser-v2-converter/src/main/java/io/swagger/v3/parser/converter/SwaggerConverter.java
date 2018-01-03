@@ -704,6 +704,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 body.setDescription(bp.getDescription());
             }
         }
+        convertExamples(((BodyParameter) param).getExamples(), content);
         body.content(content);
         return body;
     }
@@ -744,11 +745,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 Schema schema = convertFileSchema(convert(v2Response.getSchema()));
                 for (String type : mediaTypes) {
                     // TODO: examples
-                    content.addMediaType(type, new MediaType().schema(schema));
+                    MediaType mediaType = new MediaType();
+                    content.addMediaType(type, mediaType.schema(schema));
                 }
                 response.content(content);
             }
 
+            response.content(convertExamples(v2Response.getExamples(), content));
             response.setExtensions(convert(v2Response.getVendorExtensions()));
 
             if (v2Response.getHeaders() != null && v2Response.getHeaders().size() > 0) {
@@ -757,6 +760,20 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         return response;
+    }
+
+    private Content convertExamples(final Map examples, final Content content) {
+        if (examples != null) {
+            examples.forEach((k, v) -> {
+                MediaType mT = content.get(k);
+                if (mT == null) {
+                    mT = new MediaType();
+                    content.addMediaType(k.toString(), mT);
+                }
+                mT.setExample(v);
+            });
+        }
+        return content;
     }
 
     private Schema convertFileSchema(Schema schema) {

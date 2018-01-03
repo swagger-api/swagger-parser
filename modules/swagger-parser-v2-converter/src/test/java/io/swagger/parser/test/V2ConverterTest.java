@@ -67,6 +67,7 @@ public class V2ConverterTest {
     private static final String ISSUE_599_JSON = "issue-599.json";
     private static final String ISSUE_600_JSON = "issue-600.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
+    private static final String ISSUE_540_JSON = "issue-540.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -445,7 +446,7 @@ public class V2ConverterTest {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_33_JSON);
         ApiResponse apiResponse = oas.getPaths().get(USERS_PATH).getGet().getResponses().get("200");
         assertNotNull(apiResponse);
-        assertNull(apiResponse.getContent().get(APPLICATION_YAML));
+        assertNotNull(apiResponse.getContent().get(APPLICATION_YAML).getExample());
         assertNotNull(apiResponse.getContent().get(APPLICATION_JSON));
     }
 
@@ -481,6 +482,18 @@ public class V2ConverterTest {
         Map properties = requestBody.getContent().get(CONTENT_TYPE).getSchema().getProperties();
         assertEquals(((Schema) properties.get(EMAIL)).getExample(), EMAIL_VALUE);
         assertEquals(((Schema) properties.get(PASSWORD)).getExample(), PASSWORD_VALUE);
+    }
+
+    @Test(description = "OpenAPI v2 converter - examples are lost")
+    public void testIssue540() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_540_JSON);
+        Operation operation = oas.getPaths().get("/example").getPost();
+        assertNotNull(operation);
+        Object example = operation.getRequestBody().getContent().get(APPLICATION_JSON).getExample();
+        assertNotNull(example);
+        example = operation.getResponses().get("200").getContent().get(APPLICATION_JSON);
+        assertNotNull(example);
+
     }
 
     @Test(description = "OpenAPI v2 converter - enum values for array parameters are lost ")
