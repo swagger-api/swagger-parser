@@ -1,4 +1,10 @@
 openapi: 3.0.1
+"security": [
+  {},
+  {"oauth": […]},
+  {"token-1": []},
+  {"token-2": []}
+]
 paths:
   /pet:
     summary: "summary"
