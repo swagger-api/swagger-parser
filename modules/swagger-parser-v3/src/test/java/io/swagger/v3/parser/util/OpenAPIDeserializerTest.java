@@ -644,6 +644,25 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void readEmptySecurityRequirement() throws Exception {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas.yaml").toURI())));
+
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        Assert.assertNotNull(result);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+
+        SecurityRequirement securityRequirement = openAPI.getSecurity().get(0);
+
+        assertTrue(securityRequirement.isEmpty());
+        assertEquals(openAPI.getSecurity().size(), 4);
+    }
+
+    @Test
     public void readEmptyServerObject() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas2.yaml.template").toURI())));
