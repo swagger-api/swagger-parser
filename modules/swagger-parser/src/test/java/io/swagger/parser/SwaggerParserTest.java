@@ -1020,6 +1020,12 @@ public class SwaggerParserTest {
 
     }
 
+    @Test(description = "Issue #616 Relative references inside of 'allOf'")
+    public void checkAllOfWithRelativeReferencesAreFound() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/allOf-relative-file-references/parent.json");
+        assertEquals(4, swagger.getDefinitions().size());
+    }
+
     @Test(description = "A string example should not be over quoted when parsing a yaml string")
     public void readingSpecStringShouldNotOverQuotingStringExample() throws Exception {
         SwaggerParser parser = new SwaggerParser();
