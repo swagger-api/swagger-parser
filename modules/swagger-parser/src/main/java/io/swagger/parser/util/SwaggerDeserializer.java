@@ -731,6 +731,12 @@ public class SwaggerDeserializer {
                 am.items(items);
             }
 
+            Integer maxItems = getInteger("maxItems", node, false, location, result);
+            am.setMaxItems(maxItems);
+
+            Integer minItems = getInteger("minItems", node, false, location, result);
+            am.setMinItems(minItems);
+
             // extra keys
             Set<String> keys = getKeys(node);
             for(String key : keys) {

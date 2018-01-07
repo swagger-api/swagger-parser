@@ -954,6 +954,35 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue594() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "paths:\n" +
+                        "  /test:\n" +
+                        "    post:\n" +
+                        "      parameters:\n" +
+                        "        - name: body\n" +
+                        "          in: body\n" +
+                        "          description: Hello world\n" +
+                        "          schema:\n" +
+                        "            type: array\n" +
+                        "            minItems: 1\n" +
+                        "            maxItems: 1\n" +
+                        "            items: \n" +
+                        "              $ref: \"#/definitions/Pet\"\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: 'OK'\n";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertNotNull(result.getSwagger());
+        ArrayModel schema = (ArrayModel)((BodyParameter)result.getSwagger().getPaths().get("/test").getPost().getParameters().get(0)).getSchema();
+        assertEquals(((RefProperty)schema.getItems()).get$ref(),"#/definitions/Pet");
+        assertNotNull(schema.getMaxItems());
+        assertNotNull(schema.getMinItems());
+
+    }
+
+    @Test
     public void testIssue450() {
         String desc = "An array of Pets";
         String xTag = "x-my-tag";
