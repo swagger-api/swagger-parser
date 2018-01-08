@@ -70,7 +70,7 @@ public class RefUtils {
                 return readExternalRef(url, RefFormat.URL, auths, null);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file + " path:" + rootPath, e);
         }
 
         return result;
@@ -143,7 +143,7 @@ public class RefUtils {
 
             }
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file + " path: "+parentDirectory, e);
         }
 
         return result;

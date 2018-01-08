@@ -92,31 +92,14 @@ public final class ExternalRefProcessor {
                         } else {
                             processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
                         }
+                    } else if (allOfModel instanceof ModelImpl) {
+                        //Loop through additional properties of allOf and recursively call this method;
+                        processProperties(allOfModel.getProperties(), file);
                     }
                 }
             }
             //Loop the properties and recursively call this method;
-            Map<String, Property> subProps = model.getProperties();
-            if (subProps != null) {
-                for (Map.Entry<String, Property> prop : subProps.entrySet()) {
-                    if (prop.getValue() instanceof RefProperty) {
-                        processRefProperty((RefProperty) prop.getValue(), file);
-                    } else if (prop.getValue() instanceof ArrayProperty) {
-                        ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
-                        if (arrayProp.getItems() instanceof RefProperty) {
-                            processRefProperty((RefProperty) arrayProp.getItems(), file);
-                        }
-                    } else if (prop.getValue() instanceof MapProperty) {
-                        MapProperty mapProp = (MapProperty) prop.getValue();
-                        if (mapProp.getAdditionalProperties() instanceof RefProperty) {
-                            processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
-                        } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
-                                ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
-                            processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(), file);
-                        }
-                    }
-                }
-            }
+            processProperties(model.getProperties(), file);
             if (model instanceof  ModelImpl) {
                 ModelImpl modelImpl = (ModelImpl) model;
                 Property additionalProperties = modelImpl.getAdditionalProperties();
@@ -146,6 +129,31 @@ public final class ExternalRefProcessor {
         }
 
         return newRef;
+    }
+
+    private void processProperties(final Map<String, Property> subProps, final String file) {
+        if (subProps == null || 0 == subProps.entrySet().size() ) {
+            return;
+        }
+        for (Map.Entry<String, Property> prop : subProps.entrySet()) {
+            if (prop.getValue() instanceof RefProperty) {
+                processRefProperty((RefProperty) prop.getValue(), file);
+            } else if (prop.getValue() instanceof ArrayProperty) {
+                ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
+                if (arrayProp.getItems() instanceof RefProperty) {
+                    processRefProperty((RefProperty) arrayProp.getItems(), file);
+                }
+            } else if (prop.getValue() instanceof MapProperty) {
+                MapProperty mapProp = (MapProperty) prop.getValue();
+                if (mapProp.getAdditionalProperties() instanceof RefProperty) {
+                    processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
+                } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
+                        ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
+                    processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(),
+                            file);
+                }
+            }
+        }
     }
 
     private void processRefProperty(RefProperty subRef, String externalFile) {
