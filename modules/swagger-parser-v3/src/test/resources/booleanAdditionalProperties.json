@@ -28,7 +28,9 @@
         "required": [
           "innerObject"
         ],
-        "additionalProperties": false,
+        "additionalProperties": {
+          "type": "string"
+        },
         "properties": {
           "innerObject": {
             "type": "object",
