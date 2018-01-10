@@ -22,16 +22,15 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.AbstractNumericProperty;
 import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.FileProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -63,8 +62,8 @@ import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.lang3.StringUtils;
+
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -707,6 +706,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 body.setDescription(bp.getDescription());
             }
         }
+        convertExamples(((BodyParameter) param).getExamples(), content);
         body.content(content);
         return body;
     }
@@ -747,11 +747,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 Schema schema = convertFileSchema(convert(v2Response.getSchema()));
                 for (String type : mediaTypes) {
                     // TODO: examples
-                    content.addMediaType(type, new MediaType().schema(schema));
+                    MediaType mediaType = new MediaType();
+                    content.addMediaType(type, mediaType.schema(schema));
                 }
                 response.content(content);
             }
 
+            response.content(convertExamples(v2Response.getExamples(), content));
             response.setExtensions(convert(v2Response.getVendorExtensions()));
 
             if (v2Response.getHeaders() != null && v2Response.getHeaders().size() > 0) {
@@ -760,6 +762,20 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         return response;
+    }
+
+    private Content convertExamples(final Map examples, final Content content) {
+        if (examples != null) {
+            examples.forEach((k, v) -> {
+                MediaType mT = content.get(k);
+                if (mT == null) {
+                    mT = new MediaType();
+                    content.addMediaType(k.toString(), mT);
+                }
+                mT.setExample(v);
+            });
+        }
+        return content;
     }
 
     private Schema convertFileSchema(Schema schema) {
@@ -823,18 +839,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             result = arraySchema;
 
-        } else {
+        } else if (schema instanceof FileProperty) {
+            FileSchema fileSchema = Json.mapper().convertValue(schema, FileSchema.class);
+            result = fileSchema;
 
-            result = new SchemaTypeUtil().createSchema(schema.getType(),schema.getFormat()); //Json.mapper().convertValue(schema, Schema.class);
+        }else {
 
-            result.setFormat(schema.getFormat());
-            result.setType(schema.getType());
-
-            if (schema instanceof StringProperty){
-                StringProperty stringSchema = (StringProperty) schema;
-                result.setEnum(stringSchema.getEnum());
-            }
-
+            result = Json.mapper().convertValue(schema, Schema.class);
             result.setExample(schema.getExample());
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
@@ -1011,9 +1022,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
             arraySchema.setItems(convert(((ArrayModel) v2Model).getItems()));
 
             result = arraySchema;
-
-            return result;
-
         } else if (v2Model instanceof ComposedModel) {
             ComposedModel composedModel = (ComposedModel) v2Model;
 
@@ -1022,58 +1030,51 @@ public class SwaggerConverter implements SwaggerParserExtension {
             composed.setAllOf(composedModel.getAllOf().stream().map(this::convert).collect(Collectors.toList()));
 
             result = composed;
+        } else {
+            String v2discriminator = null;
 
-            return result;
-
-        } else if (v2Model instanceof ModelImpl) {
-                String v2discriminator = null;
-                
+            if (v2Model instanceof ModelImpl) {
                 ModelImpl model = (ModelImpl) v2Model;
-
-                result =  new SchemaTypeUtil().createSchema(model.getType(),model.getFormat());
 
                 v2discriminator = model.getDiscriminator();
                 model.setDiscriminator(null);
+            }
+
+            result = Json.mapper().convertValue(v2Model, Schema.class);
+
+            if ((v2Model.getProperties() != null) && (v2Model.getProperties().size() > 0)) {
+                Map<String, Property> properties = v2Model.getProperties();
+
+                properties.forEach((k, v) -> {
+                    result.addProperties(k, convert(v));
+                });
+
+            }
+
+            if (v2Model instanceof ModelImpl) {
+                ModelImpl model = (ModelImpl) v2Model;
 
                 if (model.getAdditionalProperties() != null) {
                     result.setAdditionalProperties(convert(model.getAdditionalProperties()));
                 }
+            }
 
-                if (v2discriminator != null) {
-                    Discriminator discriminator = new Discriminator();
+            if (v2discriminator != null) {
+                Discriminator discriminator = new Discriminator();
 
-                    discriminator.setPropertyName(v2discriminator);
-                    result.setDiscriminator(discriminator);
-                }
-
-                if ((model.getProperties() != null) && (model.getProperties().size() > 0)) {
-                    Map<String, Property> properties = model.getProperties();
-
-                    properties.forEach((k, v) -> {
-                        result.addProperties(k, convert(v));
-                    });
-                }
-
-                if((model.getRequired() != null && model.getRequired().size() > 0)){
-                    result.setRequired(model.getRequired());
-                }
-
-                if (v2Model.getVendorExtensions() != null) {
-                    Object nullableExtension = v2Model.getVendorExtensions().get("x-nullable");
-                    if (nullableExtension != null) {
-                        result.setNullable((Boolean) nullableExtension);
-                    }
-                }
-
-
-                return result;
-
-        } else if (v2Model instanceof RefModel){
-            RefModel model = (RefModel) v2Model;
-            result =  new Schema().$ref(model.get$ref());
-            return result;
+                discriminator.setPropertyName(v2discriminator);
+                result.setDiscriminator(discriminator);
+            }
         }
 
-        return null;
+        if (v2Model.getVendorExtensions() != null) {
+            Object nullableExtension = v2Model.getVendorExtensions().get("x-nullable");
+            if (nullableExtension != null) {
+                result.setNullable((Boolean) nullableExtension);
+            }
+        }
+
+        return result;
     }
 }
+

@@ -446,7 +446,7 @@ public class V2ConverterTest {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_33_JSON);
         ApiResponse apiResponse = oas.getPaths().get(USERS_PATH).getGet().getResponses().get("200");
         assertNotNull(apiResponse);
-        assertNull(apiResponse.getContent().get(APPLICATION_YAML));
+        assertNotNull(apiResponse.getContent().get(APPLICATION_YAML));
         assertNotNull(apiResponse.getContent().get(APPLICATION_JSON));
     }
 
