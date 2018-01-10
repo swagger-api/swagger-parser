@@ -96,6 +96,10 @@ public class PathsProcessor {
                     for (Operation operation : operations) {
                         List<Parameter> parametersToAdd = new ArrayList<>();
                         List<Parameter> existingParameters = operation.getParameters();
+                        if (existingParameters == null) {
+                            existingParameters = new ArrayList<>();
+                            operation.setParameters(existingParameters);
+                        }
                         for (Parameter parameterToAdd : parameters) {
                             boolean matched = false;
                             for (Parameter existingParameter : existingParameters) {

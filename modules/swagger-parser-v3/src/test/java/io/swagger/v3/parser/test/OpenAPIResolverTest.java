@@ -16,23 +16,20 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.parser.OpenAPIResolver;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.OpenAPIResolver;
-import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
-import io.swagger.v3.oas.models.parameters.Parameter;
-
 import io.swagger.v3.parser.util.ResolverFully;
 import mockit.Injectable;
-
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
-
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -606,6 +603,7 @@ public class OpenAPIResolverTest {
 
     }
 
+    @Test
     public void referringSpecWithoutComponentsTag() throws Exception {
         ParseOptions resolve = new ParseOptions();
         resolve.setResolveFully(true);
@@ -616,7 +614,7 @@ public class OpenAPIResolverTest {
     }
 
 
-
+    @Test
     public void testRefNameConflicts() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
@@ -627,6 +625,35 @@ public class OpenAPIResolverTest {
         AssertJUnit.assertEquals("referred", ((Schema)openAPI.getPaths().get("/yetAnotherPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
         AssertJUnit.assertEquals("local", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj").getProperties().get("location")).getExample());
         AssertJUnit.assertEquals("referred", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj_2").getProperties().get("location")).getExample());
+    }
+
+
+    @Test
+    public void testParameterOnPathLevel() throws Exception {
+        String yaml = "openapi: 3.0.1\n" +
+                "info:\n" +
+                "  version: '1.0.0'\n" +
+                "  title: 'title'\n" +
+                "  description: 'description'\n" +
+                "paths:\n" +
+                "  /foo:\n" +
+                "    parameters:\n" +
+                "      - in: query\n" +
+                "        name: bar\n" +
+                "        schema:\n" +
+                "          type: string\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, options).getOpenAPI();
+        assertNotNull(openAPI);
+        List<Parameter> getParameters = openAPI.getPaths().get("/foo").getGet().getParameters();
+        assertNotNull(getParameters);
+        assertEquals(1, getParameters.size());
+        assertEquals("bar", getParameters.get(0).getName());
     }
 
 

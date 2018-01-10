@@ -2395,27 +2395,29 @@ public class OpenAPIDeserializer {
             if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
                 SecurityRequirement securityRequirement = new SecurityRequirement();
                 Set<String> keys = getKeys((ObjectNode) node);
-                for (String key : keys) {
-                    if (key != null) {
-                        JsonNode value = node.get(key);
-                        if (key != null && JsonNodeType.ARRAY.equals(value.getNodeType())) {
-                            ArrayNode arrayNode = (ArrayNode)value;
-                            List<String> scopes = Stream
-                                    .generate(arrayNode.elements()::next)
-                                    .map((n) -> n.asText())
-                                    .limit(arrayNode.size())
-                                    .collect(Collectors.toList());
-                            securityRequirement.addList(key,scopes);
-                            if (securityRequirement.size() > 0){
-                                securityRequirements.add(securityRequirement);
+                if (keys.size() == 0){
+                    securityRequirements.add(securityRequirement);
+                }else {
+                    for (String key : keys) {
+                        if (key != null) {
+                            JsonNode value = node.get(key);
+                            if (key != null && JsonNodeType.ARRAY.equals(value.getNodeType())) {
+                                ArrayNode arrayNode = (ArrayNode) value;
+                                List<String> scopes = Stream
+                                        .generate(arrayNode.elements()::next)
+                                        .map((n) -> n.asText())
+                                        .limit(arrayNode.size())
+                                        .collect(Collectors.toList());
+                                securityRequirement.addList(key, scopes);
+                                if (securityRequirement.size() > 0) {
+                                    securityRequirements.add(securityRequirement);
+                                }
                             }
                         }
                     }
                 }
             }
         }
-
-
 
         return securityRequirements;
 
