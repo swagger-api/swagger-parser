@@ -1170,6 +1170,10 @@ components:
       type: apiKey
       name: api_key
       in: header
+    api_key_cookie:
+      type: apiKey
+      name: api_key
+      in: cookie
     http:
       type: http
       scheme: Basic
