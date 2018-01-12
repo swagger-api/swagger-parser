@@ -317,14 +317,17 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void allowBooleanAdditionalPropertiesIssue499() {
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("booleanAdditionalProperties.json", null, null);
+    public void testRefAndInlineAllOf(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/allOfAndRef.yaml",auths,options);
 
-        assertNotNull(result);
-        assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
-        List<String> messages = result.getMessages();
-        assertTrue(messages.isEmpty(), messages.stream().collect(Collectors.joining("\n")));
+        Assert.assertNotNull(openAPI);
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 2);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("UserEx"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("User"));
+        Assert.assertTrue(openAPI.getPaths().get("/refToAllOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().size() == 2);
     }
 
 
