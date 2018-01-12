@@ -314,6 +314,20 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("result"));
     }
 
+    @Test
+    public void testRefAndInlineAllOf(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/allOfAndRef.yaml",auths,options);
+
+        Assert.assertNotNull(openAPI);
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 2);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("UserEx"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("User"));
+        Assert.assertTrue(openAPI.getPaths().get("/refToAllOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().size() == 2);
+    }
+
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
