@@ -223,9 +223,8 @@ public class ResolverFully {
                                 model.addExtension(key, composedSchema.getExtensions().get(key));
                             }
                         }
-                        return model;
                     }
-
+                    return model;
                 } else if (composedSchema.getOneOf() != null) {
                     Schema resolved;
                     List<Schema> list = new ArrayList<>();
