@@ -4,6 +4,7 @@ package io.swagger.v3.parser.test;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -328,6 +329,21 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("UserEx"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("User"));
         Assert.assertTrue(openAPI.getPaths().get("/refToAllOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().size() == 2);
+    }
+
+    @Test
+    public void testAllOfRef(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/allOfRef.yaml",auths,options);
+
+        Assert.assertNotNull(openAPI);
+
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 3);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Cat"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Dog"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
+
     }
 
 

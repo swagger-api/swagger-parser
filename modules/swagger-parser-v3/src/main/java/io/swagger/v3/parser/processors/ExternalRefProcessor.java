@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -83,11 +84,35 @@ public final class ExternalRefProcessor {
 
             String file = $ref.split("#/")[0];
             if (schema.get$ref() != null) {
-                RefFormat format = computeRefFormat(schema.get$ref());
-                if (isAnExternalRefFormat(format)) {
-                    schema.set$ref(processRefToExternalSchema(schema.get$ref(), format));
-                } else {
-                    processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
+                processRefSchema(schema,file);
+            }
+
+            if(schema instanceof ComposedSchema){
+                ComposedSchema composedSchema = (ComposedSchema) schema;
+                if (composedSchema.getAllOf() != null){
+                    for(Schema item : composedSchema.getAllOf()){
+                        if (item.get$ref() != null){
+                            processRefSchema(item,file);
+                        }
+                    }
+
+                }else if (composedSchema.getOneOf() != null){
+                    for(Schema item : composedSchema.getOneOf()){
+                        if (item.get$ref() != null){
+                            if (item.get$ref() != null){
+                                processRefSchema(item,file);
+                            }
+                        }
+                    }
+                }else if (composedSchema.getAnyOf() != null){
+                    for(Schema item : composedSchema.getAnyOf()){
+                        if (item.get$ref() != null){
+                            if (item.get$ref() != null){
+                                processRefSchema(item,file);
+                            }
+                        }
+                    }
+
                 }
             }
             //Loop the properties and recursively call this method;
@@ -95,22 +120,22 @@ public final class ExternalRefProcessor {
             if (subProps != null) {
                 for (Map.Entry<String, Schema> prop : subProps.entrySet()) {
                     if (prop.getValue().get$ref() != null) {
-                        processRefProperty(prop.getValue(), file);
+                        processRefSchema(prop.getValue(), file);
                     } else if (prop.getValue() instanceof ArraySchema) {
                         ArraySchema arrayProp = (ArraySchema) prop.getValue();
                         if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
                                 StringUtils.isNotBlank(arrayProp.get$ref())) {
-                            processRefProperty(arrayProp.getItems(), file);
+                            processRefSchema(arrayProp.getItems(), file);
                         }
                     } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
                         Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
                         if (mapProp.get$ref() != null) {
-                            processRefProperty(mapProp, file);
+                            processRefSchema(mapProp, file);
                         } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
                                     ((ArraySchema) mapProp).getItems()!= null &&
                                         ((ArraySchema) mapProp).getItems().get$ref() != null
                                         && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref())) {
-                            processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
+                            processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                         }
                     }
                 }
@@ -118,29 +143,29 @@ public final class ExternalRefProcessor {
             if(schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema){
                 Schema additionalProperty = (Schema) schema.getAdditionalProperties();
                 if (additionalProperty.get$ref() != null) {
-                    processRefProperty(additionalProperty, file);
+                    processRefSchema(additionalProperty, file);
                 } else if (additionalProperty instanceof ArraySchema) {
                     ArraySchema arrayProp = (ArraySchema) additionalProperty;
                     if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
                             StringUtils.isNotBlank(arrayProp.get$ref())) {
-                        processRefProperty(arrayProp.getItems(), file);
+                        processRefSchema(arrayProp.getItems(), file);
                     }
                 } else if (additionalProperty.getAdditionalProperties() != null && additionalProperty.getAdditionalProperties() instanceof Schema) {
                     Schema mapProp =  (Schema) additionalProperty.getAdditionalProperties();
                     if (mapProp.get$ref() != null) {
-                        processRefProperty(mapProp, file);
+                        processRefSchema(mapProp, file);
                     } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
                                 ((ArraySchema) mapProp).getItems() != null &&
                                     ((ArraySchema) mapProp).getItems().get$ref() != null
                                     && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref()))  {
-                        processRefProperty(((ArraySchema) mapProp).getItems(), file);
+                        processRefSchema(((ArraySchema) mapProp).getItems(), file);
                     }
                 }
 
             }
             if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null && ((ArraySchema) schema).getItems().get$ref() != null
                     && StringUtils.isNotBlank(((ArraySchema) schema).getItems().get$ref())) {
-                processRefProperty(((ArraySchema) schema).getItems(), file);
+                processRefSchema(((ArraySchema) schema).getItems(), file);
             }
         }
 
@@ -614,7 +639,7 @@ public final class ExternalRefProcessor {
     }
 
 
-    private void processRefProperty(Schema subRef, String externalFile) {
+    private void processRefSchema(Schema subRef, String externalFile) {
         RefFormat format = computeRefFormat(subRef.get$ref());
         if (isAnExternalRefFormat(format)) {
             String $ref = constructRef(subRef, externalFile);
