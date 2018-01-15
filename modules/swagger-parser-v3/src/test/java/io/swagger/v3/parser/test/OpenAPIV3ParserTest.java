@@ -26,12 +26,14 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 
 public class OpenAPIV3ParserTest {
@@ -169,8 +171,8 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
-        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
     @Test
@@ -187,8 +189,8 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
-        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
     @Test
@@ -219,8 +221,8 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         Components components = result.getOpenAPI().getComponents();
         ApiResponse response = result.getOpenAPI().getPaths().get("/mockResponses/objectMultipleExamples").getGet().getResponses().get("200");
-        Assert.assertEquals(response.getContent().get("application/json").getExamples().get("ArthurDent"), components.getExamples().get("Arthur"));
-        Assert.assertEquals(response.getContent().get("application/xml").getExamples().get("Trillian"), components.getExamples().get("Trillian"));
+        assertEquals(response.getContent().get("application/json").getExamples().get("ArthurDent"), components.getExamples().get("Arthur"));
+        assertEquals(response.getContent().get("application/xml").getExamples().get("Trillian"), components.getExamples().get("Trillian"));
     }
 
     @Test
@@ -262,8 +264,8 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
-        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
     @Test
@@ -274,7 +276,7 @@ public class OpenAPIV3ParserTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().read(url);
         Assert.assertNotNull(openAPI);
-        Assert.assertEquals(openAPI.getOpenapi(), "3.0.1");
+        assertEquals(openAPI.getOpenapi(), "3.0.1");
     }
 
     @Test

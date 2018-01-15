@@ -22,6 +22,7 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.AbstractNumericProperty;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.FileProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
@@ -29,7 +30,7 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -62,6 +63,7 @@ import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
+
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -837,7 +839,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             result = arraySchema;
 
-        } else {
+        } else if (schema instanceof FileProperty) {
+            FileSchema fileSchema = Json.mapper().convertValue(schema, FileSchema.class);
+            result = fileSchema;
+
+        }else {
 
             result = Json.mapper().convertValue(schema, Schema.class);
             result.setExample(schema.getExample());
@@ -1071,3 +1077,4 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return result;
     }
 }
+

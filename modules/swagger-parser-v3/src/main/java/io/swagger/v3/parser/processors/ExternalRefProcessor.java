@@ -102,21 +102,21 @@ public final class ExternalRefProcessor {
                                 StringUtils.isNotBlank(arrayProp.get$ref())) {
                             processRefProperty(arrayProp.getItems(), file);
                         }
-                    } else if (prop.getValue().getAdditionalProperties() != null) {
-                        Schema mapProp =  prop.getValue();
-                        if (mapProp.getAdditionalProperties().get$ref() != null) {
-                            processRefProperty(mapProp.getAdditionalProperties(), file);
+                    } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
+                        Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
+                        if (mapProp.get$ref() != null) {
+                            processRefProperty(mapProp, file);
                         } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                                    ((ArraySchema) mapProp.getAdditionalProperties()).getItems()!= null &&
-                                        ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null
-                                        && StringUtils.isNotBlank(((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref())) {
+                                    ((ArraySchema) mapProp).getItems()!= null &&
+                                        ((ArraySchema) mapProp).getItems().get$ref() != null
+                                        && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref())) {
                             processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                         }
                     }
                 }
             }
-            if(schema.getAdditionalProperties() != null){
-                Schema additionalProperty = schema.getAdditionalProperties();
+            if(schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema){
+                Schema additionalProperty = (Schema) schema.getAdditionalProperties();
                 if (additionalProperty.get$ref() != null) {
                     processRefProperty(additionalProperty, file);
                 } else if (additionalProperty instanceof ArraySchema) {
@@ -125,15 +125,15 @@ public final class ExternalRefProcessor {
                             StringUtils.isNotBlank(arrayProp.get$ref())) {
                         processRefProperty(arrayProp.getItems(), file);
                     }
-                } else if (additionalProperty.getAdditionalProperties() != null) {
-                    Schema mapProp =  additionalProperty;
-                    if (mapProp.getAdditionalProperties().get$ref() != null) {
-                        processRefProperty(mapProp.getAdditionalProperties(), file);
+                } else if (additionalProperty.getAdditionalProperties() != null && additionalProperty.getAdditionalProperties() instanceof Schema) {
+                    Schema mapProp =  (Schema) additionalProperty.getAdditionalProperties();
+                    if (mapProp.get$ref() != null) {
+                        processRefProperty(mapProp, file);
                     } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                                ((ArraySchema) mapProp.getAdditionalProperties()).getItems() != null &&
-                                    ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null
-                                    && StringUtils.isNotBlank(((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref()))  {
-                        processRefProperty(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
+                                ((ArraySchema) mapProp).getItems() != null &&
+                                    ((ArraySchema) mapProp).getItems().get$ref() != null
+                                    && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref()))  {
+                        processRefProperty(((ArraySchema) mapProp).getItems(), file);
                     }
                 }
 

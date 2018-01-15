@@ -1983,11 +1983,22 @@ public class OpenAPIDeserializer {
             schema.setProperties(properties);
         }
 
-        ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
-        if(additionalPropertiesObj != null) {
-            Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
-            if(additionalProperties != null) {
-                schema.setAdditionalProperties(additionalProperties);
+
+        if (node.get("additionalProperties") != null) {
+            if (node.get("additionalProperties").getNodeType().equals(JsonNodeType.OBJECT)) {
+                ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
+                if (additionalPropertiesObj != null) {
+                    Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
+                    if (additionalProperties != null) {
+                        schema.setAdditionalProperties(additionalProperties);
+                    }
+                }
+            } else if (node.get("additionalProperties").getNodeType().equals(JsonNodeType.BOOLEAN)) {
+                Boolean additionalProperties = getBoolean("additionalProperties", node, false, location, result);
+                if (additionalProperties != null) {
+                    schema.setAdditionalProperties(additionalProperties);
+                }
+
             }
         }
         value = getString("description",node,false,location,result);
