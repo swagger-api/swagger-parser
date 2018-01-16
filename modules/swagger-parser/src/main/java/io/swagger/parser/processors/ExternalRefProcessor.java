@@ -78,7 +78,8 @@ public final class ExternalRefProcessor {
                     processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
                 }
 
-            } else if (model instanceof ComposedModel){
+            }
+            if (model instanceof ComposedModel){
                 
                 ComposedModel composedModel = (ComposedModel) model;
                 List<Model> listOfAllOF = composedModel.getAllOf();
@@ -100,6 +101,7 @@ public final class ExternalRefProcessor {
             }
             //Loop the properties and recursively call this method;
             processProperties(model.getProperties(), file);
+
             if (model instanceof  ModelImpl) {
                 ModelImpl modelImpl = (ModelImpl) model;
                 Property additionalProperties = modelImpl.getAdditionalProperties();

@@ -1105,6 +1105,20 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger.getDefinitions().get("result"));
     }
 
+    @Test
+    public void testRefEnum() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/refEnum.yaml");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 5);
+        Yaml.prettyPrint(swagger);
+
+        Assert.assertNotNull(swagger.getDefinitions().get("PrintInfo"));
+        Assert.assertNotNull(swagger.getDefinitions().get("SomeEnum"));
+        Assert.assertNotNull(swagger.getDefinitions().get("ShippingInfo"));
+    }
+
 
 
 }
