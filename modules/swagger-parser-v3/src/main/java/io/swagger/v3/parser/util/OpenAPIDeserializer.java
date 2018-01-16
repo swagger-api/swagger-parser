@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1584,14 +1585,12 @@ public class OpenAPIDeserializer {
             securityScheme.setName(value);
         }
 
-        value = getString("in", node, inRequired, location, result);
-        if (StringUtils.isNotBlank(value)) {
-            if (QUERY_PARAMETER.equals(value)) {
-                securityScheme.setIn(SecurityScheme.In.QUERY);
-            } else if (HEADER_PARAMETER.equals(value)) {
-                securityScheme.setIn(SecurityScheme.In.HEADER);
-            }
-        }
+        final String securitySchemeIn = getString("in", node, inRequired, location, result);
+        final Optional<SecurityScheme.In> matchingIn = Arrays.stream(SecurityScheme.In.values())
+                .filter(in -> in.toString().equals(securitySchemeIn))
+                .findFirst();
+
+        securityScheme.setIn(matchingIn.orElse(null));
 
         value = getString("scheme", node, schemeRequired, location, result);
         if (StringUtils.isNotBlank(value)) {

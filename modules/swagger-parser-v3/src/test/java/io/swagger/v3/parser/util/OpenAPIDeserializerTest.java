@@ -810,7 +810,7 @@ public class OpenAPIDeserializerTest {
 
         final Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
         Assert.assertNotNull(securitySchemes);
-        Assert.assertEquals(securitySchemes.size(),9);
+        Assert.assertEquals(securitySchemes.size(),10);
 
         SecurityScheme securityScheme = securitySchemes.get("reference");
         assertTrue(securityScheme.get$ref().equals("#/components/securitySchemes/api_key"));
@@ -832,7 +832,12 @@ public class OpenAPIDeserializerTest {
         
         securityScheme = securitySchemes.get("api_key");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
-        
+        assertTrue(securityScheme.getIn()== SecurityScheme.In.HEADER);
+
+        securityScheme = securitySchemes.get("api_key_cookie");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
+        assertTrue(securityScheme.getIn()== SecurityScheme.In.COOKIE);
+
         securityScheme = securitySchemes.get("http");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.HTTP);
 
