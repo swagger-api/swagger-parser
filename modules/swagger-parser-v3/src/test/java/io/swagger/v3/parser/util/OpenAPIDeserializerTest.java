@@ -1067,6 +1067,9 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
 
+        //Operation trace
+        Assert.assertNotNull(petEndpoint.getTrace());
+        Assert.assertNotNull(petEndpoint.getDescription());
 
         //Operation post
         Assert.assertNotNull(petEndpoint.getPost());
@@ -1080,7 +1083,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getParameters());
         Assert.assertEquals(petEndpoint.getParameters().size(), 2);
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
-        Parameter parameter = petEndpoint.getParameters().get(0);
         Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(0), "write:pets");
         Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(1), "read:pets");
 

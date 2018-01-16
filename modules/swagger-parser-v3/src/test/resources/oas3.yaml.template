@@ -102,6 +102,11 @@ paths:
   "/pet":
     summary: summary
     description: description
+    trace:
+      description: Dummy operation to test retrieval of trace operations
+      responses:
+        200:
+          description: Dummy response
     post:
       externalDocs:
         description: Find out more
