@@ -5,11 +5,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.util.RefUtils;
 
-
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +125,10 @@ public class SchemaProcessor {
             if (schemas != null) {
                 for (Schema schema : schemas) {
                     if (schema.get$ref() != null) {
+                        String oldRef = schema.get$ref();
                         processReferenceSchema(schema);
+                        String newRef = schema.get$ref();
+                        changeDiscriminatorMapping(composedSchema, oldRef, newRef);
                     } else {
                         processSchemaType(schema);
                     }
@@ -141,6 +147,35 @@ public class SchemaProcessor {
             }
         }
 
+    }
+
+    private void changeDiscriminatorMapping(ComposedSchema composedSchema, String oldRef, String newRef) {
+        Discriminator discriminator = composedSchema.getDiscriminator();
+        if (!oldRef.equals(newRef) && discriminator != null) {
+            String oldName = RefUtils.computeDefinitionName(oldRef, new HashSet());
+            String newName = RefUtils.computeDefinitionName(newRef, new HashSet());
+
+            String mappingName = null;
+            if (discriminator.getMapping() != null) {
+                for (String name : discriminator.getMapping().keySet()) {
+                    if (oldRef.equals(discriminator.getMapping().get(name))) {
+                        mappingName = name;
+                        break;
+                    }
+                }
+                if (mappingName != null) {
+                    discriminator.getMapping().put(mappingName, newRef);
+                }
+            }
+
+            if (mappingName == null && !oldName.equals(newName)) {
+                if (discriminator.getMapping() == null) {
+                    discriminator.setMapping(new HashMap());
+                }
+                discriminator.getMapping().put(oldName, newRef);
+            }
+
+        }
     }
 
     public void processArraySchema(ArraySchema arraySchema) {
