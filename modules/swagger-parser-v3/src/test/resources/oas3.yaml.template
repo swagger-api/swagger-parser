@@ -102,6 +102,11 @@ paths:
   "/pet":
     summary: summary
     description: description
+    trace:
+      description: Dummy operation to test retrieval of trace operations
+      responses:
+        200:
+          description: Dummy response
     post:
       externalDocs:
         description: Find out more
@@ -1170,6 +1175,10 @@ components:
       type: apiKey
       name: api_key
       in: header
+    api_key_cookie:
+      type: apiKey
+      name: api_key
+      in: cookie
     http:
       type: http
       scheme: Basic

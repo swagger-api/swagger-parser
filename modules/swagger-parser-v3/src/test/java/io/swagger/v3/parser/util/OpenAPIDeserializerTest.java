@@ -810,7 +810,7 @@ public class OpenAPIDeserializerTest {
 
         final Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
         Assert.assertNotNull(securitySchemes);
-        Assert.assertEquals(securitySchemes.size(),9);
+        Assert.assertEquals(securitySchemes.size(),10);
 
         SecurityScheme securityScheme = securitySchemes.get("reference");
         assertTrue(securityScheme.get$ref().equals("#/components/securitySchemes/api_key"));
@@ -832,7 +832,12 @@ public class OpenAPIDeserializerTest {
         
         securityScheme = securitySchemes.get("api_key");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
-        
+        assertTrue(securityScheme.getIn()== SecurityScheme.In.HEADER);
+
+        securityScheme = securitySchemes.get("api_key_cookie");
+        assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
+        assertTrue(securityScheme.getIn()== SecurityScheme.In.COOKIE);
+
         securityScheme = securitySchemes.get("http");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.HTTP);
 
@@ -1067,6 +1072,9 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getUrl(),"http://swagger.io");
         Assert.assertEquals(petEndpoint.getPost().getExternalDocs().getDescription(),"Find out more");
 
+        //Operation trace
+        Assert.assertNotNull(petEndpoint.getTrace());
+        Assert.assertNotNull(petEndpoint.getDescription());
 
         //Operation post
         Assert.assertNotNull(petEndpoint.getPost());
@@ -1080,7 +1088,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getParameters());
         Assert.assertEquals(petEndpoint.getParameters().size(), 2);
         Assert.assertNotNull(petEndpoint.getPost().getParameters());
-        Parameter parameter = petEndpoint.getParameters().get(0);
         Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(0), "write:pets");
         Assert.assertEquals(petEndpoint.getPost().getSecurity().get(0).get("petstore_auth").get(1), "read:pets");
 

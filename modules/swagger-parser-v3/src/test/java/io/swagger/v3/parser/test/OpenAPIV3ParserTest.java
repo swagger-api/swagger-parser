@@ -9,13 +9,12 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.OpenAPIV3Parser;
 import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
-
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -27,14 +26,9 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.testng.Assert.*;
 
 
 public class OpenAPIV3ParserTest {
@@ -335,7 +329,7 @@ public class OpenAPIV3ParserTest {
     public void testComposedRefResolvingIssue628(@Injectable final List<AuthorizationValue> auths) throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/composedSchemaRef.yaml",auths,options);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/composedSchemaRef.yaml", auths, options);
 
         Assert.assertNotNull(openAPI);
 
@@ -346,6 +340,16 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Lion"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Bear"));
 
+    }
+
+    @Test
+    public void testOneOfExternalRefConflictName() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/oneof_name_conflict/oneOf-external-ref-name-conflict.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema pet = openAPI.getComponents().getSchemas().get("Pet");
+        Assert.assertNotNull(pet);
+        Assert.assertTrue(pet.getDiscriminator().getMapping().containsKey("Cat"));
+        Assert.assertTrue(pet.getDiscriminator().getMapping().get("Cat").equals("#/components/schemas/Cat_2"));
     }
 
 
