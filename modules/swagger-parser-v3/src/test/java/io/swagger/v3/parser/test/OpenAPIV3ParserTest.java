@@ -332,17 +332,19 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testAllOfRef(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void testComposedRefResolvingIssue628(@Injectable final List<AuthorizationValue> auths) throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/allOfRef.yaml",auths,options);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/composedSchemaRef.yaml",auths,options);
 
         Assert.assertNotNull(openAPI);
 
-        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 3);
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 5);
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Cat"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Dog"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Lion"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Bear"));
 
     }
 

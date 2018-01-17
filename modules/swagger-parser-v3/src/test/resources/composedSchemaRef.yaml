@@ -15,6 +15,7 @@ paths:
                 oneOf:
                   - $ref: './refComponents.yaml#/components/schemas/Cat'
                   - $ref: './refComponents.yaml#/components/schemas/Dog'
+                  - $ref: './refComponents.yaml#/components/schemas/Lion'
   /anyOf:
     get:
       responses:
@@ -26,3 +27,4 @@ paths:
                 anyOf:
                   - $ref: './refComponents.yaml#/components/schemas/Cat'
                   - $ref: './refComponents.yaml#/components/schemas/Dog'
+                  - $ref: './refComponents.yaml#/components/schemas/Bear'
