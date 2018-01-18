@@ -1,0 +1,20 @@
+swagger: '2.0'
+info:
+  title: Tests
+  description: Tests
+  version: beta
+host: 'myhost.com'
+basePath: /testpath
+schemes:
+  - http
+paths:
+  pets:
+    get:
+      summary: null
+      description: null
+      operationId: list
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: 'Pet.yaml#/Pet'
