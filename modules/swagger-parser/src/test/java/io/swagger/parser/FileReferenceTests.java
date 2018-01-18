@@ -209,4 +209,24 @@ public class FileReferenceTests {
         assertTrue(swagger.getDefinitions().get("Order") instanceof ModelImpl);
         assertTrue(swagger.getDefinitions().get("Order").getProperties().size() == 6);
     }
+
+    @Test
+    public void testRelativeRefIssue421() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/main.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        assertNotNull(swagger.getPath("pets"));
+        assertNotNull(swagger.getPath("pets").getGet());
+        assertNotNull(swagger.getPath("pets").getGet().getResponses());
+        assertNotNull(swagger.getPath("pets").getGet().getResponses().get("200"));
+        assertNotNull(swagger.getPath("pets").getGet().getResponses().get("200").getSchema());
+        assertTrue(swagger.getPath("pets").getGet().getResponses().get("200").getSchema() instanceof RefProperty);
+
+        assertEquals(((RefProperty)swagger.getPath("pets").getGet().getResponses().get("200").getSchema()).get$ref(), "#/definitions/Pet");
+
+        assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
+        assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 2);
+    }
 }
