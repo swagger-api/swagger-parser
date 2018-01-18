@@ -1,9 +1,6 @@
 package io.swagger.parser.processors;
 
-import io.swagger.models.ArrayModel;
-import io.swagger.models.Model;
-import io.swagger.models.RefModel;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
@@ -14,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
@@ -31,6 +29,11 @@ public final class ExternalRefProcessor {
     }
 
     public String processRefToExternalDefinition(String $ref, RefFormat refFormat) {
+        String renamedRef = cache.getRenamedRef($ref);
+        if(renamedRef != null) {
+            return renamedRef;
+        }
+
         final Model model = cache.loadRef($ref, refFormat, Model.class);
 
         if(model == null) {
@@ -47,7 +50,7 @@ public final class ExternalRefProcessor {
             definitions = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, definitions.keySet());
 
         Model existingModel = definitions.get(possiblyConflictingDefinitionName);
 
@@ -74,20 +77,44 @@ public final class ExternalRefProcessor {
                 } else {
                     processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
                 }
+
+            }
+            if (model instanceof ComposedModel){
+                
+                ComposedModel composedModel = (ComposedModel) model;
+                List<Model> listOfAllOF = composedModel.getAllOf();
+
+                for (Model allOfModel: listOfAllOF){
+                    if (allOfModel instanceof RefModel) {
+                        RefModel refModel = (RefModel) allOfModel;
+                        if (isAnExternalRefFormat(refModel.getRefFormat())) {
+                            String joinedRef = join(file, refModel.get$ref());
+                            refModel.set$ref(processRefToExternalDefinition(joinedRef, refModel.getRefFormat()));
+                        } else {
+                            processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                        }
+                    } else if (allOfModel instanceof ModelImpl) {
+                        //Loop through additional properties of allOf and recursively call this method;
+                        processProperties(allOfModel.getProperties(), file);
+                    }
+                }
             }
             //Loop the properties and recursively call this method;
-            Map<String, Property> subProps = model.getProperties();
-            if (subProps != null) {
-                for (Map.Entry<String, Property> prop : subProps.entrySet()) {
-                    if (prop.getValue() instanceof RefProperty) {
-                        processRefProperty((RefProperty) prop.getValue(), file);
-                    } else if (prop.getValue() instanceof ArrayProperty) {
-                        ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
+            processProperties(model.getProperties(), file);
+
+            if (model instanceof  ModelImpl) {
+                ModelImpl modelImpl = (ModelImpl) model;
+                Property additionalProperties = modelImpl.getAdditionalProperties();
+                if (additionalProperties != null) {
+                    if (additionalProperties instanceof RefProperty) {
+                        processRefProperty(((RefProperty) additionalProperties), file);
+                    } else if (additionalProperties instanceof ArrayProperty) {
+                        ArrayProperty arrayProp = (ArrayProperty) additionalProperties;
                         if (arrayProp.getItems() instanceof RefProperty) {
                             processRefProperty((RefProperty) arrayProp.getItems(), file);
                         }
-                    } else if (prop.getValue() instanceof MapProperty) {
-                        MapProperty mapProp = (MapProperty) prop.getValue();
+                    } else if (additionalProperties instanceof MapProperty) {
+                        MapProperty mapProp = (MapProperty) additionalProperties;
                         if (mapProp.getAdditionalProperties() instanceof RefProperty) {
                             processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
                         } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
@@ -95,6 +122,7 @@ public final class ExternalRefProcessor {
                             processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(), file);
                         }
                     }
+
                 }
             }
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
@@ -103,6 +131,31 @@ public final class ExternalRefProcessor {
         }
 
         return newRef;
+    }
+
+    private void processProperties(final Map<String, Property> subProps, final String file) {
+        if (subProps == null || 0 == subProps.entrySet().size() ) {
+            return;
+        }
+        for (Map.Entry<String, Property> prop : subProps.entrySet()) {
+            if (prop.getValue() instanceof RefProperty) {
+                processRefProperty((RefProperty) prop.getValue(), file);
+            } else if (prop.getValue() instanceof ArrayProperty) {
+                ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
+                if (arrayProp.getItems() instanceof RefProperty) {
+                    processRefProperty((RefProperty) arrayProp.getItems(), file);
+                }
+            } else if (prop.getValue() instanceof MapProperty) {
+                MapProperty mapProp = (MapProperty) prop.getValue();
+                if (mapProp.getAdditionalProperties() instanceof RefProperty) {
+                    processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
+                } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
+                        ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
+                    processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(),
+                            file);
+                }
+            }
+        }
     }
 
     private void processRefProperty(RefProperty subRef, String externalFile) {

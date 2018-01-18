@@ -1,9 +1,11 @@
 package io.swagger.parser;
 
 import io.swagger.models.*;
+
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
@@ -13,6 +15,9 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 import static org.testng.Assert.*;
+import java.util.Arrays;
+import java.util.Map;
+
 
 public class FileReferenceTests {
     @Test
@@ -154,10 +159,21 @@ public class FileReferenceTests {
     @Test
     public void testIssue304() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-304.json", null, true);
-        assertNotNull(result.getSwagger());
+        assertNotNull(result.getSwagger().getDefinitions());
+    }
 
-        Swagger swagger = result.getSwagger();
-        assertFalse(swagger.getDefinitions().get("BarData") instanceof RefModel);
+    @Test
+    public void testAllOfFlatAndNested() {
+        for (String path : Arrays.asList("./src/test/resources/allOf-properties-ext-ref/models/swagger.json",
+                "./src/test/resources/allOf-properties-ext-ref/swagger.json")) {
+            Swagger swagger = new SwaggerParser().read(path);
+            assertEquals(3, swagger.getDefinitions().size());
+            ComposedModel composedModel = (ComposedModel)swagger.getDefinitions().get("record");
+            assertEquals(((RefModel) composedModel.getParent()).getSimpleRef(), "pet");
+            Map<String, Property> props = composedModel.getChild().getProperties();
+            assertEquals(((RefProperty) props.get("mother")).getSimpleRef(), "pet");
+            assertEquals(((RefProperty) ((ArrayProperty) props.get("siblings")).getItems()).getSimpleRef(), "pet");
+        }
     }
 
     @Test

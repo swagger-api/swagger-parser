@@ -24,6 +24,55 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 public class SwaggerDeserializerTest {
+
+
+    @Test
+    public void testEmptyDefinitions() throws Exception {
+        String yaml = "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  version: \"1.0\"\n" +
+                "  title: \"dd\"\n" +
+                "host: \"abc:5555\"\n" +
+                "basePath: \"/mypath\"\n" +
+                "schemes:\n" +
+                "- \"http\"\n" +
+                "consumes:\n" +
+                "- \"application/json\"\n" +
+                "produces:\n" +
+                "- \"application/json\"\n" +
+                "paths:\n" +
+                "  /resource1/Id:\n" +
+                "    post:\n" +
+                "      description: \"\"\n" +
+                "      operationId: \"postOp\"\n" +
+                "      parameters:\n" +
+                "      - in: \"body\"\n" +
+                "        name: \"input3\"\n" +
+                "        description: \"\"\n" +
+                "        required: true\n" +
+                "        schema:\n" +
+                "          $ref: \"#/definitions/mydefinition\"\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: \"Successful\"\n" +
+                "        401:\n" +
+                "          description: \"Access Denied\"\n" +
+                "definitions:\n" +
+                "  mydefinition: {}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        assertNotNull(swagger.getDefinitions().get("mydefinition"));
+
+
+    }
+
+
     @Test
     public void testSecurityDeserialization() throws Exception {
         String json = "{\n" +
@@ -91,16 +140,14 @@ public class SwaggerDeserializerTest {
         String json = "{\n" +
                 "  \"properties\": {\n" +
                 "    \"data\": {\n" +
-                "      \"properties\": {\n" +
-                "        \"description\": \"the array type\",\n" +
-                "        \"type\": \"array\",\n" +
-                "        \"items\": {\n" +
-                "          \"properties\": {\n" +
-                "            \"name\": {\n" +
-                "              \"description\": \"the inner type\",\n" +
-                "              \"type\": \"string\",\n" +
-                "              \"minLength\": 1\n" +
-                "            }\n" +
+                "      \"description\": \"the array type\",\n" +
+                "      \"type\": \"array\",\n" +
+                "      \"items\": {\n" +
+                "        \"properties\": {\n" +
+                "          \"name\": {\n" +
+                "            \"description\": \"the inner type\",\n" +
+                "            \"type\": \"string\",\n" +
+                "            \"minLength\": 1\n" +
                 "          }\n" +
                 "        }\n" +
                 "      }\n" +

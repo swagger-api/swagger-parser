@@ -36,6 +36,10 @@ public class ExternalRefProcessorTest {
         final RefFormat refFormat = RefFormat.URL;
 
         new StrictExpectations() {{
+        	cache.getRenamedRef(ref);
+        	times = 1;
+        	result = null;
+
             cache.loadRef(ref, refFormat, Model.class);
             times = 1;
             result = mockedModel;
