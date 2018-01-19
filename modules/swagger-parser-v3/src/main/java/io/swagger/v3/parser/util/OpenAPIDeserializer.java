@@ -1794,34 +1794,44 @@ public class OpenAPIDeserializer {
         ArrayNode anyOfArray = getArray("anyOf", node, false, location, result);
         ObjectNode itemsNode = getObject("items", node, false, location, result);
 
-        if(allOfArray != null) {
-            ComposedSchema allOfList = new ComposedSchema();
-            for(JsonNode n : allOfArray) {
-                if(n.isObject()) {
-                    schema = getSchema((ObjectNode) n,location,result);
-                    allOfList.addAllOfItem(schema);
+
+
+        if((allOfArray != null )||(anyOfArray != null)|| (oneOfArray != null)) {
+            ComposedSchema composedSchema = new ComposedSchema();
+
+            if (allOfArray != null) {
+
+                for (JsonNode n : allOfArray) {
+                    if (n.isObject()) {
+                        schema = getSchema((ObjectNode) n, location, result);
+                        composedSchema.addAllOfItem(schema);
+                    }
                 }
+                schema = composedSchema;
             }
-            schema = allOfList;
-        } else if(anyOfArray != null) {
-            ComposedSchema anyOfList = new ComposedSchema();
-            for(JsonNode n : anyOfArray) {
-                if(n.isObject()) {
-                    schema = getSchema((ObjectNode) n, location, result);
-                    anyOfList.addAnyOfItem(schema);
+            if (anyOfArray != null) {
+
+                for (JsonNode n : anyOfArray) {
+                    if (n.isObject()) {
+                        schema = getSchema((ObjectNode) n, location, result);
+                        composedSchema.addAnyOfItem(schema);
+                    }
                 }
+                schema = composedSchema;
             }
-            schema = anyOfList;
-        } else if(oneOfArray != null) {
-            ComposedSchema oneOfList = new ComposedSchema();
-            for(JsonNode n : oneOfArray) {
-                if(n.isObject()) {
-                    schema = getSchema((ObjectNode) n, location, result);
-                    oneOfList.addOneOfItem(schema);
+            if (oneOfArray != null) {
+
+                for (JsonNode n : oneOfArray) {
+                    if (n.isObject()) {
+                        schema = getSchema((ObjectNode) n, location, result);
+                        composedSchema.addOneOfItem(schema);
+                    }
                 }
+                schema = composedSchema;
             }
-            schema = oneOfList;
-        } else if(itemsNode != null) {
+        }
+
+        if(itemsNode != null) {
             ArraySchema items = new ArraySchema();
             if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)){
                 items.setItems(getSchema(itemsNode, location, result));
@@ -1833,7 +1843,9 @@ public class OpenAPIDeserializer {
                 }
             }
             schema = items;
-        } else {
+        }
+
+        if (schema == null){
             schema = SchemaTypeUtil.createSchemaByType(node);
         }
 

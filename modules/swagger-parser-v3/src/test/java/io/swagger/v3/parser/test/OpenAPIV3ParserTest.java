@@ -339,6 +339,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Lion"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Bear"));
+        Yaml.prettyPrint(openAPI);
 
     }
 

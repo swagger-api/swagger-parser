@@ -225,7 +225,7 @@ public class ResolverFully {
                         }
                     }
                     return model;
-                } else if (composedSchema.getOneOf() != null) {
+                } if (composedSchema.getOneOf() != null) {
                     Schema resolved;
                     List<Schema> list = new ArrayList<>();
                     for (Schema innerModel : composedSchema.getOneOf()) {
@@ -234,7 +234,7 @@ public class ResolverFully {
                     }
                     composedSchema.setOneOf(list);
 
-                } else if (composedSchema.getAnyOf() != null) {
+                } if (composedSchema.getAnyOf() != null) {
                     Schema resolved;
                     List<Schema> list = new ArrayList<>();
                     for (Schema innerModel : composedSchema.getAnyOf()) {
@@ -250,9 +250,9 @@ public class ResolverFully {
                 // User don't want to aggregate composed schema, we only solve refs
                 if (composedSchema.getAllOf() != null)
                     composedSchema.allOf(composedSchema.getAllOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
-                else if (composedSchema.getOneOf() != null)
+                if (composedSchema.getOneOf() != null)
                     composedSchema.oneOf(composedSchema.getOneOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
-                else if (composedSchema.getAnyOf() != null)
+                if (composedSchema.getAnyOf() != null)
                     composedSchema.anyOf(composedSchema.getAnyOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
                 return composedSchema;
             }

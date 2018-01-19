@@ -96,7 +96,7 @@ public final class ExternalRefProcessor {
                         }
                     }
 
-                }else if (composedSchema.getOneOf() != null){
+                }if (composedSchema.getOneOf() != null){
                     for(Schema item : composedSchema.getOneOf()){
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
@@ -104,7 +104,7 @@ public final class ExternalRefProcessor {
                             }
                         }
                     }
-                }else if (composedSchema.getAnyOf() != null){
+                }if (composedSchema.getAnyOf() != null){
                     for(Schema item : composedSchema.getAnyOf()){
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
