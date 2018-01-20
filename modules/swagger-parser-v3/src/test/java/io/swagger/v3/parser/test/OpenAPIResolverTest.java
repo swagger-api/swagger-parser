@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
@@ -654,6 +655,21 @@ public class OpenAPIResolverTest {
         assertNotNull(getParameters);
         assertEquals(1, getParameters.size());
         assertEquals("bar", getParameters.get(0).getName());
+    }
+
+    @Test
+    public void testComposedSchemaAdjacent(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/composedSchemaRef.yaml", auths, options);
+
+        Assert.assertNotNull(openAPI);
+
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 5);
+        Schema schema = openAPI.getPaths().get("/path").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        Assert.assertTrue(schema.getProperties().size() == 4);
+        Yaml.prettyPrint(openAPI);
     }
 
 

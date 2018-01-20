@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -339,8 +340,24 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Lion"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Bear"));
-        Yaml.prettyPrint(openAPI);
 
+
+    }
+
+    @Test
+    public void testComposedSchemaAdjacent(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/composedSchemaRef.yaml", auths, options);
+
+        Assert.assertNotNull(openAPI);
+
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 5);
+        Schema schema = openAPI.getPaths().get("/path").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        Assert.assertTrue(schema instanceof ComposedSchema);
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        Assert.assertTrue(composedSchema.getOneOf().size() == 2);
+        Assert.assertTrue(composedSchema.getAllOf().size() == 1);
     }
 
     @Test

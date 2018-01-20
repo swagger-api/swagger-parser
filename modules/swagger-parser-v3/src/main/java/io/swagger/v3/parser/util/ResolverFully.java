@@ -224,28 +224,82 @@ public class ResolverFully {
                             }
                         }
                     }
-                    return model;
+                    //return model;
+
                 } if (composedSchema.getOneOf() != null) {
-                    Schema resolved;
+                    /*Schema resolved;
                     List<Schema> list = new ArrayList<>();
                     for (Schema innerModel : composedSchema.getOneOf()) {
                         resolved = resolveSchema(innerModel);
                         list.add(resolved);
                     }
-                    composedSchema.setOneOf(list);
+                    composedSchema.setOneOf(list);*/
+                    for (Schema innerModel : composedSchema.getOneOf()) {
+                        Schema resolved = resolveSchema(innerModel);
+                        Map<String, Schema> properties = resolved.getProperties();
+                        if (resolved.getProperties() != null) {
+                            for (String key : properties.keySet()) {
+                                Schema prop = (Schema) resolved.getProperties().get(key);
+                                model.addProperties(key, resolveSchema(prop));
+                            }
+                            if (resolved.getRequired() != null) {
+                                for (int i = 0; i < resolved.getRequired().size(); i++) {
+                                    if (resolved.getRequired().get(i) != null) {
+                                        requiredProperties.add(resolved.getRequired().get(i).toString());
+                                    }
+                                }
+                            }
+                        }
+                        if (requiredProperties.size() > 0) {
+                            model.setRequired(new ArrayList<>(requiredProperties));
+                        }
+                        if (composedSchema.getExtensions() != null) {
+                            Map<String, Object> extensions = composedSchema.getExtensions();
+                            for (String key : extensions.keySet()) {
+                                model.addExtension(key, composedSchema.getExtensions().get(key));
+                            }
+                        }
+                    }
 
                 } if (composedSchema.getAnyOf() != null) {
-                    Schema resolved;
+                    /*Schema resolved;
                     List<Schema> list = new ArrayList<>();
                     for (Schema innerModel : composedSchema.getAnyOf()) {
                         resolved = resolveSchema(innerModel);
                         list.add(resolved);
                     }
-                    composedSchema.setAnyOf(list);
+                    composedSchema.setAnyOf(list);*/
+
+                    for (Schema innerModel : composedSchema.getAnyOf()) {
+                        Schema resolved = resolveSchema(innerModel);
+                        Map<String, Schema> properties = resolved.getProperties();
+                        if (resolved.getProperties() != null) {
+                            for (String key : properties.keySet()) {
+                                Schema prop = (Schema) resolved.getProperties().get(key);
+                                model.addProperties(key, resolveSchema(prop));
+                            }
+                            if (resolved.getRequired() != null) {
+                                for (int i = 0; i < resolved.getRequired().size(); i++) {
+                                    if (resolved.getRequired().get(i) != null) {
+                                        requiredProperties.add(resolved.getRequired().get(i).toString());
+                                    }
+                                }
+                            }
+                        }
+                        if (requiredProperties.size() > 0) {
+                            model.setRequired(new ArrayList<>(requiredProperties));
+                        }
+                        if (composedSchema.getExtensions() != null) {
+                            Map<String, Object> extensions = composedSchema.getExtensions();
+                            for (String key : extensions.keySet()) {
+                                model.addExtension(key, composedSchema.getExtensions().get(key));
+                            }
+                        }
+                    }
                 }
 
 
-                return composedSchema;
+                return model;
             } else {
                 // User don't want to aggregate composed schema, we only solve refs
                 if (composedSchema.getAllOf() != null)
