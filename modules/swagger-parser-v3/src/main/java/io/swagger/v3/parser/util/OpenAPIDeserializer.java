@@ -1193,7 +1193,9 @@ public class OpenAPIDeserializer {
             }
         }
         else if(v.getNodeType().equals(JsonNodeType.NUMBER)) {
-            value = v.intValue();
+            if (v.isInt()) {
+                value = v.intValue();
+            }
         }
         else if(!v.isValueNode()) {
             result.invalidType(location, key, "integer", node);

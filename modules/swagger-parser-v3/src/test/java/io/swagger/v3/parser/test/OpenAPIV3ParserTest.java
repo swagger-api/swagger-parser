@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -350,6 +351,13 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(pet);
         Assert.assertTrue(pet.getDiscriminator().getMapping().containsKey("Cat"));
         Assert.assertTrue(pet.getDiscriminator().getMapping().get("Cat").equals("#/components/schemas/Cat_2"));
+    }
+
+    @Test
+    public void int64ExampleWithoutOverflow() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/int64example.yaml");
+        IntegerSchema date = ((IntegerSchema) openAPI.getPaths().get("/foo").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().get("date"));
+        Assert.assertEquals("1516042231144", date.getExample().toString());
     }
 
 
