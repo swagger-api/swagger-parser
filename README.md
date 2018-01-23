@@ -95,7 +95,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.0-rc2</version>
+  <version>2.0.0-rc3</version>
 </dependency>
 
 ```
@@ -106,7 +106,7 @@ or
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>2.0.0-rc3</version>
 </dependency>
 
 ```
