@@ -1125,7 +1125,7 @@ public class SwaggerParserTest {
     @Test
     public void testIssue643() throws Exception {
         Swagger swagger = new SwaggerParser().read("src/test/resources/issue_643.yaml");
-        
+
         Assert.assertNotNull(swagger);
 
         Assert.assertTrue(swagger.getDefinitions().size() == 1);
