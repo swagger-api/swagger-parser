@@ -1,0 +1,25 @@
+---
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Sample Issue
+  description: API
+  termsOfService: TBD
+  contact:
+    name: API Team
+  license:
+    name: MIT
+host: xyz.com
+basePath: ''
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  "/xyz":
+    "$ref": "./xyz.yaml#/do_xyz"
+definitions:
+  XYZResponse:
+    "$ref": "./xyz.yaml#/definitions/XYZResponse"
