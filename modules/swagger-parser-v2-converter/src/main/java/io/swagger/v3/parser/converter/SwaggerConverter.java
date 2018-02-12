@@ -1057,6 +1057,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 if (model.getAdditionalProperties() != null) {
                     result.setAdditionalProperties(convert(model.getAdditionalProperties()));
                 }
+            } else if(v2Model instanceof RefModel) {
+                RefModel ref = (RefModel) v2Model;
+                if (ref.get$ref().indexOf("#/definitions") == 0) {
+                    String updatedRef = "#/components/schemas" + ref.get$ref().substring("#/definitions".length());
+                    result.set$ref(updatedRef);
+                }
             }
 
             if (v2discriminator != null) {
