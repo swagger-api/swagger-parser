@@ -1085,6 +1085,10 @@ public class SwaggerParserTest {
     public void testRefNameConflicts() throws Exception {
         Swagger swagger = new SwaggerParser().read("./refs-name-conflict/a.yaml");
 
+        Yaml.prettyPrint(swagger);
+
+        assertTrue(swagger.getDefinitions().size() == 2);
+
         assertEquals("#/definitions/PersonObj", ((RefProperty) swagger.getPath("/newPerson").getPost().getResponses().get("200").getSchema()).get$ref());
         assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/oldPerson").getPost().getResponses().get("200").getSchema()).get$ref());
         assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/yetAnotherPerson").getPost().getResponses().get("200").getSchema()).get$ref());
@@ -1112,13 +1116,23 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger);
 
         Assert.assertTrue(swagger.getDefinitions().size() == 5);
-        Yaml.prettyPrint(swagger);
 
         Assert.assertNotNull(swagger.getDefinitions().get("PrintInfo"));
         Assert.assertNotNull(swagger.getDefinitions().get("SomeEnum"));
         Assert.assertNotNull(swagger.getDefinitions().get("ShippingInfo"));
     }
 
+    @Test
+    public void testIssue643() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/issue_643.yaml");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 1);
+
+        Assert.assertNotNull(swagger.getDefinitions().get("XYZResponse"));
+
+    }
 
 
 }
