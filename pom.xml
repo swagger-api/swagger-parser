@@ -248,16 +248,4 @@
         <wiremock-version>2.4.1</wiremock-version>
         <surefire-version>2.18.1</surefire-version>
     </properties>
-    <repositories>
-        <repository>
-            <id>local-repo</id>
-            <url>file:///gen/local-repo</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>
