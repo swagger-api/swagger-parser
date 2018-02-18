@@ -68,6 +68,7 @@ public class V2ConverterTest {
     private static final String ISSUE_600_JSON = "issue-600.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
     private static final String ISSUE_540_JSON = "issue-540.json";
+    private static final String ISSUE_647_JSON = "issue-647.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -132,6 +133,7 @@ public class V2ConverterTest {
     private static final String SOLD = "sold";
     private static final String ARRAY_VALUES = "[{\"id\":-1,\"name\":\"Marvin the Paranoid Android\"}," +
             "{\"id\":1000000,\"name\":\"Zaphod Beeblebrox\",\"friends\":[15]}]";
+    private static final String SCHEMAS_A_REF = "#/components/schemas/A";
 
     private static final int MAX_LENGTH = 60;
     private static final int REQUIRED_SIZE = 2;
@@ -532,6 +534,14 @@ public class V2ConverterTest {
         List required = schema.getRequired();
         assertNotNull(required);
         assertEquals(required.size(), REQUIRED_SIZE);
+    }
+
+    @Test(description = "OpenAPI v2 converter - ref in RequestBodies are correctly updated")
+    public void testIssue647() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_647_JSON);
+
+        String ref = oas.getComponents().getRequestBodies().get("b").getContent().get("*/*").getSchema().get$ref();
+        assertEquals(ref, SCHEMAS_A_REF);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
