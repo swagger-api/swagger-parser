@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class RefUtils {
 
-    public static String computeDefinitionName(String ref, Set<String> reserved) {
+    public static String computeDefinitionName(String ref) {
 
         final String[] refParts = ref.split("#/");
 
@@ -39,13 +39,8 @@ public class RefUtils {
             final String[] split = plausibleName.split("\\.");
             plausibleName = split[0];
         }
-        String tryName = plausibleName;
 
-        for (int i = 2; reserved.contains(tryName); i++) {
-            tryName = plausibleName + "_" + i;
-        }
-
-        return tryName;
+        return plausibleName;
     }
 
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
@@ -145,7 +140,9 @@ public class RefUtils {
 
         try {
             if (refFormat == RefFormat.URL) {
+
                 result = RemoteUrl.urlToString(file, auths);
+
             } else {
                 //its assumed to be a relative file ref
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
@@ -158,6 +155,7 @@ public class RefUtils {
 
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
         }
 

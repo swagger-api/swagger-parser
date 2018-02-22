@@ -107,7 +107,13 @@ public class ParameterProcessor {
                         }
                     }
                 }
-                processedPathLevelParameters.add(resolvedParameter);
+
+                if(matched) {
+                    refParameters.add(resolvedParameter);
+                }
+                else {
+                    processedPathLevelParameters.add(resolvedParameter);
+                }
             }
             else {
                 processedPathLevelParameters.add(parameter);

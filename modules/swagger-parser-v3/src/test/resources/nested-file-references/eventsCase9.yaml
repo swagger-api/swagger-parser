@@ -1,0 +1,11 @@
+get:
+  description: A list of events
+  operationId: getEvents
+  responses:
+    200:
+      description: OK
+      schema:
+        type: object
+        properties:
+          paging:
+            $ref: './common/pagingWithFolderRef.yaml#/Paging'

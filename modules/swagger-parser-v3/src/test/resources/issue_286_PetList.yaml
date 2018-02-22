@@ -1,0 +1,6 @@
+title: "PetList"
+properties:
+  pets:
+    type: array
+    items:
+      $ref: "./issue_286_Pet.yaml"

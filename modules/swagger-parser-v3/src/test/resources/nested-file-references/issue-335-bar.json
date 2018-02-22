@@ -1,0 +1,56 @@
+{
+  "bar": {
+    "post": {
+      "description": "posts stuff",
+      "deprecated": true,
+      "operationId": "enrollInBar",
+      "produces": [
+        "application/json"
+      ],
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "header",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "barRequest",
+          "in": "body",
+          "description": "The request body containing the amount",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/BarSettingsRequest"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/BarData"
+          }
+        },
+        "default": {}
+      }
+    }
+  },
+  "definitions": {
+    "BarSettingsRequest": {
+      "properties": {
+        "stuff": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "stuff"
+      ]
+    },
+    "BarData": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

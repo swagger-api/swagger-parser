@@ -26,7 +26,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: './src/test/resources/refs-name-conflict/b.yaml#/components/schemas/PersonObj'
+                $ref: './refs-name-conflict/b.yaml#/components/schemas/PersonObj'
   /yetAnotherPerson:
     post:
       summary: Create yet another person
@@ -37,7 +37,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: './src/test/resources/refs-name-conflict/b.yaml#/components/schemas/PersonObj'
+                $ref: './refs-name-conflict/b.yaml#/components/schemas/PersonObj'
 components:
   schemas:
     PersonObj:

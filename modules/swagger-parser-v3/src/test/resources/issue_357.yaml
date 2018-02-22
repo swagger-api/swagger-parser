@@ -1,0 +1,29 @@
+openapi: 3.0.0
+servers: []
+info:
+  title: Test model for swagger-parser issue 357
+  contact:
+    name: Andy Lowry
+    email: andy.lowry@reprezen.com
+  version: '1.0'
+paths:
+  /testApi:
+    get:
+      operationId: getTest
+      parameters:
+        - name: pathParam1
+          in: query
+          schema:
+            type: integer
+      responses:
+        default:
+          description: OK
+    parameters:
+      - name: pathParam1
+        in: query
+        schema:
+          type: string
+      - name: pathParam2
+        in: query
+        schema:
+          type: string

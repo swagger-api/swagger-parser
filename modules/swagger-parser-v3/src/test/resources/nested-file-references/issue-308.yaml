@@ -1,0 +1,37 @@
+swagger: '2.0'
+info:
+  title: Test API
+  version: '1'
+host: example.com
+basePath: /api/v1
+schemes:
+  - https
+consumes:
+  - application/json; charset=utf-8
+produces:
+  - application/json; charset=utf-8
+
+paths:
+  /events:
+    get:
+      description: A list of events
+      operationId: getEvents
+      responses:
+        200:
+          description: OK
+          schema:
+            required:
+              - paging
+              - items
+            type: object
+            properties:
+              paging:
+                $ref: './paging.yaml#/Paging'
+              items:
+                $ref: '#/definitions/StatusResponse'
+
+definitions:
+  StatusResponse:
+    properties:
+      http_code:
+        type: integer

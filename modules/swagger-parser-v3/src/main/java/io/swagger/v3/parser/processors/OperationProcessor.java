@@ -51,6 +51,15 @@ public class OperationProcessor {
             for (String responseCode : responses.keySet()) {
                 ApiResponse response = responses.get(responseCode);
                 if(response != null) {
+                    if (response.get$ref() != null){
+                        RefFormat refFormat = computeRefFormat(response.get$ref());
+                        ApiResponse resolvedResponse = cache.loadRef(response.get$ref(), refFormat, ApiResponse.class);
+
+                        if (resolvedResponse != null) {
+                            response = resolvedResponse;
+                            responses.put(responseCode, resolvedResponse);
+                        }
+                    }
                     responseProcessor.processResponse(response);
                 }
             }

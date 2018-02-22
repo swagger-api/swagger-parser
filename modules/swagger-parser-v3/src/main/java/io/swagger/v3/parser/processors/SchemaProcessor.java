@@ -45,10 +45,10 @@ public class SchemaProcessor {
 
         if (schema instanceof ArraySchema) {
             processArraySchema((ArraySchema) schema);
-        } else if (schema instanceof ComposedSchema) {
+        }
+        if (schema instanceof ComposedSchema) {
             processComposedSchema((ComposedSchema) schema);
         }
-
         if(schema.getProperties()!= null){
             processPropertySchema(schema);
         }
@@ -93,17 +93,16 @@ public class SchemaProcessor {
             processReferenceSchema(schema);
         }
 
-
          Map<String, Schema> properties = schema.getProperties();
          if (properties != null) {
              for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
                  Schema property = propertyEntry.getValue();
-                 if (property instanceof ArraySchema) {
-                     processArraySchema((ArraySchema) property);
-                 }
                  if(property.get$ref() != null) {
                      processReferenceSchema(property);
+                 }else {
+                     processSchemaType(property);
                  }
+
              }
          }
     }
@@ -152,8 +151,8 @@ public class SchemaProcessor {
     private void changeDiscriminatorMapping(ComposedSchema composedSchema, String oldRef, String newRef) {
         Discriminator discriminator = composedSchema.getDiscriminator();
         if (!oldRef.equals(newRef) && discriminator != null) {
-            String oldName = RefUtils.computeDefinitionName(oldRef, new HashSet());
-            String newName = RefUtils.computeDefinitionName(newRef, new HashSet());
+            String oldName = RefUtils.computeDefinitionName(oldRef);
+            String newName = RefUtils.computeDefinitionName(newRef);
 
             String mappingName = null;
             if (discriminator.getMapping() != null) {
@@ -188,18 +187,11 @@ public class SchemaProcessor {
         }
     }
 
-   /* public Schema processReferenceSchema(Schema schema){
-        RefFormat refFormat = computeRefFormat(schema.get$ref());
-        String $ref = schema.get$ref();
-        Schema newSchema = cache.loadRef($ref, refFormat, Schema.class);
-        return newSchema;
-    }*/
-
     private void processReferenceSchema(Schema schema) {
     /* if this is a URL or relative ref:
         1) we need to load it into memory.
-        2) shove it into the #/definitions
-        3) update the RefModel to point to its location in #/definitions
+        2) shove it into the #/components/schemas
+        3) update the RefModel to point to its location in #/components/schemas
      */
         RefFormat refFormat = computeRefFormat(schema.get$ref());
         String $ref = schema.get$ref();

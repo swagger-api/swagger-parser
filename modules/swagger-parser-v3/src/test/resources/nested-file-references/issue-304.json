@@ -1,0 +1,27 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "test",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "empty": null
+  },
+  "definitions": {
+    "BaseEntityDto": {
+      "$ref": "./issue-304_parent.json#/definitions/BaseEntity"
+    },
+    "InheritanceDto": {
+      "$ref": "./issue-304_child.json#/definitions/Inheritance"
+    },
+    "CompositionDto": {
+      "$ref": "./issue-304_child.json#/definitions/Composition"
+    },
+    "InheritanceAndCompositionDto": {
+      "$ref": "./issue-304_child.json#/definitions/InheritanceAndComposition"
+    },
+    "ReferenceToTheSameFile": {
+      "$ref": "./issue-304.json#/definitions/InheritanceAndCompositionDto"
+    }
+  }
+}
