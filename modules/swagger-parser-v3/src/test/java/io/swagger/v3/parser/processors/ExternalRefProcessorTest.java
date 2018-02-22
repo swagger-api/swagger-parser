@@ -1,6 +1,7 @@
 package io.swagger.v3.parser.processors;
 
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -44,9 +45,13 @@ public class ExternalRefProcessorTest {
             times = 1;
             result = mockedModel;
 
-            openAPI.getComponents().getSchemas();
-            times = 1;
-            result = null;
+			openAPI.getComponents();
+			times = 1;
+			result = new Components();
+
+			openAPI.getComponents().getSchemas();
+			times = 1;
+			result = null;
 
             cache.putRenamedRef(ref, "bar");
             openAPI.getComponents().addSchemas("bar", mockedModel); times=1;
