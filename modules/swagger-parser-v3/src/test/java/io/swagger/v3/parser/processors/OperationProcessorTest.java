@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.util.RefUtils;
 import mockit.Expectations;
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -28,6 +29,7 @@ public class OperationProcessorTest {
 
     @Mocked
     ParameterProcessor parameterProcessor;
+
 
     @Mocked
     ResponseProcessor responseProcessor;
@@ -59,9 +61,18 @@ public class OperationProcessorTest {
             times = 1;
             result = outputParameterList;
 
+            RefUtils.computeRefFormat(ref);
+            times = 1;
+
             cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
             times = 1;
             result = resolvedResponse;
+
+            RefUtils.computeRefFormat(ref);
+            times = 1;
+
+            incomingResponse.get$ref();
+            times = 1;
 
             responseProcessor.processResponse(incomingResponse);
             times = 1;

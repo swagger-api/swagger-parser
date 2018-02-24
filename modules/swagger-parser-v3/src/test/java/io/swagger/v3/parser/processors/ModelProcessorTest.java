@@ -45,7 +45,7 @@ public class ModelProcessorTest {
 
         Schema refModel = new Schema().$ref(ref);
 
-        new SchemaProcessor(cache, openAPI).processSchema(refModel);
+        schemaProcessor.processSchema(refModel);
 
         assertEquals(refModel.get$ref(), "#/components/schemas/bar");
     }

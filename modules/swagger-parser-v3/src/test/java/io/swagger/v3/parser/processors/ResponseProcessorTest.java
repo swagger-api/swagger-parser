@@ -29,14 +29,35 @@ public class ResponseProcessorTest {
     @Mocked
     SchemaProcessor propertyProcessor;
 
+    @Mocked
+    HeaderProcessor headerProcessor;
+
+    @Mocked
+    HeaderProcessor linkProcessor;
+
     @Test
     public void testProcessResponse(@Injectable final Schema responseSchema,
                                     @Injectable final Header responseHeader) throws Exception {
 
         new StrictExpectations(){{
-            new SchemaProcessor(cache, swagger); times=1; result = propertyProcessor;
+            new SchemaProcessor(cache, swagger);
+            times=1;
+            result = propertyProcessor;
 
-            propertyProcessor.processSchema(responseSchema); times=1;
+           /* new HeaderProcessor(cache,swagger);
+            times = 1;
+            result = headerProcessor;
+
+            new LinkProcessor(cache,swagger);
+            times = 1;
+            result = linkProcessor;*/
+
+
+
+            propertyProcessor.processSchema(responseSchema);
+            times=1;
+
+
         }};
 
         ApiResponse response = new ApiResponse();
@@ -44,6 +65,7 @@ public class ResponseProcessorTest {
         response.addHeaderObject("foo", responseHeader);
 
         new ResponseProcessor(cache, swagger).processResponse(response);
+
 
         new FullVerifications(){{}};
     }
