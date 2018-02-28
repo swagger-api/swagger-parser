@@ -33,7 +33,7 @@ public class ResponseProcessorTest {
     HeaderProcessor headerProcessor;
 
     @Mocked
-    HeaderProcessor linkProcessor;
+    LinkProcessor linkProcessor;
 
     @Test
     public void testProcessResponse(@Injectable final Schema responseSchema,
@@ -44,18 +44,20 @@ public class ResponseProcessorTest {
             times=1;
             result = propertyProcessor;
 
-           /* new HeaderProcessor(cache,swagger);
+            new HeaderProcessor(cache,swagger);
             times = 1;
             result = headerProcessor;
 
             new LinkProcessor(cache,swagger);
             times = 1;
-            result = linkProcessor;*/
-
+            result = linkProcessor;
 
 
             propertyProcessor.processSchema(responseSchema);
             times=1;
+
+            headerProcessor.processHeader(responseHeader);
+            times = 1;
 
 
         }};

@@ -65,27 +65,21 @@ public class SchemaProcessorTest {
 
 
     @Test
-    public void testProcessArraySchema(@Injectable final Schema property,
-                                       @Mocked SchemaProcessor propertyProcessor) throws Exception {
+    public void testProcessArraySchema() throws Exception {
 
-        //setupPropertyAndExternalRefProcessors();
+        Schema property = new Schema();
+        SchemaProcessor propertyProcessor = new SchemaProcessor(cache, openAPI);
+        propertyProcessor.processSchema(property);
 
-        new StrictExpectations() {{
-            new SchemaProcessor(cache,openAPI);
-            times = 1;
-            result = propertyProcessor;
-
-
-            propertyProcessor.processSchema(property);
-            times = 1;
-
-        }};
 
         ArraySchema model = new ArraySchema();
         model.setItems(property);
 
         SchemaProcessor schemaProcessor = new SchemaProcessor(cache, openAPI);
         schemaProcessor.processSchema(model);
+
+        assertEquals(property,model.getItems());
+
     }
 
     @Test
@@ -134,29 +128,25 @@ public class SchemaProcessorTest {
     }
 
     @Test
-    public void testProcessSchema(@Injectable final Schema property1,
-                                     @Injectable final Schema property2, @Mocked
-                                              SchemaProcessor propertyProcessor) throws Exception {
-        setupPropertyAndExternalRefProcessors();
+    public void testProcessSchema() throws Exception {
+
+
+        Schema property1 = new Schema();
+        Schema property2 = new Schema();
+
+        SchemaProcessor propertyProcessor = new SchemaProcessor(cache,openAPI);
 
         Schema model = new Schema();
         model.addProperties("foo", property1);
         model.addProperties("bar", property2);
 
-        new Expectations() {{
-            new SchemaProcessor(cache,openAPI);
-            times = 1;
-            result = propertyProcessor;
-
-            propertyProcessor.processSchema(property1);
-            times = 1;
-            propertyProcessor.processSchema(property2);
-            times = 1;
-        }};
+        propertyProcessor.processSchema(property1);
+        propertyProcessor.processSchema(property2);
 
         new SchemaProcessor(cache, openAPI).processSchema(model);
 
-        new FullVerifications(){{}};
+        assertEquals(model.getProperties().get("foo"), property1);
+        assertEquals(model.getProperties().get("bar"), property2);
     }
 
     private void setupPropertyAndExternalRefProcessors() {

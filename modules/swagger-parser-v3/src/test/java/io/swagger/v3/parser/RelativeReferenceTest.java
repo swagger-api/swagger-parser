@@ -52,12 +52,11 @@ public class RelativeReferenceTest {
             result = samplePath;
         }};
 
-        //OpenAPI swagger = new OpenAPIV3Parser().read("test.yaml");
+
         OpenAPI swagger = new OpenAPIV3Parser().read("http://foo.bar.com/swagger.json");
         assertNotNull(swagger);
-        Yaml.prettyPrint(samplePath);
         assertNotNull(swagger.getPaths().get("/samplePath"));
-        //Yaml.prettyPrint(swagger);
+
         assertNotNull(swagger.getPaths().get("/samplePath").getGet());
         assertNotNull(swagger.getPaths().get("/samplePath").getGet().getRequestBody());
         RequestBody body = swagger.getPaths().get("/samplePath").getGet().getRequestBody();

@@ -12,7 +12,6 @@ import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.util.RefUtils;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -49,9 +48,11 @@ public class SchemaProcessor {
         if (schema instanceof ComposedSchema) {
             processComposedSchema((ComposedSchema) schema);
         }
-        if(schema.getProperties()!= null){
+
+        if(schema.getProperties() != null && schema.getProperties().size() > 0){
             processPropertySchema(schema);
         }
+
         if(schema.getNot() != null){
             processNotSchema(schema);
         }
