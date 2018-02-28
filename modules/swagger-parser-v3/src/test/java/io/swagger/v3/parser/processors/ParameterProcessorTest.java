@@ -52,14 +52,21 @@ public class ParameterProcessorTest {
                         pathParameter));
 
         new FullVerifications() {{
+            headerParameter.get$ref();
+            times = 1;
+            queryParameter.get$ref();
+            times = 1;
+            cookieParameter.get$ref();
+            times = 1;
+            pathParameter.get$ref();
+            times = 1;
         }};
 
-        assertEquals(processedParameters.size(), 5);
+        assertEquals(processedParameters.size(), 4);
         assertEquals(processedParameters.get(0), headerParameter);
         assertEquals(processedParameters.get(1), queryParameter);
         assertEquals(processedParameters.get(2), cookieParameter);
         assertEquals(processedParameters.get(3), pathParameter);
-       // assertEquals(processedParameters.get(4), formParameter);
     }
 
     @Test
@@ -90,6 +97,15 @@ public class ParameterProcessorTest {
         }};
     }
 
+    private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
+                                           final RequestBody resolvedParam) {
+        new StrictExpectations() {{
+            /*cache.loadRef(ref, refFormat, RequestBody.class);
+            times = 1;
+            result = resolvedParam;*/
+        }};
+    }
+
     @Test
     public void testProcessParameters_BodyParameter(@Injectable final Schema bodyParamSchema) throws Exception {
 
@@ -102,9 +118,6 @@ public class ParameterProcessorTest {
         new RequestBodyProcessor(cache, openAPI).processRequestBody(bodyParameter);
 
         new FullVerifications(){{}};
-
-        /*assertEquals(processedParameters.size(), 1);
-        assertEquals(processedParameters.get(0), bodyParameter);*/
     }
 
     private void expectModelProcessorInvoked(@Injectable final Schema bodyParamSchema) {
@@ -113,31 +126,14 @@ public class ParameterProcessorTest {
         }};
     }
 
-    /*@Test
-    public void testProcessParameters_RefToBodyParam(@Injectable final Model bodyParamSchema) throws Exception {
-        expectedModelProcessorCreation();
-
-        final String ref = "#/parameters/foo";
-        RefParameter refParameter = new RefParameter(ref);
-        final BodyParameter resolvedBodyParam = new BodyParameter().schema(bodyParamSchema);
-
-        expectLoadingRefFromCache(ref, RefFormat.INTERNAL, resolvedBodyParam);
-        expectModelProcessorInvoked(bodyParamSchema);
-
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, swagger)
-                .processParameters(Arrays.<Parameter>asList(refParameter));
-
-        new FullVerifications(){{}};
-
-        assertEquals(processedParameters.size(), 1);
-        assertEquals(processedParameters.get(0), resolvedBodyParam);
-    }*/
 
     private void expectedModelProcessorCreation() {
         new StrictExpectations() {{
             new SchemaProcessor(cache, openAPI);
             times = 1;
             result = modelProcessor;
+
+
         }};
     }
 }

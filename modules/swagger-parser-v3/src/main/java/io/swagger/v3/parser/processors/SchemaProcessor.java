@@ -21,24 +21,24 @@ import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 
 public class SchemaProcessor {
-    private final ResolverCache cache;
     private final ExternalRefProcessor externalRefProcessor;
 
 
     public SchemaProcessor(ResolverCache cache, OpenAPI openAPI) {
-        this.cache = cache;
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
 
     public void processSchema(Schema schema) {
-        if (schema != null) {
-            if (schema.get$ref() != null) {
-                processReferenceSchema(schema);
-            } else {
-                processSchemaType(schema);
-            }
+        if (schema == null) {
+            return;
         }
+        if (schema.get$ref() != null) {
+            processReferenceSchema(schema);
+        } else {
+            processSchemaType(schema);
+        }
+
     }
 
     public void processSchemaType(Schema schema){
