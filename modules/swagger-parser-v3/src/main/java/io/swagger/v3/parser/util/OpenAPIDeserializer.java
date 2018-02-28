@@ -1320,9 +1320,11 @@ public class OpenAPIDeserializer {
             parameter.setDeprecated(deprecated);
         }
 
-        Boolean allowEmptyValue = getBoolean("allowEmptyValue", obj, false, location, result);
-        if (allowEmptyValue != null) {
-            parameter.setAllowEmptyValue(allowEmptyValue);
+        if (parameter instanceof QueryParameter) {
+            Boolean allowEmptyValue = getBoolean("allowEmptyValue", obj, false, location, result);
+            if (allowEmptyValue != null) {
+                parameter.setAllowEmptyValue(allowEmptyValue);
+            }
         }
 
         value = getString("style", obj, false, location, result);
@@ -1431,11 +1433,6 @@ public class OpenAPIDeserializer {
         Boolean deprecated = getBoolean("deprecated", headerNode, false, location, result);
         if (deprecated != null) {
             header.setDeprecated(deprecated);
-        }
-
-        Boolean allowEmptyValue = getBoolean("allowEmptyValue", headerNode, false, location, result);
-        if (allowEmptyValue != null) {
-            header.setAllowEmptyValue(allowEmptyValue);
         }
 
         Boolean explode = getBoolean("explode", headerNode, false, location, result);
