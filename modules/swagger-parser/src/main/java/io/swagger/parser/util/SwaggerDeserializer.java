@@ -640,13 +640,8 @@ public class SwaggerDeserializer {
                     bp.setPattern(pat);
                 }
 
-                // allowEmptyValue
-                Boolean bl = getBoolean("allowEmptyValue", obj, false, location, result);
-                if(bl != null) {
-                    bp.setAllowEmptyValue(bl);
-                }
                 // readOnly
-                bl = getBoolean("readOnly", obj, false, location, result);
+                Boolean bl = getBoolean("readOnly", obj, false, location, result);
                 if(bl != null) {
                     bp.setReadOnly(bl);
                 }
