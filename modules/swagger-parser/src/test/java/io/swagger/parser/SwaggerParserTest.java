@@ -558,7 +558,6 @@ public class SwaggerParserTest {
         assertTrue(stringBodyParameter instanceof BodyParameter);
         BodyParameter sbp = (BodyParameter) stringBodyParameter;
         assertTrue(sbp.getRequired());
-        assertTrue(sbp.getAllowEmptyValue());
         assertEquals(sbp.getName(), "simple");
 
         Model sbpModel = sbp.getSchema();
@@ -573,7 +572,6 @@ public class SwaggerParserTest {
         assertTrue(refBodyParameter instanceof BodyParameter);
         BodyParameter ref = (BodyParameter) refBodyParameter;
         assertTrue(ref.getRequired());
-        assertTrue(ref.getAllowEmptyValue());
         assertEquals(ref.getName(), "simple");
 
         Model refModel = ref.getSchema();

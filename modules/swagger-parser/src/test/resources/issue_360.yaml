@@ -27,7 +27,6 @@ paths:
       - name: simple
         in: body
         required: true
-        allowEmptyValue: true
         schema:
           type: string
           format: uuid
@@ -37,7 +36,6 @@ paths:
       - name: simple
         in: body
         required: true
-        allowEmptyValue: true
         schema:
           $ref: '#/definitions/Pet'
 definitions:
