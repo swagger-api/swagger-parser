@@ -890,7 +890,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (StringUtils.isNotBlank(v2Parameter.getDescription())) {
             v3Parameter.setDescription(v2Parameter.getDescription());
         }
-        v3Parameter.setAllowEmptyValue(v2Parameter.getAllowEmptyValue());
+        if (v2Parameter instanceof SerializableParameter) {
+            v3Parameter.setAllowEmptyValue(((SerializableParameter)v2Parameter).getAllowEmptyValue());
+        }
         v3Parameter.setIn(v2Parameter.getIn());
         v3Parameter.setName(v2Parameter.getName());
 
