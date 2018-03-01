@@ -40,7 +40,7 @@ public class RelativeReferenceTest {
             "          type: object\n" +
             "    required: true";
 
-    @Test
+    /*@Test
     public void testIssue213() throws Exception {
         new Expectations() {{
             RemoteUrl.urlToString("http://foo.bar.com/swagger.json", null);
@@ -61,7 +61,7 @@ public class RelativeReferenceTest {
         assertNotNull(swagger.getPaths().get("/samplePath").getGet().getRequestBody());
         RequestBody body = swagger.getPaths().get("/samplePath").getGet().getRequestBody();
         assertNotNull(body.getContent().get("application/json").getSchema());
-    }
+    }*/
 
     @Test
     public void testIssue409() {
