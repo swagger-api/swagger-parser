@@ -1,0 +1,19 @@
+swagger: '2.0'
+info:
+  title: groovy
+  description: stuff
+  version: '2.0.0'
+paths:
+  /health:
+    $ref: 'http://remote2/resources/foo#/pathItems/health'
+  /stuff:
+    get:
+      parameters:
+        - $ref: 'http://remote2/resources/foo#/parameters/skip'
+      responses:
+        200:
+          $ref: 'http://remote2/resources/foo#/responses/Success'
+        400:
+          description: bad stuff!
+          schema:
+            $ref: 'http://remote2/resources/foo#/definitions/Error'

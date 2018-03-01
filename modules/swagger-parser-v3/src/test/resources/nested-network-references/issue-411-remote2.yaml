@@ -1,0 +1,35 @@
+pathItems:
+  health:
+    get:
+      parameters: []
+      responses:
+        200:
+          description: all good
+          schema:
+            $ref: '#/definitions/Success'
+parameters:
+  skip:
+    in: query
+    name: skip
+    type: integer
+    format: int32
+responses:
+  Success:
+    description: it worked!
+    schema:
+      type: string
+      description: something helpful
+definitions:
+  Success:
+    type: object
+    properties:
+      message:
+        type: string
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+      code:
+        type: integer
+        format: int32

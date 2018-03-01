@@ -1,0 +1,12 @@
+definitions:
+  Address:
+    title: the address
+    properties:
+      street:
+        type: string
+      phone:
+        $ref: '#/definitions/Phone'
+  Phone:
+    title: the phone number
+    type: string
+    example: '408-867-5309'

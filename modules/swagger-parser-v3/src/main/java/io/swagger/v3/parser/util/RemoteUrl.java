@@ -29,7 +29,9 @@ import java.util.List;
 
 
 public class RemoteUrl {
+
     static Logger LOGGER = LoggerFactory.getLogger(RemoteUrl.class);
+
 
     private static final String TRUST_ALL = String.format("%s.trustAll", RemoteUrl.class.getName());
     private static final ConnectionConfigurator CONNECTION_CONFIGURATOR = createConnectionConfigurator();
@@ -93,7 +95,13 @@ public class RemoteUrl {
     }
 
     public static String cleanUrl(String url) {
-        return url.replaceAll("\\{", "%7B").replaceAll("\\}", "%7D");
+        String result = null;
+        try {
+             result =url.replaceAll("\\{", "%7B").replaceAll("\\}", "%7D");
+        }catch (Exception t){
+            t.printStackTrace();
+        }
+        return result;
     }
 
     public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {

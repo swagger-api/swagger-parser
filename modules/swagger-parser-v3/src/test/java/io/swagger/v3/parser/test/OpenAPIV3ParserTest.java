@@ -303,7 +303,7 @@ public class OpenAPIV3ParserTest {
 
     @Test
     public void testRefAdditionalProperties() throws Exception {
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/additionalProperties.yaml");
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/relative/additionalProperties.yaml");
 
         Assert.assertNotNull(openAPI);
         Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 3);
@@ -345,7 +345,7 @@ public class OpenAPIV3ParserTest {
 
     @Test
     public void testOneOfExternalRefConflictName() throws Exception {
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/oneof_name_conflict/oneOf-external-ref-name-conflict.yaml");
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./oneof_name_conflict/oneOf-external-ref-name-conflict.yaml");
         Assert.assertNotNull(openAPI);
         Schema pet = openAPI.getComponents().getSchemas().get("Pet");
         Assert.assertNotNull(pet);

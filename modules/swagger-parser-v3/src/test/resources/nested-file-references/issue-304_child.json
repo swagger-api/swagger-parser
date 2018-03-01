@@ -1,0 +1,42 @@
+{
+  "definitions": {
+    "Inheritance": {
+      "allOf": [
+        {
+          "$ref": "./issue-304.json#/definitions/BaseEntityDto"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "addressId": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "Composition": {
+      "type": "object",
+      "properties": {
+        "addressId": {
+          "$ref": "./issue-304.json#/definitions/BaseEntityDto"
+        }
+      }
+    },
+    "InheritanceAndComposition": {
+      "allOf": [
+        {
+          "$ref": "./issue-304.json#/definitions/BaseEntityDto"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "addressId": {
+              "$ref": "./issue-304.json#/definitions/BaseEntityDto"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
