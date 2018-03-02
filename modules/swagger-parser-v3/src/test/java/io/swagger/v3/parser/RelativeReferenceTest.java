@@ -2,13 +2,16 @@ package io.swagger.v3.parser;
 
 
 
-import io.swagger.v3.core.util.Yaml;
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 import static org.testng.Assert.assertNotNull;
 
@@ -40,14 +43,14 @@ public class RelativeReferenceTest {
             "          type: object\n" +
             "    required: true";
 
-    /*@Test
+    @Test
     public void testIssue213() throws Exception {
         new Expectations() {{
             RemoteUrl.urlToString("http://foo.bar.com/swagger.json", null);
             times = 1;
             result = spec;
 
-            RemoteUrl.urlToString("http://foo.bar.com/path/samplePath.yaml", null);
+            RemoteUrl.urlToString("http://foo.bar.com/path/samplePath.yaml", Arrays.asList(new AuthorizationValue[]{}));
             times = 1;
             result = samplePath;
         }};
@@ -61,7 +64,7 @@ public class RelativeReferenceTest {
         assertNotNull(swagger.getPaths().get("/samplePath").getGet().getRequestBody());
         RequestBody body = swagger.getPaths().get("/samplePath").getGet().getRequestBody();
         assertNotNull(body.getContent().get("application/json").getSchema());
-    }*/
+    }
 
     @Test
     public void testIssue409() {
