@@ -344,7 +344,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 Property innerType = PropertyBuilder.build(type, format, null);
                 if (innerType != null) {
                     am.setItems(innerType);
-                } else if (items.getRef() != null) {
+                }
+                if (items.getRef() != null) {
                     am.setItems(new RefProperty(items.getRef()));
                 } else {
                     am.setItems(new RefProperty(type));
