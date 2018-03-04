@@ -3,6 +3,7 @@ package io.swagger.v3.parser.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -11,12 +12,16 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BinarySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
@@ -28,6 +33,7 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.parser.OpenAPIResolver;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -37,6 +43,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
@@ -44,10 +51,1296 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
-
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 public class OpenAPIDeserializerTest {
+
+    @Test
+    public void testEmptyDefinitions() throws Exception {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers:\n" +
+                "  - url: 'http://abc:5555/mypath'\n" +
+                "info:\n" +
+                "  version: '1.0'\n" +
+                "  title: dd\n" +
+                "paths:\n" +
+                "  /resource1/Id:\n" +
+                "    post:\n" +
+                "      description: ''\n" +
+                "      operationId: postOp\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: Successful\n" +
+                "        '401':\n" +
+                "          description: Access Denied\n" +
+                "      requestBody:\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              $ref: '#/components/schemas/mydefinition'\n" +
+                "        required: true\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    mydefinition: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        assertNotNull(openAPI.getComponents().getSchemas().get("mydefinition"));
+
+
+    }
+
+
+    @Test
+    public void testSecurityDeserialization() throws Exception {
+        String yaml = "openapi: 3.0.0\n" +
+                "security:\n" +
+                "  - api_key1: []\n" +
+                "    api_key2: []\n" +
+                "  - api_key3: []\n";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        List<SecurityRequirement> security = openAPI.getSecurity();
+        assertTrue(security.size() == 2);
+
+    }
+
+    @Test
+    public void testSchema() throws Exception {
+        String json = "{\n" +
+                "  \"type\":\"object\",\n" +
+                "  \"properties\": {\n" +
+                "    \"data\": {\n" +
+                "      \"properties\": {\n" +
+                "        \"name\": {\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"minLength\": 1\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"required\": [\n" +
+                "    \"data\"\n" +
+                "  ]\n" +
+                "}";
+
+        Schema m = Json.mapper().readValue(json, Schema.class);
+        assertNotNull(m);
+        Map<String, Schema> properties = m.getProperties();
+
+        assertTrue(properties.keySet().size() == 1);
+        Schema data = properties.get("data");
+        assertTrue(data instanceof ObjectSchema);
+        ObjectSchema op = (ObjectSchema) data;
+        Map<String, Schema> innerProperties = ((ObjectSchema) data).getProperties();
+        assertTrue(innerProperties.keySet().size() == 1);
+
+        Schema name = innerProperties.get("name");
+        assertTrue(name instanceof StringSchema);
+    }
+
+    @Test
+    public void testArraySchema() throws Exception {
+        String json = "{\n" +
+                "  \"properties\": {\n" +
+                "    \"data\": {\n" +
+                "      \"description\": \"the array type\",\n" +
+                "      \"type\": \"array\",\n" +
+                "      \"items\": {\n" +
+                "        \"properties\": {\n" +
+                "          \"name\": {\n" +
+                "            \"description\": \"the inner type\",\n" +
+                "            \"type\": \"string\",\n" +
+                "            \"minLength\": 1\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"required\": [\n" +
+                "    \"data\"\n" +
+                "  ]\n" +
+                "}";
+
+        Schema m = Json.mapper().readValue(json, Schema.class);
+
+        Schema data = (Schema) m.getProperties().get("data");
+        assertTrue(data instanceof ArraySchema);
+
+        ArraySchema ap = (ArraySchema) data;
+        assertEquals("the array type", ap.getDescription());
+
+        Schema inner = ap.getItems();
+        assertNotNull(inner);
+
+        assertTrue(inner instanceof ObjectSchema);
+        ObjectSchema op = (ObjectSchema) inner;
+
+        Schema name = op.getProperties().get("name");
+        assertEquals(name.getDescription(), "the inner type");
+        assertTrue((name).getMinLength() == 1);
+    }
+
+    @Test
+    public void testEmpty() {
+        String json = "{}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute openapi is missing"));
+    }
+
+    @Test
+    public void testSecurity() {
+        String json = "{\n" +
+                "  \"openapi\": \"3.0.0\",\n" +
+                "  \"security\": [\n" +
+                "    {\n" +
+                "      \"petstore_auth\": [\n" +
+                "        \"write:pets\",\n" +
+                "        \"read:pets\"\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(json, null, null);
+
+
+        OpenAPI openAPI = result.getOpenAPI();
+
+        assertNotNull(openAPI.getSecurity());
+        List<SecurityRequirement> security = openAPI.getSecurity();
+        Assert.assertTrue(security.size() == 1);
+        Assert.assertTrue(security.get(0).size() == 1);
+
+        List<String> requirement = security.get(0).get("petstore_auth");
+        Assert.assertTrue(requirement.size() == 2);
+
+        Set<String> requirements = new HashSet(requirement);
+        Assert.assertTrue(requirements.contains("read:pets"));
+        Assert.assertTrue(requirements.contains("write:pets"));
+    }
+
+    @Test
+    public void testSecurityDefinition() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "paths:\n" +
+                "  /pet:\n" +
+                "    get:\n" +
+                "      security:\n" +
+                "        - basic_auth: []\n" +
+                "          api_key: []\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: Default response\n" +
+                "info:\n" +
+                "  version: ''\n" +
+                "  title: ''\n" +
+                "components:\n" +
+                "  securitySchemes:\n" +
+                "    basic_auth:\n" +
+                "      type: http\n" +
+                "      x-foo: basicBar\n" +
+                "      scheme: basic\n" +
+                "    api_key:\n" +
+                "      type: apiKey\n" +
+                "      name: api_key\n" +
+                "      in: header\n" +
+                "      description: api key description\n" +
+                "      x-foo: apiKeyBar";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSecuritySchemes());
+        assertTrue(openAPI.getComponents().getSecuritySchemes().keySet().size() == 2);
+
+        // Basic Authentication
+        SecurityScheme definitionBasic = openAPI.getComponents().getSecuritySchemes().get("basic_auth");
+        assertNotNull(definitionBasic);
+        assertEquals(definitionBasic.getType(), SecurityScheme.Type.HTTP);
+        assertEquals(definitionBasic.getExtensions().get("x-foo"), "basicBar");
+        // API Key Authentication
+        SecurityScheme definition = openAPI.getComponents().getSecuritySchemes().get("api_key");
+        assertNotNull(definition);
+        assertEquals(definition.getType(), SecurityScheme.Type.APIKEY);
+
+        SecurityScheme apiKey =  definition;
+        assertEquals(apiKey.getName(), "api_key");
+        assertEquals(apiKey.getIn(), SecurityScheme.In.HEADER);
+        assertEquals(apiKey.getDescription(), "api key description");
+        assertEquals(apiKey.getExtensions().get("x-foo"), "apiKeyBar");
+    }
+
+    @Test
+    public void testSecurityDefinitionWithMissingAttribute() {
+        String yaml = "openapi: 3.0.0\n" +
+                "components:\n" +
+                "  securitySchemes:\n" +
+                "    api_key:\n" +
+                "      description: api key description";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute components.securitySchemes.api_key.type is missing"));
+    }
+
+    @Test
+    public void testRootInfo() {
+        String json = "{\n" +
+                "\t\"openapi\": \"3.0.0\",\n" +
+                "\t\"foo\": \"bar\",\n" +
+                "\t\"info\": \"invalid\"\n" +
+                "}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute foo is unexpected"));
+        assertTrue(messages.contains("attribute info is not of type `object`"));
+    }
+
+    @Test
+    public void testContact() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  title: title\n" +
+                "  bad: bad\n" +
+                "  x-foo: bar\n" +
+                "  description: description\n" +
+                "  termsOfService: tos\n" +
+                "  contact:\n" +
+                "    name: tony\n" +
+                "    url: url\n" +
+                "    email: email\n" +
+                "    invalid: invalid\n" +
+                "    x-fun: true\n" +
+                "  version: version\n" +
+                "paths: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertEquals(result.getOpenAPI().getInfo().getTitle(), "title");
+        assertEquals(result.getOpenAPI().getInfo().getDescription(), "description");
+        assertEquals(result.getOpenAPI().getInfo().getTermsOfService(), "tos");
+        assertEquals(result.getOpenAPI().getInfo().getVersion(), "version");
+
+        Contact contact = result.getOpenAPI().getInfo().getContact();
+        assertEquals(contact.getName(), "tony");
+        assertEquals(contact.getUrl(), "url");
+        assertEquals(contact.getEmail(), "email");
+
+        assertTrue(messages.contains("attribute info.bad is unexpected"));
+        assertTrue(messages.contains("attribute info.contact.invalid is unexpected"));
+
+        assertEquals(result.getOpenAPI().getInfo().getExtensions().get("x-foo").toString(), "bar");
+    }
+
+    @Test
+    public void testResponses() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  version: ''\n" +
+                "  title: ''\n" +
+                "paths: {}\n" +
+                "components:\n" +
+                "  responses:\n" +
+                "    foo:\n" +
+                "      description: description\n" +
+                "      bar: baz\n" +
+                "      x-foo: bar";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute components.responses.foo.bar is unexpected"));
+
+        assertEquals(result.getOpenAPI().getComponents().getResponses().get("foo").getExtensions().get("x-foo").toString(), "bar");
+    }
+
+    @Test
+    public void testLicense () {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  license:\n" +
+                "    invalid: true\n" +
+                "    x-valid:\n" +
+                "      isValid: true\n" +
+                "  version: ''\n";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+        assertTrue(messages.contains("attribute info.license.invalid is unexpected"));
+        assertTrue(messages.contains("attribute info.title is missing"));
+        assertTrue(messages.contains("attribute paths is missing"));
+
+        assertEquals(((Map)result.getOpenAPI().getInfo().getLicense().getExtensions().get("x-valid")).get("isValid"), true);
+    }
+
+
+
+    @Test
+    public void testDefinitions () {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  version: ''\n" +
+                "  title: ''\n" +
+                "paths: {}\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    invalid: true\n" +
+                "    Person:\n" +
+                "      required:\n" +
+                "        - id\n" +
+                "        - name\n" +
+                "      properties:\n" +
+                "        id:\n" +
+                "          type: integer\n" +
+                "          format: int64\n" +
+                "        name:\n" +
+                "          type: string";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute components.schemas.invalid is not of type `object`"));
+        assertTrue(result.getOpenAPI().getComponents().getSchemas().get("Person") instanceof Schema);
+
+        List<String> required = ((Schema)result.getOpenAPI().getComponents().getSchemas().get("Person")).getRequired();
+        Set<String> requiredKeys = new HashSet<String>(required);
+        assertTrue(requiredKeys.contains("id"));
+        assertTrue(requiredKeys.contains("name"));
+        assertTrue(requiredKeys.size() == 2);
+    }
+
+    @Test
+    public void testNestedDefinitions() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  version: ''\n" +
+                "  title: ''\n" +
+                "paths: {}\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Person:\n" +
+                "      required:\n" +
+                "        - id\n" +
+                "        - name\n" +
+                "      properties:\n" +
+                "        id:\n" +
+                "          type: integer\n" +
+                "          format: int64\n" +
+                "        name:\n" +
+                "          type: string\n" +
+                "        address:\n" +
+                "          $ref: '#/components/schemas/Address'\n" +
+                "    Address:\n" +
+                "      required:\n" +
+                "        - zip\n" +
+                "      properties:\n" +
+                "        street:\n" +
+                "          type: string\n" +
+                "        zip:\n" +
+                "          type: integer\n" +
+                "          format: int32\n" +
+                "          minimum: 0\n" +
+                "          exclusiveMinimum: true\n" +
+                "          maximum: 99999\n" +
+                "          exclusiveMaximum: true";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+
+        assertTrue(result.getOpenAPI().getComponents().getSchemas().get("Person") instanceof Schema);
+        assertTrue(result.getOpenAPI().getComponents().getSchemas().get("Address") instanceof Schema);
+
+        Schema person =  result.getOpenAPI().getComponents().getSchemas().get("Person");
+        Schema property = (Schema) person.getProperties().get("address");
+        assertTrue(property.get$ref() !=  null);
+
+        Schema zip = (Schema)(result.getOpenAPI().getComponents().getSchemas().get("Address")).getProperties().get("zip");
+        assertTrue(zip instanceof IntegerSchema);
+
+        IntegerSchema zipProperty = (IntegerSchema) zip;
+        assertEquals(zipProperty.getMinimum(), new BigDecimal("0"));
+        assertTrue(zipProperty.getExclusiveMinimum());
+
+        assertEquals(zipProperty.getMaximum(), new BigDecimal("99999"));
+        assertTrue(zipProperty.getExclusiveMaximum());
+    }
+
+    @Test
+    public void testPaths() {
+        String json = "{\n" +
+                "  \"openapi\": \"3.0.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"foo\": \"bar\",\n" +
+                "      \"get\": {\n" +
+                "        \"security\": [\n" +
+                "          {\n" +
+                "            \"petstore_auth\": [\n" +
+                "              \"write:pets\",\n" +
+                "              \"read:pets\"\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute paths.'/pet'.foo is unexpected"));
+        OpenAPI openAPI = result.getOpenAPI();
+
+        PathItem path = openAPI.getPaths().get("/pet");
+        assertNotNull(path);
+        Operation operation = path.getGet();
+        assertNotNull(operation);
+        List<SecurityRequirement> security = operation.getSecurity();
+
+        assertTrue(security.size() == 1);
+        Map<String, List<String>> requirement = security.get(0);
+
+        assertTrue(requirement.containsKey("petstore_auth"));
+        List<String> scopesList = requirement.get("petstore_auth");
+
+        Set<String> scopes = new HashSet<>(scopesList);
+        assertTrue(scopes.contains("read:pets"));
+        assertTrue(scopes.contains("write:pets"));
+    }
+
+    @Test
+    public void testPathsWithRefResponse() {
+        String json = "{\n" +
+                "  \"openapi\": \"3.0.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"get\": {\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"$ref\": \"#/components/responses/OK\"" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+
+        PathItem path = openAPI.getPaths().get("/pet");
+        assertNotNull(path);
+        Operation operation = path.getGet();
+        assertNotNull(operation);
+        assertTrue(operation.getResponses().containsKey("200"));
+        assertEquals(ApiResponse.class,operation.getResponses().get("200").getClass());
+        ApiResponse refResponse = operation.getResponses().get("200");
+        assertEquals("#/components/responses/OK",refResponse.get$ref());
+    }
+
+    @Test
+    public void testArrayModelDefinition() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "paths:\n" +
+                        "  \"/store/inventory\":\n" +
+                        "    get:\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: successful operation\n" +
+                        "          content:\n" +
+                        "            application/json:\n" +
+                        "              schema:\n" +
+                        "                type: object\n" +
+                        "                additionalProperties:\n" +
+                        "                  type: integer\n" +
+                        "                  format: int32\n";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema response = openAPI.getPaths().get("/store/inventory").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(response.getAdditionalProperties() != null);
+    }
+
+    @Test
+    public void testArrayQueryParam() throws Exception {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "paths:\n" +
+                "  /pet/findByStatus:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - name: status\n" +
+                "          in: query\n" +
+                "          description: Status values that need to be considered for filter\n" +
+                "          required: false\n" +
+                "          style: pipeDelimited\n" +
+                "          schema:\n" +
+                "            type: array\n" +
+                "            items:\n" +
+                "              type: string\n" +
+                "            default: available\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: successful operation\n" +
+                "          content:\n" +
+                "            '*/*':\n" +
+                "              schema:\n" +
+                "                $ref: #/components/schemas/PetArray\n" +
+                "info:\n" +
+                "  version: ''\n" +
+                "  title: ''";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        OpenAPI openAPI = result.getOpenAPI();
+        Parameter param = openAPI.getPaths().get("/pet/findByStatus").getGet().getParameters().get(0);
+
+        assertTrue(param instanceof QueryParameter);
+        QueryParameter qp = (QueryParameter) param;
+        Schema p = qp.getSchema();
+
+        assertEquals(p.getType(), "array");
+        assertTrue(((ArraySchema) p).getItems() instanceof StringSchema);
+    }
+
+
+    @Test(description = "it should read a top-level extension per https://github.com/openAPI-api/validator-badge/issues/59")
+    public void testToplevelExtension() throws Exception {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "x-foo: woof\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: Simple API\n" +
+                "paths:\n" +
+                "  /:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertNotNull(result.getOpenAPI().getExtensions());
+    }
+
+    @Test
+    public void testDeserializeBinaryString() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  title: foo\n" +
+                "  version: ''\n" +
+                "paths:\n" +
+                "  /test:\n" +
+                "    post:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "      requestBody:\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              type: string\n" +
+                "              format: binary";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        final OpenAPI resolved = new OpenAPIResolver(result.getOpenAPI(), null).resolve();
+        assertTrue(resolved.getPaths().get("/test").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof BinarySchema);
+    }
+
+    @Test
+    public void testDeserializeEnum() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: your title\n" +
+                "paths:\n" +
+                "  /persons:\n" +
+                "    get:\n" +
+                "      description: a test\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: Successful response\n" +
+                "          content:\n" +
+                "            '*/*':\n" +
+                "              schema:\n" +
+                "                type: object\n" +
+                "                properties:\n" +
+                "                  se:\n" +
+                "                    $ref: '#/components/schemas/StringEnum'\n" +
+                "                  ie:\n" +
+                "                    $ref: '#/components/schemas/IntegerEnum'\n" +
+                "                  ne:\n" +
+                "                    $ref: '#/components/schemas/NumberEnum'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    StringEnum:\n" +
+                "      type: string\n" +
+                "      default: foo\n" +
+                "      enum:\n" +
+                "        - First\n" +
+                "        - Second\n" +
+                "    IntegerEnum:\n" +
+                "      type: integer\n" +
+                "      default: 1\n" +
+                "      enum:\n" +
+                "        - -1\n" +
+                "        - 0\n" +
+                "        - 1\n" +
+                "    NumberEnum:\n" +
+                "      type: number\n" +
+                "      default: 3.14\n" +
+                "      enum:\n" +
+                "        - -1.151\n" +
+                "        - 0\n" +
+                "        - 1.6161\n" +
+                "        - 3.14";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        final OpenAPI resolved = new OpenAPIResolver(result.getOpenAPI(), null).resolve();
+
+        Schema stringModel = resolved.getComponents().getSchemas().get("StringEnum");
+        assertTrue(stringModel instanceof Schema);
+        Schema stringImpl = stringModel;
+        List<String> stringValues = stringImpl.getEnum();
+        assertEquals(2, stringValues.size());
+        assertEquals("First", stringValues.get(0));
+        assertEquals("Second", stringValues.get(1));
+
+        Schema integerModel = resolved.getComponents().getSchemas().get("IntegerEnum");
+        assertTrue(integerModel instanceof Schema);
+        Schema integerImpl =  integerModel;
+        List<String> integerValues = integerImpl.getEnum();
+        assertEquals(3, integerValues.size());
+        assertEquals(-1, integerValues.get(0));
+        assertEquals(0, integerValues.get(1));
+        assertEquals(1, integerValues.get(2));
+
+        Schema numberModel = resolved.getComponents().getSchemas().get("NumberEnum");
+        assertTrue(numberModel instanceof Schema);
+        Schema numberImpl =  numberModel;
+        List<String> numberValues = numberImpl.getEnum();
+        assertEquals(4, numberValues.size());
+        assertEquals(new BigDecimal("-1.151"), numberValues.get(0));
+        assertEquals(new BigDecimal("0"), numberValues.get(1));
+        assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
+        assertEquals(new BigDecimal("3.14"), numberValues.get(3));
+    }
+
+    @Test
+    public void testDeserializeWithMessages() {
+        String yaml = "openapi: '3.0.0'\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title:\n" +
+                "    - bar";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml,null, null);
+
+        Set<String> messages = new HashSet<>(result.getMessages());
+        assertTrue(messages.size() == 2);
+
+        assertTrue(messages.contains("attribute info.title is not of type `string`"));
+        assertTrue(messages.contains("attribute paths is missing"));
+    }
+
+    @Test
+    public void testDeserializeWithDiscriminator() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "servers: []\n" +
+                        "info:\n" +
+                        "  version: ''\n" +
+                        "  title: ''\n" +
+                        "paths: {}\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Animal:\n" +
+                        "      type: object\n" +
+                        "      discriminator:\n" +
+                        "        propertyName: petType\n" +
+                        "      description: |\n" +
+                        "        A basic `Animal` object which can extend to other animal types.\n" +
+                        "      required:\n" +
+                        "        - commonName\n" +
+                        "        - petType\n" +
+                        "      properties:\n" +
+                        "        commonName:\n" +
+                        "          description: the household name of the animal\n" +
+                        "          type: string\n" +
+                        "        petType:\n" +
+                        "          description: |\n" +
+                        "            The discriminator for the animal type.  It _must_\n" +
+                        "            match one of the concrete schemas by name (i.e. `Cat`)\n" +
+                        "            for proper deserialization\n" +
+                        "          type: string";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        Set<String> messages = new HashSet<>(result.getMessages());
+        assertFalse(messages.contains("attribute definitions.Animal.discriminator is unexpected"));
+    }
+
+    @Test
+    public void testDeserializeWithEnumDiscriminator() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Animal:\n" +
+                        "      type: object\n" +
+                        "      discriminator:\n" +
+                        "        propertyName: petType\n" +
+                        "      description: |\n" +
+                        "        A basic `Animal` object which can extend to other animal types.\n" +
+                        "      required:\n" +
+                        "        - commonName\n" +
+                        "        - petType\n" +
+                        "      properties:\n" +
+                        "        commonName:\n" +
+                        "          description: the household name of the animal\n" +
+                        "          type: string\n" +
+                        "        petType:\n" +
+                        "          description: |\n" +
+                        "            The discriminator for the animal type.  It _must_\n" +
+                        "            match one of the concrete schemas by name (i.e. `Cat`)\n" +
+                        "            for proper deserialization\n" +
+                        "          enum:\n" +
+                        "            - cat\n" +
+                        "            - dog";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        Map<String, Schema> properties = result.getOpenAPI().getComponents().getSchemas().get("Animal").getProperties();
+        assertTrue(properties.containsKey("commonName"));
+        assertTrue(properties.containsKey("petType"));
+        assertEquals(properties.get("petType").getType(), "string");
+    }
+
+    @Test
+    public void testDeserializeWithNumericEnumDiscriminator() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Animal:\n" +
+                        "      type: object\n" +
+                        "      discriminator:\n" +
+                        "        propertyName: petType\n" +
+                        "      description: |\n" +
+                        "        A basic `Animal` object which can extend to other animal types.\n" +
+                        "      required:\n" +
+                        "        - commonName\n" +
+                        "        - petType\n" +
+                        "      properties:\n" +
+                        "        commonName:\n" +
+                        "          description: the household name of the animal\n" +
+                        "          type: string\n" +
+                        "        petType:\n" +
+                        "          enum:\n" +
+                        "            - 1\n" +
+                        "            - 2";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        Map<String, Schema> properties = result.getOpenAPI().getComponents().getSchemas().get("Animal").getProperties();
+        assertTrue(properties.containsKey("commonName"));
+        assertTrue(properties.containsKey("petType"));
+        assertEquals(properties.get("petType").getType(), "number");
+    }
+
+    @Test
+    public void testDeserializeWithBooleanEnumDiscriminator() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Animal:\n" +
+                        "      type: object\n" +
+                        "      discriminator:\n" +
+                        "        propertyName: petType\n" +
+                        "      description: |\n" +
+                        "        A basic `Animal` object which can extend to other animal types.\n" +
+                        "      required:\n" +
+                        "        - commonName\n" +
+                        "        - petType\n" +
+                        "      properties:\n" +
+                        "        commonName:\n" +
+                        "          description: the household name of the animal\n" +
+                        "          type: string\n" +
+                        "        petType:\n" +
+                        "          enum:\n" +
+                        "            - true\n" +
+                        "            - false";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        Map<String, Schema> properties = result.getOpenAPI().getComponents().getSchemas().get("Animal").getProperties();
+        assertTrue(properties.containsKey("commonName"));
+        assertTrue(properties.containsKey("petType"));
+        assertEquals(properties.get("petType").getType(), "boolean");
+    }
+
+    @Test
+    public void testIssue161() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "servers: []\n" +
+                        "paths:\n" +
+                        "  /users:\n" +
+                        "    get:\n" +
+                        "      parameters:\n" +
+                        "        - in: query\n" +
+                        "          name: name\n" +
+                        "          required: false\n" +
+                        "          schema:\n" +
+                        "            type: string\n" +
+                        "            minLength: 10\n" +
+                        "            maxLength: 100\n" +
+                        "      responses:\n" +
+                        "        default:\n" +
+                        "          description: ok\n";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        Set<String> messages = new HashSet<>(result.getMessages());
+        assertFalse(messages.contains("attribute paths.'/users'(get).[name].maxLength is unexpected"));
+    }
+
+    @Test
+    public void testValidatorIssue50() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers:\n" +
+                "  - url: 'http://local.xxx.com/'\n" +
+                "info:\n" +
+                "  version: 2.0.0\n" +
+                "  title: Beanhunter API\n" +
+                "  description: Description of the api goes here.\n" +
+                "paths:\n" +
+                "  /city:\n" +
+                "    get:\n" +
+                "      description: test description\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Endpoints:\n" +
+                "      title: Endpoints object\n" +
+                "      properties:\n" +
+                "        links: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertTrue(result.getMessages().size() == 1);
+    }
+
+    @Test
+    public void testIssue151() throws Exception {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "servers: []\n" +
+                        "info:\n" +
+                        "  version: 2.0.0\n" +
+                        "  title: Test Issue 151\n" +
+                        "  description: Tests that ComposedSchema vendor extensions are deserialized correctly.\n" +
+                        "paths:\n" +
+                        "  /:\n" +
+                        "    get:\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: OK\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Pet:\n" +
+                        "      type: object\n" +
+                        "      required:\n" +
+                        "        - id\n" +
+                        "      properties:\n" +
+                        "        id:\n" +
+                        "          type: integer\n" +
+                        "          format: int64\n" +
+                        "    Dog:\n" +
+                        "      type: object\n" +
+                        "      allOf:\n" +
+                        "        - $ref: '#/components/schemas/Pet'\n" +
+                        "        - required:\n" +
+                        "            - name\n" +
+                        "          properties:\n" +
+                        "            name:\n" +
+                        "              type: string\n" +
+                        "      x-vendor-ext: some data";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertTrue(result.getMessages().isEmpty());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
+        assertTrue(definitions.size() == 2);
+        Schema allOfModel = definitions.get("Dog");
+        assertTrue(allOfModel instanceof ComposedSchema);
+        assertFalse(allOfModel.getExtensions().isEmpty());
+        assertEquals("some data", allOfModel.getExtensions().get("x-vendor-ext"));
+    }
+
+    @Test
+    public void testIssue204_allOf() throws Exception {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "servers: []\n" +
+                        "info:\n" +
+                        "  version: 2.0.0\n" +
+                        "  title: Test allOf API\n" +
+                        "  description: 'Tests the allOf API for parent, interface and child models.'\n" +
+                        "paths:\n" +
+                        "  /:\n" +
+                        "    get:\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: OK\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Pet:\n" +
+                        "      type: object\n" +
+                        "      required:\n" +
+                        "        - id\n" +
+                        "      properties:\n" +
+                        "        id:\n" +
+                        "          type: integer\n" +
+                        "          format: int64\n" +
+                        "    Furry:\n" +
+                        "      type: object\n" +
+                        "      required:\n" +
+                        "        - coatColour\n" +
+                        "      properties:\n" +
+                        "        coatColour:\n" +
+                        "          type: string\n" +
+                        "    Dog:\n" +
+                        "      type: object\n" +
+                        "      allOf:\n" +
+                        "        - $ref: '#/components/schemas/Pet'\n" +
+                        "        - $ref: '#/components/schemas/Furry'\n" +
+                        "        - required:\n" +
+                        "            - name\n" +
+                        "          properties:\n" +
+                        "            name:\n" +
+                        "              type: string";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertTrue(result.getMessages().isEmpty());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
+        assertNotNull(definitions);
+        assertEquals(3, definitions.size());
+
+        Schema pet = definitions.get("Pet");
+        Schema furry = definitions.get("Furry");
+        Schema dog = definitions.get("Dog");
+
+        assertNotNull(pet);
+        assertNotNull( furry);
+        assertNotNull( dog);
+        assertTrue(dog instanceof ComposedSchema);
+        ComposedSchema dogComposed = (ComposedSchema) dog;
+        assertNotNull(dogComposed.getAllOf());
+        assertEquals(3, dogComposed.getAllOf().size());
+        Schema dogInterfaceRef = dogComposed.getAllOf().get(0);
+        Schema dogInterface = definitions.get(dogInterfaceRef.get$ref());
+        dogInterfaceRef = dogComposed.getAllOf().get(1);
+        dogInterface = definitions.get(dogInterfaceRef.get$ref());
+        assertTrue(dogComposed.getAllOf().get(0).get$ref() != null);
+    }
+
+    @Test
+    public void testPR246() throws Exception {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  description: 'Tests the allOf API for parent, interface and child models.'\n" +
+                "  version: 2.0.0\n" +
+                "  title: Test allOf API\n" +
+                "paths:\n" +
+                "  /:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK\n" +
+                "    parameters: []\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Pet:\n" +
+                "      type: object\n" +
+                "      required:\n" +
+                "        - id\n" +
+                "      properties:\n" +
+                "        id:\n" +
+                "          type: integer\n" +
+                "          format: int64\n" +
+                "    Furry:\n" +
+                "      type: object\n" +
+                "      required:\n" +
+                "        - coatColour\n" +
+                "      properties:\n" +
+                "        coatColour:\n" +
+                "          type: string\n" +
+                "    Dog:\n" +
+                "      allOf:\n" +
+                "        - $ref: '#/components/schemas/Pet'\n" +
+                "        - $ref: '#/components/schemas/Furry'\n" +
+                "        - type: object\n" +
+                "          required:\n" +
+                "            - name\n" +
+                "          properties:\n" +
+                "            name:\n" +
+                "              type: string";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema dog = openAPI.getComponents().getSchemas().get("Dog");
+        assertNotNull(dog);
+        assertTrue(dog instanceof ComposedSchema);
+        ComposedSchema composed = (ComposedSchema) dog;
+
+        assertTrue(composed.getAllOf().get(0).get$ref() != null);
+        assertTrue(composed.getAllOf().size() == 3);
+    }
+
+    @Test
+    public void testIssue247() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "servers: []\n" +
+                        "info:\n" +
+                        "  description: bleh\n" +
+                        "  version: 2.0.0\n" +
+                        "  title: Test\n" +
+                        "paths:\n" +
+                        "  /:\n" +
+                        "    get:\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: OK\n" +
+                        "    parameters: []\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Pet:\n" +
+                        "      allOf:\n" +
+                        "        - type: object\n" +
+                        "          required:\n" +
+                        "            - id\n" +
+                        "          properties:\n" +
+                        "            id:\n" +
+                        "              type: integer\n" +
+                        "              format: int64";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
+    }
+
+    @Test
+    public void testIssue343Parameter() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "servers: []\n" +
+                        "info:\n" +
+                        "  description: bleh\n" +
+                        "  version: 2.0.0\n" +
+                        "  title: Test\n" +
+                        "paths:\n" +
+                        "  /foo:\n" +
+                        "    post:\n" +
+                        "      parameters:\n" +
+                        "        - in: query\n" +
+                        "          name: skip\n" +
+                        "          schema:\n" +
+                        "            type: integer\n" +
+                        "            format: int32\n" +
+                        "            multipleOf: 3\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: OK\n" +
+                        "      requestBody:\n" +
+                        "        content:\n" +
+                        "          application/json:\n" +
+                        "            schema:\n" +
+                        "              type: object\n" +
+                        "              additionalProperties:\n" +
+                        "                type: string\n" +
+                        "        required: true\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Fun:\n" +
+                        "      properties:\n" +
+                        "        id:\n" +
+                        "          type: integer\n" +
+                        "          format: int32\n" +
+                        "          multipleOf: 5\n" +
+                        "        mySet:\n" +
+                        "          type: array\n" +
+                        "          uniqueItems: true\n" +
+                        "          items:\n" +
+                        "            type: string";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+
+        QueryParameter qp = (QueryParameter)openAPI.getPaths().get("/foo").getPost().getParameters().get(0);
+        assertEquals(new BigDecimal("3"), qp.getSchema().getMultipleOf());
+
+        RequestBody bp =  openAPI.getPaths().get("/foo").getPost().getRequestBody();
+        Schema schema = bp.getContent().get("application/json").getSchema();
+        assertTrue(schema.getAdditionalProperties() != null);
+
+        IntegerSchema id = (IntegerSchema)openAPI.getComponents().getSchemas().get("Fun").getProperties().get("id");
+        assertEquals(id.getMultipleOf(), new BigDecimal("5"));
+
+        ArraySchema ap = (ArraySchema)openAPI.getComponents().getSchemas().get("Fun").getProperties().get("mySet");
+        assertTrue(ap.getUniqueItems());
+    }
+
+    @Test
+    public void testIssue386() {
+        String yaml =
+                "openapi: 3.0.0\n" +
+                        "servers: []\n" +
+                        "info:\n" +
+                        "  description: bleh\n" +
+                        "  version: 2.0.0\n" +
+                        "  title: Test\n" +
+                        "paths:\n" +
+                        "  /foo:\n" +
+                        "    post:\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          description: OK\n" +
+                        "      requestBody:\n" +
+                        "        content:\n" +
+                        "          application/json:\n" +
+                        "            schema:\n" +
+                        "              type: object\n" +
+                        "              enum:\n" +
+                        "                - id: fun\n" +
+                        "              properties:\n" +
+                        "                id:\n" +
+                        "                  type: string\n" +
+                        "components:\n" +
+                        "  schemas:\n" +
+                        "    Fun:\n" +
+                        "      type: object\n" +
+                        "      properties:\n" +
+                        "        complex:\n" +
+                        "          enum:\n" +
+                        "            - id: 110\n" +
+                        "          type: object\n" +
+                        "          properties:\n" +
+                        "            id:\n" +
+                        "              type: string\n" +
+                        "    MyEnum:\n" +
+                        "      type: integer\n" +
+                        "      enum:\n" +
+                        "        - value: 3\n" +
+                        "          description: Value 1\n" +
+                        "        - value: 10\n" +
+                        "          description: Value 2";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+    }
+
+    @Test
+    public void testIssue360() {
+        OpenAPI openAPI = new OpenAPI();
+
+        Schema model = new Schema();
+        model.setEnum((List<String>) null);
+        openAPI.components(new Components().addSchemas("modelWithNullEnum", model));
+
+        String json = Json.pretty(openAPI);
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        OpenAPI rebuilt = result.getOpenAPI();
+        assertNotNull(rebuilt);
+    }
 
     @Test
     public void testAllOfSchema(@Injectable List<AuthorizationValue> auths){

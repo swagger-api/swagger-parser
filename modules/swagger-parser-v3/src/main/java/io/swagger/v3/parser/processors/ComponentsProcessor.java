@@ -213,9 +213,31 @@ public class ComponentsProcessor {
     public void processSchemas(Set<String> schemaKeys, Map<String, Schema> schemas) {
         schemaKeys.addAll(schemas.keySet());
 
-        for (String schemaName : schemaKeys) {
-            final Schema schema = schemas.get(schemaName);
-            schemaProcessor.processSchema(schema);
+        for (String modelName : schemaKeys) {
+            final Schema model = schemas.get(modelName);
+
+            String originalRef = model.get$ref() != null  ? model.get$ref() : null;
+
+            schemaProcessor.processSchema(model);
+
+            //if we process a RefModel here, in the #/definitions table, we want to overwrite it with the referenced value
+            if (model.get$ref() != null) {
+                final String renamedRef = cache.getRenamedRef(originalRef);
+
+                if (renamedRef != null) {
+                    //we definitely resolved the referenced and shoved it in the definitions map
+                    // because the referenced model may be in the definitions map, we need to remove old instances
+                    final Schema resolvedModel = schemas.get(renamedRef);
+
+                    // ensure the reference isn't still in use
+                    if(!cache.hasReferencedKey(renamedRef)) {
+                        schemas.remove(renamedRef);
+                    }
+
+                    // add the new key
+                    schemas.put(modelName, resolvedModel);
+                }
+            }
         }
     }
 }

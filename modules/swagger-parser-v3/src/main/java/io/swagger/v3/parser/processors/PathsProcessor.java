@@ -61,9 +61,9 @@ public class PathsProcessor {
                 // TODO: update references to the parent location
 
                 String pathRef = pathItem.get$ref().split("#")[0];
-                updateLocalRefs(resolvedPath, pathRef);
 
                 if (resolvedPath != null) {
+                    updateLocalRefs(resolvedPath, pathRef);
                     //we need to put the resolved path into swagger object
                     openAPI.path(pathStr, resolvedPath);
                     pathItem = resolvedPath;
@@ -74,7 +74,7 @@ public class PathsProcessor {
             final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
             pathItem.setParameters(processedPathParameters);
 
-            addParametersToEachOperation(pathItem);
+            //addParametersToEachOperation(pathItem);
 
             final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
 

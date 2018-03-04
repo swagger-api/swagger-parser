@@ -10,4 +10,4 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "./src/test/resources/ref-without-component/b.yaml#/components/schemas/CustomerType"
+                "$ref": "./ref-without-component/b.yaml#/components/schemas/CustomerType"

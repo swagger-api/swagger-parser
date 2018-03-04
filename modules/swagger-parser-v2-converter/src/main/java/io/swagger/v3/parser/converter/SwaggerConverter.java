@@ -890,7 +890,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (StringUtils.isNotBlank(v2Parameter.getDescription())) {
             v3Parameter.setDescription(v2Parameter.getDescription());
         }
-        v3Parameter.setAllowEmptyValue(v2Parameter.getAllowEmptyValue());
+        if (v2Parameter instanceof SerializableParameter) {
+            v3Parameter.setAllowEmptyValue(((SerializableParameter)v2Parameter).getAllowEmptyValue());
+        }
         v3Parameter.setIn(v2Parameter.getIn());
         v3Parameter.setName(v2Parameter.getName());
 
@@ -1056,6 +1058,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 if (model.getAdditionalProperties() != null) {
                     result.setAdditionalProperties(convert(model.getAdditionalProperties()));
+                }
+            } else if(v2Model instanceof RefModel) {
+                RefModel ref = (RefModel) v2Model;
+                if (ref.get$ref().indexOf("#/definitions") == 0) {
+                    String updatedRef = "#/components/schemas" + ref.get$ref().substring("#/definitions".length());
+                    result.set$ref(updatedRef);
                 }
             }
 
