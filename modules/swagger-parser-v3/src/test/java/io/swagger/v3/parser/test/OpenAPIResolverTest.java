@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -46,7 +45,6 @@ import mockit.Mocked;
 import mockit.StrictExpectations;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
-import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -74,8 +72,8 @@ public class OpenAPIResolverTest {
 
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
-    private static final String REMOTE_REF_JSON = "https://gist.githubusercontent.com/gracekarina/76ad8156f03a3cb1223abffb891d7269/raw/3950c7bcbbdd47a635cd649ec57ac5390fed3500/remote_ref_json#/components/schemas/Tag";
-    private static final String REMOTE_REF_YAML = "https://gist.githubusercontent.com/gracekarina/975d133674bea6b22d09ce4ec349597d/raw/f1e31e732ac9e0d69cd197e012b4ed7eac3e07fb/remote_ref_yaml#/components/schemas/Tag";
+    private static final String REMOTE_REF_JSON = "http://localhost:${dynamicPort}/remote_ref_json#/components/schemas/Tag";
+    private static final String REMOTE_REF_YAML = "http://localhost:${dynamicPort}/remote_ref_yaml#/components/schemas/Tag";
 
     @BeforeClass
     private void setUpWireMockServer() throws IOException {
@@ -172,6 +170,27 @@ public class OpenAPIResolverTest {
                         .withHeader("Content-type", "application/yaml")
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_ref_yaml.yaml"));
+
+
+        WireMock.stubFor(get(urlPathMatching("/remote_ref_yaml"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_ref_json.json"));
+
+
+        WireMock.stubFor(get(urlPathMatching("/remote_ref_json"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/json")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
 
 
     }
@@ -689,7 +708,7 @@ public class OpenAPIResolverTest {
         Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 5);
         Schema schema = openAPI.getPaths().get("/path").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
         Assert.assertTrue(schema.getProperties().size() == 4);
-        Yaml.prettyPrint(openAPI);
+
     }
 
     @Test
@@ -744,15 +763,16 @@ public class OpenAPIResolverTest {
 
     @Test(description = "resolve a simple remote model property definition in json")
     public void testJsonSimpleRemoteModelProperty() {
-        testSimpleRemoteModelProperty(REMOTE_REF_JSON);
+        testSimpleRemoteModelProperty(replacePort(REMOTE_REF_JSON));
     }
 
     @Test(description = "resolve a simple remote model property definition in yaml")
     public void testYamlSimpleRemoteModelProperty() {
-        testSimpleRemoteModelProperty(REMOTE_REF_YAML);
+        testSimpleRemoteModelProperty(replacePort(REMOTE_REF_YAML));
     }
 
     private void testArrayRemoteModelProperty(String remoteRef) {
+
         final OpenAPI swagger = new OpenAPI();
         swagger.components(new Components().addSchemas("Sample", new Schema()
                 .addProperties("remoteRef", new ArraySchema().items(new Schema().$ref(remoteRef)))));
@@ -767,12 +787,12 @@ public class OpenAPIResolverTest {
 
     @Test(description = "resolve an array remote model property definition in json")
     public void testJsonArrayRemoteModelProperty() {
-        testArrayRemoteModelProperty(REMOTE_REF_JSON);
+        testArrayRemoteModelProperty(replacePort(REMOTE_REF_JSON));
     }
 
     @Test(description = "resolve an array remote model property definition in yaml")
     public void testYamlArrayRemoteModelProperty() {
-        testArrayRemoteModelProperty(REMOTE_REF_YAML);
+        testArrayRemoteModelProperty(replacePort(REMOTE_REF_YAML));
     }
 
     private void testMapRemoteModelProperty(String remoteRef) {
@@ -791,12 +811,12 @@ public class OpenAPIResolverTest {
 
     @Test(description = "resolve an map remote model property definition in json")
     public void testJsonMapRemoteModelProperty() {
-        testMapRemoteModelProperty(REMOTE_REF_JSON);
+        testMapRemoteModelProperty(replacePort(REMOTE_REF_JSON));
     }
 
     @Test(description = "resolve an map remote model property definition in yaml")
     public void testYamlMapRemoteModelProperty() {
-        testMapRemoteModelProperty(REMOTE_REF_YAML);
+        testMapRemoteModelProperty(replacePort(REMOTE_REF_YAML));
     }
 
     private void testOperationBodyparamRemoteRefs(String remoteRef) {
@@ -816,12 +836,13 @@ public class OpenAPIResolverTest {
 
     @Test(description = "resolve operation bodyparam remote refs in json")
     public void testJsonOperationBodyparamRemoteRefs() {
-        testOperationBodyparamRemoteRefs(REMOTE_REF_JSON);
+        testOperationBodyparamRemoteRefs(replacePort(REMOTE_REF_JSON));
     }
 
     @Test(description = "resolve operation bodyparam remote refs in yaml")
     public void testYamlOperationBodyparamRemoteRefs() {
-        testOperationBodyparamRemoteRefs(REMOTE_REF_YAML);
+
+        testOperationBodyparamRemoteRefs(replacePort(REMOTE_REF_YAML));
     }
 
     @Test(description = "resolve operation parameter remote refs")
@@ -840,14 +861,14 @@ public class OpenAPIResolverTest {
                 .schema(new IntegerSchema())));
 
         final OpenAPI resolved = new OpenAPIResolver(swagger, null).resolve();
-        Yaml.prettyPrint(swagger);
+
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final Parameter param = params.get(0);
         assertEquals(param.getName(), "skip");
     }
 
-    //@org.junit.Test//(description = "resolve operation body parameter remote refs")
+
     @Test
     public void testOperationBodyParameterRemoteRefs() {
         final Schema schema = new Schema();
@@ -888,12 +909,12 @@ public class OpenAPIResolverTest {
 
     @Test(description = "resolve response remote refs in json")
     public void testJsonResponseRemoteRefs() {
-        testResponseRemoteRefs(REMOTE_REF_JSON);
+        testResponseRemoteRefs(replacePort(REMOTE_REF_JSON));
     }
 
     @Test(description = "resolve response remote refs in yaml")
     public void testYamlResponseRemoteRefs() {
-        testResponseRemoteRefs(REMOTE_REF_YAML);
+        testResponseRemoteRefs(replacePort(REMOTE_REF_YAML));
     }
 
     @Test(description = "resolve array response remote refs in yaml")
@@ -904,7 +925,7 @@ public class OpenAPIResolverTest {
                         .responses(new ApiResponses().addApiResponse("200", new ApiResponse()
                                 .content(new Content().addMediaType("*/*",new MediaType().schema(
                                         new ArraySchema().items(
-                                                new Schema().$ref(REMOTE_REF_YAML)))))))));
+                                                new Schema().$ref(replacePort(REMOTE_REF_YAML))))))))));
 
         final OpenAPI resolved = new OpenAPIResolver(swagger, null).resolve();
         final ApiResponse response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
@@ -1051,12 +1072,12 @@ public class OpenAPIResolverTest {
         assertEquals(qp.getName(), "page");
     }
 
-    @Test
-    public void testCodegenIssue5753() {
-        OpenAPI swagger = new OpenAPIV3Parser().read("./relative-file-references/yaml/issue-5753.yaml");
 
-        Json.prettyPrint(swagger);
+    public String replacePort(String url){
+        String pathFile = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        return pathFile;
     }
+
     private static int getDynamicPort() {
         return new Random().ints(50000, 60000).findFirst().getAsInt();
     }
