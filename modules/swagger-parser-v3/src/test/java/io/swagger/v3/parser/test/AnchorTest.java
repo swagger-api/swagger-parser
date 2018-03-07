@@ -22,6 +22,7 @@ public class AnchorTest {
                 "x-types:\n" +
                 "  OperationType:\n" +
                 "    - registration\n" +
+                "# Describe your paths here\n" +
                 "paths:\n" +
                 "  /checker:\n" +
                 "    get:\n" +

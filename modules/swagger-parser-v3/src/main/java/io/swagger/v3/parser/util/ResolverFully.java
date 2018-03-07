@@ -217,6 +217,9 @@ public class ResolverFully {
                         if (requiredProperties.size() > 0) {
                             model.setRequired(new ArrayList<>(requiredProperties));
                         }
+                        if (resolved.getExample() != null) {
+                            model.setExample(resolved.getExample());
+                        }
                         if (composedSchema.getExtensions() != null) {
                             Map<String, Object> extensions = composedSchema.getExtensions();
                             for (String key : extensions.keySet()) {
@@ -253,6 +256,9 @@ public class ResolverFully {
                         if (requiredProperties.size() > 0) {
                             model.setRequired(new ArrayList<>(requiredProperties));
                         }
+                        if (resolved.getExample() != null) {
+                            model.setExample(resolved.getExample());
+                        }
                         if (composedSchema.getExtensions() != null) {
                             Map<String, Object> extensions = composedSchema.getExtensions();
                             for (String key : extensions.keySet()) {
@@ -288,6 +294,9 @@ public class ResolverFully {
                         }
                         if (requiredProperties.size() > 0) {
                             model.setRequired(new ArrayList<>(requiredProperties));
+                        }
+                        if (resolved.getExample() != null) {
+                            model.setExample(resolved.getExample());
                         }
                         if (composedSchema.getExtensions() != null) {
                             Map<String, Object> extensions = composedSchema.getExtensions();
