@@ -709,6 +709,12 @@ public class OpenAPIResolverTest {
         Schema schema = openAPI.getPaths().get("/path").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
         Assert.assertTrue(schema.getProperties().size() == 4);
 
+        ComposedSchema schemaOneOf = (ComposedSchema) openAPI.getPaths().get("/oneOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        Assert.assertTrue(schemaOneOf.getOneOf().size() == 3);
+
+        ComposedSchema schemaAnyOf = (ComposedSchema) openAPI.getPaths().get("/anyOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        Assert.assertTrue(schemaAnyOf.getAnyOf().size() == 3);
+
     }
 
     @Test
