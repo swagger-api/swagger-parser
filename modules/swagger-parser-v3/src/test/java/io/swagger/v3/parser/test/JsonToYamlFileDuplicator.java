@@ -1,4 +1,4 @@
-package io.swagger.v3.parser;
+package io.swagger.v3.parser.test;
 
 
 import com.fasterxml.jackson.databind.JsonNode;

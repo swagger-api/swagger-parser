@@ -1,9 +1,10 @@
-package io.swagger.v3.parser;
+package io.swagger.v3.parser.test;
 
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;

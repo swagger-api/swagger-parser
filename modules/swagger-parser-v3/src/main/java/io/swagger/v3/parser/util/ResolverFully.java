@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -194,9 +195,21 @@ public class ResolverFully {
 
         if(schema instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schema;
+            boolean adjacent = false;
             if (aggregateCombinators) {
                 Schema model = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
                 Set<String> requiredProperties = new HashSet<>();
+                Set<Object> examples = new HashSet<>();
+
+                if ((composedSchema.getAllOf() != null && composedSchema.getAnyOf() != null && composedSchema.getOneOf() != null)||
+                        (composedSchema.getAllOf() != null && composedSchema.getAnyOf() != null) ||
+                        (composedSchema.getAllOf() != null && composedSchema.getOneOf() != null)||
+                        (composedSchema.getOneOf() != null && composedSchema.getAnyOf() != null)){
+
+                    adjacent = true;
+
+                }
+
                 if (composedSchema.getAllOf() != null) {
                     for (Schema innerModel : composedSchema.getAllOf()) {
                         Schema resolved = resolveSchema(innerModel);
@@ -217,6 +230,9 @@ public class ResolverFully {
                         if (requiredProperties.size() > 0) {
                             model.setRequired(new ArrayList<>(requiredProperties));
                         }
+                        if (resolved.getExample() != null) {
+                            examples.add(resolved.getExample());
+                        }
                         if (composedSchema.getExtensions() != null) {
                             Map<String, Object> extensions = composedSchema.getExtensions();
                             for (String key : extensions.keySet()) {
@@ -224,35 +240,100 @@ public class ResolverFully {
                             }
                         }
                     }
-                    return model;
-                } else if (composedSchema.getOneOf() != null) {
-                    Schema resolved;
-                    List<Schema> list = new ArrayList<>();
-                    for (Schema innerModel : composedSchema.getOneOf()) {
-                        resolved = resolveSchema(innerModel);
-                        list.add(resolved);
-                    }
-                    composedSchema.setOneOf(list);
 
-                } else if (composedSchema.getAnyOf() != null) {
-                    Schema resolved;
-                    List<Schema> list = new ArrayList<>();
-                    for (Schema innerModel : composedSchema.getAnyOf()) {
-                        resolved = resolveSchema(innerModel);
-                        list.add(resolved);
+                } if (composedSchema.getOneOf() != null) {
+                    if(adjacent == false) {
+                        Schema resolved;
+                        List<Schema> list = new ArrayList<>();
+                        for (Schema innerModel : composedSchema.getOneOf()) {
+                            resolved = resolveSchema(innerModel);
+                            list.add(resolved);
+                        }
+                        composedSchema.setOneOf(list);
+                        return composedSchema;
+                    }else {
+                        for (Schema innerModel : composedSchema.getOneOf()) {
+                            Schema resolved = resolveSchema(innerModel);
+                            Map<String, Schema> properties = resolved.getProperties();
+                            if (resolved.getProperties() != null) {
+                                for (String key : properties.keySet()) {
+                                    Schema prop = (Schema) resolved.getProperties().get(key);
+                                    model.addProperties(key, resolveSchema(prop));
+                                }
+                                if (resolved.getRequired() != null) {
+                                    for (int i = 0; i < resolved.getRequired().size(); i++) {
+                                        if (resolved.getRequired().get(i) != null) {
+                                            requiredProperties.add(resolved.getRequired().get(i).toString());
+                                        }
+                                    }
+                                }
+                            }
+                            if (requiredProperties.size() > 0) {
+                                model.setRequired(new ArrayList<>(requiredProperties));
+                            }
+                            if (resolved.getExample() != null) {
+                                examples.add(resolved.getExample());
+                            }
+                            if (composedSchema.getExtensions() != null) {
+                                Map<String, Object> extensions = composedSchema.getExtensions();
+                                for (String key : extensions.keySet()) {
+                                    model.addExtension(key, composedSchema.getExtensions().get(key));
+                                }
+                            }
+                        }
                     }
-                    composedSchema.setAnyOf(list);
+
+                } if (composedSchema.getAnyOf() != null) {
+                    if(adjacent == false) {
+                        Schema resolved;
+                        List<Schema> list = new ArrayList<>();
+                        for (Schema innerModel : composedSchema.getAnyOf()) {
+                            resolved = resolveSchema(innerModel);
+                            list.add(resolved);
+                        }
+                        composedSchema.setAnyOf(list);
+                        return composedSchema;
+                    }else {
+                        for (Schema innerModel : composedSchema.getAnyOf()) {
+                            Schema resolved = resolveSchema(innerModel);
+                            Map<String, Schema> properties = resolved.getProperties();
+                            if (resolved.getProperties() != null) {
+                                for (String key : properties.keySet()) {
+                                    Schema prop = (Schema) resolved.getProperties().get(key);
+                                    model.addProperties(key, resolveSchema(prop));
+                                }
+                                if (resolved.getRequired() != null) {
+                                    for (int i = 0; i < resolved.getRequired().size(); i++) {
+                                        if (resolved.getRequired().get(i) != null) {
+                                            requiredProperties.add(resolved.getRequired().get(i).toString());
+                                        }
+                                    }
+                                }
+                            }
+                            if (requiredProperties.size() > 0) {
+                                model.setRequired(new ArrayList<>(requiredProperties));
+                            }
+                            if (resolved.getExample() != null) {
+                                examples.add(resolved.getExample());
+                            }
+                            if (composedSchema.getExtensions() != null) {
+                                Map<String, Object> extensions = composedSchema.getExtensions();
+                                for (String key : extensions.keySet()) {
+                                    model.addExtension(key, composedSchema.getExtensions().get(key));
+                                }
+                            }
+                        }
+                    }
                 }
-
-
-                return composedSchema;
+                model.setExample(examples);
+                return model;
             } else {
                 // User don't want to aggregate composed schema, we only solve refs
                 if (composedSchema.getAllOf() != null)
                     composedSchema.allOf(composedSchema.getAllOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
-                else if (composedSchema.getOneOf() != null)
+                if (composedSchema.getOneOf() != null)
                     composedSchema.oneOf(composedSchema.getOneOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
-                else if (composedSchema.getAnyOf() != null)
+                if (composedSchema.getAnyOf() != null)
                     composedSchema.anyOf(composedSchema.getAnyOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
                 return composedSchema;
             }
