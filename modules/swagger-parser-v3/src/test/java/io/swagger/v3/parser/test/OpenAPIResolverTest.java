@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -55,9 +56,11 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -715,6 +718,25 @@ public class OpenAPIResolverTest {
         ComposedSchema schemaAnyOf = (ComposedSchema) openAPI.getPaths().get("/anyOf").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
         Assert.assertTrue(schemaAnyOf.getAnyOf().size() == 3);
 
+    }
+
+    @Test
+    public void testComposedSchemaAdjacentWithExamples(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/anyOf_OneOf.yaml", auths, options);
+
+        Assert.assertNotNull(openAPI);
+
+        Assert.assertTrue(openAPI.getComponents().getSchemas().size() == 2);
+
+        Schema schemaPath = openAPI.getPaths().get("/path").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        Assert.assertTrue(schemaPath instanceof Schema);
+        Assert.assertTrue(schemaPath.getProperties().size() == 5);
+        Assert.assertTrue(schemaPath.getExample() instanceof HashSet);
+        Set<Object> examples = (HashSet) schemaPath.getExample();
+        Assert.assertTrue(examples.size() == 2);
     }
 
     @Test

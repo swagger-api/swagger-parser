@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -194,12 +195,22 @@ public class ResolverFully {
 
         if(schema instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schema;
-            int adjacentCounter = 0;
+            boolean adjacent = false;
             if (aggregateCombinators) {
                 Schema model = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
                 Set<String> requiredProperties = new HashSet<>();
+                Set<Object> examples = new HashSet<>();
+
+                if ((composedSchema.getAllOf() != null && composedSchema.getAnyOf() != null && composedSchema.getOneOf() != null)||
+                        (composedSchema.getAllOf() != null && composedSchema.getAnyOf() != null) ||
+                        (composedSchema.getAllOf() != null && composedSchema.getOneOf() != null)||
+                        (composedSchema.getOneOf() != null && composedSchema.getAnyOf() != null)){
+
+                    adjacent = true;
+
+                }
+
                 if (composedSchema.getAllOf() != null) {
-                    adjacentCounter += 1;
                     for (Schema innerModel : composedSchema.getAllOf()) {
                         Schema resolved = resolveSchema(innerModel);
                         Map<String, Schema> properties = resolved.getProperties();
@@ -220,7 +231,7 @@ public class ResolverFully {
                             model.setRequired(new ArrayList<>(requiredProperties));
                         }
                         if (resolved.getExample() != null) {
-                            model.setExample(resolved.getExample());
+                            examples.add(resolved.getExample());
                         }
                         if (composedSchema.getExtensions() != null) {
                             Map<String, Object> extensions = composedSchema.getExtensions();
@@ -229,10 +240,9 @@ public class ResolverFully {
                             }
                         }
                     }
-                    //return model;
 
                 } if (composedSchema.getOneOf() != null) {
-                    if(adjacentCounter == 0) {
+                    if(adjacent == false) {
                         Schema resolved;
                         List<Schema> list = new ArrayList<>();
                         for (Schema innerModel : composedSchema.getOneOf()) {
@@ -242,7 +252,6 @@ public class ResolverFully {
                         composedSchema.setOneOf(list);
                         return composedSchema;
                     }else {
-                        adjacentCounter += 1;
                         for (Schema innerModel : composedSchema.getOneOf()) {
                             Schema resolved = resolveSchema(innerModel);
                             Map<String, Schema> properties = resolved.getProperties();
@@ -263,7 +272,7 @@ public class ResolverFully {
                                 model.setRequired(new ArrayList<>(requiredProperties));
                             }
                             if (resolved.getExample() != null) {
-                                model.setExample(resolved.getExample());
+                                examples.add(resolved.getExample());
                             }
                             if (composedSchema.getExtensions() != null) {
                                 Map<String, Object> extensions = composedSchema.getExtensions();
@@ -275,7 +284,7 @@ public class ResolverFully {
                     }
 
                 } if (composedSchema.getAnyOf() != null) {
-                    if(adjacentCounter == 0) {
+                    if(adjacent == false) {
                         Schema resolved;
                         List<Schema> list = new ArrayList<>();
                         for (Schema innerModel : composedSchema.getAnyOf()) {
@@ -285,7 +294,6 @@ public class ResolverFully {
                         composedSchema.setAnyOf(list);
                         return composedSchema;
                     }else {
-                        adjacentCounter += 1;
                         for (Schema innerModel : composedSchema.getAnyOf()) {
                             Schema resolved = resolveSchema(innerModel);
                             Map<String, Schema> properties = resolved.getProperties();
@@ -306,7 +314,7 @@ public class ResolverFully {
                                 model.setRequired(new ArrayList<>(requiredProperties));
                             }
                             if (resolved.getExample() != null) {
-                                model.setExample(resolved.getExample());
+                                examples.add(resolved.getExample());
                             }
                             if (composedSchema.getExtensions() != null) {
                                 Map<String, Object> extensions = composedSchema.getExtensions();
@@ -317,7 +325,7 @@ public class ResolverFully {
                         }
                     }
                 }
-
+                model.setExample(examples);
                 return model;
             } else {
                 // User don't want to aggregate composed schema, we only solve refs
