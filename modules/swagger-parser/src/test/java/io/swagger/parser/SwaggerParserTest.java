@@ -235,19 +235,7 @@ public class SwaggerParserTest {
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
     }
 
-    @Test
-    public void testLoadExternalNestedDefinitions() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/nested-references/b.yaml");
 
-        Map<String, Model> definitions = swagger.getDefinitions();
-        assertTrue(definitions.containsKey("x"));
-        assertTrue(definitions.containsKey("y"));
-        assertTrue(definitions.containsKey("z"));
-        assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
-        assertEquals("k-definition", definitions.get("k").getTitle());
-        assertEquals("k-definition", definitions.get("k_2").getTitle());
-    }
 
     @Test
     public void testPetstore() throws Exception {
@@ -1083,8 +1071,6 @@ public class SwaggerParserTest {
     public void testRefNameConflicts() throws Exception {
         Swagger swagger = new SwaggerParser().read("./refs-name-conflict/a.yaml");
 
-        Yaml.prettyPrint(swagger);
-
         assertTrue(swagger.getDefinitions().size() == 2);
 
         assertEquals("#/definitions/PersonObj", ((RefProperty) swagger.getPath("/newPerson").getPost().getResponses().get("200").getSchema()).get$ref());
@@ -1130,6 +1116,33 @@ public class SwaggerParserTest {
 
         Assert.assertNotNull(swagger.getDefinitions().get("XYZResponse"));
 
+    }
+
+    @Test
+    public void testIssueGrace() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/issue_657/issue_657.json");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 2);
+
+        Assert.assertNotNull(swagger.getDefinitions().get("Person"));
+        Assert.assertNotNull(swagger.getDefinitions().get("Persons"));
+
+    }
+
+    @Test
+    public void testLoadExternalNestedDefinitions() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/nested-references/b.yaml");
+
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("x"));
+        assertTrue(definitions.containsKey("y"));
+        assertTrue(definitions.containsKey("z"));
+        assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
+        assertEquals("k-definition", definitions.get("k").getTitle());
+        assertEquals("k-definition", definitions.get("k_2").getTitle());
     }
 
 
