@@ -176,15 +176,10 @@ public final class ExternalRefProcessor {
     }
 
     private void processRefProperty(RefProperty subRef, String externalFile) {
-        if (isAnExternalRefFormat(subRef.getRefFormat())) {
-            //String $ref = constructRef(subRef, externalFile);
-            //subRef.set$ref($ref);
-            if(subRef.get$ref().startsWith("."))
-                processRefToExternalDefinition(subRef.get$ref(), RefFormat.RELATIVE);
-            else {
-                processRefToExternalDefinition(subRef.get$ref(), RefFormat.URL);
-            }
 
+        if (isAnExternalRefFormat(subRef.getRefFormat())) {
+            String joinedRef = join(externalFile, subRef.get$ref());
+            subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
         } else {
             processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
         }
