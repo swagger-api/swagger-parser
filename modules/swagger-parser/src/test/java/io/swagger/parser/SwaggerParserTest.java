@@ -50,6 +50,30 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SwaggerParserTest {
+
+    @Test
+    public void testRefPaths() throws Exception {
+        String yaml = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: Path item $ref test\n" +
+                "paths:\n" +
+                "  /foo:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: OK\n" +
+                "  /foo2:\n" +
+                "    $ref: '#/paths/~1foo'";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.parse(yaml);
+
+        assertEquals(swagger.getPaths().get("foo"),swagger.getPaths().get("foo2"));
+        
+
+    }
     @Test
     public void testModelParameters() throws Exception {
         String yaml = "swagger: '2.0'\n" +
@@ -211,19 +235,7 @@ public class SwaggerParserTest {
         //Json.mapper().writerWithDefaultPrettyPrinter().writeValue(new File("resolved.json"), swagger);
     }
 
-    @Test
-    public void testLoadExternalNestedDefinitions() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/nested-references/b.yaml");
 
-        Map<String, Model> definitions = swagger.getDefinitions();
-        assertTrue(definitions.containsKey("x"));
-        assertTrue(definitions.containsKey("y"));
-        assertTrue(definitions.containsKey("z"));
-        assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
-        assertEquals("k-definition", definitions.get("k").getTitle());
-        assertEquals("k-definition", definitions.get("k_2").getTitle());
-    }
 
     @Test
     public void testPetstore() throws Exception {
@@ -545,7 +557,6 @@ public class SwaggerParserTest {
         assertTrue(stringBodyParameter instanceof BodyParameter);
         BodyParameter sbp = (BodyParameter) stringBodyParameter;
         assertTrue(sbp.getRequired());
-        assertTrue(sbp.getAllowEmptyValue());
         assertEquals(sbp.getName(), "simple");
 
         Model sbpModel = sbp.getSchema();
@@ -560,7 +571,6 @@ public class SwaggerParserTest {
         assertTrue(refBodyParameter instanceof BodyParameter);
         BodyParameter ref = (BodyParameter) refBodyParameter;
         assertTrue(ref.getRequired());
-        assertTrue(ref.getAllowEmptyValue());
         assertEquals(ref.getName(), "simple");
 
         Model refModel = ref.getSchema();
@@ -941,6 +951,35 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue594() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "paths:\n" +
+                        "  /test:\n" +
+                        "    post:\n" +
+                        "      parameters:\n" +
+                        "        - name: body\n" +
+                        "          in: body\n" +
+                        "          description: Hello world\n" +
+                        "          schema:\n" +
+                        "            type: array\n" +
+                        "            minItems: 1\n" +
+                        "            maxItems: 1\n" +
+                        "            items: \n" +
+                        "              $ref: \"#/definitions/Pet\"\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: 'OK'\n";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
+        assertNotNull(result.getSwagger());
+        ArrayModel schema = (ArrayModel)((BodyParameter)result.getSwagger().getPaths().get("/test").getPost().getParameters().get(0)).getSchema();
+        assertEquals(((RefProperty)schema.getItems()).get$ref(),"#/definitions/Pet");
+        assertNotNull(schema.getMaxItems());
+        assertNotNull(schema.getMinItems());
+
+    }
+
+    @Test
     public void testIssue450() {
         String desc = "An array of Pets";
         String xTag = "x-my-tag";
@@ -1007,6 +1046,18 @@ public class SwaggerParserTest {
 
     }
 
+    @Test(description = "Issue #616 Relative references inside of 'allOf'")
+    public void checkAllOfWithRelativeReferencesAreFound() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/allOf-relative-file-references/parent.json");
+        assertEquals(4, swagger.getDefinitions().size());
+    }
+
+    @Test(description = "Issue #616 Relative references inside of 'allOf'")
+    public void checkAllOfWithRelativeReferencesIssue604() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/allOf-relative-file-references/swagger.yaml");
+        assertEquals(2, swagger.getDefinitions().size());
+    }
+
     @Test(description = "A string example should not be over quoted when parsing a yaml string")
     public void readingSpecStringShouldNotOverQuotingStringExample() throws Exception {
         SwaggerParser parser = new SwaggerParser();
@@ -1031,10 +1082,79 @@ public class SwaggerParserTest {
     public void testRefNameConflicts() throws Exception {
         Swagger swagger = new SwaggerParser().read("./refs-name-conflict/a.yaml");
 
+        assertTrue(swagger.getDefinitions().size() == 2);
+
         assertEquals("#/definitions/PersonObj", ((RefProperty) swagger.getPath("/newPerson").getPost().getResponses().get("200").getSchema()).get$ref());
         assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/oldPerson").getPost().getResponses().get("200").getSchema()).get$ref());
         assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/yetAnotherPerson").getPost().getResponses().get("200").getSchema()).get$ref());
         assertEquals("local", swagger.getDefinitions().get("PersonObj").getProperties().get("location").getExample());
         assertEquals("referred", swagger.getDefinitions().get("PersonObj_2").getProperties().get("location").getExample());
     }
+
+    @Test
+    public void testRefAdditionalProperties() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/additionalProperties.yaml");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 3);
+        
+        Assert.assertNotNull(swagger.getDefinitions().get("link-object"));
+        Assert.assertNotNull(swagger.getDefinitions().get("rel-data"));
+        Assert.assertNotNull(swagger.getDefinitions().get("result"));
+    }
+
+    @Test
+    public void testRefEnum() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/refEnum.yaml");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 5);
+
+        Assert.assertNotNull(swagger.getDefinitions().get("PrintInfo"));
+        Assert.assertNotNull(swagger.getDefinitions().get("SomeEnum"));
+        Assert.assertNotNull(swagger.getDefinitions().get("ShippingInfo"));
+    }
+
+    @Test
+    public void testIssue643() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/issue_643.yaml");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 1);
+
+        Assert.assertNotNull(swagger.getDefinitions().get("XYZResponse"));
+
+    }
+
+    @Test
+    public void testIssueGrace() throws Exception {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/issue_657/issue_657.json");
+
+        Assert.assertNotNull(swagger);
+
+        Assert.assertTrue(swagger.getDefinitions().size() == 2);
+
+        Assert.assertNotNull(swagger.getDefinitions().get("Person"));
+        Assert.assertNotNull(swagger.getDefinitions().get("Persons"));
+
+    }
+
+    @Test
+    public void testLoadExternalNestedDefinitions() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/nested-references/b.yaml");
+
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("x"));
+        assertTrue(definitions.containsKey("y"));
+        assertTrue(definitions.containsKey("z"));
+        assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
+        assertEquals("k-definition", definitions.get("k").getTitle());
+        assertEquals("k-definition", definitions.get("k_2").getTitle());
+    }
+
+
 }

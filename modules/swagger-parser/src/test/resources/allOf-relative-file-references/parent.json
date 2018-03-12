@@ -1,0 +1,84 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Issue #616. This is a modified Petstore server where we have two pet definitions  1. pet and 2. fancy_pet which inherits pet using allOf."
+  },
+  "host": "petstore.swagger.io",
+  "basePath": "/v3",
+  "paths": {
+    "/pet": {
+      "get": {
+        "operationId": "getPetById",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "./models/pet.json"
+            }
+          }
+        }
+      }
+    },
+    "/fancy-pet": {
+      "get": {
+        "operationId": "getFancyPetById",
+        "parameters": [
+          {
+            "name": "fancyPetId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "./models/fancy_pet.json"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DomesticPet": {
+      "allOf": [
+        {
+          "$ref": "./models/pet.json"
+        },
+        {
+          "properties": {
+            "description": {
+              "type": "string",
+              "example": "friendly"
+            }
+          }
+        }
+      ]
+    },
+    "DancingPet": {
+      "allOf": [
+        {
+          "$ref": "./models/fancy_pet.json"
+        },
+        {
+          "properties": {
+            "style": {
+              "type": "string",
+              "example": "salsa"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

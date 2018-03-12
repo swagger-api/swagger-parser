@@ -36,9 +36,9 @@ public class ExternalRefProcessorTest {
         final RefFormat refFormat = RefFormat.URL;
 
         new StrictExpectations() {{
-        	cache.getRenamedRef(ref);
-        	times = 1;
-        	result = null;
+			cache.getRenamedRef(ref);
+			times = 1;
+			result = null;
 
             cache.loadRef(ref, refFormat, Model.class);
             times = 1;
@@ -59,6 +59,8 @@ public class ExternalRefProcessorTest {
         String newRef = new ExternalRefProcessor(cache, swagger).processRefToExternalDefinition(ref, refFormat);
         assertEquals(newRef, "bar");
     }
+
+
 
     @Test
     public void testNestedExternalRefs(@Injectable final Model mockedModel){

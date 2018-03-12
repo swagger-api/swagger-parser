@@ -64,14 +64,10 @@ public class RefUtilsTest {
         doComputeDefinitionNameTestCase("./path/to/file#/foo", "foo");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar", "bar");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar/hello", "hello");
-
-        // Name conflicts resolved by adding _number
-        assertEquals("file_2", RefUtils.computeDefinitionName("http://my.company.com/path/to/file.json", singleton("file")));
-        assertEquals("file_3", RefUtils.computeDefinitionName("http://my.company.com/path/to/file.json", new HashSet<>(asList("file", "file_2"))));
     }
 
     private void doComputeDefinitionNameTestCase(String ref, String expectedDefinitionName) {
-        assertEquals(expectedDefinitionName, RefUtils.computeDefinitionName(ref, Collections.<String>emptySet()));
+        assertEquals(expectedDefinitionName, RefUtils.computeDefinitionName(ref));
     }
 
     private Map<String, Model> createMap(String... keys) {
