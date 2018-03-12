@@ -184,11 +184,7 @@ public final class ExternalRefProcessor {
             processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
         }
     }
-
-    /*protected String constructRef(RefProperty refProperty, String rootLocation) {
-        String ref = refProperty.get$ref();
-        return join(rootLocation, ref);
-    }*/
+    
 
     public static String join(String source, String fragment) {
         try {
