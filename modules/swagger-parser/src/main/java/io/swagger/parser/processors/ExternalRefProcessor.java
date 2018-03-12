@@ -176,24 +176,15 @@ public final class ExternalRefProcessor {
     }
 
     private void processRefProperty(RefProperty subRef, String externalFile) {
-        if (isAnExternalRefFormat(subRef.getRefFormat())) {
-            String $ref = constructRef(subRef, externalFile);
-            subRef.set$ref($ref);
-            if($ref.startsWith("."))
-                processRefToExternalDefinition($ref, RefFormat.RELATIVE);
-            else {
-                processRefToExternalDefinition($ref, RefFormat.URL);
-            }
 
+        if (isAnExternalRefFormat(subRef.getRefFormat())) {
+            String joinedRef = join(externalFile, subRef.get$ref());
+            subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
         } else {
             processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
         }
     }
-
-    protected String constructRef(RefProperty refProperty, String rootLocation) {
-        String ref = refProperty.get$ref();
-        return join(rootLocation, ref);
-    }
+    
 
     public static String join(String source, String fragment) {
         try {
@@ -214,6 +205,7 @@ public final class ExternalRefProcessor {
             URI resolved = uri.resolve(f);
 
             URI normalized = resolved.normalize();
+
             if(Character.isAlphabetic(normalized.toString().charAt(0)) && isRelative) {
                 return "./" + normalized.toString();
             }

@@ -1,0 +1,46 @@
+patch:
+      description: Update a tenant record.
+      operationId: update
+      tags:
+      - tenants
+      parameters:
+      - $ref: "#/parameters/id"
+      - in: body
+        name: tenant
+        description: The tenant properties to update
+        schema:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              $ref: '#/definitions/Tenant/properties/name'
+
+definitions:
+  Tenant:
+    type: object
+    required:
+      - name
+      - handle
+    properties:
+      id:
+        type: integer
+        format: int32
+        readOnly: true
+      name:
+        type: string
+      handle:
+        type: string
+        pattern: '^[a-zA-Z0-9-]{0,62}$'
+      createdAt:
+        type: string
+        format: date-time
+        readOnly: true
+      updatedAt:
+        type: string
+        format: date-time
+        readOnly: true
+      deletedAt:
+        type: string
+        format: date-time
+        readOnly: true

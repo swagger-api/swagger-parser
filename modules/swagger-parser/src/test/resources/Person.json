@@ -1,0 +1,21 @@
+{
+  "definitions": {
+    "Person": {
+      "type": "object",
+      "description": "A simple definition of a person.",
+      "required": [
+        "firstName", "lastName"
+      ],
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "example": "Stan"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Smith"
+        }
+      }
+    }
+  }
+}
