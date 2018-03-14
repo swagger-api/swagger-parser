@@ -20,18 +20,18 @@ public class SwaggerParser {
         if (location == null) {
             return null;
         }
-        location = location.replaceAll("\\\\","/");
+        location = location.replaceAll("\\\\", "/");
         List<SwaggerParserExtension> parserExtensions = getExtensions();
         SwaggerDeserializationResult output;
 
-        if(auths == null) {
+        if (auths == null) {
             auths = new ArrayList<AuthorizationValue>();
         }
 
         output = new Swagger20Parser().readWithInfo(location, auths);
         if (output != null) {
-            if(output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
-                if(resolve) {
+            if (output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
+                if (resolve) {
                     output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
                 }
                 return output;
@@ -43,9 +43,9 @@ public class SwaggerParser {
                 return output;
             }
         }
-        if(output == null) {
+        if (output == null) {
             output = new SwaggerDeserializationResult()
-                .message("The swagger definition could not be read");
+                    .message("The swagger definition could not be read");
         }
         return output;
     }
@@ -58,7 +58,7 @@ public class SwaggerParser {
         if (location == null) {
             return null;
         }
-        location = location.replaceAll("\\\\","/");
+        location = location.replaceAll("\\\\", "/");
         Swagger output;
 
         try {
@@ -87,7 +87,11 @@ public class SwaggerParser {
     }
 
     public SwaggerDeserializationResult readWithInfo(String swaggerAsString) {
-        if(swaggerAsString == null) {
+        return readWithInfo(swaggerAsString, Boolean.TRUE);
+    }
+
+    public SwaggerDeserializationResult readWithInfo(String swaggerAsString, boolean resolve) {
+        if (swaggerAsString == null) {
             return new SwaggerDeserializationResult().message("empty or null swagger supplied");
         }
         try {
@@ -101,14 +105,14 @@ public class SwaggerParser {
 
             SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);
             if (result != null) {
-                result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
-            }
-            else {
-            	result = new SwaggerDeserializationResult().message("Definition does not appear to be a valid Swagger format");
+                if (resolve) {
+                    result.setSwagger(new SwaggerResolver(result.getSwagger(), new ArrayList<AuthorizationValue>(), null).resolve());
+                }
+            } else {
+                result = new SwaggerDeserializationResult().message("Definition does not appear to be a valid Swagger format");
             }
             return result;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return new SwaggerDeserializationResult().message("malformed or unreadable swagger supplied");
         }
     }
@@ -148,10 +152,9 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().read(node);
             if (output != null) {
-                if(resolve) {
+                if (resolve) {
                     return new SwaggerResolver(output, authorizationValues).resolve();
-                }
-                else {
+                } else {
                     return output;
                 }
             }

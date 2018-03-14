@@ -16,10 +16,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -60,7 +64,6 @@ public class RefUtilsTest {
         doComputeDefinitionNameTestCase("./path/to/file#/foo", "foo");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar", "bar");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar/hello", "hello");
-
     }
 
     private void doComputeDefinitionNameTestCase(String ref, String expectedDefinitionName) {

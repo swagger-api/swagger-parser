@@ -24,6 +24,55 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 public class SwaggerDeserializerTest {
+
+
+    @Test
+    public void testEmptyDefinitions() throws Exception {
+        String yaml = "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  version: \"1.0\"\n" +
+                "  title: \"dd\"\n" +
+                "host: \"abc:5555\"\n" +
+                "basePath: \"/mypath\"\n" +
+                "schemes:\n" +
+                "- \"http\"\n" +
+                "consumes:\n" +
+                "- \"application/json\"\n" +
+                "produces:\n" +
+                "- \"application/json\"\n" +
+                "paths:\n" +
+                "  /resource1/Id:\n" +
+                "    post:\n" +
+                "      description: \"\"\n" +
+                "      operationId: \"postOp\"\n" +
+                "      parameters:\n" +
+                "      - in: \"body\"\n" +
+                "        name: \"input3\"\n" +
+                "        description: \"\"\n" +
+                "        required: true\n" +
+                "        schema:\n" +
+                "          $ref: \"#/definitions/mydefinition\"\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: \"Successful\"\n" +
+                "        401:\n" +
+                "          description: \"Access Denied\"\n" +
+                "definitions:\n" +
+                "  mydefinition: {}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        assertNotNull(swagger.getDefinitions().get("mydefinition"));
+
+
+    }
+
+
     @Test
     public void testSecurityDeserialization() throws Exception {
         String json = "{\n" +
@@ -91,16 +140,14 @@ public class SwaggerDeserializerTest {
         String json = "{\n" +
                 "  \"properties\": {\n" +
                 "    \"data\": {\n" +
-                "      \"properties\": {\n" +
-                "        \"description\": \"the array type\",\n" +
-                "        \"type\": \"array\",\n" +
-                "        \"items\": {\n" +
-                "          \"properties\": {\n" +
-                "            \"name\": {\n" +
-                "              \"description\": \"the inner type\",\n" +
-                "              \"type\": \"string\",\n" +
-                "              \"minLength\": 1\n" +
-                "            }\n" +
+                "      \"description\": \"the array type\",\n" +
+                "      \"type\": \"array\",\n" +
+                "      \"items\": {\n" +
+                "        \"properties\": {\n" +
+                "          \"name\": {\n" +
+                "            \"description\": \"the inner type\",\n" +
+                "            \"type\": \"string\",\n" +
+                "            \"minLength\": 1\n" +
                 "          }\n" +
                 "        }\n" +
                 "      }\n" +
@@ -1371,5 +1418,40 @@ public class SwaggerDeserializerTest {
         SwaggerDeserializationResult result = parser.readWithInfo(json);
         Swagger rebuilt = result.getSwagger();
         assertNotNull(rebuilt);
+    }
+
+    @Test(description = "it should deserialize untyped additionalProperties")
+    public void testUntypedAdditionalProperties() {
+        String json = "{\n" +
+                "  \"paths\": {\n" +
+                "    \"/store/inventory\": {\n" +
+                "      \"get\": {\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"successful operation\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"object\",\n" +
+                "              \"description\": \"map of anything\",\n" +
+                "              \"additionalProperties\": {}\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+
+        Property response = swagger.getPath("/store/inventory").getGet().getResponses().get("200").getSchema();
+        assertTrue(response instanceof MapProperty);
+        Property additionalProperties = ((MapProperty) response).getAdditionalProperties();
+        assertTrue(additionalProperties instanceof UntypedProperty);
+        assertEquals(additionalProperties.getType(), null);
     }
 }

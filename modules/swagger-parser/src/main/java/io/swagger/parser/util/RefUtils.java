@@ -9,10 +9,12 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public class RefUtils {
 
     public static String computeDefinitionName(String ref) {
+
 
         final String[] refParts = ref.split("#/");
 
@@ -39,7 +41,6 @@ public class RefUtils {
 
         return plausibleName;
     }
-
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
         return refFormat == RefFormat.URL || refFormat == RefFormat.RELATIVE;
     }
@@ -64,7 +65,7 @@ public class RefUtils {
                 return readExternalRef(url, RefFormat.URL, auths, null);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file + " path:" + rootPath, e);
         }
 
         return result;
@@ -137,7 +138,7 @@ public class RefUtils {
 
             }
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file + " path: "+parentDirectory, e);
         }
 
         return result;

@@ -43,6 +43,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import io.swagger.models.properties.UntypedProperty;
 import io.swagger.models.resourcelisting.ApiInfo;
 import io.swagger.models.resourcelisting.ApiKeyAuthorization;
 import io.swagger.models.resourcelisting.ApiListingReference;
@@ -52,18 +53,23 @@ import io.swagger.models.resourcelisting.BasicAuthorization;
 import io.swagger.models.resourcelisting.ImplicitGrant;
 import io.swagger.models.resourcelisting.OAuth2Authorization;
 import io.swagger.models.resourcelisting.ResourceListing;
+import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.report.MessageBuilder;
 import io.swagger.transform.migrate.ApiDeclarationMigrator;
 import io.swagger.transform.migrate.ResourceListingMigrator;
 import io.swagger.util.Json;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -186,7 +192,22 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 String json = RemoteUrl.urlToString(input, auths);
                 jsonNode = Json.mapper().readTree(json);
             } else {
-                jsonNode = Json.mapper().readTree(new File(input));
+                final String fileScheme = "file:";
+                java.nio.file.Path path;
+                if (input.toLowerCase().startsWith(fileScheme)) {
+                    path = Paths.get(URI.create(input));
+                } else {
+                    path = Paths.get(input);
+                }
+                String json;
+                if (Files.exists(path)) {
+                    json= FileUtils.readFileToString(path.toFile(), "UTF-8");
+                } else {
+                    json = ClasspathHelper.loadFileFromClasspath(input  );
+                }
+
+                jsonNode = Json.mapper().readTree(json);
+
             }
             if (jsonNode.get("swaggerVersion") == null) {
                 return null;
@@ -323,7 +344,8 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 Property innerType = PropertyBuilder.build(type, format, null);
                 if (innerType != null) {
                     am.setItems(innerType);
-                } else if (items.getRef() != null) {
+                }
+                if (items.getRef() != null) {
                     am.setItems(new RefProperty(items.getRef()));
                 } else {
                     am.setItems(new RefProperty(type));
@@ -331,7 +353,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 output = am;
             } else {
                 Property input = PropertyBuilder.build(type, format, null);
-                if (input == null && !"void".equals(type)) {
+                if (input != null) {
+                	output = PropertyBuilder.toModel(input);
+                } else if (!"void".equals(type)) {
                     //use ref model
                     output = new RefModel().asDefault(type);
                 }
@@ -367,7 +391,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 args.put(PropertyBuilder.PropertyId.ENUM, enumValues);
             }
             Property innerType = PropertyBuilder.build(type, format, args);
-            if (innerType != null) {
+            if (innerType != null && !(innerType instanceof UntypedProperty)) {
                 am.setItems(innerType);
             } else if (items.getRef() != null) {
                 am.setItems(new RefProperty(items.getRef()));
@@ -388,7 +412,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             }
 
             Property i = PropertyBuilder.build(type, format, args);
-            if (i != null) {
+            if (i != null && !(i instanceof UntypedProperty)) {
                 output = i;
             } else {
                 if (obj.getRef() != null) {
@@ -487,7 +511,21 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 String json = RemoteUrl.urlToString(input, auths);
                 jsonNode = Json.mapper().readTree(json);
             } else {
-                jsonNode = Json.mapper().readTree(new java.io.File(input));
+                final String fileScheme = "file:";
+                java.nio.file.Path path;
+                if (input.toLowerCase().startsWith(fileScheme)) {
+                    path = Paths.get(URI.create(input));
+                } else {
+                    path = Paths.get(input);
+                }
+                String json;
+                if (Files.exists(path)) {
+                     json= FileUtils.readFileToString(path.toFile(), "UTF-8");
+                } else {
+                    json = ClasspathHelper.loadFileFromClasspath(input  );
+                }
+
+                jsonNode = Json.mapper().readTree(json);
             }
 
             // this should be moved to a json patch

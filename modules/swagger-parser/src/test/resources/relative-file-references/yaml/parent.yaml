@@ -1,0 +1,43 @@
+---
+swagger: "2.0"
+paths:
+  /health:
+    $ref: "./paths/healthPath.yaml"
+definitions:
+  refInDefinitions:
+    $ref: "./models/example.yaml"
+  arrayModel:
+    type: "array"
+    items:
+      $ref: "./models/foo.yaml"
+  composedCat:
+    allOf:
+    - foo: "bar"
+    - $ref: "./models/pet.yaml"
+    - $ref: "./models/conflict.yaml#/foo"
+    - properties:
+        huntingSkill:
+          type: "string"
+          description: "The measured skill for hunting"
+          default: "lazy"
+          enum:
+          - "clueless"
+          - "lazy"
+          - "adventurous"
+          - "aggressive"
+        prop2:
+          $ref: "./models/foo.yaml"
+        reflexes:
+          type: "array"
+          items:
+            $ref: "./models/reflex.yaml"
+        reflexMap:
+          type: "object"
+          additionalProperties:
+            $ref: "./models/reflex.yaml"
+      required:
+      - "huntingSkill"
+  externalArray:
+    $ref: "./models/localrefence.yaml#/localArray"
+  externalObject:
+    $ref: "./models/localrefence.yaml#/localObject"
