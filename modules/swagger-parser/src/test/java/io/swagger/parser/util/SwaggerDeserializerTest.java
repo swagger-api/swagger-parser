@@ -1419,4 +1419,39 @@ public class SwaggerDeserializerTest {
         Swagger rebuilt = result.getSwagger();
         assertNotNull(rebuilt);
     }
+
+    @Test(description = "it should deserialize untyped additionalProperties")
+    public void testUntypedAdditionalProperties() {
+        String json = "{\n" +
+                "  \"paths\": {\n" +
+                "    \"/store/inventory\": {\n" +
+                "      \"get\": {\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"successful operation\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"object\",\n" +
+                "              \"description\": \"map of anything\",\n" +
+                "              \"additionalProperties\": {}\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+
+        Property response = swagger.getPath("/store/inventory").getGet().getResponses().get("200").getSchema();
+        assertTrue(response instanceof MapProperty);
+        Property additionalProperties = ((MapProperty) response).getAdditionalProperties();
+        assertTrue(additionalProperties instanceof UntypedProperty);
+        assertEquals(additionalProperties.getType(), null);
+    }
 }
