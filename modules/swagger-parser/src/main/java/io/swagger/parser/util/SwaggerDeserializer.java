@@ -1104,14 +1104,15 @@ public class SwaggerDeserializer {
                         schemaRef = schema.get("$ref");
                     }
 
-                    Property schemaProp = new RefProperty(schemaRef.textValue());
-                    output.schema(schemaProp);
+                    Model schemaProp = new RefModel(schemaRef.textValue());
+                    output.responseSchema(schemaProp);
                 } else {
                     result.invalidType(location, "$ref", "string", node);
                 }
             } else {
-                output.schema(Json.mapper().convertValue(schema, Property.class));
+                output.responseSchema(Json.mapper().convertValue(schema, Model.class));
             }
+
         }
         ObjectNode headersNode = getObject("headers", node, false, location, result);
         if(headersNode != null) {

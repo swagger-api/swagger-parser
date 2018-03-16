@@ -207,11 +207,11 @@ public class SwaggerResolverTest {
         swagger.path("/fun", new Path()
                 .get(new Operation()
                         .response(200, new Response()
-                                .schema(new RefProperty(remoteRef)))));
+                                .responseSchema(new RefModel(remoteRef)))));
 
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
         final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
-        final RefProperty ref = (RefProperty) response.getSchema();
+        final RefModel ref = (RefModel) response.getResponseSchema();
         assertEquals(ref.get$ref(), "#/definitions/Tag");
         assertNotNull(swagger.getDefinitions().get("Tag"));
     }
@@ -232,13 +232,13 @@ public class SwaggerResolverTest {
         swagger.path("/fun", new Path()
                 .get(new Operation()
                         .response(200, new Response()
-                                .schema(
-                                        new ArrayProperty(
+                                .responseSchema(
+                                        new ArrayModel().items(
                                                 new RefProperty(REMOTE_REF_YAML))))));
 
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
         final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
-        final ArrayProperty array = (ArrayProperty) response.getSchema();
+        final ArrayModel array = (ArrayModel) response.getResponseSchema();
         assertNotNull(array.getItems());
 
         final RefProperty ref = (RefProperty) array.getItems();
