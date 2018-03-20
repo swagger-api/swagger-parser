@@ -1,5 +1,6 @@
 package io.swagger.parser.test;
 
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -441,7 +442,7 @@ public class V2ConverterTest {
         numbers.add(4);
         numbers.add(5);
         assertEquals(((ArraySchema) properties.get(FRIEND_IDS)).getExample(), numbers);
-        assertEquals(schemas.get(ARRAY_OF_USERS_MODEL).getExample(), ARRAY_VALUES);
+        assertEquals(Json.mapper().writeValueAsString(schemas.get(ARRAY_OF_USERS_MODEL).getExample()), ARRAY_VALUES);
     }
 
     @Test(description = "Convert response examples")
