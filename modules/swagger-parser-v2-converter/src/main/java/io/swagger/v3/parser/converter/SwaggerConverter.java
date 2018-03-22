@@ -71,6 +71,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SwaggerConverter implements SwaggerParserExtension {
@@ -195,7 +196,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         Paths v3Paths = new Paths();
-        for (String pathname : swagger.getPaths().keySet()) {
+        Map<String, Path> pathMap = Optional.ofNullable(swagger.getPaths()).orElse(new HashMap<>());
+        for (String pathname : pathMap.keySet()) {
             io.swagger.models.Path v2Path = swagger.getPath(pathname);
             PathItem v3Path = convert(v2Path);
             v3Paths.put(pathname, v3Path);

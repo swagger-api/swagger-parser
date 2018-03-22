@@ -70,6 +70,7 @@ public class V2ConverterTest {
     private static final String ISSUE_455_JSON = "issue-455.json";
     private static final String ISSUE_540_JSON = "issue-540.json";
     private static final String ISSUE_647_JSON = "issue-647.yaml";
+    private static final String ISSUE_662_JSON = "issue-662.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -543,6 +544,12 @@ public class V2ConverterTest {
 
         String ref = oas.getComponents().getRequestBodies().get("b").getContent().get("*/*").getSchema().get$ref();
         assertEquals(ref, SCHEMAS_A_REF);
+    }
+
+    @Test(description = "OpenAPI v2 converter - NPE when no \"paths\" is empty")
+    public void testIssue662() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_662_JSON);
+        assertTrue(oas.getPaths().isEmpty());
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
