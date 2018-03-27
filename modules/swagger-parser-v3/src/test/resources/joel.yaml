@@ -1,0 +1,2050 @@
+openapi: 3.0.0
+servers:
+  - url: 'https://virtserver.swaggerhub.com/mia87/MiamiAPI/1.0.1'
+  - url: 'http://virtserver.swaggerhub.com/mia87/MiamiAPI/1.0.1'
+info:
+  description: |
+    This is a sample Petstore server.  You can find
+    out more about Swagger at
+    [http://swagger.io](http://swagger.io) or on
+    [irc.freenode.net, #swagger](http://swagger.io/irc/).
+  version: 1.0.1
+  title: Swagger Petstore
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: candidate
+    description: Everything about your Candidates
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+  - name: user
+    description: Operations about user
+    externalDocs:
+      description: Find out more about our store
+      url: 'http://swagger.io'
+  - name: besoin
+    description: Everything about your Besoins
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+  - name: school
+    description: Everything about your Schools
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+  - name: client
+    description: Everything about your Clients
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+  - name: jobboard
+    description: Everything about your JobBoards
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+  - name: jobglobal
+    description: Everything about your JobGlobals
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+  - name: source
+    description: Everything about your Sources
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+paths:
+  /candidates:
+    post:
+      tags:
+        - candidate
+      summary: Add a new candidate to the database
+      operationId: addCandidate
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Candidate'
+        description: Candiadate object that needs to be added to the database
+        required: true
+    put:
+      tags:
+        - candidate
+      summary: Update an existing candidate
+      operationId: updateCandidate
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Candidate not found
+        '405':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Candidate'
+        description: Candidate object that needs to be update to the database
+        required: true
+    get:
+      tags:
+        - candidate
+      summary: Finds all candidates
+      description: Get all candidates
+      operationId: findCandidates
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Candidate'
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth:
+            - 'read:pets'
+  '/candidates/{candidateId}':
+    get:
+      tags:
+        - candidate
+      summary: Find candidate by ID
+      description: Returns a single candidate
+      operationId: getCandidateById
+      parameters:
+        - name: candidateId
+          in: path
+          description: ID of candidate to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Candidate not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - candidate
+      summary: Updates a candidate in the database with form data
+      operationId: updateCandidatetWithForm
+      parameters:
+        - name: candidateId
+          in: path
+          description: ID of candidate that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Updated name of the candidate
+                  type: string
+                status:
+                  description: Updated status of the candidate
+                  type: string
+    delete:
+      tags:
+        - candidate
+      summary: Deletes a candidate
+      operationId: deleteCandidate
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: candidateId
+          in: path
+          description: Candidate id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Candidate not found
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+  '/candidates/{candidateId}/uploadCV':
+    post:
+      tags:
+        - candidate
+      operationId: uploadCV
+      parameters:
+        - name: candidateId
+          in: path
+          description: ID of candidate to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                additionalMetadata:
+                  description: Additional data to pass to server
+                  type: string
+                file:
+                  description: file to upload
+                  type: string
+                  format: binary
+  /user:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Created user object
+        required: true
+  /user/login:
+    get:
+      tags:
+        - user
+      summary: Logs user into the system
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      tags:
+        - user
+      summary: Logs out current logged in user session
+      operationId: logoutUser
+      responses:
+        default:
+          description: successful operation
+  '/user/{username}':
+    get:
+      tags:
+        - user
+      summary: Get user by user name
+      operationId: getUserByName
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be fetched. Use user1 for testing.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+    put:
+      tags:
+        - user
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid user supplied
+        '404':
+          description: User not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Updated user object
+        required: true
+    delete:
+      tags:
+        - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+  /besoins:
+    post:
+      tags:
+        - besoin
+      summary: Add a new besoin to the database
+      operationId: addBesoin
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Besoin'
+        description: Besoin object that needs to be added to the database
+        required: true
+    put:
+      tags:
+        - besoin
+      summary: Update an existing besoin
+      operationId: updateBesoin
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Besoin not found
+        '405':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Besoin'
+        description: Besoin object that needs to be update to the database
+        required: true
+    get:
+      tags:
+        - besoin
+      summary: Finds all besoins
+      description: Get all besoins
+      operationId: findBesoins
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Besoin'
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth:
+            - 'read:pets'
+  '/besoins/{besoinId}':
+    get:
+      tags:
+        - besoin
+      summary: Find besoin by ID
+      description: Returns a single besoin
+      operationId: getBesoinById
+      parameters:
+        - name: besoinId
+          in: path
+          description: ID of besoin to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Besoin'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Besoin not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - besoin
+      summary: Updates a besoin in the database with form data
+      operationId: updateBesoinWithForm
+      parameters:
+        - name: besoinId
+          in: path
+          description: ID of besoin that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Updated name of the besoin
+                  type: string
+                status:
+                  description: Updated status of the besoin
+                  type: string
+    delete:
+      tags:
+        - besoin
+      summary: Deletes a besoin
+      operationId: deleteBesoin
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: besoinId
+          in: path
+          description: Besoin id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Besoin not found
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+  /schools:
+    post:
+      tags:
+        - school
+      summary: Add a new school to the database
+      operationId: addSchool
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/School'
+        description: School object that needs to be added to the database
+        required: true
+    put:
+      tags:
+        - school
+      summary: Update an existing school
+      operationId: updateSchool
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: School not found
+        '405':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/School'
+        description: School object that needs to be update to the database
+        required: true
+    get:
+      tags:
+        - school
+      summary: Finds all schools
+      description: Get all schools
+      operationId: findSchools
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/School'
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth:
+            - 'read:pets'
+  '/schools/{schoolId}':
+    get:
+      tags:
+        - school
+      summary: Find school by ID
+      description: Returns a single school
+      operationId: getSchoolById
+      parameters:
+        - name: schoolId
+          in: path
+          description: ID of school to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: School not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - school
+      summary: Updates a besooloin in the database with form data
+      operationId: updateSchoolWithForm
+      parameters:
+        - name: schoolId
+          in: path
+          description: ID of school that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Updated name of the school
+                  type: string
+                status:
+                  description: Updated status of the school
+                  type: string
+    delete:
+      tags:
+        - school
+      summary: Deletes a school
+      operationId: deleteSchool
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: schoolId
+          in: path
+          description: School id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: School not found
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+  /clients:
+    post:
+      tags:
+        - client
+      summary: Add a new client to the database
+      operationId: addClient
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+        description: Client object that needs to be added to the database
+        required: true
+    put:
+      tags:
+        - client
+      summary: Update an existing client
+      operationId: updateClient
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Client not found
+        '405':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+        description: Client object that needs to be update to the database
+        required: true
+    get:
+      tags:
+        - client
+      summary: Finds all clients
+      description: Get all clients
+      operationId: findClients
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth:
+            - 'read:pets'
+  '/clients/{clientId}':
+    get:
+      tags:
+        - client
+      summary: Find client by ID
+      description: Returns a single client
+      operationId: getClientById
+      parameters:
+        - name: clientId
+          in: path
+          description: ID of client to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Client not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - client
+      summary: Updates a client in the database with form data
+      operationId: updateClientWithForm
+      parameters:
+        - name: clientId
+          in: path
+          description: ID of client that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Updated name of the client
+                  type: string
+                status:
+                  description: Updated status of the client
+                  type: string
+    delete:
+      tags:
+        - client
+      summary: Deletes a client
+      operationId: deleteClient
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          description: Client id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Client not found
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+  /jobboards:
+    post:
+      tags:
+        - jobboard
+      summary: Add a new jobboard to the database
+      operationId: addJobBoard
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobBoard'
+        description: JobBoard object that needs to be added to the database
+        required: true
+    put:
+      tags:
+        - jobboard
+      summary: Update an existing jobboard
+      operationId: updateJobBoard
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: JobBoard not found
+        '405':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobBoard'
+        description: JobBoard object that needs to be update to the database
+        required: true
+    get:
+      tags:
+        - jobboard
+      summary: Finds all JobBoards
+      description: Get all JobBoards
+      operationId: findJobBoards
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobBoard'
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth:
+            - 'read:pets'
+  '/jobboards/{jobboardId}':
+    get:
+      tags:
+        - jobboard
+      summary: Find jobboard by ID
+      description: Returns a single jobboard
+      operationId: getJobBoardById
+      parameters:
+        - name: jobboardId
+          in: path
+          description: ID of jobboard to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobBoard'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: JobBoard not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - jobboard
+      summary: Updates a jobboard in the database with form data
+      operationId: updateJobBoardWithForm
+      parameters:
+        - name: jobboardId
+          in: path
+          description: ID of jobboard that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Updated name of the jobboard
+                  type: string
+                status:
+                  description: Updated status of the jobboard
+                  type: string
+    delete:
+      tags:
+        - jobboard
+      summary: Deletes a jobboard
+      operationId: deleteJobBoard
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: jobboardId
+          in: path
+          description: JobBoard id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: JobBoard not found
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+  /jobglobals:
+    post:
+      tags:
+        - jobglobal
+      summary: Add a new jobglobal to the database
+      operationId: addJobGlobal
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobGlobal'
+        description: JobGlobal object that needs to be added to the database
+        required: true
+    put:
+      tags:
+        - jobglobal
+      summary: Update an existing jobglobal
+      operationId: updateJobGlobal
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: JobGlobal not found
+        '405':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobGlobal'
+        description: JobGlobal object that needs to be update to the database
+        required: true
+    get:
+      tags:
+        - jobglobal
+      summary: Finds all JobGlobals
+      description: Get all JobGlobals
+      operationId: findJobGlobals
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobGlobal'
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth:
+            - 'read:pets'
+  '/jobglobals/{jobglobalId}':
+    get:
+      tags:
+        - jobglobal
+      summary: Find jobglobal by ID
+      description: Returns a single jobglobal
+      operationId: getJobGlobalById
+      parameters:
+        - name: jobglobalId
+          in: path
+          description: ID of jobglobal to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobGlobal'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: JobGlobal not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - jobglobal
+      summary: Updates a jobglobal in the database with form data
+      operationId: updateJobGlobalWithForm
+      parameters:
+        - name: jobglobalId
+          in: path
+          description: ID of jobglobal that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Updated name of the jobglobal
+                  type: string
+                status:
+                  description: Updated status of the jobglobal
+                  type: string
+    delete:
+      tags:
+        - jobglobal
+      summary: Deletes a jobglobal
+      operationId: deleteJobGlobal
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: jobglobalId
+          in: path
+          description: JobGlobal id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: JobGlobal not found
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+  /sources:
+    post:
+      tags:
+        - source
+      summary: Add a new source to the database
+      operationId: addSource
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+        description: Source object that needs to be added to the database
+        required: true
+    put:
+      tags:
+        - source
+      summary: Update an existing source
+      operationId: updateSource
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Source not found
+        '405':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+        description: Source object that needs to be update to the database
+        required: true
+    get:
+      tags:
+        - source
+      summary: Finds all Sources
+      description: Get all Sources
+      operationId: findSources
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Source'
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth:
+            - 'read:pets'
+  '/sources/{sourceId}':
+    get:
+      tags:
+        - source
+      summary: Find source by ID
+      description: Returns a single jourceobboard
+      operationId: getSourceById
+      parameters:
+        - name: sourceId
+          in: path
+          description: ID of source to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Source not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - source
+      summary: Updates a source in the database with form data
+      operationId: updateSourceWithForm
+      parameters:
+        - name: sourceId
+          in: path
+          description: ID of source that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Updated name of the source
+                  type: string
+                status:
+                  description: Updated status of the source
+                  type: string
+    delete:
+      tags:
+        - source
+      summary: Deletes a source
+      operationId: deleteSource
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: sourceId
+          in: path
+          description: Source id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Source not found
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
+components:
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'http://petstore.swagger.io/oauth/dialog'
+          scopes:
+            'write:pets': modify pets in your account
+            'read:pets': read your pets
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        userStatus:
+          type: integer
+          format: int32
+          description: User Status
+      xml:
+        name: User
+    Candidate:
+      type: object
+      required:
+        - firstName
+        - lastName
+      properties:
+        id:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+          example: Jean
+        lastName:
+          type: string
+          example: Dupont
+        dateContacted:
+          type: string
+          example: 01-02-2018
+        managerEval:
+          type: string
+          example: ED
+        cdrEval:
+          type: string
+          example: VIP
+        dirEval:
+          type: string
+          example: ED
+        commentGlobal:
+          type: string
+          example: commentaire
+        experience:
+          type: string
+          example: 2017-Orange-developpeur PHP
+        salary:
+          type: string
+          example: 40K
+        salaryMin:
+          type: string
+          example: 38K
+        salaryMax:
+          type: string
+          example: 42K
+        lang:
+          type: string
+          example: fr
+        mobility:
+          type: string
+          example: PACA
+        availabilityDate:
+          type: string
+          example: 02-03-2018
+        availability:
+          type: string
+          example: 2 months
+        source:
+          $ref: '#/components/schemas/Source'
+        nationality:
+          type: string
+          example: français
+        jobBoard:
+          $ref: '#/components/schemas/JobBoard'
+        status:
+          type: string
+          description: candidate status in the database
+          enum:
+            - go
+            - no go
+            - ko
+        certifications:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Certification'
+        RIManager:
+          $ref: '#/components/schemas/User'
+        RHManager:
+          $ref: '#/components/schemas/User'
+        school:
+          $ref: '#/components/schemas/School'
+        jobGlobal:
+          $ref: '#/components/schemas/JobGlobal'
+        jobDetails:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/JobDetail'
+        shoots:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Shoot'
+        shootRecaps:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/ShootRecap'
+        interviews:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Interview'
+        histories:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/History'
+        updateddAt:
+          type: string
+          example: 22-02-2018
+        new:
+          type: boolean
+        active:
+          type: boolean
+        display:
+          type: boolean
+        preshoots:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PreShoot'
+        qcm:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Qcm'
+        cv:
+          type: string
+          example: cv.docx
+        dt:
+          type: string
+          example: dt_david.docx
+        cv_plainame:
+          type: string
+          example: cv.docx
+        dt_plainame:
+          type: string
+          example: dt_david.docx
+        email:
+          type: string
+          example: monmail@testemail.com
+        telephone:
+          type: string
+          example: 17314053
+        engineer:
+          $ref: '#/components/schemas/Engineer'
+    Source:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: CDR
+        candidates:
+          $ref: '#/components/schemas/Candidate'
+    JobBoard:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: LinkeDin
+        candidates:
+          $ref: '#/components/schemas/Candidate'
+    Certification:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Certified scrum master
+        candidates:
+          $ref: '#/components/schemas/Candidate'
+    School:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Polytech Paris
+        country:
+          type: string
+          example: France
+        category:
+          type: string
+          example: G1
+        rank:
+          type: string
+          example: A
+        candidates:
+          $ref: '#/components/schemas/Candidate'
+        besoins:
+          $ref: '#/components/schemas/Besoin'
+    JobGlobal:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Developpeur
+        candidates:
+          $ref: '#/components/schemas/Candidate'
+        shoots:
+          $ref: '#/components/schemas/Shoot'
+    JobDetail:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: developpeur
+        candidates:
+          $ref: '#/components/schemas/Candidate'
+        besoins:
+          $ref: '#/components/schemas/Besoin'
+    Shoot:
+      type: object
+      required:
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          example: en cours
+        comment:
+          type: string
+          example: commentaire
+        jobGlobal:
+          $ref: '#/components/schemas/JobGlobal'
+        date:
+          type: string
+          example: 22-02-2018
+        time:
+          type: string
+          example: 22-02-2018
+        client:
+          $ref: '#/components/schemas/Client'
+        manager:
+          $ref: '#/components/schemas/User'
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+        besoin:
+          $ref: '#/components/schemas/Besoin'
+        dateRT:
+          type: string
+          example: 22-02-2018
+        dateReponseClient:
+          type: string
+          example: 22-02-2018
+        preShoot:
+          $ref: '#/components/schemas/PreShoot'
+    ShootRecap:
+      type: object
+      required:
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          example: en cours
+        comment:
+          type: string
+          example: commentaire
+        date:
+          type: string
+          example: 22-02-2018
+        client:
+          $ref: '#/components/schemas/Client'
+        manager:
+          $ref: '#/components/schemas/User'
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+        dateRT:
+          type: string
+          example: 22-02-2018
+        eures:
+          type: boolean
+        rejected:
+          type: boolean
+        active:
+          type: boolean
+        sendByCdr:
+          type: boolean
+    Interview:
+      type: object
+      required:
+        - type
+      properties:
+        id:
+          type: integer
+          format: int64
+        manager:
+          $ref: '#/components/schemas/User'
+        type:
+          type: string
+          example: EC1
+        status:
+          type: string
+          example: todo
+        physical:
+          type: boolean
+        comment:
+          type: string
+          example: commentaire
+        dateEc:
+          type: string
+          example: 22-02-2018
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+    History:
+      type: object
+      required:
+        - object
+      properties:
+        id:
+          type: integer
+          format: int64
+        manager:
+          $ref: '#/components/schemas/User'
+        object:
+          type: string
+          example: Candidate
+        new:
+          type: boolean
+        label:
+          type: string
+          example: label
+        date:
+          type: string
+          example: 22-02-2018
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+        historyChanges:
+          $ref: '#/components/schemas/HistoryChange'
+    PreShoot:
+      type: object
+      required:
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          example: en cours
+        comment:
+          type: string
+          example: commentaire
+        date:
+          type: string
+          example: 22-02-2018
+        startDate:
+          type: string
+          example: 22-02-2018
+        endDate:
+          type: string
+          example: 22-02-2018
+        client:
+          $ref: '#/components/schemas/Client'
+        manager:
+          $ref: '#/components/schemas/User'
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+        active:
+          type: boolean
+        paused:
+          type: boolean
+        timeout:
+          type: boolean
+        nok:
+          type: boolean
+        shoot:
+          $ref: '#/components/schemas/PreShoot'
+        flowOrder:
+          type: integer
+          format: int64
+    Qcm:
+      type: object
+      required:
+        - code
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+          example: qcm-42
+        comment:
+          type: string
+          example: commentaire
+        name:
+          type: string
+          example: QCM PHP
+        score:
+          type: string
+          example: 42
+        scoreFraction:
+          type: string
+          example: 42%
+        scoreFractionTime:
+          type: string
+          example: 0h42min
+        dateFinished:
+          type: string
+          example: 22-02-2018
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+    Engineer:
+      type: object
+      required:
+        - matricule
+        - firstName
+        - lastName
+      properties:
+        id:
+          type: integer
+          format: int64
+        matricule:
+          type: string
+          example: 842042h
+        firstName:
+          type: string
+          example: Jean
+        lastName:
+          type: string
+          example: Dupont
+        gender:
+          type: string
+          example: male
+        dateHired:
+          type: string
+          example: 01-02-2018
+        manager:
+          $ref: '#/components/schemas/User'
+        seniority:
+          type: string
+          example: 2ans
+        firstExperience:
+          type: string
+          example: 01-02-2018
+        totalExperience:
+          type: string
+          example: 2ans
+        client:
+          type: string
+          example: Amadeus
+        coefficient:
+          type: string
+          example: 2.2
+        salary:
+          type: string
+          example: 40K
+        dob:
+          type: string
+          example: 01-02-2018
+        age:
+          type: string
+          example: 42
+        nationality:
+          type: string
+          example: française
+        origin:
+          type: string
+          example: PACA
+        school:
+          $ref: '#/components/schemas/School'
+        dateGraduation:
+          type: string
+          example: 02-03-2018
+        chez:
+          type: string
+          example: Chez M. Dupont
+        address1:
+          type: string
+          example: 42 route des Lucioles
+        address2:
+          type: string
+          example: Bat les écolucioles b2
+        codePostale:
+          type: string
+          example: 3440
+        ville:
+          type: string
+          example: Valbonne
+        telephone:
+          type: string
+          example: 17314053
+        personnalEmail:
+          type: string
+          example: jean.dupont@gmail.com
+        progessionalEmail:
+          type: string
+          example: jean.dupont@alten.com
+        title:
+          type: string
+          example: M.
+        active:
+          type: boolean
+        exitDate:
+          type: string
+          example: 22-02-2018
+        exitMotive:
+          type: string
+          example: Personnal
+        exitComment:
+          type: string
+          example: Wife moving from another city
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+        isRsi:
+          type: boolean
+        rsi:
+          $ref: '#/components/schemas/Engineer'
+        signed:
+          type: string
+          example: oui
+        isPrev:
+          type: boolean
+        prevLastDate:
+          type: string
+          example: 22-02-2018
+        createdDate:
+          type: string
+          example: 22-02-2018
+        suspendedContract:
+          type: boolean
+        rc:
+          $ref: '#/components/schemas/User'
+        notation:
+          type: string
+          example: dt_david.docx
+    Besoin:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        manager:
+          $ref: '#/components/schemas/User'
+        client:
+          $ref: '#/components/schemas/Client'
+        name:
+          type: string
+          example: Dev PHP/Symfony
+        availability:
+          type: string
+          example: 01-02-2018
+        jobGlobal:
+          $ref: '#/components/schemas/JobGlobal'
+        jobDetail:
+          $ref: '#/components/schemas/JobDetail'
+        notification:
+          $ref: '#/components/schemas/Notification'
+        schoolGroup:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            type: string
+        experience:
+          type: string
+          example: Amadeus
+        salary:
+          type: string
+          example: 40K
+        lang:
+          type: string
+          description: lang need
+          enum:
+            - FR
+            - FR/EN
+            - EN
+        nationality:
+          type: string
+          example: française
+        availabiltyDate:
+          type: string
+          example: 02-03-2018
+        jobDetailWeight:
+          type: string
+          example: 42
+        experienceWeight:
+          type: string
+          example: 42
+        salaryWeight:
+          type: string
+          example: 42
+        langWeight:
+          type: string
+          example: 42
+        schoolWeight:
+          type: string
+          example: 42
+        availabilityWeight:
+          type: string
+          example: 42
+        nationalityWeight:
+          type: string
+          example: 42
+        extraSkills:
+          type: string
+          example: script bash
+        comment:
+          type: string
+          example: commentaire
+        active:
+          type: boolean
+    Client:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Orange
+        description:
+          type: string
+          example: Phone operator
+        department:
+          type: string
+          example: OIH
+        manager:
+          $ref: '#/components/schemas/User'
+        shoots:
+          $ref: '#/components/schemas/Shoot'
+        contactDate:
+          type: string
+          example: 01-02-2018
+    HistoryChange:
+      type: object
+      required:
+        - field
+      properties:
+        id:
+          type: integer
+          format: int64
+        field:
+          type: string
+          example: name
+        newValue:
+          type: string
+          example: Orange Telecom
+        history:
+          $ref: '#/components/schemas/History'
+    Notification:
+      type: object
+      required:
+        - manager
+      properties:
+        id:
+          type: integer
+          format: int64
+        manager:
+          $ref: '#/components/schemas/User'
+        candidate:
+          $ref: '#/components/schemas/Candidate'
+        besoin:
+          $ref: '#/components/schemas/Besoin'
+        dateCreated:
+          type: string
+          example: 01-02-2018
+        seen:
+          type: boolean
+        seenRh:
+          type: boolean
+        seenDir:
+          type: boolean
+        rank:
+          type: number
+          format: float
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string

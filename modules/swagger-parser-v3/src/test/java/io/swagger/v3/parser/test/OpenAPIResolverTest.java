@@ -496,84 +496,91 @@ public class OpenAPIResolverTest {
     @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
         String yaml = "" +
-                "openapi: '3.0.1'\n" +
+                "openapi: 3.0.1\n" +
                 "paths:\n" +
                 "  /selfRefA:\n" +
                 "    get:\n" +
-                "      parameters:\n" +
-                "        - in: query\n" +
-                "          name: body\n" +
-                "          schema:\n" +
-                "            $ref: '#/components/Schemas/SchemaA'\n" +
+                "      requestBody:\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              $ref: '#/components/schemas/ModelA'\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: Default response\n" +
                 "  /selfRefB:\n" +
                 "    get:\n" +
-                "      parameters:\n" +
-                "        - in: query\n" +
-                "          name: body\n" +
-                "          schema:\n" +
-                "            $ref: '#/components/Schemas/SchemaB'\n" +
+                "      requestBody:\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              $ref: '#/components/schemas/ModelB'\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: Default response\n" +
                 "  /selfRefC:\n" +
                 "    get:\n" +
-                "      parameters:\n" +
-                "        - in: query\n" +
-                "          name: body\n" +
-                "          schema:\n" +
-                "            $ref: '#/components/Schemas/SchemaC'\n" +
+                "      requestBody:\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              $ref: '#/components/schemas/ModelC'\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: Default response\n" +
                 "  /selfRefD:\n" +
                 "    get:\n" +
-                "      parameters: []\n" +
                 "      responses:\n" +
-                "           default:\n"+
-                "               content:\n"+
-                "                'application/json':\n"+
-                "                     schema:\n"+
-                "                        type: array\n" +
-                "                        items:\n" +
-                "                           $ref: '#/components/Schemas/SchemaA'\n" +
+                "        default:\n" +
+                "          description: Default response\n" +
+                "          content:\n" +
+                "            '*/*':\n" +
+                "              schema:\n" +
+                "                $ref: '#/components/schemas/ModelA'\n" +
                 "  /selfRefE:\n" +
                 "    get:\n" +
-                "      parameters: []\n" +
                 "      responses:\n" +
-                "           default:\n"+
-                "               content:\n"+
-                "                'application/json':\n"+
-                "                     schema:\n"+
-                "                        type: array\n" +
-                "                        items:\n" +
-                "                           $ref: '#/components/Schemas/SchemaA'\n" +
-
+                "        default:\n" +
+                "          description: Default response\n" +
+                "          content:\n" +
+                "            '*/*':\n" +
+                "              schema:\n" +
+                "                type: array\n" +
+                "                items:\n" +
+                "                  $ref: '#/components/schemas/ModelA'\n" +
+                "info:\n" +
+                "  version: ''\n" +
+                "  title: ''\n" +
                 "components:\n" +
-                "   schemas:\n" +
-                "       SchemaA:\n" +
-                "           properties:\n" +
-                "               modelB:\n" +
-                "                   $ref: '#/components/Schemas/SchemaB'\n" +
-                "       SchemaB:\n" +
-                "           properties:\n" +
-                "                modelB:\n" +
-                "                    $ref: '#/components/Schemas/SchemaB'\n" +
-                "       SchemaC:\n" +
-                "            properties:\n" +
-                "               modelA:\n" +
-                "                   $ref: '#/components/Schemas/SchemaA'";
+                "  schemas:\n" +
+                "    ModelA:\n" +
+                "      properties:\n" +
+                "        modelB:\n" +
+                "          $ref: '#/components/schemas/ModelB'\n" +
+                "    ModelB:\n" +
+                "      properties:\n" +
+                "        modelB:\n" +
+                "          $ref: '#/components/schemas/ModelB'\n" +
+                "    ModelC:\n" +
+                "      properties:\n" +
+                "        modelA:\n" +
+                "          $ref: '#/components/schemas/ModelA'";
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
-        ResolverFully resolverUtil = new ResolverFully();
-        resolverUtil.resolveFully(openAPI);
 
-        Schema schemaB = openAPI.getPaths().get("/selfRefB").getGet().getParameters().get(0).getSchema();
+        Schema schemaB = openAPI.getPaths().get("/selfRefB").getGet().getRequestBody().getContent().get("application/json").getSchema();
         assertTrue(schemaB instanceof Schema);
 
-        assertEquals(schemaB, openAPI.getComponents().getSchemas().get("SchemaB"));
+        assertEquals(openAPI.getComponents().getSchemas().get("ModelB"), schemaB);
 
-        Schema schema = openAPI.getPaths().get("/selfRefE").getGet().getResponses().get("default").getContent().get("application/json").getSchema();
+        Schema schema = openAPI.getPaths().get("/selfRefE").getGet().getResponses().get("default").getContent().get("*/*").getSchema();
         assertTrue(schema instanceof ArraySchema);
         ArraySchema arraySchema = (ArraySchema) schema;
-        assertEquals(arraySchema.getItems(), openAPI.getComponents().getSchemas().get("SchemaA"));
+        assertEquals(openAPI.getComponents().getSchemas().get("ModelA"), arraySchema.getItems());
 
     }
 
@@ -737,6 +744,17 @@ public class OpenAPIResolverTest {
         Assert.assertTrue(schemaPath.getExample() instanceof HashSet);
         Set<Object> examples = (HashSet) schemaPath.getExample();
         Assert.assertTrue(examples.size() == 2);
+    }
+
+    @Test
+    public void testRecurssion(@Injectable final List<AuthorizationValue> auths) throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/joel.yaml", auths, options);
+
+        Assert.assertNotNull(openAPI);
+        Yaml.prettyPrint(openAPI);
     }
 
     @Test
