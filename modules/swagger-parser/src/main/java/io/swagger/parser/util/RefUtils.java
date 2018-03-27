@@ -114,6 +114,7 @@ public class RefUtils {
             }
             else if ("..".equals(relPathParts[i])) {
                 trimRel += 1;
+                trimRoot += 1;
             }
         }
 
