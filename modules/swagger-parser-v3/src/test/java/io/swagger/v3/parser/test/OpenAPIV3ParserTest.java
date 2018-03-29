@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -192,7 +193,7 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testResolveFully(@Injectable final List<AuthorizationValue> auths) throws Exception{
+    public void testResolveFully() throws Exception{
 
 
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
@@ -200,7 +201,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, new ArrayList<>(), options  );
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
@@ -221,7 +222,7 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testResolveFullyExample(@Injectable final List<AuthorizationValue> auths) throws Exception{
+    public void testResolveFullyExample() throws Exception{
 
 
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
@@ -230,7 +231,7 @@ public class OpenAPIV3ParserTest {
         //options.setResolve(true);
         options.setResolveFully(true);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, new ArrayList<>(), options  );
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
@@ -295,7 +296,7 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testInlineModelResolverByUrl(@Injectable final List<AuthorizationValue> auths){
+    public void testInlineModelResolverByUrl(){
 
         String url = "http://localhost:${dynamicPort}/remote/json";
         url = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
@@ -303,7 +304,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url,auths,options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url,new ArrayList<>(),options);
         Assert.assertNotNull(result);
         OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);

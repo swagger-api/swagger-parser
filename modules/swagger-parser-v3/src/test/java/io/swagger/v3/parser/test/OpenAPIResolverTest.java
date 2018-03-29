@@ -203,7 +203,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void componentsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void componentsResolver() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
@@ -216,7 +216,7 @@ public class OpenAPIResolverTest {
         Assert.assertNotNull(result);
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
+        assertEquals(new OpenAPIResolver(openAPI, new ArrayList<>(), null).resolve(), openAPI);
 
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
 
@@ -353,7 +353,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void pathsResolver(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void pathsResolver() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
@@ -367,7 +367,7 @@ public class OpenAPIResolverTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
 
-        assertEquals(new OpenAPIResolver(openAPI, auths, null).resolve(), openAPI);
+        assertEquals(new OpenAPIResolver(openAPI, new ArrayList<>(), null).resolve(), openAPI);
 
 
         //internal url pathItem

@@ -9,7 +9,12 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -114,9 +119,11 @@ public class RefUtilsTest {
         assertEquals(expectedResult, actualResult);
     }
 
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @Test
     public void testReadExternalRef_UrlFormat_ExceptionThrown(@Injectable final List<AuthorizationValue> auths,
-                                                              @Injectable final Exception mockedException,
                                                               @Mocked RemoteUrl remoteUrl
     ) throws Exception {
 
@@ -125,44 +132,41 @@ public class RefUtilsTest {
         new StrictExpectations() {{
             RemoteUrl.urlToString(url, auths);
             times = 1;
-            result = mockedException;
+            result = new Exception();
         }};
-
-        try {
-            RefUtils.readExternalRef(url, RefFormat.URL, auths, null);
-            fail("Should have thrown an exception");
-        } catch (RuntimeException e) {
-            assertEquals(mockedException, e.getCause());
-        }
-
+        thrown.expect(RuntimeException.class);
+        RefUtils.readExternalRef(url, RefFormat.URL, auths, null);
     }
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
     public void testReadExternalRef_RelativeFileFormat(@Injectable final List<AuthorizationValue> auths,
                                                        @Mocked IOUtils ioUtils,
-                                                       @Mocked final FileInputStream fileInputStream,
                                                        @Mocked Files files,
                                                        @Injectable final Path parentDirectory,
-                                                       @Injectable final Path pathToUse,
-                                                       @Injectable final File file
+                                                       @Injectable final Path pathToUse
     ) throws Exception {
-
-        final String filePath = "./path/to/file.json";
+        final String filePath = "file.json";
+        File file = tempFolder.newFile(filePath);
         final String expectedResult = "really good json";
 
-        setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
+        setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString(fileInputStream, "UTF-8");
+            IOUtils.toString((FileInputStream) any, "UTF-8");
             times = 1;
             result = expectedResult;
+
         }};
 
         String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
         assertEquals(expectedResult, actualResult);
+
     }
 
-    private void setupRelativeFileExpectations(@Mocked final FileInputStream fileInputStream, @Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
+    private void setupRelativeFileExpectations(@Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
         new StrictExpectations() {{
 
             parentDirectory.resolve(filePath).normalize();
@@ -177,38 +181,37 @@ public class RefUtilsTest {
             times = 1;
             result = file;
 
-            new FileInputStream(file);
-            times = 1;
-            result = fileInputStream;
         }};
     }
 
     @Test
     public void testReadExternalRef_RelativeFileFormat_ExceptionThrown(@Injectable final List<AuthorizationValue> auths,
                                                                        @Mocked IOUtils ioUtils,
-                                                                       @Mocked final FileInputStream fileInputStream,
                                                                        @Mocked Files files,
-                                                                       @Injectable final IOException mockedException,
                                                                        @Injectable final Path parentDirectory,
-                                                                       @Injectable final Path pathToUse,
-                                                                       @Injectable final File file
+                                                                       @Injectable final Path pathToUse
     ) throws Exception {
-        final String filePath = "./path/to/file.json";
+        final String filePath = "file.json";
+        File file = tempFolder.newFile(filePath);
+        final String expectedResult = "really good json";
 
-        setupRelativeFileExpectations(fileInputStream, parentDirectory, pathToUse, file, filePath);
+        setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString(fileInputStream, "UTF-8");
+            IOUtils.toString((FileInputStream) any, "UTF-8");
             times = 1;
-            result = mockedException;
+            result = new IOException();
         }};
 
-        try {
-            RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
-            fail("Should have thrown an exception");
-        } catch (RuntimeException e) {
-            assertEquals(mockedException, e.getCause());
-        }
+        thrown.expect(new BaseMatcher<IOException>() {
+            @Override
+            public void describeTo(Description description) { }
+            @Override
+            public boolean matches(Object o) {
+                return ((Exception)o).getCause().getClass().equals(IOException.class);
+            }
+        });
+        RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
     }
 
     @Test
