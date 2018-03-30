@@ -1,5 +1,10 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "https://api.foo.com/"
+    }
+  ],
   "info": {
     "version": "1.0.0",
     "title": "FooAPI",
@@ -12,31 +17,22 @@
       "name": "MIT"
     }
   },
-  "host": "api.foo.com",
-  "basePath": "",
-  "schemes": [
-    "https"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
   "paths": {
     "/bar": {
       "$ref": "./issue-340-Bar.json#/bar"
     }
   },
-  "definitions": {
-    "BarSettingsRequest": {
-      "$ref": "./issue-340-Bar.json#/definitions/BarSettingsRequest"
-    },
-    "BarData": {
-      "$ref": "./issue-340-Bar.json#/definitions/BarData"
-    },
-    "BazData": {
-      "$ref": "./issue-340-Bar.json#/definitions/BazData"
+  "components": {
+    "schemas": {
+      "BarSettingsRequest": {
+        "$ref": "./issue-340-Bar.json#/components/schemas/BarSettingsRequest"
+      },
+      "BarData": {
+        "$ref": "./issue-340-Bar.json#/components/schemas/BarData"
+      },
+      "BazData": {
+        "$ref": "./issue-340-Bar.json#/components/schemas/BazData"
+      }
     }
   }
 }

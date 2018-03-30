@@ -3,5 +3,6 @@ petIdParam:
   in: path
   description: ID of pet to return
   required: true
-  type: integer
-  format: int64
+  schema:
+    type: integer
+    format: int64

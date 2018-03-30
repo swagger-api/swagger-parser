@@ -28,7 +28,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class NetworkReferenceTests {
+public class NetworkReferenceTest {
     @Mocked
     public RemoteUrl remoteUrl = new RemoteUrl();
 

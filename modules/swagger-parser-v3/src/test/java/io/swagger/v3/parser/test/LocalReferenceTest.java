@@ -19,7 +19,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class LocalReferenceTests {
+public class LocalReferenceTest {
     @Mocked
     public RemoteUrl remoteUrl = new RemoteUrl();
 

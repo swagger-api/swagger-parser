@@ -1,18 +1,19 @@
-swagger: '2.0'
-definitions:
-  Animal:
-    required:
-      - id
-    properties:
-      id:
-        type: string
-      categories:
-        $ref: './components/entities.yaml#/definitions/Category'
-  Inventory:
-    properties:
-      book:
-        $ref: './book.yaml'
-  Orders:
-    properties:
-      book:
-        $ref: 'book.yaml'
+openapi: '3.0.0'
+components:
+  schemas:
+    Animal:
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        categories:
+          $ref: './components/entities.yaml#/components/schemas/Category'
+    Inventory:
+      properties:
+        book:
+          $ref: './book.yaml'
+    Orders:
+      properties:
+        book:
+          $ref: 'book.yaml'

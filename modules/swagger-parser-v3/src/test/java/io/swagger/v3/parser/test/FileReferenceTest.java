@@ -1,6 +1,7 @@
 package io.swagger.v3.parser.test;
 
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -18,7 +19,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 
-public class FileReferenceTests {
+public class FileReferenceTest {
     @Test
     public void testIssue306() {
         ParseOptions options = new ParseOptions();
@@ -191,10 +192,10 @@ public class FileReferenceTests {
             OpenAPI swagger = new OpenAPIV3Parser().readLocation(path,null, options).getOpenAPI();
             assertEquals(3, swagger.getComponents().getSchemas().size());
             ComposedSchema composedModel = (ComposedSchema)swagger.getComponents().getSchemas().get("record");
-            assertEquals(composedModel.getAllOf().get(0), "pet");
-            Map<String, Schema> props = composedModel.getAllOf().get(0).getProperties();
-            assertEquals( props.get("mother").get$ref(), "pet");
-            assertEquals( ((ArraySchema)props.get("siblings")).getItems().get$ref(), "pet");
+            assertEquals(composedModel.getAllOf().get(0).get$ref(), "#/components/schemas/pet");
+            Map<String, Schema> props = composedModel.getAllOf().get(1).getProperties();
+            assertEquals( props.get("mother").get$ref(), "#/components/schemas/pet");
+            assertEquals( ((ArraySchema)props.get("siblings")).getItems().get$ref(), "#/components/schemas/pet");
         }
     }
 
@@ -206,6 +207,7 @@ public class FileReferenceTests {
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
+        Yaml.prettyPrint(swagger);
         assertNotNull(swagger.getPaths().get("/pet/{petId}"));
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getGet());
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getGet().getParameters());
@@ -216,19 +218,18 @@ public class FileReferenceTests {
 
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getPost());
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getPost().getParameters());
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getParameters().size() == 3);
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getParameters().get(1).get$ref() != null);
-        //assertTrue((swagger.getPaths().get("/pet/{petId}").getPost().getParameters().get(1).get$ref(). == RefFormat.INTERNAL);
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getParameters().get(1).get$ref().equals("name"));
+        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getParameters().size() == 1);
+        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody() != null);
+        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref() != null);
+        assertEquals(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody");
+        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref().equals("name"));
 
         assertNotNull(swagger.getPaths().get("/store/order"));
         assertNotNull(swagger.getPaths().get("/store/order").getPost());
-        assertNotNull(swagger.getPaths().get("/store/order").getPost().getParameters());
-        assertTrue(swagger.getPaths().get("/store/order").getPost().getParameters().size() == 1);
-        assertTrue(swagger.getPaths().get("/store/order").getPost().getRequestBody()instanceof RequestBody);
-        assertNotNull(swagger.getPaths().get("/store/order").getPost().getParameters().get(0).getSchema());
-        assertTrue(swagger.getPaths().get("/store/order").getPost().getParameters().get(0).getSchema().get$ref() != null);
-        assertTrue(swagger.getPaths().get("/store/order").getPost().getParameters().get(0).getSchema().get$ref().equals("Order"));
+        assertNotNull(swagger.getPaths().get("/store/order").getPost().getRequestBody());
+        assertNotNull(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema());
+        assertTrue(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema().get$ref() != null);
+        assertTrue(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema().get$ref().equals("#/components/schemas/Order"));
 
         assertTrue(swagger.getComponents().getSchemas().get("Order") instanceof Schema);
         assertTrue(swagger.getComponents().getSchemas().get("Order").getProperties().size() == 6);
@@ -247,10 +248,10 @@ public class FileReferenceTests {
         assertNotNull(swagger.getPaths().get("pets").getGet());
         assertNotNull(swagger.getPaths().get("pets").getGet().getResponses());
         assertNotNull(swagger.getPaths().get("pets").getGet().getResponses().get("200"));
-        assertNotNull(swagger.getPaths().get("pets").getGet().getResponses().get("200").getContent().get("").getSchema());
-        assertTrue(swagger.getPaths().get("pets").getGet().getResponses().get("200").getContent().get("").getSchema().get$ref() != null);
+        assertNotNull(swagger.getPaths().get("pets").getGet().getResponses().get("200").getContent().get("*/*").getSchema());
+        assertTrue(swagger.getPaths().get("pets").getGet().getResponses().get("200").getContent().get("*/*").getSchema().get$ref() != null);
 
-        assertEquals(swagger.getPaths().get("pets").getGet().getResponses().get("200").getContent().get("").getSchema().get$ref(), "#/components/schemas/Pet");
+        assertEquals(swagger.getPaths().get("pets").getGet().getResponses().get("200").getContent().get("*/*").getSchema().get$ref(), "#/components/schemas/Pet");
 
         assertTrue(swagger.getComponents().getSchemas().get("Pet") instanceof Schema);
         assertTrue(swagger.getComponents().getSchemas().get("Pet").getProperties().size() == 2);
