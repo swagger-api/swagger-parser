@@ -16,6 +16,11 @@
             <artifactId>swagger-models</artifactId>
             <version>${swagger-core-version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser-v3</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

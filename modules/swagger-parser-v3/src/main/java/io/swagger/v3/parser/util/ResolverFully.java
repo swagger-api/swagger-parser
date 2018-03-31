@@ -108,13 +108,17 @@ public class ResolverFully {
                 }
             }
 
-            if (op.getRequestBody() != null && op.getRequestBody().getContent() != null){
-                Map<String,MediaType> content = op.getRequestBody().getContent();
-                for (String key: content.keySet()){
-                    if (content.get(key) != null && content.get(key).getSchema() != null ){
-                        Schema resolved = resolveSchema(content.get(key).getSchema());
-                        if (resolved != null) {
-                            content.get(key).setSchema(resolved);
+            if (op.getRequestBody() != null) {
+                if (op.getRequestBody().get$ref() != null)
+
+                if (op.getRequestBody().getContent() != null){
+                    Map<String,MediaType> content = op.getRequestBody().getContent();
+                    for (String key: content.keySet()){
+                        if (content.get(key) != null && content.get(key).getSchema() != null ){
+                            Schema resolved = resolveSchema(content.get(key).getSchema());
+                            if (resolved != null) {
+                                content.get(key).setSchema(resolved);
+                            }
                         }
                     }
                 }
