@@ -28,8 +28,8 @@ public class FileReferenceTest {
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
-
-        assertTrue(swagger.getComponents().getSchemas().size() == 3);
+        Yaml.prettyPrint(swagger);
+        assertTrue(swagger.getComponents().getSchemas().size() == 5);
         // resolved from `$ref: './book.yaml'`
         assertNotNull(swagger.getComponents().getSchemas().get("Inventory"));
         // resolved from `$ref: 'book.yaml'`

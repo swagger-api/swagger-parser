@@ -4,4 +4,4 @@ properties:
   name:
     type: string
   address:
-    $ref: 'http://server2/resources/common/entities.yaml#/definitions/Address'
+    $ref: 'http://server2/resources/common/entities.yaml#/components/schemas/Address'

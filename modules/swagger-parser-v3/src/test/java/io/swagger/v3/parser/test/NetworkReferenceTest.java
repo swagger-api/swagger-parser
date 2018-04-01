@@ -2,6 +2,7 @@ package io.swagger.v3.parser.test;
 
 
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
@@ -161,7 +162,7 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue335() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://server1/resources/swagger1.yaml", new ArrayList<>());
+            remoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<>());
             result = issue_335_json;
 
             remoteUrl.urlToString("http://server1/resources/Bar.json", new ArrayList<>());
@@ -171,7 +172,7 @@ public class NetworkReferenceTest {
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://server1/resources/swagger1.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://server1/resources/swagger.yaml", null, options);
 
         OpenAPI swagger = result.getOpenAPI();
         assertNotNull(swagger);
@@ -190,20 +191,18 @@ public class NetworkReferenceTest {
         }};
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        String yaml =
-                "swagger: '2.0'\n" +
+        String yaml = "openapi: 3.0.0\n" +
                 "info:\n" +
-                "  description: |\n" +
+                "  description: ''\n" +
                 "  version: 1.0.0\n" +
                 "  title: testing\n" +
                 "paths:\n" +
-                "   /foo:\n" +
-                "     $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n" +
-                "   /bar:\n" +
-                "     $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n" +
-                "schemes:\n" +
-                " - https\n" +
-                " - http";
+                "  /foo:\n" +
+                "    $ref: '#/paths/~1pet'\n" +
+                "  /bar:\n" +
+                "    $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n";
+
+        Yaml.prettyPrint(yaml);
         final SwaggerParseResult result = parser.readContents(yaml,null,null);
         Assert.assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() == 0);
@@ -228,16 +227,16 @@ public class NetworkReferenceTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         SwaggerParseResult result = parser.readLocation("http://remote1/resources/swagger1.yaml", auths, options);
-        Json.prettyPrint(result);
+
         OpenAPI swagger = result.getOpenAPI();
         assertNotNull(swagger.getPaths().get("/health"));
         PathItem health = swagger.getPaths().get("/health");
         assertTrue(health.getGet().getParameters().size() == 0);
-        Schema responseRef = health.getGet().getResponses().get("200").getContent().get("").getSchema();
+        Schema responseRef = health.getGet().getResponses().get("200").getContent().get("*/*").getSchema();
         assertTrue(responseRef.get$ref() != null);
 
 
-        assertEquals(responseRef.get$ref(), "#/definitions/Success");
+        assertEquals(responseRef.get$ref(), "#/components/schemas/Success");
 
         assertNotNull(swagger.getComponents().getSchemas().get("Success"));
 
@@ -247,11 +246,11 @@ public class NetworkReferenceTest {
 
         ApiResponse response = swagger.getPaths().get("/stuff").getGet().getResponses().get("200");
         assertNotNull(response);
-        assertTrue(response.getContent().get("").getSchema() instanceof StringSchema);
+        assertTrue(response.getContent().get("*/*").getSchema() instanceof StringSchema);
 
         ApiResponse error = swagger.getPaths().get("/stuff").getGet().getResponses().get("400");
         assertNotNull(error);
-        Schema errorProp = error.getContent().get("").getSchema();
+        Schema errorProp = error.getContent().get("*/*").getSchema();
         assertNotNull(errorProp);
         assertTrue(errorProp.get$ref() != null);
         assertEquals(errorProp.get$ref(), "#/components/schemas/Error");

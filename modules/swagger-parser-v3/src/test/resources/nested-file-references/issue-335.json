@@ -1,5 +1,10 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "https://api.foo.com/"
+    }
+  ],
   "info": {
     "version": "1.0.0",
     "title": "FooAPI",
@@ -12,20 +17,7 @@
       "name": "MIT"
     }
   },
-  "host": "api.foo.com",
-  "basePath": "",
-  "schemes": [
-    "https"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
   "paths": {
-    "/bar": {
-      "$ref": "./Bar.json#/bar"
-    }
+    "$ref": "./Bar.json#/bar"
   }
 }
