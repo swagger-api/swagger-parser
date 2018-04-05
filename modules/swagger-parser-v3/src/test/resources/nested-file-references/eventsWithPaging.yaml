@@ -2,10 +2,12 @@ get:
   description: A list of events
   operationId: getEvents
   responses:
-    200:
+    '200':
       description: OK
-      schema:
-        type: object
-        properties:
-          paging:
-            $ref: './common/paging2.yaml#/Paging2'
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: object
+            properties:
+              paging:
+                $ref: './common/paging2.yaml#/Paging2'

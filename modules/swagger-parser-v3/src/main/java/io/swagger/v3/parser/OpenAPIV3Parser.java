@@ -39,14 +39,13 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-
+            if (auth == null) {
+                auth = new ArrayList<>();
+            }
             result = readWithInfo(url,auth);
 
             if (result.getOpenAPI() != null) {
                 String version = result.getOpenAPI().getOpenapi();
-                if (auth == null) {
-                    auth = new ArrayList<>();
-                }
                 if (version != null && version.startsWith("3.0")) {
                     if (options != null) {
                         OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, url);
@@ -76,7 +75,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public OpenAPI read(String location) {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        return read(location, null, options);
+        return read(location,  null, options);
     }
     public OpenAPI read(String location, List<AuthorizationValue> auths, ParseOptions resolve) {
         if (location == null) {
@@ -246,5 +245,11 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         }
 
         return output;
+    }
+
+    public SwaggerParseResult readContents(String yaml) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        return readContents(yaml,null, options);
     }
 }

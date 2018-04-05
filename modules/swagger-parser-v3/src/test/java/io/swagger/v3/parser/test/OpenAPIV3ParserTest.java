@@ -81,7 +81,8 @@ public class OpenAPIV3ParserTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
-        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_responses.yaml"));
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_responses.yaml.template"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         WireMock.stubFor(get(urlPathMatching("/remote/response"))
                 .willReturn(aResponse()
@@ -197,7 +198,6 @@ public class OpenAPIV3ParserTest {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
         ParseOptions options = new ParseOptions();
-        //options.setResolve(true);
         options.setResolveFully(true);
 
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
@@ -613,9 +613,7 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = parser.readLocation("src/test/resources/petstore1.yaml", null, options);
-
-        System.out.println(result.getMessages());
+        SwaggerParseResult result = parser.readLocation("src/test/resources/petstore.yaml", null, options);
 
         assertNotNull(result);
         assertTrue(result.getMessages().isEmpty());
@@ -733,7 +731,7 @@ public class OpenAPIV3ParserTest {
     @Test(description = "Test (path & form) parameter's required attribute")
     public void testParameterRequired() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        final OpenAPI openAPI = parser.read("src/test/resources/petstore1.yaml");
+        final OpenAPI openAPI = parser.read("src/test/resources/petstore.yaml");
         final List<Parameter> operationParams = openAPI.getPaths().get("/pet/{petId}").getPost().getParameters();
 
         final PathParameter pathParameter = (PathParameter) operationParams.get(0);
@@ -1004,10 +1002,6 @@ public class OpenAPIV3ParserTest {
 
         BigDecimal minimum = orderIdPathParam.getSchema().getMinimum();
         assertEquals(minimum.toString(), "1");
-
-        //FormParameter formParam = (FormParameter) openAPI.getPaths().get("/fake").getPost().getParameters().get(3);
-
-        //assertEquals(formParam.getMinimum().toString(), "32.1");
     }
 
     @Test
@@ -1027,8 +1021,6 @@ public class OpenAPIV3ParserTest {
     public void testCodegenIssue4555() throws Exception {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         String yaml = "openapi: 3.0.0\n" +
-                "servers: []\n" +
-                "\n" +
                 "info:\n" +
                 "  title: test\n" +
                 "  version: \"0.0.1\"\n" +
@@ -1064,7 +1056,6 @@ public class OpenAPIV3ParserTest {
     @Test
     public void testConverterIssue17() throws Exception {
         String yaml = "openapi: 3.0.0\n" +
-                "servers: []\n" +
                 "info:\n" +
                 "  version: 0.0.0\n" +
                 "  title: nada\n" +
@@ -1106,7 +1097,6 @@ public class OpenAPIV3ParserTest {
     public void testIssue393() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         String yaml = "openapi: 3.0.0\n" +
-                "servers: []\n" +
                 "info:\n" +
                 "  title: x\n" +
                 "  version: 1.0.0\n" +
@@ -1132,6 +1122,7 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI.getExtensions().get("x-error-defs"));
     }
 
+    @Test
     public void testBadFormat() throws Exception {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         final OpenAPI openAPI = parser.read("src/test/resources/bad_format.yaml");
@@ -1167,7 +1158,6 @@ public class OpenAPIV3ParserTest {
         assertTrue(parameter instanceof QueryParameter);
         queryParameter = (QueryParameter) parameter;
         assertEquals(queryParameter.getName(), "query-param-collection-format-and-uniqueItems");
-        //assertEquals(queryParameter.getCollectionFormat(), "multi");
         assertTrue(queryParameter.getSchema().getUniqueItems());
     }
 

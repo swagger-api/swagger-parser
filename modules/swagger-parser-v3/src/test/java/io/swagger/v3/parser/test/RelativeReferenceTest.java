@@ -47,7 +47,7 @@ public class RelativeReferenceTest {
     @Test
     public void testIssue213() throws Exception {
         new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", null);
+            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}));
             times = 1;
             result = spec;
 

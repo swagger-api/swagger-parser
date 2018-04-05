@@ -6,8 +6,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -103,7 +101,8 @@ public class OpenAPIResolverTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
-        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_responses.yaml"));
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/remote_references/remote_responses.yaml.template"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
         WireMock.stubFor(get(urlPathMatching("/remote/response"))
                 .willReturn(aResponse()
@@ -746,16 +745,6 @@ public class OpenAPIResolverTest {
         Assert.assertTrue(examples.size() == 2);
     }
 
-    @Test
-    public void testRecurssion(@Injectable final List<AuthorizationValue> auths) throws Exception {
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        options.setResolveFully(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/joel.yaml", auths, options);
-
-        Assert.assertNotNull(openAPI);
-        Yaml.prettyPrint(openAPI);
-    }
 
     @Test
     public void testSwaggerResolver(@Injectable final OpenAPI swagger,

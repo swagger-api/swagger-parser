@@ -1,12 +1,9 @@
-swagger: '2.0'
+openapi: 3.0.0
+servers:
+  - url: 'https://example.com/api/v1'
 info:
   title: Test API
   version: '1'
-host: example.com
-basePath: /api/v1
-schemes:
-  - https
-
 paths:
   '/pet/{petId}':
     get:
@@ -15,15 +12,15 @@ paths:
       summary: Find pet by ID
       description: Returns a single pet
       operationId: getPetById
-      produces:
-        - application/json
       parameters:
-        - $ref: 'common/issue-421-parms.yaml#/petIdParam'
+        - $ref: './common/issue-421-parms.yaml#/petIdParam'
       responses:
         '200':
           description: successful operation
-          schema:
-            $ref: 'common/issue-421-defns.yaml#/definitions/Pet'
+          content:
+            application/json:
+              schema:
+                $ref: './common/issue-421-defns.yaml#/components/schemas/Pet'
         '400':
           description: Invalid ID supplied
         '404':
@@ -34,20 +31,20 @@ paths:
       summary: Updates a pet in the store with form data
       description: ''
       operationId: updatePetWithForm
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/xml
-        - application/json
       parameters:
-        - $ref: 'common/issue-421-parms.yaml#/petIdParam'
-        - $ref: '#/parameters/name'
-        - $ref: '#/parameters/status'
+        - $ref: './common/issue-421-parms.yaml#/petIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/requestBody'
       responses:
         '200':
           description: successful operation
-          schema:
-            $ref: '#/definitions/ApiResponse'
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
         '405':
           description: Invalid input
   /store/order:
@@ -57,44 +54,47 @@ paths:
       summary: Place an order for a pet
       description: ''
       operationId: placeOrder
-      produces:
-        - application/xml
-        - application/json
-      parameters:
-        - in: body
-          name: body
-          description: order placed for purchasing the pet
-          required: true
-          schema:
-            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Order'
       responses:
         '200':
           description: successful operation
-          schema:
-            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Order'
+          content:
+            application/xml:
+              schema:
+                $ref: './petstore.yaml#/components/schemas/Order'
+            application/json:
+              schema:
+                $ref: './petstore.yaml#/components/schemas/Order'
         '400':
           description: Invalid Order
-
-parameters:
-  - name: name
-    in: formData
-    description: Updated name of the pet
-    required: false
-    type: string
-  - name: status
-    in: formData
-    description: Updated status of the pet
-    required: false
-    type: string
-
-definitions:
-  ApiResponse:
-    type: object
-    properties:
-      code:
-        type: integer
-        format: int32
-      type:
-        type: string
-      message:
-        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './petstore.yaml#/components/schemas/Order'
+        description: order placed for purchasing the pet
+        required: true
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+  requestBodies:
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              name:
+                description: Updated name of the pet
+                type: string
+              status:
+                description: Updated status of the pet
+                type: string

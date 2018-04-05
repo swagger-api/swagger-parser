@@ -1,6 +1,7 @@
 package io.swagger.v3.parser.test;
 
 
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -14,12 +15,13 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class LocalReferenceTests {
+public class LocalReferenceTest {
     @Mocked
     public RemoteUrl remoteUrl = new RemoteUrl();
 
@@ -38,10 +40,10 @@ public class LocalReferenceTests {
     @Test
     public void testAuth() throws Exception  {
         new Expectations() {{
-            remoteUrl.urlToString("https://remote-server.com/issue-454.yaml", null);
+            remoteUrl.urlToString("https://remote-server.com/issue-454.yaml", new ArrayList<>());
             result = issue_454_yaml;
 
-            remoteUrl.urlToString("https://remote-components.com/issue-454-components", null);
+            remoteUrl.urlToString("https://remote-components.com/issue-454-components", new ArrayList<>());
             result = issue_454_components_yaml;
         }};
         ParseOptions options = new ParseOptions();

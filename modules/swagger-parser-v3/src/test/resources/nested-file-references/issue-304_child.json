@@ -1,42 +1,44 @@
 {
-  "definitions": {
-    "Inheritance": {
-      "allOf": [
-        {
-          "$ref": "./issue-304.json#/definitions/BaseEntityDto"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "addressId": {
-              "type": "string"
+  "components": {
+    "schemas": {
+      "Inheritance": {
+        "allOf": [
+          {
+            "$ref": "./issue-304.json#/components/schemas/BaseEntityDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "addressId": {
+                "type": "string"
+              }
             }
           }
+        ]
+      },
+      "Composition": {
+        "type": "object",
+        "properties": {
+          "addressId": {
+            "$ref": "./issue-304.json#/components/schemas/BaseEntityDto"
+          }
         }
-      ]
-    },
-    "Composition": {
-      "type": "object",
-      "properties": {
-        "addressId": {
-          "$ref": "./issue-304.json#/definitions/BaseEntityDto"
-        }
+      },
+      "InheritanceAndComposition": {
+        "allOf": [
+          {
+            "$ref": "./issue-304.json#/components/schemas/BaseEntityDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "addressId": {
+                "$ref": "./issue-304.json#/components/schemas/BaseEntityDto"
+              }
+            }
+          }
+        ]
       }
-    },
-    "InheritanceAndComposition": {
-      "allOf": [
-        {
-          "$ref": "./issue-304.json#/definitions/BaseEntityDto"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "addressId": {
-              "$ref": "./issue-304.json#/definitions/BaseEntityDto"
-            }
-          }
-        }
-      ]
     }
   }
 }

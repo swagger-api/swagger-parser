@@ -61,7 +61,14 @@ paths:
             - 'write:pets'
             - 'read:pets'
       requestBody:
-        $ref: '#/components/requestBodies/Pet'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Pet'
+        description: Pet object that needs to be added to the store
     put:
       tags:
         - pet

@@ -1,7 +1,7 @@
 package io.swagger.v3.parser.test;
 
 
-import io.swagger.v3.core.util.Json;
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
@@ -28,7 +28,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class NetworkReferenceTests {
+public class NetworkReferenceTest {
     @Mocked
     public RemoteUrl remoteUrl = new RemoteUrl();
 
@@ -59,7 +59,7 @@ public class NetworkReferenceTests {
             issue_335_json          = readFile("src/test/resources/nested-file-references/issue-335.json");
             issue_335_bar_json      = readFile("src/test/resources/nested-file-references/issue-335-bar.json");
 
-            issue_407_json          = readFile("src/test/resources/petstore1.yaml");
+            issue_407_json          = readFile("src/test/resources/petstore.yaml");
 
             issue_411_server        = readFile("src/test/resources/nested-network-references/issue-411-server.yaml");
             issue_411_components    = readFile("src/test/resources/nested-network-references/issue-411-remote2.yaml");
@@ -88,7 +88,7 @@ public class NetworkReferenceTests {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8080/nested-file-references/issue-323.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8080/nested-file-references/issue-323.yaml", new ArrayList<>(), options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -117,7 +117,7 @@ public class NetworkReferenceTests {
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8080/resources/swagger/issue-328.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8080/resources/swagger/issue-328.yaml", new ArrayList<>(), options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -146,7 +146,7 @@ public class NetworkReferenceTests {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://server1/resources/swagger.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://server1/resources/swagger.yaml", new ArrayList<>(), options);
 
         assertNotNull(result.getOpenAPI());
         OpenAPI swagger = result.getOpenAPI();
@@ -161,7 +161,7 @@ public class NetworkReferenceTests {
     @Test
     public void testIssue335() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://server1/resources/swagger1.yaml", new ArrayList<>());
+            remoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<>());
             result = issue_335_json;
 
             remoteUrl.urlToString("http://server1/resources/Bar.json", new ArrayList<>());
@@ -171,7 +171,7 @@ public class NetworkReferenceTests {
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://server1/resources/swagger1.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://server1/resources/swagger.json", new ArrayList<>(), options);
 
         OpenAPI swagger = result.getOpenAPI();
         assertNotNull(swagger);
@@ -190,21 +190,19 @@ public class NetworkReferenceTests {
         }};
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        String yaml =
-                "swagger: '2.0'\n" +
+        String yaml = "openapi: 3.0.0\n" +
                 "info:\n" +
-                "  description: |\n" +
+                "  description: ''\n" +
                 "  version: 1.0.0\n" +
                 "  title: testing\n" +
                 "paths:\n" +
-                "   /foo:\n" +
-                "     $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n" +
-                "   /bar:\n" +
-                "     $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n" +
-                "schemes:\n" +
-                " - https\n" +
-                " - http";
-        final SwaggerParseResult result = parser.readContents(yaml,null,null);
+                "  /foo:\n" +
+                "    $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n" +
+                "  /bar:\n" +
+                "    $ref: 'http://petstore.swagger.io/v2/swagger.json#/paths/~1pet'\n";
+
+
+        final SwaggerParseResult result = parser.readContents(yaml);
         Assert.assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() == 0);
         assertTrue(result.getOpenAPI().getComponents().getSchemas().size() == 3);
@@ -217,7 +215,7 @@ public class NetworkReferenceTests {
         auths.add(auth);
 
         new Expectations() {{
-            remoteUrl.urlToString("http://remote1/resources/swagger1.yaml", auths);
+            remoteUrl.urlToString("http://remote1/resources/swagger.yaml", auths);
             result = issue_411_server;
 
             remoteUrl.urlToString("http://remote2/resources/foo", auths);
@@ -227,17 +225,17 @@ public class NetworkReferenceTests {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = parser.readLocation("http://remote1/resources/swagger1.yaml", auths, options);
-        Json.prettyPrint(result);
+        SwaggerParseResult result = parser.readLocation("http://remote1/resources/swagger.yaml", auths, options);
+
         OpenAPI swagger = result.getOpenAPI();
         assertNotNull(swagger.getPaths().get("/health"));
         PathItem health = swagger.getPaths().get("/health");
         assertTrue(health.getGet().getParameters().size() == 0);
-        Schema responseRef = health.getGet().getResponses().get("200").getContent().get("").getSchema();
+        Schema responseRef = health.getGet().getResponses().get("200").getContent().get("*/*").getSchema();
         assertTrue(responseRef.get$ref() != null);
 
 
-        assertEquals(responseRef.get$ref(), "#/definitions/Success");
+        assertEquals(responseRef.get$ref(), "#/components/schemas/Success");
 
         assertNotNull(swagger.getComponents().getSchemas().get("Success"));
 
@@ -247,11 +245,11 @@ public class NetworkReferenceTests {
 
         ApiResponse response = swagger.getPaths().get("/stuff").getGet().getResponses().get("200");
         assertNotNull(response);
-        assertTrue(response.getContent().get("").getSchema() instanceof StringSchema);
+        assertTrue(response.getContent().get("*/*").getSchema() instanceof StringSchema);
 
         ApiResponse error = swagger.getPaths().get("/stuff").getGet().getResponses().get("400");
         assertNotNull(error);
-        Schema errorProp = error.getContent().get("").getSchema();
+        Schema errorProp = error.getContent().get("*/*").getSchema();
         assertNotNull(errorProp);
         assertTrue(errorProp.get$ref() != null);
         assertEquals(errorProp.get$ref(), "#/components/schemas/Error");

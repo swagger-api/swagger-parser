@@ -197,6 +197,8 @@ public class PathsProcessor {
                     updateLocalRefs(mediaType.getSchema(), pathRef);
                 }
             }
+        }else if(body.get$ref() != null){
+
         }
     }
 

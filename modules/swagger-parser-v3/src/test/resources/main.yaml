@@ -17,4 +17,4 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: 'Pet.yaml#/Pet'
+                $ref: './Pet.yaml#/Pet'

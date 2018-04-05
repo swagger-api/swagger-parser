@@ -1,5 +1,6 @@
-definitions:
-  Category:
-    properties:
-      name:
-        type: string
+components:
+  schemas:
+    Category:
+      properties:
+        name:
+          type: string

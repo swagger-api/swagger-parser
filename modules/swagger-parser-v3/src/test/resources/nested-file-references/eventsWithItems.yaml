@@ -2,15 +2,17 @@ get:
   description: A list of events
   operationId: getEvents
   responses:
-    200:
+    '200':
       description: OK
-      schema:
-        required:
-          - paging
-          - items
-        type: object
-        properties:
-          paging:
-            $ref: './common/paging.yaml#/Paging'
-          items:
-            $ref: './common2/bar.yaml#/Foobar'
+      content:
+        application/json; charset=utf-8:
+          schema:
+            required:
+              - paging
+              - items
+            type: object
+            properties:
+              paging:
+                $ref: './common/paging.yaml#/Paging'
+              items:
+                $ref: './common2/bar.yaml#/Foobar'
