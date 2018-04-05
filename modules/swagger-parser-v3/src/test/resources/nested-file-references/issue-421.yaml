@@ -60,17 +60,17 @@ paths:
           content:
             application/xml:
               schema:
-                $ref: './petstore1.yaml#/components/schemas/Order'
+                $ref: './petstore.yaml#/components/schemas/Order'
             application/json:
               schema:
-                $ref: './petstore1.yaml#/components/schemas/Order'
+                $ref: './petstore.yaml#/components/schemas/Order'
         '400':
           description: Invalid Order
       requestBody:
         content:
           application/json:
             schema:
-              $ref: './petstore1.yaml#/components/schemas/Order'
+              $ref: './petstore.yaml#/components/schemas/Order'
         description: order placed for purchasing the pet
         required: true
 components:

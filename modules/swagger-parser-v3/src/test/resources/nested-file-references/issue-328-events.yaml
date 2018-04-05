@@ -4,8 +4,10 @@ get:
   responses:
     200:
       description: OK
-      schema:
-        type: object
-        properties:
-          paging:
-            $ref: 'http://localhost:8080/resources/swagger/common/issue-328-paging.yaml#/Paging'
+      content:
+        "*/*":
+          schema:
+            type: object
+            properties:
+              paging:
+                $ref: 'http://localhost:8080/resources/swagger/common/issue-328-paging.yaml#/Paging'

@@ -22,5 +22,7 @@ components:
   responses:
     GeneralError:
       description: General Error
-      schema:
-        $ref: '#/components/schemas/ErrorModel'
+      content:
+        "*/*":
+          schema:
+            $ref: '#/components/schemas/ErrorModel'

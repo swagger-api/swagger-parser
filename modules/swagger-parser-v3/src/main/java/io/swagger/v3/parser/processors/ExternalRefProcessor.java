@@ -112,6 +112,8 @@ public final class ExternalRefProcessor {
                     for(Schema item : composedSchema.getAllOf()){
                         if (item.get$ref() != null){
                             processRefSchema(item,file);
+                        } else if (item.getProperties() != null) {
+                            processProperties(item.getProperties(), file);
                         }
                     }
 
@@ -136,29 +138,9 @@ public final class ExternalRefProcessor {
             }
             //Loop the properties and recursively call this method;
             Map<String, Schema> subProps = schema.getProperties();
-            if (subProps != null) {
-                for (Map.Entry<String, Schema> prop : subProps.entrySet()) {
-                    if (prop.getValue().get$ref() != null) {
-                        processRefSchema(prop.getValue(), file);
-                    } else if (prop.getValue() instanceof ArraySchema) {
-                        ArraySchema arrayProp = (ArraySchema) prop.getValue();
-                        if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
-                                StringUtils.isNotBlank(arrayProp.getItems().get$ref())) {
-                            processRefSchema(arrayProp.getItems(), file);
-                        }
-                    } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
-                        Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
-                        if (mapProp.get$ref() != null) {
-                            processRefSchema(mapProp, file);
-                        } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                                    ((ArraySchema) mapProp).getItems()!= null &&
-                                        ((ArraySchema) mapProp).getItems().get$ref() != null
-                                        && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref())) {
-                            processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
-                        }
-                    }
-                }
-            }
+
+            processProperties(subProps,file);
+
             if(schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema){
                 Schema additionalProperty = (Schema) schema.getAdditionalProperties();
                 if (additionalProperty.get$ref() != null) {
@@ -189,6 +171,32 @@ public final class ExternalRefProcessor {
         }
 
         return newRef;
+    }
+
+    private void processProperties(Map<String,Schema> subProps, String file) {
+        if (subProps != null) {
+            for (Map.Entry<String, Schema> prop : subProps.entrySet()) {
+                if (prop.getValue().get$ref() != null) {
+                    processRefSchema(prop.getValue(), file);
+                } else if (prop.getValue() instanceof ArraySchema) {
+                    ArraySchema arrayProp = (ArraySchema) prop.getValue();
+                    if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
+                            StringUtils.isNotBlank(arrayProp.getItems().get$ref())) {
+                        processRefSchema(arrayProp.getItems(), file);
+                    }
+                } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
+                    Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
+                    if (mapProp.get$ref() != null) {
+                        processRefSchema(mapProp, file);
+                    } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
+                            ((ArraySchema) mapProp).getItems()!= null &&
+                            ((ArraySchema) mapProp).getItems().get$ref() != null
+                            && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref())) {
+                        processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
+                    }
+                }
+            }
+        }
     }
 
     public String processRefToExternalResponse(String $ref, RefFormat refFormat) {

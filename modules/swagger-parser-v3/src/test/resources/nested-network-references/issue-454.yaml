@@ -25,8 +25,9 @@ paths:
           description: search results matching criteria
         default:
           $ref: 'https://remote-components.com/issue-454-components#/components/responses/GeneralError'
-          description: Default response
-  ModelWithNestedProperties:
-    properties:
-      remoteProperty:
-        $ref: 'https://remote-components.com/issue-454-components#/components/schemas/RemoteComponent'
+components:
+  schemas:
+    ModelWithNestedProperties:
+      properties:
+        remoteProperty:
+          $ref: 'https://remote-components.com/issue-454-components#/components/schemas/RemoteComponent'

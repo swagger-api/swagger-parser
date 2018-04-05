@@ -18,6 +18,8 @@
     }
   },
   "paths": {
-    "$ref": "./Bar.json#/bar"
+    "/bar": {
+      "$ref": "./Bar.json#/bar"
+    }
   }
 }
