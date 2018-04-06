@@ -154,7 +154,7 @@ public class ResolverCache {
     protected <T> void updateLocalRefs(String file, T result) {
         if(result instanceof Response) {
             Response response = (Response) result;
-            updateLocalRefs(file, response.getSchema());
+            updateLocalRefs(file, response.getResponseSchema());
         }
         else if(result instanceof RefProperty) {
             RefProperty prop = (RefProperty) result;
