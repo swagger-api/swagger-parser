@@ -10,6 +10,7 @@ import io.swagger.util.Json;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -22,31 +23,34 @@ public class SwaggerParser {
         }
         location = location.replaceAll("\\\\", "/");
         List<SwaggerParserExtension> parserExtensions = getExtensions();
-        SwaggerDeserializationResult output;
+        SwaggerDeserializationResult output = new SwaggerDeserializationResult();
+        try {
+            if (auths == null) {
+                auths = new ArrayList<AuthorizationValue>();
+            }
 
-        if (auths == null) {
-            auths = new ArrayList<AuthorizationValue>();
-        }
-
-        output = new Swagger20Parser().readWithInfo(location, auths);
-        if (output != null) {
-            if (output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
-                if (resolve) {
-                    output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
+            output = new Swagger20Parser().readWithInfo(location, auths);
+            if (output != null) {
+                if (output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
+                    if (resolve) {
+                        output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
+                    }
+                    return output;
                 }
-                return output;
             }
-        }
-        for (SwaggerParserExtension extension : parserExtensions) {
-            output = extension.readWithInfo(location, auths);
-            if (output != null && output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
-                return output;
+            for (SwaggerParserExtension extension : parserExtensions) {
+                output = extension.readWithInfo(location, auths);
+                if (output != null && output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
+                    return output;
+                }
             }
-        }
-        if (output == null) {
-            output = new SwaggerDeserializationResult()
-                    .message("The swagger definition could not be read");
-        }
+            if (output == null) {
+                output = new SwaggerDeserializationResult()
+                        .message("The swagger definition could not be read");
+            }
+        }catch (Exception e) {
+                output.setMessages(Arrays.asList(e.getMessage()));
+            }
         return output;
     }
 

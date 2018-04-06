@@ -10,6 +10,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Yaml;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 
-public class FileReferenceTests {
+public class FileReferenceTest {
     @Test
     public void testIssue306() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-306.yaml", null, true);
@@ -27,7 +28,7 @@ public class FileReferenceTests {
 
         Swagger swagger = result.getSwagger();
 
-        assertTrue(swagger.getDefinitions().size() == 3);
+        assertTrue(swagger.getDefinitions().size() == 5);
         // resolved from `$ref: './book.yaml'`
         assertNotNull(swagger.getDefinitions().get("Inventory"));
         // resolved from `$ref: 'book.yaml'`
