@@ -68,6 +68,7 @@ public class V2ConverterTest {
     private static final String ISSUE_600_JSON = "issue-600.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
     private static final String ISSUE_540_JSON = "issue-540.json";
+    private static final String ISSUE_676_JSON = "issue-676.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -532,6 +533,18 @@ public class V2ConverterTest {
         List required = schema.getRequired();
         assertNotNull(required);
         assertEquals(required.size(), REQUIRED_SIZE);
+    }
+
+    @Test(description = "OpenAPI v2 converter - integer elements of enum are converted to String")
+    public void testIssue676() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_676_JSON);
+        List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
+        assertNotNull(parameters);
+
+        List anEnum = parameters.get(0).getSchema().getEnum();
+        assertNotNull(anEnum);
+        assertEquals(anEnum.get(0), 1);
+        assertEquals(anEnum.get(1), -2);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
