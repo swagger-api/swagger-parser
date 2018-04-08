@@ -986,7 +986,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             if (sp.getEnum() != null) {
                 for (String e : sp.getEnum()) {
-                    schema.addEnumItemObject(e);
+                    if ("integer".equals(sp.getType())) {
+                        schema.addEnumItemObject(Integer.parseInt(e));
+                    } else {
+                        schema.addEnumItemObject(e);
+                    }
                 }
             }
 
