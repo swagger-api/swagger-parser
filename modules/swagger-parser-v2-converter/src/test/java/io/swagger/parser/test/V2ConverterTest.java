@@ -1,5 +1,6 @@
 package io.swagger.parser.test;
 
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -68,6 +69,8 @@ public class V2ConverterTest {
     private static final String ISSUE_600_JSON = "issue-600.json";
     private static final String ISSUE_455_JSON = "issue-455.json";
     private static final String ISSUE_540_JSON = "issue-540.json";
+    private static final String ISSUE_647_JSON = "issue-647.yaml";
+    private static final String ISSUE_662_JSON = "issue-662.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
@@ -133,6 +136,7 @@ public class V2ConverterTest {
     private static final String SOLD = "sold";
     private static final String ARRAY_VALUES = "[{\"id\":-1,\"name\":\"Marvin the Paranoid Android\"}," +
             "{\"id\":1000000,\"name\":\"Zaphod Beeblebrox\",\"friends\":[15]}]";
+    private static final String SCHEMAS_A_REF = "#/components/schemas/A";
 
     private static final int MAX_LENGTH = 60;
     private static final int REQUIRED_SIZE = 2;
@@ -440,7 +444,7 @@ public class V2ConverterTest {
         numbers.add(4);
         numbers.add(5);
         assertEquals(((ArraySchema) properties.get(FRIEND_IDS)).getExample(), numbers);
-        assertEquals(schemas.get(ARRAY_OF_USERS_MODEL).getExample(), ARRAY_VALUES);
+        assertEquals(Json.mapper().writeValueAsString(schemas.get(ARRAY_OF_USERS_MODEL).getExample()), ARRAY_VALUES);
     }
 
     @Test(description = "Convert response examples")
@@ -533,6 +537,20 @@ public class V2ConverterTest {
         List required = schema.getRequired();
         assertNotNull(required);
         assertEquals(required.size(), REQUIRED_SIZE);
+    }
+
+    @Test(description = "OpenAPI v2 converter - ref in RequestBodies are correctly updated")
+    public void testIssue647() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_647_JSON);
+
+        String ref = oas.getComponents().getRequestBodies().get("b").getContent().get("*/*").getSchema().get$ref();
+        assertEquals(ref, SCHEMAS_A_REF);
+    }
+
+    @Test(description = "OpenAPI v2 converter - NPE when no \"paths\" is empty")
+    public void testIssue662() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_662_JSON);
+        assertTrue(oas.getPaths().isEmpty());
     }
 
     @Test(description = "OpenAPI v2 converter - integer elements of enum are converted to String")

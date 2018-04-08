@@ -1,0 +1,35 @@
+openapi: 3.0.0
+servers: []
+info:
+  version: 0.0.1
+  title: API
+x-types:
+  OperationType:
+    - registration
+paths:
+  /checker:
+    get:
+      parameters:
+        - name: operations
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - registration
+            default:
+              - registration
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OperationType'
+components:
+  schemas:
+    OperationType:
+      type: string
+      enum:
+        - registration

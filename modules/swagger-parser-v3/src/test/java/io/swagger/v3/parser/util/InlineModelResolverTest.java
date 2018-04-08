@@ -16,7 +16,6 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import io.swagger.v3.core.util.Json;
 import org.testng.annotations.Test;
 
 
@@ -783,7 +782,6 @@ public class InlineModelResolverTest {
 
 
         new InlineModelResolver().flatten(openAPI);
-        Json.prettyPrint(openAPI);
 
         ApiResponse response = openAPI.getPaths().get("/foo/baz").getGet().getResponses().get("200");
 
@@ -886,8 +884,6 @@ public class InlineModelResolverTest {
         openAPI.getComponents().addSchemas("User", user);
 
         new InlineModelResolver().flatten(openAPI);
-
-        Json.prettyPrint(openAPI);
     }
 
     @Test

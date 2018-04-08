@@ -63,8 +63,8 @@ public final class ExternalRefProcessor {
             schemas = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, schemas.keySet());
-
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
+        String tryName = null;
         Schema existingModel = schemas.get(possiblyConflictingDefinitionName);
 
         if (existingModel != null) {
@@ -72,9 +72,23 @@ public final class ExternalRefProcessor {
             if(existingModel.get$ref() != null) {
                 // use the new model
                 existingModel = null;
+            }else{
+                //We add a number at the end of the definition name
+                int i = 2;
+                for (String name : schemas.keySet()) {
+                    if (name.equals(possiblyConflictingDefinitionName)) {
+                        tryName = possiblyConflictingDefinitionName + "_" + i;
+                        existingModel = schemas.get(tryName);
+                        i++;
+                    }
+                }
             }
         }
-        newRef = possiblyConflictingDefinitionName;
+        if (StringUtils.isNotBlank(tryName)){
+            newRef = tryName;
+        }else{
+            newRef = possiblyConflictingDefinitionName;
+        }
         cache.putRenamedRef($ref, newRef);
 
         if(existingModel == null) {
@@ -84,7 +98,12 @@ public final class ExternalRefProcessor {
 
             String file = $ref.split("#/")[0];
             if (schema.get$ref() != null) {
-                processRefSchema(schema,file);
+                RefFormat ref = computeRefFormat(schema.get$ref());
+                if (isAnExternalRefFormat(ref)) {
+                    schema.set$ref(processRefToExternalSchema(schema.get$ref(), ref));
+                } else {
+                    processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
+                }
             }
 
             if(schema instanceof ComposedSchema){
@@ -93,10 +112,12 @@ public final class ExternalRefProcessor {
                     for(Schema item : composedSchema.getAllOf()){
                         if (item.get$ref() != null){
                             processRefSchema(item,file);
+                        } else if (item.getProperties() != null) {
+                            processProperties(item.getProperties(), file);
                         }
                     }
 
-                }else if (composedSchema.getOneOf() != null){
+                }if (composedSchema.getOneOf() != null){
                     for(Schema item : composedSchema.getOneOf()){
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
@@ -104,7 +125,7 @@ public final class ExternalRefProcessor {
                             }
                         }
                     }
-                }else if (composedSchema.getAnyOf() != null){
+                }if (composedSchema.getAnyOf() != null){
                     for(Schema item : composedSchema.getAnyOf()){
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
@@ -117,29 +138,9 @@ public final class ExternalRefProcessor {
             }
             //Loop the properties and recursively call this method;
             Map<String, Schema> subProps = schema.getProperties();
-            if (subProps != null) {
-                for (Map.Entry<String, Schema> prop : subProps.entrySet()) {
-                    if (prop.getValue().get$ref() != null) {
-                        processRefSchema(prop.getValue(), file);
-                    } else if (prop.getValue() instanceof ArraySchema) {
-                        ArraySchema arrayProp = (ArraySchema) prop.getValue();
-                        if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
-                                StringUtils.isNotBlank(arrayProp.get$ref())) {
-                            processRefSchema(arrayProp.getItems(), file);
-                        }
-                    } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
-                        Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
-                        if (mapProp.get$ref() != null) {
-                            processRefSchema(mapProp, file);
-                        } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                                    ((ArraySchema) mapProp).getItems()!= null &&
-                                        ((ArraySchema) mapProp).getItems().get$ref() != null
-                                        && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref())) {
-                            processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
-                        }
-                    }
-                }
-            }
+
+            processProperties(subProps,file);
+
             if(schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema){
                 Schema additionalProperty = (Schema) schema.getAdditionalProperties();
                 if (additionalProperty.get$ref() != null) {
@@ -172,6 +173,32 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
+    private void processProperties(Map<String,Schema> subProps, String file) {
+        if (subProps != null) {
+            for (Map.Entry<String, Schema> prop : subProps.entrySet()) {
+                if (prop.getValue().get$ref() != null) {
+                    processRefSchema(prop.getValue(), file);
+                } else if (prop.getValue() instanceof ArraySchema) {
+                    ArraySchema arrayProp = (ArraySchema) prop.getValue();
+                    if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
+                            StringUtils.isNotBlank(arrayProp.getItems().get$ref())) {
+                        processRefSchema(arrayProp.getItems(), file);
+                    }
+                } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
+                    Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
+                    if (mapProp.get$ref() != null) {
+                        processRefSchema(mapProp, file);
+                    } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
+                            ((ArraySchema) mapProp).getItems()!= null &&
+                            ((ArraySchema) mapProp).getItems().get$ref() != null
+                            && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref())) {
+                        processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
+                    }
+                }
+            }
+        }
+    }
+
     public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
         String renamedRef = cache.getRenamedRef($ref);
         if(renamedRef != null) {
@@ -197,7 +224,7 @@ public final class ExternalRefProcessor {
             responses = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, responses.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         ApiResponse existingResponse = responses.get(possiblyConflictingDefinitionName);
 
@@ -255,7 +282,7 @@ public final class ExternalRefProcessor {
             bodies = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, bodies.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         RequestBody existingBody= bodies.get(possiblyConflictingDefinitionName);
 
@@ -313,7 +340,7 @@ public final class ExternalRefProcessor {
             headers = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, headers.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         Header existingHeader = headers.get(possiblyConflictingDefinitionName);
 
@@ -371,7 +398,7 @@ public final class ExternalRefProcessor {
             securitySchemeMap = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, securitySchemeMap.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         SecurityScheme existingSecurityScheme = securitySchemeMap.get(possiblyConflictingDefinitionName);
 
@@ -429,7 +456,7 @@ public final class ExternalRefProcessor {
             links = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, links.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         Link existingLink = links.get(possiblyConflictingDefinitionName);
 
@@ -487,7 +514,7 @@ public final class ExternalRefProcessor {
             examples = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, examples.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         Example existingExample = examples.get(possiblyConflictingDefinitionName);
 
@@ -545,7 +572,7 @@ public final class ExternalRefProcessor {
             parameters = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, parameters.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         Parameter existingParameters = parameters.get(possiblyConflictingDefinitionName);
 
@@ -603,7 +630,7 @@ public final class ExternalRefProcessor {
             callbacks = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref, callback.keySet());
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         Callback existingCallback = callbacks.get(possiblyConflictingDefinitionName);
 

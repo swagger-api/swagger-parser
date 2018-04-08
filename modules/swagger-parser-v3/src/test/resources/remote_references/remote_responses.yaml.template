@@ -4,7 +4,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/ExtendedErrorModel'
+          $ref: 'http://localhost:${dynamicPort}/remote/schema#/components/schemas/ExtendedErrorModel'
   IllegalInput:
       description: Illegal input for operation.
   GeneralError:
@@ -12,4 +12,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/ExtendedErrorModel'
+          $ref: 'http://localhost:${dynamicPort}/remote/schema#/components/schemas/ExtendedErrorModel'

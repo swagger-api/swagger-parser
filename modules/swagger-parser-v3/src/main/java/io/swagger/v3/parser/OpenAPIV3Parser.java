@@ -14,6 +14,8 @@ import io.swagger.v3.parser.util.RemoteUrl;
 import io.swagger.v3.parser.util.ResolverFully;
 import org.apache.commons.io.FileUtils;
 import javax.net.ssl.SSLHandshakeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.nio.file.Files;
@@ -27,6 +29,7 @@ import java.util.ServiceLoader;
 
 public class OpenAPIV3Parser implements SwaggerParserExtension {
     private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
 
     static {
         JSON_MAPPER = ObjectMapperFactory.createJson();
@@ -36,17 +39,16 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-
+            if (auth == null) {
+                auth = new ArrayList<>();
+            }
             result = readWithInfo(url,auth);
 
             if (result.getOpenAPI() != null) {
                 String version = result.getOpenAPI().getOpenapi();
-                if (auth == null) {
-                    auth = new ArrayList<>();
-                }
                 if (version != null && version.startsWith("3.0")) {
                     if (options != null) {
-                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, null);
+                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, url);
                         if (options.isResolve()) {
                             result.setOpenAPI(resolver.resolve());
                         }
@@ -64,6 +66,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         }
 
         catch (Exception e) {
+            LOGGER.warn("Exception while reading:", e);
             result.setMessages(Arrays.asList(e.getMessage()));
         }
         return result;
@@ -72,7 +75,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     public OpenAPI read(String location) {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        return read(location, null, options);
+        return read(location,  null, options);
     }
     public OpenAPI read(String location, List<AuthorizationValue> auths, ParseOptions resolve) {
         if (location == null) {
@@ -82,8 +85,13 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         OpenAPI output;
 
         List<SwaggerParserExtension> parserExtensions = getExtensions();
+        SwaggerParseResult parsed;
         for (SwaggerParserExtension extension : parserExtensions) {
-            output = extension.readLocation(location, auths,resolve).getOpenAPI();
+            parsed = extension.readLocation(location, auths, resolve);
+            for (String message : parsed.getMessages()) {
+                LOGGER.info("{}: {}", extension, message);
+            }
+            output = parsed.getOpenAPI();
             if (output != null) {
                 return output;
             }
@@ -127,10 +135,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     data = ClasspathHelper.loadFileFromClasspath(location);
                 }
             }
-            
+            LOGGER.debug("Loaded raw data: {}", data);
             ObjectMapper mapper = getRightMapper(data);
             JsonNode rootNode = mapper.readTree(data);
-            
+            LOGGER.debug("Parsed rootNode: {}", rootNode);
             return readWithInfo(rootNode);
         }
         catch (SSLHandshakeException e) {
@@ -141,6 +149,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             return output;
         }
         catch (Exception e) {
+            LOGGER.warn("Exception while reading:", e);
             SwaggerParseResult output = new SwaggerParseResult();
             output.setMessages(Arrays.asList("unable to read location `" + location + "`"));
             return output;
@@ -236,5 +245,11 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         }
 
         return output;
+    }
+
+    public SwaggerParseResult readContents(String yaml) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        return readContents(yaml,null, options);
     }
 }

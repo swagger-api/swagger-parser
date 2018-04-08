@@ -62,7 +62,7 @@ components:
         pet_type:
           type: string
       oneOf:
-      - $ref: './src/test/resources/oneof_name_conflict/relative_ref/OtherPets.yaml#/components/schemas/Cat'
+      - $ref: './oneof_name_conflict/relative_ref/OtherPets.yaml#/components/schemas/Cat'
       - $ref: '#/components/schemas/Dog'
       - $ref: '#/components/schemas/Lizard'
       discriminator:

@@ -28,3 +28,16 @@ paths:
                   - $ref: './refComponents.yaml#/components/schemas/Cat'
                   - $ref: './refComponents.yaml#/components/schemas/Dog'
                   - $ref: './refComponents.yaml#/components/schemas/Bear'
+  /path:
+      get:
+        responses:
+          '200':
+            description: Any of Cat or Dog
+            content:
+              application/json:
+                schema:
+                  oneOf:
+                    - $ref: './refComponents.yaml#/components/schemas/Cat'
+                    - $ref: './refComponents.yaml#/components/schemas/Dog'
+                  allOf:
+                    - $ref: './refComponents.yaml#/components/schemas/Lion'

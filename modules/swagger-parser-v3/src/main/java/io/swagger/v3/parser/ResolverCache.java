@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
@@ -11,6 +12,7 @@ import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.PathUtils;
 import io.swagger.v3.parser.util.RefUtils;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -144,9 +146,65 @@ public class ResolverCache {
         } else {
             result = DeserializationUtils.deserialize(tree, file, expectedType);
         }
+
+        updateLocalRefs(file, result);
+
         resolutionCache.put(ref, result);
 
         return result;
+    }
+
+    protected <T> void updateLocalRefs(String file, T result) {
+        if(result instanceof ApiResponse) {
+            ApiResponse response = (ApiResponse) result;
+            for(String mediaType : response.getContent().keySet()) {
+                updateLocalRefs(file, response.getContent().get(mediaType).getSchema());
+            }
+        }
+        if(result instanceof Schema && ((Schema)(result)).get$ref() != null) {
+            Schema prop = (Schema) result;
+            updateLocalRefs(file, prop);
+        }
+        else if(result instanceof Schema) {
+            Schema model = (Schema) result;
+            updateLocalRefs(file, model);
+        }
+    }
+
+    protected <T> void updateLocalRefs(String file, Schema schema) {
+        if(schema.get$ref() != null) {
+            String updatedLocation = merge(file, schema.get$ref());
+            schema.set$ref(updatedLocation);
+        }
+        else if(schema.getProperties() != null) {
+            Map<String,Schema> properties = schema.getProperties();
+            for(Schema property : properties.values()) {
+                updateLocalRefs(file, property);
+            }
+
+        }
+    }
+
+
+    protected String merge(String host, String ref) {
+        if(StringUtils.isBlank(host)) {
+            return ref;
+        }
+        if(ref.startsWith("http:") || ref.startsWith("https:")) {
+            // already an absolute ref
+            return ref;
+        }
+        if(!host.startsWith("http:") && !host.startsWith("https:")) {
+            return ref;
+        }
+        if(ref.startsWith(".")) {
+            // relative ref, leave alone
+            return ref;
+        }
+        if(host.endsWith("/") && ref.startsWith("/")) {
+            return host + ref.substring(1);
+        }
+        return host + ref;
     }
 
 

@@ -71,6 +71,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SwaggerConverter implements SwaggerParserExtension {
@@ -195,7 +196,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         Paths v3Paths = new Paths();
-        for (String pathname : swagger.getPaths().keySet()) {
+        Map<String, Path> pathMap = Optional.ofNullable(swagger.getPaths()).orElse(new HashMap<>());
+        for (String pathname : pathMap.keySet()) {
             io.swagger.models.Path v2Path = swagger.getPath(pathname);
             PathItem v3Path = convert(v2Path);
             v3Paths.put(pathname, v3Path);
@@ -890,7 +892,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (StringUtils.isNotBlank(v2Parameter.getDescription())) {
             v3Parameter.setDescription(v2Parameter.getDescription());
         }
-        v3Parameter.setAllowEmptyValue(v2Parameter.getAllowEmptyValue());
+        if (v2Parameter instanceof SerializableParameter) {
+            v3Parameter.setAllowEmptyValue(((SerializableParameter)v2Parameter).getAllowEmptyValue());
+        }
         v3Parameter.setIn(v2Parameter.getIn());
         v3Parameter.setName(v2Parameter.getName());
 
@@ -1060,6 +1064,12 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 if (model.getAdditionalProperties() != null) {
                     result.setAdditionalProperties(convert(model.getAdditionalProperties()));
+                }
+            } else if(v2Model instanceof RefModel) {
+                RefModel ref = (RefModel) v2Model;
+                if (ref.get$ref().indexOf("#/definitions") == 0) {
+                    String updatedRef = "#/components/schemas" + ref.get$ref().substring("#/definitions".length());
+                    result.set$ref(updatedRef);
                 }
             }
 
