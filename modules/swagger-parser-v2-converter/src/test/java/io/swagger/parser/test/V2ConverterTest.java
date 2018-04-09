@@ -553,7 +553,7 @@ public class V2ConverterTest {
         assertTrue(oas.getPaths().isEmpty());
     }
 
-    @Test(description = "OpenAPI v2 converter - NPE when no \"paths\" is empty")
+    @Test(description = "OpenAPI v2 converter - NullPointerException when converting an spec #")
     public void testIssue672() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_672_JSON);
         assertNotNull(oas);
