@@ -80,6 +80,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <swagger-core-module-version>2.0.0-SNAPSHOT</swagger-core-module-version>
+        <swagger-core-module-version>2.0.1-SNAPSHOT</swagger-core-module-version>
     </properties>
 </project>

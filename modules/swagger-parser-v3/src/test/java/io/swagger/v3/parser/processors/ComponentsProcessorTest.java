@@ -138,7 +138,7 @@ public class ComponentsProcessorTest {
         openAPI.components(new Components().addSchemas("foo", refModel));
 
         final MockUp<ResolverCache> mockup = new MockUp<ResolverCache>() {
-            @Mock(invocations = 1)
+            @Mock
             String getRenamedRef(String ref) {
                 openAPI.getComponents().getSchemas().put("bar", resolvedModel);
                 return "bar";
