@@ -20,6 +20,14 @@
                       "required": true,
                       "type": "integer",
                       "enum": [1, -2]
+                    },
+                    {
+                      "name": "enum_number",
+                      "in": "query",
+                      "description": "",
+                      "required": true,
+                      "type": "number",
+                      "enum": [1, -2]
                     }
                 ],
                 "responses": {
