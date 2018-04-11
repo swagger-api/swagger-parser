@@ -568,6 +568,11 @@ public class V2ConverterTest {
         assertNotNull(anEnum);
         assertEquals(anEnum.get(0), new BigDecimal(1));
         assertEquals(anEnum.get(1), new BigDecimal(-2));
+
+        anEnum = parameters.get(2).getSchema().getEnum();
+        assertNotNull(anEnum);
+        assertEquals(anEnum.get(0), true);
+        assertEquals(anEnum.get(1), false);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {

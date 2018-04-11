@@ -28,7 +28,15 @@
                       "required": true,
                       "type": "number",
                       "enum": [1, -2]
-                    }
+                    },
+                  {
+                    "name": "enum_boolean",
+                    "in": "query",
+                    "description": "",
+                    "required": true,
+                    "type": "boolean",
+                    "enum": [true, false]
+                  }
                 ],
                 "responses": {
                     "200": {

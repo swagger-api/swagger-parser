@@ -997,6 +997,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
                         case "number":
                             schema.addEnumItemObject(new BigDecimal(e));
                             break;
+                        case "boolean":
+                            schema.addEnumItemObject(Boolean.valueOf(e));
+                            break;
                         default:
                             schema.addEnumItemObject(e);
                             break;
