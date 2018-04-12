@@ -62,6 +62,7 @@ import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -990,7 +991,20 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             if (sp.getEnum() != null) {
                 for (String e : sp.getEnum()) {
-                    schema.addEnumItemObject(e);
+                    switch (sp.getType()) {
+                        case SchemaTypeUtil.INTEGER_TYPE:
+                            schema.addEnumItemObject(Integer.parseInt(e));
+                            break;
+                        case SchemaTypeUtil.NUMBER_TYPE:
+                            schema.addEnumItemObject(new BigDecimal(e));
+                            break;
+                        case SchemaTypeUtil.BOOLEAN_TYPE:
+                            schema.addEnumItemObject(Boolean.valueOf(e));
+                            break;
+                        default:
+                            schema.addEnumItemObject(e);
+                            break;
+                    }
                 }
             }
 
