@@ -71,11 +71,8 @@ public class V2ConverterTest {
     private static final String ISSUE_540_JSON = "issue-540.json";
     private static final String ISSUE_647_JSON = "issue-647.yaml";
     private static final String ISSUE_662_JSON = "issue-662.yaml";
-<<<<<<< Updated upstream
-    private static final String ISSUE_676_JSON = "issue-676.json";
-=======
     private static final String ISSUE_673_YAML = "issue-673.yaml";
->>>>>>> Stashed changes
+    private static final String ISSUE_676_JSON = "issue-676.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -557,7 +554,6 @@ public class V2ConverterTest {
         assertTrue(oas.getPaths().isEmpty());
     }
 
-<<<<<<< Updated upstream
     @Test(description = "OpenAPI v2 converter - integer elements of enum are converted to String")
     public void testIssue676() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_676_JSON);
@@ -580,15 +576,12 @@ public class V2ConverterTest {
         assertEquals(anEnum.get(1), false);
     }
 
-=======
     @Test(description = "OpenAPI v2 converter - Error in BodyParameter convertion")
     public void testIssue673() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_673_YAML);
         assertNotNull(oas);
     }
 
-
->>>>>>> Stashed changes
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
         SwaggerConverter converter = new SwaggerConverter();
         String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(file).toURI())));
