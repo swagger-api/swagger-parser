@@ -788,6 +788,16 @@ public class SwaggerDeserializer {
                 impl.setUniqueItems(bp);
             }
 
+            bp = getBoolean("exclusiveMaximum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMaximum(bp);
+            }
+
+            bp = getBoolean("exclusiveMinimum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMinimum(bp);
+            }
+
             value = getString("pattern", node, false, location, result);
             impl.setPattern(value);
 
