@@ -44,10 +44,12 @@ public class ParameterProcessor {
                 // if the parameter exists, replace it
                 boolean matched = false;
                 for(Parameter param : processedPathLevelParameters) {
-                    if(param.getName().equals(resolvedParameter.getName())) {
-                        // ref param wins
-                        matched = true;
-                        break;
+                    if (param.getName() != null) {
+                        if (param.getName().equals(resolvedParameter.getName())) {
+                            // ref param wins
+                            matched = true;
+                            break;
+                        }
                     }
                 }
                 for(Parameter param : parameters) {

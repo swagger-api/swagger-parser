@@ -1,0 +1,208 @@
+{
+  "swagger":"2.0",
+  "info":{
+    "title":"swagger_validParameters",
+    "description":"BuildTookit parameter tests",
+    "version":"1.0.0"
+  },
+  "host":"api.uber.com",
+  "schemes":[
+    "https"
+  ],
+  "basePath":"/basePath",
+  "produces":[
+    "application/json"
+  ],
+  "paths":{
+    "/path1":{
+      "parameters":[
+        {
+          "$ref":"#/parameters/ParamDef1"
+        },
+        {
+          "$ref":"#/parameters/ParamDef3"
+        },
+        {
+          "name":"paramDefinedInPath",
+          "in":"path",
+          "description":"paramDefinedInPath desc",
+          "type":"integer",
+          "format":"int32",
+          "required":false,
+          "allowEmptyValue":true
+        },
+        {
+          "name":"paramDefinedInHeader",
+          "in":"header",
+          "description":"paramDefinedInHeader IN Path level",
+          "type":"integer",
+          "format":"int32",
+          "required":false,
+          "allowEmptyValue":true
+        },
+        {
+          "name":"paramToBeOverride",
+          "in":"header",
+          "description":"paramToBeOverride defined in path level. It will be overridded by parameter in operation level",
+          "type":"integer",
+          "format":"int32",
+          "required":true
+        },
+        {
+          "name":"optParamToBeOverride",
+          "in":"header",
+          "description":"optParamToBeOverride defined in path level. It will be overridded by parameter in operation level",
+          "type":"integer",
+          "format":"int32",
+          "required":true
+        },
+        {
+          "name":"reqParamToBeOverride",
+          "in":"header",
+          "description":"reqParamToBeOverride defined in path level. It will be overridded by parameter in operation level",
+          "type":"integer",
+          "format":"int32",
+          "required":false
+        }
+      ],
+      "post":{
+        "parameters":[
+          {
+            "$ref":"#/parameters/ParamDef2"
+          },
+          {
+            "name":"paramToBeOverride",
+            "in":"header",
+            "description":"paramToBeOverride in operation level",
+            "type":"string",
+            "required":true
+          },
+          {
+            "name":"body",
+            "description":"paramInBody desc",
+            "required":true,
+            "in":"body",
+            "schema":{
+              "$ref":"#/definitions/Def1"
+            }
+          },
+          {
+            "name":"optParamInPath",
+            "in":"path",
+            "description":"optParamInPath desc",
+            "type":"integer",
+            "format":"int32",
+            "required":false,
+            "allowEmptyValue":true
+          },
+          {
+            "name":"optParamInHeader",
+            "in":"header",
+            "description":"optParamInHeader desc",
+            "type":"integer",
+            "format":"int32",
+            "required":false,
+            "allowEmptyValue":true
+          },
+          {
+            "name":"optParamToBeOverride",
+            "in":"header",
+            "description":"paramToBeOverride in operation level",
+            "type":"integer",
+            "format":"int32",
+            "required":false
+          },
+          {
+            "name":"reqParamToBeOverride",
+            "in":"header",
+            "description":"paramToBeOverride in operation level",
+            "type":"integer",
+            "format":"int32",
+            "required":true
+          }
+        ],
+        "responses":{
+          "200":{
+            "headers":{
+              "respHeader1":{
+                "type":"integer"
+              }
+            },
+            "schema":{
+              "$ref":"#/definitions/Def2"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters":{
+    "ParamDef1":{
+      "name":"paramDef1",
+      "in":"header",
+      "description":"paramDef1 desc",
+      "type":"string",
+      "required":true
+    },
+    "ParamDef2":{
+      "name":"paramDef2",
+      "in":"query",
+      "description":"paramDef2 desc",
+      "type":"number",
+      "required":true
+    },
+    "ParamDef3":{
+      "$ref":"#/parameters/ParamDef4"
+    },
+    "ParamDef4":{
+      "name":"paramDef4",
+      "in":"query",
+      "description":"paramDef4 desc for paramDef3 reference",
+      "type":"number",
+      "required":true
+    }
+  },
+  "definitions":{
+    "Def1":{
+      "type":"object",
+      "properties":{
+        "def1Prop1":{
+          "type":"integer",
+          "description":"Position in pagination."
+        }
+      }
+    },
+    "Def2":{
+      "type":"object",
+      "properties":{
+        "def2Prop1":{
+          "type":"integer",
+          "description":"Position in pagination."
+        },
+        "def2Prop2":{
+          "type":"array",
+          "items":{
+            "$ref":"#/definitions/Def3"
+          }
+        }
+      }
+    },
+    "Def3":{
+      "type":"object",
+      "properties":{
+        "def3Prop1":{
+          "type":"string",
+          "description":"Unique identifier for the activity"
+        }
+      }
+    },
+    "Def4":{
+      "type":"array",
+      "items":{
+        "$ref":"#/definitions/Def3"
+      },
+      "minItems":1,
+      "maxItems":100
+    }
+  }
+}
