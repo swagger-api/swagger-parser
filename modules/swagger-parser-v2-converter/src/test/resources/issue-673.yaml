@@ -21,6 +21,7 @@ paths:
           maximum: 7
           exclusiveMinimum: true
           exclusiveMaximum: true
+          uniqueItems: true
   "/array":
     post:
       consumes:

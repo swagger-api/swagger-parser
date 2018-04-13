@@ -383,7 +383,7 @@ public class V2ConverterTest {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_23_JSON);
         assertTrue(oas.getComponents().getSchemas().get(MAP_OBJECTS_MODEL).getAdditionalProperties() instanceof Schema);
         Schema additionalProperties = (Schema) oas.getComponents().getSchemas().get(MAP_OBJECTS_MODEL).getAdditionalProperties();
-        assertEquals(OBJECT_REF,additionalProperties.get$ref());
+        assertEquals(OBJECT_REF, additionalProperties.get$ref());
     }
 
     @Test(description = "Covert path item $refs")
@@ -578,8 +578,22 @@ public class V2ConverterTest {
 
     @Test(description = "OpenAPI v2 converter - Error in BodyParameter convertion")
     public void testIssue673() throws Exception {
-        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_673_YAML);
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_673_YAML);
         assertNotNull(oas);
+        Schema schema = oas.getPaths().get("/integer").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertNotNull(schema);
+        assertTrue(schema.getUniqueItems());
+        assertTrue(schema.getExclusiveMaximum());
+        assertTrue(schema.getExclusiveMinimum());
+        assertEquals(3, schema.getMultipleOf().toBigInteger().intValue());
+        assertEquals(new BigDecimal(5), schema.getMinimum());
+        assertEquals(new BigDecimal(7), schema.getMaximum());
+
+        schema = oas.getPaths().get("/string").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertEquals(2, schema.getMinLength().intValue());
+        assertEquals(7, schema.getMaxLength().intValue());
+        assertEquals("aaa", schema.getPattern());
+
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
