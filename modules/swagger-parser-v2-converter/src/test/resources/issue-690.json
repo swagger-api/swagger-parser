@@ -22,6 +22,16 @@
                             "type": "string"
                         },
                         "collectionFormat": "csv"
+                    },
+                    {
+                        "name": "query-multi",
+                        "in": "query",
+                        "description": "",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi"
                     }
                 ],
                 "responses": {

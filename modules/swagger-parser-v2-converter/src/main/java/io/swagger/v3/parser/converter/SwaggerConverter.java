@@ -949,6 +949,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     case "tsv":
                         break;
                     case "multi":
+                        if ("query".equals(v2Parameter.getIn())) {
+                            v3Parameter.setStyle(Parameter.StyleEnum.FORM);
+                            v3Parameter.setExplode(true);
+                        }
                         break;
                     case "csv":
                     default:
