@@ -72,6 +72,7 @@ public class V2ConverterTest {
     private static final String ISSUE_647_JSON = "issue-647.yaml";
     private static final String ISSUE_662_JSON = "issue-662.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
+    private static final String ISSUE_690_JSON = "issue-690.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -573,6 +574,17 @@ public class V2ConverterTest {
         assertNotNull(anEnum);
         assertEquals(anEnum.get(0), true);
         assertEquals(anEnum.get(1), false);
+    }
+
+    @Test(description = "OpenAPI v2 converter - Missing Parameter.style property")
+    public void testIssue690() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_690_JSON);
+        List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
+        assertNotNull(parameters);
+
+        Parameter parameter = parameters.get(0);
+        assertEquals(parameter.getStyle(), Parameter.StyleEnum.FORM);
+        assertEquals(parameter.getExplode(), Boolean.FALSE);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
