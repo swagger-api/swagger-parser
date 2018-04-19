@@ -589,6 +589,10 @@ public class V2ConverterTest {
         parameter = parameters.get(1);
         assertEquals(parameter.getStyle(), Parameter.StyleEnum.FORM);
         assertEquals(parameter.getExplode(), Boolean.TRUE);
+
+        parameter = parameters.get(2);
+        assertEquals(parameter.getStyle(), Parameter.StyleEnum.SIMPLE);
+        assertEquals(parameter.getExplode(), Boolean.FALSE);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
