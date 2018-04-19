@@ -959,7 +959,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                         if ("query".equals(v2Parameter.getIn())) {
                             v3Parameter.setStyle(Parameter.StyleEnum.FORM);
                             v3Parameter.setExplode(false);
-                        } else if ("header".equals(v2Parameter.getIn())) {
+                        } else if ("header".equals(v2Parameter.getIn()) || "path".equals(v2Parameter.getIn())) {
                             v3Parameter.setStyle(Parameter.StyleEnum.SIMPLE);
                             v3Parameter.setExplode(false);
                         }
