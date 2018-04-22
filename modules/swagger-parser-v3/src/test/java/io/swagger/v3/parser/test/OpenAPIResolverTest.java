@@ -590,7 +590,7 @@ public class OpenAPIResolverTest {
         options.setResolveCombinators(false);
 
         // Testing components/schemas
-        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("composed.yaml",auths,options).getOpenAPI();
 
         ComposedSchema allOf = (ComposedSchema) openAPI.getComponents().getSchemas().get("ExtendedAddress");
         assertEquals(allOf.getAllOf().size(), 2);
@@ -620,7 +620,7 @@ public class OpenAPIResolverTest {
         options.setResolve(true);
         options.setResolveFully(true);
 
-        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("composed.yaml",auths,options).getOpenAPI();
 
 
         assertTrue(openAPI.getPaths().get("/withInvalidComposedModelArray").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ArraySchema);
@@ -636,7 +636,7 @@ public class OpenAPIResolverTest {
         ParseOptions options = new ParseOptions();
         options.setResolveCombinators(false);
         options.setResolveFully(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/oneof-anyof.yaml",auths,options).getOpenAPI();
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("oneof-anyof.yaml",auths,options).getOpenAPI();
 
 
         assertTrue(openAPI.getPaths().get("/mixed-array").getGet().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ArraySchema);
@@ -667,7 +667,7 @@ public class OpenAPIResolverTest {
     public void testRefNameConflicts() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("/refs-name-conflict/a.yaml",null, options).getOpenAPI();
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("refs-name-conflict/a.yaml",null, options).getOpenAPI();
 
         assertEquals("local", ((Schema) openAPI.getPaths().get("/newPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
         assertEquals("referred", ((Schema)openAPI.getPaths().get("/oldPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
@@ -710,7 +710,7 @@ public class OpenAPIResolverTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/composedSchemaRef.yaml", auths, options);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("composedSchemaRef.yaml", auths, options);
 
         Assert.assertNotNull(openAPI);
 
@@ -731,7 +731,7 @@ public class OpenAPIResolverTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/anyOf_OneOf.yaml", auths, options);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("anyOf_OneOf.yaml", auths, options);
 
         Assert.assertNotNull(openAPI);
 

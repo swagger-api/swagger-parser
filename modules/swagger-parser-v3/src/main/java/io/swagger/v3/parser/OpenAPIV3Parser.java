@@ -44,11 +44,13 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             }
             result = readWithInfo(url,auth);
 
+
+
             if (result.getOpenAPI() != null) {
                 String version = result.getOpenAPI().getOpenapi();
                 if (version != null && version.startsWith("3.0")) {
                     if (options != null) {
-                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, url);
+                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, processLocation(url));
                         if (options.isResolve()) {
                             result.setOpenAPI(resolver.resolve());
                         }
@@ -112,6 +114,21 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
           mapper = YAML_MAPPER;
       }
       return mapper;
+    }
+
+    public String processLocation(String location){
+        try {
+            if (location.toLowerCase().startsWith("http")) {
+                return location;
+            }
+            return getClass().getClassLoader().getResource(location).toString();
+
+
+        }
+        catch (Exception e) {
+            LOGGER.warn("Exception while reading:", e);
+            return "unable to read location `" + location + "`" ;
+        }
     }
     
     public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
