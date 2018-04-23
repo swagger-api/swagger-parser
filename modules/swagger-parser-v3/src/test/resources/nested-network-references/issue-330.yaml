@@ -18,4 +18,4 @@ paths:
                 type: object
                 properties:
                   paging:
-                    $ref: 'http://server1/resources/common/paging.yaml#/Paging'
+                    $ref: 'http://server1/ref/common/paging.yaml#/Paging'

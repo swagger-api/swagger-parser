@@ -179,7 +179,7 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         options.setResolveCombinators(false);
         options.setResolveFully(true);
-        final SwaggerParseResult result = parser.readLocation("odin.yaml", null, options);
+        final SwaggerParseResult result = parser.readLocation("classpath/odin.yaml", null, options);
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertTrue(result.getMessages().isEmpty());
         Assert.assertTrue(result.getOpenAPI().getPaths().get("/JTasker/startRun").getPost().getRequestBody().getContent().get("application/json").getSchema().getProperties().size() == 2);
@@ -726,7 +726,7 @@ public class OpenAPIV3ParserTest {
     @Test(enabled = false, description = "see https://github.com/openAPI-api/openAPI-parser/issues/337")
     public void testIssue62() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        final OpenAPI openAPI = parser.read("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/fixtures/v2.0/json/resources/resourceWithLinkedDefinitions.json");
+        final OpenAPI openAPI = parser.read("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/fixtures/v2.0/json/ref/resourceWithLinkedDefinitions.json");
 
         assertNotNull(openAPI.getPaths().get("/pets/{petId}").getGet());
     }

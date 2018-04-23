@@ -42,6 +42,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             if (auth == null) {
                 auth = new ArrayList<>();
             }
+
             result = readWithInfo(url,auth);
 
 

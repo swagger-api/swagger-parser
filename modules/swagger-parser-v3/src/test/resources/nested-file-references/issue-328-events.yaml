@@ -10,4 +10,4 @@ get:
             type: object
             properties:
               paging:
-                $ref: 'http://localhost:8080/resources/swagger/common/issue-328-paging.yaml#/Paging'
+                $ref: 'http://localhost:8080/ref/swagger/common/issue-328-paging.yaml#/Paging'
