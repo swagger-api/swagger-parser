@@ -6,7 +6,7 @@ info:
   version: '1'
 paths:
   /events:
-    $ref: 'http://localhost:8080/resources/swagger/issue-328-events.yaml'
+    $ref: 'http://localhost:8080/ref/swagger/issue-328-events.yaml'
 components:
   schemas:
     StatusResponse:

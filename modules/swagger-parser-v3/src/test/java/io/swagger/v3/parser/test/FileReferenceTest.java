@@ -23,7 +23,7 @@ public class FileReferenceTest {
     public void testIssue306() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-306.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-306.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -42,7 +42,7 @@ public class FileReferenceTest {
     public void testIssue308() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-308.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-308.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -55,7 +55,7 @@ public class FileReferenceTest {
     public void testIssue310() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-310.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-310.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -68,7 +68,7 @@ public class FileReferenceTest {
     public void testIssue312() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-312.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-312.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -86,7 +86,7 @@ public class FileReferenceTest {
     public void testIssue314() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-314.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-314.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -106,7 +106,7 @@ public class FileReferenceTest {
     public void testIssue316() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-316.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-316.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -130,7 +130,7 @@ public class FileReferenceTest {
     public void testIssue323() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-323.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-323.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -145,7 +145,7 @@ public class FileReferenceTest {
     public void testIssue289() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/issue-289.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-289.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -156,7 +156,7 @@ public class FileReferenceTest {
     public void testIssue336() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-336.json", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-336.json", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -167,7 +167,7 @@ public class FileReferenceTest {
     public void testIssue340() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-340.json", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-340.json", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -178,14 +178,14 @@ public class FileReferenceTest {
     public void testIssue304() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-304.json", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-304.json", null, options);
         assertNotNull(result.getOpenAPI().getComponents().getSchemas());
     }
 
     @Test
     public void testAllOfFlatAndNested() {
-        for (String path : Arrays.asList("./src/test/resources/allOf-properties-ext-ref/models/swagger.json",
-                "./src/test/resources/allOf-properties-ext-ref/swagger.json")) {
+        for (String path : Arrays.asList("allOf-properties-ext-ref/models/swagger.json",
+                "allOf-properties-ext-ref/swagger.json")) {
             //ParseOptions options = new ParseOptions();
             //options.setResolve(true);
             OpenAPI swagger = new OpenAPIV3Parser().read(path);
@@ -203,7 +203,7 @@ public class FileReferenceTest {
     public void testIssue421() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/nested-file-references/issue-421.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("nested-file-references/issue-421.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
@@ -238,7 +238,7 @@ public class FileReferenceTest {
     public void testRelativeRefIssue421() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/main.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("main.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
         OpenAPI swagger = result.getOpenAPI();
