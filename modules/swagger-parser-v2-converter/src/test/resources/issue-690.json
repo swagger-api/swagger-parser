@@ -1,0 +1,65 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "x-example"
+    },
+    "host": "httpbin.org",
+    "basePath": "/anything",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/{foo}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "query-csv",
+                        "in": "query",
+                        "description": "",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv"
+                    },
+                    {
+                        "name": "query-multi",
+                        "in": "query",
+                        "description": "",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi"
+                    },
+                    {
+                        "name": "header-csv",
+                        "in": "header",
+                        "description": "",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv"
+                    },
+                    {
+                        "name": "path-csv",
+                        "in": "path",
+                        "description": "",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
