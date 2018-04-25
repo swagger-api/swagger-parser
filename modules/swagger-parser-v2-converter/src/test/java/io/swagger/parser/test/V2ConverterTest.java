@@ -29,10 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class V2ConverterTest {
     private static final String PET_STORE_JSON = "petstore.json";
@@ -584,19 +581,19 @@ public class V2ConverterTest {
 
         Parameter parameter = parameters.get(0);
         assertEquals(parameter.getStyle(), Parameter.StyleEnum.FORM);
-        assertEquals(parameter.getExplode(), Boolean.FALSE);
+        assertFalse(parameter.getExplode());
 
         parameter = parameters.get(1);
         assertEquals(parameter.getStyle(), Parameter.StyleEnum.FORM);
-        assertEquals(parameter.getExplode(), Boolean.TRUE);
+        assertTrue(parameter.getExplode());
 
         parameter = parameters.get(2);
         assertEquals(parameter.getStyle(), Parameter.StyleEnum.SIMPLE);
-        assertEquals(parameter.getExplode(), Boolean.FALSE);
+        assertFalse(parameter.getExplode());
 
         parameter = parameters.get(3);
         assertEquals(parameter.getStyle(), Parameter.StyleEnum.SIMPLE);
-        assertEquals(parameter.getExplode(), Boolean.FALSE);
+        assertFalse(parameter.getExplode());
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
