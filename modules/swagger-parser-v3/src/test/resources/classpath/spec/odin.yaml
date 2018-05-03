@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './resources/urn_jsonschema_com_issinc_odin_display_CreatePlan.json'
+              $ref: './ref/urn_jsonschema_com_issinc_odin_display_CreatePlan.json'
         required: true
       responses:
         '200':

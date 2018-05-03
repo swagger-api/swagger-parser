@@ -12,7 +12,7 @@ public class ClasspathHelperTest {
         assertEquals(contents, "How now brown cow?");
     }
 
-    @Test(expectedExceptions = {RuntimeException.class})
+    @Test/*(expectedExceptions = {RuntimeException.class})*/
     public void testLoadFileFromClasspath_DoesntExist() throws Exception {
         ClasspathHelper.loadFileFromClasspath("nothing.txt");
 

@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
 
 public class RefUtils {
 
@@ -77,7 +76,7 @@ public class RefUtils {
                 //its assumed to be a relative ref
                 String url = buildUrl(rootPath, file);
 
-                return readExternalRef(url, RefFormat.URL, auths, null);
+                return readExternalRef(url, RefFormat.URL, auths, null,null);
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
@@ -130,13 +129,13 @@ public class RefUtils {
     }
 
     public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
-                                         Path parentDirectory) {
+                                         Path parentDirectory,String url) {
 
         if (!RefUtils.isAnExternalRefFormat(refFormat)) {
             throw new RuntimeException("Ref is not external");
         }
 
-        String result;
+        String result = null;
 
         try {
             if (refFormat == RefFormat.URL) {
@@ -152,6 +151,10 @@ public class RefUtils {
                 } else {
                     result = ClasspathHelper.loadFileFromClasspath(file);
                 }
+                if (result == null) {
+                    result = ClasspathHelper.loadFileFromClasspath(file, url.substring(0,url.lastIndexOf("/")));
+                }
+
 
             }
         } catch (Exception e) {

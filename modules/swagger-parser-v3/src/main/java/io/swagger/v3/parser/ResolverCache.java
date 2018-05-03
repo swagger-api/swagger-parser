@@ -50,6 +50,7 @@ public class ResolverCache {
     private final OpenAPI openApi;
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
+    private final String parentUrl;
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
@@ -76,6 +77,7 @@ public class ResolverCache {
             parentDirectory = file.toPath();
         }
 
+        parentUrl = parentFileLocation;
     }
 
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
@@ -113,7 +115,7 @@ public class ResolverCache {
 
         if (contents == null) {
             if(parentDirectory != null) {
-                contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
+                contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory, parentUrl);
             }
             else if(rootPath != null) {
                 contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath);
