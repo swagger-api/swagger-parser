@@ -19,6 +19,7 @@ import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ByteArrayProperty;
@@ -51,6 +52,14 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SwaggerParserTest {
+
+    @Test
+    public void testNPEIssue684() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue-684.json");
+        Assert.assertNotNull(swagger);
+        assertTrue(swagger.getParameters().get("ParamDef3") instanceof RefParameter);
+    }
 
     @Test
     public void testRefPaths() throws Exception {
