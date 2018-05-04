@@ -811,7 +811,7 @@ public class SwaggerDeserializer {
                 impl.setMaxLength(maxLength);
             }
 
-            Number multipleOf = getNumber("multipleOf", node, false, location, result);
+            BigDecimal multipleOf = getBigDecimal("multipleOf", node, false, location, result);
             if(multipleOf != null) {
                 impl.setMultipleOf(multipleOf);
             }
