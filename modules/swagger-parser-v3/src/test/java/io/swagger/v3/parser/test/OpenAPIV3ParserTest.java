@@ -56,6 +56,22 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void issue682() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(false);
+        options.setResolveFully(true);
+
+        String location = getClass().getResource("/odin.yaml").toString();
+        Assert.assertNotNull(location);
+        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertTrue(result.getMessages().isEmpty());
+        Assert.assertTrue(result.getOpenAPI().getPaths().get("/JTasker/startRun").getPost().getRequestBody().getContent().get("application/json").getSchema().getProperties().size() == 2);
+    }
+
 
     @BeforeClass
     private void setUpWireMockServer() throws IOException {
