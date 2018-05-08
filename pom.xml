@@ -250,7 +250,7 @@
         </repository>
     </repositories>
     <properties>
-        <swagger-parser-v2-version>1.0.35</swagger-parser-v2-version>
+        <swagger-parser-v2-version>1.0.36-SNAPSHOT</swagger-parser-v2-version>
         <commons-io-version>2.4</commons-io-version>
         <slf4j-version>1.6.3</slf4j-version>
         <swagger-core-version>2.0.1</swagger-core-version>
