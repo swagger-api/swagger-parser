@@ -4,11 +4,12 @@ script: mvn verify
 jdk:
   - oraclejdk8
   - oraclejdk9
-after_success:
-  - if [ $SONATYPE_USERNAME ] && [ -z $TRAVIS_TAG ] && [ $TRAVIS_PULL_REQUEST == false ]; then
-      mvn clean deploy --settings .travis/settings.xml;
-    fi;
-branches:
-  only:
-  - master
-  - 2.0
+# skip deployment, test all branches
+#after_success:
+#  - if [ $SONATYPE_USERNAME ] && [ -z $TRAVIS_TAG ] && [ $TRAVIS_PULL_REQUEST == false ]; then
+#      mvn clean deploy --settings .travis/settings.xml;
+#    fi;
+#branches:
+#  only:
+#  - master
+#  - 2.0
