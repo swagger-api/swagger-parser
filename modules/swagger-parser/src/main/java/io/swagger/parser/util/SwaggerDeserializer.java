@@ -788,6 +788,44 @@ public class SwaggerDeserializer {
                 impl.setUniqueItems(bp);
             }
 
+            bp = getBoolean("exclusiveMaximum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMaximum(bp);
+            }
+
+            bp = getBoolean("exclusiveMinimum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMinimum(bp);
+            }
+
+            value = getString("pattern", node, false, location, result);
+            impl.setPattern(value);
+
+            BigDecimal maximum = getBigDecimal("maximum", node, false, location, result);
+            if(maximum != null) {
+                impl.maximum(maximum);
+            }
+
+            BigDecimal minimum = getBigDecimal("minimum", node, false, location, result);
+            if(minimum != null) {
+                impl.minimum(minimum);
+            }
+
+            Integer minLength = getInteger("minLength", node, false, location, result);
+            if(minLength != null) {
+                impl.setMinLength(minLength);
+            }
+
+            Integer maxLength = getInteger("maxLength", node, false, location, result);
+            if(maxLength != null) {
+                impl.setMaxLength(maxLength);
+            }
+
+            BigDecimal multipleOf = getBigDecimal("multipleOf", node, false, location, result);
+            if(multipleOf != null) {
+                impl.setMultipleOf(multipleOf);
+            }
+
             ap = node.get("enum");
             if(ap != null) {
                 ArrayNode arrayNode = getArray("enum", node, false, location, result);
