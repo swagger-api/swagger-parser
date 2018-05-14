@@ -72,6 +72,7 @@ public class V2ConverterTest {
     private static final String ISSUE_647_JSON = "issue-647.yaml";
     private static final String ISSUE_662_JSON = "issue-662.yaml";
     private static final String ISSUE_672_JSON = "issue-672.json";
+    private static final String ISSUE_676_JSON = "issue-676.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -557,6 +558,28 @@ public class V2ConverterTest {
     public void testIssue672() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_672_JSON);
         assertNotNull(oas);
+    }
+
+    @Test(description = "OpenAPI v2 converter - integer elements of enum are converted to String")
+    public void testIssue676() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_676_JSON);
+        List<Parameter> parameters = oas.getPaths().get(FOO_PATH).getGet().getParameters();
+        assertNotNull(parameters);
+
+        List anEnum = parameters.get(0).getSchema().getEnum();
+        assertNotNull(anEnum);
+        assertEquals(anEnum.get(0), 1);
+        assertEquals(anEnum.get(1), -2);
+
+        anEnum = parameters.get(1).getSchema().getEnum();
+        assertNotNull(anEnum);
+        assertEquals(anEnum.get(0), new BigDecimal(1));
+        assertEquals(anEnum.get(1), new BigDecimal(-2));
+
+        anEnum = parameters.get(2).getSchema().getEnum();
+        assertNotNull(anEnum);
+        assertEquals(anEnum.get(0), true);
+        assertEquals(anEnum.get(1), false);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
