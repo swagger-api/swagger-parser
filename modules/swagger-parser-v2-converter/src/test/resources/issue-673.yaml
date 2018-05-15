@@ -1,0 +1,54 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Test
+paths:
+  "/integer":
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: integer
+          format: int32
+          multipleOf: 3
+          minimum: 5
+          maximum: 7
+          exclusiveMinimum: true
+          exclusiveMaximum: true
+          uniqueItems: true
+  "/array":
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+  "/string":
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 7
+          pattern: aaa
