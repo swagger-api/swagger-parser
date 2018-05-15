@@ -71,6 +71,7 @@ public class V2ConverterTest {
     private static final String ISSUE_540_JSON = "issue-540.json";
     private static final String ISSUE_647_JSON = "issue-647.yaml";
     private static final String ISSUE_662_JSON = "issue-662.yaml";
+    private static final String ISSUE_672_JSON = "issue-672.json";
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
 
@@ -383,7 +384,7 @@ public class V2ConverterTest {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_23_JSON);
         assertTrue(oas.getComponents().getSchemas().get(MAP_OBJECTS_MODEL).getAdditionalProperties() instanceof Schema);
         Schema additionalProperties = (Schema) oas.getComponents().getSchemas().get(MAP_OBJECTS_MODEL).getAdditionalProperties();
-        assertEquals(OBJECT_REF, additionalProperties.get$ref());
+        assertEquals(OBJECT_REF,additionalProperties.get$ref());
     }
 
     @Test(description = "Covert path item $refs")
@@ -552,6 +553,12 @@ public class V2ConverterTest {
     public void testIssue662() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_662_JSON);
         assertTrue(oas.getPaths().isEmpty());
+    }
+
+    @Test(description = "OpenAPI v2 converter - NullPointerException when converting an spec #")
+    public void testIssue672() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_672_JSON);
+        assertNotNull(oas);
     }
 
     @Test(description = "OpenAPI v2 converter - integer elements of enum are converted to String")
