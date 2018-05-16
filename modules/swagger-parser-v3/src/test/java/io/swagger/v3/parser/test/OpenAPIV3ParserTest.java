@@ -72,6 +72,14 @@ public class OpenAPIV3ParserTest {
         Assert.assertTrue(result.getOpenAPI().getPaths().get("/JTasker/startRun").getPost().getRequestBody().getContent().get("application/json").getSchema().getProperties().size() == 2);
     }
 
+    @Test
+    public void testPattern() {
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("testPattern.yaml", null, new ParseOptions()).getOpenAPI();
+
+        Schema s = openAPI.getComponents().getSchemas().get("SomeObj");
+        Assert.assertEquals(s.getPattern(),"^[A-Z]+$"); //ERROR: got null
+    }
+
 
     @BeforeClass
     private void setUpWireMockServer() throws IOException {
