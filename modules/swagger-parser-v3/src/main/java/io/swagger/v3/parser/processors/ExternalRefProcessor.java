@@ -189,9 +189,9 @@ public final class ExternalRefProcessor {
                     if (mapProp.get$ref() != null) {
                         processRefSchema(mapProp, file);
                     } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                            ((ArraySchema) mapProp).getItems()!= null &&
-                            ((ArraySchema) mapProp).getItems().get$ref() != null
-                            && StringUtils.isNotBlank(((ArraySchema) mapProp).getItems().get$ref())) {
+                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems()!= null &&
+                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null
+                            && StringUtils.isNotBlank(((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref())) {
                         processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
                     }
                 }
