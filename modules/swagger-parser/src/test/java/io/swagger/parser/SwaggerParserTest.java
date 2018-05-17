@@ -46,12 +46,47 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SwaggerParserTest {
+
+    @Test
+    public void testIssue697() throws Exception {
+        String yaml = "{\n" +
+                "    \"swagger\": \"2.0\",\n" +
+                "    \"info\": {\n" +
+                "        \"version\": \"1.0\",\n" +
+                "        \"title\": \"x-example\"\n" +
+                "    },\n" +
+                "    \"host\": \"httpbin.org\",\n" +
+                "    \"basePath\": \"/anything\",\n" +
+                "    \"schemes\": [\n" +
+                "        \"http\"\n" +
+                "    ],\n" +
+                "    \"paths\": {\n" +
+                "        \"/{foo}\": {\n" +
+                "            \"get\": {\n" +
+                "                \"responses\": {\n" +
+                "                    \"200\": {\n" +
+                "                        \"description\": \"OK\"\n" +
+                "                    }\n" +
+                "                },\n" +
+                "                \"deprecated\": false\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.parse(yaml);
+        assertFalse(swagger.getPaths().get("/{foo}").getGet().isDeprecated());
+
+    }
 
     @Test
     public void testNPEIssue684() throws Exception {
