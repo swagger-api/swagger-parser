@@ -27,6 +27,7 @@ import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.util.SwaggerDeserializationResult;
@@ -872,6 +873,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 result.setExclusiveMaximum(np.getExclusiveMaximum());
                 result.setExclusiveMinimum(np.getExclusiveMinimum());
+            }
+
+            if (schema instanceof StringProperty) {
+                StringProperty sp = (StringProperty) schema;
+
+                result.setMinLength(sp.getMinLength());
+                result.setMaxLength(sp.getMaxLength());
+                result.setPattern(sp.getPattern());
             }
         }
 
