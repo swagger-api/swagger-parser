@@ -642,7 +642,7 @@ public class V2ConverterTest {
     @Test(description = "OpenAPI v2 converter - SwaggerParseResult has message")
     public void testSwaggerParseResultHasMessage() throws Exception {
         SwaggerConverter converter = new SwaggerConverter();
-        String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(ISSUE_676_JSON).toURI())));
+        String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(PET_STORE_JSON).toURI())));
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(false);
         SwaggerParseResult result = converter.readContents(swaggerAsString, null, parseOptions);
