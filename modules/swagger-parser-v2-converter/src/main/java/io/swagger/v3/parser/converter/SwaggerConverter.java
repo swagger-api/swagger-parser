@@ -133,6 +133,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         OpenAPI openAPI = new OpenAPI();
         SwaggerParseResult output = new SwaggerParseResult();
+        output.setMessages(parse.getMessages());
 
         SwaggerInventory inventory = new SwaggerInventory().process(parse.getSwagger());
 
