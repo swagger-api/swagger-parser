@@ -126,14 +126,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
             return null;
         }
 
+        SwaggerParseResult output = new SwaggerParseResult().messages(parse.getMessages());
+
         if (parse.getSwagger() == null) {
-            return new SwaggerParseResult()
-                    .messages(parse.getMessages());
+            return output;
         }
 
         OpenAPI openAPI = new OpenAPI();
-        SwaggerParseResult output = new SwaggerParseResult();
-
         SwaggerInventory inventory = new SwaggerInventory().process(parse.getSwagger());
 
         Swagger swagger = parse.getSwagger();
