@@ -36,14 +36,14 @@
 			"in": "body",
 			"required": true,
 			"schema": {
-				"$ref": "../schemas/schema.json#/definitions/AddressEx"
+				"$ref": "../Schemas/schema.json#/definitions/AddressEx"
 			}
 		}],
 		"responses": {
 			"200": {
 				"description": "OK",
 				"schema": {
-					"$ref": "../schemas/schema.json#/definitions/AddressEx"
+					"$ref": "../Schemas/schema.json#/definitions/AddressEx"
 				}
 			}
 		}

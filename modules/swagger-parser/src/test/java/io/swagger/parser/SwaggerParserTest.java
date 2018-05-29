@@ -57,11 +57,11 @@ public class SwaggerParserTest {
     @Test
     public void testIssue704() throws Exception {
         SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("sample/swagger.json");
+        final Swagger swagger = parser.read("src/test/resources/sample/swagger.json");
         Assert.assertNotNull(swagger);
 
         assertNotNull(swagger.getPaths().get("/api/Address").getGet());
-        assertTrue(swagger.getDefinitions().size() == 1);
+        assertTrue(swagger.getDefinitions().size() == 2);
         assertNotNull(swagger.getDefinitions().get("AddressEx"));
     }
 
