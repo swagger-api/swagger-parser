@@ -13,7 +13,7 @@
 				"schema": {
 					"type": "array",
 					"items": {
-						"$ref": "../schemas/schema.json#/definitions/AddressEx"
+						"$ref": "../Schemas/schema.json#/definitions/AddressEx"
 					}
 				}
 			}
