@@ -55,6 +55,17 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue704() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("sample/swagger.json");
+        Assert.assertNotNull(swagger);
+
+        assertNotNull(swagger.getPaths().get("/api/Address").getGet());
+        assertTrue(swagger.getDefinitions().size() == 1);
+        assertNotNull(swagger.getDefinitions().get("AddressEx"));
+    }
+
+    @Test
     public void testIssue697() throws Exception {
         String yaml = "{\n" +
                 "    \"swagger\": \"2.0\",\n" +

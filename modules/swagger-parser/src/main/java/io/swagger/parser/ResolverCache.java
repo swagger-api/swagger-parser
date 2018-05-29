@@ -47,6 +47,7 @@ public class ResolverCache {
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
+    private final String parentUrl;
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
@@ -72,6 +73,7 @@ public class ResolverCache {
             File file = new File(".");
             parentDirectory = file.toPath();
         }
+        parentUrl = parentFileLocation;
 
     }
 

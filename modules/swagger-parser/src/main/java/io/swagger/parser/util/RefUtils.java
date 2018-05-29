@@ -121,7 +121,7 @@ public class RefUtils {
             throw new RuntimeException("Ref is not external");
         }
 
-        String result;
+        String result = null;
 
         try {
             if (refFormat == RefFormat.URL) {
@@ -133,8 +133,22 @@ public class RefUtils {
                 if(Files.exists(pathToUse)) {
                     result = IOUtils.toString(new FileInputStream(pathToUse.toFile()), "UTF-8");
                 } else {
+                    String url = file;
+                    if(url.contains("..")) {
+                        url = parentDirectory + url.substring(url.indexOf(".") + 2);
+                    }else{
+                        url = parentDirectory + url.substring(url.indexOf(".") + 1);
+                    }
+                    final Path pathToUse2 = parentDirectory.resolve(url).normalize();
+
+                    if(Files.exists(pathToUse2)) {
+                        result = IOUtils.toString(new FileInputStream(pathToUse2.toFile()), "UTF-8");
+                    }
+                }
+                if (result == null){
                     result = ClasspathHelper.loadFileFromClasspath(file);
                 }
+
 
             }
         } catch (Exception e) {
