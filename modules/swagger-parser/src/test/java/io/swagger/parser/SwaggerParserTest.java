@@ -61,7 +61,7 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger);
 
         assertNotNull(swagger.getPaths().get("/api/Address").getGet());
-        assertTrue(swagger.getDefinitions().size() == 2);
+        assertTrue(swagger.getDefinitions().size() == 1);
         assertNotNull(swagger.getDefinitions().get("AddressEx"));
     }
 
