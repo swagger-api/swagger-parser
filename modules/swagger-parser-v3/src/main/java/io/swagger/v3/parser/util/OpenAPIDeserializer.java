@@ -194,6 +194,17 @@ public class OpenAPIDeserializer {
         return openAPI;
     }
 
+    public String mungedRef(String refString) {
+        // Ref: IETF RFC 3966, Section 5.2.2
+        if (!refString.contains(":") &&   // No scheme
+                !refString.startsWith("#") && // Path is not empty
+                !refString.startsWith("/") && // Path is not absolute
+                refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
+            return "./" + refString;
+        }
+        return null;
+    }
+
     public Map<String,Object> getExtensions(ObjectNode node){
 
         Map<String,Object> extensions = new LinkedHashMap<>();
@@ -490,8 +501,13 @@ public class OpenAPIDeserializer {
             JsonNode ref = obj.get("$ref");
 
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                pathItem.set$ref(ref.asText());
-                return pathItem.$ref((ref.asText()));
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    pathItem.set$ref(mungedRef);
+                }else{
+                    pathItem.set$ref(ref.textValue());
+                }
+                return pathItem;
             } else if (ref.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode node = (ObjectNode) ref;
 
