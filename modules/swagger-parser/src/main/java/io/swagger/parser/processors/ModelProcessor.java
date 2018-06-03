@@ -89,13 +89,17 @@ public class ModelProcessor {
      */
 
         if (isAnExternalRefFormat(refModel.getRefFormat())) {
+
             final String newRef = externalRefProcessor.processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat());
 
             if (newRef != null) {
                 refModel.set$ref(newRef);
             }
         }
+
     }
+
+
 
 
 }

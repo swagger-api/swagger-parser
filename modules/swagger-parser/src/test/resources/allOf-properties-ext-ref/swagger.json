@@ -6,7 +6,7 @@
   },
   "definitions": {
     "record": {
-      "$ref": "./models/purebred_pet.json"
+      "$ref": "models/purebred_pet.json"
     }
   }
 }

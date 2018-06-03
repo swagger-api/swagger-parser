@@ -11,7 +11,7 @@
 	"https"],
 	"paths": {
 		"/api/Address": {
-			"$ref": "./Paths/Address.json"
+			"$ref": "Paths/Address.json"
 		}
 	}	
 }
