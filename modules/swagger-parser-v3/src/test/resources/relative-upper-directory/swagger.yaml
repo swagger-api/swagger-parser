@@ -8,4 +8,4 @@ info:
   description: Service for Swagger and JSON schema testing
 paths:
   /api/Address:
-    $ref: "./Paths/Address.yaml"
+    $ref: "Paths/Address.yaml"

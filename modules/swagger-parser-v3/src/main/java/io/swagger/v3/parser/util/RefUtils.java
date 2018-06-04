@@ -49,6 +49,7 @@ public class RefUtils {
 
     public static RefFormat computeRefFormat(String ref) {
         RefFormat result = RefFormat.INTERNAL;
+        ref = mungedRef(ref);
         if(ref.startsWith("http")||ref.startsWith("https")) {
             result = RefFormat.URL;
         } else if(ref.startsWith("#/")) {
@@ -58,6 +59,18 @@ public class RefUtils {
         }
 
         return result;
+    }
+
+    public static String mungedRef(String refString) {
+        // Ref: IETF RFC 3966, Section 5.2.2
+        if (!refString.contains(":") &&   // No scheme
+                !refString.startsWith("#") && // Path is not empty
+                !refString.startsWith("/") && // Path is not absolute
+                !refString.contains("$") &&
+                refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
+            return "./" + refString;
+        }
+        return refString;
     }
 
 

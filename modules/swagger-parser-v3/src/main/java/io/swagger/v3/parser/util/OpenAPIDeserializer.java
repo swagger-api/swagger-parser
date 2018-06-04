@@ -1867,8 +1867,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                schema.set$ref(ref.asText());
-                return schema.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    schema.set$ref(mungedRef);
+                }else{
+                    schema.set$ref(ref.asText());
+                }
+                return schema;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
