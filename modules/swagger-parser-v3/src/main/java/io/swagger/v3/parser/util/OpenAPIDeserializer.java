@@ -980,8 +980,14 @@ public class OpenAPIDeserializer {
         JsonNode ref = linkNode.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                link.set$ref(ref.asText());
-                return link.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    link.set$ref(mungedRef);
+                }else{
+                    link.set$ref(ref.textValue());
+                }
+
+                return link;
             } else {
                 result.invalidType(location, "$ref", "string", linkNode);
                 return null;
@@ -1076,7 +1082,13 @@ public class OpenAPIDeserializer {
                 if (ref != null) {
                     if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                         PathItem pathItem = new PathItem();
-                        return callback.addPathItem(name,pathItem.$ref(ref.asText()));
+                        String mungedRef = mungedRef(ref.textValue());
+                        if (mungedRef != null) {
+                            pathItem.set$ref(mungedRef);
+                        }else{
+                            pathItem.set$ref(ref.textValue());
+                        }
+                        return callback.addPathItem(name,pathItem);
                     } else {
                         result.invalidType(location, "$ref", "string", node);
                         return null;
@@ -1270,8 +1282,13 @@ public class OpenAPIDeserializer {
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                 parameter = new Parameter();
-                parameter.set$ref(ref.asText());
-                return parameter.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    parameter.set$ref(mungedRef);
+                }else{
+                    parameter.set$ref(ref.textValue());
+                }
+                return parameter;
             } else {
                 result.invalidType(location, "$ref", "string", obj);
                 return null;
@@ -1426,8 +1443,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = headerNode.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                header.set$ref(ref.asText());
-                return header.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    header.set$ref(mungedRef);
+                }else{
+                    header.set$ref(ref.textValue());
+                }
+                return header;
             } else {
                 result.invalidType(location, "$ref", "string", headerNode);
                 return null;
@@ -1561,8 +1583,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                securityScheme.set$ref(ref.asText());
-                return securityScheme.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    securityScheme.set$ref(mungedRef);
+                }else{
+                    securityScheme.set$ref(ref.textValue());
+                }
+                return securityScheme;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -2172,8 +2199,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                example.set$ref(ref.asText());
-                return example.$ref((ref.asText()));
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    example.set$ref(mungedRef);
+                }else{
+                    example.set$ref(ref.textValue());
+                }
+                return example;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -2276,8 +2308,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                 apiResponse.set$ref(ref.asText());
-                 return apiResponse.$ref((ref.asText()));
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    apiResponse.set$ref(mungedRef);
+                }else{
+                    apiResponse.set$ref(ref.textValue());
+                }
+                 return apiResponse;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -2501,8 +2538,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                body.set$ref(ref.asText());
-                return body.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    body.set$ref(mungedRef);
+                }else{
+                    body.set$ref(ref.textValue());
+                }
+                return body;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
