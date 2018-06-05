@@ -436,6 +436,7 @@ public class InlineModelResolver {
         model.setExample(example);
         model.setName(name);
         model.setXml(xml);
+        model.setType(object.getType());
 
         if (properties != null) {
             flattenProperties(properties, path);
