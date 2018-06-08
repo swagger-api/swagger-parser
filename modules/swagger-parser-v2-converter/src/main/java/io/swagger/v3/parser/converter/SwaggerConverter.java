@@ -317,7 +317,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         Scopes scopes = new Scopes();
-        oAuth2Definition.getScopes().forEach((k, v) -> scopes.addString(k, v));
+        Map<String, String> oAuth2Scopes = oAuth2Definition.getScopes();
+        if (oAuth2Scopes != null) {
+            oAuth2Scopes.forEach((k, v) -> scopes.addString(k, v));
+        }
         oAuthFlow.setScopes(scopes);
 
         securityScheme.setFlows(oAuthFlows);
