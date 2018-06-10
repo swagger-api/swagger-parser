@@ -55,6 +55,16 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue719() {
+        final Swagger swagger = new SwaggerParser().readWithInfo("extensions-responses/extensions.yaml", null, true).getSwagger();
+
+        Assert.assertNotNull(swagger);
+        Assert.assertNotNull(swagger.getPaths().getVendorExtensions());
+        Assert.assertNotNull(swagger.getPaths().get("/something").getGet().getResponses().getVendorExtensions());
+
+    }
+
+    @Test
     public void testIssue697() throws Exception {
         String yaml = "{\n" +
                 "    \"swagger\": \"2.0\",\n" +
@@ -470,8 +480,6 @@ public class SwaggerParserTest {
 
         assertEquals(((Map) swagger.getVendorExtensions().get("x-some-vendor")).get("sometesting"), "bye!");
         assertEquals(swagger.getPath("/foo").getVendorExtensions().get("x-something"), "yes, it is supported");
-        assertTrue(result.getMessages().size() == 1);
-        assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
     }
 
     @Test
