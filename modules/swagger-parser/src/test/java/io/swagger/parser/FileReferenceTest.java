@@ -193,7 +193,6 @@ public class FileReferenceTest {
         assertNotNull(swagger.getPath("/pet/{petId}").getGet());
         assertNotNull(swagger.getPath("/pet/{petId}").getGet().getParameters());
         assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().size() == 1);
-        Yaml.prettyPrint(swagger.getPaths());
         assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().get(0).getName().equals("petId"));
         assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
         assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 6);
