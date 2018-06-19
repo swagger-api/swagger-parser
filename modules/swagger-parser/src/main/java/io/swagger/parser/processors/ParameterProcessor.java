@@ -34,12 +34,15 @@ public class ParameterProcessor {
         for (Parameter parameter : parameters) {
             if (parameter instanceof RefParameter) {
                 RefParameter refParameter = (RefParameter) parameter;
-                final Parameter resolvedParameter = cache.loadRef(refParameter.get$ref(), refParameter.getRefFormat(), Parameter.class);
+                 Parameter resolvedParameter = cache.loadRef(refParameter.get$ref(), refParameter.getRefFormat(), Parameter.class);
 
                 if(resolvedParameter == null) {
-                    // can't resolve it!
-                    processedPathLevelParameters.add(refParameter);
-                    continue;
+                    resolvedParameter = cache.loadRef(refParameter.getOriginalRef(), refParameter.getOriginalRefFormat(), Parameter.class);
+                    if (resolvedParameter == null) {
+                        // can't resolve it!
+                        processedPathLevelParameters.add(refParameter);
+                        continue;
+                    }
                 }
                 // if the parameter exists, replace it
                 boolean matched = false;

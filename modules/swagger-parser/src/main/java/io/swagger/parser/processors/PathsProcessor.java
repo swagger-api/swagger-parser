@@ -77,13 +77,17 @@ public class PathsProcessor {
             if (path instanceof RefPath) {
                 RefPath refPath = (RefPath) path;
                 Path resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), Path.class);
+                if (resolvedPath == null){
+                    resolvedPath = cache.loadRef(refPath.getOriginalRef(), refPath.getOriginalRefFormat(), Path.class);
+                }
 
                 // TODO: update references to the parent location
 
                 String pathRef = refPath.get$ref().split("#")[0];
-                updateLocalRefs(resolvedPath, pathRef);
+
 
                 if (resolvedPath != null) {
+                    updateLocalRefs(resolvedPath, pathRef);
                     //we need to put the resolved path into swagger object
                     swagger.path(pathStr, resolvedPath);
                     path = resolvedPath;
@@ -145,7 +149,9 @@ public class PathsProcessor {
             RefModel refModel = (RefModel) model;
             if(isLocalRef(refModel.get$ref())) {
                 refModel.set$ref(computeLocalRef(refModel.get$ref(), pathRef));
-            }
+            }/*else if(isLocalRef(refModel.getOriginalRef())) {
+                    refModel.set$ref(computeLocalRef(refModel.getOriginalRef(), pathRef));
+            }*/
         }
         else if(model instanceof ModelImpl) {
             // process properties
@@ -175,7 +181,9 @@ public class PathsProcessor {
             RefProperty ref = (RefProperty) property;
             if(isLocalRef(ref.get$ref())) {
                 ref.set$ref(computeLocalRef(ref.get$ref(), pathRef));
-            }
+            }/*else if(isLocalRef(ref.getOriginalRef())) {
+                ref.set$ref(computeLocalRef(ref.getOriginalRef(), pathRef));
+            }*/
         }
     }
 

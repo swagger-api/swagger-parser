@@ -28,7 +28,7 @@ public class FileReferenceTest {
 
         Swagger swagger = result.getSwagger();
 
-        assertTrue(swagger.getDefinitions().size() == 6);
+        assertTrue(swagger.getDefinitions().size() == 5);
         // resolved from `$ref: './book.yaml'`
         assertNotNull(swagger.getDefinitions().get("Inventory"));
         // resolved from `$ref: 'book.yaml'`
@@ -169,7 +169,13 @@ public class FileReferenceTest {
                 "./src/test/resources/allOf-properties-ext-ref/swagger.json")) {
             Swagger swagger = new SwaggerParser().read(path);
             assertEquals(3, swagger.getDefinitions().size());
-            ComposedModel composedModel = (ComposedModel)swagger.getDefinitions().get("record");
+            assertNotNull(swagger.getDefinitions().get("record"));
+            assertTrue(swagger.getDefinitions().get("record")instanceof RefModel);
+
+            assertNotNull(swagger.getDefinitions().get("purebred_pet"));
+            assertTrue(swagger.getDefinitions().get("purebred_pet")instanceof ComposedModel);
+            ComposedModel composedModel = (ComposedModel) swagger.getDefinitions().get("purebred_pet");
+
             assertEquals(((RefModel) composedModel.getParent()).getSimpleRef(), "pet");
             Map<String, Property> props = composedModel.getChild().getProperties();
             assertEquals(((RefProperty) props.get("mother")).getSimpleRef(), "pet");
@@ -187,6 +193,7 @@ public class FileReferenceTest {
         assertNotNull(swagger.getPath("/pet/{petId}").getGet());
         assertNotNull(swagger.getPath("/pet/{petId}").getGet().getParameters());
         assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().size() == 1);
+        Yaml.prettyPrint(swagger.getPaths());
         assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().get(0).getName().equals("petId"));
         assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
         assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 6);
