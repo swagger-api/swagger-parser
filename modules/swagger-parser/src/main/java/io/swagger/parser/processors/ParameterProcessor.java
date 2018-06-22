@@ -37,12 +37,9 @@ public class ParameterProcessor {
                  Parameter resolvedParameter = cache.loadRef(refParameter.get$ref(), refParameter.getRefFormat(), Parameter.class);
 
                 if(resolvedParameter == null) {
-                    resolvedParameter = cache.loadRef(refParameter.getOriginalRef(), refParameter.getOriginalRefFormat(), Parameter.class);
-                    if (resolvedParameter == null) {
-                        // can't resolve it!
-                        processedPathLevelParameters.add(refParameter);
-                        continue;
-                    }
+                    // can't resolve it!
+                    processedPathLevelParameters.add(refParameter);
+                    continue;
                 }
                 // if the parameter exists, replace it
                 boolean matched = false;

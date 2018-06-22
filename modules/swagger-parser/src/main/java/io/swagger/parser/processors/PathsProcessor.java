@@ -77,9 +77,6 @@ public class PathsProcessor {
             if (path instanceof RefPath) {
                 RefPath refPath = (RefPath) path;
                 Path resolvedPath = cache.loadRef(refPath.get$ref(), refPath.getRefFormat(), Path.class);
-                if (resolvedPath == null){
-                    resolvedPath = cache.loadRef(refPath.getOriginalRef(), refPath.getOriginalRefFormat(), Path.class);
-                }
 
                 // TODO: update references to the parent location
 
