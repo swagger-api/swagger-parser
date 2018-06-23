@@ -117,8 +117,8 @@ public class PathsProcessor {
                     updateLocalRefs(param, pathRef);
                 }
             }
-            if(op.getResponses() != null) {
-                for(Response response : op.getResponses().values()) {
+            if(op.getResponsesObject() != null) {
+                for(Response response : op.getResponsesObject().values()) {
                     updateLocalRefs(response, pathRef);
                 }
             }

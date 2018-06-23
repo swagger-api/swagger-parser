@@ -473,7 +473,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
             Model responseModel = null;
             if (message.getResponseModel() != null) {
-                response.schema(new RefProperty(message.getResponseModel()));
+                response.responseSchema(new RefModel(message.getResponseModel()));
             }
             output.response(message.getCode(), response);
         }
@@ -483,7 +483,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
         Response response = new Response()
                 .description("success")
                 .schema(responseProperty);
-        if (output.getResponses() == null) {
+        if (output.getResponsesObject() == null) {
             output.defaultResponse(response);
         } else if (responseProperty != null) {
             output.response(200, response);

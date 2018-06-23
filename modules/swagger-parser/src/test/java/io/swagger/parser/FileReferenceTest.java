@@ -220,12 +220,12 @@ public class FileReferenceTest {
         assertNotNull(swagger);
         assertNotNull(swagger.getPath("pets"));
         assertNotNull(swagger.getPath("pets").getGet());
-        assertNotNull(swagger.getPath("pets").getGet().getResponses());
-        assertNotNull(swagger.getPath("pets").getGet().getResponses().get("200"));
-        assertNotNull(swagger.getPath("pets").getGet().getResponses().get("200").getSchema());
-        assertTrue(swagger.getPath("pets").getGet().getResponses().get("200").getSchema() instanceof RefProperty);
+        assertNotNull(swagger.getPath("pets").getGet().getResponsesObject());
+        assertNotNull(swagger.getPath("pets").getGet().getResponsesObject().get("200"));
+        assertNotNull(swagger.getPath("pets").getGet().getResponsesObject().get("200").getResponseSchema());
+        assertTrue(swagger.getPath("pets").getGet().getResponsesObject().get("200").getResponseSchema() instanceof RefModel);
 
-        assertEquals(((RefProperty)swagger.getPath("pets").getGet().getResponses().get("200").getSchema()).get$ref(), "#/definitions/Pet");
+        assertEquals(((RefModel)swagger.getPath("pets").getGet().getResponsesObject().get("200").getResponseSchema()).get$ref(), "#/definitions/Pet");
 
         assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
         assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 2);

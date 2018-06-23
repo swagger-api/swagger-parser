@@ -59,8 +59,8 @@ public class SwaggerParserTest {
         final Swagger swagger = new SwaggerParser().readWithInfo("extensions-responses/extensions.yaml", null, true).getSwagger();
 
         Assert.assertNotNull(swagger);
-        Assert.assertNotNull(swagger.getPaths().getVendorExtensions());
-        Assert.assertNotNull(swagger.getPaths().get("/something").getGet().getResponses().getVendorExtensions());
+        //Assert.assertNotNull(swagger.getPaths().getVendorExtensions());
+        Assert.assertNotNull(swagger.getPaths().get("/something").getGet().getResponsesObject().getVendorExtensions());
 
     }
 
@@ -546,9 +546,9 @@ public class SwaggerParserTest {
         SwaggerParser parser = new SwaggerParser();
 
         Swagger swagger = parser.read("issue_286.yaml");
-        Property response = swagger.getPath("/").getGet().getResponses().get("200").getSchema();
-        assertTrue(response instanceof RefProperty);
-        assertEquals(((RefProperty) response).getSimpleRef(), "issue_286_PetList");
+        Model response = swagger.getPath("/").getGet().getResponsesObject().get("200").getResponseSchema();
+        assertTrue(response instanceof RefModel);
+        assertEquals(((RefModel) response).getSimpleRef(), "issue_286_PetList");
         assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
     }
 
@@ -557,7 +557,7 @@ public class SwaggerParserTest {
         SwaggerParser parser = new SwaggerParser();
 
         Swagger swagger = parser.read("issue_286.yaml");
-        Model response = swagger.getPath("/").getGet().getResponses().get("200").getResponseSchema();
+        Model response = swagger.getPath("/").getGet().getResponsesObject().get("200").getResponseSchema();
         assertTrue(response instanceof RefModel);
         assertEquals( "issue_286_PetList", ((RefModel) response).getSimpleRef());
         assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
@@ -648,7 +648,7 @@ public class SwaggerParserTest {
         final BodyParameter bodyParameter = (BodyParameter) operationParams.get(2);
         assertEquals(((RefModel) bodyParameter.getSchema()).get$ref(), "#/definitions/health");
 
-        final Map<String, Response> responsesMap = operation.getResponses();
+        final Map<String, Response> responsesMap = operation.getResponsesObject();
 
         assertResponse(swagger, responsesMap, "200", "Health information from the server", "#/definitions/health");
         assertResponse(swagger, responsesMap, "400", "Your request was not valid", "#/definitions/error");
@@ -696,9 +696,9 @@ public class SwaggerParserTest {
     private void assertResponse(Swagger swagger, Map<String, Response> responsesMap, String responseCode,
                                 String expectedDescription, String expectedSchemaRef) {
         final Response response = responsesMap.get(responseCode);
-        final RefProperty schema = (RefProperty) response.getSchema();
+        final RefModel schema = (RefModel) response.getResponseSchema();
         assertEquals(response.getDescription(), expectedDescription);
-        assertEquals(schema.getClass(), RefProperty.class);
+        assertEquals(schema.getClass(), RefModel.class);
         assertEquals(schema.get$ref(), expectedSchemaRef);
         assertTrue(swagger.getDefinitions().containsKey(schema.getSimpleRef()));
     }
@@ -834,9 +834,9 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml, Boolean.FALSE);
 
         assertNotNull(result.getSwagger());
-        assertEquals(((RefProperty) result.getSwagger().getPaths().
-                get("/persons").getGet().getResponses().get("200")
-                .getSchema()).get$ref(), "#/definitions/Content");
+        assertEquals(((RefModel) result.getSwagger().getPaths().
+                get("/persons").getGet().getResponsesObject().get("200")
+                .getResponseSchema()).get$ref(), "#/definitions/Content");
     }
 
     @Test
@@ -1176,9 +1176,9 @@ public class SwaggerParserTest {
 
         assertTrue(swagger.getDefinitions().size() == 2);
 
-        assertEquals("#/definitions/PersonObj", ((RefProperty) swagger.getPath("/newPerson").getPost().getResponses().get("200").getSchema()).get$ref());
-        assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/oldPerson").getPost().getResponses().get("200").getSchema()).get$ref());
-        assertEquals("#/definitions/PersonObj_2", ((RefProperty) swagger.getPath("/yetAnotherPerson").getPost().getResponses().get("200").getSchema()).get$ref());
+        assertEquals("#/definitions/PersonObj", ((RefModel) swagger.getPath("/newPerson").getPost().getResponsesObject().get("200").getResponseSchema()).get$ref());
+        assertEquals("#/definitions/PersonObj_2", ((RefModel) swagger.getPath("/oldPerson").getPost().getResponsesObject().get("200").getResponseSchema()).get$ref());
+        assertEquals("#/definitions/PersonObj_2", ((RefModel) swagger.getPath("/yetAnotherPerson").getPost().getResponsesObject().get("200").getResponseSchema()).get$ref());
         assertEquals("local", swagger.getDefinitions().get("PersonObj").getProperties().get("location").getExample());
         assertEquals("referred", swagger.getDefinitions().get("PersonObj_2").getProperties().get("location").getExample());
     }

@@ -27,7 +27,7 @@ public class OperationProcessor {
         final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
         operation.setParameters(processedOperationParameters);
 
-        final Responses responses = operation.getResponses();
+        final Responses responses = operation.getResponsesObject();
 
         if (responses != null) {
             for (String responseCode : responses.keySet()) {

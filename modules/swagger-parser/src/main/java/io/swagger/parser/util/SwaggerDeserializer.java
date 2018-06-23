@@ -342,7 +342,7 @@ public class SwaggerDeserializer {
         if(responsesObject != null && responsesObject.size() == 0) {
             result.missing(location, "responses");
         }
-        output.setResponses(responsesObject);
+        output.setResponsesObject(responsesObject);
 
         array = getArray("schemes", obj, false, location, result);
         if(array != null) {
