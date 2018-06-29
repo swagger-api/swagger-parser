@@ -41,6 +41,10 @@ public class OpenAPIResolver {
         operationsProcessor = new OperationProcessor(cache, openApi);
     }
 
+    public ResolverCache getCache() {
+        return cache;
+    }
+
     public OpenAPI resolve() {
         if (openApi == null) {
             return null;

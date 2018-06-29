@@ -49,6 +49,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 if (version != null && version.startsWith("3.0")) {
                     if (options != null) {
                         OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, url);
+                        result.setRefsCache(resolver.getCache());
                         if (options.isResolve()) {
                             result.setOpenAPI(resolver.resolve());
                         }
@@ -173,7 +174,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         result = deserializer.deserialize(rootNode);
                         OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, null);
                         result.setOpenAPI(resolver.resolve());
-
+                        result.setRefsCache(resolver.getCache());
                     } catch (Exception e) {
                         result.setMessages(Arrays.asList(e.getMessage()));
                     }
@@ -186,7 +187,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         result.setMessages(Arrays.asList(e.getMessage()));
                     }
                 }if (options.isResolveFully()){
-                    result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                    OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, null);
+                    result.setOpenAPI(resolver.resolve());
+                    result.setRefsCache(resolver.getCache());
                     new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
 
                 }if (options.isFlatten()){
