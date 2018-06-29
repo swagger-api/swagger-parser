@@ -15,7 +15,6 @@ import io.swagger.models.Operation;
 import io.swagger.models.ParamType;
 import io.swagger.models.PassAs;
 import io.swagger.models.Path;
-import io.swagger.models.Paths;
 import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Scheme;
@@ -570,8 +569,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             info = new Info()
                     .version(resourceListing.getApiVersion());
         }
-
-        Paths paths = new Paths();
+        Map<String, Path> paths = new HashMap<String, Path>();
         Map<String, Model> definitions = new HashMap<String, Model>();
         String basePath = null;
 

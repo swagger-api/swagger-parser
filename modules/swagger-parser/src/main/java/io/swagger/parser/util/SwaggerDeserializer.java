@@ -106,7 +106,7 @@ public class SwaggerDeserializer {
             }
 
             obj = getObject("paths", on, true, location, result);
-            Paths paths = paths(obj, "paths", result);
+            Map<String, Path> paths = paths(obj, "paths", result);
             swagger.paths(paths);
 
             obj = getObject("definitions", on, false, location, result);
@@ -168,8 +168,8 @@ public class SwaggerDeserializer {
         return swagger;
     }
 
-    public Paths paths(ObjectNode obj, String location, ParseResult result) {
-        Paths output = new Paths();
+    public Map<String,Path> paths(ObjectNode obj, String location, ParseResult result) {
+        Map<String,Path> output = new LinkedHashMap<>();
         if(obj == null) {
             return null;
         }
@@ -178,7 +178,7 @@ public class SwaggerDeserializer {
         for(String pathName : pathKeys) {
             JsonNode pathValue = obj.get(pathName);
             if(pathName.startsWith("x-")) {
-                output.addVendorExtension(pathName, extension(pathValue));
+                result.unsupported(location, pathName, pathValue);
             }
             else {
                 if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
