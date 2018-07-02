@@ -42,7 +42,7 @@ public class OperationProcessor {
         }
         final RequestBody requestBody = operation.getRequestBody();
         if(requestBody != null) {
-            requestBodyProcessor.processRequestBody(requestBody);
+            operation.setRequestBody(requestBodyProcessor.processRequestBody(requestBody));
         }
 
 

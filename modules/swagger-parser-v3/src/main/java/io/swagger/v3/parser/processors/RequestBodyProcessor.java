@@ -9,8 +9,7 @@ import io.swagger.v3.parser.models.RefFormat;
 
 import java.util.Map;
 
-import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
-import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.*;
 
 /**
  * Created by gracekarina on 20/06/17.
@@ -28,11 +27,8 @@ public class RequestBodyProcessor {
         this.openAPI = openAPI;
     }
 
-    public void processRequestBody(RequestBody requestBody) {
-
-        if (requestBody.get$ref() != null){
-            processReferenceRequestBody(requestBody);
-        }
+    public RequestBody processRequestBody(RequestBody refRequestBody) {
+        RequestBody requestBody = refRequestBody.get$ref() != null ? processReferenceRequestBody(refRequestBody) : refRequestBody;
         Schema schema = null;
         if(requestBody.getContent() != null){
             Map<String,MediaType> content = requestBody.getContent();
@@ -46,10 +42,11 @@ public class RequestBodyProcessor {
                 }
             }
         }
+        return requestBody;
     }
 
 
-    public void processReferenceRequestBody(RequestBody requestBody){
+    public RequestBody processReferenceRequestBody(RequestBody requestBody){
         RefFormat refFormat = computeRefFormat(requestBody.get$ref());
         String $ref = requestBody.get$ref();
         if (isAnExternalRefFormat(refFormat)){
@@ -58,7 +55,14 @@ public class RequestBodyProcessor {
             if (newRef != null) {
                 requestBody.set$ref(newRef);
             }
+        } else if (openAPI.getComponents() != null) {
+            Map<String, RequestBody> requestBodies = openAPI.getComponents().getRequestBodies();
+            if (requestBodies != null) {
+                String referenceKey = computeDefinitionName($ref);
+                return requestBodies.getOrDefault(referenceKey, requestBody);
+            }
         }
+        return requestBody;
     }
 
 }
