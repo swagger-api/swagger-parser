@@ -317,7 +317,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         Scopes scopes = new Scopes();
-        oAuth2Definition.getScopes().forEach((k, v) -> scopes.addString(k, v));
+        Map<String, String> oAuth2Scopes = oAuth2Definition.getScopes();
+        if (oAuth2Scopes != null) {
+            oAuth2Scopes.forEach((k, v) -> scopes.addString(k, v));
+        }
         oAuthFlow.setScopes(scopes);
 
         securityScheme.setFlows(oAuthFlows);
@@ -1058,11 +1061,15 @@ public class SwaggerConverter implements SwaggerParserExtension {
             result = arraySchema;
         } else if (v2Model instanceof ComposedModel) {
             ComposedModel composedModel = (ComposedModel) v2Model;
-
-            ComposedSchema composed = Json.mapper().convertValue(v2Model, ComposedSchema.class);
-
+            ComposedSchema composed = new ComposedSchema();
+            composed.setDescription(composedModel.getDescription());
+            composed.setExample(composedModel.getExample());
+            if (composedModel.getExternalDocs() != null) {
+                composed.setExternalDocs(convert(composedModel.getExternalDocs()));
+            }
+            composed.setTitle(composedModel.getTitle());
+            composed.setExtensions(convert(composedModel.getVendorExtensions()));
             composed.setAllOf(composedModel.getAllOf().stream().map(this::convert).collect(Collectors.toList()));
-
             result = composed;
         } else {
             String v2discriminator = null;
