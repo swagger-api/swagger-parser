@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class RefUtils {
 
@@ -79,46 +81,8 @@ public class RefUtils {
 
     }
 
-    public static String buildUrl(String rootPath, String relativePath) {
-        String[] rootPathParts = rootPath.split("/");
-        String [] relPathParts = relativePath.split("/");
-
-        if(rootPath == null || relativePath == null) {
-            return null;
-        }
-
-        int trimRoot = 0;
-        int trimRel = 0;
-
-        if(!"".equals(rootPathParts[rootPathParts.length - 1])) {
-            trimRoot = 1;
-        }
-        for(int i = 0; i < rootPathParts.length; i++) {
-            if("".equals(rootPathParts[i])) {
-                trimRel += 1;
-            }
-            else {
-                break;
-            }
-        }
-        for(int i = 0; i < relPathParts.length; i ++) {
-            if(".".equals(relPathParts[i])) {
-                trimRel += 1;
-            }
-            else if ("..".equals(relPathParts[i])) {
-                trimRel += 1;
-            }
-        }
-
-        String [] outputParts = new String[rootPathParts.length + relPathParts.length - trimRoot - trimRel];
-        System.arraycopy(rootPathParts, 0, outputParts, 0, rootPathParts.length - trimRoot);
-        System.arraycopy(relPathParts,
-                trimRel,
-                outputParts,
-                rootPathParts.length - trimRoot + trimRel - 1,
-                relPathParts.length - trimRel);
-
-        return StringUtils.join(outputParts, "/");
+    public static String buildUrl(String rootPath, String relativePath) throws URISyntaxException {
+        return new URI(rootPath).resolve(new URI(relativePath)).toString();
     }
 
 
