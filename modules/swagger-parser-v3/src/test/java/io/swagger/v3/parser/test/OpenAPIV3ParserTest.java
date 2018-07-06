@@ -1408,7 +1408,7 @@ public class OpenAPIV3ParserTest {
         String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        OpenAPI openAPI = (parser.readWithInfo(rootNode)).getOpenAPI();
+        OpenAPI openAPI = (parser.readWithInfo(null, rootNode)).getOpenAPI();
 
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());

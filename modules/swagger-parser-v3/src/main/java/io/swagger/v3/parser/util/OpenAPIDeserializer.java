@@ -48,7 +48,11 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -97,10 +101,14 @@ public class OpenAPIDeserializer {
 
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
+    	return deserialize(rootNode, null);
+    }
+    
+    public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
             ParseResult rootParse = new ParseResult();
-            OpenAPI api = parseRoot(rootNode, rootParse);
+            OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.setOpenAPI(api);
             result.setMessages(rootParse.getMessages());
         } catch (Exception e) {
@@ -110,7 +118,7 @@ public class OpenAPIDeserializer {
         return result;
     }
 
-    public OpenAPI parseRoot(JsonNode node, ParseResult result) {
+    public OpenAPI parseRoot(JsonNode node, ParseResult result, String path) {
         String location = "";
         OpenAPI openAPI = new OpenAPI();
         if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -145,7 +153,7 @@ public class OpenAPIDeserializer {
 
             ArrayNode array = getArray("servers", rootNode, false, location, result);
             if (array != null && array.size() > 0) {
-                openAPI.setServers(getServersList(array, String.format("%s.%s", location, "servers"), result));
+                openAPI.setServers(getServersList(array, String.format("%s.%s", location, "servers"), result, path));
             }else {
                 Server defaultServer = new Server();
                 defaultServer.setUrl("/");
@@ -331,7 +339,7 @@ public class OpenAPIDeserializer {
 
 
 
-    public List<Server> getServersList(ArrayNode obj, String location, ParseResult result) {
+    public List<Server> getServersList(ArrayNode obj, String location, ParseResult result, String path) {
 
         List<Server> servers = new ArrayList<>();
         if (obj == null) {
@@ -352,8 +360,16 @@ public class OpenAPIDeserializer {
         }
         return servers;
     }
+    
+    public List<Server> getServersList(ArrayNode obj, String location, ParseResult result) {
+		return getServersList(obj, location, result, null);
+	}
 
-    public Server getServer(ObjectNode obj, String location, ParseResult result) {
+	public Server getServer(ObjectNode obj, String location, ParseResult result) {
+		return getServer(obj, location, result, null);
+	}
+
+    public Server getServer(ObjectNode obj, String location, ParseResult result, String path) {
         if (obj == null) {
             return null;
         }
@@ -362,6 +378,18 @@ public class OpenAPIDeserializer {
 
         String value = getString("url", obj, true, location, result);
         if(StringUtils.isNotBlank(value)) {
+        	File file = new File(value);
+			if(!isValidURL(value) && !file.isAbsolute() && path != null){
+				try {
+					final URI absURI = new URI(path);
+					if("http".equals(absURI.getScheme()) || "https".equals(absURI.getScheme())){
+						value = absURI.resolve(new URI(value)).toString();
+					}
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+
+			}
             server.setUrl(value);
         }
 
@@ -393,6 +421,16 @@ public class OpenAPIDeserializer {
 
         return server;
     }
+    
+    boolean isValidURL(String urlString){
+		try {
+			URL url = new URL(urlString);
+			url.toURI();
+			return true;
+		} catch (Exception exception) {
+			return false;
+		}
+	}
 
     public ServerVariables getServerVariables(ObjectNode obj, String location, ParseResult result){
         ServerVariables serverVariables = new ServerVariables();
