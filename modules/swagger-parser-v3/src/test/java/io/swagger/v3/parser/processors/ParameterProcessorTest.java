@@ -44,6 +44,7 @@ public class ParameterProcessorTest {
         new Expectations() {
             {
                 headerParameter.getSchema();
+                result = null;
                 queryParameter.getSchema();
                 result = null;
                 cookieParameter.getSchema();
