@@ -1048,6 +1048,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
     }
 
     public Schema convert(io.swagger.models.Model v2Model) {
+        if (v2Model == null) {
+            return null;
+        }
         Schema result;
 
         if (v2Model instanceof ArrayModel) {
