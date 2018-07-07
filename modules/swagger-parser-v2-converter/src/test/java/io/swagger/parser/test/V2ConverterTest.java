@@ -77,6 +77,7 @@ public class V2ConverterTest {
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
+    private static final String ISSUE_762_JSON = "issue-762.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -614,6 +615,12 @@ public class V2ConverterTest {
         assertEquals(schema.getMinLength(), Integer.valueOf(1));
         assertEquals(schema.getMaxLength(), Integer.valueOf(3));
         assertEquals(schema.getPattern(), "^[0-9]+$");
+    }
+
+    @Test(description = "OpenAPI v2 Converter: NPE when type is array and 'items' field is missing in array property")
+    public void testIssue762() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_762_JSON);
+        assertNotNull(oas);
     }
 
     @Test(description = "OpenAPI v2 converter - Missing Parameter.style property")

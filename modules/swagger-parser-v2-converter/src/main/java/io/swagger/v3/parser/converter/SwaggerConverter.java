@@ -812,6 +812,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
     }
 
     private Schema convert(Property schema) {
+        if (schema == null) {
+            return null;
+        }
         Schema result;
 
         if (schema instanceof RefProperty) {
