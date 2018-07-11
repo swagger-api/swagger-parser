@@ -1010,7 +1010,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             if (sp.getEnum() != null) {
                 for (String e : sp.getEnum()) {
-                    switch (sp.getType()) {
+                    switch (sp.getType() == null ? SchemaTypeUtil.OBJECT_TYPE : sp.getType()) {
                         case SchemaTypeUtil.INTEGER_TYPE:
                             schema.addEnumItemObject(Integer.parseInt(e));
                             break;
