@@ -76,6 +76,7 @@ public class V2ConverterTest {
     private static final String ISSUE_672_JSON = "issue-672.json";
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
+    private static final String ISSUE_740_YAML = "issue-740.yaml";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
@@ -614,6 +615,16 @@ public class V2ConverterTest {
         assertEquals(schema.getMinLength(), Integer.valueOf(1));
         assertEquals(schema.getMaxLength(), Integer.valueOf(3));
         assertEquals(schema.getPattern(), "^[0-9]+$");
+    }
+
+    @Test(description = "OpenAPI v2 converter - Migrate a schema with AllOf")
+    public void testIssue740() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_740_YAML);
+        assertNotNull(oas);
+        Schema schema = oas.getComponents().getSchemas().get("Action");
+        assertTrue(schema instanceof ComposedSchema);
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        assertEquals(composedSchema.getAllOf().size(), 2);
     }
 
     @Test(description = "OpenAPI v2 converter - Missing Parameter.style property")
