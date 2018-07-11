@@ -48,7 +48,6 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -348,7 +347,7 @@ public class OpenAPIDeserializer {
         }
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
-                Server server = getServer((ObjectNode) item, location, result);
+                Server server = getServer((ObjectNode) item, location, result, path);
                 if (server != null) {
                     servers.add(server);
                 }else{
@@ -378,8 +377,7 @@ public class OpenAPIDeserializer {
 
         String value = getString("url", obj, true, location, result);
         if(StringUtils.isNotBlank(value)) {
-        	File file = new File(value);
-			if(!isValidURL(value) && !file.isAbsolute() && path != null){
+			if(!isValidURL(value) && path != null){
 				try {
 					final URI absURI = new URI(path);
 					if("http".equals(absURI.getScheme()) || "https".equals(absURI.getScheme())){
