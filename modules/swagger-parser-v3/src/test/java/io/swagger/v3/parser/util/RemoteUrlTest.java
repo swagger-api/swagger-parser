@@ -21,7 +21,7 @@ import static org.testng.Assert.assertEquals;
 
 public class RemoteUrlTest {
 
-    private static final int WIRE_MOCK_PORT = 9999;
+    private static final int WIRE_MOCK_PORT = 9998;
     private static final String EXPECTED_ACCEPTS_HEADER = "application/json, application/yaml, */*";
     private static final String LOCALHOST = "localhost";
     private WireMockServer wireMockServer;
