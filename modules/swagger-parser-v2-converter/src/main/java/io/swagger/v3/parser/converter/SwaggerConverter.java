@@ -317,7 +317,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         Scopes scopes = new Scopes();
-        oAuth2Definition.getScopes().forEach((k, v) -> scopes.addString(k, v));
+        Map<String, String> oAuth2Scopes = oAuth2Definition.getScopes();
+        if (oAuth2Scopes != null) {
+            oAuth2Scopes.forEach((k, v) -> scopes.addString(k, v));
+        }
         oAuthFlow.setScopes(scopes);
 
         securityScheme.setFlows(oAuthFlows);
@@ -1007,7 +1010,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             if (sp.getEnum() != null) {
                 for (String e : sp.getEnum()) {
-                    switch (sp.getType()) {
+                    switch (sp.getType() == null ? SchemaTypeUtil.OBJECT_TYPE : sp.getType()) {
                         case SchemaTypeUtil.INTEGER_TYPE:
                             schema.addEnumItemObject(Integer.parseInt(e));
                             break;
