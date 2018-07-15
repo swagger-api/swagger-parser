@@ -3,16 +3,50 @@ package io.swagger.parser;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import org.junit.Test;
 import java.util.Map;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 public class OpenAPIParserTest {
+    @Test
+    public void testIssue749() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue749-main.yaml", null, options);
+        assertNotNull(result);
+
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        Components components = openAPI.getComponents();
+        assertNotNull(components);
+
+        PathItem pathItem = openAPI.getPaths().get("/some/ping");
+        assertNotNull(pathItem);
+        List<Parameter> parameters = pathItem.getGet().getParameters();
+        assertNotNull(parameters);
+        assertEquals(parameters.size(), 1);
+        assertEquals(parameters.get(0).getName(), "i");
+        assertNotNull(parameters.get(0).getSchema());
+        assertEquals(parameters.get(0).getSchema().get$ref(), "#/components/schemas/SomeId");
+
+        Map<String, Schema> schemas = components.getSchemas();
+        assertNotNull(schemas);
+        assertEquals(schemas.size(), 1);
+        assertNotNull(schemas.get("SomeId"));
+    }
+
     @Test
     public void testSimple() {
         SwaggerParseResult result = new OpenAPIParser().readLocation("petstore.yaml", null, null);
