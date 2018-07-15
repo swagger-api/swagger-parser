@@ -2,6 +2,7 @@ package io.swagger.parser;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -9,6 +10,7 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import org.junit.Test;
+import java.util.Map;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,25 @@ public class OpenAPIParserTest {
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+    }
+
+    @Test
+    public void testIssue768() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue768-main.yaml", null, options);
+        assertNotNull(result);
+
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        Components components = openAPI.getComponents();
+        assertNotNull(components);
+
+        Map<String, Schema> schemas = components.getSchemas();
+        assertNotNull(schemas);
+
+        assertEquals(schemas.size(), 1);
     }
 
     @Test
