@@ -133,6 +133,13 @@ public class ParameterProcessor {
 
         }
 
+        for (Parameter parameter : processedPathLevelParameters) {
+            Schema schema = parameter.getSchema();
+            if(schema != null){
+                schemaProcessor.processSchema(schema);
+            }
+        }
+
         return processedPathLevelParameters;
     }
 }

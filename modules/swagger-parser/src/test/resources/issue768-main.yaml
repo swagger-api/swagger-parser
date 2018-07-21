@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: ref test
+  version: '1.0'
+servers:
+  - url: 'http://localhost:8000/'
+paths:
+  /user/login:
+    post:
+      summary: Login
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "issue768-reference.yaml#/User"
+components:
+  schemas: {}

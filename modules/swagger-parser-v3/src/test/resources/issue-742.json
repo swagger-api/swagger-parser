@@ -1,0 +1,44 @@
+{
+    "openapi": "3.0.1",
+    "servers": [
+      {
+        "description": "An absolute path",
+        "url": "https://api.absolute.org/v2"
+      },
+      {
+        "description": "Server relative to root path",
+        "url": "/api/v2"
+      },
+      {
+        "description": "Server relative path 1",
+        "url": "path/v2"
+      },
+      {
+        "description": "Server relative path 2",
+        "url": "../v2"
+      }
+    ],
+    "info": {
+      "description": "This is a sample server",
+      "version": "1.0.0",
+      "title": "Issue 742 API",
+      "license": {
+        "name": "Apache-2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      }
+    },
+    "paths": {
+      "/ping": {
+        "get": {
+          "summary": "Some ping operation",
+          "description": "Some ping operation",
+          "operationId": "doPing",
+          "responses": {
+            "201": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    }
+  }
