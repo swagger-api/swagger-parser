@@ -1,0 +1,22 @@
+openapi: 3.0.1
+info:
+  title: ping test
+  version: '1.0'
+servers:
+  - url: 'http://localhost:8000/'
+paths:
+  /some/ping:
+    get:
+      operationId: pingGet
+      parameters:
+        - name: i
+          in: query
+          description: Test
+          required: true
+          schema:
+            $ref: './issue749-reference.yaml#/SomeId'
+      responses:
+        '201':
+          description: OK
+components:
+  schemas: {}

@@ -11,7 +11,9 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.parser.models.RefFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
+import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public class ResolverFully {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResolverFully.class);
@@ -41,10 +47,17 @@ public class ResolverFully {
     private Map<String, Schema> schemas;
     private Map<String, Schema> resolvedModels = new HashMap<>();
     private Map<String, Example> examples;
-
+    private Map<String, RequestBody> requestBodies;
 
 
     public void resolveFully(OpenAPI openAPI) {
+        if (openAPI.getComponents() != null && openAPI.getComponents().getRequestBodies() != null) {
+            requestBodies = openAPI.getComponents().getRequestBodies();
+            if (requestBodies == null) {
+                requestBodies = new HashMap<>();
+            }
+        }
+
         if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
             schemas = openAPI.getComponents().getSchemas();
             if (schemas == null) {
@@ -108,13 +121,17 @@ public class ResolverFully {
                 }
             }
 
-            if (op.getRequestBody() != null && op.getRequestBody().getContent() != null){
-                Map<String,MediaType> content = op.getRequestBody().getContent();
-                for (String key: content.keySet()){
-                    if (content.get(key) != null && content.get(key).getSchema() != null ){
-                        Schema resolved = resolveSchema(content.get(key).getSchema());
-                        if (resolved != null) {
-                            content.get(key).setSchema(resolved);
+            RequestBody refRequestBody = op.getRequestBody();
+            if (refRequestBody != null){
+                RequestBody requestBody = refRequestBody.get$ref() != null ? resolveRequestBody(refRequestBody) : refRequestBody;
+                if (requestBody.getContent() != null) {
+                    Map<String, MediaType> content = requestBody.getContent();
+                    for (String key : content.keySet()) {
+                        if (content.get(key) != null && content.get(key).getSchema() != null) {
+                            Schema resolved = resolveSchema(content.get(key).getSchema());
+                            if (resolved != null) {
+                                content.get(key).setSchema(resolved);
+                            }
                         }
                     }
                 }
@@ -142,6 +159,17 @@ public class ResolverFully {
         }
     }
 
+    public RequestBody resolveRequestBody(RequestBody requestBody){
+        RefFormat refFormat = computeRefFormat(requestBody.get$ref());
+        String $ref = requestBody.get$ref();
+        if (!isAnExternalRefFormat(refFormat)){
+            if (requestBodies != null && !requestBodies.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return requestBodies.getOrDefault(referenceKey, requestBody);
+            }
+        }
+        return requestBody;
+    }
 
     public Schema resolveSchema(Schema schema) {
         if(schema.get$ref() != null) {

@@ -53,7 +53,7 @@ public class RefUtils {
             result = RefFormat.URL;
         } else if(ref.startsWith("#/")) {
             result = RefFormat.INTERNAL;
-        } else if(ref.startsWith(".") || ref.startsWith("/")) {
+        } else if(ref.startsWith(".") || ref.startsWith("/") || ref.indexOf("#/") > 0) {
             result = RefFormat.RELATIVE;
         }
 

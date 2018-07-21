@@ -99,9 +99,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return null;
     }
 
-    public SwaggerParseResult readWithInfo(JsonNode node) {
+    public SwaggerParseResult readWithInfo(String path, JsonNode node) {
         OpenAPIDeserializer ser = new OpenAPIDeserializer();
-        return ser.deserialize(node);
+        return ser.deserialize(node, path);
     }
 
     private ObjectMapper getRightMapper(String data) {
@@ -139,7 +139,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             ObjectMapper mapper = getRightMapper(data);
             JsonNode rootNode = mapper.readTree(data);
             LOGGER.debug("Parsed rootNode: {}", rootNode);
-            return readWithInfo(rootNode);
+            return readWithInfo(location, rootNode);
         }
         catch (SSLHandshakeException e) {
             SwaggerParseResult output = new SwaggerParseResult();
