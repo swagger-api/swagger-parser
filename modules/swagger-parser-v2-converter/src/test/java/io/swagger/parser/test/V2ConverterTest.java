@@ -77,6 +77,7 @@ public class V2ConverterTest {
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
+    private static final String ISSUE_765_YAML = "issue-765.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -614,6 +615,15 @@ public class V2ConverterTest {
         assertEquals(schema.getMinLength(), Integer.valueOf(1));
         assertEquals(schema.getMaxLength(), Integer.valueOf(3));
         assertEquals(schema.getPattern(), "^[0-9]+$");
+    }
+
+    @Test(description = "requestBody not correctly populated when Parameters is a list of $refs (OAS 2 to 3 conversion)")
+    public void testIssue765() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_765_YAML);
+        assertNotNull(oas);
+        RequestBody requestBody = oas.getPaths().get("/ping/{ActivityTypePath}").getPost().getRequestBody();
+        assertNotNull(requestBody);
+        assertEquals("#/components/requestBodies/Block", requestBody.get$ref());
     }
 
     @Test(description = "OpenAPI v2 converter - Missing Parameter.style property")

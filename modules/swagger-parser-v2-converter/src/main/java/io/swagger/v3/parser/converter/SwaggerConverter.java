@@ -532,7 +532,13 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 } else if ("body".equals(param.getIn())) {
                     operation.setRequestBody(convertParameterToRequestBody(param, v2Operation.getConsumes()));
                 } else {
-                    operation.addParametersItem(convert(param));
+                    Parameter convert = convert(param);
+                    String $ref = convert.get$ref();
+                    if ($ref != null && $ref.startsWith("#/components/requestBodies/")) {
+                        operation.setRequestBody(new RequestBody().$ref($ref));
+                    } else {
+                        operation.addParametersItem(convert);
+                    }
                 }
             }
 
