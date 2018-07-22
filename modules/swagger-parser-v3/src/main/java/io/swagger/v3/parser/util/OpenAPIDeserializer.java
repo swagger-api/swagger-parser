@@ -503,7 +503,10 @@ public class OpenAPIDeserializer {
         for (String pathName : pathKeys) {
             JsonNode pathValue = obj.get(pathName);
             if(pathName.startsWith("x-")) {
-                result.unsupported(location, pathName, pathValue);
+                Map <String,Object> extensions = getExtensions(obj);
+                if(extensions != null && extensions.size() > 0) {
+                    paths.setExtensions(extensions);
+                }
             } else {
                 if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                     result.invalidType(location, pathName, "object", pathValue);
@@ -2270,11 +2273,18 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
 
         for (String key : keys) {
-            ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
-            if(obj != null) {
-                ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
-                if(response != null) {
-                    apiResponses.put(key, response);
+            if (key.startsWith("x-")) {
+                Map <String,Object> extensions = getExtensions(node);
+                if(extensions != null && extensions.size() > 0) {
+                    apiResponses.setExtensions(extensions);
+                }
+            } else {
+                ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
+                if (obj != null) {
+                    ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
+                    if (response != null) {
+                        apiResponses.put(key, response);
+                    }
                 }
             }
         }

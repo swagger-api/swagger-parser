@@ -57,6 +57,17 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue719() {
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("extensions-responses.yaml", null, new ParseOptions()).getOpenAPI();
+
+        Assert.assertNotNull(openAPI);
+
+        Assert.assertNotNull(openAPI.getPaths().getExtensions());
+        Assert.assertNotNull(openAPI.getPaths().get("/something").getGet().getResponses().getExtensions());
+
+    }
+
+    @Test
     public void issue682() throws Exception {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -798,8 +809,7 @@ public class OpenAPIV3ParserTest {
 
         assertEquals(((Map) openAPI.getExtensions().get("x-some-vendor")).get("sometesting"), "bye!");
         assertEquals(openAPI.getPaths().get("/foo").getExtensions().get("x-something"), "yes, it is supported");
-        assertTrue(result.getMessages().size() == 1);
-        assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
+       
     }
 
 
