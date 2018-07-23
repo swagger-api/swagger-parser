@@ -106,10 +106,12 @@ public class OpenAPIDeserializer {
     public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
+            
             ParseResult rootParse = new ParseResult();
             OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.setOpenAPI(api);
             result.setMessages(rootParse.getMessages());
+
         } catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
 
