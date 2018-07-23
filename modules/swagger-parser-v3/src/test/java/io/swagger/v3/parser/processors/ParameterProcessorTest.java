@@ -13,10 +13,7 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.StrictExpectations;
+import mockit.*;
 import org.testng.annotations.Test;
 
 
@@ -44,7 +41,18 @@ public class ParameterProcessorTest {
                                                                @Injectable final CookieParameter cookieParameter,
                                                                @Injectable final PathParameter pathParameter) throws Exception {
         expectedModelProcessorCreation();
-
+        new Expectations() {
+            {
+                headerParameter.getSchema();
+                result = null;
+                queryParameter.getSchema();
+                result = null;
+                cookieParameter.getSchema();
+                result = null;
+                pathParameter.getSchema();
+                result = null;
+            }
+        };
         final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
                 .processParameters(Arrays.<Parameter>asList(headerParameter,
                         queryParameter,
@@ -78,6 +86,12 @@ public class ParameterProcessorTest {
         Parameter refParameter = new Parameter().$ref(ref);
 
         expectLoadingRefFromCache(ref, RefFormat.INTERNAL, resolvedHeaderParam);
+        new Expectations() {
+            {
+                resolvedHeaderParam.getSchema();
+                result = null;
+            }
+        };
 
         final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
                 .processParameters(Arrays.<Parameter>asList(refParameter));
@@ -132,8 +146,6 @@ public class ParameterProcessorTest {
             new SchemaProcessor(cache, openAPI);
             times = 1;
             result = modelProcessor;
-
-
         }};
     }
 }
