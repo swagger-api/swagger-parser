@@ -1524,6 +1524,52 @@ public class SwaggerDeserializerTest {
         assertNotNull(rebuilt);
     }
 
+    @Test
+    public void testIssue781AllOfProperties() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  description: 'Good'\n" +
+                        "  version: '2.0.0'\n" +
+                        "  title: 'Test'\n" +
+                        "paths:\n" +
+                        "  /foo:\n" +
+                        "    post:\n" +
+                        "      parameters:\n" +
+                        "        - name: id\n" +
+                        "          in: body\n" +
+                        "          description: Dummy header\n" +
+                        "          required: false\n" +
+                        "          schema:\n" +
+                        "            type: object\n" +
+                        "            properties:\n" +
+                        "              bar:\n" +
+                        "                allOf:\n" +
+                        "                  - type: object\n" +
+                        "                    properties:\n" +
+                        "                      child1:\n" +
+                        "                        type: string\n" +
+                        "                  - type: object\n" +
+                        "                    properties:\n" +
+                        "                      child2:\n" +
+                        "                        type: string\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: 'OK'\n";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        BodyParameter bp = (BodyParameter) swagger.getPath("/foo").getPost().getParameters().get(0);
+        Map<String, Property> properties = bp.getSchema().getProperties();
+        assertEquals( 1, properties.size());
+        Property bar = properties.get("bar");
+        assertTrue(bar instanceof ObjectProperty);
+        ObjectProperty op = (ObjectProperty) bar;
+        assertEquals( 2, op.getProperties().keySet().size());
+    }
+
     @Test(description = "it should deserialize untyped additionalProperties")
     public void testUntypedAdditionalProperties() {
         String json = "{\n" +
