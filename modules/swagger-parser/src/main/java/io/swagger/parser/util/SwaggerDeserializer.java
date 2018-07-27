@@ -8,6 +8,7 @@ import io.swagger.models.parameters.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.utils.PropertyModelConverter;
 import io.swagger.util.Json;
 
 import java.math.BigDecimal;
@@ -684,7 +685,7 @@ public class SwaggerDeserializer {
     public RefParameter refParameter(TextNode obj, String location, ParseResult result) {
         return new RefParameter(obj.asText());
     }
-    
+
     public RefResponse refResponse(TextNode obj, String location, ParseResult result) {
         return new RefResponse(obj.asText());
     }
@@ -1031,7 +1032,16 @@ public class SwaggerDeserializer {
                 node.put("$ref", mungedRef);
             }
         }
-        return Json.mapper().convertValue(node, Property.class);
+
+        JsonNode allOf = node.get("allOf");
+        if(allOf != null && allOf.isArray()) {
+            Model model = allOfModel(node, location, result);
+            Model composedModel = Json.mapper().convertValue(model, Model.class);
+            PropertyModelConverter converter = new PropertyModelConverter();
+            return converter.modelToProperty(composedModel);
+        } else {
+            return Json.mapper().convertValue(node, Property.class);
+        }
     }
 
     public String inferTypeFromArray(ArrayNode an) {
@@ -1331,7 +1341,7 @@ public class SwaggerDeserializer {
             else {
                 result.invalidType(location + ".type", "type", "basic|apiKey|oauth2", node);
             }
-            
+
             // extra keys
             Set<String> keys = getKeys(node);
             for(String key : keys) {
