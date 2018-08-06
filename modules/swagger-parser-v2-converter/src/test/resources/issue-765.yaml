@@ -1,0 +1,43 @@
+swagger: '2.0'
+info:
+  description: 'Test'
+  version: 1.0.0
+  title: OpenAPI Test
+  license:
+    name: Apache-2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: petstore.swagger.io
+basePath: /v2
+schemes:
+  - http
+parameters:
+  ActivityTypePath:
+    in: path
+    name: type
+    required: true
+    type: string
+  Block:
+    in: body
+    name: block
+    required: true
+    schema:
+      properties:
+        visual_type:
+          type: string
+      type: object
+paths:
+  /ping/{ActivityTypePath}:
+    post:
+      summary: test
+      description: 'test it'
+      operationId: pingOp
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Block'
+        - $ref: '#/parameters/ActivityTypePath'
+      responses:
+        '200':
+          description: OK
