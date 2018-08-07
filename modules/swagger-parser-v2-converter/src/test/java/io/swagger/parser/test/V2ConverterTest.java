@@ -82,6 +82,7 @@ public class V2ConverterTest {
     private static final String ISSUE_758_JSON = "issue-758.json";
     private static final String ISSUE_762_JSON = "issue-762.json";
     private static final String ISSUE_765_YAML = "issue-765.yaml";
+    private static final String ISSUE_768_JSON = "issue-786.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -690,6 +691,12 @@ public class V2ConverterTest {
         SwaggerParseResult result = converter.readContents(swaggerAsString, null, parseOptions);
 
         assertNotNull(result.getMessages());
+    }
+
+    @Test(description = "OpenAPI v2 converter - Migrate minLength, maxLength and pattern of String property")
+    public void testIssue786() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_768_JSON);
+        assertNotNull(oas);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
