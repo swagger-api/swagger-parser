@@ -408,14 +408,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 servers.add(server);
             }
         } else {
-            if (!"/".equals(baseUrl)) {
-                Server server = new Server();
-                server.setUrl(baseUrl);
-
-                servers.add(server);
-            } else {
-                return null;
-            }
+            Server server = new Server();
+            server.setUrl(baseUrl);
+            servers.add(server);
         }
 
         return servers;

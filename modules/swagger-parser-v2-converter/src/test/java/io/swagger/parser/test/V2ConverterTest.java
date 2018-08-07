@@ -433,10 +433,10 @@ public class V2ConverterTest {
         assertNotNull(oas);
     }
 
-    @Test(description = "No Servers - without host, basePath, scheme")
+    @Test(description = "Expect a default server object when a swagger without host, basePath and scheme is converted to openAPI")
     public void testIssue31() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_31_JSON);
-        assertNull(oas.getServers());
+        assertNotNull(oas.getServers());
     }
 
     @Test(description = "Convert schema, property and array examples")
