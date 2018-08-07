@@ -1,0 +1,38 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1",
+    "title": "EchoSoap"
+  },
+  "paths": {
+    "/echo": {
+      "post": {
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "x-examples": {
+              "application/json": "{}"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": "{}"
+            }
+          }
+        }
+      },
+      "parameters": []
+    }
+  }
+}

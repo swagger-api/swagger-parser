@@ -38,6 +38,7 @@ public class NetworkReferenceTest {
     private static String issue_335_json, issue_335_bar_json;
     private static String issue_407_json;
     private static String issue_411_server, issue_411_components;
+    private static String issue_742_json;
 
     static {
         try {
@@ -63,6 +64,8 @@ public class NetworkReferenceTest {
 
             issue_411_server        = readFile("src/test/resources/nested-network-references/issue-411-server.yaml");
             issue_411_components    = readFile("src/test/resources/nested-network-references/issue-411-remote2.yaml");
+
+            issue_742_json          = readFile("src/test/resources/issue-742.json");
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -255,6 +258,33 @@ public class NetworkReferenceTest {
         assertEquals(errorProp.get$ref(), "#/components/schemas/Error");
 
         assertTrue(swagger.getComponents().getSchemas().get("Error") instanceof Schema);
+    }
+    
+    @Test
+    public void testIssue742() throws Exception {
+        final List< AuthorizationValue > auths = new ArrayList<>();
+
+        new Expectations() {{
+            remoteUrl.urlToString("http://www.example.io/one/two/swagger.json", auths);
+            result = issue_742_json;
+        }};
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = parser.readLocation("http://www.example.io/one/two/swagger.json", auths, options);
+
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertNotNull(result.getOpenAPI().getServers());
+        Assert.assertEquals(result.getOpenAPI().getServers().size(), 4);
+        Assert.assertEquals(result.getOpenAPI().getServers().get(0).getDescription(), "An absolute path");
+        Assert.assertEquals(result.getOpenAPI().getServers().get(0).getUrl(), "https://api.absolute.org/v2");
+        Assert.assertEquals(result.getOpenAPI().getServers().get(1).getDescription(), "Server relative to root path");
+        Assert.assertEquals(result.getOpenAPI().getServers().get(1).getUrl(), "http://www.example.io/api/v2");
+        Assert.assertEquals(result.getOpenAPI().getServers().get(2).getDescription(), "Server relative path 1");
+        Assert.assertEquals(result.getOpenAPI().getServers().get(2).getUrl(), "http://www.example.io/one/two/path/v2");
+        Assert.assertEquals(result.getOpenAPI().getServers().get(3).getDescription(), "Server relative path 2");
+        Assert.assertEquals(result.getOpenAPI().getServers().get(3).getUrl(), "http://www.example.io/one/v2");
     }
 
     static String readFile(String name) throws Exception {

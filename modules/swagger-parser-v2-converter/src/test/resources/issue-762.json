@@ -1,0 +1,47 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "PetStore on Heroku",
+    "description": "**This example has a working backend hosted in Heroku**\n\nYou can try all HTTP operation described in this Swagger spec.\n\nFind source code of this API [here](https://github.com/mohsen1/petstore-api)\n"
+  },
+  "host": "petstore-api.herokuapp.com",
+  "basePath": "/pet",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/": {
+      "put": {
+        "parameters": [
+          {
+            "name": "pet",
+            "in": "body",
+            "description": "The pet JSON you want to post",
+            "schema": {
+              "$ref": "#/definitions/Pet"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updates the pet"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Pet": {
+      "type": "object",
+      "required" : ["name"],
+      "properties": {
+        "name": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

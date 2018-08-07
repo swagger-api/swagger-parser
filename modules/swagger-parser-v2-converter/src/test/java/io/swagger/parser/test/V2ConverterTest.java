@@ -79,6 +79,11 @@ public class V2ConverterTest {
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
+    private static final String ISSUE_740_YAML = "issue-740.yaml";
+    private static final String ISSUE_756_JSON = "issue-756.json";
+    private static final String ISSUE_758_JSON = "issue-758.json";
+    private static final String ISSUE_762_JSON = "issue-762.json";
+    private static final String ISSUE_765_YAML = "issue-765.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -625,6 +630,43 @@ public class V2ConverterTest {
         SwaggerConverter converter = new SwaggerConverter();
         List<io.swagger.models.auth.AuthorizationValue> convertedAuthList = converter.convert(authorizationValues);
         assertEquals(convertedAuthList.size(), authorizationValues.size());
+    }
+
+    @Test(description = "OpenAPI v2 converter - Migrate a schema with AllOf")
+    public void testIssue740() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_740_YAML);
+        assertNotNull(oas);
+        Schema schema = oas.getComponents().getSchemas().get("Action");
+        assertTrue(schema instanceof ComposedSchema);
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        assertEquals(composedSchema.getAllOf().size(), 2);
+    }
+
+    @Test(description = "OpenAPI v2 converter - no model in body parameter")
+    public void testIssue756() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_756_JSON);
+          assertNotNull(oas);
+    }
+
+    @Test(description = "OpenAPI v2 converter - NPE when 'enum' field is available and 'type' field is missing in query parameter")
+    public void testIssue758() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_758_JSON);
+        assertNotNull(oas);
+    }
+  
+    @Test(description = "OpenAPI v2 Converter: NPE when type is array and 'items' field is missing in array property")
+    public void testIssue762() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_762_JSON);
+        assertNotNull(oas);
+    } 
+  
+    @Test(description = "requestBody not correctly populated when Parameters is a list of $refs (OAS 2 to 3 conversion)")
+    public void testIssue765() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_765_YAML);
+        assertNotNull(oas);
+        RequestBody requestBody = oas.getPaths().get("/ping/{ActivityTypePath}").getPost().getRequestBody();
+        assertNotNull(requestBody);
+        assertEquals("#/components/requestBodies/Block", requestBody.get$ref());
     }
 
     @Test(description = "OpenAPI v2 converter - Missing Parameter.style property")

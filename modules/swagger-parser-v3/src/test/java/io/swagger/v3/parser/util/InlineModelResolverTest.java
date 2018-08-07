@@ -16,6 +16,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.testng.annotations.Test;
 
 
@@ -29,6 +31,17 @@ import static org.testng.AssertJUnit.*;
 
 @SuppressWarnings("static-method")
 public class InlineModelResolverTest {
+
+    @Test
+    public void testIssue705() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue-705.yaml",null, options);
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200").getType());
+    }
+
+
     @Test
     public void resolveInlineModelTestWithoutTitle() throws Exception {
         OpenAPI openAPI = new OpenAPI();
