@@ -77,6 +77,7 @@ public class V2ConverterTest {
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
+    private static final String ISSUE_790_YAML = "issue-790.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -428,10 +429,10 @@ public class V2ConverterTest {
         assertNotNull(oas);
     }
 
-    @Test(description = "No Servers - without host, basePath, scheme")
+    @Test(description = "Expect a default server object when a swagger without host, basePath and scheme is converted to openAPI")
     public void testIssue31() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_31_JSON);
-        assertNull(oas.getServers());
+        assertNotNull(oas.getServers());
     }
 
     @Test(description = "Convert schema, property and array examples")
