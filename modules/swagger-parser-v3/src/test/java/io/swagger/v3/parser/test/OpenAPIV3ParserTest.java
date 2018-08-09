@@ -72,15 +72,25 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        options.setResolveCombinators(false);
-        options.setResolveFully(true);
 
-        String location = getClass().getResource("/odin.yaml").toString();
-        Assert.assertNotNull(location);
-        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/sample/SwaggerPetstore.yaml", null, options);
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertTrue(result.getMessages().isEmpty());
-        Assert.assertTrue(result.getOpenAPI().getPaths().get("/JTasker/startRun").getPost().getRequestBody().getContent().get("application/json").getSchema().getProperties().size() == 2);
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/pets").getGet());
+    }
+
+    @Test
+    public void issueRelativeRefs2() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/relative-upper-directory/swagger.yaml", null, options);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getPaths().get("/api/Address").getGet());
+        assertTrue(openAPI.getComponents().getSchemas().size() == 1);
+        assertNotNull(openAPI.getComponents().getSchemas().get("AddressEx"));
     }
 
     @Test

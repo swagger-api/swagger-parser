@@ -79,12 +79,14 @@ public class V2ConverterTest {
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
+    private static final String ISSUE_755_YAML = "issue-755.yaml";
     private static final String ISSUE_740_YAML = "issue-740.yaml";
     private static final String ISSUE_756_JSON = "issue-756.json";
     private static final String ISSUE_758_JSON = "issue-758.json";
     private static final String ISSUE_762_JSON = "issue-762.json";
     private static final String ISSUE_765_YAML = "issue-765.yaml";
     private static final String ISSUE_768_JSON = "issue-786.json";
+
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -704,9 +706,17 @@ public class V2ConverterTest {
         assertNotNull(result.getMessages());
     }
 
+    
     @Test(description = "OpenAPI v2 converter - Migrate minLength, maxLength and pattern of String property")
     public void testIssue786() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_768_JSON);
+        assertNotNull(oas);
+    }
+
+
+    @Test(description = "OpenAPI v2 converter - Conversion of a spec without a info section")
+    public void testIssue755() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_755_YAML);
         assertNotNull(oas);
     }
 

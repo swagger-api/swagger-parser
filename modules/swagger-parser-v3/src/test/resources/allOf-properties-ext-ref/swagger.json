@@ -7,7 +7,7 @@
 	"components": {
 		"schemas": {
 			"record": {
-				"$ref": "./models/purebred_pet.json"
+				"$ref": "models/purebred_pet.json"
 			}
 		}
 	}
