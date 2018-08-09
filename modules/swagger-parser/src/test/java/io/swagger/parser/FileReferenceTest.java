@@ -28,7 +28,7 @@ public class FileReferenceTest {
 
         Swagger swagger = result.getSwagger();
 
-        assertTrue(swagger.getDefinitions().size() == 5);
+        assertTrue(swagger.getDefinitions().size() == 6);
         // resolved from `$ref: './book.yaml'`
         assertNotNull(swagger.getDefinitions().get("Inventory"));
         // resolved from `$ref: 'book.yaml'`

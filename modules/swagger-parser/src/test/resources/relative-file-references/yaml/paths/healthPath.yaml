@@ -8,8 +8,8 @@ get:
   produces:
   - "application/json"
   parameters:
-  - $ref: "./parameters/params.yaml#/param3"
-  - $ref: "./parameters/params.yaml#/param4"
+  - $ref: "../parameters/params.yaml#/param3"
+  - $ref: "../parameters/params.yaml#/param4"
   - name: "body"
     in: "body"
     required: true

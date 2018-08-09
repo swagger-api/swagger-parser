@@ -232,8 +232,10 @@ public class RefUtilsTest {
     public void testReadExternalRef_OnClasspath(@Mocked Files files,
                                                 @Mocked ClasspathHelper classpathHelper,
                                                 @Injectable final Path parentDirectory,
-                                                @Injectable final Path pathToUse) throws Exception {
+                                                @Injectable final Path pathToUse,
+                                                @Injectable final Path pathToUse2) throws Exception {
         final String filePath = "./path/to/file.json";
+        final String url = parentDirectory + "/path/to/file.json";
         final String expectedResult = "really good json";
 
         new StrictExpectations() {{
@@ -243,6 +245,14 @@ public class RefUtilsTest {
             result = pathToUse;
 
             Files.exists(pathToUse);
+            times = 1;
+            result = false;
+
+            parentDirectory.resolve(url).normalize();
+            times = 1;
+            result = pathToUse2;
+
+            Files.exists(pathToUse2);
             times = 1;
             result = false;
 

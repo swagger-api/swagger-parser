@@ -55,6 +55,27 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue727() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue-714/serviceA.yaml");
+        Assert.assertNotNull(swagger);
+        assertNotNull(swagger.getPaths().get("/test").getGet().getParameters().get(0));
+        assertTrue(swagger.getDefinitions().size() == 1);
+        assertNotNull(swagger.getDefinitions().get("refA"));
+    }
+
+    @Test
+    public void testIssue704() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/sample/swagger.json");
+        Assert.assertNotNull(swagger);
+
+        assertNotNull(swagger.getPaths().get("/api/Address").getGet());
+        assertTrue(swagger.getDefinitions().size() == 1);
+        assertNotNull(swagger.getDefinitions().get("AddressEx"));
+    }
+
+    @Test
     public void testIssue697() throws Exception {
         String yaml = "{\n" +
                 "    \"swagger\": \"2.0\",\n" +
@@ -1164,7 +1185,7 @@ public class SwaggerParserTest {
 
     @Test
     public void testRefNameConflicts() throws Exception {
-        Swagger swagger = new SwaggerParser().read("./refs-name-conflict/a.yaml");
+        Swagger swagger = new SwaggerParser().read("name-conflicts/refs-name-conflict/a.yaml");
 
         assertTrue(swagger.getDefinitions().size() == 2);
 

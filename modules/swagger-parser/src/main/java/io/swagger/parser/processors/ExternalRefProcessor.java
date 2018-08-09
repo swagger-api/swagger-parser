@@ -107,7 +107,10 @@ public final class ExternalRefProcessor {
                         if (isAnExternalRefFormat(refModel.getRefFormat())) {
                             String joinedRef = join(file, refModel.get$ref());
                             refModel.set$ref(processRefToExternalDefinition(joinedRef, refModel.getRefFormat()));
-                        } else {
+                        }/*else if (isAnExternalRefFormat(refModel.getOriginalRefFormat())) {
+                            String joinedRef = join(file, refModel.getOriginalRef());
+                            refModel.set$ref(processRefToExternalDefinition(joinedRef, refModel.getOriginalRefFormat()));
+                        }*/else {
                             processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
                         }
                     } else if (allOfModel instanceof ModelImpl) {

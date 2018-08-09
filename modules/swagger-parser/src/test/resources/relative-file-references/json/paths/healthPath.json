@@ -15,10 +15,10 @@
     ],
     "parameters": [
       {
-        "$ref": "./parameters/params.json#/param3"
+        "$ref": "../parameters/params.json#/param3"
       },
       {
-        "$ref": "./parameters/params.json#/param4"
+        "$ref": "../parameters/params.json#/param4"
       },
       {
         "name": "body",
