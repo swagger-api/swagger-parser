@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
@@ -26,6 +27,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -620,6 +622,15 @@ public class V2ConverterTest {
         assertEquals(schema.getMinLength(), Integer.valueOf(1));
         assertEquals(schema.getMaxLength(), Integer.valueOf(3));
         assertEquals(schema.getPattern(), "^[0-9]+$");
+    }
+
+    @Test(description = "OpenAPIParser.readLocation fails when fetching valid Swagger 2.0 resource with AuthorizationValues provided")
+    public void testIssue785() {
+        AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
+        List<AuthorizationValue> authorizationValues = Arrays.asList(apiKey);
+        SwaggerConverter converter = new SwaggerConverter();
+        List<io.swagger.models.auth.AuthorizationValue> convertedAuthList = converter.convert(authorizationValues);
+        assertEquals(convertedAuthList.size(), authorizationValues.size());
     }
 
     @Test(description = "OpenAPI v2 converter - Migrate a schema with AllOf")

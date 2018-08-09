@@ -116,6 +116,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 v.setType(auth.getType());
                 v.setValue(auth.getValue());
                 v.setKeyName(auth.getKeyName());
+                convertedAuth.add(v);
             }
         }
 
