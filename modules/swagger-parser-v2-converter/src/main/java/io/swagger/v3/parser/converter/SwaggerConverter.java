@@ -116,6 +116,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 v.setType(auth.getType());
                 v.setValue(auth.getValue());
                 v.setKeyName(auth.getKeyName());
+                convertedAuth.add(v);
             }
         }
 
@@ -299,25 +300,28 @@ public class SwaggerConverter implements SwaggerParserExtension {
         OAuthFlow oAuthFlow = new OAuthFlow();
 
         securityScheme.setType(SecurityScheme.Type.OAUTH2);
+        String flow = oAuth2Definition.getFlow();
 
-        switch (oAuth2Definition.getFlow()) {
-            case "implicit":
-                oAuthFlow.setAuthorizationUrl(oAuth2Definition.getAuthorizationUrl());
-                oAuthFlows.setImplicit(oAuthFlow);
-                break;
-            case "password":
-                oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
-                oAuthFlows.setPassword(oAuthFlow);
-                break;
-            case "application":
-                oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
-                oAuthFlows.setClientCredentials(oAuthFlow);
-                break;
-            case "accessCode":
-                oAuthFlow.setAuthorizationUrl(oAuth2Definition.getAuthorizationUrl());
-                oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
-                oAuthFlows.setAuthorizationCode(oAuthFlow);
-                break;
+        if (flow != null) {
+            switch (flow) {
+                case "implicit":
+                    oAuthFlow.setAuthorizationUrl(oAuth2Definition.getAuthorizationUrl());
+                    oAuthFlows.setImplicit(oAuthFlow);
+                    break;
+                case "password":
+                    oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
+                    oAuthFlows.setPassword(oAuthFlow);
+                    break;
+                case "application":
+                    oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
+                    oAuthFlows.setClientCredentials(oAuthFlow);
+                    break;
+                case "accessCode":
+                    oAuthFlow.setAuthorizationUrl(oAuth2Definition.getAuthorizationUrl());
+                    oAuthFlow.setTokenUrl(oAuth2Definition.getTokenUrl());
+                    oAuthFlows.setAuthorizationCode(oAuthFlow);
+                    break;
+            }
         }
 
         Scopes scopes = new Scopes();
@@ -410,14 +414,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 servers.add(server);
             }
         } else {
-            if (!"/".equals(baseUrl)) {
-                Server server = new Server();
-                server.setUrl(baseUrl);
-
-                servers.add(server);
-            } else {
-                return null;
-            }
+            Server server = new Server();
+            server.setUrl(baseUrl);
+            servers.add(server);
         }
 
         return servers;
