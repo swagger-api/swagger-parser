@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
@@ -26,6 +27,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +80,13 @@ public class V2ConverterTest {
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
     private static final String ISSUE_745_YAML = "issue-745.yaml";
+    private static final String ISSUE_755_YAML = "issue-755.yaml";
+    private static final String ISSUE_740_YAML = "issue-740.yaml";
+    private static final String ISSUE_756_JSON = "issue-756.json";
+    private static final String ISSUE_758_JSON = "issue-758.json";
+    private static final String ISSUE_762_JSON = "issue-762.json";
+    private static final String ISSUE_765_YAML = "issue-765.yaml";
+    private static final String ISSUE_768_JSON = "issue-786.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -429,7 +438,7 @@ public class V2ConverterTest {
         assertNotNull(oas);
     }
 
-    @Test(description = "No Servers - without host, basePath, scheme")
+    @Test(description = "Expect a default server object when a swagger without host, basePath and scheme is converted to openAPI")
     public void testIssue31() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_31_JSON);
         assertNotNull(oas.getServers());
@@ -622,6 +631,52 @@ public class V2ConverterTest {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_745_YAML);
         assertTrue(oas.getServers().get(0).getUrl().startsWith("//"));
     }
+  
+    @Test(description = "OpenAPIParser.readLocation fails when fetching valid Swagger 2.0 resource with AuthorizationValues provided")
+    public void testIssue785() {
+        AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
+        List<AuthorizationValue> authorizationValues = Arrays.asList(apiKey);
+        SwaggerConverter converter = new SwaggerConverter();
+        List<io.swagger.models.auth.AuthorizationValue> convertedAuthList = converter.convert(authorizationValues);
+        assertEquals(convertedAuthList.size(), authorizationValues.size());
+    }
+
+    @Test(description = "OpenAPI v2 converter - Migrate a schema with AllOf")
+    public void testIssue740() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_740_YAML);
+        assertNotNull(oas);
+        Schema schema = oas.getComponents().getSchemas().get("Action");
+        assertTrue(schema instanceof ComposedSchema);
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        assertEquals(composedSchema.getAllOf().size(), 2);
+    }
+
+    @Test(description = "OpenAPI v2 converter - no model in body parameter")
+    public void testIssue756() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_756_JSON);
+          assertNotNull(oas);
+    }
+
+    @Test(description = "OpenAPI v2 converter - NPE when 'enum' field is available and 'type' field is missing in query parameter")
+    public void testIssue758() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_758_JSON);
+        assertNotNull(oas);
+    }
+  
+    @Test(description = "OpenAPI v2 Converter: NPE when type is array and 'items' field is missing in array property")
+    public void testIssue762() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_762_JSON);
+        assertNotNull(oas);
+    } 
+  
+    @Test(description = "requestBody not correctly populated when Parameters is a list of $refs (OAS 2 to 3 conversion)")
+    public void testIssue765() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_765_YAML);
+        assertNotNull(oas);
+        RequestBody requestBody = oas.getPaths().get("/ping/{ActivityTypePath}").getPost().getRequestBody();
+        assertNotNull(requestBody);
+        assertEquals("#/components/requestBodies/Block", requestBody.get$ref());
+    }
 
     @Test(description = "OpenAPI v2 converter - Missing Parameter.style property")
     public void testParameterConversion() throws Exception {
@@ -655,6 +710,20 @@ public class V2ConverterTest {
         SwaggerParseResult result = converter.readContents(swaggerAsString, null, parseOptions);
 
         assertNotNull(result.getMessages());
+    }
+
+    
+    @Test(description = "OpenAPI v2 converter - Migrate minLength, maxLength and pattern of String property")
+    public void testIssue786() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_768_JSON);
+        assertNotNull(oas);
+    }
+
+
+    @Test(description = "OpenAPI v2 converter - Conversion of a spec without a info section")
+    public void testIssue755() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_755_YAML);
+        assertNotNull(oas);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {

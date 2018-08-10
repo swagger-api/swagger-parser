@@ -49,6 +49,9 @@ import io.swagger.v3.core.util.Json;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -97,12 +100,18 @@ public class OpenAPIDeserializer {
 
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
+    	return deserialize(rootNode, null);
+    }
+    
+    public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
+            
             ParseResult rootParse = new ParseResult();
-            OpenAPI api = parseRoot(rootNode, rootParse);
+            OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.setOpenAPI(api);
             result.setMessages(rootParse.getMessages());
+
         } catch (Exception e) {
             result.setMessages(Arrays.asList(e.getMessage()));
 
@@ -110,7 +119,7 @@ public class OpenAPIDeserializer {
         return result;
     }
 
-    public OpenAPI parseRoot(JsonNode node, ParseResult result) {
+    public OpenAPI parseRoot(JsonNode node, ParseResult result, String path) {
         String location = "";
         OpenAPI openAPI = new OpenAPI();
         if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -145,7 +154,7 @@ public class OpenAPIDeserializer {
 
             ArrayNode array = getArray("servers", rootNode, false, location, result);
             if (array != null && array.size() > 0) {
-                openAPI.setServers(getServersList(array, String.format("%s.%s", location, "servers"), result));
+                openAPI.setServers(getServersList(array, String.format("%s.%s", location, "servers"), result, path));
             }else {
                 Server defaultServer = new Server();
                 defaultServer.setUrl("/");
@@ -192,6 +201,17 @@ public class OpenAPIDeserializer {
         }
 
         return openAPI;
+    }
+
+    public String mungedRef(String refString) {
+        // Ref: IETF RFC 3966, Section 5.2.2
+        if (!refString.contains(":") &&   // No scheme
+                !refString.startsWith("#") && // Path is not empty
+                !refString.startsWith("/") && // Path is not absolute
+                refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
+            return "./" + refString;
+        }
+        return null;
     }
 
     public Map<String,Object> getExtensions(ObjectNode node){
@@ -331,7 +351,7 @@ public class OpenAPIDeserializer {
 
 
 
-    public List<Server> getServersList(ArrayNode obj, String location, ParseResult result) {
+    public List<Server> getServersList(ArrayNode obj, String location, ParseResult result, String path) {
 
         List<Server> servers = new ArrayList<>();
         if (obj == null) {
@@ -340,7 +360,7 @@ public class OpenAPIDeserializer {
         }
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
-                Server server = getServer((ObjectNode) item, location, result);
+                Server server = getServer((ObjectNode) item, location, result, path);
                 if (server != null) {
                     servers.add(server);
                 }else{
@@ -352,8 +372,16 @@ public class OpenAPIDeserializer {
         }
         return servers;
     }
+    
+    public List<Server> getServersList(ArrayNode obj, String location, ParseResult result) {
+		return getServersList(obj, location, result, null);
+	}
 
-    public Server getServer(ObjectNode obj, String location, ParseResult result) {
+	public Server getServer(ObjectNode obj, String location, ParseResult result) {
+		return getServer(obj, location, result, null);
+	}
+
+    public Server getServer(ObjectNode obj, String location, ParseResult result, String path) {
         if (obj == null) {
             return null;
         }
@@ -362,6 +390,17 @@ public class OpenAPIDeserializer {
 
         String value = getString("url", obj, true, location, result);
         if(StringUtils.isNotBlank(value)) {
+			if(!isValidURL(value) && path != null){
+				try {
+					final URI absURI = new URI(path);
+					if("http".equals(absURI.getScheme()) || "https".equals(absURI.getScheme())){
+						value = absURI.resolve(new URI(value)).toString();
+					}
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+
+			}
             server.setUrl(value);
         }
 
@@ -393,6 +432,16 @@ public class OpenAPIDeserializer {
 
         return server;
     }
+    
+    boolean isValidURL(String urlString){
+		try {
+			URL url = new URL(urlString);
+			url.toURI();
+			return true;
+		} catch (Exception exception) {
+			return false;
+		}
+	}
 
     public ServerVariables getServerVariables(ObjectNode obj, String location, ParseResult result){
         ServerVariables serverVariables = new ServerVariables();
@@ -467,7 +516,10 @@ public class OpenAPIDeserializer {
         for (String pathName : pathKeys) {
             JsonNode pathValue = obj.get(pathName);
             if(pathName.startsWith("x-")) {
-                result.unsupported(location, pathName, pathValue);
+                Map <String,Object> extensions = getExtensions(obj);
+                if(extensions != null && extensions.size() > 0) {
+                    paths.setExtensions(extensions);
+                }
             } else {
                 if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                     result.invalidType(location, pathName, "object", pathValue);
@@ -490,8 +542,13 @@ public class OpenAPIDeserializer {
             JsonNode ref = obj.get("$ref");
 
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                pathItem.set$ref(ref.asText());
-                return pathItem.$ref((ref.asText()));
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    pathItem.set$ref(mungedRef);
+                }else{
+                    pathItem.set$ref(ref.textValue());
+                }
+                return pathItem;
             } else if (ref.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode node = (ObjectNode) ref;
 
@@ -964,8 +1021,14 @@ public class OpenAPIDeserializer {
         JsonNode ref = linkNode.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                link.set$ref(ref.asText());
-                return link.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    link.set$ref(mungedRef);
+                }else{
+                    link.set$ref(ref.textValue());
+                }
+
+                return link;
             } else {
                 result.invalidType(location, "$ref", "string", linkNode);
                 return null;
@@ -1060,7 +1123,13 @@ public class OpenAPIDeserializer {
                 if (ref != null) {
                     if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                         PathItem pathItem = new PathItem();
-                        return callback.addPathItem(name,pathItem.$ref(ref.asText()));
+                        String mungedRef = mungedRef(ref.textValue());
+                        if (mungedRef != null) {
+                            pathItem.set$ref(mungedRef);
+                        }else{
+                            pathItem.set$ref(ref.textValue());
+                        }
+                        return callback.addPathItem(name,pathItem);
                     } else {
                         result.invalidType(location, "$ref", "string", node);
                         return null;
@@ -1254,8 +1323,13 @@ public class OpenAPIDeserializer {
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
                 parameter = new Parameter();
-                parameter.set$ref(ref.asText());
-                return parameter.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    parameter.set$ref(mungedRef);
+                }else{
+                    parameter.set$ref(ref.textValue());
+                }
+                return parameter;
             } else {
                 result.invalidType(location, "$ref", "string", obj);
                 return null;
@@ -1410,8 +1484,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = headerNode.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                header.set$ref(ref.asText());
-                return header.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    header.set$ref(mungedRef);
+                }else{
+                    header.set$ref(ref.textValue());
+                }
+                return header;
             } else {
                 result.invalidType(location, "$ref", "string", headerNode);
                 return null;
@@ -1545,8 +1624,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                securityScheme.set$ref(ref.asText());
-                return securityScheme.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    securityScheme.set$ref(mungedRef);
+                }else{
+                    securityScheme.set$ref(ref.textValue());
+                }
+                return securityScheme;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -1851,8 +1935,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                schema.set$ref(ref.asText());
-                return schema.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    schema.set$ref(mungedRef);
+                }else{
+                    schema.set$ref(ref.asText());
+                }
+                return schema;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -2151,8 +2240,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                example.set$ref(ref.asText());
-                return example.$ref((ref.asText()));
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    example.set$ref(mungedRef);
+                }else{
+                    example.set$ref(ref.textValue());
+                }
+                return example;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -2234,11 +2328,18 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
 
         for (String key : keys) {
-            ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
-            if(obj != null) {
-                ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
-                if(response != null) {
-                    apiResponses.put(key, response);
+            if (key.startsWith("x-")) {
+                Map <String,Object> extensions = getExtensions(node);
+                if(extensions != null && extensions.size() > 0) {
+                    apiResponses.setExtensions(extensions);
+                }
+            } else {
+                ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
+                if (obj != null) {
+                    ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
+                    if (response != null) {
+                        apiResponses.put(key, response);
+                    }
                 }
             }
         }
@@ -2255,8 +2356,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                 apiResponse.set$ref(ref.asText());
-                 return apiResponse.$ref((ref.asText()));
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    apiResponse.set$ref(mungedRef);
+                }else{
+                    apiResponse.set$ref(ref.textValue());
+                }
+                 return apiResponse;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;
@@ -2480,8 +2586,13 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                body.set$ref(ref.asText());
-                return body.$ref(ref.asText());
+                String mungedRef = mungedRef(ref.textValue());
+                if (mungedRef != null) {
+                    body.set$ref(mungedRef);
+                }else{
+                    body.set$ref(ref.textValue());
+                }
+                return body;
             } else {
                 result.invalidType(location, "$ref", "string", node);
                 return null;

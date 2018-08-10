@@ -1,0 +1,14 @@
+swagger: '2.0'
+host: petstore.swagger.io
+basePath: /v2
+schemes:
+  - http
+paths:
+  /ping:
+    post:
+      summary: test
+      description: 'test it'
+      operationId: pingOp
+      responses:
+        '200':
+          description: OK

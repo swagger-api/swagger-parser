@@ -1,0 +1,29 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1",
+    "title" : "EchoSoap"
+  },
+  "paths" : {
+    "/echo" : {
+      "post" : {
+        "parameters" : [           {
+          "name": "sort",
+          "in": "query",
+          "required": false,
+          "enum": [
+            "forks",
+            "stars",
+            "updated"
+          ],
+          "description": "If not provided, results are sorted by best match."
+        }],
+        "responses" : {
+          "200" : {
+            "description" : "Dummy response"
+          }
+        }
+      }
+    }
+  }
+}

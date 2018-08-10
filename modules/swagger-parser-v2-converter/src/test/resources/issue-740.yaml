@@ -1,0 +1,66 @@
+swagger: '2.0'
+info:
+  description: 'Test'
+  version: 1.0.0
+  title: OpenAPI Test Issue 740
+  license:
+    name: Apache-2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: petstore.swagger.io
+basePath: /v2
+schemes:
+  - http
+paths:
+  /ping:
+    post:
+      summary: test
+      operationId: pingOperation
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Entity'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Action'
+definitions:
+  Entity:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        example: "1438752"
+        description: "The ID of the entity."
+        readOnly: true
+    title: "Entity"
+    description: "A base object for all API entities."
+  Action:
+    title: "Action"
+    allOf:
+    - $ref: "#/definitions/Entity"
+    - type: "object"
+      required:
+      - "action_type"
+      discriminator: "action_type"
+      properties:
+        name:
+          type: "string"
+          description: "The name of the action."
+          readOnly: true
+        action_type:
+          $ref: "#/definitions/ActionType"
+  ActionType:
+    type: "string"
+    title: "ActionType"
+    description: "Some enum"
+    enum:
+    - "value1"
+    - "value2"
+    x-swagger-router-model: "ActionTypeDto"

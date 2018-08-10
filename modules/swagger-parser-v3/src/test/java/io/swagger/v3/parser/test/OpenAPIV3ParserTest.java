@@ -57,19 +57,40 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue719() {
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("extensions-responses.yaml", null, new ParseOptions()).getOpenAPI();
+
+        Assert.assertNotNull(openAPI);
+
+        Assert.assertNotNull(openAPI.getPaths().getExtensions());
+        Assert.assertNotNull(openAPI.getPaths().get("/something").getGet().getResponses().getExtensions());
+
+    }
+
+    @Test
     public void issue682() throws Exception {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        options.setResolveCombinators(false);
-        options.setResolveFully(true);
 
-        String location = getClass().getResource("/odin.yaml").toString();
-        Assert.assertNotNull(location);
-        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/sample/SwaggerPetstore.yaml", null, options);
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertTrue(result.getMessages().isEmpty());
-        Assert.assertTrue(result.getOpenAPI().getPaths().get("/JTasker/startRun").getPost().getRequestBody().getContent().get("application/json").getSchema().getProperties().size() == 2);
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/pets").getGet());
+    }
+
+    @Test
+    public void issueRelativeRefs2() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/relative-upper-directory/swagger.yaml", null, options);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getPaths().get("/api/Address").getGet());
+        assertTrue(openAPI.getComponents().getSchemas().size() == 1);
+        assertNotNull(openAPI.getComponents().getSchemas().get("AddressEx"));
     }
 
     @Test
@@ -798,8 +819,7 @@ public class OpenAPIV3ParserTest {
 
         assertEquals(((Map) openAPI.getExtensions().get("x-some-vendor")).get("sometesting"), "bye!");
         assertEquals(openAPI.getPaths().get("/foo").getExtensions().get("x-something"), "yes, it is supported");
-        assertTrue(result.getMessages().size() == 1);
-        assertEquals(result.getMessages().get(0), "attribute paths.x-nothing is unsupported");
+       
     }
 
 
@@ -1408,7 +1428,7 @@ public class OpenAPIV3ParserTest {
         String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        OpenAPI openAPI = (parser.readWithInfo(rootNode)).getOpenAPI();
+        OpenAPI openAPI = (parser.readWithInfo(null, rootNode)).getOpenAPI();
 
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
