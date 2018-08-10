@@ -404,13 +404,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         } else {
             if (!"/".equals(baseUrl)) {
-                Server server = new Server();
-                server.setUrl(baseUrl);
-
-                servers.add(server);
-            } else {
-                return null;
+                baseUrl = "//" + baseUrl;
             }
+            Server server = new Server();
+            server.setUrl(baseUrl);
+            servers.add(server);
         }
 
         return servers;

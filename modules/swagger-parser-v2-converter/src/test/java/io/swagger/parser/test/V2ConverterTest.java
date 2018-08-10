@@ -77,6 +77,7 @@ public class V2ConverterTest {
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
+    private static final String ISSUE_745_YAML = "issue-745.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -431,7 +432,7 @@ public class V2ConverterTest {
     @Test(description = "No Servers - without host, basePath, scheme")
     public void testIssue31() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_31_JSON);
-        assertNull(oas.getServers());
+        assertNotNull(oas.getServers());
     }
 
     @Test(description = "Convert schema, property and array examples")
@@ -614,6 +615,12 @@ public class V2ConverterTest {
         assertEquals(schema.getMinLength(), Integer.valueOf(1));
         assertEquals(schema.getMaxLength(), Integer.valueOf(3));
         assertEquals(schema.getPattern(), "^[0-9]+$");
+    }
+
+    @Test(description = "Issue in converting server url in RFC 3986 format from OpenAPI Spec 2 to Open API Spec 3")
+    public void testIssue745() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_745_YAML);
+        assertTrue(oas.getServers().get(0).getUrl().startsWith("//"));
     }
 
     @Test(description = "OpenAPI v2 converter - Missing Parameter.style property")
