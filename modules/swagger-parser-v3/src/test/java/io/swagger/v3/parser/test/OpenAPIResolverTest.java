@@ -1107,6 +1107,20 @@ public class OpenAPIResolverTest {
         assertEquals(qp.getName(), "page");
     }
 
+    @Test
+    public void testIssue783() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue-783.yaml", null, options);
+
+        ComposedSchema commonSchema = (ComposedSchema) openAPI.getComponents().getSchemas().get("common");
+        assertEquals(commonSchema.getAllOf().get(0).get$ref(), "#/components/schemas/core");
+        assertEquals(((Schema) commonSchema.getAllOf().get(1).getProperties().get("direct")).get$ref(), "#/components/schemas/core");
+        assertEquals(((ArraySchema) commonSchema.getAllOf().get(1).getProperties().get("referenced")).getItems().get$ref(), "#/components/schemas/core");
+
+        Schema coreSchema = openAPI.getComponents().getSchemas().get("core");
+        assertEquals(((Schema) coreSchema.getProperties().get("inner")).get$ref(), "#/components/schemas/innerCore");
+    }
 
     public String replacePort(String url){
         String pathFile = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
