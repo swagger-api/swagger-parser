@@ -30,6 +30,7 @@ import mockit.Mocked;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
+import javax.validation.constraints.AssertFalse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -257,5 +258,13 @@ public class LegacyConverterTest {
         Set<String> actual = new HashSet<>(sp.getEnum());
 
         assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testIssue799() throws Exception {
+
+        Swagger swagger = converter.read("src/test/resources/specs/v1_2/issue799.json");
+        Assert.assertEquals( swagger.getPaths().get("/api/v1beta3/namespaces/{namespaces}/bindings").getPost().getResponses().get("200").getResponseSchema().getReference(), "#/definitions/v1beta3.Binding");
+        Json.prettyPrint(swagger);
     }
 }

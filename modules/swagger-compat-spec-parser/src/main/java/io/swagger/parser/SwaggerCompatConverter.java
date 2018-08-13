@@ -473,16 +473,16 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
             Model responseModel = null;
             if (message.getResponseModel() != null) {
-                response.schema(new RefProperty(message.getResponseModel()));
+                response.setResponseSchema(new RefModel().asDefault(message.getResponseModel()));
             }
             output.response(message.getCode(), response);
         }
 
         // default response type
-        Property responseProperty = propertyFromTypedObject(operation);
+        Model responseProperty = modelFromExtendedTypedObject(operation);
         Response response = new Response()
                 .description("success")
-                .schema(responseProperty);
+                .responseSchema(responseProperty);
         if (output.getResponses() == null) {
             output.defaultResponse(response);
         } else if (responseProperty != null) {
