@@ -1,5 +1,7 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -10,6 +12,8 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import org.junit.Test;
+import org.testng.Assert;
+
 import java.util.Map;
 
 import java.util.List;
@@ -138,5 +142,18 @@ public class OpenAPIParserTest {
         assertNotNull(prettyOpenAPI);
         assertNotNull(prettyOpenAPI.getExtensions());
         assertEquals(prettyOpenAPI.getExtensions().get("x-some-extension"), "some-value");
+    }
+
+    @Test
+    public void testIssue799() {
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+
+        OpenAPI openAPI = openApiParser.readLocation("issue799.json", null, options).getOpenAPI();
+        Assert.assertEquals(((Schema)openAPI.getComponents().getSchemas().get("v1beta3.Binding").getProperties().get("metadata")).get$ref(),"#/components/schemas/v1beta3.ObjectMeta");
+
+
     }
 }
