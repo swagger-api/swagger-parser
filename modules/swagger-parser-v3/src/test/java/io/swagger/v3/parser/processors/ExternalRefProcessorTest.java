@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -138,4 +140,23 @@ public class ExternalRefProcessorTest {
     	assertTrue(testedOpenAPI.getComponents().getSchemas().get("Contact") != null);
     	assertTrue(testedOpenAPI.getComponents().getSchemas().get("Address") != null);
     }
+
+	@Test
+	public void testRelativeRefIncludingUrlRef(@Injectable final Schema mockedModel) {
+		final RefFormat refFormat = RefFormat.RELATIVE;
+
+		OpenAPI mockedOpenAPI = new OpenAPI();
+		mockedOpenAPI.setComponents(new Components());
+		mockedOpenAPI.getComponents().setSchemas(new HashMap<>());
+		Schema bar = new Schema();
+		bar.addProperties("my-property", new StringSchema());
+		mockedOpenAPI.getComponents().getSchemas().put("Bar", bar);
+		ResolverCache mockedResolverCache = new ResolverCache(mockedOpenAPI, null, null);
+		mockedResolverCache.putRenamedRef("https://www.example.com/schema-file.yaml#/Bar", "Bar");
+
+		ExternalRefProcessor processor = new ExternalRefProcessor(mockedResolverCache, mockedOpenAPI);
+
+		processor.processRefToExternalSchema("./relative-with-url/relative-with-url.yaml#/relative-with-url", refFormat);
+		assertThat(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Foo")).get$ref(), is("https://www.example.com/schema-file.yaml#/Bar"));
+	}
 }

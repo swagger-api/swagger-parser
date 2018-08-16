@@ -1,0 +1,4 @@
+relative-with-url:
+  properties:
+    Foo:
+      $ref: https://www.example.com/schema-file.yaml#/Bar
