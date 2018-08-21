@@ -1,4 +1,4 @@
-# Swagger Parser
+# Swagger Parser - DevOps
 
 ## Overview 
 This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
