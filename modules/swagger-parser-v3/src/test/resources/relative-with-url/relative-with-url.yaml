@@ -1,4 +1,4 @@
 relative-with-url:
   properties:
     Foo:
-      $ref: https://raw.githubusercontent.com/swagger-api/swagger-parser/v2.0.2/modules/swagger-parser-v3/src/test/resources/relative/globals.yaml#/components/schemas/link-object
+      $ref: https://my.example.remote.url.com/globals.yaml#/components/schemas/link-object

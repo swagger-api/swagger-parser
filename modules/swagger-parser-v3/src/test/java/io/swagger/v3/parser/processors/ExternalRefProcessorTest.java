@@ -6,9 +6,12 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.parser.ResolverCache;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.StrictExpectations;
 import org.testng.annotations.Test;
 
@@ -141,9 +144,48 @@ public class ExternalRefProcessorTest {
     	assertTrue(testedOpenAPI.getComponents().getSchemas().get("Address") != null);
     }
 
+
+  @Mocked
+	RemoteUrl remoteUrl;
+
+
 	@Test
-	public void testRelativeRefIncludingUrlRef(@Injectable final Schema mockedModel) {
+	public void testRelativeRefIncludingUrlRef(@Injectable final Schema mockedModel)
+			throws Exception {
 		final RefFormat refFormat = RefFormat.RELATIVE;
+
+		final String url = "https://my.example.remote.url.com/globals.yaml";
+
+		final String expectedResult = "components:\n" +
+				"  schemas:\n" +
+				"    link-object:\n" +
+				"      type: object\n" +
+				"      additionalProperties:\n" +
+				"        \"$ref\": \"#/components/schemas/rel-data\"\n" +
+				"    rel-data:\n" +
+				"      type: object\n" +
+				"      required:\n" +
+				"      - href\n" +
+				"      properties:\n" +
+				"        href:\n" +
+				"          type: string\n" +
+				"        note:\n" +
+				"          type: string\n" +
+				"    result:\n" +
+				"      type: object\n" +
+				"      properties:\n" +
+				"        name:\n" +
+				"          type: string\n" +
+				"        _links:\n" +
+				"          \"$ref\": \"#/components/schemas/link-object\"\n" +
+				"";
+		List<AuthorizationValue> auths = null;
+
+		new Expectations() {{
+			RemoteUrl.urlToString(url, auths);
+			times = 1;
+			result = expectedResult;
+		}};
 
 		OpenAPI mockedOpenAPI = new OpenAPI();
 		mockedOpenAPI.setComponents(new Components());
@@ -154,7 +196,7 @@ public class ExternalRefProcessorTest {
 
 		processor.processRefToExternalSchema("./relative-with-url/relative-with-url.yaml#/relative-with-url", refFormat);
 		assertThat(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Foo")).get$ref(),
-				is("https://raw.githubusercontent.com/swagger-api/swagger-parser/v2.0.2/modules/swagger-parser-v3/src/test/resources/relative/globals.yaml#/components/schemas/link-object")
+				is("https://my.example.remote.url.com/globals.yaml#/components/schemas/link-object")
 		);
 		assertThat(mockedOpenAPI.getComponents().getSchemas().keySet().contains("link-object"), is(true));
 		assertThat(mockedOpenAPI.getComponents().getSchemas().keySet().contains("rel-data"), is(true));
