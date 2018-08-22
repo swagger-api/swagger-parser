@@ -145,7 +145,7 @@ public class ExternalRefProcessorTest {
     }
 
 
-  @Mocked
+	@Mocked
 	RemoteUrl remoteUrl;
 
 
