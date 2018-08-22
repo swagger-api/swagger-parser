@@ -75,33 +75,33 @@ public class ExternalRefProcessorTest {
     @Test
     public void testNestedExternalRefs(@Injectable final Schema mockedModel){
     	final RefFormat refFormat = RefFormat.URL;
-  	
+
     	//Swagger test instance
     	OpenAPI testedOpenAPI = new OpenAPI();
-    	
+
     	//Start with customer, add address property to it
     	final String customerURL = "http://my.company.com/path/to/customer.json#/definitions/Customer";
-    	
+
     	final Schema customerModel = new Schema();
     	Map<String,Schema> custProps = new HashMap<>();
     	Schema address = new Schema();
     	final String addressURL = "http://my.company.com/path/to/address.json#/definitions/Address";
     	address.set$ref(addressURL);
     	custProps.put("Address", address);
-    	
+
     	//Create a 'local' reference to something in #/definitions, this should be ignored a no longer result in a null pointer exception
     	final String loyaltyURL = "#/definitions/LoyaltyScheme";
-    	
+
     	Schema loyaltyProp = new Schema();
     	loyaltyProp.set$ref(loyaltyURL);
     	loyaltyProp.setName("LoyaltyCardNumber");
     	List<String> required = new ArrayList<>();
     	required.add("LoyaltyCardNumber");
     	loyaltyProp.setRequired(required);
-    	
+
     	custProps.put("Loyalty", loyaltyProp);
     	customerModel.setProperties(custProps);
-    	
+
     	//create address model, add Contact Ref Property to it
     	final Schema addressModel = new Schema();
     	Map<String, Schema> addressProps = new HashMap<>();
@@ -110,8 +110,8 @@ public class ExternalRefProcessorTest {
     	contact.set$ref(contactURL);
     	addressProps.put("Contact", contact);
     	addressModel.setProperties(addressProps);
-    	
-    	
+
+
     	//Create contact model, with basic type property
     	final Schema contactModel = new Schema();
     	Schema contactProp = new StringSchema();
@@ -122,21 +122,21 @@ public class ExternalRefProcessorTest {
     	Map<String, Schema> contactProps = new HashMap<>();
     	contactProps.put("PhoneNumber", contactProp);
     	contactModel.setProperties(contactProps);
-    	
+
     	new Expectations(){{
     		cache.loadRef(customerURL, refFormat, Schema.class);
     		result = customerModel;
     		times = 1;
-    				
+
     		cache.loadRef(addressURL, refFormat, Schema.class);
     		result = addressModel;
     		times = 1;
-    		
+
     		cache.loadRef(contactURL, refFormat, Schema.class);
     		result = contactModel;
     		times = 1;
  		}};
-    	
+
     	String actualRef = new ExternalRefProcessor(cache, testedOpenAPI).processRefToExternalSchema(customerURL, refFormat);
 
 		assertTrue(testedOpenAPI.getComponents().getSchemas().get("Customer") != null);
@@ -200,5 +200,9 @@ public class ExternalRefProcessorTest {
 		);
 		assertThat(mockedOpenAPI.getComponents().getSchemas().keySet().contains("link-object"), is(true));
 		assertThat(mockedOpenAPI.getComponents().getSchemas().keySet().contains("rel-data"), is(true));
+		// assert that ref is relative ref is resolved. and the file path is from root yaml file.
+		assertThat(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Bar")).get$ref(),
+        is("./relative-with-url/relative-with-local.yaml#/relative-same-file")
+    );
 	}
 }
