@@ -665,21 +665,19 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
-
     private void processRefSchema(Schema subRef, String externalFile) {
         RefFormat format = computeRefFormat(subRef.get$ref());
-        if (isAnExternalRefFormat(format)) {
-            String $ref = constructRef(subRef, externalFile);
-            subRef.set$ref($ref);
-            if($ref.startsWith("."))
-                processRefToExternalSchema($ref, RefFormat.RELATIVE);
-            else {
-                processRefToExternalSchema($ref, RefFormat.URL);
-            }
 
-        } else {
+        if (!isAnExternalRefFormat(format)) {
             processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            return;
         }
+        String $ref = subRef.get$ref();
+        if (format.equals(RefFormat.RELATIVE)) {
+            $ref = constructRef(subRef, externalFile);
+            subRef.set$ref($ref);
+        }
+        processRefToExternalSchema($ref, computeRefFormat(subRef.get$ref()));
     }
 
 
@@ -688,6 +686,7 @@ public final class ExternalRefProcessor {
         return join(rootLocation, ref);
     }
 
+    // visible for testing
     public static String join(String source, String fragment) {
         try {
             boolean isRelative = false;
