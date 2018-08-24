@@ -2125,7 +2125,7 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("default", node, false, location, result);
-        if (StringUtils.isNotBlank(value)) {
+        if (value != null) {
             schema.setDefault(value);
         }
 
