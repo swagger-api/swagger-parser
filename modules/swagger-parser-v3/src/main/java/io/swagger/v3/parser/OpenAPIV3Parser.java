@@ -165,41 +165,32 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             if(auth == null) {
                 auth = new ArrayList<>();
             }
-            if(options != null) {
-                if (options.isResolve()) {
-                    try {
+            try{
+                if(options != null) {
+                    if (options.isResolve()) {
                         OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
                         JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
                         result = deserializer.deserialize(rootNode);
                         OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, null);
                         result.setOpenAPI(resolver.resolve());
-
-                    } catch (Exception e) {
-                        result.setMessages(Arrays.asList(e.getMessage()));
-                    }
-                }else{
-                    try {
+                    }else{
                         JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
                         result = new OpenAPIDeserializer().deserialize(rootNode);
-
-                    } catch (Exception e) {
-                        result.setMessages(Arrays.asList(e.getMessage()));
                     }
-                }if (options.isResolveFully()){
-                    result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
-                    new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                    if (options.isResolveFully()) {
+                        result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
+                        new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
 
-                }if (options.isFlatten()){
-                    new InlineModelResolver().flatten(result.getOpenAPI());
-                }
-            }else{
-                try {
+                    }
+                    if (options.isFlatten()) {
+                        new InlineModelResolver().flatten(result.getOpenAPI());
+                    }
+                }else{
                     JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
                     result = new OpenAPIDeserializer().deserialize(rootNode);
-
-                } catch (Exception e) {
-                    result.setMessages(Arrays.asList(e.getMessage()));
                 }
+            } catch (Exception e) {
+                result.setMessages(Arrays.asList(e.getMessage()));
             }
         }
         else {
