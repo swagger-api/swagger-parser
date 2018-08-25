@@ -23,6 +23,7 @@ import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class OpenAPIParserTest {
     @Test
@@ -160,11 +161,195 @@ public class OpenAPIParserTest {
         Assert.assertEquals( openAPI.getPaths().get("/api/v1beta3/namespaces/{namespaces}/componentstatuses/{name}").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/v1beta3.ComponentStatus");
         Assert.assertEquals( openAPI.getPaths().get("/api/v1beta3/namespaces/{namespaces}/componentstatuses").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/v1beta3.ComponentStatusList");
         Schema conditionsProperty = (Schema) openAPI.getComponents().getSchemas().get("v1beta3.ComponentStatus").getProperties().get("conditions");
-        Assert.assertTrue( conditionsProperty instanceof ArraySchema);
+        assertTrue( conditionsProperty instanceof ArraySchema);
         Schema items = ((ArraySchema)conditionsProperty).getItems();
-        Assert.assertTrue( items.get$ref() != null);
+        assertTrue( items.get$ref() != null);
         Assert.assertEquals( items.get$ref(), "#/components/schemas/v1beta3.ObjectReference");
 
+
+    }
+
+    @Test
+    public void testIssue813() throws Exception {
+
+        String inputSpec = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"info\": {\n" +
+                "    \"description\": \"This is a sample server Petstore server.  You can find out more about Swagger at <a href=\\\"http://swagger.io\\\">http://swagger.io</a> or on irc.freenode.net, #swagger.  For this sample, you can use the api key \\\"special-key\\\" to test the authorization filters\",\n" +
+                "    \"version\": \"1.0.0\",\n" +
+                "    \"title\": \"Swagger Petstore\",\n" +
+                "    \"termsOfService\": \"http://helloreverb.com/terms/\",\n" +
+                "    \"contact\": {\n" +
+                "      \"email\": \"apiteam@wordnik.com\"\n" +
+                "    },\n" +
+                "    \"license\": {\n" +
+                "      \"name\": \"Apache-2.0\",\n" +
+                "      \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"host\": \"petstore.swagger.io\",\n" +
+                "  \"basePath\": \"/v2\",\n" +
+                "  \"schemes\": [\n" +
+                "    \"http\"\n" +
+                "  ],\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"post\": {\n" +
+                "        \"tags\": [\n" +
+                "          \"pet\"\n" +
+                "        ],\n" +
+                "        \"summary\": \"Add a new pet to the store\",\n" +
+                "        \"description\": \"\",\n" +
+                "        \"operationId\": \"addPet\",\n" +
+                "        \"consumes\": [\n" +
+                "          \"application/json\",\n" +
+                "          \"application/xml\"\n" +
+                "        ],\n" +
+                "        \"produces\": [\n" +
+                "          \"application/json\",\n" +
+                "          \"application/xml\"\n" +
+                "        ],\n" +
+                "        \"parameters\": [{\n" +
+                "          \"in\": \"body\",\n" +
+                "          \"name\": \"body\",\n" +
+                "          \"description\": \"Pet object that needs to be added to the store\",\n" +
+                "          \"required\": false,\n" +
+                "          \"schema\": {\n" +
+                "            \"$ref\": \"#/definitions/Pet\"\n" +
+                "          }\n" +
+                "        }],\n" +
+                "        \"responses\": {\n" +
+                "          \"405\": {\n" +
+                "            \"description\": \"Invalid input\"\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"security\": [{\n" +
+                "          \"petstore_auth\": [\n" +
+                "            \"write:pets\",\n" +
+                "            \"read:pets\"\n" +
+                "          ]\n" +
+                "        }]\n" +
+                "      },\n" +
+                "      \"put\": {\n" +
+                "        \"tags\": [\n" +
+                "          \"pet\"\n" +
+                "        ],\n" +
+                "        \"summary\": \"Update an existing pet\",\n" +
+                "        \"description\": \"\",\n" +
+                "        \"operationId\": \"updatePet\",\n" +
+                "        \"consumes\": [\n" +
+                "          \"application/json\",\n" +
+                "          \"application/xml\"\n" +
+                "        ],\n" +
+                "        \"produces\": [\n" +
+                "          \"application/json\",\n" +
+                "          \"application/xml\"\n" +
+                "        ],\n" +
+                "        \"parameters\": [{\n" +
+                "          \"in\": \"body\",\n" +
+                "          \"name\": \"body\",\n" +
+                "          \"description\": \"Pet object that needs to be added to the store\",\n" +
+                "          \"required\": false,\n" +
+                "          \"schema\": {\n" +
+                "            \"$ref\": \"#/definitions/Pet\"\n" +
+                "          }\n" +
+                "        }],\n" +
+                "        \"responses\": {\n" +
+                "          \"405\": {\n" +
+                "            \"description\": \"Validation exception\"\n" +
+                "          },\n" +
+                "          \"404\": {\n" +
+                "            \"description\": \"Pet not found\"\n" +
+                "          },\n" +
+                "          \"400\": {\n" +
+                "            \"description\": \"Invalid ID supplied\"\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"security\": [{\n" +
+                "          \"petstore_auth\": [\n" +
+                "            \"write:pets\",\n" +
+                "            \"read:pets\"\n" +
+                "          ]\n" +
+                "        }]\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"securityDefinitions\": {\n" +
+                "      \"api_key\": {\n" +
+                "        \"type\": \"apiKey\",\n" +
+                "        \"name\": \"api_key\",\n" +
+                "        \"in\": \"header\"\n" +
+                "      },\n" +
+                "      \"petstore_auth\": {\n" +
+                "        \"type\": \"oauth2\",\n" +
+                "        \"authorizationUrl\": \"http://petstore.swagger.io/api/oauth/dialog\",\n" +
+                "        \"flow\": \"implicit\",\n" +
+                "        \"scopes\": {\n" +
+                "          \"write:pets\": \"modify pets in your account\",\n" +
+                "          \"read:pets\": \"read your pets\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"definitions\": {\n" +
+                "      \"Pet\": {\n" +
+                "        \"required\": [\n" +
+                "          \"name\",\n" +
+                "          \"photoUrls\"\n" +
+                "        ],\n" +
+                "        \"properties\": {\n" +
+                "          \"id\": {\n" +
+                "            \"type\": \"integer\",\n" +
+                "            \"format\": \"int64\"\n" +
+                "          },\n" +
+                "          \"category\": {\n" +
+                "            \"$ref\": \"#/definitions/Category\"\n" +
+                "          },\n" +
+                "          \"name\": {\n" +
+                "            \"type\": \"string\",\n" +
+                "            \"example\": \"doggie\"\n" +
+                "          },\n" +
+                "          \"photoUrls\": {\n" +
+                "            \"type\": \"array\",\n" +
+                "            \"xml\": {\n" +
+                "              \"name\": \"photoUrl\",\n" +
+                "              \"wrapped\": true\n" +
+                "            },\n" +
+                "            \"items\": {\n" +
+                "              \"type\": \"string\"\n" +
+                "            }\n" +
+                "          },\n" +
+                "          \"tags\": {\n" +
+                "            \"type\": \"array\",\n" +
+                "            \"xml\": {\n" +
+                "              \"name\": \"tag\",\n" +
+                "              \"wrapped\": true\n" +
+                "            },\n" +
+                "            \"items\": {\n" +
+                "              \"$ref\": \"#/definitions/Tag\"\n" +
+                "            }\n" +
+                "          },\n" +
+                "          \"status\": {\n" +
+                "            \"type\": \"string\",\n" +
+                "            \"description\": \"pet status in the store\",\n" +
+                "            \"enum\": [\n" +
+                "              \"available\",\n" +
+                "              \"pending\",\n" +
+                "              \"sold\"\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"xml\": {\n" +
+                "          \"name\": \"Pet\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        SwaggerParseResult result = new OpenAPIParser().readContents(inputSpec, null, options);
+        assertTrue(result.getOpenAPI() != null);
 
     }
 }
