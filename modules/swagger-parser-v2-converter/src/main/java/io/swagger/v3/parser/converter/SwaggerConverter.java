@@ -659,11 +659,17 @@ public class SwaggerConverter implements SwaggerParserExtension {
             schema.setMinLength(sp.getMinLength());
             schema.setMaxLength(sp.getMaxLength());
 
-            Object exampleExtension = sp.getVendorExtensions().get("x-example");
-            if (exampleExtension != null) {
-                schema.setExample(exampleExtension);
+            if (sp.getVendorExtensions() != null) {
+                Object exampleExtension = sp.getVendorExtensions().get("x-example");
+                if (exampleExtension != null) {
+                    schema.setExample(exampleExtension);
+                }
+                Object nullableExtension = sp.getVendorExtensions().get("x-nullable");
+                if (nullableExtension != null) {
+                    schema.setNullable((Boolean) nullableExtension);
+                }
+                schema.setExtensions(convert(sp.getVendorExtensions()));
             }
-            schema.setExtensions(convert(sp.getVendorExtensions()));
 
             if (sp.getMultipleOf() != null) {
                 schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));

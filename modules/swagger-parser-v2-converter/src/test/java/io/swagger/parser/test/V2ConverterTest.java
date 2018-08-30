@@ -87,6 +87,7 @@ public class V2ConverterTest {
     private static final String ISSUE_762_JSON = "issue-762.json";
     private static final String ISSUE_765_YAML = "issue-765.yaml";
     private static final String ISSUE_768_JSON = "issue-786.json";
+    private static final String ISSUE_820_YAML = "issue-820.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -724,6 +725,33 @@ public class V2ConverterTest {
     public void testIssue755() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_755_YAML);
         assertNotNull(oas);
+    }
+    
+    @Test(description = "OpenAPI v2 converter - Conversion param extensions should be preserved")
+    public void testIssue820() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_820_YAML);
+        assertNotNull(oas);
+        Operation post = oas.getPaths().get("/issue820").getPost();
+        assertNotNull(post.getRequestBody().getContent().get("multipart/form-data"));
+        assertNotNull(post.getRequestBody().getContent().get("multipart/form-data").getSchema());
+        Map<String, Schema> properties = post.getRequestBody().getContent().get("multipart/form-data").getSchema().getProperties();
+        assertNotNull(properties);
+        assertEquals(properties.size(), 3, "size");
+        Schema foo = properties.get("foo");
+        assertNotNull(foo);
+        assertNotNull(foo.getExtensions());
+        assertEquals(foo.getExtensions().get("x-ext"), "some foo");
+        assertEquals(foo.getNullable(), null);
+        Schema bar = properties.get("bar");
+        assertNotNull(bar);
+        assertNotNull(bar.getExtensions());
+        assertEquals(bar.getExtensions().get("x-ext"), "some bar");
+        assertEquals(bar.getNullable(), Boolean.TRUE);
+        Schema baz = properties.get("baz");
+        assertNotNull(baz);
+        assertNotNull(baz.getExtensions());
+        assertEquals(baz.getExtensions().get("x-ext"), "some baz");
+        assertEquals(baz.getNullable(), Boolean.FALSE);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {

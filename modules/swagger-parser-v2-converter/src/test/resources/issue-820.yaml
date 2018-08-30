@@ -1,0 +1,33 @@
+swagger: "2.0"
+info:
+  version: "1.0.1"
+  title: "Test for issue 820"
+basePath: "/v1"
+paths:
+  /issue820:
+    post:
+      operationId: "issue820"
+      parameters:
+        - name: foo
+          in: formData
+          description: some foo param
+          required: false
+          type: string
+          x-ext: some foo
+        - name: bar
+          in: formData
+          description: some bar param
+          required: true
+          type: integer
+          x-nullable: true
+          x-ext: some bar
+        - name: baz
+          in: formData
+          description: some baz param
+          required: true
+          type: integer
+          x-nullable: false
+          x-ext: some baz
+      responses:
+        200:
+          description: "success"
