@@ -140,6 +140,22 @@ public class FileReferenceTest {
     }
 
     @Test
+    public void testIssue822() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/issue-enc.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+
+        assertNotNull(swagger.getPath("/foo").getGet());
+        assertNotNull(swagger.getPath("/bar/wtf").getGet());
+        assertNull(swagger.getPath("/bar/haha").getGet());
+        assertNotNull(swagger.getPath("/wtf/{bar}").getGet());
+        assertNotNull(swagger.getPath("/haha/{bar}").getGet());
+        assertNull(swagger.getPath("/haha2/{bar}").getGet());
+
+    }
+
+    @Test
     public void testIssue336() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-336.json", null, true);
         assertNotNull(result.getSwagger());
