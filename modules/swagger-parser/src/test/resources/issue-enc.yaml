@@ -1,0 +1,20 @@
+swagger: "2.0"
+
+info:
+  version: 1.0.0
+  title: Path include test case
+
+paths:
+  /foo:
+    $ref: './issue-enc-b.yaml#/paths/~1foo'
+  /wtf/{bar}:
+    $ref: './issue-enc-b.yaml#/paths/~1wtf~1%7Bbar%7D'
+  /bar/wtf:
+    $ref: './issue-enc-b.yaml#/paths/~1bar~1wtf'
+  /haha/{bar}:
+    $ref: './issue-enc-b.yaml#/paths/~1haha~1{bar}'
+  /haha2/{bar}:
+    $ref: './issue-enc-b.yaml#/paths/~1haha/{bar}'
+  /bar/haha:
+    $ref: './issue-enc-b.yaml#/paths/bar/haha'
+
