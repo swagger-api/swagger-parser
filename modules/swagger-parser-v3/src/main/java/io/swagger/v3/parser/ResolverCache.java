@@ -15,6 +15,8 @@ import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -249,6 +251,12 @@ public class ResolverCache {
     }
 
     private String unescapePointer(String jsonPathElement) {
+        // URL decode the fragment
+        try {
+            jsonPathElement = URLDecoder.decode(jsonPathElement, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            //
+        }
         // Unescape the JSON Pointer segment using the algorithm described in RFC 6901, section 4:
         // https://tools.ietf.org/html/rfc6901#section-4
         // First transform any occurrence of the sequence '~1' to '/'
