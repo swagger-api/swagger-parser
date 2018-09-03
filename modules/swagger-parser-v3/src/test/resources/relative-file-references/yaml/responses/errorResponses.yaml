@@ -3,10 +3,10 @@ bad-request:
   content:
     '*/*':
       schema:
-        $ref: ./models/error.yaml
+        $ref: ../models/error.yaml
 internal-server-error:
   description: An unexpected error occur during processing
   content:
     '*/*':
       schema:
-        $ref: ./models/error.yaml
+        $ref: ../models/error.yaml

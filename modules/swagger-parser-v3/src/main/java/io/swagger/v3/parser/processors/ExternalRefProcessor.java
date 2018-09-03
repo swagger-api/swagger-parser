@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -199,11 +200,7 @@ public final class ExternalRefProcessor {
         }
     }
 
-    public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
-        String renamedRef = cache.getRenamedRef($ref);
-        if(renamedRef != null) {
-            return renamedRef;
-        }
+    public void processRefToExternalResponse(String $ref, RefFormat refFormat) {
 
         final ApiResponse response = cache.loadRef($ref, refFormat, ApiResponse.class);
 
@@ -211,11 +208,12 @@ public final class ExternalRefProcessor {
             // stop!  There's a problem.  retain the original ref
             LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
                     "or the reference isn't a valid model schema");
-            return $ref;
         }
-        String newRef;
+        //String newRef;
 
-        if (openAPI.getComponents() == null) {
+        String file = $ref.split("#/")[0];
+
+        /*if (openAPI.getComponents() == null) {
             openAPI.setComponents(new Components());
         }
         Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
@@ -237,13 +235,13 @@ public final class ExternalRefProcessor {
         }
         newRef = possiblyConflictingDefinitionName;
         cache.putRenamedRef($ref, newRef);
-
-        if(existingResponse == null) {
+*/
+        /*if(existingResponse == null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addResponses(newRef, response);
             cache.addReferencedKey(newRef);
 
-            String file = $ref.split("#/")[0];
+
             if (response.get$ref() != null) {
                 RefFormat format = computeRefFormat(response.get$ref());
                 if (isAnExternalRefFormat(format)) {
@@ -251,10 +249,30 @@ public final class ExternalRefProcessor {
                 } else {
                     processRefToExternalResponse(file + response.get$ref(), RefFormat.RELATIVE);
                 }
-            }
-        }
+            }else {*/
+                //TODO check if it has a schema to solve :O
+                Schema schema = null;
+                if(response.getContent() != null){
+                    Map<String, MediaType> content = response.getContent();
+                    for( String mediaName : content.keySet()) {
+                        MediaType mediaType = content.get(mediaName);
+                        if(mediaType.getSchema()!= null) {
+                            schema = mediaType.getSchema();
+                            if (schema.get$ref() != null) {
+                                RefFormat ref = computeRefFormat(schema.get$ref());
+                                if (isAnExternalRefFormat(ref)) {
+                                   processRefSchema(schema, $ref);
+                                } else {
+                                    processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
+                                }
+                            }
+                        }
+                    }
+                }
+            //}
+        //}
 
-        return newRef;
+        //return newRef;
     }
 
     public String processRefToExternalRequestBody(String $ref, RefFormat refFormat) {

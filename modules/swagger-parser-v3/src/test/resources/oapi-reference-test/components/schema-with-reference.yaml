@@ -1,0 +1,8 @@
+---
+type: object
+properties:
+  reference_array:
+    type: array
+    items:
+      # changing this to $ref: "./referent.yaml" works
+      $ref: "./referent.yaml"
