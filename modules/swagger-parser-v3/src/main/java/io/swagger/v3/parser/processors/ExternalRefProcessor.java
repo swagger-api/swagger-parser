@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -199,62 +200,33 @@ public final class ExternalRefProcessor {
         }
     }
 
-    public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
-        String renamedRef = cache.getRenamedRef($ref);
-        if(renamedRef != null) {
-            return renamedRef;
-        }
+    public void processRefToExternalResponse(String $ref, RefFormat refFormat) {
 
         final ApiResponse response = cache.loadRef($ref, refFormat, ApiResponse.class);
 
-        if(response == null) {
-            // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
-            return $ref;
-        }
-        String newRef;
+        if(response != null) {
 
-        if (openAPI.getComponents() == null) {
-            openAPI.setComponents(new Components());
-        }
-        Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
+        String file = $ref.split("#/")[0];
 
-        if (responses == null) {
-            responses = new LinkedHashMap<>();
-        }
-
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        ApiResponse existingResponse = responses.get(possiblyConflictingDefinitionName);
-
-        if (existingResponse != null) {
-            LOGGER.debug("A model for " + existingResponse + " already exists");
-            if(existingResponse.get$ref() != null) {
-                // use the new model
-                existingResponse = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
-        cache.putRenamedRef($ref, newRef);
-
-        if(existingResponse == null) {
-            // don't overwrite existing model reference
-            openAPI.getComponents().addResponses(newRef, response);
-            cache.addReferencedKey(newRef);
-
-            String file = $ref.split("#/")[0];
-            if (response.get$ref() != null) {
-                RefFormat format = computeRefFormat(response.get$ref());
-                if (isAnExternalRefFormat(format)) {
-                    response.set$ref(processRefToExternalResponse(response.get$ref(), format));
-                } else {
-                    processRefToExternalResponse(file + response.get$ref(), RefFormat.RELATIVE);
+            Schema schema = null;
+            if(response.getContent() != null){
+                Map<String, MediaType> content = response.getContent();
+                for( String mediaName : content.keySet()) {
+                    MediaType mediaType = content.get(mediaName);
+                    if(mediaType.getSchema()!= null) {
+                        schema = mediaType.getSchema();
+                        if (schema.get$ref() != null) {
+                            RefFormat ref = computeRefFormat(schema.get$ref());
+                            if (isAnExternalRefFormat(ref)) {
+                               processRefSchema(schema, $ref);
+                            } else {
+                                processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        return newRef;
     }
 
     public String processRefToExternalRequestBody(String $ref, RefFormat refFormat) {

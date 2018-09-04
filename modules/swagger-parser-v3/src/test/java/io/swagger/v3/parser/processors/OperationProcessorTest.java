@@ -49,10 +49,12 @@ public class OperationProcessorTest {
         operation.responses(new ApiResponses().addApiResponse("200", refResponse));
         operation.getResponses().addApiResponse("400", incomingResponse);
 
+
         new Expectations() {{
             new ParameterProcessor(cache, openAPI);
             times = 1;
             result = parameterProcessor;
+
             new ResponseProcessor(cache, openAPI);
             times = 1;
             result = responseProcessor;
@@ -60,6 +62,9 @@ public class OperationProcessorTest {
             parameterProcessor.processParameters(inputParameterList);
             times = 1;
             result = outputParameterList;
+
+            responseProcessor.processResponse(refResponse);
+            times = 1;
 
             RefUtils.computeRefFormat(ref);
             times = 1;
@@ -78,9 +83,13 @@ public class OperationProcessorTest {
             times = 1;
             responseProcessor.processResponse(resolvedResponse);
             times = 1;
+
         }};
 
+
+
         new OperationProcessor(cache, openAPI).processOperation(operation);
+
 
         new FullVerifications() {{}};
 

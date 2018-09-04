@@ -4,7 +4,7 @@
 		"content": {
 			"*/*": {
 				"schema": {
-					"$ref": "./models/error.json"
+					"$ref": "../models/error.json"
 				}
 			}
 		}
@@ -14,7 +14,7 @@
 		"content": {
 			"*/*": {
 				"schema": {
-					"$ref": "./models/error.json"
+					"$ref": "../models/error.json"
 				}
 			}
 		}
