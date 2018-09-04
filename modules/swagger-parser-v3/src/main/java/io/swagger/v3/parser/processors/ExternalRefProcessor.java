@@ -204,75 +204,29 @@ public final class ExternalRefProcessor {
 
         final ApiResponse response = cache.loadRef($ref, refFormat, ApiResponse.class);
 
-        if(response == null) {
-            // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
-        }
-        //String newRef;
+        if(response != null) {
 
         String file = $ref.split("#/")[0];
 
-        /*if (openAPI.getComponents() == null) {
-            openAPI.setComponents(new Components());
-        }
-        Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
-
-        if (responses == null) {
-            responses = new LinkedHashMap<>();
-        }
-
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        ApiResponse existingResponse = responses.get(possiblyConflictingDefinitionName);
-
-        if (existingResponse != null) {
-            LOGGER.debug("A model for " + existingResponse + " already exists");
-            if(existingResponse.get$ref() != null) {
-                // use the new model
-                existingResponse = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
-        cache.putRenamedRef($ref, newRef);
-*/
-        /*if(existingResponse == null) {
-            // don't overwrite existing model reference
-            openAPI.getComponents().addResponses(newRef, response);
-            cache.addReferencedKey(newRef);
-
-
-            if (response.get$ref() != null) {
-                RefFormat format = computeRefFormat(response.get$ref());
-                if (isAnExternalRefFormat(format)) {
-                    response.set$ref(processRefToExternalResponse(response.get$ref(), format));
-                } else {
-                    processRefToExternalResponse(file + response.get$ref(), RefFormat.RELATIVE);
-                }
-            }else {*/
-                //TODO check if it has a schema to solve :O
-                Schema schema = null;
-                if(response.getContent() != null){
-                    Map<String, MediaType> content = response.getContent();
-                    for( String mediaName : content.keySet()) {
-                        MediaType mediaType = content.get(mediaName);
-                        if(mediaType.getSchema()!= null) {
-                            schema = mediaType.getSchema();
-                            if (schema.get$ref() != null) {
-                                RefFormat ref = computeRefFormat(schema.get$ref());
-                                if (isAnExternalRefFormat(ref)) {
-                                   processRefSchema(schema, $ref);
-                                } else {
-                                    processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
-                                }
+            Schema schema = null;
+            if(response.getContent() != null){
+                Map<String, MediaType> content = response.getContent();
+                for( String mediaName : content.keySet()) {
+                    MediaType mediaType = content.get(mediaName);
+                    if(mediaType.getSchema()!= null) {
+                        schema = mediaType.getSchema();
+                        if (schema.get$ref() != null) {
+                            RefFormat ref = computeRefFormat(schema.get$ref());
+                            if (isAnExternalRefFormat(ref)) {
+                               processRefSchema(schema, $ref);
+                            } else {
+                                processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
                             }
                         }
                     }
                 }
-            //}
-        //}
-
-        //return newRef;
+            }
+        }
     }
 
     public String processRefToExternalRequestBody(String $ref, RefFormat refFormat) {

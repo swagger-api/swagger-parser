@@ -63,8 +63,8 @@ public class OpenAPIV3ParserTest {
         final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("oapi-reference-test2/index.yaml", null, options).getOpenAPI();
 
         Assert.assertNotNull(openAPI);
+        Assert.assertEquals(openAPI.getPaths().get("/").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/schema-with-reference");
 
-        Yaml.prettyPrint(openAPI);
 
     }
 
