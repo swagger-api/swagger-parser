@@ -5,9 +5,14 @@ import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
@@ -72,7 +77,7 @@ public class RefUtils {
 
     }
 
-    public static String buildUrl(String rootPath, String relativePath) {
+    /*public static String buildUrl(String rootPath, String relativePath) {
         String[] rootPathParts = rootPath.split("/");
         String [] relPathParts = relativePath.split("/");
 
@@ -112,6 +117,10 @@ public class RefUtils {
                 relPathParts.length - trimRel);
 
         return StringUtils.join(outputParts, "/");
+    }*/
+
+    public static String buildUrl(String rootPath, String relativePath) throws URISyntaxException {
+        return new URI(rootPath).resolve(new URI(relativePath)).toString();
     }
 
     public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
