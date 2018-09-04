@@ -55,6 +55,17 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue811() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/oapi-reference-test/index.yaml");
+        Assert.assertNotNull(swagger);
+        assertTrue(swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema() instanceof RefModel);
+        RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema();
+        Assert.assertEquals(model.get$ref(),"#/definitions/schema-with-reference");
+
+    }
+
+    @Test
     public void testIssue727() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue-714/serviceA.yaml");

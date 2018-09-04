@@ -7,6 +7,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
+import io.swagger.parser.util.RefUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -153,6 +154,30 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
+
+    public void processRefToExternalResponse(String $ref, RefFormat refFormat) {
+
+        final Response response = cache.loadRef($ref, refFormat, Response.class);
+
+        if(response != null) {
+
+            String file = $ref.split("#/")[0];
+
+            Model model = null;
+            if (response.getResponseSchema() != null) {
+                model = response.getResponseSchema();
+                if (model instanceof RefModel) {
+                    RefModel refModel = (RefModel) model;
+                    if (RefUtils.isAnExternalRefFormat(refFormat)) {
+                        processRefModel(refModel, $ref);
+                    } else {
+                        processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                    }
+                }
+            }
+        }
+    }
+
     private void processProperties(final Map<String, Property> subProps, final String file) {
         if (subProps == null || 0 == subProps.entrySet().size() ) {
             return;
@@ -179,6 +204,16 @@ public final class ExternalRefProcessor {
     }
 
     private void processRefProperty(RefProperty subRef, String externalFile) {
+
+        if (isAnExternalRefFormat(subRef.getRefFormat())) {
+            String joinedRef = join(externalFile, subRef.get$ref());
+            subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
+        } else {
+            processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+        }
+    }
+
+    private void processRefModel(RefModel subRef, String externalFile) {
 
         if (isAnExternalRefFormat(subRef.getRefFormat())) {
             String joinedRef = join(externalFile, subRef.get$ref());

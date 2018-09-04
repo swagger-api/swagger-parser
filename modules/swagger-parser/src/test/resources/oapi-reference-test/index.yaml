@@ -1,0 +1,16 @@
+---
+swagger: "2.0"
+
+info:
+  version: 1.0.0
+  title: Path include test case child
+
+paths:
+  /:
+    get:
+      description: Test
+      summary: Test
+      operationId: getTest
+      responses:
+        200:
+          $ref: "./components/response-with-reference.yaml"

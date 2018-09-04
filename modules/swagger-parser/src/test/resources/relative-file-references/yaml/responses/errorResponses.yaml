@@ -2,8 +2,8 @@
 bad-request:
   description: "Your request was not valid"
   schema:
-    $ref: "./models/error.yaml"
+    $ref: "../models/error.yaml"
 internal-server-error:
   description: "An unexpected error occur during processing"
   schema:
-    $ref: "./models/error.yaml"
+    $ref: "../models/error.yaml"
