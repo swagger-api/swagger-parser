@@ -155,9 +155,36 @@ public final class ExternalRefProcessor {
     }
 
 
-    public void processRefToExternalResponse(String $ref, RefFormat refFormat) {
+    public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
 
+        String renamedRef = cache.getRenamedRef($ref);
+        if(renamedRef != null) {
+            return renamedRef;
+        }
         final Response response = cache.loadRef($ref, refFormat, Response.class);
+
+        String newRef;
+
+
+        Map<String, Response> responses = swagger.getResponses();
+
+        if (responses == null) {
+            responses = new LinkedHashMap<>();
+        }
+
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
+
+        Response existingResponse = responses.get(possiblyConflictingDefinitionName);
+
+        if (existingResponse != null) {
+            LOGGER.debug("A model for " + existingResponse + " already exists");
+            if(existingResponse instanceof RefResponse) {
+                // use the new model
+                existingResponse = null;
+            }
+        }
+        newRef = possiblyConflictingDefinitionName;
+        cache.putRenamedRef($ref, newRef);
 
         if(response != null) {
 
@@ -176,6 +203,7 @@ public final class ExternalRefProcessor {
                 }
             }
         }
+        return newRef;
     }
 
     private void processProperties(final Map<String, Property> subProps, final String file) {

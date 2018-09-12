@@ -55,6 +55,39 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue834() {
+        Swagger swagger = new SwaggerParser().read("issue-834/index.yaml", null, true);
+        assertNotNull(swagger);
+
+        Response foo200 =swagger.getPaths().get("/foo").getGet().getResponses().get("200");
+        assertNotNull(foo200);
+        RefModel model200 = (RefModel) foo200.getResponseSchema();
+        String foo200SchemaRef = model200.get$ref();
+        assertEquals(foo200SchemaRef, "#/definitions/schema");
+
+        Response foo300 = swagger.getPaths().get("/foo").getGet().getResponses().get("300");
+        assertNotNull(foo300);
+        RefModel model300 = (RefModel) foo300.getResponseSchema();
+        String foo300SchemaRef = model300.get$ref();
+        assertEquals(foo300SchemaRef, "#/definitions/schema");
+
+        Response bar200 = swagger.getPaths().get("/bar").getGet().getResponses().get("200");
+        assertNotNull(bar200);
+        RefModel modelBar200 = (RefModel) bar200.getResponseSchema();
+        String bar200SchemaRef = modelBar200.get$ref();
+        assertEquals(bar200SchemaRef, "#/definitions/schema");
+    }
+
+    @Test
+    public void testIssue811_RefSchema_ToRefSchema() {
+        final Swagger swagger = new SwaggerParser().read("oapi-reference-test2/index.yaml", null, true);
+        Assert.assertNotNull(swagger);
+        RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema();
+        Assert.assertEquals(model.get$ref() ,"#/definitions/schema-with-reference");
+    }
+
+
+    @Test
     public void testIssue811() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/oapi-reference-test/index.yaml");
