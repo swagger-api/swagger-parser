@@ -29,7 +29,7 @@ paths:
                 local:
                   $ref: '#/components/examples/LocalRef'
                 external:
-                  $ref: 'components.yaml#/components/examples/ExternalRef'
+                  $ref: './issue837/components.yaml#/components/examples/ExternalRef'
 components:
   examples:
     LocalRef:

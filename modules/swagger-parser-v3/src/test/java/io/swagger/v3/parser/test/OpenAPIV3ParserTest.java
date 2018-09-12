@@ -55,7 +55,9 @@ public class OpenAPIV3ParserTest {
 
     @Test
     public void testIssue837() {
-        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("./issue837/main.yaml", null, new ParseOptions()).getOpenAPI();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("./issue837/main.yaml", null, options).getOpenAPI();
 
         Assert.assertNotNull(openAPI);
 
