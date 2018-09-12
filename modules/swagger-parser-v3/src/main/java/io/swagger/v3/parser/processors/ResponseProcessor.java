@@ -1,5 +1,6 @@
 package io.swagger.v3.parser.processors;
 
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -20,6 +21,7 @@ public class ResponseProcessor {
     private final HeaderProcessor headerProcessor;
     private final LinkProcessor linkProcessor;
     private final ExternalRefProcessor externalRefProcessor;
+    private final ExampleProcessor exampleProcessor;
     private final ResolverCache cache;
     private final OpenAPI openAPI;
 
@@ -27,6 +29,7 @@ public class ResponseProcessor {
         schemaProcessor = new SchemaProcessor(cache,openAPI);
         headerProcessor = new HeaderProcessor(cache,openAPI);
         linkProcessor = new LinkProcessor(cache,openAPI);
+        exampleProcessor = new ExampleProcessor(cache,openAPI);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
         this.cache = cache;
         this.openAPI = openAPI;
@@ -46,6 +49,11 @@ public class ResponseProcessor {
                     schema = mediaType.getSchema();
                     if (schema != null) {
                         schemaProcessor.processSchema(schema);
+                    }
+                }
+                if(mediaType.getExamples() != null) {
+                    for(Example ex: mediaType.getExamples().values()){
+                        exampleProcessor.processExample(ex);
                     }
                 }
             }
