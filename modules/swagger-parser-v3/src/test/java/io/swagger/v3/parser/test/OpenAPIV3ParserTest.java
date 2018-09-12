@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ByteArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -55,6 +56,29 @@ import static org.testng.Assert.*;
 public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
+
+    @Test
+    public void testIssue834() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-834/index.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+
+        Content foo200Content = result.getOpenAPI().getPaths().get("/foo").getGet().getResponses().get("200").getContent();
+        assertNotNull(foo200Content);
+        String foo200SchemaRef = foo200Content.get("application/json").getSchema().get$ref();
+        assertEquals(foo200SchemaRef, "#/components/schemas/schema");
+
+        Content foo300Content = result.getOpenAPI().getPaths().get("/foo").getGet().getResponses().get("300").getContent();
+        assertNotNull(foo300Content);
+        String foo300SchemaRef = foo300Content.get("application/json").getSchema().get$ref();
+        assertEquals(foo300SchemaRef, "#/components/schemas/schema");
+
+        Content bar200Content = result.getOpenAPI().getPaths().get("/bar").getGet().getResponses().get("200").getContent();
+        assertNotNull(bar200Content);
+        String bar200SchemaRef = bar200Content.get("application/json").getSchema().get$ref();
+        assertEquals(bar200SchemaRef, "#/components/schemas/schema");
+    }
 
     @Test
     public void testIssue811_RefSchema_ToRefSchema() {
