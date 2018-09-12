@@ -194,7 +194,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 if ("body".equals(v.getIn())) {
                     components.addRequestBodies(k, convertParameterToRequestBody(v));
                 } else if ("formData".equals(v.getIn())) {
-                    components.addRequestBodies(k, convertFormDataToRequestBody(v));
+                    // formData_ is added not to overwrite existing schemas
+                    components.addSchemas("formData_" + k, convertFormDataToSchema(v));
                 } else {
                     components.addParameters(k, convert(v));
                 }
@@ -529,6 +530,16 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return false;
     }
 
+    private boolean isRefAFormParam(io.swagger.models.parameters.Parameter param) {
+        if (param instanceof RefParameter) {
+            RefParameter refParameter = (RefParameter) param;
+            String simpleRef = refParameter.getSimpleRef();
+            io.swagger.models.parameters.Parameter parameter = globalV2Parameters.get(simpleRef);
+            return "formData".equals(parameter.getIn());
+        }
+        return false;
+    }
+
     public Operation convert(io.swagger.models.Operation v2Operation) {
         Operation operation = new Operation();
         if (StringUtils.isNotBlank(v2Operation.getDescription())) {
@@ -555,10 +566,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     String $ref = convert.get$ref();
                     if ($ref != null && $ref.startsWith("#/components/requestBodies/") && isRefABodyParam(param)) {
                         operation.setRequestBody(new RequestBody().$ref($ref));
+                    } else if ($ref != null && $ref.startsWith("#/components/schemas/") && isRefAFormParam(param)) {
+                        formParams.add(param);
                     } else {
                         operation.addParametersItem(convert);
                     }
-                    //operation.addParametersItem(convert(param));
                 }
             }
 
@@ -611,8 +623,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         return vendorExtensions;
     }
 
-    private RequestBody convertFormDataToRequestBody(io.swagger.models.parameters.Parameter formParam) {
-        return convertFormDataToRequestBody(Arrays.asList(formParam), null);
+    private Schema convertFormDataToSchema(io.swagger.models.parameters.Parameter formParam) {
+        SerializableParameter sp = (SerializableParameter) formParam;
+        return convert(sp);
     }
 
     private RequestBody convertFormDataToRequestBody(List<io.swagger.models.parameters.Parameter> formParams, List<String> consumes) {
@@ -621,73 +634,27 @@ public class SwaggerConverter implements SwaggerParserExtension {
         Schema formSchema = new Schema();
 
         for (io.swagger.models.parameters.Parameter param : formParams) {
-            SerializableParameter sp = (SerializableParameter) param;
+            SerializableParameter sp;
 
             Schema schema;
-            if ("file".equals(sp.getType())) {
-                schema = new FileSchema();
-            } else if ("array".equals(sp.getType())) {
-                ArraySchema as = new ArraySchema();
-                if (sp.getItems() != null) {
-                    as.setItems(convert(sp.getItems()));
-                }
-                schema = as;
+            String name;
+            if (param instanceof RefParameter) {
+                RefParameter refParameter = (RefParameter) param;
+                String simpleRef = refParameter.getSimpleRef();
+                sp = (SerializableParameter) globalV2Parameters.get(simpleRef);
+                name = components.getSchemas().get("formData_" + simpleRef).getName();
+                schema = new Schema().$ref("#/components/schemas/formData_" + simpleRef);
             } else {
-                schema = new Schema();
-                schema.setType(sp.getType());
-                schema.setFormat(sp.getFormat());
-            }
-
-            schema.setDescription(sp.getDescription());
-            schema.setReadOnly(sp.isReadOnly());
-            schema.setEnum(sp.getEnum());
-
-            if (sp.getMaxItems() != null) {
-                schema.setMaxItems(sp.getMaxItems());
-            }
-            if (sp.getMinItems() != null) {
-                schema.setMinItems(sp.getMinItems());
-            }
-            if (sp.isUniqueItems() != null) {
-                schema.setUniqueItems(sp.isUniqueItems());
-            }
-
-            schema.setMaximum(sp.getMaximum());
-            schema.setExclusiveMaximum(sp.isExclusiveMaximum());
-            schema.setMinimum(sp.getMinimum());
-            schema.setExclusiveMinimum(sp.isExclusiveMinimum());
-            schema.setMinLength(sp.getMinLength());
-            schema.setMaxLength(sp.getMaxLength());
-
-            if (sp.getVendorExtensions() != null) {
-                Object exampleExtension = sp.getVendorExtensions().get("x-example");
-                if (exampleExtension != null) {
-                    schema.setExample(exampleExtension);
-                }
-                Object nullableExtension = sp.getVendorExtensions().get("x-nullable");
-                if (nullableExtension != null) {
-                    schema.setNullable((Boolean) nullableExtension);
-                }
-                schema.setExtensions(convert(sp.getVendorExtensions()));
-            }
-
-            if (sp.getMultipleOf() != null) {
-                schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
-            }
-
-            schema.setPattern(sp.getPattern());
-            schema.setExtensions(convert(sp.getVendorExtensions()));
-
-            if (sp instanceof AbstractSerializableParameter) {
-                AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
-                schema.setDefault(ap.getDefault());
+                sp = (SerializableParameter) param;
+                schema = convert(sp);
+                name = schema.getName();
             }
 
             if (sp.getRequired()) {
                 formSchema.addRequiredItem(sp.getName());
             }
 
-            formSchema.addProperties(param.getName(), schema);
+            formSchema.addProperties(name, schema);
         }
 
         List<String> mediaTypes = new ArrayList<>(globalConsumes);
@@ -707,6 +674,69 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
         body.content(content);
         return body;
+    }
+
+    private Schema convert(SerializableParameter sp) {
+        Schema schema;
+        if ("file".equals(sp.getType())) {
+            schema = new FileSchema();
+        } else if ("array".equals(sp.getType())) {
+            ArraySchema as = new ArraySchema();
+            if (sp.getItems() != null) {
+                as.setItems(convert(sp.getItems()));
+            }
+            schema = as;
+        } else {
+            schema = new Schema();
+            schema.setType(sp.getType());
+            schema.setFormat(sp.getFormat());
+        }
+
+        schema.setDescription(sp.getDescription());
+        schema.setReadOnly(sp.isReadOnly());
+        schema.setEnum(sp.getEnum());
+
+        if (sp.getMaxItems() != null) {
+            schema.setMaxItems(sp.getMaxItems());
+        }
+        if (sp.getMinItems() != null) {
+            schema.setMinItems(sp.getMinItems());
+        }
+        if (sp.isUniqueItems() != null) {
+            schema.setUniqueItems(sp.isUniqueItems());
+        }
+
+        schema.setMaximum(sp.getMaximum());
+        schema.setExclusiveMaximum(sp.isExclusiveMaximum());
+        schema.setMinimum(sp.getMinimum());
+        schema.setExclusiveMinimum(sp.isExclusiveMinimum());
+        schema.setMinLength(sp.getMinLength());
+        schema.setMaxLength(sp.getMaxLength());
+        schema.setName(sp.getName());
+
+        if (sp.getVendorExtensions() != null) {
+            Object exampleExtension = sp.getVendorExtensions().get("x-example");
+            if (exampleExtension != null) {
+                schema.setExample(exampleExtension);
+            }
+            Object nullableExtension = sp.getVendorExtensions().get("x-nullable");
+            if (nullableExtension != null) {
+                schema.setNullable((Boolean) nullableExtension);
+            }
+            schema.setExtensions(convert(sp.getVendorExtensions()));
+        }
+
+        if (sp.getMultipleOf() != null) {
+            schema.setMultipleOf(new BigDecimal(sp.getMultipleOf().toString()));
+        }
+
+        schema.setPattern(sp.getPattern());
+
+        if (sp instanceof AbstractSerializableParameter) {
+            AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
+            schema.setDefault(ap.getDefault());
+        }
+        return schema;
     }
 
     private RequestBody convertParameterToRequestBody(io.swagger.models.parameters.Parameter param) {
@@ -957,6 +987,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 if (components.getRequestBodies() != null &&
                         components.getRequestBodies().get(ref.getSimpleRef()) != null) {
                     updatedRef += "requestBodies";
+                } else if (components.getSchemas() != null && components.getSchemas().get("formData_" + ref.getSimpleRef()) != null) {
+                    updatedRef += "schemas";
                 } else {
                     updatedRef += "parameters";
                 }

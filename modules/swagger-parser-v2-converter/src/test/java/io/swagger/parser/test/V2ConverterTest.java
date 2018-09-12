@@ -325,11 +325,12 @@ public class V2ConverterTest {
     public void testIssue17() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_17_JSON);
         Map<String, RequestBody> requestBodies = oas.getComponents().getRequestBodies();
-        assertNotNull(requestBodies.get("formEmail").getContent().get("multipart/form-data"));
-        assertNotNull(requestBodies.get("formPassword").getContent().get("multipart/form-data"));
+        Map<String, Schema> schemas = oas.getComponents().getSchemas();
+        assertNotNull(schemas.get("formData_formEmail"));
+        assertNotNull(schemas.get("formData_formPassword"));
         assertNotNull(requestBodies.get("bodyParam").getContent().get("*/*"));
-        assertEquals(oas.getPaths().get("/formPost").getPost().getParameters().get(0).get$ref(),
-                REQUEST_BODY_FORMEMAIL);
+        assertNull(oas.getPaths().get("/formPost").getPost().getParameters());
+        assertNotNull(oas.getPaths().get("/formPost").getPost().getRequestBody());
         assertNotNull(oas.getPaths().get("/report/{userId}").getGet().getRequestBody().
                 getContent().get("multipart/form-data").getSchema().getProperties().get("limitForm"));
     }
