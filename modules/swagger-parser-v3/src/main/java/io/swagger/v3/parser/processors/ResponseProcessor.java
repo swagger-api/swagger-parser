@@ -40,6 +40,7 @@ public class ResponseProcessor {
         if (response.get$ref() != null){
             processReferenceResponse(response);
         }
+
         Schema schema = null;
         if(response.getContent() != null){
             Map<String,MediaType> content = response.getContent();
@@ -80,11 +81,7 @@ public class ResponseProcessor {
         RefFormat refFormat = computeRefFormat(response.get$ref());
         String $ref = response.get$ref();
         if (isAnExternalRefFormat(refFormat)){
-            final String newRef = externalRefProcessor.processRefToExternalResponse($ref, refFormat);
-
-            if (newRef != null) {
-                response.set$ref(newRef);
-            }
+            externalRefProcessor.processRefToExternalResponse($ref, refFormat);
         }
     }
 }

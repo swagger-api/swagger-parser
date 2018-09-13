@@ -1,0 +1,10 @@
+swagger: '2.0'
+info:
+  description: 'Test'
+  version: 1.0.0
+  title: OpenAPI Test
+  license:
+    name: Apache-2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: petstore.swagger.io
+basePath: /v2

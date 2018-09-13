@@ -49,7 +49,8 @@ public class RefUtils {
 
     public static RefFormat computeRefFormat(String ref) {
         RefFormat result = RefFormat.INTERNAL;
-        if(ref.startsWith("http")) {
+        ref = mungedRef(ref);
+        if(ref.startsWith("http")||ref.startsWith("https")) {
             result = RefFormat.URL;
         } else if(ref.startsWith("#/")) {
             result = RefFormat.INTERNAL;
@@ -58,6 +59,18 @@ public class RefUtils {
         }
 
         return result;
+    }
+
+    public static String mungedRef(String refString) {
+        // Ref: IETF RFC 3966, Section 5.2.2
+        if (!refString.contains(":") &&   // No scheme
+                !refString.startsWith("#") && // Path is not empty
+                !refString.startsWith("/") && // Path is not absolute
+                !refString.contains("$") &&
+                refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
+            return "./" + refString;
+        }
+        return refString;
     }
 
 
@@ -136,13 +149,11 @@ public class RefUtils {
             throw new RuntimeException("Ref is not external");
         }
 
-        String result;
+        String result = null;
 
         try {
             if (refFormat == RefFormat.URL) {
-
                 result = RemoteUrl.urlToString(file, auths);
-
             } else {
                 //its assumed to be a relative file ref
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
@@ -150,13 +161,26 @@ public class RefUtils {
                 if(Files.exists(pathToUse)) {
                     result = IOUtils.toString(new FileInputStream(pathToUse.toFile()), "UTF-8");
                 } else {
+                    String url = file;
+                    if(url.contains("..")) {
+                        url = parentDirectory + url.substring(url.indexOf(".") + 2);
+                    }else{
+                        url = parentDirectory + url.substring(url.indexOf(".") + 1);
+                    }
+                    final Path pathToUse2 = parentDirectory.resolve(url).normalize();
+
+                    if(Files.exists(pathToUse2)) {
+                        result = IOUtils.toString(new FileInputStream(pathToUse2.toFile()), "UTF-8");
+                    }
+                }
+                if (result == null){
                     result = ClasspathHelper.loadFileFromClasspath(file);
                 }
 
+
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file + " path: "+parentDirectory, e);
         }
 
         return result;

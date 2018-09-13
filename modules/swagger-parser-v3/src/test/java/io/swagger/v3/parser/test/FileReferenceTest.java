@@ -153,6 +153,22 @@ public class FileReferenceTest {
     }
 
     @Test
+    public void testIssue822() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/issue-822.yaml", null, options);
+
+        OpenAPI swagger = result.getOpenAPI();
+        assertNotNull(swagger.getPaths().get("/foo").getGet());
+        assertNotNull(swagger.getPaths().get("/bar/wtf").getGet());
+        assertNull(swagger.getPaths().get("/bar/haha").getGet());
+        assertNotNull(swagger.getPaths().get("/wtf/{bar}").getGet());
+        assertNotNull(swagger.getPaths().get("/haha/{bar}").getGet());
+        assertNull(swagger.getPaths().get("/haha2/{bar}").getGet());
+    }
+
+    @Test
     public void testIssue336() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);

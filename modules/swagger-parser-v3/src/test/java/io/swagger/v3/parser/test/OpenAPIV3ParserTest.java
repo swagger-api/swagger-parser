@@ -13,7 +13,13 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.examples.Example;
-import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ByteArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
@@ -70,6 +76,53 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
     }
+  
+    @Test
+    public void testIssue834() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-834/index.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+
+        Content foo200Content = result.getOpenAPI().getPaths().get("/foo").getGet().getResponses().get("200").getContent();
+        assertNotNull(foo200Content);
+        String foo200SchemaRef = foo200Content.get("application/json").getSchema().get$ref();
+        assertEquals(foo200SchemaRef, "#/components/schemas/schema");
+
+        Content foo300Content = result.getOpenAPI().getPaths().get("/foo").getGet().getResponses().get("300").getContent();
+        assertNotNull(foo300Content);
+        String foo300SchemaRef = foo300Content.get("application/json").getSchema().get$ref();
+        assertEquals(foo300SchemaRef, "#/components/schemas/schema");
+
+        Content bar200Content = result.getOpenAPI().getPaths().get("/bar").getGet().getResponses().get("200").getContent();
+        assertNotNull(bar200Content);
+        String bar200SchemaRef = bar200Content.get("application/json").getSchema().get$ref();
+        assertEquals(bar200SchemaRef, "#/components/schemas/schema");
+    }
+
+    @Test
+    public void testIssue811_RefSchema_ToRefSchema() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("oapi-reference-test2/index.yaml", null, options).getOpenAPI();
+
+        Assert.assertNotNull(openAPI);
+        Assert.assertEquals(openAPI.getPaths().get("/").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/schema-with-reference");
+
+
+    }
+
+    @Test
+    public void testIssue811() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("oapi-reference-test/index.yaml", null, options).getOpenAPI();
+
+        Assert.assertNotNull(openAPI);
+
+        Assert.assertEquals(openAPI.getPaths().get("/").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/schema-with-reference");
+
+    }
 
     @Test
     public void testIssue719() {
@@ -87,15 +140,25 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        options.setResolveCombinators(false);
-        options.setResolveFully(true);
 
-        String location = getClass().getResource("/odin.yaml").toString();
-        Assert.assertNotNull(location);
-        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/sample/SwaggerPetstore.yaml", null, options);
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertTrue(result.getMessages().isEmpty());
-        Assert.assertTrue(result.getOpenAPI().getPaths().get("/JTasker/startRun").getPost().getRequestBody().getContent().get("application/json").getSchema().getProperties().size() == 2);
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/pets").getGet());
+    }
+
+    @Test
+    public void issueRelativeRefs2() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/relative-upper-directory/swagger.yaml", null, options);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getPaths().get("/api/Address").getGet());
+        assertTrue(openAPI.getComponents().getSchemas().size() == 1);
+        assertNotNull(openAPI.getComponents().getSchemas().get("AddressEx"));
     }
 
     @Test

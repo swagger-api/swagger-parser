@@ -9,10 +9,12 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
@@ -204,15 +206,8 @@ public final class ExternalRefProcessor {
         if(renamedRef != null) {
             return renamedRef;
         }
-
         final ApiResponse response = cache.loadRef($ref, refFormat, ApiResponse.class);
 
-        if(response == null) {
-            // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
-            return $ref;
-        }
         String newRef;
 
         if (openAPI.getComponents() == null) {
@@ -238,22 +233,29 @@ public final class ExternalRefProcessor {
         newRef = possiblyConflictingDefinitionName;
         cache.putRenamedRef($ref, newRef);
 
-        if(existingResponse == null) {
-            // don't overwrite existing model reference
-            openAPI.getComponents().addResponses(newRef, response);
-            cache.addReferencedKey(newRef);
+        if(response != null) {
 
-            String file = $ref.split("#/")[0];
-            if (response.get$ref() != null) {
-                RefFormat format = computeRefFormat(response.get$ref());
-                if (isAnExternalRefFormat(format)) {
-                    response.set$ref(processRefToExternalResponse(response.get$ref(), format));
-                } else {
-                    processRefToExternalResponse(file + response.get$ref(), RefFormat.RELATIVE);
+        String file = $ref.split("#/")[0];
+
+            Schema schema = null;
+            if(response.getContent() != null){
+                Map<String, MediaType> content = response.getContent();
+                for( String mediaName : content.keySet()) {
+                    MediaType mediaType = content.get(mediaName);
+                    if(mediaType.getSchema()!= null) {
+                        schema = mediaType.getSchema();
+                        if (schema.get$ref() != null) {
+                            RefFormat ref = computeRefFormat(schema.get$ref());
+                            if (isAnExternalRefFormat(ref)) {
+                               processRefSchema(schema, $ref);
+                            } else {
+                                processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
+                            }
+                        }
+                    }
                 }
             }
         }
-
         return newRef;
     }
 
@@ -665,21 +667,19 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
-
     private void processRefSchema(Schema subRef, String externalFile) {
         RefFormat format = computeRefFormat(subRef.get$ref());
-        if (isAnExternalRefFormat(format)) {
-            String $ref = constructRef(subRef, externalFile);
-            subRef.set$ref($ref);
-            if($ref.startsWith("."))
-                processRefToExternalSchema($ref, RefFormat.RELATIVE);
-            else {
-                processRefToExternalSchema($ref, RefFormat.URL);
-            }
 
-        } else {
+        if (!isAnExternalRefFormat(format)) {
             processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            return;
         }
+        String $ref = subRef.get$ref();
+        if (format.equals(RefFormat.RELATIVE)) {
+            $ref = constructRef(subRef, externalFile);
+            subRef.set$ref($ref);
+        }
+        processRefToExternalSchema($ref, computeRefFormat(subRef.get$ref()));
     }
 
 
@@ -688,6 +688,7 @@ public final class ExternalRefProcessor {
         return join(rootLocation, ref);
     }
 
+    // visible for testing
     public static String join(String source, String fragment) {
         try {
             boolean isRelative = false;

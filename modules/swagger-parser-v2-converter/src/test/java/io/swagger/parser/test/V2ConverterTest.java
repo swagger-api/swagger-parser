@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
@@ -26,6 +27,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -77,12 +79,15 @@ public class V2ConverterTest {
     private static final String ISSUE_673_YAML = "issue-673.yaml";
     private static final String ISSUE_676_JSON = "issue-676.json";
     private static final String ISSUE_708_YAML = "issue-708.yaml";
+    private static final String ISSUE_745_YAML = "issue-745.yaml";
+    private static final String ISSUE_755_YAML = "issue-755.yaml";
     private static final String ISSUE_740_YAML = "issue-740.yaml";
     private static final String ISSUE_756_JSON = "issue-756.json";
     private static final String ISSUE_758_JSON = "issue-758.json";
     private static final String ISSUE_762_JSON = "issue-762.json";
     private static final String ISSUE_765_YAML = "issue-765.yaml";
     private static final String ISSUE_768_JSON = "issue-786.json";
+    private static final String ISSUE_820_YAML = "issue-820.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -320,11 +325,12 @@ public class V2ConverterTest {
     public void testIssue17() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_17_JSON);
         Map<String, RequestBody> requestBodies = oas.getComponents().getRequestBodies();
-        assertNotNull(requestBodies.get("formEmail").getContent().get("multipart/form-data"));
-        assertNotNull(requestBodies.get("formPassword").getContent().get("multipart/form-data"));
+        Map<String, Schema> schemas = oas.getComponents().getSchemas();
+        assertNotNull(schemas.get("formData_formEmail"));
+        assertNotNull(schemas.get("formData_formPassword"));
         assertNotNull(requestBodies.get("bodyParam").getContent().get("*/*"));
-        assertEquals(oas.getPaths().get("/formPost").getPost().getParameters().get(0).get$ref(),
-                REQUEST_BODY_FORMEMAIL);
+        assertNull(oas.getPaths().get("/formPost").getPost().getParameters());
+        assertNotNull(oas.getPaths().get("/formPost").getPost().getRequestBody());
         assertNotNull(oas.getPaths().get("/report/{userId}").getGet().getRequestBody().
                 getContent().get("multipart/form-data").getSchema().getProperties().get("limitForm"));
     }
@@ -622,6 +628,21 @@ public class V2ConverterTest {
         assertEquals(schema.getPattern(), "^[0-9]+$");
     }
 
+    @Test(description = "Issue in converting server url in RFC 3986 format from OpenAPI Spec 2 to Open API Spec 3")
+    public void testIssue745() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_745_YAML);
+        assertTrue(oas.getServers().get(0).getUrl().startsWith("//"));
+    }
+  
+    @Test(description = "OpenAPIParser.readLocation fails when fetching valid Swagger 2.0 resource with AuthorizationValues provided")
+    public void testIssue785() {
+        AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
+        List<AuthorizationValue> authorizationValues = Arrays.asList(apiKey);
+        SwaggerConverter converter = new SwaggerConverter();
+        List<io.swagger.models.auth.AuthorizationValue> convertedAuthList = converter.convert(authorizationValues);
+        assertEquals(convertedAuthList.size(), authorizationValues.size());
+    }
+
     @Test(description = "OpenAPI v2 converter - Migrate a schema with AllOf")
     public void testIssue740() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_740_YAML);
@@ -693,10 +714,45 @@ public class V2ConverterTest {
         assertNotNull(result.getMessages());
     }
 
+    
     @Test(description = "OpenAPI v2 converter - Migrate minLength, maxLength and pattern of String property")
     public void testIssue786() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_768_JSON);
         assertNotNull(oas);
+    }
+
+
+    @Test(description = "OpenAPI v2 converter - Conversion of a spec without a info section")
+    public void testIssue755() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_755_YAML);
+        assertNotNull(oas);
+    }
+    
+    @Test(description = "OpenAPI v2 converter - Conversion param extensions should be preserved")
+    public void testIssue820() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_820_YAML);
+        assertNotNull(oas);
+        Operation post = oas.getPaths().get("/issue820").getPost();
+        assertNotNull(post.getRequestBody().getContent().get("multipart/form-data"));
+        assertNotNull(post.getRequestBody().getContent().get("multipart/form-data").getSchema());
+        Map<String, Schema> properties = post.getRequestBody().getContent().get("multipart/form-data").getSchema().getProperties();
+        assertNotNull(properties);
+        assertEquals(properties.size(), 3, "size");
+        Schema foo = properties.get("foo");
+        assertNotNull(foo);
+        assertNotNull(foo.getExtensions());
+        assertEquals(foo.getExtensions().get("x-ext"), "some foo");
+        assertEquals(foo.getNullable(), null);
+        Schema bar = properties.get("bar");
+        assertNotNull(bar);
+        assertNotNull(bar.getExtensions());
+        assertEquals(bar.getExtensions().get("x-ext"), "some bar");
+        assertEquals(bar.getNullable(), Boolean.TRUE);
+        Schema baz = properties.get("baz");
+        assertNotNull(baz);
+        assertNotNull(baz.getExtensions());
+        assertEquals(baz.getExtensions().get("x-ext"), "some baz");
+        assertEquals(baz.getNullable(), Boolean.FALSE);
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {

@@ -1,7 +1,7 @@
 {
   "allOf": [
     {
-      "$ref": "./pet.json"
+      "$ref": "pet.json"
     },
     {
       "type": "object",
@@ -11,12 +11,12 @@
           "sample": "Labrador"
         },
         "mother": {
-          "$ref": "./pet.json"
+          "$ref": "pet.json"
         },
         "siblings": {
           "type": "array",
           "items": {
-            "$ref": "./pet.json"
+            "$ref": "pet.json"
           }
         }
       }
