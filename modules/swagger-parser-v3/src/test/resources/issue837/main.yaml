@@ -1,0 +1,40 @@
+openapi: 3.0.0
+servers:
+  - url: 'https://example.com/api/v1'
+info:
+  title: Test API
+  version: '1'
+paths:
+  /events:
+    get:
+      description: A list of events
+      operationId: getEvents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                required:
+                  - test
+                type: object
+                properties:
+                  test:
+                    type: string
+              examples:
+                plain:
+                  summary: plain example
+                  value:
+                    test: plain
+                local:
+                  $ref: '#/components/examples/LocalRef'
+                external:
+                  $ref: './issue837/components.yaml#/components/examples/ExternalRef'
+components:
+  examples:
+    LocalRef:
+      summary: A local reference
+      value:
+        test: local
+
+
