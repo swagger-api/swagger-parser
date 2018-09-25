@@ -55,6 +55,12 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue845() {
+        SwaggerDeserializationResult swaggerDeserializationResult = new SwaggerParser().readWithInfo("");
+        assertEquals(swaggerDeserializationResult.getMessages().get(0), "empty or null swagger supplied");
+    }
+  
+    @Test
     public void testIssue834() {
         Swagger swagger = new SwaggerParser().read("issue-834/index.yaml", null, true);
         assertNotNull(swagger);
@@ -85,7 +91,6 @@ public class SwaggerParserTest {
         RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema();
         Assert.assertEquals(model.get$ref() ,"#/definitions/schema-with-reference");
     }
-
 
     @Test
     public void testIssue811() throws Exception {
