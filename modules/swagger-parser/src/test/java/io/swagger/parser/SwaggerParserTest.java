@@ -55,6 +55,12 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testEmptyStringAsContent() {
+        SwaggerDeserializationResult swaggerDeserializationResult = new SwaggerParser().readWithInfo("");
+        assertEquals(swaggerDeserializationResult.getMessages().get(0), "empty or null swagger supplied");
+    }
+
+    @Test
     public void testIssue697() throws Exception {
         String yaml = "{\n" +
                 "    \"swagger\": \"2.0\",\n" +
