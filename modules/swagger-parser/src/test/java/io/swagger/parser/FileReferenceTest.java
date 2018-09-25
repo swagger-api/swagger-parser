@@ -28,7 +28,7 @@ public class FileReferenceTest {
 
         Swagger swagger = result.getSwagger();
 
-        assertTrue(swagger.getDefinitions().size() == 5);
+        assertTrue(swagger.getDefinitions().size() == 6);
         // resolved from `$ref: './book.yaml'`
         assertNotNull(swagger.getDefinitions().get("Inventory"));
         // resolved from `$ref: 'book.yaml'`
@@ -137,6 +137,22 @@ public class FileReferenceTest {
 
         Swagger swagger = result.getSwagger();
         assertNotNull(swagger.getPath("/foo").getGet());
+    }
+
+    @Test
+    public void testIssue822() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/issue-enc.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+
+        assertNotNull(swagger.getPath("/foo").getGet());
+        assertNotNull(swagger.getPath("/bar/wtf").getGet());
+        assertNull(swagger.getPath("/bar/haha").getGet());
+        assertNotNull(swagger.getPath("/wtf/{bar}").getGet());
+        assertNotNull(swagger.getPath("/haha/{bar}").getGet());
+        assertNull(swagger.getPath("/haha2/{bar}").getGet());
+
     }
 
     @Test

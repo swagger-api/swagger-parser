@@ -1,0 +1,51 @@
+{
+	"get": {
+		"tags": ["Address"],
+		"operationId": "Address_Get",
+		"consumes": [],
+		"produces": ["application/json",
+		"text/json",
+		"application/xml",
+		"text/xml"],
+		"responses": {
+			"200": {
+				"description": "OK",
+				"schema": {
+					"type": "array",
+					"items": {
+						"$ref": "../Schemas/schema.json#/definitions/AddressEx"
+					}
+				}
+			}
+		}
+	},
+	"post": {
+		"tags": ["Address"],
+		"operationId": "Address_Post",
+		"consumes": ["application/json",
+		"text/json",
+		"application/xml",
+		"text/xml",
+		"application/x-www-form-urlencoded"],
+		"produces": ["application/json",
+		"text/json",
+		"application/xml",
+		"text/xml"],
+		"parameters": [{
+			"name": "value",
+			"in": "body",
+			"required": true,
+			"schema": {
+				"$ref": "../Schemas/schema.json#/definitions/AddressEx"
+			}
+		}],
+		"responses": {
+			"200": {
+				"description": "OK",
+				"schema": {
+					"$ref": "../Schemas/schema.json#/definitions/AddressEx"
+				}
+			}
+		}
+	}
+}

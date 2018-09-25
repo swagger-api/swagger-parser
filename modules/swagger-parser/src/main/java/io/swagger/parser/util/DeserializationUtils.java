@@ -1,8 +1,12 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;

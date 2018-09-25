@@ -199,6 +199,7 @@ public class SwaggerDeserializer {
         if(obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return pathRef((TextNode)ref, location, result);
             }
 
@@ -425,21 +426,6 @@ public class SwaggerDeserializer {
         return output;
     }
 
-    // Refs may need to be massaged slightly to ensure that swagger-core (specifically GenericRef) recognizes
-    // relative refs properly.  This should be done anywhere refs could appear (properties, parameters, schema, etc),
-    // so we have this function to ensure it is done consistently (and hopefully correctly) for all these occurrences.
-    //
-    // Returns a new ref string is change is needed, else returns null
-    public String mungedRef(String refString) {
-        // Ref: IETF RFC 3966, Section 5.2.2
-        if (!refString.contains(":") &&   // No scheme
-                !refString.startsWith("#") && // Path is not empty
-                !refString.startsWith("/") && // Path is not absolute
-                 refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
-            return "./" + refString;
-        }
-        return null;
-    }
 
     public Parameter parameter(ObjectNode obj, String location, ParseResult result) {
         if(obj == null) {
@@ -450,12 +436,6 @@ public class SwaggerDeserializer {
         JsonNode ref = obj.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
-                // work-around for https://github.com/swagger-api/swagger-core/issues/2138
-                String mungedRef = mungedRef(ref.textValue());
-                if (mungedRef != null) {
-                    obj.put("$ref", mungedRef);
-                    ref = obj.get("$ref");
-                }
                 return refParameter((TextNode) ref, location, result);
             }
             else {
@@ -691,6 +671,7 @@ public class SwaggerDeserializer {
 
     public Path pathRef(TextNode ref, String location, ParseResult result) {
         RefPath output = new RefPath();
+
         output.set$ref(ref.textValue());
         return output;
     }
@@ -1023,14 +1004,6 @@ public class SwaggerDeserializer {
             }
         }
 
-        // work-around for https://github.com/swagger-api/swagger-core/issues/1977
-        if(node.get("$ref") != null && node.get("$ref").isTextual()) {
-            // check if it's a relative ref
-            String mungedRef = mungedRef(node.get("$ref").textValue());
-            if(mungedRef != null) {
-                node.put("$ref", mungedRef);
-            }
-        }
         return Json.mapper().convertValue(node, Property.class);
     }
 
@@ -1118,6 +1091,7 @@ public class SwaggerDeserializer {
         JsonNode ref = node.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return refResponse((TextNode) ref, location, result);
             }
             else {
@@ -1134,14 +1108,6 @@ public class SwaggerDeserializer {
             JsonNode schemaRef = schema.get("$ref");
             if (schemaRef != null) {
                 if (schemaRef.getNodeType().equals(JsonNodeType.STRING)) {
-
-                    // work-around for https://github.com/swagger-api/swagger-core/issues/2138
-                    String mungedRef = mungedRef(schemaRef.textValue());
-                    if (mungedRef != null) {
-                        schema.put("$ref", mungedRef);
-                        schemaRef = schema.get("$ref");
-                    }
-
                     Model schemaProp = new RefModel(schemaRef.textValue());
                     output.responseSchema(schemaProp);
                 } else {

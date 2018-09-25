@@ -1,0 +1,30 @@
+---
+swagger: "2.0"
+externalDocs:
+  description: Test
+  url: http://test.com/test
+info:
+  version: 0.0.1
+  title: Test
+  license:
+    name: Test
+    url: http://test.com/test
+paths:
+  /foo:
+    get:
+      description: foo
+      summary: foo
+      operationId: foo
+      responses:
+        200:
+          $ref: "./components/response1.yaml"
+        300:
+          $ref: "./components/response2.yaml"
+  /bar:
+    get:
+      description: bar
+      summary: bar
+      operationId: bar
+      responses:
+        200:
+          $ref: "./components/response1.yaml"
