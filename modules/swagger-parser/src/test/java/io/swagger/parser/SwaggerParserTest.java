@@ -1310,5 +1310,12 @@ public class SwaggerParserTest {
         assertEquals("k-definition", definitions.get("k_2").getTitle());
     }
 
+    @Test(description = "Parser not honoring redirect responses")
+    public void testIssue844() {
+        SwaggerParser parser = new SwaggerParser();
+        final SwaggerDeserializationResult swagger = parser.readWithInfo("src/test/resources/reusableParametersWithExternalRef.json", null, true);
+        assertNotNull(swagger.getSwagger());
+        assertEquals(swagger.getSwagger().getPath("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
+    }
 
 }
