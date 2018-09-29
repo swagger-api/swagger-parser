@@ -1053,8 +1053,6 @@ public class OpenAPIV3ParserTest {
         assertEquals(composedCat.getAllOf().get(0).get$ref(), "#/components/schemas/pet");
         assertEquals(composedCat.getAllOf().get(1).get$ref(), "#/components/schemas/foo_2");
 
-        Json.prettyPrint(openAPI);
-
         return openAPI;
     }
 
