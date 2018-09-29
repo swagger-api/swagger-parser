@@ -1,0 +1,28 @@
+{
+	"description": "Description",
+	"type": "object",
+	"properties": {
+		"testingApi": {
+			"type": "array",
+			"items": {
+				"title": "testingApi",
+				"type": "object",
+				"properties": {
+					"itemID": {
+						"$ref": "../../../../common/simpleIDType_v01.json"
+					},
+					"testLink": {
+						"type": "array",
+						"items": {
+							"$ref": "../../../../common/linkType_v01.json"
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},		
+		"_confirmMessage": {
+			"$ref": "../../../../common/confirmMessageType_v01.json"
+		}		
+	}
+}

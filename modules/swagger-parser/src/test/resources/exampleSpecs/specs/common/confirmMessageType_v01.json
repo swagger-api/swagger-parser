@@ -1,0 +1,50 @@
+{
+	"description": "",
+	"type": "object",
+	"properties": {
+		"confirmMessageID": {
+			"description": "",
+			"$ref": "./simpleIDType_v01.json"
+		},
+		"processID": {
+			"description": "",
+			"$ref": "./simpleIDType_v01.json"
+		},
+		"processStatus": {
+			"description": "",
+			"type": "string",
+			"enum": [
+				"success", "partial-failure", "failure"
+			]
+		},
+		"resources": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"resourceID": {
+						"description": "",
+						 "$ref": "./simpleIDType_v01.json"						
+					},
+					"resourceReference": {
+						"description": "",
+						"type": "string"
+					},
+					"resourceStatus": {
+						"description": "",
+						"type": "string",
+						"enum": [
+							"success", "partial-failure", "failure"
+						]
+					}
+				}
+			}
+		},
+		"links": {
+			"type": "array",
+			"items": {
+				"$ref": "./linkType_v01.json"
+			}
+		}
+	}
+}

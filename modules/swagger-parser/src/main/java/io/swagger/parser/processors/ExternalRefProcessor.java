@@ -3,6 +3,7 @@ package io.swagger.parser.processors;
 import io.swagger.models.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
@@ -217,6 +218,12 @@ public final class ExternalRefProcessor {
                 ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
                 if (arrayProp.getItems() instanceof RefProperty) {
                     processRefProperty((RefProperty) arrayProp.getItems(), file);
+                }
+                if (arrayProp.getItems() != null){
+                    if (arrayProp.getItems() instanceof  ObjectProperty) {
+                        ObjectProperty objectProperty = (ObjectProperty) arrayProp.getItems();
+                        processProperties(objectProperty.getProperties(), file);
+                    }
                 }
             } else if (prop.getValue() instanceof MapProperty) {
                 MapProperty mapProp = (MapProperty) prop.getValue();
