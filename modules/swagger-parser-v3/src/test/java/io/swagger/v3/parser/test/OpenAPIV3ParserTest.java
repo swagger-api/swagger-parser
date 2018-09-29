@@ -59,6 +59,7 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
     @Test
     public void testIssue837() {
         ParseOptions options = new ParseOptions();
@@ -1051,6 +1052,8 @@ public class OpenAPIV3ParserTest {
         assertEquals(composedCat.getAllOf().size(), 3);
         assertEquals(composedCat.getAllOf().get(0).get$ref(), "#/components/schemas/pet");
         assertEquals(composedCat.getAllOf().get(1).get$ref(), "#/components/schemas/foo_2");
+
+        Json.prettyPrint(openAPI);
 
         return openAPI;
     }

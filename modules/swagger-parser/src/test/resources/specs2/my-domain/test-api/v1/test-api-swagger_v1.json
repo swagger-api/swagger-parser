@@ -1,0 +1,112 @@
+{
+	"openapi": "3.0.5",
+	"servers": [
+		{
+			"url": "https://__host__/"
+		}
+	],
+	"info": {
+		"description": "APIs to retrieve some data",
+		"version": "1.0",
+		"title": "TEST A NEW API",
+		"contact": {
+			"name": "mine",
+			"email": "mine@me.com"
+		}
+	},
+	"tags": [
+		{
+			"name": "Test",
+			"description": "APIs to retrieve some data"
+		}
+	],
+	"paths": {
+		"/my-domain/v1/test-system": {
+			"get": {
+				"description": "Retrieve relevant data",
+				"tags": [
+					"Test"
+				],
+				"summary": "Retrieve relevant data",
+				"responses": {
+					"200": {
+						"description": "Request was successful",
+						"headers": {
+						},
+						"content": {
+							"*/*": {
+								"schema": {
+									"$ref": "./schemas/test-api-schema_v01.json"
+                                }
+							}
+						}
+					},
+					"204": {
+						"$ref": "#/components/responses/204"
+					},
+					"400": {
+						"$ref": "#/components/responses/400"
+					}
+				},
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/address"					
+					}
+				]
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+		},
+		"responses": {
+			"200": {
+				"description": "OK",
+				"headers": {
+				}
+			},
+			"400": {
+				"description": "Bad Request",
+				"headers": {
+				},
+				"content": {
+					"*/*": {
+						"schema": {
+							"$ref": "../../../common/confirmMessageType_v01.json"
+						}
+					}
+				}			
+			}
+		},
+		"parameters": {			
+			"address": {
+				"name": "address",
+				"in": "query",
+				"description": "address",
+				"required": false,
+				"schema": {
+					"type" : "string"
+				}
+			},
+			"asOfDate": {
+				"name": "asOfDate",
+				"in": "query",
+				"description": "Filter on the records that is effective, or overlap, on the asOfDate",
+				"required": false,
+				"schema": {
+					"$ref": "../../../common/dateType_v01.json"
+				},
+				"example": "2017-01-01"
+			},
+			"header_Accept-Language": {
+				"name": "Accept-Language",
+				"in": "header",
+				"description": "Accept-Language :  ( language | * ) [; q =qvalue]. Specifies the language(s) that are acceptable for the response. The optional qvalue represents a quality level for acceptable languages.",
+				"required": false,
+				"schema": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

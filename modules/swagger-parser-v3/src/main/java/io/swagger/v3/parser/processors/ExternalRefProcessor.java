@@ -186,6 +186,9 @@ public final class ExternalRefProcessor {
                             StringUtils.isNotBlank(arrayProp.getItems().get$ref())) {
                         processRefSchema(arrayProp.getItems(), file);
                     }
+                    if (arrayProp.getItems() != null && arrayProp.getItems().getProperties() != null ) {
+                        processProperties(arrayProp.getItems().getProperties(), file);
+                    }
                 } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
                     Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
                     if (mapProp.get$ref() != null) {
@@ -675,6 +678,7 @@ public final class ExternalRefProcessor {
             return;
         }
         String $ref = subRef.get$ref();
+
         if (format.equals(RefFormat.RELATIVE)) {
             $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
