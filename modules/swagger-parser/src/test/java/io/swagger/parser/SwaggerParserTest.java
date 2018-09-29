@@ -25,6 +25,7 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
@@ -53,6 +54,19 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SwaggerParserTest {
+
+    @Test
+    public void testIssueRelativeRefs2(){
+        String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
+        Swagger swagger = new SwaggerParser().read(location, null, true);
+        assertNotNull(swagger);
+        Map<String, Model> definitions = swagger.getDefinitions();
+        Assert.assertTrue(definitions.get("confirmMessageType_v01").getProperties().get("resources") instanceof ArrayProperty);
+        ArrayProperty arraySchema = (ArrayProperty) definitions.get("confirmMessageType_v01").getProperties().get("resources");
+        ObjectProperty prop = (ObjectProperty) arraySchema.getItems();
+        RefProperty refProperty = (RefProperty) prop.getProperties().get("resourceID");
+        assertEquals(refProperty.get$ref(),"#/definitions/simpleIDType_v01");
+    }
 
     @Test
     public void testIssue845() {
