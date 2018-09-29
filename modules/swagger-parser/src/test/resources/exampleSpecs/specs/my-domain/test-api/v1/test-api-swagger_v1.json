@@ -60,14 +60,14 @@
 		"asOfDate": {
 			"name": "asOfDate",
 			"in": "query",
-			"description": "Filter on the records that is effective, or overlap, on the asOfDate",
+			"description": "date",
 			"required": false,
 			"example": "2017-01-01"
 		},
 		"header_Accept-Language": {
 			"name": "Accept-Language",
 			"in": "header",
-			"description": "Accept-Language :  ( language | * ) [; q =qvalue]. Specifies the language(s) that are acceptable for the response. The optional qvalue represents a quality level for acceptable languages.",
+			"description": "Accept-Language",
 			"required": false,
 			"schema": {
 				"type": "string"

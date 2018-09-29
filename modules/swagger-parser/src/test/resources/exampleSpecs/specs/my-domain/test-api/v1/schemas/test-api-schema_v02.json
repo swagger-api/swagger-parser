@@ -1,6 +1,5 @@
 {
-	"$schema": "http://json-schema.org/draft-04/schema#",
-	"description": "Collection of pay schedules for a given organization",
+	"description": "Test Description",
 	"type": "object",
 	"properties": {
 		"testingApi": {
