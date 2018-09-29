@@ -1,14 +1,13 @@
 {
-	"$schema": "http://json-schema.org/draft-04/schema#",
 	"title": "link",
-	"description": "A link description object is used to describe link relations.  In the context of a schema, it defines the link relations of the instances of the schema, and can be parameterized by the instance values.  The link description format can be used on its own in regular (non-schema) documents, and use of this format can be declared by referencing the normative link description schema as the schema for the data structure that uses the links.",
+	"description": "",
 	"type": "object",
 	"properties": {
 		"href": {
 			"$ref": "./simpleIDType_v01.json"
 		},
 		"mediaType": {
-			"description": "The media type that the linked resource will return (Response) in",
+			"description": "",
 			"type": "string",
 			"enum": [
 				"application/gzip",
@@ -51,11 +50,11 @@
 				"type": "object",
 				"properties": {
 					"argumentPath": {
-						"description": "Argument path (typically a key field) of the payload item",
+						"description": "",
 						"type": "string"
 					},
 					"argumentValue": {
-						"description": "Argument value (typically a key field) of the payload item",
+						"description": "",
 						"type": "string"
 					}
 				}
