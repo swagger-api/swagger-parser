@@ -1,0 +1,51 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"description": "The confirm message contains the processing results for the corresponding request.  A request may have its processing reported as: succeeded, partially failed, or failed.",
+	"type": "object",
+	"properties": {
+		"confirmMessageID": {
+			"description": "An identifier for the instance of the confirm message",
+			"$ref": "./simpleIDType_v01.json"
+		},
+		"processID": {
+			"description": "A process identifier if one is available, like a batch ID",
+			"$ref": "./simpleIDType_v01.json"
+		},
+		"processStatus": {
+			"description": "The process results status code for the request",
+			"type": "string",
+			"enum": [
+				"success", "partial-failure", "failure"
+			]
+		},
+		"resources": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"resourceID": {
+						"description": "A resource identifier if one is available",
+						"$ref": "./simpleIDType_v01.json"
+					},
+					"resourceReference": {
+						"description": "An optional additiona reference to the resource",
+						"type": "string"
+					},
+					"resourceStatus": {
+						"description": "The process results status code for the request",
+						"type": "string",
+						"enum": [
+							"success", "partial-failure", "failure"
+						]
+					}
+				}
+			}
+		},
+		"links": {
+			"type": "array",
+			"items": {
+				"$ref": "./linkType_v01.json"
+			}
+		}
+	}
+}

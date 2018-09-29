@@ -1,15 +1,16 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.v3.core.util.Yaml;
+
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.Schema;
+
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
@@ -19,7 +20,7 @@ import org.testng.Assert;
 import java.util.Map;
 
 import java.util.List;
-import java.util.Map;
+
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -354,6 +355,7 @@ public class OpenAPIParserTest {
     }
 
     @Test
+
     public void testIssue844() {
         OpenAPIParser openApiParser = new OpenAPIParser();
         ParseOptions options = new ParseOptions();
@@ -362,5 +364,43 @@ public class OpenAPIParserTest {
         OpenAPI openAPI = openApiParser.readLocation("reusableParametersWithExternalRef.json", null, options).getOpenAPI();
         assertNotNull(openAPI);
         assertEquals(openAPI.getPaths().get("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
+    }
+    @Test
+    public void testIssueRelativeRefs2(){
+        String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
+        ParseOptions po = new ParseOptions();
+        po.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation(location, null, po);
+
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        Assert.assertTrue(schemas.get("confirmMessageType_v01").getProperties().get("resources") instanceof ArraySchema);
+
+        ArraySchema arraySchema = (ArraySchema) schemas.get("confirmMessageType_v01").getProperties().get("resources");
+        Schema prop = (Schema) arraySchema.getItems().getProperties().get("resourceID");
+
+        assertEquals(prop.get$ref(),"#/components/schemas/simpleIDType_v01");
+    }
+
+    @Test
+    public void testIssueRelativeRefs1(){
+        String location = "specs2/my-domain/test-api/v1/test-api-swagger_v1.json";
+        ParseOptions po = new ParseOptions();
+        po.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation(location, null, po);
+
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        Assert.assertTrue(schemas.get("test-api-schema_v01").getProperties().get("testingApi") instanceof ArraySchema);
+
+        ArraySchema arraySchema = (ArraySchema) schemas.get("test-api-schema_v01").getProperties().get("testingApi");
+        Schema prop = (Schema) arraySchema.getItems().getProperties().get("itemID");
+
+        assertEquals(prop.get$ref(),"#/components/schemas/simpleIDType_v01");
+
     }
 }

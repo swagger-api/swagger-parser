@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "date",
+  "description": "The string representation of the date value using the ISO-8601:2000 format",
+  "type": "string",
+  "format": "date"
+}
