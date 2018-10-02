@@ -44,12 +44,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.testng.Assert.*;
@@ -61,10 +56,34 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
+    public void testIssue853() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853/main.yaml", null, options).getOpenAPI();
+
+        Assert.assertNotNull(openAPI);
+
+        Operation post = openAPI.getPaths().get("/guests").getPost();
+        Assert.assertNotNull(post);
+
+        Content content = post.getResponses().get("201").getContent();
+        Assert.assertNotNull(content);
+
+        Map<String, Example> examples = content.get("application/json").getExamples();
+        Assert.assertEquals(examples.size(), 1);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getExamples());
+        assertNotNull(openAPI.getComponents().getExamples().get("testExample"));
+        assertEquals(((LinkedHashMap<String, Object>)openAPI.getComponents().getExamples().get("testExample").getValue()).get("test"),"value");
+
+    }
+
+    @Test
     public void testIssue837() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("./issue837/main.yaml", null, options).getOpenAPI();
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853/main.yaml", null, options).getOpenAPI();
 
         Assert.assertNotNull(openAPI);
 
