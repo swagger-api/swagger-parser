@@ -124,6 +124,7 @@ public class ResolverFully {
             RequestBody refRequestBody = op.getRequestBody();
             if (refRequestBody != null){
                 RequestBody requestBody = refRequestBody.get$ref() != null ? resolveRequestBody(refRequestBody) : refRequestBody;
+                op.setRequestBody(requestBody);
                 if (requestBody.getContent() != null) {
                     Map<String, MediaType> content = requestBody.getContent();
                     for (String key : content.keySet()) {
