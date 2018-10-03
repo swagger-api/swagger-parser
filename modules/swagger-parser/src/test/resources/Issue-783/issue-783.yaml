@@ -1,0 +1,29 @@
+swagger: 2.0
+info:
+  version: 0.0.1
+  title: API
+paths:
+  /:
+    post:
+      summary: Create
+      name: user
+      in: body
+      description: user to add to the system
+      required: true
+      schema:
+        $ref: '#/definitions/create'
+      responses:
+        '200':
+          description: Successful response
+definitions:
+  create:
+    type: object
+    properties:
+      attribute:
+        type: string
+      direct:
+        $ref: "./issue-783-b.yaml#/common"
+      referenced:
+        type: array
+        items:
+          $ref: "./issue-783-b.yaml#/common"

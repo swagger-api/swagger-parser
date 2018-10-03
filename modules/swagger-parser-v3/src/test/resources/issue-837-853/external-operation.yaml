@@ -1,0 +1,22 @@
+post:
+  description: add a guest
+  operationId: addGuest
+  responses:
+    '201':
+      description: New guest added to event list
+      content:
+        application/json:
+          schema:
+            properties:
+              test:
+                type: string
+          examples:
+            testExample:
+              $ref: '#/components/examples/testExample'
+components:
+  examples:
+    testExample:
+      value:
+        test: value
+
+

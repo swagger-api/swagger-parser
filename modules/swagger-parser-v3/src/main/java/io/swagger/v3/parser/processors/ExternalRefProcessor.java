@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
@@ -185,6 +186,9 @@ public final class ExternalRefProcessor {
                             StringUtils.isNotBlank(arrayProp.getItems().get$ref())) {
                         processRefSchema(arrayProp.getItems(), file);
                     }
+                    if (arrayProp.getItems() != null && arrayProp.getItems().getProperties() != null ) {
+                        processProperties(arrayProp.getItems().getProperties(), file);
+                    }
                 } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
                     Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
                     if (mapProp.get$ref() != null) {
@@ -200,9 +204,37 @@ public final class ExternalRefProcessor {
         }
     }
 
-    public void processRefToExternalResponse(String $ref, RefFormat refFormat) {
-
+    public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
+        String renamedRef = cache.getRenamedRef($ref);
+        if(renamedRef != null) {
+            return renamedRef;
+        }
         final ApiResponse response = cache.loadRef($ref, refFormat, ApiResponse.class);
+
+        String newRef;
+
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
+        Map<String, ApiResponse> responses = openAPI.getComponents().getResponses();
+
+        if (responses == null) {
+            responses = new LinkedHashMap<>();
+        }
+
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
+
+        ApiResponse existingResponse = responses.get(possiblyConflictingDefinitionName);
+
+        if (existingResponse != null) {
+            LOGGER.debug("A model for " + existingResponse + " already exists");
+            if(existingResponse.get$ref() != null) {
+                // use the new model
+                existingResponse = null;
+            }
+        }
+        newRef = possiblyConflictingDefinitionName;
+        cache.putRenamedRef($ref, newRef);
 
         if(response != null) {
 
@@ -227,6 +259,7 @@ public final class ExternalRefProcessor {
                 }
             }
         }
+        return newRef;
     }
 
     public String processRefToExternalRequestBody(String $ref, RefFormat refFormat) {
@@ -645,6 +678,7 @@ public final class ExternalRefProcessor {
             return;
         }
         String $ref = subRef.get$ref();
+
         if (format.equals(RefFormat.RELATIVE)) {
             $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
