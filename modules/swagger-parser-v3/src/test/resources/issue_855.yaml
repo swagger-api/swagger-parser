@@ -1,0 +1,64 @@
+openapi: '3.0.0'
+info:
+  title: Pet Store API
+  version: '3.0'
+
+paths:
+  /adopt:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/ASinglePet'
+      responses:
+        201:
+          $ref: '#/components/responses/Adopted'
+
+components:
+  requestBodies:
+    ASinglePet:
+      description: Adoption Request
+      required: true
+      content:
+        application/petstore+json:
+          schema:
+            $ref: '#/components/schemas/AdoptionRequest'
+  responses:
+    Adopted:
+      description: Pet successfully adopted
+      content:
+        application/petstore+json:
+          schema:
+            $ref: '#/components/schemas/AdoptionResponse'
+
+  schemas:
+    Pets:
+      type: object
+      properties:
+        pets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pet'
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Fluffy
+    AdoptionRequest:
+      description:  Request to adopt a new pet
+      type: object
+      required:
+      - name
+      - pets
+      properties:
+        name:
+          description: Name pet store
+          type: string
+        pets:
+          $ref: '#/components/schemas/Pets'
+    AdoptionResponse:
+      description: Adoption Response
+      type: object
+      properties:
+        string:
+          description: Uri for the adopted pet
+          type: string
