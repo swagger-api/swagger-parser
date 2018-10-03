@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ByteArraySchema;
@@ -1520,6 +1521,20 @@ public class OpenAPIV3ParserTest {
 
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
+    }
+
+    @Test(description = "Issue 855: Request Body internal refs are not being resolved")
+    public void shouldParseRequestBody() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_855.yaml", null, parseOptions);
+        Content actualComponentContent = openAPI.getComponents().getRequestBodies().get("ASinglePet").getContent();
+        Content actualPathContent = openAPI.getPaths().get("/adopt").getPost().getRequestBody().getContent();
+        Map properties = actualComponentContent.get("application/petstore+json").getSchema().getProperties();
+        assertNotNull(properties);
+        assertEquals(properties.size(), 2);
+        assertNotNull(actualPathContent);
+        assertEquals(actualPathContent, actualComponentContent);
     }
 
 
