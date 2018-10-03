@@ -1522,6 +1522,23 @@ public class OpenAPIV3ParserTest {
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
     }
 
+    @Test(description = "Issue 855: Request Body internal refs are not being resolved")
+    public void shouldParseRequestBody() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_855.yaml", null, parseOptions);
+
+        Content actualComponentContent = openAPI.getComponents().getRequestBodies().get("ASinglePet").getContent();
+        Content actualPathContent = openAPI.getPaths().get("/adopt").getPost().getRequestBody().getContent();
+        Map properties = actualComponentContent.get("application/petstore+json").getSchema().getProperties();
+
+        assertNotNull(properties);
+        assertEquals(properties.size(), 2);
+
+        assertNotNull(actualPathContent);
+        assertEquals(actualPathContent, actualComponentContent);
+    }
+
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
