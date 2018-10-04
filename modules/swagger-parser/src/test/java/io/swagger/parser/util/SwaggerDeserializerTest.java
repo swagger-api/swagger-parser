@@ -24,6 +24,55 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 public class SwaggerDeserializerTest {
+
+
+    @Test
+    public void testEmptyDefinitions() throws Exception {
+        String yaml = "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  version: \"1.0\"\n" +
+                "  title: \"dd\"\n" +
+                "host: \"abc:5555\"\n" +
+                "basePath: \"/mypath\"\n" +
+                "schemes:\n" +
+                "- \"http\"\n" +
+                "consumes:\n" +
+                "- \"application/json\"\n" +
+                "produces:\n" +
+                "- \"application/json\"\n" +
+                "paths:\n" +
+                "  /resource1/Id:\n" +
+                "    post:\n" +
+                "      description: \"\"\n" +
+                "      operationId: \"postOp\"\n" +
+                "      parameters:\n" +
+                "      - in: \"body\"\n" +
+                "        name: \"input3\"\n" +
+                "        description: \"\"\n" +
+                "        required: true\n" +
+                "        schema:\n" +
+                "          $ref: \"#/definitions/mydefinition\"\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: \"Successful\"\n" +
+                "        401:\n" +
+                "          description: \"Access Denied\"\n" +
+                "definitions:\n" +
+                "  mydefinition: {}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        assertNotNull(swagger.getDefinitions().get("mydefinition"));
+
+
+    }
+
+
     @Test
     public void testSecurityDeserialization() throws Exception {
         String json = "{\n" +
@@ -91,16 +140,14 @@ public class SwaggerDeserializerTest {
         String json = "{\n" +
                 "  \"properties\": {\n" +
                 "    \"data\": {\n" +
-                "      \"properties\": {\n" +
-                "        \"description\": \"the array type\",\n" +
-                "        \"type\": \"array\",\n" +
-                "        \"items\": {\n" +
-                "          \"properties\": {\n" +
-                "            \"name\": {\n" +
-                "              \"description\": \"the inner type\",\n" +
-                "              \"type\": \"string\",\n" +
-                "              \"minLength\": 1\n" +
-                "            }\n" +
+                "      \"description\": \"the array type\",\n" +
+                "      \"type\": \"array\",\n" +
+                "      \"items\": {\n" +
+                "        \"properties\": {\n" +
+                "          \"name\": {\n" +
+                "            \"description\": \"the inner type\",\n" +
+                "            \"type\": \"string\",\n" +
+                "            \"minLength\": 1\n" +
                 "          }\n" +
                 "        }\n" +
                 "      }\n" +
@@ -1358,6 +1405,110 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testIssue673ArrayProperties() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  description: 'Good'\n" +
+                        "  version: '2.0.0'\n" +
+                        "  title: 'Test'\n" +
+                        "paths:\n" +
+                        "  /foo:\n" +
+                        "    post:\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: 'OK'\n" +
+                        "definitions:\n" +
+                        "  Fun:\n" +
+                        "    type: object\n" +
+                        "    properties:\n" +
+                        "      id:\n" +
+                        "        type: array\n" +
+                        "        uniqueItems: true\n" +
+                        "        minLength: 1\n" +
+                        "        maxLength: 100\n";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        Property property = swagger.getDefinitions().get("Fun").getProperties().get("id");
+        assertEquals(Boolean.TRUE, ((ArrayProperty)property).getUniqueItems());
+    }
+
+    @Test
+    public void testIssue673StringProperties() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  description: 'Good'\n" +
+                        "  version: '2.0.0'\n" +
+                        "  title: 'Test'\n" +
+                        "paths:\n" +
+                        "  /foo:\n" +
+                        "    post:\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: 'OK'\n" +
+                        "definitions:\n" +
+                        "  Fun:\n" +
+                        "    type: object\n" +
+                        "    properties:\n" +
+                        "      id:\n" +
+                        "        type: string\n" +
+                        "        pattern: Pattern\n" +
+                        "        minLength: 1\n" +
+                        "        maxLength: 100\n";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        Property property = swagger.getDefinitions().get("Fun").getProperties().get("id");
+        assertEquals("Pattern", ((StringProperty)property).getPattern());
+        assertEquals(new Integer(1), ((StringProperty)property).getMinLength());
+        assertEquals(new Integer(100), ((StringProperty)property).getMaxLength());
+    }
+
+    @Test
+    public void testIssue673NumericProperties() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  description: 'Good'\n" +
+                        "  version: '2.0.0'\n" +
+                        "  title: 'Test'\n" +
+                        "paths:\n" +
+                        "  /foo:\n" +
+                        "    post:\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: 'OK'\n" +
+                        "definitions:\n" +
+                        "  Fun:\n" +
+                        "    type: object\n" +
+                        "    properties:\n" +
+                        "      id:\n" +
+                        "        type: number\n" +
+                        "        minimum: 1\n" +
+                        "        maximum: 100\n" +
+                        "        exclusiveMaximum: true\n" +
+                        "        exclusiveMinimum: true\n" +
+                        "        multipleOf: 5\n";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger);
+        Property property = swagger.getDefinitions().get("Fun").getProperties().get("id");
+        assertEquals(new BigDecimal(1), ((AbstractNumericProperty)property).getMinimum());
+        assertEquals(new BigDecimal(100), ((AbstractNumericProperty)property).getMaximum());
+        assertEquals(new BigDecimal(5), ((AbstractNumericProperty)property).getMultipleOf());
+        assertEquals(Boolean.TRUE, ((AbstractNumericProperty)property).getExclusiveMinimum());
+        assertEquals(Boolean.TRUE, ((AbstractNumericProperty)property).getExclusiveMaximum());
+    }
+
+    @Test
     public void testIssue360() {
         Swagger swagger = new Swagger();
 
@@ -1371,5 +1522,40 @@ public class SwaggerDeserializerTest {
         SwaggerDeserializationResult result = parser.readWithInfo(json);
         Swagger rebuilt = result.getSwagger();
         assertNotNull(rebuilt);
+    }
+
+    @Test(description = "it should deserialize untyped additionalProperties")
+    public void testUntypedAdditionalProperties() {
+        String json = "{\n" +
+                "  \"paths\": {\n" +
+                "    \"/store/inventory\": {\n" +
+                "      \"get\": {\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"successful operation\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"object\",\n" +
+                "              \"description\": \"map of anything\",\n" +
+                "              \"additionalProperties\": {}\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        Swagger swagger = result.getSwagger();
+
+        Property response = swagger.getPath("/store/inventory").getGet().getResponses().get("200").getSchema();
+        assertTrue(response instanceof MapProperty);
+        Property additionalProperties = ((MapProperty) response).getAdditionalProperties();
+        assertTrue(additionalProperties instanceof UntypedProperty);
+        assertEquals(additionalProperties.getType(), null);
     }
 }

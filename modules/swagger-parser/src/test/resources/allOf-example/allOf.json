@@ -1,0 +1,89 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "API to get information on services currently subscribed by a specific user or phone number.",
+    "version": "1.0.1",
+    "title": "Products API definition for the 4th Platform",
+    "termsOfService": "https://www.telefonica.es/es/",
+    "contact": {
+      "name": "4th Platform Team",
+      "email": "4pf@tid.es"
+    }
+  },
+  "x-fp-apiPrefix": "/subscribed_products",
+  "basePath": "/subscribed_products/v1.0.1",
+  "tags": [
+    {
+      "name": "subscribed_products",
+      "description": "Operations available with products subscribed by a user"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/users/{user_id}/description": {
+      "get": {
+        "operationId": "description",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DescriptionUrl"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Description": {
+      "type": "object",
+      "description": "Information about de product",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "DescriptionUrl": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "url"
+          ],
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "Url with information or picture of the product"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/Description"
+        }
+      ]
+    }
+  },
+  "parameters": {
+    "UserId": {
+      "name": "user_id",
+      "description": "Unique identifier of a user",
+      "in": "path",
+      "required": true,
+      "type": "string"
+    }
+  }
+}

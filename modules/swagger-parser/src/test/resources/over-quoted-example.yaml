@@ -1,0 +1,16 @@
+swagger: '2.0'
+paths:
+ /newPerson:
+  post:
+    summary: Create new person
+    description: Create new person
+    parameters: []
+    responses:
+      200:
+       description: OK
+       schema:
+        $ref: "#/definitions/CustomerType"
+definitions:
+  CustomerType:
+    type: string
+    example: NoQuotePlease

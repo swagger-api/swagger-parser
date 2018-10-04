@@ -1,8 +1,13 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
 
@@ -57,12 +62,12 @@ public class DeserializationUtils {
     }
 
     public static JsonNode readYamlTree(String contents) {
-        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
         return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
     }
 
     public static <T> T readYamlValue(String contents, Class<T> expectedType) {
-        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
         return Json.mapper().convertValue(yaml.load(contents), expectedType);
     }
 }

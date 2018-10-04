@@ -11,6 +11,7 @@ definitions:
     $ref: "./a.yaml#/definitions/j"
   k:
     type: object
+    title: k-definition
     properties:
       name:
         type: string

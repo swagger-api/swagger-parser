@@ -16,10 +16,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -60,7 +64,6 @@ public class RefUtilsTest {
         doComputeDefinitionNameTestCase("./path/to/file#/foo", "foo");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar", "bar");
         doComputeDefinitionNameTestCase("./path/to/file#/foo/bar/hello", "hello");
-
     }
 
     private void doComputeDefinitionNameTestCase(String ref, String expectedDefinitionName) {
@@ -229,8 +232,10 @@ public class RefUtilsTest {
     public void testReadExternalRef_OnClasspath(@Mocked Files files,
                                                 @Mocked ClasspathHelper classpathHelper,
                                                 @Injectable final Path parentDirectory,
-                                                @Injectable final Path pathToUse) throws Exception {
+                                                @Injectable final Path pathToUse,
+                                                @Injectable final Path pathToUse2) throws Exception {
         final String filePath = "./path/to/file.json";
+        final String url = parentDirectory + "/path/to/file.json";
         final String expectedResult = "really good json";
 
         new StrictExpectations() {{
@@ -240,6 +245,14 @@ public class RefUtilsTest {
             result = pathToUse;
 
             Files.exists(pathToUse);
+            times = 1;
+            result = false;
+
+            parentDirectory.resolve(url).normalize();
+            times = 1;
+            result = pathToUse2;
+
+            Files.exists(pathToUse2);
             times = 1;
             result = false;
 

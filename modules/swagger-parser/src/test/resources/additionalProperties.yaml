@@ -1,0 +1,22 @@
+swagger: "2.0"
+info:
+  title: Test API
+  version: 1.0.0
+host: swagger.io
+basePath: /show-bug
+schemes:
+- http
+produces:
+- application/json
+consumes:
+- application/json
+
+paths:
+  /tests:
+    get:
+      operationId: listTests
+      responses:
+        200:
+          description: Returns results.
+          schema:
+              $ref: "globals.yaml#/definitions/result"

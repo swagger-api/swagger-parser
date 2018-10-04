@@ -1,0 +1,11 @@
+{
+  "definitions": {
+    "Persons": {
+      "type": "array",
+      "description": "An array of person.",
+      "items": {
+        "$ref": "./Person.json#/definitions/Person"
+      }
+    }
+  }
+}
