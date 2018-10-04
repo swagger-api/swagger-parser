@@ -365,6 +365,20 @@ public class SwaggerParserTest {
     }
 
 
+  @Test
+  public void testIssue435() {
+      Swagger swagger = new SwaggerParser().read("issue_435.yaml");
+      assertNotNull(swagger.getDefinitions().get("issue_435_a"));
+      assertNotNull(swagger.getDefinitions().get("issue_435_b"));
+      Map<String, Model> definitions = swagger.getDefinitions();
+      assertTrue(definitions.containsKey("x"));
+      assertTrue(definitions.containsKey("y"));
+      assertTrue(definitions.containsKey("z"));
+      assertTrue(definitions.containsKey("referencedByLocalElement"));
+      assertEquals(((RefModel) definitions.get("i")).get$ref(), "#/definitions/k");
+      assertEquals(((RefModel) definitions.get("l")).get$ref(), "#/definitions/referencedByLocalElement"); //issue #434
+    }
+
 
     @Test
     public void testPetstore() throws Exception {
@@ -796,6 +810,8 @@ public class SwaggerParserTest {
         assertTrue(swagger.getDefinitions().containsKey("externalObject"));
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
         assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
+        assertEquals(((RefProperty)swagger.getDefinitions().get("externalObject").getProperties().get("hello1")).get$ref(),
+        		"#/definitions/referencedByLocalElement"); //issue #434
     }
 
     @Test

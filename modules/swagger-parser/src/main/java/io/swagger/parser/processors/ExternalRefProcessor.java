@@ -94,7 +94,7 @@ public final class ExternalRefProcessor {
                 if (isAnExternalRefFormat(refModel.getRefFormat())) {
                     refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
                 } else {
-                    processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                	refModel.set$ref(processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE));
                 }
 
             }
@@ -154,7 +154,7 @@ public final class ExternalRefProcessor {
 
         return newRef;
     }
-
+    
 
     public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
 
@@ -244,7 +244,7 @@ public final class ExternalRefProcessor {
             String joinedRef = join(externalFile, subRef.get$ref());
             subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
         } else {
-            processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+        	subRef.set$ref(processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
         }
     }
 
