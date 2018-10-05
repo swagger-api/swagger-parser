@@ -69,6 +69,14 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue435() {
+        Swagger swagger = new SwaggerParser().read("issue-435/main.yaml");
+        assertNotNull(swagger.getDefinitions().get("sub"));
+        assertNotNull(swagger.getDefinitions().get("subsub"));
+    }
+
+
+    @Test
     public void testIssue845() {
         SwaggerDeserializationResult swaggerDeserializationResult = new SwaggerParser().readWithInfo("");
         assertEquals(swaggerDeserializationResult.getMessages().get(0), "empty or null swagger supplied");
