@@ -69,6 +69,14 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue435() {
+        Swagger swagger = new SwaggerParser().read("issue-435/main.yaml");
+        assertNotNull(swagger.getDefinitions().get("sub"));
+        assertNotNull(swagger.getDefinitions().get("subsub"));
+    }
+
+
+    @Test
     public void testIssue845() {
         SwaggerDeserializationResult swaggerDeserializationResult = new SwaggerParser().readWithInfo("");
         assertEquals(swaggerDeserializationResult.getMessages().get(0), "empty or null swagger supplied");
@@ -796,6 +804,8 @@ public class SwaggerParserTest {
         assertTrue(swagger.getDefinitions().containsKey("externalObject"));
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
         assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
+        assertEquals(((RefProperty)swagger.getDefinitions().get("externalObject").getProperties().get("hello1")).get$ref(),
+                "#/definitions/referencedByLocalElement"); //issue #434
     }
 
     @Test
@@ -1319,9 +1329,11 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
+        assertTrue(definitions.containsKey("referencedByLocalElement"));
         assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
         assertEquals("k-definition", definitions.get("k").getTitle());
         assertEquals("k-definition", definitions.get("k_2").getTitle());
+        assertEquals(((RefModel) definitions.get("l")).get$ref(), "#/definitions/referencedByLocalElement"); //issue #434
     }
 
     @Test(description = "Parser not honoring redirect responses")
