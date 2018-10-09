@@ -1,8 +1,6 @@
-**NOTE:** If you're looking for swagger=parser 1.X and OpenApi 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-core/tree/v1)
-
 # Swagger Parser
 
-[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v1.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v1)
+[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-master.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser)
 [![PR Stats](https://img.shields.io/github/issues-pr/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/pulls)
 [![Issue Stats](https://img.shields.io/github/issues/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/issues)
