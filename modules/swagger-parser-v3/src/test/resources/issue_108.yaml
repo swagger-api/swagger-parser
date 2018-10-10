@@ -1,0 +1,31 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://local.xxx.com/'
+info:
+  version: 2.0.0
+  title: Beanhunter API
+  description: Description of the api goes here.
+paths:
+  /city:
+    get:
+      description: test description
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      name:
+                        type: string
+                        minLength: 1
+                required:
+                  - data
+components:
+  schemas:
+    Endpoints:
+      title: Endpoints object
+      properties:
+        links: {}

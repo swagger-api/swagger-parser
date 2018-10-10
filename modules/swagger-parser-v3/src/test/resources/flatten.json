@@ -1,0 +1,30 @@
+{
+  "openapi" : "3.0.1",
+  "components" : {
+    "schemas" : {
+      "User" : {
+        "required" : [ "address" ],
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "address" : {
+            "type" : "object",
+            "properties" : {
+              "street" : {
+                "type" : "string"
+              },
+              "city" : {
+                "type" : "string"
+              }
+            },
+            "description" : "description",
+            "readOnly" : false,
+            "default" : "default"
+          }
+        },
+        "description" : "a common user"
+      }
+    }
+  }
+}

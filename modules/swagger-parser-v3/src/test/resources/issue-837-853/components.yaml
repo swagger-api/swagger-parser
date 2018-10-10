@@ -1,0 +1,7 @@
+
+components:
+  examples:
+    ExternalRef:
+      summary: An external reference
+      value:
+        test: external

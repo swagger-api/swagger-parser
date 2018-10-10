@@ -1,48 +1,37 @@
 # Swagger Parser
 
-[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-master.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser)
-[![PR Stats](https://img.shields.io/github/issues-pr/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/pulls)
-[![Issue Stats](https://img.shields.io/github/issues/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/issues)
+[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2)
 
 ## Overview 
 This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
-
-## What's Swagger?
-
-The goal of Swagger™ is to define a standard, language-agnostic interface to REST APIs which allows both humans and computers to discover and understand the capabilities of the service without access to source code, documentation, or through network traffic inspection. When properly defined via Swagger, a consumer can understand and interact with the remote service with a minimal amount of implementation logic. Similar to what interfaces have done for lower-level programming, Swagger removes the guesswork in calling the service.
-
-
-Check out [Swagger-Spec](https://github.com/OAI/OpenAPI-Specification) for additional information about the Swagger project, including additional libraries with support for other languages and more. 
 
 
 ### Usage
 Using the swagger-parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
 
 ```java
-import io.swagger.parser.SwaggerParser;
-import io.swagger.models.Swagger;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.oas.models.OpenAPI;
 
 // ... your code
 
   // read a swagger description from the petstore
-  Swagger swagger = new SwaggerParser().read("http://petstore.swagger.io/v2/swagger.json");
+  
+  
+  OpenAPI openAPI = new OpenAPIV3Parser().read("http://petstore.swagger.io/v3/openapi.json");
+
 ```
 
 You can read from a file location as well:
 ```java
-  Swagger swagger = new SwaggerParser().read("./path/to/swagger.json");
+  OpenAPI openAPI = new OpenAPIV3Parser().read("./path/to/openapi.yaml");
 
 ```
 
-And with the swagger-compat-spec-parser module, you can read older formats, and convert them into swagger 2.0:
-```java
-  Swagger swagger = new SwaggerCompatConverter().read("http://petstore.swagger.io/api/api-docs");
-```
 
-If your swagger resource is protected, you can pass headers in the request:
+If your OpenAPI definition is protected, you can pass headers in the request:
 ```java
-import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 
 // ... your code
 
@@ -54,16 +43,10 @@ import io.swagger.models.auth.AuthorizationValue;
 
   // or in a single constructor
   AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
-  Swagger swagger = new SwaggerParser().read(
+  OpenAPI openAPI = new OpenAPIV3Parser().readWithInfo(
     "http://petstore.swagger.io/v2/swagger.json",
     Arrays.asList(mySpecialHeader, apiKey)
   );
-```
-
-And, if your intent is to read in a Swagger 1.2 spec so that you can then output a Swagger 2 spec to string/file
-then you are in luck - you have the spec in pojo form, now pass it to pretty() and you're good to go.
-```
-    String swaggerString = Json.pretty(swagger);
 ```
 
 ### Dealing with self-signed SSL certificates
@@ -78,8 +61,7 @@ And then the swagger-parser will _ignore_ invalid certificates.  Of course this 
 working inside a firewall or really know what you're doing, well, there's your rope.
 
 ### Dealing with Let's Encrypt
-Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_
-by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
+Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_ by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
 JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
 not accepting Let's Encrypt signed certificates.
 
@@ -94,8 +76,8 @@ But... this is all standard SSL configuration stuff and is well documented acros
 ### Prerequisites
 You need the following installed and available in your $PATH:
 
-* [Java 1.7](http://java.oracle.com)
-* [Apache maven 3.0.3 or greater](http://maven.apache.org/)
+* [Java 1.8](http://java.oracle.com)
+* [Apache maven 3.x](http://maven.apache.org/)
 
 After cloning the project, you can build it from source with this command:
 
@@ -104,7 +86,7 @@ mvn package
 ```
 
 ### Extensions
-This project has a core artifact--`swagger-parser`, which uses Java Service Provider Inteface (SPI) so additional extensions can be added.  To read Swagger 1.0, 1.1, and 1.2 specifications, a module is included called `swagger-compat-spec-parser`.  This reads those older versions of the spec and produces 2.0 objects.
+This project has a core artifact--`swagger-parser`, which uses Java Service Provider Inteface (SPI) so additional extensions can be added. 
 
 To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.parser.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.parser.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
 
@@ -113,19 +95,20 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 
 ```xml
 <dependency>
-  <groupId>io.swagger</groupId>
+  <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.40-SNAPSHOT</version>
+  <version>2.0.6-SNAPSHOT</version>
 </dependency>
 
 ```
 
-To add swagger parsing support for older versions of swagger, add the `compat` module.  Since it depends on `swagger-parser`, you don't need to include both:
+or
+
 ```xml
 <dependency>
-  <groupId>io.swagger</groupId>
-  <artifactId>swagger-compat-spec-parser</artifactId>
-  <version>1.0.40-SNAPSHOT</version>
+  <groupId>io.swagger.parser.v3</groupId>
+  <artifactId>swagger-parser</artifactId>
+  <version>2.0.6-SNAPSHOT</version>
 </dependency>
 
 ```

@@ -1,0 +1,52 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Uber API",
+        "description": "Move your app forward with the Uber API",
+        "version": "1.0.0"
+    },
+    "host": "api.uber.com",
+    "schemes": [
+        "https"
+    ],
+    "basePath": "/v1",
+    "produces": [
+        "application/json"
+    ],
+    "consumes" : [ "application/json" ],
+    "paths": {
+        "/api/batch/" : {
+            "get" : {
+                "tags" : [ "Batch" ],
+                "summary" : "Get the list of resources",
+                "description" : "Returns a list of available resources.",
+                "schemes" : [ "https" ],
+                "produces" : [ "application/json" ],
+                "parameters" : [
+                    {
+                        "$ref" : "#/parameters/serverID"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "successful operation"
+                    },
+                    "400" : {
+                        "description" : "Bad request"
+                    }
+                }
+            }
+        }
+    },
+    "parameters": {
+        "serverID": {
+            "name": "serverID",
+            "in": "path",
+            "description": "serverID is: hostName,etc",
+            "required": true,
+            "type": "string"
+        }
+    },
+    "definitions" : {
+    }
+}

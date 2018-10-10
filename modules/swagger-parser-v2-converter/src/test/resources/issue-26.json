@@ -1,0 +1,45 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "allOf test"
+    },
+    "paths": {},
+    "definitions": {
+        "ErrorModel": {
+            "type": "object",
+            "required": [
+                "message",
+                "code"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 600
+                }
+            }
+        },
+        "ExtendedErrorModel": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ErrorModel"
+                },
+                {
+                    "type": "object",
+                    "required": [
+                        "rootCause"
+                    ],
+                    "properties": {
+                        "rootCause": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

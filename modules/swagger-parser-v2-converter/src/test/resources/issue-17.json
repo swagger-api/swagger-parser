@@ -1,0 +1,128 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Parameter references"
+    },
+    "paths": {
+        "/report/{userId}": {
+            "get": {
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/userIdParam"
+                    },
+                    {
+                        "$ref": "#/parameters/dateRangeParam"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "number of pets to return",
+                        "type": "string",
+                        "x-example": "value"
+                    },
+                    {
+
+                        "name": "limitForm",
+                        "in": "formData",
+                        "type": "string",
+                        "format": "email",
+                        "required": true
+
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/formPost": {
+            "post": {
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/formEmail"
+                    },
+                    {
+                        "$ref": "#/parameters/formPassword"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/bodyPost": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/bodyParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "parameters": {
+        "dateRangeParam": {
+            "in": "query",
+            "name": "dateRange",
+            "type": "string",
+            "enum": [
+                "Today",
+                "Yesterday",
+                "LastWeek"
+            ],
+            "default": "Today"
+        },
+        "userIdParam": {
+            "in": "path",
+            "name": "userId",
+            "type": "integer",
+            "required": true
+        },
+        "formEmail": {
+            "in": "formData",
+            "name": "email",
+            "type": "string",
+            "format": "email",
+            "required": true
+        },
+        "formPassword": {
+            "in": "formData",
+            "name": "password",
+            "type": "string",
+            "format": "password",
+            "required": true
+        },
+        "bodyParam": {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,8 @@
+requestBodies:
+  remote_requestBody:
+    description: request body in components
+    content:
+      application/json:
+        description: Pet object that needs to be added to the store
+        schema:
+          "$ref": "#/components/schemas/Pet"

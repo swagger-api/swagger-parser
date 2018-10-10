@@ -24,7 +24,7 @@
 				"properties": {
 					"resourceID": {
 						"description": "",
-						 "$ref": "./simpleIDType_v01.json"						
+						 "$ref": "./simpleIDType_v01.json"
 					},
 					"resourceReference": {
 						"description": "",

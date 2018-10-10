@@ -1,9 +1,0 @@
-[
-  {
-    "original": {
-      "foo": null,
-      "bar": null
-    },
-    "errorMessage": "object already has a member named \"bar\""
-  }
-]

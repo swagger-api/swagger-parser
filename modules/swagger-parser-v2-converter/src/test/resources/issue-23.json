@@ -1,0 +1,19 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "test"
+    },
+    "paths": {},
+    "definitions": {
+        "MapOfObjects": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/Object"
+            }
+        },
+        "Object": {
+            "type": "object"
+        }
+    }
+}

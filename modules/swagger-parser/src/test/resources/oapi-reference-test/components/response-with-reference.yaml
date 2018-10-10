@@ -1,4 +1,0 @@
----
-description: Response with schema containing reference
-schema:
-  $ref: "./schema-with-reference.yaml"

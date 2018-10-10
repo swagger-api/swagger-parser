@@ -4,8 +4,10 @@
 atlassian-ide-plugin.xml
 .idea/
 target/
-
+.DS_Store
 .classpath
 .project
 .settings/
+modules/swagger-parser/src/test/resources/relative-file-references/yaml
 **/test-output/*
+dependency-reduced-pom.xml

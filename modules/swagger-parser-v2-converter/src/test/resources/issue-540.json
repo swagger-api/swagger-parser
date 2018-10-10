@@ -1,0 +1,51 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Test Examples"
+  },
+  "host": "foobar",
+  "paths": {
+    "/example": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "first": {
+                  "type": "string"
+                },
+                "last": {
+                  "type": "string"
+                }
+              }
+            },
+            "examples": {
+              "application/json": "{\n  \"first\": \"John\",\n  \"last\": \"Doe\"\n}\n"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "application/json": {
+                "str": "123",
+                "num": 456
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

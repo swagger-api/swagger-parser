@@ -1,7 +1,0 @@
----
-definitions:
- PersonObj:
-  properties:
-    location:
-      type: string
-      example: referred

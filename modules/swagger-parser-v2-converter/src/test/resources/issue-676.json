@@ -1,0 +1,49 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "x-example"
+    },
+    "host": "httpbin.org",
+    "basePath": "/anything",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/{foo}": {
+            "get": {
+                "parameters": [
+                    {
+                      "name": "enum_integer",
+                      "in": "query",
+                      "description": "",
+                      "required": true,
+                      "type": "integer",
+                      "enum": [1, -2]
+                    },
+                    {
+                      "name": "enum_number",
+                      "in": "query",
+                      "description": "",
+                      "required": true,
+                      "type": "number",
+                      "enum": [1, -2]
+                    },
+                  {
+                    "name": "enum_boolean",
+                    "in": "query",
+                    "description": "",
+                    "required": true,
+                    "type": "boolean",
+                    "enum": [true, false]
+                  }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

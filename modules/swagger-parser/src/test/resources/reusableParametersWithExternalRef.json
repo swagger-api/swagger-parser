@@ -1,15 +1,9 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.1",
   "info": {
     "version": "1.0.9-abcd",
     "title": "Swagger Sample API Reusable Parameters"
   },
-  "host": "my.api.com",
-  "basePath": "/v1",
-  "schemes": [
-    "http",
-    "https"
-  ],
   "paths": {
     "/pets/{id}": {
       "get": {

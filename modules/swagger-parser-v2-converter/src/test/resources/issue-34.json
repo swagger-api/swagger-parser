@@ -1,0 +1,184 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Examples"
+    },
+    "host": "httpbin.org",
+    "basePath": "/anything",
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/x-www-form-urlencoded"
+    ],
+    "paths": {
+        "/order/pizza/default": {
+            "post": {
+                "description": "Should have `explode: false` and, optionally, `style: form`.\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "toppings",
+                        "description": "Choose your pizza toppings",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "cheese",
+                                "onion",
+                                "mushrooms",
+                                "bacon"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/order/pizza/csv": {
+            "post": {
+                "description": "Should have `explode: false` and, optionally, `style: form`.\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "toppings",
+                        "description": "Choose your pizza toppings",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "cheese",
+                                "onion",
+                                "mushrooms",
+                                "bacon"
+                            ]
+                        },
+                        "collectionFormat": "csv"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/order/pizza/ssv": {
+            "post": {
+                "description": "Should have `style: spaceDelimited`, with optional `explode: false`\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "toppings",
+                        "description": "Choose your pizza toppings",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "cheese",
+                                "onion",
+                                "mushrooms",
+                                "bacon"
+                            ]
+                        },
+                        "collectionFormat": "ssv"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/order/pizza/tsv": {
+            "post": {
+                "description": "3.0 does not have `tsv`-like style, so `tsv` should be ignored.\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "toppings",
+                        "description": "Choose your pizza toppings",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "cheese",
+                                "onion",
+                                "mushrooms",
+                                "bacon"
+                            ]
+                        },
+                        "collectionFormat": "tsv"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/order/pizza/pipes": {
+            "post": {
+                "description": "Should be `style: pipeDelimited`, with optional `explode: false`\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "toppings",
+                        "description": "Choose your pizza toppings",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "cheese",
+                                "onion",
+                                "mushrooms",
+                                "bacon"
+                            ]
+                        },
+                        "collectionFormat": "pipes"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/order/pizza/multi": {
+            "post": {
+                "description": "Multi is the default style for form request bodies in 3.0. Any of the following will be valid:\n * no `style` or `explode`\n * `style: form`\n * `explode: true`\n * `style: form` + `explode: true`\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "toppings",
+                        "description": "Choose your pizza toppings",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "cheese",
+                                "onion",
+                                "mushrooms",
+                                "bacon"
+                            ]
+                        },
+                        "collectionFormat": "multi"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
