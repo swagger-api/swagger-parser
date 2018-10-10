@@ -1,4 +1,4 @@
-**NOTE:** If you're looking for swagger=parser 1.X and OpenApi 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-core/tree/v1)
+**NOTE:** If you're looking for `swagger-parser` 2.X and OpenApi 3.0, please refer to [master branch](https://github.com/swagger-api/swagger-parser)
 
 # Swagger Parser
 
