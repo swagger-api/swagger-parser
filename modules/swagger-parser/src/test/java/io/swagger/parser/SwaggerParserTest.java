@@ -1248,4 +1248,12 @@ public class SwaggerParserTest {
         assertEquals(swagger.getSwagger().getPath("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
     }
 
+    @Test
+    public void testIssue258() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("duplicateOperationId.json", null, true);
+        assertNotNull(result);
+        assertNotNull(result.getSwagger());
+        assertEquals(result.getMessages().get(0), "attribute paths.'/pets/{id}'(post).operationId is repeated");
+    }
+
 }
