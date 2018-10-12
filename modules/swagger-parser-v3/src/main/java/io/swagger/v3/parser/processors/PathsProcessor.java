@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -168,6 +169,20 @@ public class PathsProcessor {
                 if (mediaType.getSchema() != null) {
                     updateLocalRefs(mediaType.getSchema(), pathRef);
                 }
+                Map<String, Example> examples = content.get(key).getExamples();
+                if (examples != null) {
+                    for( Example example:examples.values()){
+                        updateLocalRefs(example, pathRef);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void updateLocalRefs(Example example, String pathRef) {
+        if(example.get$ref() != null) {
+            if(isLocalRef(example.get$ref())) {
+                example.set$ref(computeLocalRef(example.get$ref(), pathRef));
             }
         }
     }

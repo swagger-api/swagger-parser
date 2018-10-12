@@ -1,6 +1,8 @@
 # Swagger Parser
 
-[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-2.0.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-2.0)
+**NOTE:** If you're looking for `swagger-parser` 1.X and OpenApi 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-parser/tree/v1)
+
+[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2)
 
 ## Overview 
 This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
@@ -97,7 +99,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.4</version>
+  <version>2.0.6-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -108,7 +110,7 @@ or
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.4</version>
+  <version>2.0.6-SNAPSHOT</version>
 </dependency>
 
 ```

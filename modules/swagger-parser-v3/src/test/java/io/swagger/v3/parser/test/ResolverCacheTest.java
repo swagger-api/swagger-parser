@@ -36,8 +36,6 @@ public class ResolverCacheTest {
     @Mocked
     RefUtils refUtils;
 
-    @Mocked
-    DeserializationUtils deserializationUtils;
 
     @Injectable
     OpenAPI openAPI;
@@ -50,7 +48,7 @@ public class ResolverCacheTest {
         final String ref = "http://my.company.com/path/to/file.json";
         final String contentsOfExternalFile = "really good json";
 
-        new Expectations() {{
+        new Expectations(DeserializationUtils.class) {{
             RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
             times = 1;
             result = contentsOfExternalFile;
@@ -75,7 +73,7 @@ public class ResolverCacheTest {
         final String ref = "http://my.company.com/path/to/file.json";
         final String contentsOfExternalFile = "really good json";
 
-        new Expectations() {{
+        new Expectations(DeserializationUtils.class) {{
             RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
             times = 1;
             result = contentsOfExternalFile;
@@ -126,6 +124,35 @@ public class ResolverCacheTest {
 
         PathItem path = cache.loadRef(ref+"#/paths/~1foo~0bar~01", RefFormat.URL, PathItem.class);
         assertNotNull(path);
+    }
+
+    @Test
+    public void testLoadExternalRefResponseWithNoContent() throws Exception {
+        final RefFormat format = RefFormat.URL;
+        final String ref = "http://my.company.com/path/to/main.yaml";
+        final String contentsOfExternalFile = "openapi: 3.0.0\n" +
+          "\n" +
+          "info:\n" +
+          "  version: 1.0.0\n" +
+          "  title: Response include test case child\n" +
+          "\n" +
+          "components:\n" +
+          "  responses:\n" +
+          "    200:\n" +
+          "      description: Success\n";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
+            times = 1;
+            result = contentsOfExternalFile;
+        }};
+
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json");
+
+        ApiResponse response = cache.loadRef(ref+"#/components/responses/200", RefFormat.URL, ApiResponse.class);
+        assertNotNull(response);
+        assertEquals(response.getDescription(), "Success");
+        assertNull(response.getContent());
     }
 
     @Test
