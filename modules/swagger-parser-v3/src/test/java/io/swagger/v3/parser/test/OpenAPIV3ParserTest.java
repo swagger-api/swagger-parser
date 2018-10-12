@@ -1537,6 +1537,16 @@ public class OpenAPIV3ParserTest {
         assertEquals(actualPathContent, actualComponentContent);
     }
 
+    @Test
+    public void shouldParseParameters() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_877.yaml", null, parseOptions);
+        Parameter parameter = openAPI.getPaths().get("/adopt").getGet().getParameters().get(0);
+        assertNotNull(parameter);
+        assertEquals(parameter.getIn(), "path");
+        assertEquals(parameter.getName(), "playerId");
+    }
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
