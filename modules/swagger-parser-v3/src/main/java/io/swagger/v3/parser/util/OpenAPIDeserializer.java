@@ -1122,14 +1122,13 @@ public class OpenAPIDeserializer {
                 JsonNode ref = node.get("$ref");
                 if (ref != null) {
                     if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                        PathItem pathItem = new PathItem();
                         String mungedRef = mungedRef(ref.textValue());
                         if (mungedRef != null) {
-                            pathItem.set$ref(mungedRef);
+                            callback.set$ref(mungedRef);
                         }else{
-                            pathItem.set$ref(ref.textValue());
+                            callback.set$ref(ref.textValue());
                         }
-                        return callback.addPathItem(name,pathItem);
+                        return callback;
                     } else {
                         result.invalidType(location, "$ref", "string", node);
                         return null;
