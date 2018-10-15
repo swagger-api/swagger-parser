@@ -1050,6 +1050,11 @@ public class OpenAPIDeserializer {
             link.setParameters(getLinkParameters(parametersObject, location, result));
         }
 
+        String requestBody = getString("requestBody",linkNode,false,location,result);
+        if (requestBody!= null) {
+            link.setRequestBody(requestBody);
+        }
+
         ObjectNode headerObject = getObject("headers",linkNode,false,location,result);
         if (headerObject!= null) {
             link.setHeaders(getHeaders(headerObject, location, result));

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -1535,6 +1536,16 @@ public class OpenAPIV3ParserTest {
         assertEquals(properties.size(), 2);
         assertNotNull(actualPathContent);
         assertEquals(actualPathContent, actualComponentContent);
+    }
+
+    @Test
+    public void testLinkIssue() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/linkIssue.yaml", null, parseOptions);
+        Map<String, Link> links = openAPI.getPaths().get("/2.0/repositories/{username}").getGet().getResponses().get("200").getLinks();
+        Object requestBody = links.get("userRepository").getRequestBody();
+        assertEquals(requestBody, "$response.body#/slug");
     }
 
 
