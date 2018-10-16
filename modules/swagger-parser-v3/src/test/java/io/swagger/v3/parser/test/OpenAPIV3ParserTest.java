@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -1537,6 +1538,15 @@ public class OpenAPIV3ParserTest {
         assertEquals(actualPathContent, actualComponentContent);
     }
 
+    @Test
+    public void testIssue884() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_884.yaml", null, parseOptions);
+        Map<String, Link> links = openAPI.getPaths().get("/2.0/repositories/{username}").getGet().getResponses().get("200").getLinks();
+        String operationId = links.get("userRepository").getOperationId();
+        assertEquals(operationId, "getRepository");
+    }
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
