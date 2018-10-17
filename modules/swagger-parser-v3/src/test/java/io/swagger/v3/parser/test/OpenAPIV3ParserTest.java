@@ -1547,6 +1547,17 @@ public class OpenAPIV3ParserTest {
         String operationId = links.get("userRepository").getOperationId();
         assertEquals(operationId, "getRepository");
     }
+    @Test
+    public void testLinkIssue() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/linkIssue.yaml", null, parseOptions);
+        Map<String, Link> links = openAPI.getPaths().get("/2.0/repositories/{username}").getGet().getResponses().get("200").getLinks();
+        Object requestBody = links.get("userRepository").getRequestBody();
+        assertEquals(requestBody, "$response.body#/slug");
+    }
+
+
 
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();

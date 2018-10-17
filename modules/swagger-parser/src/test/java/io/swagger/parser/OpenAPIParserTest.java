@@ -365,6 +365,19 @@ public class OpenAPIParserTest {
         assertNotNull(openAPI);
         assertEquals(openAPI.getPaths().get("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
     }
+
+    @Test
+    public void testIssue258() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("duplicateOperationId.json", null, options);
+
+        System.out.println(result.getMessages());
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().get(0), "attribute paths.'/pets/{id}'(post).operationId is repeated");
+   }
+
     @Test
     public void testIssueRelativeRefs2(){
         String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
@@ -401,6 +414,5 @@ public class OpenAPIParserTest {
         Schema prop = (Schema) arraySchema.getItems().getProperties().get("itemID");
 
         assertEquals(prop.get$ref(),"#/components/schemas/simpleIDType_v01");
-
     }
 }
