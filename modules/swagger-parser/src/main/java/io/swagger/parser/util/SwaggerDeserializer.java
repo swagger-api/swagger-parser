@@ -475,12 +475,12 @@ public class SwaggerDeserializer {
 
             if(sp != null) {
                 // type is mandatory when sp != null
-                getString("type", obj, true, location, result);
+                String paramType = getString("type", obj, true, location, result);
                 Map<PropertyBuilder.PropertyId, Object> map = new LinkedHashMap<PropertyBuilder.PropertyId, Object>();
 
                 map.put(TYPE, type);
                 map.put(FORMAT, format);
-                String defaultValue = getString("default", obj, false, location, result);
+                String defaultValue = parameterDefault(obj, paramType, location, result);
                 map.put(DEFAULT, defaultValue);
                 sp.setDefault(defaultValue);
 
@@ -655,6 +655,15 @@ public class SwaggerDeserializer {
         }
 
         return output;
+    }
+
+    private String parameterDefault(ObjectNode node, String type, String location, ParseResult result) {
+        String key = "default";
+        if (type != null && type.equals("array")) {
+            ArrayNode array = getArray(key, node, false, location, result);
+            return array != null ? array.toString() : null;
+        }
+        return getString(key, node, false, location, result);
     }
 
     private Property schema(Map<String, Object> schemaItems, JsonNode obj, String location, ParseResult result) {
