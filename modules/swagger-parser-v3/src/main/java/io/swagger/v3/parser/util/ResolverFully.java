@@ -49,6 +49,7 @@ public class ResolverFully {
     private Map<String, Schema> schemas;
     private Map<String, Schema> resolvedModels = new HashMap<>();
     private Map<String, Example> examples;
+    private Map<String, Parameter> parameters;
     private Map<String, RequestBody> requestBodies;
     private Map<String, Link> links;
 
@@ -74,10 +75,18 @@ public class ResolverFully {
             }
         }
 
+
+        if (openAPI.getComponents() != null && openAPI.getComponents().getParameters() != null) {
+            parameters = openAPI.getComponents().getParameters();
+            if (parameters == null) {
+                parameters = new HashMap<>();
+            }
+        }
         if (openAPI.getComponents() != null && openAPI.getComponents().getLinks() != null) {
             links = openAPI.getComponents().getLinks();
             if (links == null) {
                 links = new HashMap<>();
+
             }
         }
 
@@ -94,6 +103,7 @@ public class ResolverFully {
             // inputs
             if (op.getParameters() != null) {
                 for (Parameter parameter : op.getParameters()) {
+                    parameter = parameter.get$ref() != null ? resolveParameter(parameter) : parameter;
                     if (parameter.getSchema() != null) {
                         Schema resolved = resolveSchema(parameter.getSchema());
                         if (resolved != null) {
@@ -200,6 +210,18 @@ public class ResolverFully {
             }
         }
         return requestBody;
+    }
+
+    public Parameter resolveParameter(Parameter parameter){
+        String $ref = parameter.get$ref();
+        RefFormat refFormat = computeRefFormat($ref);
+        if (!isAnExternalRefFormat(refFormat)){
+            if (parameters != null && !parameters.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return parameters.getOrDefault(referenceKey, parameter);
+            }
+        }
+        return parameter;
     }
 
     public Schema resolveSchema(Schema schema) {
