@@ -339,11 +339,11 @@ public class OpenAPIResolverTest {
 
         Map<String, Callback> callbacks = openAPI.getComponents().getCallbacks();
         // internal callback reference
-        assertEquals(callbacks.get("referenced").get("$ref").get$ref(),"#/components/callbacks/failed");
+        assertEquals(callbacks.get("referenced").get$ref(),"#/components/callbacks/failed");
         //callback pathItem -> operation ->requestBody
         assertEquals(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody3");
         //remote callback ref
-        assertEquals(callbacks.get("remoteCallback").get("$ref").get$ref(),"#/components/callbacks/callback");
+        assertEquals(callbacks.get("remoteCallback").get$ref(),"http://localhost:" + serverPort + "/remote/callback");
 
     }
 

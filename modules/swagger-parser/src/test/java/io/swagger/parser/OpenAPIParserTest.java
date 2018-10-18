@@ -415,4 +415,19 @@ public class OpenAPIParserTest {
 
         assertEquals(prop.get$ref(),"#/components/schemas/simpleIDType_v01");
     }
+
+    @Test
+    public void testIssue879() {
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        OpenAPI openAPI = openApiParser.readLocation("issue_879.yaml", null, options).getOpenAPI();
+
+        String ref = openAPI.getPaths()
+                .get("/register")
+                .getPost()
+                .getCallbacks()
+                .get("myEvent")
+                .get$ref();
+        assertEquals(ref, "#/components/callbacks/callbackEvent");
+    }
 }
