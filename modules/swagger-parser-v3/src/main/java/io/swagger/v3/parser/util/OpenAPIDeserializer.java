@@ -52,15 +52,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -299,16 +291,18 @@ public class OpenAPIDeserializer {
         if (obj == null) {
             return null;
         }
-        List<Tag> tags = new ArrayList<>();
+        Map<String, Tag> tags = new LinkedHashMap<String,Tag>();
+
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
                 Tag tag = getTag((ObjectNode) item, location, result);
-                if (tag != null) {
-                    tags.add(tag);
+                if (tag != null ) {
+                    tags.put(tag.getName(),tag);
                 }
             }
         }
-        return tags;
+        List<Tag> list = new ArrayList<Tag>(tags.values());
+        return list;
     }
 
     public Tag getTag(ObjectNode obj, String location, ParseResult result) {
@@ -2415,15 +2409,17 @@ public class OpenAPIDeserializer {
     public List<String> getTagsStrings(ArrayNode nodes, String location, ParseResult result) {
         if (nodes == null)
             return null;
-
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new LinkedHashSet<>();
 
         for (JsonNode node : nodes) {
             if (node.getNodeType().equals(JsonNodeType.STRING)) {
                 tags.add(node.textValue());
             }
         }
-        return tags;
+
+        List<String> tagString =   new ArrayList<>();
+        tagString.addAll(tags);
+        return tagString;
     }
 
 
