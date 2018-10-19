@@ -64,6 +64,14 @@ public class OpenAPIParserTest {
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
     }
 
+
+    @Test
+    public void testDuplicationOfTags() {
+        String filelocation = "apiWithMultipleTags.json";
+        SwaggerParseResult result = new OpenAPIParser().readLocation(filelocation, null,null);
+        assertEquals(result.getOpenAPI().getPaths().get("/getTimeAfterJson/{time}").getPost().getTags().size(),3);
+}
+
     @Test
     public void testIssue768() {
         ParseOptions options = new ParseOptions();
