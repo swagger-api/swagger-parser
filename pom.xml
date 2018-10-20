@@ -232,6 +232,11 @@
                 <version>${wiremock-version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${felix-version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <modules>
@@ -239,6 +244,7 @@
         <module>modules/swagger-compat-spec-parser</module>
     </modules>
     <properties>
+        <felix-version>2.3.7</felix-version>
         <commons-io-version>2.4</commons-io-version>
         <slf4j-version>1.6.3</slf4j-version>
         <swagger-core-version>1.5.21</swagger-core-version>
