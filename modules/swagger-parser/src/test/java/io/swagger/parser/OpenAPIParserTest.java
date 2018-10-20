@@ -67,7 +67,6 @@ public class OpenAPIParserTest {
 
     @Test
     public void testDuplicationOfTags() {
-        //String filelocation = "/Users/sree/Documents/opensource/github/swagger-parser/modules/swagger-parser/src/test/resources/apiWithMultipleTags.json";
         String filelocation ="apiWithMultipleTags.json";
         SwaggerParseResult result = new OpenAPIParser().readLocation(filelocation, null,null);
         assertEquals(result.getOpenAPI().getTags().size(),2);

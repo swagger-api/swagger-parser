@@ -297,20 +297,23 @@ public class OpenAPIDeserializer {
         if (obj == null) {
             return null;
         }
-        
-//        Map<String, Tag> tags = new LinkedHashMap<String,Tag>();
         List<Tag> tags = new ArrayList<>();
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
                 Tag tag = getTag((ObjectNode) item, location, result);
-                if (tag != null ) {
-                    if(tags.contains(tag.getName())) {
-                        LOGGER.warn("Duplicate tags found: "+tag.getName());
+                if (tag != null) {
+
+                    if(tags.stream().filter(o -> o.getName().equals(tag.getName())).findFirst().isPresent()) {
+                        LOGGER.warn("Duplicate Tags Found: "+tag.getName());
                     }
+
                     tags.add(tag);
                 }
             }
         }
+
+
+
         return tags;
     }
 
@@ -2418,7 +2421,7 @@ public class OpenAPIDeserializer {
     public List<String> getTagsStrings(ArrayNode nodes, String location, ParseResult result) {
         if (nodes == null)
             return null;
-        Set<String> tags = new LinkedHashSet<>();
+        List<String> tags = new ArrayList<>();
 
         for (JsonNode node : nodes) {
             if (node.getNodeType().equals(JsonNodeType.STRING)) {
@@ -2426,9 +2429,7 @@ public class OpenAPIDeserializer {
             }
         }
 
-        List<String> tagString =   new ArrayList<>();
-        tagString.addAll(tags);
-        return tagString;
+        return tags;
     }
 
 
