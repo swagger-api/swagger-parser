@@ -780,6 +780,13 @@ public class SwaggerDeserializer {
                 impl.setUniqueItems(bp);
             }
 
+
+            BigDecimal bd = getBigDecimal("minimum", node, false, location, result);
+            impl.setMinimum(bd);
+
+            bd = getBigDecimal("maximum", node, false, location, result);
+            impl.setMaximum(bd);
+
             bp = getBoolean("exclusiveMaximum", node, false, location, result);
             if(bp != null) {
                 impl.setExclusiveMaximum(bp);
@@ -817,6 +824,7 @@ public class SwaggerDeserializer {
             if(multipleOf != null) {
                 impl.setMultipleOf(multipleOf);
             }
+
 
             ap = node.get("enum");
             if(ap != null) {
