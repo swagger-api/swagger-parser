@@ -22,7 +22,6 @@
         "post": {
           "tags":[
             "sample",
-            "sample",
             "test"
             ],
           "security" : [{"OpenID":["read"]}],
