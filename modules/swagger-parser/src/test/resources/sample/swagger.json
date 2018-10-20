@@ -1,0 +1,17 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"version": "v1",
+		"title": "SwaggerTest",
+		"description": "Service for Swagger and JSON schema testing"
+	},
+	"host": "paeshin-w7",
+	"basePath": "/SwaggerTest",
+	"schemes": ["http",
+	"https"],
+	"paths": {
+		"/api/Address": {
+			"$ref": "Paths/Address.json"
+		}
+	}	
+}

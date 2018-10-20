@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.29-SNAPSHOT</version>
+    <version>1.0.40-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
     <developers>
@@ -198,6 +198,11 @@
                 <version>${swagger-core-version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger-core-version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng-version}</version>
@@ -236,7 +241,7 @@
     <properties>
         <commons-io-version>2.4</commons-io-version>
         <slf4j-version>1.6.3</slf4j-version>
-        <swagger-core-version>1.5.12</swagger-core-version>
+        <swagger-core-version>1.5.21</swagger-core-version>
         <junit-version>4.8.1</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>

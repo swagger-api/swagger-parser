@@ -186,7 +186,7 @@
               "type": "string"
             },
             "collectionFormat": "pipes",
-            "default": "available"
+            "default": ["available"]
           }
         ],
         "responses": {

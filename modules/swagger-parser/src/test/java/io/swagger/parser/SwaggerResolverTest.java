@@ -11,6 +11,7 @@ import io.swagger.models.properties.*;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.PathsProcessor;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.StrictExpectations;
@@ -206,11 +207,11 @@ public class SwaggerResolverTest {
         swagger.path("/fun", new Path()
                 .get(new Operation()
                         .response(200, new Response()
-                                .schema(new RefProperty(remoteRef)))));
+                                .responseSchema(new RefModel(remoteRef)))));
 
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
         final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
-        final RefProperty ref = (RefProperty) response.getSchema();
+        final RefModel ref = (RefModel) response.getResponseSchema();
         assertEquals(ref.get$ref(), "#/definitions/Tag");
         assertNotNull(swagger.getDefinitions().get("Tag"));
     }
@@ -231,13 +232,13 @@ public class SwaggerResolverTest {
         swagger.path("/fun", new Path()
                 .get(new Operation()
                         .response(200, new Response()
-                                .schema(
-                                        new ArrayProperty(
+                                .responseSchema(
+                                        new ArrayModel().items(
                                                 new RefProperty(REMOTE_REF_YAML))))));
 
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
         final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
-        final ArrayProperty array = (ArrayProperty) response.getSchema();
+        final ArrayModel array = (ArrayModel) response.getResponseSchema();
         assertNotNull(array.getItems());
 
         final RefProperty ref = (RefProperty) array.getItems();
@@ -387,5 +388,12 @@ public class SwaggerResolverTest {
         assertEquals(resolved.getPaths().get("/test/{id}").getGet().getParameters().size(), 1);
         QueryParameter qp = (QueryParameter)resolved.getPaths().get("/test/{id}").getGet().getParameters().get(0);
         assertEquals(qp.getName(), "page");
+    }
+
+    @Test
+    public void testCodegenIssue5753() {
+        Swagger swagger = new SwaggerParser().read("./relative-file-references/yaml/issue-5753.yaml");
+
+        Json.prettyPrint(swagger);
     }
 }

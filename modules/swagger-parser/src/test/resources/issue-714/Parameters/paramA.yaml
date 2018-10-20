@@ -1,0 +1,7 @@
+parameters:
+  PageSize:
+    name: r # r(esults-per-page); alternative: pageSize
+    description: maximum number of elements to be returned on a page
+    in: query
+    type: integer
+    default: 50

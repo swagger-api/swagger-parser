@@ -1,0 +1,33 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.9-abcd",
+    "title": "Swagger Sample API Reusable Parameters"
+  },
+  "host": "my.api.com",
+  "basePath": "/v1",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/pets/{id}": {
+      "get": {
+        "description": "Returns pets based on ID",
+        "summary": "Find pets by ID",
+        "operationId": "getPetsById",
+        "parameters": [
+          { "$ref": "http://docs.baikalplatform.com/common/v2.0/common.json#/parameters/x-correlator" }
+        ],
+        "responses": {
+          "200": {
+            "description": "pet response"
+          },
+          "default": {
+            "description": "error payload"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+	"title": "link",
+	"description": "A link description object",
+	"type": "object",
+	"properties": {
+		"href": {
+			"$ref": "./simpleIDType_v01.json"
+		},
+		"mediaType": {
+			"description": "media type description",
+			"type": "string",
+			"enum": [
+				"application/gzip",
+				"application/json",
+				"application/msword",
+				"application/pdf",
+				"application/postscript",
+				"application/vnd.ms-excel",
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+				"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+				"application/xml",
+				"application/x-www-form-urlencoded",
+				"image/gif",
+				"image/jpeg",
+				"image/png",
+				"image/tiff",
+				"multipart/mixed",
+				"text/html",
+				"text/plain",
+				"application/vnd.visio",
+				"image/bmp",
+				"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+				"application/vnd.ms-powerpoint",
+				"video/mp4",
+				"audio/mpeg",
+				"video/x-msvideo",
+				"video/x-ms-wmv",
+				"application/rtf",
+				"application/vnd.ms-outlook",
+				"text/csv",
+				"video/quicktime",
+				"application/zip",
+				"application/illustrator",
+				"text/xml"
+			]
+		},		
+		"payloadArguments": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"argumentPath": {
+						"description": "payloadArguments",
+						"type": "string"
+					},
+					"argumentValue": {
+						"description": "payloadArguments",
+						"type": "string"
+					}
+				}
+			}
+		}
+	}
+}

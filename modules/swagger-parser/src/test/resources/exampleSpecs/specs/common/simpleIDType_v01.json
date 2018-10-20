@@ -1,0 +1,7 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "simpleID",
+	"description": "Simple (string) identifier of an object to be used when there is no appropriate specific named ID Type",
+	"type": "string",
+	"pattern": "^[a-zA-Z0-9.$-_\/]+$"
+}

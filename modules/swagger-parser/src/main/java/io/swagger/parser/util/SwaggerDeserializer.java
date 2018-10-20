@@ -7,6 +7,7 @@ import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.util.Json;
 
 import java.math.BigDecimal;
@@ -198,6 +199,7 @@ public class SwaggerDeserializer {
         if(obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return pathRef((TextNode)ref, location, result);
             }
 
@@ -424,6 +426,7 @@ public class SwaggerDeserializer {
         return output;
     }
 
+
     public Parameter parameter(ObjectNode obj, String location, ParseResult result) {
         if(obj == null) {
             return null;
@@ -472,12 +475,12 @@ public class SwaggerDeserializer {
 
             if(sp != null) {
                 // type is mandatory when sp != null
-                getString("type", obj, true, location, result);
+                String paramType = getString("type", obj, true, location, result);
                 Map<PropertyBuilder.PropertyId, Object> map = new LinkedHashMap<PropertyBuilder.PropertyId, Object>();
 
                 map.put(TYPE, type);
                 map.put(FORMAT, format);
-                String defaultValue = getString("default", obj, false, location, result);
+                String defaultValue = parameterDefault(obj, paramType, location, result);
                 map.put(DEFAULT, defaultValue);
                 sp.setDefault(defaultValue);
 
@@ -617,13 +620,8 @@ public class SwaggerDeserializer {
                     bp.setPattern(pat);
                 }
 
-                // allowEmptyValue
-                Boolean bl = getBoolean("allowEmptyValue", obj, false, location, result);
-                if(bl != null) {
-                    bp.setAllowEmptyValue(bl);
-                }
                 // readOnly
-                bl = getBoolean("readOnly", obj, false, location, result);
+                Boolean bl = getBoolean("readOnly", obj, false, location, result);
                 if(bl != null) {
                     bp.setReadOnly(bl);
                 }
@@ -659,6 +657,15 @@ public class SwaggerDeserializer {
         return output;
     }
 
+    private String parameterDefault(ObjectNode node, String type, String location, ParseResult result) {
+        String key = "default";
+        if (type != null && type.equals("array")) {
+            ArrayNode array = getArray(key, node, false, location, result);
+            return array != null ? array.toString() : null;
+        }
+        return getString(key, node, false, location, result);
+    }
+
     private Property schema(Map<String, Object> schemaItems, JsonNode obj, String location, ParseResult result) {
         return Json.mapper().convertValue(obj, Property.class);
     }
@@ -673,6 +680,7 @@ public class SwaggerDeserializer {
 
     public Path pathRef(TextNode ref, String location, ParseResult result) {
         RefPath output = new RefPath();
+
         output.set$ref(ref.textValue());
         return output;
     }
@@ -731,6 +739,20 @@ public class SwaggerDeserializer {
                 am.items(items);
             }
 
+            Integer maxItems = getInteger("maxItems", node, false, location, result);
+            am.setMaxItems(maxItems);
+
+            Integer minItems = getInteger("minItems", node, false, location, result);
+            am.setMinItems(minItems);
+
+            // extra keys
+            Set<String> keys = getKeys(node);
+            for(String key : keys) {
+                if(key.startsWith("x-")) {
+                    am.setVendorExtension(key, extension(node.get(key)));
+                }
+            }
+
             model = am;
         }
         else {
@@ -756,11 +778,51 @@ public class SwaggerDeserializer {
                 impl.setUniqueItems(bp);
             }
 
+
             BigDecimal bd = getBigDecimal("minimum", node, false, location, result);
             impl.setMinimum(bd);
 
             bd = getBigDecimal("maximum", node, false, location, result);
             impl.setMaximum(bd);
+
+            bp = getBoolean("exclusiveMaximum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMaximum(bp);
+            }
+
+            bp = getBoolean("exclusiveMinimum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMinimum(bp);
+            }
+
+            value = getString("pattern", node, false, location, result);
+            impl.setPattern(value);
+
+            BigDecimal maximum = getBigDecimal("maximum", node, false, location, result);
+            if(maximum != null) {
+                impl.maximum(maximum);
+            }
+
+            BigDecimal minimum = getBigDecimal("minimum", node, false, location, result);
+            if(minimum != null) {
+                impl.minimum(minimum);
+            }
+
+            Integer minLength = getInteger("minLength", node, false, location, result);
+            if(minLength != null) {
+                impl.setMinLength(minLength);
+            }
+
+            Integer maxLength = getInteger("maxLength", node, false, location, result);
+            if(maxLength != null) {
+                impl.setMaxLength(maxLength);
+            }
+
+            BigDecimal multipleOf = getBigDecimal("multipleOf", node, false, location, result);
+            if(multipleOf != null) {
+                impl.setMultipleOf(multipleOf);
+            }
+
 
             ap = node.get("enum");
             if(ap != null) {
@@ -829,22 +891,12 @@ public class SwaggerDeserializer {
                     result.extra(location, key, node.get(key));
                 }
             }
-            if("{ }".equals(Json.pretty(impl)))
-                return null;
             model = impl;
         }
         JsonNode exampleNode = node.get("example");
         if(exampleNode != null) {
-            // we support text or object nodes
-            if(exampleNode.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode on = getObject("example", node, false, location, result);
-                if(on != null) {
-                    model.setExample(on);
-                }
-            }
-            else {
-                model.setExample(exampleNode.toString());
-            }
+            Object example = Json.mapper().convertValue(exampleNode, Object.class);
+            model.setExample(example);
         }
 
         if(model != null) {
@@ -969,15 +1021,6 @@ public class SwaggerDeserializer {
             }
         }
 
-        // work-around for https://github.com/swagger-api/swagger-core/issues/1977
-        if(node.get("$ref") != null && node.get("$ref").isTextual()) {
-            // check if it's a relative ref
-            String refString = node.get("$ref").textValue();
-            if(refString.indexOf("/") == -1 && refString.indexOf(".") > 0) {
-                refString = "./" + refString;
-                node.put("$ref", refString);
-            }
-        }
         return Json.mapper().convertValue(node, Property.class);
     }
 
@@ -1065,6 +1108,7 @@ public class SwaggerDeserializer {
         JsonNode ref = node.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return refResponse((TextNode) ref, location, result);
             }
             else {
@@ -1078,7 +1122,18 @@ public class SwaggerDeserializer {
 
         ObjectNode schema = getObject("schema", node, false, location, result);
         if(schema != null) {
-            output.schema(Json.mapper().convertValue(schema, Property.class));
+            JsonNode schemaRef = schema.get("$ref");
+            if (schemaRef != null) {
+                if (schemaRef.getNodeType().equals(JsonNodeType.STRING)) {
+                    Model schemaProp = new RefModel(schemaRef.textValue());
+                    output.responseSchema(schemaProp);
+                } else {
+                    result.invalidType(location, "$ref", "string", node);
+                }
+            } else {
+                output.responseSchema(Json.mapper().convertValue(schema, Model.class));
+            }
+
         }
         ObjectNode headersNode = getObject("headers", node, false, location, result);
         if(headersNode != null) {
@@ -1243,10 +1298,18 @@ public class SwaggerDeserializer {
                         output.setDescription(description);
                     }
                 }
+                JsonNode desc = node.get("description");
+                if(desc != null) {
+                    output.setDescription(desc.textValue());
+                }
             }
             else if (type.equals("oauth2")) {
                 // TODO: parse manually for better feedback
                 output = Json.mapper().convertValue(node, OAuth2Definition.class);
+                JsonNode desc = node.get("description");
+                if(desc != null) {
+                    output.setDescription(desc.textValue());
+                }
             }
             else {
                 result.invalidType(location + ".type", "type", "basic|apiKey|oauth2", node);

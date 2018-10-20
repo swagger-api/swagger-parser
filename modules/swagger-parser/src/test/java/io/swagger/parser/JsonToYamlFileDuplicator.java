@@ -42,8 +42,8 @@ public class JsonToYamlFileDuplicator {
 
             final JsonNode jsonNode = DeserializationUtils.deserializeIntoTree(fileContents, next.toString());
 
-            final String yamlOutput = Yaml.mapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
-
+            final String yamlOutput = Yaml.mapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode)
+                    .replaceAll("\\n", System.getProperty("line.separator"));
 
             final String relativePath = "./" + next.toString().replace(inputDirectory.toString(), "").replace(".json", ".yaml");
 
