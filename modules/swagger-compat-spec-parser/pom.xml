@@ -10,26 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-compat-spec-parser</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>swagger-compat-spec-parser</name>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            io.swagger.deserializer;version="${project.version}",
-                            io.swagger.parser;version="${project.version}",
-                            io.swagger.reader;version="${project.version}"
-                        </Export-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
     <dependencies>
         <dependency>
             <groupId>io.swagger</groupId>
