@@ -14,11 +14,13 @@ import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.parser.SwaggerParser;
@@ -30,6 +32,7 @@ import mockit.Mocked;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
+import javax.validation.constraints.AssertFalse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -257,5 +260,26 @@ public class LegacyConverterTest {
         Set<String> actual = new HashSet<>(sp.getEnum());
 
         assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testIssue799() throws Exception {
+
+        Swagger swagger = converter.read("src/test/resources/specs/v1_2/issue799.json");
+        Assert.assertEquals( swagger.getPaths().get("/api/v1beta3/namespaces/{namespaces}/bindings").getPost().getResponses().get("200").getResponseSchema().getReference(), "#/definitions/v1beta3.Binding");
+        Parameter bodyParameter = swagger.getPaths().get("/api/v1beta3/namespaces/{namespaces}/bindings").getPost().getParameters().get(1);
+        Assert.assertEquals( bodyParameter.getName(), "body");
+        Assert.assertTrue( bodyParameter instanceof BodyParameter);
+        Assert.assertEquals( ((BodyParameter)bodyParameter).getSchema().getReference(), "#/definitions/v1beta3.Binding");
+        Assert.assertEquals( swagger.getPaths().get("/api/v1beta3/namespaces/{namespaces}/componentstatuses/{name}").getGet().getResponses().get("200").getResponseSchema().getReference(), "#/definitions/v1beta3.ComponentStatus");
+        Assert.assertEquals( swagger.getPaths().get("/api/v1beta3/namespaces/{namespaces}/componentstatuses").getGet().getResponses().get("200").getResponseSchema().getReference(), "#/definitions/v1beta3.ComponentStatusList");
+        Property conditionsProperty = swagger.getDefinitions().get("v1beta3.ComponentStatus").getProperties().get("conditions");
+        Assert.assertTrue( conditionsProperty instanceof ArrayProperty);
+        Property items = ((ArrayProperty)conditionsProperty).getItems();
+        Assert.assertTrue( items instanceof RefProperty);
+        Assert.assertEquals( ((RefProperty)items).get$ref(), "#/definitions/v1beta3.ObjectReference");
+        Property metadataProperty = swagger.getDefinitions().get("v1beta3.ComponentStatus").getProperties().get("metadata");
+        Assert.assertTrue( metadataProperty instanceof RefProperty);
+        Assert.assertEquals( ((RefProperty)metadataProperty).get$ref(), "#/definitions/v1beta3.ObjectMeta");
     }
 }

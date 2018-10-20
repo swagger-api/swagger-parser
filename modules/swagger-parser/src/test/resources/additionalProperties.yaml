@@ -19,4 +19,4 @@ paths:
         200:
           description: Returns results.
           schema:
-              $ref: "./globals.yaml#/definitions/result"
+              $ref: "globals.yaml#/definitions/result"

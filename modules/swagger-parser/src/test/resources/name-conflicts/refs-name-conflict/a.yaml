@@ -23,7 +23,7 @@ paths:
       200:
        description: OK
        schema:
-         $ref: "./refs-name-conflict/b.yaml#/definitions/PersonObj"
+         $ref: "../test-relative/b.yaml#/definitions/PersonObj"
  /yetAnotherPerson:
   post:
     summary: Create yet another person
@@ -33,7 +33,7 @@ paths:
       200:
        description: OK
        schema:
-         $ref: "./refs-name-conflict/b.yaml#/definitions/PersonObj"
+         $ref: "../test-relative/b.yaml#/definitions/PersonObj"
 
 definitions:
  PersonObj:

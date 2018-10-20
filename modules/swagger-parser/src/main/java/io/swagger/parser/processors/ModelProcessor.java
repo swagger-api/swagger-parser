@@ -87,15 +87,21 @@ public class ModelProcessor {
         2) shove it into the #/definitions
         3) update the RefModel to point to its location in #/definitions
      */
+        String newRef = null;
 
         if (isAnExternalRefFormat(refModel.getRefFormat())) {
-            final String newRef = externalRefProcessor.processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat());
 
-            if (newRef != null) {
-                refModel.set$ref(newRef);
-            }
+            newRef    = externalRefProcessor.processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat());
+
         }
+
+        if (newRef != null) {
+            refModel.set$ref(newRef);
+        }
+
     }
+
+
 
 
 }

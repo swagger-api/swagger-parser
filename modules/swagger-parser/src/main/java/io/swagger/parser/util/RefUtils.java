@@ -5,9 +5,14 @@ import io.swagger.models.refs.RefFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
@@ -114,6 +119,8 @@ public class RefUtils {
         return StringUtils.join(outputParts, "/");
     }
 
+
+
     public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
                                          Path parentDirectory) {
 
@@ -121,7 +128,7 @@ public class RefUtils {
             throw new RuntimeException("Ref is not external");
         }
 
-        String result;
+        String result = null;
 
         try {
             if (refFormat == RefFormat.URL) {
@@ -133,8 +140,22 @@ public class RefUtils {
                 if(Files.exists(pathToUse)) {
                     result = IOUtils.toString(new FileInputStream(pathToUse.toFile()), "UTF-8");
                 } else {
+                    String url = file;
+                    if(url.contains("..")) {
+                        url = parentDirectory + url.substring(url.indexOf(".") + 2);
+                    }else{
+                        url = parentDirectory + url.substring(url.indexOf(".") + 1);
+                    }
+                    final Path pathToUse2 = parentDirectory.resolve(url).normalize();
+
+                    if(Files.exists(pathToUse2)) {
+                        result = IOUtils.toString(new FileInputStream(pathToUse2.toFile()), "UTF-8");
+                    }
+                }
+                if (result == null){
                     result = ClasspathHelper.loadFileFromClasspath(file);
                 }
+
 
             }
         } catch (Exception e) {

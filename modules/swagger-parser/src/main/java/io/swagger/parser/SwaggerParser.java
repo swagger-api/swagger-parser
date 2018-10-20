@@ -95,7 +95,7 @@ public class SwaggerParser {
     }
 
     public SwaggerDeserializationResult readWithInfo(String swaggerAsString, boolean resolve) {
-        if (swaggerAsString == null) {
+        if (swaggerAsString == null || swaggerAsString.trim().isEmpty()) {
             return new SwaggerDeserializationResult().message("empty or null swagger supplied");
         }
         try {

@@ -32,6 +32,8 @@ public class SwaggerDeserializer {
     protected static Set<String> BODY_PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
     protected static Set<String> SECURITY_SCHEME_KEYS = new LinkedHashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
 
+    private final Set<String> operationIDs = new HashSet<>();
+
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
         ParseResult rootParse = new ParseResult();
@@ -199,6 +201,7 @@ public class SwaggerDeserializer {
         if(obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return pathRef((TextNode)ref, location, result);
             }
 
@@ -301,7 +304,7 @@ public class SwaggerDeserializer {
         ExternalDocs docs = externalDocs(externalDocs, location, result);
         output.setExternalDocs(docs);
 
-        value = getString("operationId", obj, false, location, result);
+        value = getString("operationId", obj, false, location, result, operationIDs);
         output.operationId(value);
 
         array = getArray("consumes", obj, false, location, result);
@@ -425,21 +428,6 @@ public class SwaggerDeserializer {
         return output;
     }
 
-    // Refs may need to be massaged slightly to ensure that swagger-core (specifically GenericRef) recognizes
-    // relative refs properly.  This should be done anywhere refs could appear (properties, parameters, schema, etc),
-    // so we have this function to ensure it is done consistently (and hopefully correctly) for all these occurrences.
-    //
-    // Returns a new ref string is change is needed, else returns null
-    public String mungedRef(String refString) {
-        // Ref: IETF RFC 3966, Section 5.2.2
-        if (!refString.contains(":") &&   // No scheme
-                !refString.startsWith("#") && // Path is not empty
-                !refString.startsWith("/") && // Path is not absolute
-                 refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
-            return "./" + refString;
-        }
-        return null;
-    }
 
     public Parameter parameter(ObjectNode obj, String location, ParseResult result) {
         if(obj == null) {
@@ -450,12 +438,6 @@ public class SwaggerDeserializer {
         JsonNode ref = obj.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
-                // work-around for https://github.com/swagger-api/swagger-core/issues/2138
-                String mungedRef = mungedRef(ref.textValue());
-                if (mungedRef != null) {
-                    obj.put("$ref", mungedRef);
-                    ref = obj.get("$ref");
-                }
                 return refParameter((TextNode) ref, location, result);
             }
             else {
@@ -495,12 +477,12 @@ public class SwaggerDeserializer {
 
             if(sp != null) {
                 // type is mandatory when sp != null
-                getString("type", obj, true, location, result);
+                String paramType = getString("type", obj, true, location, result);
                 Map<PropertyBuilder.PropertyId, Object> map = new LinkedHashMap<PropertyBuilder.PropertyId, Object>();
 
                 map.put(TYPE, type);
                 map.put(FORMAT, format);
-                String defaultValue = getString("default", obj, false, location, result);
+                String defaultValue = parameterDefault(obj, paramType, location, result);
                 map.put(DEFAULT, defaultValue);
                 sp.setDefault(defaultValue);
 
@@ -677,6 +659,15 @@ public class SwaggerDeserializer {
         return output;
     }
 
+    private String parameterDefault(ObjectNode node, String type, String location, ParseResult result) {
+        String key = "default";
+        if (type != null && type.equals("array")) {
+            ArrayNode array = getArray(key, node, false, location, result);
+            return array != null ? array.toString() : null;
+        }
+        return getString(key, node, false, location, result);
+    }
+
     private Property schema(Map<String, Object> schemaItems, JsonNode obj, String location, ParseResult result) {
         return Json.mapper().convertValue(obj, Property.class);
     }
@@ -691,6 +682,7 @@ public class SwaggerDeserializer {
 
     public Path pathRef(TextNode ref, String location, ParseResult result) {
         RefPath output = new RefPath();
+
         output.set$ref(ref.textValue());
         return output;
     }
@@ -787,6 +779,52 @@ public class SwaggerDeserializer {
             if(bp != null) {
                 impl.setUniqueItems(bp);
             }
+
+
+            BigDecimal bd = getBigDecimal("minimum", node, false, location, result);
+            impl.setMinimum(bd);
+
+            bd = getBigDecimal("maximum", node, false, location, result);
+            impl.setMaximum(bd);
+
+            bp = getBoolean("exclusiveMaximum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMaximum(bp);
+            }
+
+            bp = getBoolean("exclusiveMinimum", node, false, location, result);
+            if(bp != null) {
+                impl.setExclusiveMinimum(bp);
+            }
+
+            value = getString("pattern", node, false, location, result);
+            impl.setPattern(value);
+
+            BigDecimal maximum = getBigDecimal("maximum", node, false, location, result);
+            if(maximum != null) {
+                impl.maximum(maximum);
+            }
+
+            BigDecimal minimum = getBigDecimal("minimum", node, false, location, result);
+            if(minimum != null) {
+                impl.minimum(minimum);
+            }
+
+            Integer minLength = getInteger("minLength", node, false, location, result);
+            if(minLength != null) {
+                impl.setMinLength(minLength);
+            }
+
+            Integer maxLength = getInteger("maxLength", node, false, location, result);
+            if(maxLength != null) {
+                impl.setMaxLength(maxLength);
+            }
+
+            BigDecimal multipleOf = getBigDecimal("multipleOf", node, false, location, result);
+            if(multipleOf != null) {
+                impl.setMultipleOf(multipleOf);
+            }
+
 
             ap = node.get("enum");
             if(ap != null) {
@@ -985,14 +1023,6 @@ public class SwaggerDeserializer {
             }
         }
 
-        // work-around for https://github.com/swagger-api/swagger-core/issues/1977
-        if(node.get("$ref") != null && node.get("$ref").isTextual()) {
-            // check if it's a relative ref
-            String mungedRef = mungedRef(node.get("$ref").textValue());
-            if(mungedRef != null) {
-                node.put("$ref", mungedRef);
-            }
-        }
         return Json.mapper().convertValue(node, Property.class);
     }
 
@@ -1080,6 +1110,7 @@ public class SwaggerDeserializer {
         JsonNode ref = node.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return refResponse((TextNode) ref, location, result);
             }
             else {
@@ -1096,14 +1127,6 @@ public class SwaggerDeserializer {
             JsonNode schemaRef = schema.get("$ref");
             if (schemaRef != null) {
                 if (schemaRef.getNodeType().equals(JsonNodeType.STRING)) {
-
-                    // work-around for https://github.com/swagger-api/swagger-core/issues/2138
-                    String mungedRef = mungedRef(schemaRef.textValue());
-                    if (mungedRef != null) {
-                        schema.put("$ref", mungedRef);
-                        schemaRef = schema.get("$ref");
-                    }
-
                     Model schemaProp = new RefModel(schemaRef.textValue());
                     output.responseSchema(schemaProp);
                 } else {
@@ -1539,6 +1562,10 @@ public class SwaggerDeserializer {
     }
 
     public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        return getString(key, node, required, location, result, null);
+    }
+
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result, Set<String> uniqueValues) {
         String value = null;
         JsonNode v = node.get(key);
         if (node == null || v == null) {
@@ -1552,6 +1579,10 @@ public class SwaggerDeserializer {
         }
         else {
             value = v.asText();
+            if (uniqueValues != null && !uniqueValues.add(value)) {
+                result.unique(location, "operationId");
+                result.invalid();
+            }
         }
         return value;
     }
@@ -1576,6 +1607,7 @@ public class SwaggerDeserializer {
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<Location, JsonNode>();
         private Map<Location, String> invalidType = new LinkedHashMap<Location, String>();
         private List<Location> missing = new ArrayList<Location>();
+        private List<Location> unique = new ArrayList<>();
 
         public ParseResult() {
         }
@@ -1586,6 +1618,10 @@ public class SwaggerDeserializer {
 
         public void extra(String location, String key, JsonNode value) {
             extra.put(new Location(location, key), value);
+        }
+
+        public void unique(String location, String key) {
+            unique.add(new Location(location, key));
         }
 
         public void missing(String location, String key) {
@@ -1655,6 +1691,11 @@ public class SwaggerDeserializer {
             for(Location l : missing) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            for (Location l : unique) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is repeated";
                 messages.add(message);
             }
             for(Location l : unsupported.keySet()) {

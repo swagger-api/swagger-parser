@@ -19,6 +19,8 @@ import io.swagger.parser.util.SwaggerDeserializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ public class ResolverCache {
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
+    private final String parentUrl;
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
@@ -72,6 +75,7 @@ public class ResolverCache {
             File file = new File(".");
             parentDirectory = file.toPath();
         }
+        parentUrl = parentFileLocation;
 
     }
 
@@ -212,6 +216,12 @@ public class ResolverCache {
     }
 
     private String unescapePointer(String jsonPathElement) {
+        // URL decode the fragment
+        try {
+            jsonPathElement = URLDecoder.decode(jsonPathElement, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            //
+        }
         // Unescape the JSON Pointer segment using the algorithm described in RFC 6901, section 4:
         // https://tools.ietf.org/html/rfc6901#section-4
         // First transform any occurrence of the sequence '~1' to '/'
