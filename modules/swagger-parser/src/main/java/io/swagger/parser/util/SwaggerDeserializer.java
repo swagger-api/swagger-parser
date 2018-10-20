@@ -32,6 +32,8 @@ public class SwaggerDeserializer {
     protected static Set<String> BODY_PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
     protected static Set<String> SECURITY_SCHEME_KEYS = new LinkedHashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
 
+    private final Set<String> operationIDs = new HashSet<>();
+
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
         ParseResult rootParse = new ParseResult();
@@ -302,7 +304,7 @@ public class SwaggerDeserializer {
         ExternalDocs docs = externalDocs(externalDocs, location, result);
         output.setExternalDocs(docs);
 
-        value = getString("operationId", obj, false, location, result);
+        value = getString("operationId", obj, false, location, result, operationIDs);
         output.operationId(value);
 
         array = getArray("consumes", obj, false, location, result);
@@ -1552,6 +1554,10 @@ public class SwaggerDeserializer {
     }
 
     public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        return getString(key, node, required, location, result, null);
+    }
+
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result, Set<String> uniqueValues) {
         String value = null;
         JsonNode v = node.get(key);
         if (node == null || v == null) {
@@ -1565,6 +1571,10 @@ public class SwaggerDeserializer {
         }
         else {
             value = v.asText();
+            if (uniqueValues != null && !uniqueValues.add(value)) {
+                result.unique(location, "operationId");
+                result.invalid();
+            }
         }
         return value;
     }
@@ -1589,6 +1599,7 @@ public class SwaggerDeserializer {
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<Location, JsonNode>();
         private Map<Location, String> invalidType = new LinkedHashMap<Location, String>();
         private List<Location> missing = new ArrayList<Location>();
+        private List<Location> unique = new ArrayList<>();
 
         public ParseResult() {
         }
@@ -1599,6 +1610,10 @@ public class SwaggerDeserializer {
 
         public void extra(String location, String key, JsonNode value) {
             extra.put(new Location(location, key), value);
+        }
+
+        public void unique(String location, String key) {
+            unique.add(new Location(location, key));
         }
 
         public void missing(String location, String key) {
@@ -1668,6 +1683,11 @@ public class SwaggerDeserializer {
             for(Location l : missing) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            for (Location l : unique) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is repeated";
                 messages.add(message);
             }
             for(Location l : unsupported.keySet()) {
