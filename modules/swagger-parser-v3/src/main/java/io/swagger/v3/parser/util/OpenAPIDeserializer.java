@@ -97,6 +97,8 @@ public class OpenAPIDeserializer {
 
 
 
+    private final Set<String> operationIDs = new HashSet<>();
+
     public SwaggerParseResult deserialize(JsonNode rootNode) {
     	return deserialize(rootNode, null);
     }
@@ -693,7 +695,7 @@ public class OpenAPIDeserializer {
     }
 
 
-    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result, Set<String> uniqueValues) {
         String value = null;
         JsonNode v = node.get(key);
         if (node == null || v == null) {
@@ -705,8 +707,16 @@ public class OpenAPIDeserializer {
             result.invalidType(location, key, "string", node);
         } else {
             value = v.asText();
+            if (uniqueValues != null && !uniqueValues.add(value)) {
+                result.unique(location, "operationId");
+                result.invalid();
+            }
         }
         return value;
+    }
+
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        return getString(key, node, required, location, result, null);
     }
 
     public Set<String> getKeys(ObjectNode node) {
@@ -1056,6 +1066,11 @@ public class OpenAPIDeserializer {
             link.setParameters(getLinkParameters(parametersObject, location, result));
         }
 
+        String requestBody = getString("requestBody",linkNode,false,location,result);
+        if (requestBody!= null) {
+            link.setRequestBody(requestBody);
+        }
+
         ObjectNode headerObject = getObject("headers",linkNode,false,location,result);
         if (headerObject!= null) {
             link.setHeaders(getHeaders(headerObject, location, result));
@@ -1128,14 +1143,13 @@ public class OpenAPIDeserializer {
                 JsonNode ref = node.get("$ref");
                 if (ref != null) {
                     if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                        PathItem pathItem = new PathItem();
                         String mungedRef = mungedRef(ref.textValue());
                         if (mungedRef != null) {
-                            pathItem.set$ref(mungedRef);
+                            callback.set$ref(mungedRef);
                         }else{
-                            pathItem.set$ref(ref.textValue());
+                            callback.set$ref(ref.textValue());
                         }
-                        return callback.addPathItem(name,pathItem);
+                        return callback;
                     } else {
                         result.invalidType(location, "$ref", "string", node);
                         return null;
@@ -2461,7 +2475,7 @@ public class OpenAPIDeserializer {
         if(docs != null) {
             operation.setExternalDocs(docs);
         }
-        value = getString("operationId", obj, false, location, result);
+        value = getString("operationId", obj, false, location, result, operationIDs);
         if (StringUtils.isNotBlank(value)) {
             operation.operationId(value);
         }
@@ -2676,6 +2690,7 @@ public class OpenAPIDeserializer {
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<>();
         private Map<Location, String> invalidType = new LinkedHashMap<>();
         private List<Location> missing = new ArrayList<>();
+        private List<Location> unique = new ArrayList<>();
 
         public ParseResult() {
         }
@@ -2690,6 +2705,10 @@ public class OpenAPIDeserializer {
 
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
+        }
+
+        public void unique(String location, String key) {
+            unique.add(new Location(location, key));
         }
 
         public void invalidType(String location, String key, String expectedType, JsonNode value) {
@@ -2724,6 +2743,11 @@ public class OpenAPIDeserializer {
             for (Location l : unsupported.keySet()) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is unsupported";
+                messages.add(message);
+            }
+            for (Location l : unique) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is repeated";
                 messages.add(message);
             }
             return messages;
