@@ -7,6 +7,10 @@
       "description": "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.",
       "version": "0.1.9"
     },
+    "tags":[
+      {"name":"sample"},
+      {"name":"sample1"}
+    ],
     "servers": [
       {
         "url": "http://localhost:5555/rest/RestNativeService",
@@ -19,8 +23,7 @@
           "tags":[
             "sample",
             "sample",
-            "!@#$%^",
-            "//n"
+            "test"
             ],
           "security" : [{"OpenID":["read"]}],
           "parameters": [

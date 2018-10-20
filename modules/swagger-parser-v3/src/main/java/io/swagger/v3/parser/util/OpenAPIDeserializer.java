@@ -44,9 +44,12 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -89,6 +92,9 @@ public class OpenAPIDeserializer {
     private static final String COOKIE_PARAMETER = "cookie";
     private static final String PATH_PARAMETER = "path";
     private static final String HEADER_PARAMETER = "header";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIDeserializer.class);
+
 
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
@@ -291,18 +297,21 @@ public class OpenAPIDeserializer {
         if (obj == null) {
             return null;
         }
-        Map<String, Tag> tags = new LinkedHashMap<String,Tag>();
-
+        
+//        Map<String, Tag> tags = new LinkedHashMap<String,Tag>();
+        List<Tag> tags = new ArrayList<>();
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
                 Tag tag = getTag((ObjectNode) item, location, result);
                 if (tag != null ) {
-                    tags.put(tag.getName(),tag);
+                    if(tags.contains(tag.getName())) {
+                        LOGGER.warn("Duplicate tags found: "+tag.getName());
+                    }
+                    tags.add(tag);
                 }
             }
         }
-        List<Tag> list = new ArrayList<Tag>(tags.values());
-        return list;
+        return tags;
     }
 
     public Tag getTag(ObjectNode obj, String location, ParseResult result) {
