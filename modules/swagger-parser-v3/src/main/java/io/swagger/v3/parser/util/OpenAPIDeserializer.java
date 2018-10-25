@@ -293,15 +293,18 @@ public class OpenAPIDeserializer {
             return null;
         }
         List<Tag> tags = new ArrayList<>();
+        Set<String> tagsTracker = new HashSet<>();
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
                 Tag tag = getTag((ObjectNode) item, location, result);
                 if (tag != null) {
                     tags.add(tag);
-                    if(tags.stream().filter(o -> o.getName().equals(tag.getName())).findFirst().isPresent()) {
+
+                    if(tagsTracker.contains((String)tag.getName())) {
                         result.uniqueTags(location,tag.getName());
                     }
 
+                    tagsTracker.add(tag.getName());
                 }
             }
         }
