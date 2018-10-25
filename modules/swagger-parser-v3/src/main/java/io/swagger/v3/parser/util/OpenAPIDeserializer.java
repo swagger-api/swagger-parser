@@ -293,11 +293,18 @@ public class OpenAPIDeserializer {
             return null;
         }
         List<Tag> tags = new ArrayList<>();
+        Set<String> tagsTracker = new HashSet<>();
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
                 Tag tag = getTag((ObjectNode) item, location, result);
                 if (tag != null) {
                     tags.add(tag);
+
+                    if(tagsTracker.contains((String)tag.getName())) {
+                        result.uniqueTags(location,tag.getName());
+                    }
+
+                    tagsTracker.add(tag.getName());
                 }
             }
         }
@@ -2676,6 +2683,7 @@ public class OpenAPIDeserializer {
         private Map<Location, String> invalidType = new LinkedHashMap<>();
         private List<Location> missing = new ArrayList<>();
         private List<Location> unique = new ArrayList<>();
+        private List<Location> uniqueTags = new ArrayList<>();
 
         public ParseResult() {
         }
@@ -2695,6 +2703,8 @@ public class OpenAPIDeserializer {
         public void unique(String location, String key) {
             unique.add(new Location(location, key));
         }
+
+        public void uniqueTags(String location, String key) {uniqueTags.add(new Location(location,key));}
 
         public void invalidType(String location, String key, String expectedType, JsonNode value) {
             invalidType.put(new Location(location, key), expectedType);
@@ -2731,6 +2741,11 @@ public class OpenAPIDeserializer {
                 messages.add(message);
             }
             for (Location l : unique) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is repeated";
+                messages.add(message);
+            }
+            for (Location l : uniqueTags) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is repeated";
                 messages.add(message);
