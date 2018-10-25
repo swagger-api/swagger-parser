@@ -524,6 +524,9 @@ public class OpenAPIDeserializer {
                 if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                     result.invalidType(location, pathName, "object", pathValue);
                 } else {
+                    if(!pathName.startsWith("/")){
+                        result.warning(location," Resource "+pathName+ " should start with /");
+                    }
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path,String.format("%s.'%s'", location,pathName), result);
                     paths.put(pathName, pathObj);
@@ -2682,6 +2685,7 @@ public class OpenAPIDeserializer {
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<>();
         private Map<Location, String> invalidType = new LinkedHashMap<>();
         private List<Location> missing = new ArrayList<>();
+        private List<Location> warnings = new ArrayList<>();
         private List<Location> unique = new ArrayList<>();
         private List<Location> uniqueTags = new ArrayList<>();
 
@@ -2699,9 +2703,14 @@ public class OpenAPIDeserializer {
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
         }
-
+      
+        public void warning(String location, String key) {
+            warnings.add(new Location(location, key));
+        }
+      
         public void unique(String location, String key) {
             unique.add(new Location(location, key));
+
         }
 
         public void uniqueTags(String location, String key) {uniqueTags.add(new Location(location,key));}
@@ -2733,6 +2742,11 @@ public class OpenAPIDeserializer {
             for (Location l : missing) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            for (Location l : warnings) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location +l.key;
                 messages.add(message);
             }
             for (Location l : unsupported.keySet()) {
