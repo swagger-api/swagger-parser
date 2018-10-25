@@ -674,7 +674,7 @@ public final class ExternalRefProcessor {
         RefFormat format = computeRefFormat(subRef.get$ref());
 
         if (!isAnExternalRefFormat(format)) {
-            processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            subRef.set$ref(processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
             return;
         }
         String $ref = subRef.get$ref();
