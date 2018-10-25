@@ -64,6 +64,17 @@ public class OpenAPIParserTest {
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
     }
 
+
+    @Test
+    public void testIssue887() {
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIParser().readLocation("apiWithMultipleTags.json", null, null);
+        System.out.println(result.getMessages());
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().get(0), "attribute tags.sample is repeated");
+    }
+
     @Test
     public void testIssue768() {
         ParseOptions options = new ParseOptions();

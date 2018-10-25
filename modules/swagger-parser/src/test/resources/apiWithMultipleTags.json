@@ -1,0 +1,142 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Sample API",
+      "description": "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.",
+      "version": "0.1.9"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:5555/rest/RestNativeService",
+        "description": "a service that accepts anything"
+      }
+    ],
+    "tags":[
+        {"name":"sample"},
+        {"name":"sample"}
+        ],
+    "paths": {
+      "/getTimeAfterJson/{time}": {
+        "post": {
+          
+          "security" : [{"OpenID":["read"]}],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "time",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "integer"
+                    
+                  }
+                }
+              }
+            },
+            
+            {
+              "in": "cookie",
+              "name": "debug",
+              "schema": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1
+                ],
+                "default": 0
+              },
+              "required":true
+            },
+            {
+              "in": "cookie",
+              "name": "csrftoken",
+              "schema": {
+                "type": "string"
+              },
+              "required":true
+            }            
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/temp"
+                    },
+                    {
+                      "$ref": "#/components/schemas/temp1"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Updated"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes":{
+        "BasicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "refreshUrl":"http://localhost:555",
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {
+              "read": "Grants read access",
+              "write": "Grants write access",
+              "admin": "Grants access to admin operations"
+            }
+          }
+        }
+      }
+      },
+      "schemas": {
+        "temp": {
+          "type": "object",
+          "properties": {
+            "bool1": {
+              "type": "boolean"
+            },
+            "timetype": {
+              "type": "string",
+              "enum": [
+                "nanoseconds",
+                "milliseconds"
+              ]
+            }
+          },
+          "required":["bool1","timetype"]
+        },
+        "temp1": {
+          "properties":{
+              "int":{
+                "type": "integer"
+              }
+          }
+          
+        }
+      }
+    
+    }
+  }
