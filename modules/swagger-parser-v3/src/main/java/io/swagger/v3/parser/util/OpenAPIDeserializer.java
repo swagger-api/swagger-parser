@@ -813,6 +813,12 @@ public class OpenAPIDeserializer {
 
         value = getString("url", node, false, location, result);
         if(StringUtils.isNotBlank(value)) {
+            try {
+               new URL(value);
+            }
+            catch (Exception e) {
+                result.warning(location,value);
+            }
             license.setUrl(value);
         }
 
@@ -844,6 +850,12 @@ public class OpenAPIDeserializer {
 
         value = getString("url", node, false, location, result);
         if(StringUtils.isNotBlank(value)) {
+            try {
+                new URL(value);
+            }
+            catch (Exception e) {
+                result.warning(location,value);
+            }
             contact.setUrl(value);
         }
 

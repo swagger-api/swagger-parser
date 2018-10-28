@@ -3,9 +3,15 @@
 	"info": {
 		"version": "1.0.0",
 		"title": "Swagger Petstore",
+		"contact": {
+            "name": "API Support",
+            "url": "test",
+            "email": "support@example.com"
+          },
 		"license": {
-			"name": "MIT"
-		}
+            "name": "Apache 2.0",
+            "url": "test1"
+            }
 	},
 	"servers": [
 		{
