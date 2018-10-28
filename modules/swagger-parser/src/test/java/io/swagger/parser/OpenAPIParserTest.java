@@ -80,7 +80,7 @@ public class OpenAPIParserTest {
         SwaggerParseResult result = new OpenAPIParser().readLocation("issue895.yaml", null, null);
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getMessages().get(0),"attribute info.license.test");
+        assertEquals(result.getMessages().get(0),"attribute info.contact.test");
         assertEquals(result.getMessages().get(1),"attribute info.license.test1");
 
     }
