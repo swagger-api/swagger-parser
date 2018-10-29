@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -406,7 +405,11 @@ public class ResolverFully {
                         }
                     }
                 }
-                model.setExample(examples);
+                if (schema.getExample() != null) {
+                    model.setExample(schema.getExample());
+                } else if (!examples.isEmpty()) {
+                    model.setExample(examples);
+                }
                 return model;
             } else {
                 // User don't want to aggregate composed schema, we only solve refs
