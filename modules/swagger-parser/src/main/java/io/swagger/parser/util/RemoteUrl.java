@@ -84,7 +84,9 @@ public class RemoteUrl {
     }
 
     public static String cleanUrl(String url) {
-        return url.replaceAll("\\{", "%7B").replaceAll("\\}", "%7D");
+        return url.replaceAll("\\{", "%7B").
+                replaceAll("\\}", "%7D").
+                replaceAll(" ", "%20");
     }
 
     public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {
