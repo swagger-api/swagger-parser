@@ -1134,6 +1134,14 @@ public class OpenAPIResolverTest {
         assertEquals(((Schema) coreSchema.getProperties().get("inner")).get$ref(), "#/components/schemas/innerCore");
     }
 
+    @Test
+    public void recursiveResolving() throws JsonProcessingException {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/recursive.yaml", null, parseOptions);
+        Json.mapper().writeValueAsString(openAPI);
+    }
+
     public String replacePort(String url){
         String pathFile = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
         return pathFile;
