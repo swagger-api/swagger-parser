@@ -7,6 +7,7 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 
 import java.util.List;
@@ -96,7 +97,8 @@ public class ModelProcessor {
         }
 
         if (newRef != null) {
-            refModel.set$ref(newRef);
+            refModel.set$ref(RefType.DEFINITION.getInternalPrefix() + newRef);
+
         }
 
     }
