@@ -1,0 +1,12 @@
+{
+    "properties": {
+        "indicatorType": {
+            "type": "object",
+            "properties": {
+                "indicator": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}
