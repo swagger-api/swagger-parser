@@ -235,6 +235,16 @@ public final class ExternalRefProcessor {
                             file);
                 }
             }
+            else if (prop.getValue() instanceof ObjectProperty){
+                ObjectProperty objProp = (ObjectProperty) prop.getValue();
+                if(objProp.getProperties() != null ){
+                    for(Map.Entry<String, Property> objSubProp : (objProp.getProperties().entrySet())){
+                        if (objSubProp.getValue() instanceof RefProperty){
+                            processRefProperty((RefProperty) objSubProp.getValue(), file);
+                        }
+                    }
+                }
+            }
         }
     }
 

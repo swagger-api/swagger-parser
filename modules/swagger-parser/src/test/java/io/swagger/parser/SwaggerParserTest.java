@@ -1405,4 +1405,12 @@ public class SwaggerParserTest {
         assertEquals(result.getMessages().get(0), "attribute paths.'/pets/{id}'(post).operationId is repeated");
     }
 
+    @Test
+    public void testIssue913() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue-913/BS/ApiSpecification.yaml");
+        Assert.assertNotNull(swagger);
+        Assert.assertNotNull(swagger.getDefinitions().get("indicatorType"));
+        Assert.assertEquals(swagger.getDefinitions().get("indicatorType").getProperties().size(),1);
+    }
 }
