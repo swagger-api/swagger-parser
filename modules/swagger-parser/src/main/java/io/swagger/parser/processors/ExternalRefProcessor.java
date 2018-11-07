@@ -7,6 +7,7 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 import io.swagger.parser.util.RefUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -244,7 +245,8 @@ public final class ExternalRefProcessor {
             String joinedRef = join(externalFile, subRef.get$ref());
             subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
         } else {
-            subRef.set$ref(processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
+            String processRef = processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+processRef);
         }
     }
 
