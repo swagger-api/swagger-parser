@@ -70,6 +70,20 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue901_2() {
+        Swagger swagger = new SwaggerParser().read("issue-901/spec2.yaml");
+        assertNotNull(swagger);
+        Yaml.prettyPrint(swagger);
+    }
+
+    @Test
+    public void testIssue901() {
+        Swagger swagger = new SwaggerParser().read("issue-901/spec.yaml");
+        assertNotNull(swagger);
+
+    }
+
+    @Test
     public void testIssue435() {
         Swagger swagger = new SwaggerParser().read("issue-435/main.yaml");
         assertNotNull(swagger.getDefinitions().get("sub"));
