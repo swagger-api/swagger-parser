@@ -236,6 +236,12 @@ public final class ExternalRefProcessor {
                             file);
                 }
             }
+            else if (prop.getValue() instanceof ObjectProperty){
+                ObjectProperty objProp = (ObjectProperty) prop.getValue();
+                if(objProp.getProperties() != null ){
+                    processProperties(objProp.getProperties(),file);
+                }
+            }
         }
     }
 
