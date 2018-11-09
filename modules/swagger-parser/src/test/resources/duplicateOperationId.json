@@ -1,0 +1,27 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.9-abcd",
+    "title": "Duplicate operationID"
+  },
+  "paths": {
+    "/pets/{id}": {
+      "get": {
+        "operationId": "getPetsById",
+        "responses": {
+          "default": {
+            "description": "error payload"
+          }
+        }
+      },
+      "post": {
+        "operationId": "getPetsById",
+        "responses": {
+          "default": {
+            "description": "error payload"
+          }
+        }
+      }
+    }
+  }
+}
