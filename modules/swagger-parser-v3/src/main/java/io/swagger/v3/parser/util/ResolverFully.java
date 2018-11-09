@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.models.RefFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,7 @@ public class ResolverFully {
     private Map<String, Schema> resolvedModels = new HashMap<>();
     private Map<String, Example> examples;
     private Map<String, RequestBody> requestBodies;
+    private Map<String, Header> headers;
 
 
     public void resolveFully(OpenAPI openAPI) {
@@ -69,6 +72,13 @@ public class ResolverFully {
             examples = openAPI.getComponents().getExamples();
             if (examples == null) {
                 examples = new HashMap<>();
+            }
+        }
+
+        if (openAPI.getComponents() != null && openAPI.getComponents().getHeaders() != null) {
+            headers = openAPI.getComponents().getHeaders();
+            if (headers == null) {
+                headers = new HashMap<>();
             }
         }
 
@@ -138,9 +148,10 @@ public class ResolverFully {
                 }
             }
             // responses
-            if(op.getResponses() != null) {
-                for(String code : op.getResponses().keySet()) {
-                    ApiResponse response = op.getResponses().get(code);
+            ApiResponses responses = op.getResponses();
+            if(responses != null) {
+                for(String code : responses.keySet()) {
+                    ApiResponse response = responses.get(code);
                     if (response.getContent() != null) {
                         Map<String, MediaType> content = response.getContent();
                         for(String mediaType: content.keySet()){
@@ -155,9 +166,29 @@ public class ResolverFully {
                             }
                         }
                     }
+                    Map<String, Header> headers = response.getHeaders();
+                    if (headers != null) {
+                        for (Map.Entry<String, Header> header : headers.entrySet()) {
+                            Header value = header.getValue();
+                            Header resolvedValue = value.get$ref() != null ? resolveHeader(value) : value;
+                            header.setValue(resolvedValue);
+                        }
+                    }
                 }
             }
         }
+    }
+
+    public Header resolveHeader(Header header){
+        RefFormat refFormat = computeRefFormat(header.get$ref());
+        String $ref = header.get$ref();
+        if (!isAnExternalRefFormat(refFormat)){
+            if (headers != null && !headers.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return headers.getOrDefault(referenceKey, header);
+            }
+        }
+        return header;
     }
 
     public RequestBody resolveRequestBody(RequestBody requestBody){
