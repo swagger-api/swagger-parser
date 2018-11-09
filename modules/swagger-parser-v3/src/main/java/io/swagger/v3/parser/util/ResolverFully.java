@@ -171,6 +171,11 @@ public class ResolverFully {
                         for (Map.Entry<String, Header> header : headers.entrySet()) {
                             Header value = header.getValue();
                             Header resolvedValue = value.get$ref() != null ? resolveHeader(value) : value;
+                            Map<String, Example> examples = resolvedValue.getExamples();
+                            if(examples != null) {
+                                Map<String,Example> resolved = resolveExample(examples);
+                                resolvedValue.setExamples(resolved);
+                            }
                             header.setValue(resolvedValue);
                         }
                     }
