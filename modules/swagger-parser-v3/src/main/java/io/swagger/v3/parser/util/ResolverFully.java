@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -20,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -49,9 +49,10 @@ public class ResolverFully {
     private Map<String, Schema> schemas;
     private Map<String, Schema> resolvedModels = new HashMap<>();
     private Map<String, Example> examples;
+    private Map<String, Parameter> parameters;
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
-
+    private Map<String, Link> links;
 
     public void resolveFully(OpenAPI openAPI) {
         if (openAPI.getComponents() != null && openAPI.getComponents().getRequestBodies() != null) {
@@ -80,6 +81,19 @@ public class ResolverFully {
             if (headers == null) {
                 headers = new HashMap<>();
             }
+        }  
+
+        if (openAPI.getComponents() != null && openAPI.getComponents().getParameters() != null) {
+            parameters = openAPI.getComponents().getParameters();
+            if (parameters == null) {
+                parameters = new HashMap<>();
+            }
+        }
+        if (openAPI.getComponents() != null && openAPI.getComponents().getLinks() != null) {
+            links = openAPI.getComponents().getLinks();
+            if (links == null) {
+                links = new HashMap<>();
+            }
         }
 
         if(openAPI.getPaths() != null) {
@@ -95,6 +109,7 @@ public class ResolverFully {
             // inputs
             if (op.getParameters() != null) {
                 for (Parameter parameter : op.getParameters()) {
+                    parameter = parameter.get$ref() != null ? resolveParameter(parameter) : parameter;
                     if (parameter.getSchema() != null) {
                         Schema resolved = resolveSchema(parameter.getSchema());
                         if (resolved != null) {
@@ -166,12 +181,22 @@ public class ResolverFully {
                             }
                         }
                     }
+
                     Map<String, Header> headers = response.getHeaders();
                     if (headers != null) {
                         for (Map.Entry<String, Header> header : headers.entrySet()) {
                             Header value = header.getValue();
                             Header resolvedValue = value.get$ref() != null ? resolveHeader(value) : value;
                             header.setValue(resolvedValue);
+                        }
+                    }  
+
+                    Map<String, Link> links = response.getLinks();
+                    if (links != null) {
+                        for (Map.Entry<String, Link> link : links.entrySet()) {
+                            Link value = link.getValue();
+                            Link resolvedValue = value.get$ref() != null ? resolveLink(value) : value;
+                            link.setValue(resolvedValue);
                         }
                     }
                 }
@@ -190,6 +215,18 @@ public class ResolverFully {
         }
         return header;
     }
+  
+    public Link resolveLink(Link link){
+        RefFormat refFormat = computeRefFormat(link.get$ref());
+        String $ref = link.get$ref();
+        if (!isAnExternalRefFormat(refFormat)){
+            if (links != null && !links.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return links.getOrDefault(referenceKey, link);
+            }
+        }
+        return link;
+    }
 
     public RequestBody resolveRequestBody(RequestBody requestBody){
         RefFormat refFormat = computeRefFormat(requestBody.get$ref());
@@ -201,6 +238,18 @@ public class ResolverFully {
             }
         }
         return requestBody;
+    }
+
+    public Parameter resolveParameter(Parameter parameter){
+        String $ref = parameter.get$ref();
+        RefFormat refFormat = computeRefFormat($ref);
+        if (!isAnExternalRefFormat(refFormat)){
+            if (parameters != null && !parameters.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return parameters.getOrDefault(referenceKey, parameter);
+            }
+        }
+        return parameter;
     }
 
     public Schema resolveSchema(Schema schema) {
@@ -385,7 +434,11 @@ public class ResolverFully {
                         }
                     }
                 }
-                model.setExample(examples);
+                if (schema.getExample() != null) {
+                    model.setExample(schema.getExample());
+                } else if (!examples.isEmpty()) {
+                    model.setExample(examples);
+                }
                 return model;
             } else {
                 // User don't want to aggregate composed schema, we only solve refs
