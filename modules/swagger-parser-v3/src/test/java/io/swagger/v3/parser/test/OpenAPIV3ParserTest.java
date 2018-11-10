@@ -63,9 +63,8 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         final OpenAPI openAPI = parser.readLocation("issue-913/BS/ApiSpecification.yaml", null, options).getOpenAPI();
-        Yaml.prettyPrint(openAPI);
         Assert.assertNotNull(openAPI);
-        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("indicatorType"));            
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("indicatorType"));
         Assert.assertEquals(openAPI.getComponents().getSchemas().get("indicatorType").getProperties().size(),1);
     }
 
