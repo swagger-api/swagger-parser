@@ -58,6 +58,41 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
+    public void testIssue913() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = parser.readLocation("issue-913/BS/ApiSpecification.yaml", null, options).getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        Assert.assertNotNull(openAPI);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("indicatorType"));            
+        Assert.assertEquals(openAPI.getComponents().getSchemas().get("indicatorType").getProperties().size(),1);
+    }
+
+    @Test
+    public void testIssue901_2() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-901/spec2.yaml",null,options).getOpenAPI();
+        assertNotNull(openAPI);
+        String internalRef = openAPI.getPaths().get("/test").getPut().getResponses().get("200").getContent().get("application/json").getSchema().get$ref();
+        assertEquals(internalRef,"#/components/schemas/Test.Definition");
+        assertNotNull(openAPI.getComponents());
+
+    }
+
+    @Test
+    public void testIssue901() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-901/spec.yaml",null,options).getOpenAPI();
+        assertNotNull(openAPI);
+        String internalRef = openAPI.getPaths().get("/test").getPut().getResponses().get("200").getContent().get("application/json").getSchema().get$ref();
+        assertEquals(internalRef,"#/components/schemas/Test.Definition");
+        assertNotNull(openAPI.getComponents());
+    }
+
+    @Test
     public void testIssue853() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
