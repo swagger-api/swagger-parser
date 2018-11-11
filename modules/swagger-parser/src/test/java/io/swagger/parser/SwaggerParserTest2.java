@@ -29,7 +29,6 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
-import io.swagger.parser.util.TestUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.parser.util.TestUtils;
 import io.swagger.util.Json;
@@ -54,7 +53,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-public class SwaggerParserTest {
+public class SwaggerParserTest2 {
 
     @Test
     public void testIssueRelativeRefs2(){
@@ -68,28 +67,6 @@ public class SwaggerParserTest {
         RefProperty refProperty = (RefProperty) prop.getProperties().get("resourceID");
         assertEquals(refProperty.get$ref(),"#/definitions/simpleIDType_v01");
     }
-
-    @Test
-    public void testIssue901_2() {
-        Swagger swagger = new SwaggerParser().read("issue-901/spec2.yaml");
-        assertNotNull(swagger);
-        Yaml.prettyPrint(swagger);
-    }
-
-    @Test
-    public void testIssue901() {
-        Swagger swagger = new SwaggerParser().read("issue-901/spec.yaml");
-        assertNotNull(swagger);
-
-    }
-
-    @Test
-    public void testIssue435() {
-        Swagger swagger = new SwaggerParser().read("issue-435/main.yaml");
-        assertNotNull(swagger.getDefinitions().get("sub"));
-        assertNotNull(swagger.getDefinitions().get("subsub"));
-    }
-
 
     @Test
     public void testIssue845() {
@@ -825,7 +802,11 @@ public class SwaggerParserTest {
         expectedPropertiesInModel(refInDefinitionsAddress_2, "postal", "country");
 
         final ModelImpl refInDefinitionsCountry_2 = (ModelImpl) definitions.get("Country_2");
-        expectedPropertiesInModel(refInDefinitionsCountry_2, "name");        
+        expectedPropertiesInModel(refInDefinitionsCountry_2, "name");
+
+
+        
+        
         
         return swagger;
     }
@@ -865,8 +846,6 @@ public class SwaggerParserTest {
         assertTrue(swagger.getDefinitions().containsKey("externalObject"));
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
         assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
-        assertEquals(((RefProperty)swagger.getDefinitions().get("externalObject").getProperties().get("hello1")).get$ref(),
-                "#/definitions/referencedByLocalElement"); //issue #434
     }
 
     @Test
@@ -1017,7 +996,6 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getVendorExtensions().get("x-error-defs"));
     }
 
-    @Test
     public void testBadFormat() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/bad_format.yaml");
@@ -1055,57 +1033,6 @@ public class SwaggerParserTest {
         assertEquals(queryParameter.getName(), "query-param-collection-format-and-uniqueItems");
         assertEquals(queryParameter.getCollectionFormat(), "multi");
         assertEquals(queryParameter.isUniqueItems(), true);
-    }
-    @Test
-    public void testNumberAttributes() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/number_attributes.yaml"));
-
-        ModelImpl numberType = (ModelImpl)swagger.getDefinitions().get("NumberType");
-        assertNotNull(numberType);
-        assertNotNull(numberType.getEnum());
-        assertEquals(numberType.getEnum().size(), 2);
-        List<String> numberTypeEnumValues = numberType.getEnum();
-        assertEquals(numberTypeEnumValues.get(0), "1.0");
-        assertEquals(numberTypeEnumValues.get(1), "2.0");
-        assertEquals(numberType.getDefaultValue(), new BigDecimal("1.0"));
-        assertEquals(numberType.getMinimum(), new BigDecimal("1.0"));
-        assertEquals(numberType.getMaximum(), new BigDecimal("2.0"));
-
-        ModelImpl numberDoubleType = (ModelImpl)swagger.getDefinitions().get("NumberDoubleType");
-        assertNotNull(numberDoubleType);
-        assertNotNull(numberDoubleType.getEnum());
-        assertEquals(numberDoubleType.getEnum().size(), 2);
-        List<String> numberDoubleTypeEnumValues = numberDoubleType.getEnum();
-        assertEquals(numberDoubleTypeEnumValues.get(0), "1.0");
-        assertEquals(numberDoubleTypeEnumValues.get(1), "2.0");
-        assertEquals(numberDoubleType.getDefaultValue(), new BigDecimal("1.0"));
-        assertEquals(numberDoubleType.getMinimum(), new BigDecimal("1.0"));
-        assertEquals(numberDoubleType.getMaximum(), new BigDecimal("2.0"));
-
-        ModelImpl integerType = (ModelImpl)swagger.getDefinitions().get("IntegerType");
-        assertNotNull(integerType);
-        assertNotNull(integerType.getEnum());
-        assertEquals(integerType.getEnum().size(), 2);
-        List<String> integerTypeEnumValues = integerType.getEnum();
-        assertEquals(integerTypeEnumValues.get(0), "1");
-        assertEquals(integerTypeEnumValues.get(1), "2");
-        assertEquals(integerType.getDefaultValue(), new Integer("1"));
-        assertEquals(integerType.getMinimum(), new BigDecimal("1"));
-        assertEquals(integerType.getMaximum(), new BigDecimal("2"));
-
-        ModelImpl integerInt32Type = (ModelImpl)swagger.getDefinitions().get("IntegerInt32Type");
-        assertNotNull(integerInt32Type);
-        assertNotNull(integerInt32Type.getEnum());
-        assertEquals(integerInt32Type.getEnum().size(), 2);
-        List<String> integerInt32TypeEnumValues = integerInt32Type.getEnum();
-        assertEquals(integerInt32TypeEnumValues.get(0), "1");
-        assertEquals(integerInt32TypeEnumValues.get(1), "2");
-        assertEquals(integerInt32Type.getDefaultValue(), new Integer("1"));
-        assertEquals(integerInt32Type.getMinimum(), new BigDecimal("1"));
-        assertEquals(integerInt32Type.getMaximum(), new BigDecimal("2"));
-
-
     }
 
     @Test
@@ -1442,11 +1369,9 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
-        assertTrue(definitions.containsKey("referencedByLocalElement"));
         assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
         assertEquals("k-definition", definitions.get("k").getTitle());
         assertEquals("k-definition", definitions.get("k_2").getTitle());
-        assertEquals(((RefModel) definitions.get("l")).get$ref(), "#/definitions/referencedByLocalElement"); //issue #434
     }
 
     @Test(description = "Parser not honoring redirect responses")
@@ -1457,20 +1382,4 @@ public class SwaggerParserTest {
         assertEquals(swagger.getSwagger().getPath("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
     }
 
-    @Test
-    public void testIssue258() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("duplicateOperationId.json", null, true);
-        assertNotNull(result);
-        assertNotNull(result.getSwagger());
-        assertEquals(result.getMessages().get(0), "attribute paths.'/pets/{id}'(post).operationId is repeated");
-    }
-
-    @Test
-    public void testIssue913() {
-        SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/issue-913/BS/ApiSpecification.yaml");
-        Assert.assertNotNull(swagger);
-        Assert.assertNotNull(swagger.getDefinitions().get("indicatorType"));
-        Assert.assertEquals(swagger.getDefinitions().get("indicatorType").getProperties().size(),1);
-    }
 }
