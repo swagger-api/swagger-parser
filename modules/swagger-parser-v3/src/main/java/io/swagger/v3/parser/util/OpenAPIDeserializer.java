@@ -2152,9 +2152,11 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("default", node, false, location, result);
+        schema.setDefault(false);
         if (StringUtils.isNotBlank(value)) {
             schema.setDefault(value);
         }
+
 
         //discriminator
 
