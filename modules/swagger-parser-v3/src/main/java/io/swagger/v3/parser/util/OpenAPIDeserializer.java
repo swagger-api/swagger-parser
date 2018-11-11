@@ -2196,9 +2196,12 @@ public class OpenAPIDeserializer {
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
-        schema.setDeprecated(false);
+
         if(bool != null){
             schema.setDeprecated(bool);
+        }
+        else  {
+            schema.setDeprecated(false);
         }
 
         Map <String,Object> extensions = getExtensions(node);
