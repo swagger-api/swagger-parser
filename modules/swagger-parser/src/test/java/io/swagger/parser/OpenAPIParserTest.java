@@ -460,7 +460,7 @@ public class OpenAPIParserTest {
     }
 
     @Test
-    public void testSample() {
+    public void testIssue922() {
        OpenAPIParser openAPIParser = new OpenAPIParser();
        ParseOptions options = new ParseOptions();
        OpenAPI openAPI = openAPIParser.readLocation("petstore.json",null,null).getOpenAPI();
