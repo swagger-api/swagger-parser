@@ -2152,7 +2152,6 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("default", node, false, location, result);
-        schema.setDefault(false);
         if (StringUtils.isNotBlank(value)) {
             schema.setDefault(value);
         }
@@ -2197,6 +2196,7 @@ public class OpenAPIDeserializer {
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
+        schema.setDeprecated(false);
         if(bool != null){
             schema.setDeprecated(bool);
         }

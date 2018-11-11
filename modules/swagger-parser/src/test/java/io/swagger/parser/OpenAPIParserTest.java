@@ -465,7 +465,7 @@ public class OpenAPIParserTest {
        ParseOptions options = new ParseOptions();
        OpenAPI openAPI = openAPIParser.readLocation("petstore.json",null,null).getOpenAPI();
        assertNotNull(openAPI);
-       assertEquals(openAPI.getComponents().getSchemas().get("Pet").getDefault(),Boolean.FALSE);
+       assertEquals(openAPI.getComponents().getSchemas().get("Pet").getDeprecated(),Boolean.FALSE);
 
     }
 
