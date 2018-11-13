@@ -74,9 +74,14 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-901/spec2.yaml",null,options).getOpenAPI();
         assertNotNull(openAPI);
-        String internalRef = openAPI.getPaths().get("/test").getPut().getResponses().get("200").getContent().get("application/json").getSchema().get$ref();
-        assertEquals(internalRef,"#/components/schemas/Test.Definition");
         assertNotNull(openAPI.getComponents());
+        ArraySchema arraySchema = (ArraySchema) openAPI.getComponents().getSchemas().get("Test.Definition").getProperties().get("stuff");
+        String internalRef = arraySchema.getItems().get$ref();
+        assertEquals(internalRef,"#/components/schemas/TEST.THING.OUT.Stuff");
+
+
+
+
 
     }
 
