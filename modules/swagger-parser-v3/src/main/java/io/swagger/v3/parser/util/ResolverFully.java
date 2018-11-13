@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -50,6 +51,7 @@ public class ResolverFully {
     private Map<String, Example> examples;
     private Map<String, Parameter> parameters;
     private Map<String, RequestBody> requestBodies;
+    private Map<String, Header> headers;
     private Map<String, Link> links;
 
     public void resolveFully(OpenAPI openAPI) {
@@ -74,6 +76,12 @@ public class ResolverFully {
             }
         }
 
+        if (openAPI.getComponents() != null && openAPI.getComponents().getHeaders() != null) {
+            headers = openAPI.getComponents().getHeaders();
+            if (headers == null) {
+                headers = new HashMap<>();
+            }
+        }  
 
         if (openAPI.getComponents() != null && openAPI.getComponents().getParameters() != null) {
             parameters = openAPI.getComponents().getParameters();
@@ -85,7 +93,6 @@ public class ResolverFully {
             links = openAPI.getComponents().getLinks();
             if (links == null) {
                 links = new HashMap<>();
-
             }
         }
 
@@ -174,6 +181,21 @@ public class ResolverFully {
                             }
                         }
                     }
+
+                    Map<String, Header> headers = response.getHeaders();
+                    if (headers != null) {
+                        for (Map.Entry<String, Header> header : headers.entrySet()) {
+                            Header value = header.getValue();
+                            Header resolvedValue = value.get$ref() != null ? resolveHeader(value) : value;
+                            Map<String, Example> examples = resolvedValue.getExamples();
+                            if(examples != null) {
+                                Map<String,Example> resolved = resolveExample(examples);
+                                resolvedValue.setExamples(resolved);
+                            }
+                            header.setValue(resolvedValue);
+                        }
+                    }  
+
                     Map<String, Link> links = response.getLinks();
                     if (links != null) {
                         for (Map.Entry<String, Link> link : links.entrySet()) {
@@ -187,6 +209,18 @@ public class ResolverFully {
         }
     }
 
+    public Header resolveHeader(Header header){
+        RefFormat refFormat = computeRefFormat(header.get$ref());
+        String $ref = header.get$ref();
+        if (!isAnExternalRefFormat(refFormat)){
+            if (headers != null && !headers.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return headers.getOrDefault(referenceKey, header);
+            }
+        }
+        return header;
+    }
+  
     public Link resolveLink(Link link){
         RefFormat refFormat = computeRefFormat(link.get$ref());
         String $ref = link.get$ref();
