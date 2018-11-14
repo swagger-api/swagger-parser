@@ -52,15 +52,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -526,11 +518,62 @@ public class OpenAPIDeserializer {
                 } else {
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path,String.format("%s.'%s'", location,pathName), result);
+                    String[] eachPart = pathName.split("/");
+                    Arrays.stream(eachPart)
+                            .filter(part -> part.startsWith("{") && part.endsWith("}") && part.length() > 2)
+                            .forEach(part -> {
+                                String pathParam = part.substring(1, part.length() - 1);
+                                boolean definedInPathLevel = isPathParamDefined(pathParam, pathObj.getParameters());
+                                if (!definedInPathLevel) {
+                                    List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
+                                    operationsInAPath.forEach(operation -> {
+                                        if (!isPathParamDefined(pathParam, operation.getParameters())) {
+                                            result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
+                                            return;
+                                        }
+                                    });
+                                }
+                            });
                     paths.put(pathName, pathObj);
                 }
             }
         }
         return paths;
+    }
+
+    private boolean isPathParamDefined(String pathParam, List<Parameter> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return false;
+        } else {
+            Parameter pathParamDefined = parameters.stream()
+                            .filter(parameter -> pathParam.equals(parameter.getName()))
+                            .findFirst()
+                            .orElse(null);
+            if (pathParamDefined == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void addToOperationsList(List<Operation> operationsList, Operation operation) {
+        if (operation == null) {
+            return;
+        }
+        operationsList.add(operation);
+    }
+
+    public List<Operation> getAllOperationsInAPath(PathItem pathObj) {
+        List<Operation> operations = new ArrayList<>();
+        addToOperationsList(operations, pathObj.getGet());
+        addToOperationsList(operations, pathObj.getPut());
+        addToOperationsList(operations, pathObj.getPost());
+        addToOperationsList(operations, pathObj.getPatch());
+        addToOperationsList(operations, pathObj.getDelete());
+        addToOperationsList(operations, pathObj.getTrace());
+        addToOperationsList(operations, pathObj.getOptions());
+        addToOperationsList(operations, pathObj.getHead());
+        return operations;
     }
 
     public PathItem getPathItem(ObjectNode obj, String location, ParseResult result) {
@@ -2669,6 +2712,7 @@ public class OpenAPIDeserializer {
         private Map<Location, JsonNode> extra = new LinkedHashMap<>();
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<>();
         private Map<Location, String> invalidType = new LinkedHashMap<>();
+        private List<Location> warnings = new ArrayList<>();
         private List<Location> missing = new ArrayList<>();
 
         public ParseResult() {
@@ -2684,6 +2728,10 @@ public class OpenAPIDeserializer {
 
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
+        }
+
+        public void warning(String location, String key) {
+            warnings.add(new Location(location, key));
         }
 
         public void invalidType(String location, String key, String expectedType, JsonNode value) {
@@ -2713,6 +2761,11 @@ public class OpenAPIDeserializer {
             for (Location l : missing) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            for (Location l : warnings) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location +l.key;
                 messages.add(message);
             }
             for (Location l : unsupported.keySet()) {
