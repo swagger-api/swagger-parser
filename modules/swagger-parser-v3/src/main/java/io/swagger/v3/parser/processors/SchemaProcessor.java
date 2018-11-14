@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.models.RefType;
 import io.swagger.v3.parser.util.RefUtils;
 
 import java.util.HashMap;
@@ -201,7 +202,7 @@ public class SchemaProcessor {
             final String newRef = externalRefProcessor.processRefToExternalSchema($ref, refFormat);
 
             if (newRef != null) {
-                schema.set$ref(newRef);
+                schema.set$ref(RefType.SCHEMAS.getInternalPrefix() + newRef);
             }
         }
     }

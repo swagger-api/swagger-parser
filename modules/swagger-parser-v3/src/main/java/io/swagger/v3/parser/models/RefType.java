@@ -5,6 +5,7 @@ package io.swagger.v3.parser.models;
  */
 public enum RefType {
     COMPONENTS("#/components/"),
+    SCHEMAS("#/components/schemas/"),
     PATH("#/paths/");
 
     private final String internalPrefix;
