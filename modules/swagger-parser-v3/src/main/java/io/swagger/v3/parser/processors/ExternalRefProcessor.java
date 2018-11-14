@@ -10,6 +10,7 @@ import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.models.RefType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -198,6 +200,11 @@ public final class ExternalRefProcessor {
                             ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null
                             && StringUtils.isNotBlank(((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref())) {
                         processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
+                    }
+                }else if (prop.getValue() instanceof ObjectSchema){
+                    ObjectSchema objProp = (ObjectSchema) prop.getValue();
+                    if(objProp.getProperties() != null ){
+                        processProperties(objProp.getProperties(),file);
                     }
                 }
             }
@@ -674,7 +681,7 @@ public final class ExternalRefProcessor {
         RefFormat format = computeRefFormat(subRef.get$ref());
 
         if (!isAnExternalRefFormat(format)) {
-            processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            subRef.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
             return;
         }
         String $ref = subRef.get$ref();
@@ -682,8 +689,9 @@ public final class ExternalRefProcessor {
         if (format.equals(RefFormat.RELATIVE)) {
             $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
+        }else {
+            processRefToExternalSchema($ref, format);
         }
-        processRefToExternalSchema($ref, computeRefFormat(subRef.get$ref()));
     }
 
 

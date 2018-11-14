@@ -94,7 +94,9 @@ public class RemoteUrl {
     public static String cleanUrl(String url) {
         String result = null;
         try {
-             result =url.replaceAll("\\{", "%7B").replaceAll("\\}", "%7D");
+             result =url.replaceAll("\\{", "%7B").
+                     replaceAll("\\}", "%7D").
+                     replaceAll(" ", "%20");
         }catch (Exception t){
             t.printStackTrace();
         }
