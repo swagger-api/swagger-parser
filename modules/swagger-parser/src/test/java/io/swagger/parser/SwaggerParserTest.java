@@ -73,7 +73,6 @@ public class SwaggerParserTest {
     public void testIssue927() {
         Swagger swagger = new SwaggerParser().read("issue-927/issue-927.yaml");
         assertNotNull(swagger);
-        Yaml.prettyPrint(swagger);
         assertTrue(swagger.getDefinitions().size() == 3);
         assertNotNull(swagger.getDefinitions().get("Pet"));
         assertNotNull(swagger.getDefinitions().get("Cat"));
