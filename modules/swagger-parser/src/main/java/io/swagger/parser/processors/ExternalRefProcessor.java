@@ -197,7 +197,7 @@ public final class ExternalRefProcessor {
                 model = response.getResponseSchema();
                 if (model instanceof RefModel) {
                     RefModel refModel = (RefModel) model;
-                    if (RefUtils.isAnExternalRefFormat(refFormat)) {
+                    if (RefUtils.isAnExternalRefFormat(refModel.getRefFormat())) {
                         processRefModel(refModel, $ref);
                     } else {
                         processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);

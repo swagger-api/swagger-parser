@@ -451,6 +451,12 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testLoadnestedExternalResponseReferencesFile_Yaml() throws Exception {
+        final Swagger swagger = doRelativeResponseFileTest("src/test/resources/nested-external-response-references/swagger-root.yaml");
+        assertNotNull(Yaml.mapper().writeValueAsString(swagger));
+    }
+    
+    @Test
     public void testLoadRecursiveExternalDef() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/file-reference-to-recursive-defs/b.yaml");
@@ -785,6 +791,46 @@ public class SwaggerParserTest {
         return swagger;
     }
 
+    private Swagger doRelativeResponseFileTest(String location) {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);
+        
+        if (readResult.getMessages().size() > 0) {
+            Json.prettyPrint(readResult.getMessages());
+        }
+        final Swagger swagger = readResult.getSwagger();
+        
+        Json.prettyPrint(swagger);
+        
+        final Path path = swagger.getPath("/users");
+        assertEquals(path.getClass(), Path.class); //we successfully converted the RefPath to a Path
+
+        final Operation operation = path.getGet();
+
+        final Map<String, Response> responsesMap = operation.getResponses();
+
+        assertResponse(swagger, responsesMap, "200", "OK", "#/definitions/User");
+
+        final Map<String, Model> definitions = swagger.getDefinitions();
+        final ModelImpl refInDefinitions = (ModelImpl) definitions.get("UserX");
+        expectedPropertiesInModel(refInDefinitions, "address");
+
+        final ModelImpl refInDefinitionsAddress = (ModelImpl) definitions.get("Address");
+        expectedPropertiesInModel(refInDefinitionsAddress, "postal", "country");
+
+        final ModelImpl refInDefinitionsCountry = (ModelImpl) definitions.get("Country");
+        expectedPropertiesInModel(refInDefinitionsCountry, "name");
+
+        final ModelImpl refInDefinitionsAddress_2 = (ModelImpl) definitions.get("Address_2");
+        expectedPropertiesInModel(refInDefinitionsAddress_2, "postal", "country");
+
+        final ModelImpl refInDefinitionsCountry_2 = (ModelImpl) definitions.get("Country_2");
+        expectedPropertiesInModel(refInDefinitionsCountry_2, "name");        
+        
+        return swagger;
+    }
+    
+    
     private void expectedPropertiesInModel(ModelImpl model, String... expectedProperties) {
         assertEquals(model.getProperties().size(), expectedProperties.length);
         for (String expectedProperty : expectedProperties) {
