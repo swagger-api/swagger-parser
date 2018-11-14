@@ -557,7 +557,7 @@ public class OpenAPIDeserializer {
             return false;
         } else {
             Parameter pathParamDefined = parameters.stream()
-                            .filter(parameter -> pathParam.equals(parameter.getName()))
+                            .filter(parameter -> pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn()))
                             .findFirst()
                             .orElse(null);
             if (pathParamDefined == null) {
