@@ -1,6 +1,8 @@
+**NOTE:** If you're looking for `swagger-parser` 2.X and OpenApi 3.0, please refer to [master branch](https://github.com/swagger-api/swagger-parser)
+
 # Swagger Parser
 
-[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-master.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-master)
+[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v1.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v1)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser)
 [![PR Stats](https://img.shields.io/github/issues-pr/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/pulls)
 [![Issue Stats](https://img.shields.io/github/issues/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/issues)
@@ -115,7 +117,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.39</version>
+  <version>1.0.40-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -125,7 +127,7 @@ To add swagger parsing support for older versions of swagger, add the `compat` m
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-compat-spec-parser</artifactId>
-  <version>1.0.39</version>
+  <version>1.0.40-SNAPSHOT</version>
 </dependency>
 
 ```

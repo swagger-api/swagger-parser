@@ -1,0 +1,9 @@
+---
+localObject:
+  $ref: "#/referencedByLocalElement"
+referencedByLocalElement:
+  properties:
+    hello1:
+      type: "string"
+    world2:
+      type: "integer"

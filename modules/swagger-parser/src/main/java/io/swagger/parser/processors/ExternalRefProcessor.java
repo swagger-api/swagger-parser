@@ -7,6 +7,7 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 import io.swagger.parser.util.RefUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -94,7 +95,7 @@ public final class ExternalRefProcessor {
                 if (isAnExternalRefFormat(refModel.getRefFormat())) {
                     refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
                 } else {
-                    processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+                    refModel.set$ref(processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE));
                 }
 
             }
@@ -196,7 +197,7 @@ public final class ExternalRefProcessor {
                 model = response.getResponseSchema();
                 if (model instanceof RefModel) {
                     RefModel refModel = (RefModel) model;
-                    if (RefUtils.isAnExternalRefFormat(refFormat)) {
+                    if (RefUtils.isAnExternalRefFormat(refModel.getRefFormat())) {
                         processRefModel(refModel, $ref);
                     } else {
                         processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
@@ -235,6 +236,12 @@ public final class ExternalRefProcessor {
                             file);
                 }
             }
+            else if (prop.getValue() instanceof ObjectProperty){
+                ObjectProperty objProp = (ObjectProperty) prop.getValue();
+                if(objProp.getProperties() != null ){
+                    processProperties(objProp.getProperties(),file);
+                }
+            }
         }
     }
 
@@ -244,7 +251,8 @@ public final class ExternalRefProcessor {
             String joinedRef = join(externalFile, subRef.get$ref());
             subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
         } else {
-            processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            String processRef = processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+processRef);
         }
     }
 

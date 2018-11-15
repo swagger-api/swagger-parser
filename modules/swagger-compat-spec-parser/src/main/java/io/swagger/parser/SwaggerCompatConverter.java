@@ -210,7 +210,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 jsonNode = Json.mapper().readTree(json);
 
             }
-            if (jsonNode.get("swaggerVersion") == null) {
+            if (jsonNode == null || jsonNode.get("swaggerVersion") == null) {
                 return null;
             }
             ResourceListingMigrator migrator = new ResourceListingMigrator();

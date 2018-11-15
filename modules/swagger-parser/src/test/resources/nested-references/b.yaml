@@ -15,3 +15,5 @@ definitions:
     properties:
       name:
         type: string
+  l:
+    $ref: "./c.yaml#/localObject"
