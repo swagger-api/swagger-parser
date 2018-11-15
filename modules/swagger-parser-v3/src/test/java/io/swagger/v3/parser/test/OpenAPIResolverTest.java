@@ -1,11 +1,13 @@
 package io.swagger.v3.parser.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -339,11 +341,11 @@ public class OpenAPIResolverTest {
 
         Map<String, Callback> callbacks = openAPI.getComponents().getCallbacks();
         // internal callback reference
-        assertEquals(callbacks.get("referenced").get("$ref").get$ref(),"#/components/callbacks/failed");
+        assertEquals(callbacks.get("referenced").get$ref(),"#/components/callbacks/failed");
         //callback pathItem -> operation ->requestBody
         assertEquals(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody3");
         //remote callback ref
-        assertEquals(callbacks.get("remoteCallback").get("$ref").get$ref(),"#/components/callbacks/callback");
+        assertEquals(callbacks.get("remoteCallback").get$ref(),"http://localhost:" + serverPort + "/remote/callback");
 
     }
 
@@ -740,6 +742,20 @@ public class OpenAPIResolverTest {
         Assert.assertTrue(examples.size() == 2);
     }
 
+    @Test
+    public void allOfExampleGeneration(@Injectable final List<AuthorizationValue> auths) throws JsonProcessingException {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/simpleAllOf.yaml", null, options);
+
+        Assert.assertNotNull(openAPI);
+        Object withoutExample = openAPI.getPaths().get("/foo").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getExample();
+        Assert.assertNull(withoutExample);
+
+        Object withExample = openAPI.getPaths().get("/bar").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getExample();
+        Assert.assertEquals("{\"someProperty\":\"ABC\",\"someOtherProperty\":42}", Json.mapper().writeValueAsString(withExample));
+    }
 
     @Test
     public void testSwaggerResolver(@Injectable final OpenAPI swagger,
@@ -1102,6 +1118,21 @@ public class OpenAPIResolverTest {
         assertEquals(qp.getName(), "page");
     }
 
+    @Test(description = "update internal references of external files")
+    public void testUpdateInternalReferencesOfExternalFiles() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().read("internal-references-in-external-files/main.yaml", null, options);
+
+        ComposedSchema commonSchema = (ComposedSchema) openAPI.getComponents().getSchemas().get("common");
+
+        assertEquals(commonSchema.getAllOf().get(0).get$ref(), "#/components/schemas/core");
+        assertEquals(((Schema) commonSchema.getAllOf().get(1).getProperties().get("direct")).get$ref(), "#/components/schemas/core");
+        assertEquals(((ArraySchema) commonSchema.getAllOf().get(1).getProperties().get("referenced")).getItems().get$ref(), "#/components/schemas/core");
+        Schema coreSchema = openAPI.getComponents().getSchemas().get("core");
+        assertEquals(((Schema) coreSchema.getProperties().get("inner")).get$ref(), "#/components/schemas/innerCore");
+    }
 
     public String replacePort(String url){
         String pathFile = url.replace("${dynamicPort}", String.valueOf(this.serverPort));

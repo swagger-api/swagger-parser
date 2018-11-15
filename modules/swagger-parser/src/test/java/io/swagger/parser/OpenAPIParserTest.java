@@ -2,6 +2,7 @@ package io.swagger.parser;
 
 
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -60,6 +61,36 @@ public class OpenAPIParserTest {
         SwaggerParseResult result = new OpenAPIParser().readLocation("petstore.yaml", null, null);
 
         assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+    }
+
+
+    @Test
+    public void testIssue887() {
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIParser().readLocation("apiWithMultipleTags.json", null, null);
+        System.out.println(result.getMessages());
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().get(0), "attribute tags.sample is repeated");
+    }
+
+    @Test
+    public void testIssue895() {
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue895.yaml", null, null);
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().get(0),"attribute info.contact.test");
+        assertEquals(result.getMessages().get(1),"attribute info.license.test1");
+
+    }
+
+    @Test
+    public void testIssue892() {
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue892-main.yaml", null, null);
+
+        assertEquals(result.getMessages().size(),1);
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
     }
@@ -375,6 +406,19 @@ public class OpenAPIParserTest {
         assertNotNull(openAPI);
         assertEquals(openAPI.getPaths().get("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
     }
+
+    @Test
+    public void testIssue258() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("duplicateOperationId.json", null, options);
+
+        System.out.println(result.getMessages());
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().get(0), "attribute paths.'/pets/{id}'(post).operationId is repeated");
+   }
+
     @Test
     public void testIssueRelativeRefs2(){
         String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
@@ -411,6 +455,21 @@ public class OpenAPIParserTest {
         Schema prop = (Schema) arraySchema.getItems().getProperties().get("itemID");
 
         assertEquals(prop.get$ref(),"#/components/schemas/simpleIDType_v01");
-
     }
+
+    @Test
+    public void testIssue879() {
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        OpenAPI openAPI = openApiParser.readLocation("issue_879.yaml", null, options).getOpenAPI();
+
+        String ref = openAPI.getPaths()
+                .get("/register")
+                .getPost()
+                .getCallbacks()
+                .get("myEvent")
+                .get$ref();
+        assertEquals(ref, "#/components/callbacks/callbackEvent");
+    }
+
 }

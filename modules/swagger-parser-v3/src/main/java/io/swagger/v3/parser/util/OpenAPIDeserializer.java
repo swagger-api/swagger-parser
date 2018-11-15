@@ -52,15 +52,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,6 +90,7 @@ public class OpenAPIDeserializer {
     private static final String PATH_PARAMETER = "path";
     private static final String HEADER_PARAMETER = "header";
     private Components components;
+    private final Set<String> operationIDs = new HashSet<>();
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
     	return deserialize(rootNode, null);
@@ -302,11 +295,18 @@ public class OpenAPIDeserializer {
             return null;
         }
         List<Tag> tags = new ArrayList<>();
+        Set<String> tagsTracker = new HashSet<>();
         for (JsonNode item : obj) {
             if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
                 Tag tag = getTag((ObjectNode) item, location, result);
                 if (tag != null) {
                     tags.add(tag);
+
+                    if(tagsTracker.contains((String)tag.getName())) {
+                        result.uniqueTags(location,tag.getName());
+                    }
+
+                    tagsTracker.add(tag.getName());
                 }
             }
         }
@@ -526,6 +526,9 @@ public class OpenAPIDeserializer {
                 if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                     result.invalidType(location, pathName, "object", pathValue);
                 } else {
+                    if(!pathName.startsWith("/")){
+                        result.warning(location," Resource "+pathName+ " should start with /");
+                    }
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path,String.format("%s.'%s'", location,pathName), result);
                     paths.put(pathName, pathObj);
@@ -689,7 +692,7 @@ public class OpenAPIDeserializer {
     }
 
 
-    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result, Set<String> uniqueValues) {
         String value = null;
         JsonNode v = node.get(key);
         if (node == null || v == null) {
@@ -701,8 +704,16 @@ public class OpenAPIDeserializer {
             result.invalidType(location, key, "string", node);
         } else {
             value = v.asText();
+            if (uniqueValues != null && !uniqueValues.add(value)) {
+                result.unique(location, "operationId");
+                result.invalid();
+            }
         }
         return value;
+    }
+
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        return getString(key, node, required, location, result, null);
     }
 
     public Set<String> getKeys(ObjectNode node) {
@@ -804,6 +815,12 @@ public class OpenAPIDeserializer {
 
         value = getString("url", node, false, location, result);
         if(StringUtils.isNotBlank(value)) {
+            try {
+               new URL(value);
+            }
+            catch (Exception e) {
+                result.warning(location,value);
+            }
             license.setUrl(value);
         }
 
@@ -835,6 +852,12 @@ public class OpenAPIDeserializer {
 
         value = getString("url", node, false, location, result);
         if(StringUtils.isNotBlank(value)) {
+            try {
+                new URL(value);
+            }
+            catch (Exception e) {
+                result.warning(location,value);
+            }
             contact.setUrl(value);
         }
 
@@ -1052,6 +1075,11 @@ public class OpenAPIDeserializer {
             link.setParameters(getLinkParameters(parametersObject, location, result));
         }
 
+        String requestBody = getString("requestBody",linkNode,false,location,result);
+        if (requestBody!= null) {
+            link.setRequestBody(requestBody);
+        }
+
         ObjectNode headerObject = getObject("headers",linkNode,false,location,result);
         if (headerObject!= null) {
             link.setHeaders(getHeaders(headerObject, location, result));
@@ -1124,14 +1152,13 @@ public class OpenAPIDeserializer {
                 JsonNode ref = node.get("$ref");
                 if (ref != null) {
                     if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-                        PathItem pathItem = new PathItem();
                         String mungedRef = mungedRef(ref.textValue());
                         if (mungedRef != null) {
-                            pathItem.set$ref(mungedRef);
+                            callback.set$ref(mungedRef);
                         }else{
-                            pathItem.set$ref(ref.textValue());
+                            callback.set$ref(ref.textValue());
                         }
-                        return callback.addPathItem(name,pathItem);
+                        return callback;
                     } else {
                         result.invalidType(location, "$ref", "string", node);
                         return null;
@@ -2471,7 +2498,7 @@ public class OpenAPIDeserializer {
         if(docs != null) {
             operation.setExternalDocs(docs);
         }
-        value = getString("operationId", obj, false, location, result);
+        value = getString("operationId", obj, false, location, result, operationIDs);
         if (StringUtils.isNotBlank(value)) {
             operation.operationId(value);
         }
@@ -2686,6 +2713,9 @@ public class OpenAPIDeserializer {
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<>();
         private Map<Location, String> invalidType = new LinkedHashMap<>();
         private List<Location> missing = new ArrayList<>();
+        private List<Location> warnings = new ArrayList<>();
+        private List<Location> unique = new ArrayList<>();
+        private List<Location> uniqueTags = new ArrayList<>();
 
         public ParseResult() {
         }
@@ -2701,6 +2731,17 @@ public class OpenAPIDeserializer {
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
         }
+      
+        public void warning(String location, String key) {
+            warnings.add(new Location(location, key));
+        }
+      
+        public void unique(String location, String key) {
+            unique.add(new Location(location, key));
+
+        }
+
+        public void uniqueTags(String location, String key) {uniqueTags.add(new Location(location,key));}
 
         public void invalidType(String location, String key, String expectedType, JsonNode value) {
             invalidType.put(new Location(location, key), expectedType);
@@ -2731,9 +2772,24 @@ public class OpenAPIDeserializer {
                 String message = "attribute " + location + l.key + " is missing";
                 messages.add(message);
             }
+            for (Location l : warnings) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location +l.key;
+                messages.add(message);
+            }
             for (Location l : unsupported.keySet()) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is unsupported";
+                messages.add(message);
+            }
+            for (Location l : unique) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is repeated";
+                messages.add(message);
+            }
+            for (Location l : uniqueTags) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is repeated";
                 messages.add(message);
             }
             return messages;

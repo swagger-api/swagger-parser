@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+    title: Service Model
+    version: 2.4.0
+paths:
+    /networkAccessProfile:
+        get:
+            tags:
+            - AccessProfile
+            operationId: getList
+            parameters:
+            - name: id
+              in: query
+              schema:
+                  type: string
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/accessProfileBO'
+servers:
+- url: 'https://api.com/{access}/accessProfileAPI'
+  variables:
+      access:
+          default: unknown
+components:
+    parameters:
+        fields:
+            name: fields
+            in: query
+            schema:
+                type: string
+    schemas:
+        accessProfileBO:
+            $ref: ../BO/Resource/ApiSpecificationBO.json

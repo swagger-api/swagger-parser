@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: headers in components
+  version: 1.0.0
+paths:
+  /2.0/users/:
+    get:
+      operationId: getUserByName
+      responses:
+        '200':
+          description: The User
+          headers:
+            X-Rate-Limit:
+              $ref: "#/components/headers/X-Rate-Limit-Ref"
+components:
+  headers:
+    X-Rate-Limit-Ref:
+      description: The number of allowed requests in the current period
+      schema:
+        type: integer

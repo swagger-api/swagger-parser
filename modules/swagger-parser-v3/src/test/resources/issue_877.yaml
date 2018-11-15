@@ -1,0 +1,27 @@
+openapi: 3.0.0
+servers:
+- url: 'http://localhost:8000/v2/api'
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+paths:
+  /adopt:
+    get:
+      tags:
+      - pet
+      summary: Find pet by ID
+      description: It gets pets
+      operationId: getPetById
+      parameters:
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: successful operation
+components:
+  parameters:
+    limit:
+      name: playerId
+      in: path
+      required: true
+      schema:
+        type: string

@@ -1,0 +1,34 @@
+### Domains, a place to put your reusable components
+
+
+info:
+  title: "aa"
+  description: "swos552"
+  version: '1.0.0'
+
+components:
+  schemas:
+    Test.Definition:
+      type: object
+      properties:
+        stuff:
+          type: array
+          items:
+            $ref: '#/components/schemas/TESTTHING'
+    TESTTHING:
+      type: object
+      properties:
+        prop:
+          type: string
+pathitems:
+  path-test:
+    put:
+      description: test ref
+      operationId: test
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Test.Definition'
