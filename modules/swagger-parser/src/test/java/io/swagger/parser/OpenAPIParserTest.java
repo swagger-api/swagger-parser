@@ -65,6 +65,16 @@ public class OpenAPIParserTest {
     }
 
     @Test
+    public void testIssue934() {
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue-934.yaml", null, null);
+
+        assertNotNull(result);
+        assertEquals(result.getMessages().size(),2);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+    }
+
+    @Test
     public void testIssue768() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
