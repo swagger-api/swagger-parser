@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.examples.Example;
@@ -56,6 +57,45 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testIssue913() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = parser.readLocation("issue-913/BS/ApiSpecification.yaml", null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("indicatorType"));
+        Assert.assertEquals(openAPI.getComponents().getSchemas().get("indicatorType").getProperties().size(),1);
+    }
+
+    @Test
+    public void testIssue901_2() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-901/spec2.yaml",null,options).getOpenAPI();
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents());
+        ArraySchema arraySchema = (ArraySchema) openAPI.getComponents().getSchemas().get("Test.Definition").getProperties().get("stuff");
+        String internalRef = arraySchema.getItems().get$ref();
+        assertEquals(internalRef,"#/components/schemas/TEST.THING.OUT.Stuff");
+
+
+
+
+
+    }
+
+    @Test
+    public void testIssue901() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-901/spec.yaml",null,options).getOpenAPI();
+        assertNotNull(openAPI);
+        String internalRef = openAPI.getPaths().get("/test").getPut().getResponses().get("200").getContent().get("application/json").getSchema().get$ref();
+        assertEquals(internalRef,"#/components/schemas/Test.Definition");
+        assertNotNull(openAPI.getComponents());
+    }
 
     @Test
     public void testIssue853() {
@@ -1539,6 +1579,15 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue915() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_918.yaml", null, parseOptions);
+        Map<String, Header> headers = openAPI.getPaths().get("/2.0/users/").getGet().getResponses().get("200").getHeaders();
+        String description = headers.get("X-Rate-Limit").getDescription();
+        assertEquals(description, "The number of allowed requests in the current period");
+    }
+
     public void shouldParseParameters() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolveFully(true);

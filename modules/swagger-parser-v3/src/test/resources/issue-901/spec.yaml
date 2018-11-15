@@ -1,0 +1,10 @@
+openapi: 3.0.1
+info:
+  title: testswos55
+  description: testswos55
+  version: "1.01"
+servers:
+- url: ///test
+paths:
+  /test:
+    $ref: ref.yaml/#/pathitems/path-test
