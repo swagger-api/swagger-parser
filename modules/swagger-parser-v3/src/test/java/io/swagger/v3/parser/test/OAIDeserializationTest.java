@@ -39,7 +39,6 @@ public class OAIDeserializationTest {
     @Test
     public void testIssue911() {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue_911.yaml", null, null);
-        System.out.println(result.getMessages());
         assertEquals(result.getMessages().size(),1);
         assertNotNull(result.getOpenAPI());
     }
