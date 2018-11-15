@@ -6,6 +6,7 @@ import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
@@ -110,10 +111,7 @@ public final class ExternalRefProcessor {
                         if (isAnExternalRefFormat(refModel.getRefFormat())) {
                             String joinedRef = join(file, refModel.get$ref());
                             refModel.set$ref(processRefToExternalDefinition(joinedRef, refModel.getRefFormat()));
-                        }/*else if (isAnExternalRefFormat(refModel.getOriginalRefFormat())) {
-                            String joinedRef = join(file, refModel.getOriginalRef());
-                            refModel.set$ref(processRefToExternalDefinition(joinedRef, refModel.getOriginalRefFormat()));
-                        }*/else {
+                        }else {
                             processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
                         }
                     } else if (allOfModel instanceof ModelImpl) {
@@ -127,6 +125,12 @@ public final class ExternalRefProcessor {
 
             if (model instanceof  ModelImpl) {
                 ModelImpl modelImpl = (ModelImpl) model;
+
+                String discriminator = modelImpl.getDiscriminator();
+                if (discriminator != null){
+                    processDiscriminator(discriminator,modelImpl.getProperties(), file);
+                }
+
                 Property additionalProperties = modelImpl.getAdditionalProperties();
                 if (additionalProperties != null) {
                     if (additionalProperties instanceof RefProperty) {
@@ -155,6 +159,8 @@ public final class ExternalRefProcessor {
 
         return newRef;
     }
+
+
 
 
     public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
@@ -208,6 +214,24 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
+    private void processDiscriminator(String discriminator, Map<String, Property> properties, String file) {
+        for (Map.Entry<String, Property> prop : properties.entrySet()) {
+            if (prop.getKey().equals(discriminator)){
+                if (prop.getValue() instanceof StringProperty){
+                    StringProperty stringProperty = (StringProperty) prop.getValue();
+                    if(stringProperty.getEnum() != null){
+                        for(String name: stringProperty.getEnum()){
+                            processRefProperty(new RefProperty(RefType.DEFINITION.getInternalPrefix()+name), file);
+                        }
+                    }
+
+
+                }
+            }
+        }
+
+    }
+
     private void processProperties(final Map<String, Property> subProps, final String file) {
         if (subProps == null || 0 == subProps.entrySet().size() ) {
             return;
@@ -242,6 +266,17 @@ public final class ExternalRefProcessor {
                     processProperties(objProp.getProperties(),file);
                 }
             }
+        }
+    }
+
+    private void processDiscriminatorAsRefProperty(RefProperty subRef, String externalFile) {
+
+        if (isAnExternalRefFormat(subRef.getRefFormat())) {
+            String joinedRef = join(externalFile, subRef.get$ref());
+            subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
+        } else {
+            String processRef = processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+            subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+processRef);
         }
     }
 

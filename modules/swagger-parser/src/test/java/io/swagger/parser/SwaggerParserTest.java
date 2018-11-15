@@ -70,16 +70,32 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue927() {
+        Swagger swagger = new SwaggerParser().read("issue-927/issue-927.yaml");
+        assertNotNull(swagger);
+        assertTrue(swagger.getDefinitions().size() == 3);
+        assertNotNull(swagger.getDefinitions().get("Pet"));
+        assertNotNull(swagger.getDefinitions().get("Cat"));
+        assertNotNull(swagger.getDefinitions().get("Dog"));
+    }
+
+    @Test
     public void testIssue901_2() {
         Swagger swagger = new SwaggerParser().read("issue-901/spec2.yaml");
         assertNotNull(swagger);
-        Yaml.prettyPrint(swagger);
+        assertNotNull(swagger.getDefinitions());
+        ArrayProperty arraySchema = (ArrayProperty) swagger.getDefinitions().get("Test.Definition").getProperties().get("stuff");
+        String internalRef = ((RefProperty) arraySchema.getItems()).get$ref();
+        assertEquals(internalRef,"#/definitions/TEST.THING.OUT.Stuff");
     }
 
     @Test
     public void testIssue901() {
         Swagger swagger = new SwaggerParser().read("issue-901/spec.yaml");
         assertNotNull(swagger);
+        String internalRef = ((RefModel)swagger.getPaths().get("/test").getPut().getResponses().get("200").getResponseSchema()).get$ref();
+        assertEquals(internalRef,"#/definitions/Test.Definition");
+        assertNotNull(swagger.getDefinitions());
 
     }
 
