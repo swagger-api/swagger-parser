@@ -1,0 +1,60 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Service Model",
+        "version": "2.4.0"
+    },
+    "host": "api.com",
+    "basePath": "/{access}/accessProfileAPI",
+    "schemes": [
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/networkAccessProfile": {
+            "get": {
+                "tags": [
+                    "AccessProfile"
+                ],
+                "operationId": "getList",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/accessProfileBO"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "accessProfileBO": {
+            "$ref": "../BO/Resource/ApiSpecificationBO.json"
+        }
+    },
+    "parameters": {
+        "fields": {
+            "name": "fields",
+            "in": "query",
+            "type": "string"
+        }
+    }
+}

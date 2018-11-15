@@ -44,6 +44,9 @@ public class RemoteUrlTest {
     public void testCleanUrl() {
         String cleaned = RemoteUrl.cleanUrl("http://foo/bar/com/{v2}/fun");
         assertEquals(cleaned, "http://foo/bar/com/%7Bv2%7D/fun");
+
+        cleaned = RemoteUrl.cleanUrl("http://westus.dev.cognitive.microsoft.com/docs/services/563879b61984550e40cbbe8d/export?DocumentFormat=Swagger&ApiName=Face API - V1.0");
+        assertEquals(cleaned, "http://westus.dev.cognitive.microsoft.com/docs/services/563879b61984550e40cbbe8d/export?DocumentFormat=Swagger&ApiName=Face%20API%20-%20V1.0");
     }
 
     @Test

@@ -1,0 +1,6 @@
+title: "aList"
+properties:
+  pets:
+    type: array
+    items:
+      $ref: "/subsub.yaml"

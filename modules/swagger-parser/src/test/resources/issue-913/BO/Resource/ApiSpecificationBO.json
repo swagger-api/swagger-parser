@@ -1,0 +1,12 @@
+{
+    "properties": {
+        "details": {
+            "type": "object",
+            "properties": {
+                "confirmationCodeRequired": {
+                    "$ref": "../Common/BasicComponents.json#/properties/indicatorType"
+                }
+            }
+        }
+    }
+}
