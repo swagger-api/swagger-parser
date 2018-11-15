@@ -186,6 +186,23 @@ public class SwaggerDeserializer {
                 } else {
                     ObjectNode path = (ObjectNode) pathValue;
                     Path pathObj = path(path, location + ".'" + pathName + "'", result);
+                    String[] eachPart = pathName.split("/");
+                    for (String part : eachPart) {
+                        if (part.startsWith("{") && part.endsWith("}") && part.length() > 2) {
+                            String pathParam = part.substring(1, part.length() - 1);
+                            boolean definedInPathLevel = isPathParamDefined(pathParam, pathObj.getParameters());
+                            if (definedInPathLevel) {
+                                continue;
+                            }
+                            List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
+                            for (Operation operation : operationsInAPath) {
+                                if (!isPathParamDefined(pathParam, operation.getParameters())) {
+                                    result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     output.put(pathName, pathObj);
                 }
             }
@@ -193,9 +210,39 @@ public class SwaggerDeserializer {
         return output;
     }
 
+    private boolean isPathParamDefined(String pathParam, List<Parameter> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return false;
+        } else {
+            for (Parameter parameter : parameters) {
+                if (pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void addToOperationsList(List<Operation> operationsList, Operation operation) {
+        if (operation == null) {
+            return;
+        }
+        operationsList.add(operation);
+    }
+
+    private List<Operation> getAllOperationsInAPath(Path pathObj) {
+        List<Operation> operations = new ArrayList<>();
+        addToOperationsList(operations, pathObj.getGet());
+        addToOperationsList(operations, pathObj.getPut());
+        addToOperationsList(operations, pathObj.getPost());
+        addToOperationsList(operations, pathObj.getPatch());
+        addToOperationsList(operations, pathObj.getDelete());
+        addToOperationsList(operations, pathObj.getOptions());
+        addToOperationsList(operations, pathObj.getHead());
+        return operations;
+    }
+
     public Path path(ObjectNode obj, String location, ParseResult result) {
-        boolean hasRef = false;
-        Path output = null;
         if(obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
@@ -1579,6 +1626,7 @@ public class SwaggerDeserializer {
         private Map<Location, JsonNode> extra = new LinkedHashMap<Location, JsonNode>();
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<Location, JsonNode>();
         private Map<Location, String> invalidType = new LinkedHashMap<Location, String>();
+        private List<Location> warnings = new ArrayList<>();
         private List<Location> missing = new ArrayList<Location>();
 
         public ParseResult() {
@@ -1594,6 +1642,10 @@ public class SwaggerDeserializer {
 
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
+        }
+
+        public void warning(String location, String key) {
+            warnings.add(new Location(location, key));
         }
 
         public void invalidType(String location, String key, String expectedType, JsonNode value){
@@ -1659,6 +1711,11 @@ public class SwaggerDeserializer {
             for(Location l : missing) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            for (Location l : warnings) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location +l.key;
                 messages.add(message);
             }
             for(Location l : unsupported.keySet()) {
