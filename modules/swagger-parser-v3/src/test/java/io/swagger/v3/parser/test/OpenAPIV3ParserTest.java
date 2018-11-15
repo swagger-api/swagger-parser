@@ -1592,7 +1592,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue931() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue_931.json", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("Issue_931.json", null, options);
         assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() > 0);
         assertEquals(result.getMessages().get(0).contains("doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$"), true);
