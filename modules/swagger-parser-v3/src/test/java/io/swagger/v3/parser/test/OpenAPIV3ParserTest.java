@@ -210,6 +210,15 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void issue941() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        final OpenAPI result = parser.read("src/test/resources/sample/SwaggerPetstore.yaml");
+        Assert.assertNotNull(result);
+        assertEquals("Documentation de l'API élaboré par nos soins", result.getInfo().getDescription());
+    }
+
+    @Test
     public void issueRelativeRefs2() throws Exception {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
