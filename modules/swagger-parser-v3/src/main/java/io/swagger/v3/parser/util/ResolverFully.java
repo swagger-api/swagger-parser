@@ -19,7 +19,6 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.models.RefFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +37,8 @@ public class ResolverFully {
 
     private boolean aggregateCombinators;
 
+
+
     public ResolverFully() {
         this(true);
     }
@@ -53,6 +54,7 @@ public class ResolverFully {
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
     private Map<String, Link> links;
+    private Map<String, Schema> resolvedProperties = new HashMap<>();
 
     public void resolveFully(OpenAPI openAPI) {
         if (openAPI.getComponents() != null && openAPI.getComponents().getRequestBodies() != null) {
@@ -259,30 +261,43 @@ public class ResolverFully {
 
     public Schema resolveSchema(Schema schema) {
         if(schema.get$ref() != null) {
+
             String ref= schema.get$ref();
             ref = ref.substring(ref.lastIndexOf("/") + 1);
             Schema resolved = schemas.get(ref);
-            if(resolved == null) {
-                LOGGER.error("unresolved model " + ref);
+
+            if (resolved != null) {
+
+                if (this.resolvedModels.containsKey(ref)) {
+                    LOGGER.debug("avoiding infinite loop");
+                    return resolvedModels.get(ref);
+                }
+                resolvedModels.put(ref, schema);
+                Schema model = resolveSchema(resolved);
+
+                // if we make it without a resolution loop, we can update the reference
+                resolvedModels.put(ref, model);
+
+
+                return model;
+
+            }else {
                 return schema;
             }
-            if(this.resolvedModels.containsKey(ref)) {
-                LOGGER.debug("avoiding infinite loop");
-                return this.resolvedModels.get(ref);
-            }
-            this.resolvedModels.put(ref, schema);
-
-            Schema model = resolveSchema(resolved);
-
-            // if we make it without a resolution loop, we can update the reference
-            this.resolvedModels.put(ref, model);
-            return model;
         }
 
         if(schema instanceof ArraySchema) {
             ArraySchema arrayModel = (ArraySchema) schema;
             if(arrayModel.getItems().get$ref() != null) {
-                arrayModel.setItems(resolveSchema(arrayModel.getItems()));
+                String ref= arrayModel.getItems().get$ref();
+                ref = ref.substring(ref.lastIndexOf("/") + 1);
+                if (resolvedModels.get(ref) == null) {
+                    arrayModel.setItems(resolveSchema(arrayModel.getItems()));
+                }else{
+                   arrayModel.setItems(resolvedModels.get(ref));
+                   //validar que tan profundo estoy en la recursion para cortar con la asignacion de propiedades.
+                   arrayModel.getItems().set$ref(arrayModel.getItems().get$ref());
+                }
             } else {
                 arrayModel.setItems(arrayModel.getItems());
             }
@@ -331,7 +346,14 @@ public class ResolverFully {
                         if (resolved.getProperties() != null) {
                             for (String key : properties.keySet()) {
                                 Schema prop = (Schema) resolved.getProperties().get(key);
-                                model.addProperties(key, resolveSchema(prop));
+                                if(resolvedProperties.get(key) == null && resolvedProperties.get(key) != prop) {
+                                    LOGGER.debug("avoiding infinite loop");
+                                    Schema resolvedProp = resolveSchema(prop);
+                                    model.addProperties(key,resolvedProp );
+                                    resolvedProperties.put(key, resolvedProp);
+                                }else {
+                                    model.addProperties(key,resolvedProperties.get(key));
+                                }
                             }
                             if (resolved.getRequired() != null) {
                                 for (int i = 0; i < resolved.getRequired().size(); i++) {
@@ -372,7 +394,14 @@ public class ResolverFully {
                             if (resolved.getProperties() != null) {
                                 for (String key : properties.keySet()) {
                                     Schema prop = (Schema) resolved.getProperties().get(key);
-                                    model.addProperties(key, resolveSchema(prop));
+                                    if(resolvedProperties.get(key) == null && resolvedProperties.get(key) != prop) {
+                                        LOGGER.debug("avoiding infinite loop");
+                                        Schema resolvedProp = resolveSchema(prop);
+                                        model.addProperties(key,resolvedProp );
+                                        resolvedProperties.put(key, resolvedProp);
+                                    }else {
+                                        model.addProperties(key,resolvedProperties.get(key));
+                                    }
                                 }
                                 if (resolved.getRequired() != null) {
                                     for (int i = 0; i < resolved.getRequired().size(); i++) {
@@ -414,7 +443,14 @@ public class ResolverFully {
                             if (resolved.getProperties() != null) {
                                 for (String key : properties.keySet()) {
                                     Schema prop = (Schema) resolved.getProperties().get(key);
-                                    model.addProperties(key, resolveSchema(prop));
+                                    if(resolvedProperties.get(key) == null && resolvedProperties.get(key) != prop) {
+                                        LOGGER.debug("avoiding infinite loop");
+                                        Schema resolvedProp = resolveSchema(prop);
+                                        model.addProperties(key,resolvedProp );
+                                        resolvedProperties.put(key, resolvedProp);
+                                    }else {
+                                        model.addProperties(key,resolvedProperties.get(key));
+                                    }
                                 }
                                 if (resolved.getRequired() != null) {
                                     for (int i = 0; i < resolved.getRequired().size(); i++) {
@@ -463,8 +499,15 @@ public class ResolverFully {
             Map<String, Schema> properties = model.getProperties();
             for (String propertyName : properties.keySet()) {
                 Schema property = (Schema) model.getProperties().get(propertyName);
-                Schema resolved = resolveSchema(property);
-                updated.put(propertyName, resolved);
+                if(resolvedProperties.get(propertyName) == null && resolvedProperties.get(propertyName) != property) {
+                    LOGGER.debug("avoiding infinite loop");
+                    Schema resolved = resolveSchema(property);
+                    updated.put(propertyName, resolved);
+                    resolvedProperties.put(propertyName, resolved);
+                }else {
+                    updated.put(propertyName, resolvedProperties.get(propertyName));
+
+                }
             }
 
             for (String key : updated.keySet()) {

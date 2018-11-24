@@ -69,6 +69,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.FileAssert.fail;
 
 
 public class OpenAPIResolverTest {
@@ -432,7 +433,7 @@ public class OpenAPIResolverTest {
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
         ResolverFully resolverUtil = new ResolverFully();
         resolverUtil.resolveFully(openAPI);
-        //System.out.println(openAPI.getPaths().get("/selfRefB").getGet().getRequestBody().getContent().get("application/json"));
+
 
         RequestBody body = openAPI.getPaths().get("/selfRefB").getGet().getRequestBody();
         Schema schema = body.getContent().get("application/json").getSchema();
@@ -594,6 +595,7 @@ public class OpenAPIResolverTest {
 
         assertTrue(allOf.getAllOf().get(0).getProperties().containsKey("street"));
         assertTrue(allOf.getAllOf().get(1).getProperties().containsKey("gps"));
+
 
         // Testing path item
         ComposedSchema schema = (ComposedSchema) openAPI.getPaths().get("/withInvalidComposedModel").getPost().getRequestBody().getContent().get("application/json").getSchema();
@@ -1132,6 +1134,21 @@ public class OpenAPIResolverTest {
         assertEquals(((ArraySchema) commonSchema.getAllOf().get(1).getProperties().get("referenced")).getItems().get$ref(), "#/components/schemas/core");
         Schema coreSchema = openAPI.getComponents().getSchemas().get("core");
         assertEquals(((Schema) coreSchema.getProperties().get("inner")).get$ref(), "#/components/schemas/innerCore");
+    }
+
+    @Test
+    public void recursiveResolving() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("recursive.yaml", null, parseOptions);
+        Assert.assertNotNull(openAPI.getPaths().get("/myPath").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().get("myProp"));
+        try {
+            Json.mapper().writeValueAsString(openAPI);
+        }
+        catch (Exception e) {
+            fail("Recursive loop found");
+        }
+
     }
 
     public String replacePort(String url){
