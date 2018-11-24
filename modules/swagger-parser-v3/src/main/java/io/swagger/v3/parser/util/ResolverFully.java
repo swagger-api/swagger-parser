@@ -264,7 +264,6 @@ public class ResolverFully {
 
     public Schema resolveSchema(Schema schema) {
         if(schema.get$ref() != null) {
-
             String ref= schema.get$ref();
             ref = ref.substring(ref.lastIndexOf("/") + 1);
             Schema resolved = schemas.get(ref);
@@ -306,8 +305,14 @@ public class ResolverFully {
                     Schema innerProperty = obj.getProperties().get(propertyName);
                     // reference check
                     if(schema != innerProperty) {
-                        Schema resolved = resolveSchema(innerProperty);
-                        updated.put(propertyName, resolved);
+                        if(resolvedProperties.get(propertyName) == null && resolvedProperties.get(propertyName) != innerProperty) {
+                            LOGGER.debug("avoiding infinite loop");
+                            Schema resolved = resolveSchema(innerProperty);
+                            updated.put(propertyName, resolved);
+                            resolvedProperties.put(propertyName, resolved);
+                        }else {
+                            updated.put(propertyName, resolvedProperties.get(propertyName));
+                        }
                     }
                 }
                 obj.setProperties(updated);
@@ -500,7 +505,6 @@ public class ResolverFully {
                     resolvedProperties.put(propertyName, resolved);
                 }else {
                     updated.put(propertyName, resolvedProperties.get(propertyName));
-
                 }
             }
 

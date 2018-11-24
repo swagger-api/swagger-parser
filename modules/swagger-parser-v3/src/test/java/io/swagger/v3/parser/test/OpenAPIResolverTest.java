@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -1149,6 +1150,20 @@ public class OpenAPIResolverTest {
             fail("Recursive loop found");
         }
 
+    }
+
+    @Test
+    public void recursiveResolving2() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("recursive2.yaml", null, parseOptions);
+        try {
+            Json.mapper().writeValueAsString(openAPI);
+        }
+        catch (Exception e) {
+            fail("Recursive loop found");
+        }
     }
 
     public String replacePort(String url){
