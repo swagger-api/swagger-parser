@@ -1613,8 +1613,10 @@ public class OpenAPIV3ParserTest {
         parseOptions.setResolveFully(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_884.yaml", null, parseOptions);
         Map<String, Link> links = openAPI.getPaths().get("/2.0/repositories/{username}").getGet().getResponses().get("200").getLinks();
-        String operationId = links.get("userRepository").getOperationId();
+        Link userRepository = links.get("userRepository");
+        String operationId = userRepository.getOperationId();
         assertEquals(operationId, "getRepository");
+        assertNotNull(userRepository.getHeaders());
     }
   
     @Test

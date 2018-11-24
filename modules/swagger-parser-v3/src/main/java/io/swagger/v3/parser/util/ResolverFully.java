@@ -187,19 +187,7 @@ public class ResolverFully {
                         }
                     }
 
-                    Map<String, Header> headers = response.getHeaders();
-                    if (headers != null) {
-                        for (Map.Entry<String, Header> header : headers.entrySet()) {
-                            Header value = header.getValue();
-                            Header resolvedValue = value.get$ref() != null ? resolveHeader(value) : value;
-                            Map<String, Example> examples = resolvedValue.getExamples();
-                            if(examples != null) {
-                                Map<String,Example> resolved = resolveExample(examples);
-                                resolvedValue.setExamples(resolved);
-                            }
-                            header.setValue(resolvedValue);
-                        }
-                    }  
+                    resolveHeaders(response.getHeaders());
 
                     Map<String, Link> links = response.getLinks();
                     if (links != null) {
@@ -211,6 +199,22 @@ public class ResolverFully {
                     }
                 }
             }
+        }
+    }
+
+    private void resolveHeaders(Map<String, Header> headers) {
+        if (headers == null || headers.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, Header> header : headers.entrySet()) {
+            Header value = header.getValue();
+            Header resolvedValue = value.get$ref() != null ? resolveHeader(value) : value;
+            Map<String, Example> examples = resolvedValue.getExamples();
+            if(examples != null) {
+                Map<String,Example> resolved = resolveExample(examples);
+                resolvedValue.setExamples(resolved);
+            }
+            header.setValue(resolvedValue);
         }
     }
 
@@ -232,7 +236,12 @@ public class ResolverFully {
         if (!isAnExternalRefFormat(refFormat)){
             if (links != null && !links.isEmpty()) {
                 String referenceKey = computeDefinitionName($ref);
-                return links.getOrDefault(referenceKey, link);
+                Link link1 = links.getOrDefault(referenceKey, link);
+                if (link1 == null) {
+                    return null;
+                }
+                resolveHeaders(link1.getHeaders());
+                return link1;
             }
         }
         return link;
