@@ -1,8 +1,10 @@
 package io.swagger.v3.parser.util;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -57,50 +59,51 @@ public class ResolverFully {
     private Map<String, Schema> resolvedProperties = new HashMap<>();
 
     public void resolveFully(OpenAPI openAPI) {
-        if (openAPI.getComponents() != null && openAPI.getComponents().getRequestBodies() != null) {
-            requestBodies = openAPI.getComponents().getRequestBodies();
+        Components components = openAPI.getComponents();
+        if (components != null && components.getRequestBodies() != null) {
+            requestBodies = components.getRequestBodies();
             if (requestBodies == null) {
                 requestBodies = new HashMap<>();
             }
         }
 
-        if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
-            schemas = openAPI.getComponents().getSchemas();
+        if (components != null && components.getSchemas() != null) {
+            schemas = components.getSchemas();
             if (schemas == null) {
                 schemas = new HashMap<>();
             }
         }
 
-        if (openAPI.getComponents() != null && openAPI.getComponents().getExamples() != null) {
-            examples = openAPI.getComponents().getExamples();
+        if (components != null && components.getExamples() != null) {
+            examples = components.getExamples();
             if (examples == null) {
                 examples = new HashMap<>();
             }
         }
 
-        if (openAPI.getComponents() != null && openAPI.getComponents().getHeaders() != null) {
-            headers = openAPI.getComponents().getHeaders();
+        if (components != null && components.getHeaders() != null) {
+            headers = components.getHeaders();
             if (headers == null) {
                 headers = new HashMap<>();
             }
         }  
 
-        if (openAPI.getComponents() != null && openAPI.getComponents().getParameters() != null) {
-            parameters = openAPI.getComponents().getParameters();
+        if (components != null && components.getParameters() != null) {
+            parameters = components.getParameters();
             if (parameters == null) {
                 parameters = new HashMap<>();
             }
         }
-        if (openAPI.getComponents() != null && openAPI.getComponents().getLinks() != null) {
-            links = openAPI.getComponents().getLinks();
+        if (components != null && components.getLinks() != null) {
+            links = components.getLinks();
             if (links == null) {
                 links = new HashMap<>();
             }
         }
-
-        if(openAPI.getPaths() != null) {
-            for (String pathname : openAPI.getPaths().keySet()) {
-                PathItem pathItem = openAPI.getPaths().get(pathname);
+        Paths paths = openAPI.getPaths();
+        if(paths != null) {
+            for (String pathname : paths.keySet()) {
+                PathItem pathItem = paths.get(pathname);
                 resolvePath(pathItem);
             }
         }
@@ -278,7 +281,6 @@ public class ResolverFully {
                 // if we make it without a resolution loop, we can update the reference
                 resolvedModels.put(ref, model);
 
-
                 return model;
 
             }else {
@@ -289,15 +291,7 @@ public class ResolverFully {
         if(schema instanceof ArraySchema) {
             ArraySchema arrayModel = (ArraySchema) schema;
             if(arrayModel.getItems().get$ref() != null) {
-                String ref= arrayModel.getItems().get$ref();
-                ref = ref.substring(ref.lastIndexOf("/") + 1);
-                if (resolvedModels.get(ref) == null) {
-                    arrayModel.setItems(resolveSchema(arrayModel.getItems()));
-                }else{
-                   arrayModel.setItems(resolvedModels.get(ref));
-                   //validar que tan profundo estoy en la recursion para cortar con la asignacion de propiedades.
-                   arrayModel.getItems().set$ref(arrayModel.getItems().get$ref());
-                }
+                arrayModel.setItems(resolveSchema(arrayModel.getItems()));
             } else {
                 arrayModel.setItems(arrayModel.getItems());
             }
