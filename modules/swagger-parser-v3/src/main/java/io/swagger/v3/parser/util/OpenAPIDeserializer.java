@@ -53,6 +53,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1019,6 +1020,11 @@ public class OpenAPIDeserializer {
 
         Set<String> linkKeys = getKeys(obj);
         for(String linkName : linkKeys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            linkName)) {
+                result.warning(location, "Link name "+ linkName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
+
             JsonNode linkValue = obj.get(linkName);
             if (!linkValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 result.invalidType(location, linkName, "object", linkValue);
@@ -1128,6 +1134,10 @@ public class OpenAPIDeserializer {
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         Set<String> keys = getKeys(node);
         for(String key : keys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            key)) {
+                result.warning(location, "Callback key "+ key + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
             Callback callback = getCallback((ObjectNode) node.get(key), location, result);
             if (callback != null) {
                 callbacks.put(key, callback);
@@ -1307,6 +1317,11 @@ public class OpenAPIDeserializer {
 
         Set<String> parameterKeys = getKeys(obj);
         for(String parameterName : parameterKeys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            parameterName)) {
+                result.warning(location, "Parameter name "+ parameterName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
+
             JsonNode parameterValue = obj.get(parameterName);
             if (parameterValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode parameterObj = (ObjectNode) parameterValue;
@@ -1485,6 +1500,10 @@ public class OpenAPIDeserializer {
 
         Set<String> headerKeys = getKeys(obj);
         for(String headerName : headerKeys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            headerName)) {
+                result.warning(location, "Header name "+ headerName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
             JsonNode headerValue = obj.get(headerName);
             if (!headerValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 result.invalidType(location, headerName, "object", headerValue);
@@ -1627,6 +1646,10 @@ public class OpenAPIDeserializer {
 
         Set<String> securitySchemeKeys = getKeys(obj);
         for(String securitySchemeName : securitySchemeKeys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            securitySchemeName)) {
+                result.warning(location, "SecurityScheme name "+ securitySchemeName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
             JsonNode securitySchemeValue = obj.get(securitySchemeName);
             if (!securitySchemeValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 result.invalidType(location, securitySchemeName, "object", securitySchemeValue);
@@ -1855,6 +1878,10 @@ public class OpenAPIDeserializer {
 
         Set<String> schemaKeys = getKeys(obj);
         for (String schemaName : schemaKeys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            schemaName)) {
+                result.warning(location, "Schema name "+ schemaName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
             JsonNode schemaValue = obj.get(schemaName);
                 if (!schemaValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                     result.invalidType(location, schemaName, "object", schemaValue);
@@ -2226,6 +2253,11 @@ public class OpenAPIDeserializer {
 
         Set<String> exampleKeys = getKeys(obj);
         for(String exampleName : exampleKeys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            exampleName)) {
+                result.warning(location, "Example name "+ exampleName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
+
             JsonNode exampleValue = obj.get(exampleName);
             if (!exampleValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 result.invalidType(location, exampleName, "object", exampleValue);
@@ -2355,6 +2387,11 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
 
         for (String key : keys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            key)) {
+                result.warning(location, "Response key "+ key + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
+
             if (key.startsWith("x-")) {
                 Map <String,Object> extensions = getExtensions(node);
                 if(extensions != null && extensions.size() > 0) {
@@ -2588,6 +2625,10 @@ public class OpenAPIDeserializer {
 
         Set<String> bodyKeys = getKeys(obj);
         for(String bodyName : bodyKeys) {
+            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                            bodyName)) {
+                result.warning(location, "RequestBody name "+ bodyName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            }
             JsonNode bodyValue = obj.get(bodyName);
             if (!bodyValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 result.invalidType(location, bodyName, "object", bodyValue);
