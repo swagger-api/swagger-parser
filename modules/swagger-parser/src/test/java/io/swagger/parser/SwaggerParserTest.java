@@ -23,6 +23,7 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ByteArrayProperty;
+import io.swagger.models.properties.ComposedProperty;
 import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
@@ -1363,6 +1364,21 @@ public class SwaggerParserTest {
     public void checkAllOfWithRelativeReferencesIssue604() {
         Swagger swagger = new SwaggerParser().read("src/test/resources/allOf-relative-file-references/swagger.yaml");
         assertEquals(2, swagger.getDefinitions().size());
+    }
+
+    @Test(description = "Test that validate resolution of external references in allOf of property")
+    public void checkExtRefResolveInPropertiesWithAllOf() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/allOf-property-relative-file-references/parent.yaml");
+        assertEquals(2, swagger.getDefinitions().size());
+        assertEquals(1, swagger.getDefinitions().get("test").getProperties().size());
+
+        ComposedProperty property = (ComposedProperty) swagger.getDefinitions().get("test").getProperties().get("property");
+        assertEquals(1, property.getVendorExtensions().size());
+        assertEquals(1, property.getAllOf().size());
+
+        RefProperty refProperty = (RefProperty) property.getAllOf().get(0);
+        assertEquals("#/definitions/def", refProperty.get$ref());
+
     }
 
     @Test(description = "A string example should not be over quoted when parsing a yaml string")

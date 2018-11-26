@@ -2,6 +2,7 @@ package io.swagger.parser.processors;
 
 import io.swagger.models.*;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ComposedProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
@@ -15,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,26 +134,7 @@ public final class ExternalRefProcessor {
                     processDiscriminator(discriminator,modelImpl.getProperties(), file);
                 }
 
-                Property additionalProperties = modelImpl.getAdditionalProperties();
-                if (additionalProperties != null) {
-                    if (additionalProperties instanceof RefProperty) {
-                        processRefProperty(((RefProperty) additionalProperties), file);
-                    } else if (additionalProperties instanceof ArrayProperty) {
-                        ArrayProperty arrayProp = (ArrayProperty) additionalProperties;
-                        if (arrayProp.getItems() instanceof RefProperty) {
-                            processRefProperty((RefProperty) arrayProp.getItems(), file);
-                        }
-                    } else if (additionalProperties instanceof MapProperty) {
-                        MapProperty mapProp = (MapProperty) additionalProperties;
-                        if (mapProp.getAdditionalProperties() instanceof RefProperty) {
-                            processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
-                        } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
-                                ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
-                            processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(), file);
-                        }
-                    }
-
-                }
+                processProperties(Arrays.asList(modelImpl.getAdditionalProperties()), file);
             }
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
                 processRefProperty((RefProperty) ((ArrayModel) model).getItems(), file);
@@ -233,38 +217,27 @@ public final class ExternalRefProcessor {
     }
 
     private void processProperties(final Map<String, Property> subProps, final String file) {
-        if (subProps == null || 0 == subProps.entrySet().size() ) {
+        if (subProps == null || subProps.isEmpty()) {
             return;
         }
-        for (Map.Entry<String, Property> prop : subProps.entrySet()) {
-            if (prop.getValue() instanceof RefProperty) {
-                processRefProperty((RefProperty) prop.getValue(), file);
-            } else if (prop.getValue() instanceof ArrayProperty) {
-                ArrayProperty arrayProp = (ArrayProperty) prop.getValue();
-                if (arrayProp.getItems() instanceof RefProperty) {
-                    processRefProperty((RefProperty) arrayProp.getItems(), file);
-                }
-                if (arrayProp.getItems() != null){
-                    if (arrayProp.getItems() instanceof  ObjectProperty) {
-                        ObjectProperty objectProperty = (ObjectProperty) arrayProp.getItems();
-                        processProperties(objectProperty.getProperties(), file);
-                    }
-                }
-            } else if (prop.getValue() instanceof MapProperty) {
-                MapProperty mapProp = (MapProperty) prop.getValue();
-                if (mapProp.getAdditionalProperties() instanceof RefProperty) {
-                    processRefProperty((RefProperty) mapProp.getAdditionalProperties(), file);
-                } else if (mapProp.getAdditionalProperties() instanceof ArrayProperty &&
-                        ((ArrayProperty) mapProp.getAdditionalProperties()).getItems() instanceof RefProperty) {
-                    processRefProperty((RefProperty) ((ArrayProperty) mapProp.getAdditionalProperties()).getItems(),
-                            file);
-                }
-            }
-            else if (prop.getValue() instanceof ObjectProperty){
-                ObjectProperty objProp = (ObjectProperty) prop.getValue();
-                if(objProp.getProperties() != null ){
-                    processProperties(objProp.getProperties(),file);
-                }
+        processProperties(subProps.values(), file);
+    }
+
+    private void processProperties(final Collection<Property> subProps, final String file) {
+        if (subProps == null || subProps.isEmpty()) {
+            return;
+        }
+        for (Property prop : subProps) {
+            if (prop instanceof RefProperty) {
+                processRefProperty((RefProperty) prop, file);
+            } else if (prop instanceof ArrayProperty) {
+                processProperties(Arrays.asList(((ArrayProperty) prop).getItems()), file);
+            } else if (prop instanceof MapProperty) {
+                processProperties(Arrays.asList(((MapProperty) prop).getAdditionalProperties()), file);
+            } else if (prop instanceof ObjectProperty) {
+                processProperties(((ObjectProperty) prop).getProperties(), file);
+            } else if (prop instanceof ComposedProperty) {
+                processProperties(((ComposedProperty) prop).getAllOf(), file);
             }
         }
     }
