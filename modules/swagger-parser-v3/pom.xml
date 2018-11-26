@@ -21,7 +21,7 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-core</artifactId>
-            <version>${swagger-core-module-version}</version>
+            <version>${swagger-core-version}</version>
         </dependency>
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
@@ -79,7 +79,4 @@
             <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
-    <properties>
-        <swagger-core-module-version>2.0.5</swagger-core-module-version>
-    </properties>
 </project>
