@@ -1,0 +1,44 @@
+swagger: 2.0
+info:
+  description: >-
+    This is a sample server Petstore server.  You can find out more about
+    Swagger at http://swagger.io or on
+    irc.freenode.net, #swagger.  For this sample, you can use the api key
+    "special-key" to test the authorization filters
+  version: 1.0.0
+  title: Swagger Petstore
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    name: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+externalDocs:
+  description: Find more info here
+  url: 'https://swagger.io'
+tags:
+- name: pet
+  description: Pet Operations
+  externalDocs:
+    url: 'http://swagger.io'
+- name: user
+  description: All about the Users
+paths:
+  '/pet/{petId}/{pathParamNotDefined}':
+    get:
+      tags:
+      - pet
+      summary: Find pet by ID
+      description: >-
+        Returns a pet when ID < 10.  ID > 10 or nonintegers will simulate API
+        error conditions
+      operationId: getPetById
+      responses:
+        200:
+          description: 200 ok
+      parameters:
+      - name: petId
+        in: path
+        description: ID of pet that needs to be fetched
+        required: true
+        type: integer

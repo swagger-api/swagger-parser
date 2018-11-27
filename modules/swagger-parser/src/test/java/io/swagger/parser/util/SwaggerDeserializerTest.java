@@ -1558,6 +1558,14 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testIssue911() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue_911.yaml", null, true);
+        System.out.println(result.getMessages());
+        assertEquals(result.getMessages().size(),1);
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
     public void testArrayParameterDefaultValue() {
         String swaggerSpec = "swagger: '2.0'\n" +
                 "basePath: /\n" +
@@ -1647,5 +1655,4 @@ public class SwaggerDeserializerTest {
         assertNotNull(parameter4.getDefault());
         assertNotNull(parameter4.getDefaultValue());
     }
-
 }
