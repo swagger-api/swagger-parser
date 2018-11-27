@@ -530,11 +530,62 @@ public class OpenAPIDeserializer {
                     }
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path,String.format("%s.'%s'", location,pathName), result);
+                    String[] eachPart = pathName.split("/");
+                    Arrays.stream(eachPart)
+                            .filter(part -> part.startsWith("{") && part.endsWith("}") && part.length() > 2)
+                            .forEach(part -> {
+                                String pathParam = part.substring(1, part.length() - 1);
+                                boolean definedInPathLevel = isPathParamDefined(pathParam, pathObj.getParameters());
+                                if (!definedInPathLevel) {
+                                    List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
+                                    operationsInAPath.forEach(operation -> {
+                                        if (!isPathParamDefined(pathParam, operation.getParameters())) {
+                                            result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
+                                            return;
+                                        }
+                                    });
+                                }
+                            });
                     paths.put(pathName, pathObj);
                 }
             }
         }
         return paths;
+    }
+
+    private boolean isPathParamDefined(String pathParam, List<Parameter> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return false;
+        } else {
+            Parameter pathParamDefined = parameters.stream()
+                            .filter(parameter -> pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn()))
+                            .findFirst()
+                            .orElse(null);
+            if (pathParamDefined == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void addToOperationsList(List<Operation> operationsList, Operation operation) {
+        if (operation == null) {
+            return;
+        }
+        operationsList.add(operation);
+    }
+
+    public List<Operation> getAllOperationsInAPath(PathItem pathObj) {
+        List<Operation> operations = new ArrayList<>();
+        addToOperationsList(operations, pathObj.getGet());
+        addToOperationsList(operations, pathObj.getPut());
+        addToOperationsList(operations, pathObj.getPost());
+        addToOperationsList(operations, pathObj.getPatch());
+        addToOperationsList(operations, pathObj.getDelete());
+        addToOperationsList(operations, pathObj.getTrace());
+        addToOperationsList(operations, pathObj.getOptions());
+        addToOperationsList(operations, pathObj.getHead());
+        return operations;
     }
 
     public PathItem getPathItem(ObjectNode obj, String location, ParseResult result) {
