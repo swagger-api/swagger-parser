@@ -2,6 +2,8 @@ package io.swagger.parser;
 
 
 
+
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -22,10 +24,7 @@ import java.util.Map;
 
 import java.util.List;
 
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class OpenAPIParserTest {
     @Test
@@ -460,6 +459,16 @@ public class OpenAPIParserTest {
                 .get("myEvent")
                 .get$ref();
         assertEquals(ref, "#/components/callbacks/callbackEvent");
+    }
+
+    @Test
+    public void testIssue922() {
+       OpenAPIParser openAPIParser = new OpenAPIParser();
+       ParseOptions options = new ParseOptions();
+       OpenAPI openAPI = openAPIParser.readLocation("petstore.json",null,null).getOpenAPI();
+       assertNotNull(openAPI);
+       assertEquals(openAPI.getComponents().getSchemas().get("Pet").getDeprecated(),Boolean.FALSE);
+
     }
 
 }
