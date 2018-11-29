@@ -766,11 +766,6 @@ public class OpenAPIDeserializer {
         return getString(key, node, required, location, result, null);
     }
 
-    public String getStringWithDefaultValueSet(String key, ObjectNode node, boolean required, String location, ParseResult result) {
-
-        return getString(key, node, required, location, result, null);
-    }
-
     public Set<String> getKeys(ObjectNode node) {
         Set<String> keys = new LinkedHashSet<>();
         if (node == null) {
@@ -1325,23 +1320,6 @@ public class OpenAPIDeserializer {
         return value;
     }
 
-    public Boolean getBooleanWithDefaultValue(String key, ObjectNode node, String location) {
-        Boolean value = null;
-        JsonNode v = node.get(key);
-        if (node == null || v == null) {
-            return false;
-        } else {
-            if (v.getNodeType().equals(JsonNodeType.BOOLEAN)) {
-                value = v.asBoolean();
-            } else if (v.getNodeType().equals(JsonNodeType.STRING)) {
-                String stringValue = v.textValue();
-                return Boolean.parseBoolean(stringValue);
-            }
-        }
-        return value;
-    }
-
-
     public BigDecimal getBigDecimal(String key, ObjectNode node, boolean required, String location, ParseResult result) {
         BigDecimal value = null;
         JsonNode v = node.get(key);
@@ -1496,7 +1474,7 @@ public class OpenAPIDeserializer {
             parameter.setDescription(value);
         }
 
-        Boolean required = getBooleanWithDefaultValue("required", obj, location);
+        Boolean required = getBoolean("required", obj, false, location, result);
         if (required != null) {
             parameter.setRequired(required);
         }else {
@@ -2256,7 +2234,6 @@ public class OpenAPIDeserializer {
             schema.setDefault(value);
         }
 
-
         //discriminator
 
         bool = getBoolean("nullable", node, false, location, result);
@@ -2295,11 +2272,10 @@ public class OpenAPIDeserializer {
             schema.setExample(example);
         }
 
-        bool = getBooleanWithDefaultValue("deprecated", node, location);
+        bool = getBoolean("deprecated", node, false, location, result);
         if(bool != null){
             schema.setDeprecated(bool);
         }
-
 
         Map <String,Object> extensions = getExtensions(node);
         if(extensions != null && extensions.size() > 0) {
@@ -2621,7 +2597,7 @@ public class OpenAPIDeserializer {
             operation.setCallbacks(callbacks);
         }
 
-        Boolean deprecated = getBooleanWithDefaultValue("deprecated", obj, location);
+        Boolean deprecated = getBoolean("deprecated", obj, false, location, result);
         if (deprecated != null) {
             operation.setDeprecated(deprecated);
         }
