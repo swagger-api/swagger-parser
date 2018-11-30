@@ -180,9 +180,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     if (options.isResolveFully()) {
                         result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
-
-                    }
-                    if (options.isFlatten()) {
+                    } else if (options.isFlatten()) {
                         new InlineModelResolver().flatten(result.getOpenAPI());
                     }
                 }else{
