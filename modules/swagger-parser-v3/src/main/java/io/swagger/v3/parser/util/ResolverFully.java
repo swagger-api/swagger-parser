@@ -314,7 +314,7 @@ public class ResolverFully {
                     Schema innerProperty = obj.getProperties().get(propertyName);
                     // reference check
                     if(schema != innerProperty) {
-                        if(resolvedProperties.get(propertyName) == null && resolvedProperties.get(propertyName) != innerProperty) {
+                        if(resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != innerProperty) {
                             LOGGER.debug("avoiding infinite loop");
                             Schema resolved = resolveSchema(innerProperty);
                             updated.put(propertyName, resolved);
@@ -354,7 +354,7 @@ public class ResolverFully {
                         if (resolved.getProperties() != null) {
                             for (String key : properties.keySet()) {
                                 Schema prop = (Schema) resolved.getProperties().get(key);
-                                if(resolvedProperties.get(key) == null && resolvedProperties.get(key) != prop) {
+                                if(resolvedProperties.get(key) == null || resolvedProperties.get(key) != prop) {
                                     LOGGER.debug("avoiding infinite loop");
                                     Schema resolvedProp = resolveSchema(prop);
                                     model.addProperties(key,resolvedProp );
@@ -402,7 +402,7 @@ public class ResolverFully {
                             if (resolved.getProperties() != null) {
                                 for (String key : properties.keySet()) {
                                     Schema prop = (Schema) resolved.getProperties().get(key);
-                                    if(resolvedProperties.get(key) == null && resolvedProperties.get(key) != prop) {
+                                    if(resolvedProperties.get(key) == null || resolvedProperties.get(key) != prop) {
                                         LOGGER.debug("avoiding infinite loop");
                                         Schema resolvedProp = resolveSchema(prop);
                                         model.addProperties(key,resolvedProp );
@@ -451,7 +451,7 @@ public class ResolverFully {
                             if (resolved.getProperties() != null) {
                                 for (String key : properties.keySet()) {
                                     Schema prop = (Schema) resolved.getProperties().get(key);
-                                    if(resolvedProperties.get(key) == null && resolvedProperties.get(key) != prop) {
+                                    if(resolvedProperties.get(key) == null || resolvedProperties.get(key) != prop) {
                                         LOGGER.debug("avoiding infinite loop");
                                         Schema resolvedProp = resolveSchema(prop);
                                         model.addProperties(key,resolvedProp );
@@ -507,7 +507,7 @@ public class ResolverFully {
             Map<String, Schema> properties = model.getProperties();
             for (String propertyName : properties.keySet()) {
                 Schema property = (Schema) model.getProperties().get(propertyName);
-                if(resolvedProperties.get(propertyName) == null && resolvedProperties.get(propertyName) != property) {
+                if(resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != property) {
                     LOGGER.debug("avoiding infinite loop");
                     Schema resolved = resolveSchema(property);
                     updated.put(propertyName, resolved);
