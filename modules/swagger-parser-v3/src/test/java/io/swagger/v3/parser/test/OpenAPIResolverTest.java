@@ -1166,6 +1166,16 @@ public class OpenAPIResolverTest {
         }
     }
 
+    @Test
+    public void propertyNameMixup() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("simple.yaml", null, parseOptions);
+        assertEquals(((StringSchema)openAPI.getComponents().getSchemas().get("Manufacturer").getProperties().get("name")).getExample(), "ACME Corporation");
+        Schema schema = openAPI.getPaths().get("/inventory").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertEquals(((ObjectSchema) ((ArraySchema) schema).getItems().getProperties().get("manufacturer")).getProperties().get("name").getExample(), "ACME Corporation");
+    }
+
     public String replacePort(String url){
         String pathFile = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
         return pathFile;
