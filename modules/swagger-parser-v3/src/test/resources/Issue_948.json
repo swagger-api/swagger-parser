@@ -1,0 +1,109 @@
+{
+  "openapi":"3.0.0",
+  "info":{
+    "title":"Test",
+    "description":"Test API",
+    "version":"1.0"
+  },
+  "servers":[
+    {
+      "url":"http://localhost:8888/api"
+    }
+  ],
+  "paths":{
+    "/devices":{
+      "get":{
+        "tags":[
+          "devices"
+        ],
+        "summary":"List all Devices",
+        "operationId":"getDevices",
+        "parameters":[
+          {
+            "$ref":"#/components/headers/Content-Type"
+          },
+          {
+            "$ref":"#/components/parameters/idFrom"
+          },
+          {
+            "name":"category",
+            "in":"query",
+            "description":"A request parameter that matches against the device category.",
+            "schema":{
+              "$ref":"#/components/schemas/deviceCategory"
+            }
+          },
+          {
+            "name":"manufacturer",
+            "in":"query",
+            "description":"A request parameter that performs LIKE matching against the device manufacturer.",
+            "schema":{
+              "maxLength":200,
+              "minLength":1,
+              "type":"string",
+              "example":"Sony"
+            }
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"An array of devices that match the request parameters requested.",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "type":"object",
+                  "properties":{
+                    "device":{
+                      "$ref":"#/components/schemas/device"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components":{
+    "schemas":{
+      "deviceCategory":{
+        "type":"string",
+        "description":"The list of avialable viewer device categories.",
+        "example":"TV",
+        "enum":[
+          "TV",
+          "Phone",
+          "Tablet",
+          "Laptop",
+          "Monitor",
+          "Other"
+        ]
+      },
+      "device":{
+        "type":"string",
+        "description":"Captures the possible states for an analysis."
+      }
+    },
+    "parameters":{
+      "idFrom":{
+        "name":"idFrom",
+        "in":"query",
+        "description":"The lower-bound of a request parameter filtering based on unique object identifier.",
+        "schema":{
+          "type":"integer"
+        }
+      }
+    },
+    "headers":{
+      "Content-Type":{
+        "required":true,
+        "schema":{
+          "type":"string",
+          "example":"application/json;charset=UTF-8",
+          "default":"application/json;charset=UTF-8"
+        }
+      }
+    }
+  }
+}
