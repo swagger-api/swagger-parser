@@ -29,16 +29,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
-      ],
-      "get": {
-        "summary": "List all pets",
-        "operationId": "listPets",
-        "tags": [
-          "pets"
-        ],
-        "parameters": [
-          {
+        },
+         {
             "name": "limit",
             "in": "query",
             "description": "How many items to return at one time (max 100)",
@@ -48,6 +40,12 @@
               "format": "int32"
             }
           }
+      ],
+      "get": {
+        "summary": "List all pets",
+        "operationId": "listPets",
+        "tags": [
+          "pets"
         ],
         "responses": {
           "200": {
@@ -119,12 +117,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name":"petId",
-            "in":"path",
-            "required": true
-
           }
         ],
         "responses": {

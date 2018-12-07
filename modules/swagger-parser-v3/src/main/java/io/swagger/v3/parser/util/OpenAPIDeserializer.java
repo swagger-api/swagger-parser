@@ -1385,9 +1385,7 @@ public class OpenAPIDeserializer {
                     }
                 }
             }
-            if(!filter.add(parameter.getName()+"#"+parameter.getIn())) {
-                result.warning(location,"There are duplicate parameter values");
-            }
+
         }
         return parameters;
     }
