@@ -1968,13 +1968,18 @@ public class OpenAPIDeserializer {
                 if(location.startsWith("paths")){
                     try{
                         String components[]=ref.asText().split("#/components");
-                        String [] childComponents=components[1].split("/");
-                        String[] newChildComponents = Arrays.copyOfRange(childComponents, 1, childComponents.length);
-                        boolean isValidComponent= ReferenceValidator.valueOf(newChildComponents[0]).validateComponent(this.components,newChildComponents[1]);
-                        if(!isValidComponent){
-                            result.missing(location,ref.asText());
+                        if((ref.asText().startsWith("#/components"))&&(components.length>1)) {
+                            String[] childComponents = components[1].split("/");
+                            String[] newChildComponents = Arrays.copyOfRange(childComponents, 1, childComponents.length);
+                            boolean isValidComponent = ReferenceValidator.valueOf(newChildComponents[0])
+                                                                         .validateComponent(this.components,
+                                                                                         newChildComponents[1]);
+                            if (!isValidComponent) {
+                                result.missing(location, ref.asText());
+                            }
                         }
                     }catch (Exception e){
+                        result.missing(location, ref.asText());
                     }
                 }
 

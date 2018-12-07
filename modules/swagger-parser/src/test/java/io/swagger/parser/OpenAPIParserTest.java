@@ -100,7 +100,7 @@ public class OpenAPIParserTest {
         SwaggerParseResult result = new OpenAPIParser().readLocation("issue-934.yaml", null, null);
 
         assertNotNull(result);
-        assertEquals(result.getMessages().size(),2);
+        assertEquals(result.getMessages().size(),1);
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
     }
