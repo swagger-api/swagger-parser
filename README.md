@@ -9,7 +9,7 @@ This is the swagger parser project, which reads OpenAPI Specifications into curr
 
 
 ### Usage
-Using the swagger-parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
+Using the Swagger Parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
 
 ```java
 import io.swagger.v3.parser.OpenAPIV3Parser;
