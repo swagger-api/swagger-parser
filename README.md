@@ -5,7 +5,7 @@
 [![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2)
 
 ## Overview 
-This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
+This is the Swagger Parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
 
 ### Usage
@@ -59,7 +59,7 @@ Manager.  That's done by setting a system environment variable as such:
 export TRUST_ALL=true
 ```
 
-And then the swagger-parser will _ignore_ invalid certificates.  Of course this is generally a bad idea, but if you're 
+And then the Swagger Parser will _ignore_ invalid certificates.  Of course this is generally a bad idea, but if you're 
 working inside a firewall or really know what you're doing, well, there's your rope.
 
 ### Dealing with Let's Encrypt
