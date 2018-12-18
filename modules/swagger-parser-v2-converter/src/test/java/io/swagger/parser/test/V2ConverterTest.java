@@ -727,6 +727,13 @@ public class V2ConverterTest {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_755_YAML);
         assertNotNull(oas);
     }
+
+    @Test(description = "OpenAPI v2 converter - top-level extensions should be preserved")
+    public void testTopLevelExtensions() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(PARAMETER_CONVERSION_JSON);
+        assertNotNull(oas);
+        assertEquals((String)oas.getExtensions().get("x-some-extensions"), "hello");
+    }
     
     @Test(description = "OpenAPI v2 converter - Conversion param extensions should be preserved")
     public void testIssue820() throws Exception {
