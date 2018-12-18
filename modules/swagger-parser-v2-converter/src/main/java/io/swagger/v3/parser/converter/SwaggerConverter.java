@@ -550,6 +550,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
         operation.setDeprecated(v2Operation.isDeprecated());
         operation.setOperationId(v2Operation.getOperationId());
+        operation.setExtensions(convert(v2Operation.getVendorExtensions()));
 
         operation.setTags(v2Operation.getTags());
 
@@ -561,6 +562,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     formParams.add(param);
                 } else if ("body".equals(param.getIn())) {
                     operation.setRequestBody(convertParameterToRequestBody(param, v2Operation.getConsumes()));
+                    operation.addExtension("x-codegen-request-body-name", param.getName());
                 } else {
                     Parameter convert = convert(param);
                     String $ref = convert.get$ref();
@@ -606,8 +608,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (v2Operation.getSecurity() != null && v2Operation.getSecurity().size() > 0) {
             operation.setSecurity(convertSecurityRequirementsMap(v2Operation.getSecurity()));
         }
-
-        operation.setExtensions(convert(v2Operation.getVendorExtensions()));
 
         return operation;
     }

@@ -669,8 +669,15 @@ public class V2ConverterTest {
     public void testIssue762() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_762_JSON);
         assertNotNull(oas);
-    } 
-  
+    }
+
+    @Test(description = "OpenAPI v2 Converter: Ensure body name is preserved in x-codegen-request-body-name extension")
+    public void testPreserveBodyParameterName() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_762_JSON);
+        assertNotNull(oas);
+        assertEquals(oas.getPaths().get("/").getPut().getExtensions().get("x-codegen-request-body-name"), "pet");
+    }
+
     @Test(description = "requestBody not correctly populated when Parameters is a list of $refs (OAS 2 to 3 conversion)")
     public void testIssue765() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_765_YAML);
