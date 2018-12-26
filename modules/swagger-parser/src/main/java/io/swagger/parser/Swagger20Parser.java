@@ -113,13 +113,14 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     private Swagger convertToSwagger(String data) throws IOException {
         if (data != null) {
-            JsonNode rootNode;
+            JsonNode rootNode = null;
             if (data.trim().startsWith("{")) {
                 ObjectMapper mapper = Json.mapper();
                 rootNode = mapper.readTree(data);
-            } else {
-                rootNode = DeserializationUtils.readYamlTree(data);
+            } else if (data.trim().startsWith("swagger") ||data.trim().startsWith("---")|| data.trim().startsWith("#")) {
+                    rootNode = DeserializationUtils.readYamlTree(data);
             }
+
 
             if (System.getProperty("debugParser") != null) {
                 LOGGER.info("\n\nSwagger Tree: \n"

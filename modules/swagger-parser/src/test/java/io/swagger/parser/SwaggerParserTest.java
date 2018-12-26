@@ -58,6 +58,13 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssueSecurity() {
+        Swagger swagger = new SwaggerParser().read("malicious.yaml");
+        assertNull(swagger);
+    }
+
+
+    @Test
     public void testIssueRelativeRefs2(){
         String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
         Swagger swagger = new SwaggerParser().read(location, null, true);
