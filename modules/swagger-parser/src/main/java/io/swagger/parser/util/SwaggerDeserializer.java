@@ -35,12 +35,14 @@ public class SwaggerDeserializer {
     private final Set<String> operationIDs = new HashSet<>();
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
+
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
         ParseResult rootParse = new ParseResult();
-
-        Swagger swagger = parseRoot(rootNode, rootParse);
-        result.setSwagger(swagger);
-        result.setMessages(rootParse.getMessages());
+        if(rootNode != null) {
+            Swagger swagger = parseRoot(rootNode, rootParse);
+            result.setSwagger(swagger);
+            result.setMessages(rootParse.getMessages());
+        }
         return result;
     }
 

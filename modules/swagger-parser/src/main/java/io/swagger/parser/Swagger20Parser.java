@@ -56,14 +56,17 @@ public class Swagger20Parser implements SwaggerParserExtension {
                     data = ClasspathHelper.loadFileFromClasspath(location);
                 }
             }
-            JsonNode rootNode;
+            JsonNode rootNode = null;
             if (data.trim().startsWith("{")) {
                 ObjectMapper mapper = Json.mapper();
                 rootNode = mapper.readTree(data);
-            } else {
+            }else if (data.trim().startsWith("swagger") ||data.trim().startsWith("---")|| data.trim().startsWith("#")) {
                 rootNode = DeserializationUtils.readYamlTree(data);
             }
+
             return readWithInfo(rootNode);
+
+
         }
         catch (SSLHandshakeException e) {
             SwaggerDeserializationResult output = new SwaggerDeserializationResult();
