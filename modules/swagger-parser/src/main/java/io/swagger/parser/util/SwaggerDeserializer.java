@@ -38,18 +38,17 @@ public class SwaggerDeserializer {
 
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
         ParseResult rootParse = new ParseResult();
-        if(rootNode != null) {
-            Swagger swagger = parseRoot(rootNode, rootParse);
-            result.setSwagger(swagger);
-            result.setMessages(rootParse.getMessages());
-        }
+        Swagger swagger = parseRoot(rootNode, rootParse);
+        result.setSwagger(swagger);
+        result.setMessages(rootParse.getMessages());
+
         return result;
     }
 
     public Swagger parseRoot(JsonNode node, ParseResult result) {
         String location = "";
         Swagger swagger = new Swagger();
-        if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
+        if (node != null && node.getNodeType().equals(JsonNodeType.OBJECT)) {
             ObjectNode on = (ObjectNode)node;
             Iterator<JsonNode> it = null;
 

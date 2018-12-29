@@ -56,11 +56,11 @@ public class Swagger20Parser implements SwaggerParserExtension {
                     data = ClasspathHelper.loadFileFromClasspath(location);
                 }
             }
-            JsonNode rootNode = null;
+            JsonNode rootNode;
             if (data.trim().startsWith("{")) {
                 ObjectMapper mapper = Json.mapper();
                 rootNode = mapper.readTree(data);
-            }else if (data.trim().startsWith("swagger") ||data.trim().startsWith("---")|| data.trim().startsWith("#")) {
+            }else {
                 rootNode = DeserializationUtils.readYamlTree(data);
             }
 
@@ -116,11 +116,11 @@ public class Swagger20Parser implements SwaggerParserExtension {
 
     private Swagger convertToSwagger(String data) throws IOException {
         if (data != null) {
-            JsonNode rootNode = null;
+            JsonNode rootNode;
             if (data.trim().startsWith("{")) {
                 ObjectMapper mapper = Json.mapper();
                 rootNode = mapper.readTree(data);
-            } else if (data.trim().startsWith("swagger") ||data.trim().startsWith("---")|| data.trim().startsWith("#")) {
+            } else {
                     rootNode = DeserializationUtils.readYamlTree(data);
             }
 

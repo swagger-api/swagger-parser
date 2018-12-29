@@ -10,6 +10,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by russellb337 on 7/14/15.
@@ -62,12 +64,20 @@ public class DeserializationUtils {
     }
 
     public static JsonNode readYamlTree(String contents) {
+        String pattern = "&";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(contents);
         org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
-        return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
+        if (!m.lookingAt()) {
+            return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
+
+        }
+        return null;
     }
 
     public static <T> T readYamlValue(String contents, Class<T> expectedType) {
         org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
         return Json.mapper().convertValue(yaml.load(contents), expectedType);
+
     }
 }
