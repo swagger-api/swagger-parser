@@ -64,7 +64,7 @@ public class DeserializationUtils {
     }
 
     public static JsonNode readYamlTree(String contents) {
-        String pattern = "&";
+        String pattern = "[>|&!%`@,.*]";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(contents);
         org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
