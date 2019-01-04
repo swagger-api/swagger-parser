@@ -57,6 +57,20 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssueIntegerDefault() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = parser.readLocation("integerDefault.yaml", null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Assert.assertFalse (((IntegerSchema) openAPI.getPaths().get("/fileUpload").getPost().getRequestBody().getContent().get("multipart/form-data").getSchema().getProperties().get("intMetadata")).getFormat() == "int32");
+        Assert.assertNull ( openAPI.getPaths().get("/mockResponses/primitiveDoubleResponse").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getFormat());
+        Assert.assertNull (openAPI.getPaths().get("/primitiveBody/binary").getPost().getRequestBody().getContent().get("application/octet-stream").getSchema().getFormat());
+
+
+    }
+
 
     @Test
     public void testIssue913() {
