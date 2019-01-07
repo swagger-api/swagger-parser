@@ -99,7 +99,7 @@ paths:
           application/octet-stream:
             schema:
               type: string
-    
+
         required: false
       responses:
         '200':
@@ -365,7 +365,7 @@ paths:
             "*/*":
               schema:
                 type: integer
-                format: int16
+               
   "/issue-128":
     get:
       responses:
