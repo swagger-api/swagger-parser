@@ -1,0 +1,101 @@
+swagger: '2.0'
+info:
+  version: "2.0.0"
+  title: 'Service Domain'
+basePath: /service
+
+# Mock end-point
+host: what.ever.ok.ok
+
+schemes:
+  - https
+#/Global Definitions.
+
+paths:
+  '/update-identification':
+    post:
+      tags:
+        - Company actions
+      summary: Update Company identification
+      description: Update the identification details for a company object
+      operationId: >-
+        ByContractcodeByBusinessunitV1CompaniesByCompanyIdUpdate-identificationPost
+      consumes:
+        - application/json-patch+json
+        - application/json
+        - text/json
+        - application/*+json
+      produces: []
+      parameters:
+        - name: companyId
+          in: path
+          description: Company Id
+          required: true
+          type: string
+        - name: payload
+          in: body
+          description: Company identification
+          required: false
+          schema:
+            $ref: >-
+             Domain1.yaml#/definitions/Company.CompanyIdentificationPayload
+        - name: contractcode
+          in: path
+          description: Contract code
+          required: true
+          type: string
+          x-example: sample
+        - name: businessunit
+          in: path
+          description: Business unit
+          required: true
+          type: string
+          x-example: sample
+      responses:
+        '200':
+          description: Success
+  '/{contractcode}/{businessunit}/v2/repair-orders/{repairOrderId}/jobs':
+    post:
+      tags:
+        - Repair order item actions
+      summary: Create Repair order item
+      description: Create a repair order item object
+      operationId: ByContractcodeByBusinessunitV2Repair-ordersByRepairOrderIdJobsPost
+      consumes:
+        - application/json-patch+json
+        - application/json
+        - text/json
+        - application/*+json
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      parameters:
+        - name: repairOrderId
+          in: path
+          description: repairOrderId
+          required: true
+          type: string
+        - name: repairOrderJob
+          in: body
+          description: Repair order item
+          required: false
+          schema:
+            $ref: 'Domain2.yaml#/definitions/RepairOrder.RepairOrderJobDetails'
+        - name: contractcode
+          in: path
+          description: Contract code
+          required: true
+          type: string
+          x-example: sample
+        - name: businessunit
+          in: path
+          description: Business unit
+          required: true
+          type: string
+          x-example: sample
+      responses:
+        '201':
+          description: Success
+          schema:
+            $ref: Domain2.yaml#/definitions/RepairOrder.RepairOrderJobResponse201

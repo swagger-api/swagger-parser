@@ -1,0 +1,41 @@
+### Service Domain
+
+info:
+  description: "CDK Open Platform Domain : Service"
+  version: "2.0.0"
+  title: 'CDK Open Platform Domain : Service'
+
+definitions:
+  RepairOrder.RepairOrderJobDetails:
+    description: RepairOrderJobDetails use for Create and Get RepairOrderJob
+    type: object
+    properties:
+      jobId:
+        description: Job Id
+        type: string
+      jobType:
+        description: Job type
+        enum:
+          - SCHEDULED_MAINTENANCE
+          - GOVERNMENT_INSPECTION
+          - REPAIR
+          - OTHER
+        type: string
+      jobSource:
+        description: Job Source
+        enum:
+          - WORKSHOP
+          - VHC
+          - CUSTOMER_REQUEST
+          - MANUFACTURER
+          - OTHER
+        type: string
+      description:
+        description: Description
+        type: string
+  RepairOrder.RepairOrderJobResponse201:
+    description: RepairOrderJobResponse201
+    type: object
+    properties:
+      jobId:
+        type: string

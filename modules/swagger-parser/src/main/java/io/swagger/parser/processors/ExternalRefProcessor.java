@@ -256,8 +256,14 @@ public final class ExternalRefProcessor {
     private void processRefProperty(RefProperty subRef, String externalFile) {
 
         if (isAnExternalRefFormat(subRef.getRefFormat())) {
+
             String joinedRef = join(externalFile, subRef.get$ref());
-            subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
+            String processRef = processRefToExternalDefinition(joinedRef, subRef.getRefFormat());
+            if(processRef.startsWith("http") || processRef.startsWith("https:")) {
+                subRef.set$ref(processRef);
+            }else {
+                subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+processRef);
+            }
         } else {
             String processRef = processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
             subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+processRef);
