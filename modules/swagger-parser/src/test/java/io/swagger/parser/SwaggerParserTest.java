@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
@@ -1504,5 +1505,12 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger);
         Assert.assertNotNull(swagger.getDefinitions().get("indicatorType"));
         Assert.assertEquals(swagger.getDefinitions().get("indicatorType").getProperties().size(),1);
+    }
+
+    @Test
+    public void testAllOfRequired() throws JsonProcessingException {
+        Swagger swagger = new SwaggerParser().read("allOf-required/file.yaml");
+        assertTrue(swagger.getDefinitions().get("composed") instanceof ComposedModel);
+        assertEquals(Arrays.asList("field", "field2"), ((ComposedModel) swagger.getDefinitions().get("composed")).getRequired());
     }
 }
