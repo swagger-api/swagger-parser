@@ -71,6 +71,12 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssueDefinitionWithDots() {
+        Swagger swagger = new SwaggerParser().read("API-Service-2.0.0-swagger.yaml");
+        assertNotNull(swagger);
+    }
+
+    @Test
     public void testIssue927() {
         Swagger swagger = new SwaggerParser().read("issue-927/issue-927.yaml");
         assertNotNull(swagger);

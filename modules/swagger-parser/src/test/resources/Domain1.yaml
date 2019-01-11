@@ -1,0 +1,28 @@
+###  Domain
+
+info:
+  description: "Platform Domain"
+  version: '1.0.0'
+  title: 'Platform Domain'
+
+definitions:
+  Company.CompanyIdentification:
+    type: object
+    properties:
+      name:
+        type: string
+      languageCode:
+        type: string
+      taxRegistration:
+        type: string
+      businessRegistration:
+        type: string
+      governmentRegistration:
+        type: string
+  Company.CompanyIdentificationPayload:
+    type: object
+    properties:
+      identification:
+        $ref: >-
+          #/definitions/Company.CompanyIdentification
+#end of spec
