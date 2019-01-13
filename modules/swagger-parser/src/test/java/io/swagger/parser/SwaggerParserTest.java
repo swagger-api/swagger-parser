@@ -1383,7 +1383,7 @@ public class SwaggerParserTest {
         assertEquals(1, property.getAllOf().size());
 
         RefProperty refProperty = (RefProperty) property.getAllOf().get(0);
-        assertEquals("#/definitions/def", refProperty.get$ref());
+        assertEquals("#/definitions/def.def", refProperty.get$ref());
 
     }
 

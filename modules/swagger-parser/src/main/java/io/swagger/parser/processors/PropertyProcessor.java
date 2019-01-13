@@ -2,6 +2,8 @@ package io.swagger.parser.processors;
 
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.*;
+import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 
 import java.util.List;
@@ -37,7 +39,7 @@ public class PropertyProcessor  {
             final String newRef = externalRefProcessor.processRefToExternalDefinition(refProperty.get$ref(), refProperty.getRefFormat());
 
             if (newRef != null) {
-                refProperty.set$ref(newRef);
+                refProperty.set$ref(RefType.DEFINITION.getInternalPrefix()+newRef);
             }
         }
     }
