@@ -71,6 +71,12 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssueDefinitionWithDots_2() {
+        Swagger swagger = new SwaggerParser().read("SimpleAPI.yaml");
+        assertNotNull(swagger);
+    }
+
+    @Test
     public void testIssueDefinitionWithDots() {
         Swagger swagger = new SwaggerParser().read("API-Service-2.0.0-swagger.yaml");
         assertNotNull(swagger);
@@ -1383,7 +1389,7 @@ public class SwaggerParserTest {
         assertEquals(1, property.getAllOf().size());
 
         RefProperty refProperty = (RefProperty) property.getAllOf().get(0);
-        assertEquals("#/definitions/def", refProperty.get$ref());
+        assertEquals("#/definitions/def.def", refProperty.get$ref());
 
     }
 

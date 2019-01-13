@@ -13,4 +13,4 @@ definitions:
       property:
         x-attr: "value"
         allOf:
-        - $ref: "./child.yaml#/definitions/def"
+        - $ref: "./child.yaml#/definitions/def.def"
