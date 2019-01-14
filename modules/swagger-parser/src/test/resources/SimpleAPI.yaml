@@ -104,7 +104,6 @@ definitions:
       manufacturer:
         $ref: 'SimpleDomain.yaml#/definitions/Item.Manufacturer'
 # Added by API Auto Mocking Plugin
-host: dev-virtserver.swaggerhub.com
-basePath: /SWOS-55/SimpleAPI/1.0.0
+
 schemes:
   - https
