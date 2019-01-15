@@ -57,6 +57,18 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue983() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = parser.readLocation("issue-983.yaml", null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Yaml.prettyPrint(openAPI);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("InventoryId"));
+
+    }
+
 
     @Test
     public void testIssue913() {

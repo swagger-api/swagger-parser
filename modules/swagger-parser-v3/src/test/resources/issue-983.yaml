@@ -1,0 +1,37 @@
+openapi: 3.0.0
+servers: []
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: Simple Inventory API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+paths:
+  /inventory/{inventory-id}:
+    get:
+      operationId: getInventoryItem
+      description: Sample
+      parameters:
+        # path
+        - $ref: 'issue-983-domain.yaml/#/components/parameters/inventory-id'
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+        '400':
+          description: bad input parameter
+
+
+components:
+  schemas:
+    InventoryItem:
+      type: string
