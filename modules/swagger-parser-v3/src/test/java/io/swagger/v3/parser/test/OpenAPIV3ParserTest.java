@@ -58,6 +58,19 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssueIntegerDefault() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = parser.readLocation("integerDefault.yaml", null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Assert.assertFalse (((IntegerSchema) openAPI.getPaths().get("/fileUpload").getPost().getRequestBody().getContent().get("multipart/form-data").getSchema().getProperties().get("intMetadata")).getFormat() == "int32");
+        Assert.assertNull ( openAPI.getPaths().get("/mockResponses/primitiveDoubleResponse").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getFormat());
+        Assert.assertNull ( openAPI.getPaths().get("/issue-125").getGet().getResponses().get("200").getContent().get("*/*").getSchema().getFormat());
+        Assert.assertNull (openAPI.getPaths().get("/primitiveBody/binary").getPost().getRequestBody().getContent().get("application/octet-stream").getSchema().getFormat());
+    }
+  
+    @Test
     public void testIssue983() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -66,10 +79,8 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI);
         Yaml.prettyPrint(openAPI);
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("InventoryId"));
-
     }
-
-
+  
     @Test
     public void testIssue913() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
