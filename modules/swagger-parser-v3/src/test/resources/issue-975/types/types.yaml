@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: Common Image Type
+  version: 5.0.0
+paths:
+  /foo:
+    get:
+      summary: Common JSON objects
+      responses:
+        '204':
+          description: Success
+
+components:
+  schemas:
+    Image:
+      type: object
+      properties:
+        title:
+          type: string
+        URL:
+          type: string
