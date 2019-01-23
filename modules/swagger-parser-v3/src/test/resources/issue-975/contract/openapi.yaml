@@ -1,0 +1,15 @@
+openapi: 3.0.0
+info:
+  title: Common Image Type
+  version: 5.0.0
+paths:
+  /foo:
+    get:
+      summary: Common JSON objects
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '../types/responses.yaml#/components/schemas/MyResponse'

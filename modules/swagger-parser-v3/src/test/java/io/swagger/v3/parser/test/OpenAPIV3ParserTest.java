@@ -1663,6 +1663,87 @@ public class OpenAPIV3ParserTest {
         assertEquals(requestBody, "$response.body#/slug");
     }
 
+    @SuppressWarnings("unchecked")
+    private Map<String, Schema> issue975ExtractPropertiesFromTestResource() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-975/contract/openapi.yaml", null, options).getOpenAPI();
+        Schema myResponseSchema = openAPI.getComponents().getSchemas().get("MyResponse");
+        return myResponseSchema.getProperties();
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a reference to a relative file.")
+    public void testIssue975_property() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        assertEquals(properties.get("images").get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an array with a reference to a relative file.")
+    public void testIssue975_array() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesArray");
+        assertEquals(imagesArray.getItems().get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a map with a reference to a relative file.")
+    public void testIssue975_map() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        Schema imagesMap = (Schema) properties.get("imagesMap").getAdditionalProperties();
+        assertEquals(imagesMap.get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an array with a map with a reference to a relative file.")
+    public void testIssue975_array_map() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesArrayMap");
+        Schema imagesdMap = (Schema) imagesArray.getItems().getAdditionalProperties();
+        assertEquals(imagesdMap.get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a map with an array with a reference to a relative file.")
+    public void testIssue975_map_array() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesMapArray").getAdditionalProperties();
+        assertEquals(imagesArray.getItems().get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an array with an array with a reference to a relative file.")
+    public void testIssue975_array_array() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesArrayArray");
+        imagesArray = (ArraySchema) imagesArray.getItems();
+        assertEquals(imagesArray.getItems().get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a map with a map with a reference to a relative file.")
+    public void testIssue975_map_map() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        Schema imagesMap = (Schema) properties.get("imagesMapMap").getAdditionalProperties();
+        imagesMap = (Schema) imagesMap.getAdditionalProperties();
+        assertEquals(imagesMap.get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an oneOf a reference to a relative file.")
+    public void testIssue975_oneOf() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ComposedSchema composed = (ComposedSchema) properties.get("oneOfExample");
+        assertEquals(composed.getOneOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an anyOf a reference to a relative file.")
+    public void testIssue975_anyOf() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ComposedSchema composed = (ComposedSchema) properties.get("anyOfExample");
+        assertEquals(composed.getAnyOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an allOf a reference to a relative file.")
+    public void testIssue975_allOf() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ComposedSchema composed = (ComposedSchema) properties.get("allOfExample");
+        assertEquals(composed.getAllOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
