@@ -1,0 +1,32 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: 'Product Operation'
+  description: 'Product Operation'
+
+
+basePath: /commerce
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+
+  /v1/product/{productId}:
+    get:
+      summary: Get the product
+      description: Get the product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: 'digitalExp-CommonDefinitionDomain.yaml#/definitions/Product'
+        400:
+          $ref: 'digitalExp-CommonDefinitionDomain.yaml#/responses/400-BadRequest'
