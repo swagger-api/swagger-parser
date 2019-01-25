@@ -213,22 +213,17 @@ public final class ExternalRefProcessor {
                     }
                 }else if (prop.getValue() instanceof RefProperty){
                     String ref = ((RefProperty) prop.getValue()).getSimpleRef();
-                    Iterator<String> itr = renamedCache.iterator();
-                    while(itr.hasNext()){
-                        String key = itr.next();
-                        String value = cache.getRenamedRef(key);
-                        if (value.equals(ref)){
-                            Object resolved = cache.getResolutionCache().get(key);
-                            if (resolved instanceof ModelImpl){
-                                ModelImpl schema = (ModelImpl) resolved;
-                                if (schema.getEnum() != null){
-                                    for(String name: schema.getEnum()){
-                                        processRefProperty(new RefProperty(RefType.DEFINITION.getInternalPrefix()+name), file);
-                                    }
-                                }
+                    Object resolved = swagger.getDefinitions().get(ref);
+                    if (resolved instanceof ModelImpl){
+                        ModelImpl schema = (ModelImpl) resolved;
+                        if (schema.getEnum() != null){
+                            for(String name: schema.getEnum()){
+                                processRefProperty(new RefProperty(RefType.DEFINITION.getInternalPrefix()+name), file);
                             }
                         }
                     }
+
+
 
                 }
             }
