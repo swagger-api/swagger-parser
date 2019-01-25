@@ -210,7 +210,8 @@ public final class ExternalRefProcessor {
                     }
                 }else if (prop.getValue() instanceof RefProperty){
                     String ref = ((RefProperty) prop.getValue()).getSimpleRef();
-                    for (String key :cache.getRenameCache().keySet()) {
+                    Map<String,String> renamedCache = cache.getRenameCache();
+                    for (String key :renamedCache.keySet()) {
                         String value = cache.getRenamedRef(key);
                         if (value.equals(ref)){
                             Object resolved = cache.getResolutionCache().get(key);
