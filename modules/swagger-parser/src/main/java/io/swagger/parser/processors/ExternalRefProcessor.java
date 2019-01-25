@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
@@ -199,7 +200,7 @@ public final class ExternalRefProcessor {
     }
 
     private void processDiscriminator(String discriminator, Map<String, Property> properties, String file) {
-        Map<String,String> renamedCache = cache.getRenameCache();
+        Set<String> renamedCache = cache.getRenameCache().keySet();
         for (Map.Entry<String, Property> prop : properties.entrySet()) {
             if (prop.getKey().equals(discriminator)){
                 if (prop.getValue() instanceof StringProperty){
@@ -211,7 +212,7 @@ public final class ExternalRefProcessor {
                     }
                 }else if (prop.getValue() instanceof RefProperty){
                     String ref = ((RefProperty) prop.getValue()).getSimpleRef();
-                    for (String key :renamedCache.keySet()) {
+                    for (String key :renamedCache) {
                         String value = cache.getRenamedRef(key);
                         if (value.equals(ref)){
                             Object resolved = cache.getResolutionCache().get(key);
