@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,7 +213,9 @@ public final class ExternalRefProcessor {
                     }
                 }else if (prop.getValue() instanceof RefProperty){
                     String ref = ((RefProperty) prop.getValue()).getSimpleRef();
-                    for (String key :renamedCache) {
+                    Iterator<String> itr = renamedCache.iterator();
+                    while(itr.hasNext()){
+                        String key = itr.next();
                         String value = cache.getRenamedRef(key);
                         if (value.equals(ref)){
                             Object resolved = cache.getResolutionCache().get(key);
