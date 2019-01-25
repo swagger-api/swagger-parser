@@ -199,6 +199,7 @@ public final class ExternalRefProcessor {
     }
 
     private void processDiscriminator(String discriminator, Map<String, Property> properties, String file) {
+        Map<String,String> renamedCache = cache.getRenameCache();
         for (Map.Entry<String, Property> prop : properties.entrySet()) {
             if (prop.getKey().equals(discriminator)){
                 if (prop.getValue() instanceof StringProperty){
@@ -210,7 +211,6 @@ public final class ExternalRefProcessor {
                     }
                 }else if (prop.getValue() instanceof RefProperty){
                     String ref = ((RefProperty) prop.getValue()).getSimpleRef();
-                    Map<String,String> renamedCache = cache.getRenameCache();
                     for (String key :renamedCache.keySet()) {
                         String value = cache.getRenamedRef(key);
                         if (value.equals(ref)){
