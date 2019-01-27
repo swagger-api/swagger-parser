@@ -90,7 +90,7 @@ public class OpenAPIDeserializer {
     private static final String COOKIE_PARAMETER = "cookie";
     private static final String PATH_PARAMETER = "path";
     private static final String HEADER_PARAMETER = "header";
-
+    private Components components;
     private final Set<String> operationIDs = new HashSet<>();
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
@@ -134,17 +134,19 @@ public class OpenAPIDeserializer {
                 openAPI.setInfo(info);
             }
 
+            obj = getObject("components", rootNode, false, location, result);
+            if (obj != null) {
+                Components components = getComponents(obj, "components", result);
+                openAPI.setComponents(components);
+                this.components=components;
+            }
+
             obj = getObject("paths", rootNode, true, location, result);
             if (obj != null) {
                 Paths paths = getPaths(obj, "paths", result);
                 openAPI.setPaths(paths);
             }
 
-            obj = getObject("components", rootNode, false, location, result);
-            if (obj != null) {
-                Components components = getComponents(obj, "components", result);
-                openAPI.setComponents(components);
-            }
 
             ArrayNode array = getArray("servers", rootNode, false, location, result);
             if (array != null && array.size() > 0) {
@@ -2040,6 +2042,25 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+
+                if(location.startsWith("paths")){
+                    try{
+                        String components[]=ref.asText().split("#/components");
+                        if((ref.asText().startsWith("#/components"))&&(components.length>1)) {
+                            String[] childComponents = components[1].split("/");
+                            String[] newChildComponents = Arrays.copyOfRange(childComponents, 1, childComponents.length);
+                            boolean isValidComponent = ReferenceValidator.valueOf(newChildComponents[0])
+                                                                         .validateComponent(this.components,
+                                                                                         newChildComponents[1]);
+                            if (!isValidComponent) {
+                                result.missing(location, ref.asText());
+                            }
+                        }
+                    }catch (Exception e){
+                        result.missing(location, ref.asText());
+                    }
+                }
+
                 String mungedRef = mungedRef(ref.textValue());
                 if (mungedRef != null) {
                     schema.set$ref(mungedRef);
