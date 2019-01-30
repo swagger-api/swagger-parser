@@ -129,7 +129,7 @@ public class ResolverCache {
         }
 
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
+        JsonNode tree = deserialize(contents, file);
 
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
@@ -153,6 +153,10 @@ public class ResolverCache {
         resolutionCache.put(ref, result);
 
         return result;
+    }
+
+    protected JsonNode deserialize(String contents, String file) {
+        return DeserializationUtils.deserializeIntoTree(contents, file);
     }
 
     protected <T> void updateLocalRefs(String file, T result) {
