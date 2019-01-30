@@ -215,11 +215,13 @@ public final class ExternalRefProcessor {
                         String value = renameCache.get(key);
                         if (value.equals(ref)) {
                             Object resolved = cache.getResolutionCache().get(key);
-                            if (resolved instanceof ModelImpl) {
-                                ModelImpl schema = (ModelImpl) resolved;
-                                if (schema.getEnum() != null) {
-                                    for (String name : schema.getEnum()) {
-                                        processRefProperty(new RefProperty(RefType.DEFINITION.getInternalPrefix() + name), file);
+                            if(resolved != null) {
+                                if (resolved instanceof ModelImpl) {
+                                    ModelImpl schema = (ModelImpl) resolved;
+                                    if (schema.getEnum() != null) {
+                                        for (String name : schema.getEnum()) {
+                                            processRefProperty(new RefProperty(RefType.DEFINITION.getInternalPrefix() + name), file);
+                                        }
                                     }
                                 }
                             }
