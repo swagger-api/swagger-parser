@@ -83,6 +83,16 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue995() {
+        Swagger swagger = new SwaggerParser().read("issue-995/digitalExp-Product-Unresolved.yaml");
+        assertNotNull(swagger);
+        assertTrue(swagger.getDefinitions().size() == 6);
+        assertNotNull(swagger.getDefinitions().get("MobileProduct"));
+        assertNotNull(swagger.getDefinitions().get("FixedVoiceProduct"));
+        assertNotNull(swagger.getDefinitions().get("InternetProduct"));
+    }
+
+    @Test
     public void testIssue927() {
         Swagger swagger = new SwaggerParser().read("issue-927/issue-927.yaml");
         assertNotNull(swagger);
