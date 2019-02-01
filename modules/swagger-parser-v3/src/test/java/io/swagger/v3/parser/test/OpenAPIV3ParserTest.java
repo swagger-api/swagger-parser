@@ -30,6 +30,7 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.parser.OpenAPIResolver;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -1628,6 +1629,16 @@ public class OpenAPIV3ParserTest {
         assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() > 0);
         assertEquals(result.getMessages().get(0).contains("doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$"), true);
+
+    }
+
+    @Test
+    public void testIssue948() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("Issue_948.json", null, options);
+        new OpenAPIResolver(result.getOpenAPI()).resolve();
+        assertNotNull(result.getOpenAPI());
 
     }
 
