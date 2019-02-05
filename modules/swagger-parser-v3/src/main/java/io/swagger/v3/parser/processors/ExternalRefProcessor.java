@@ -73,7 +73,7 @@ public final class ExternalRefProcessor {
         Schema existingModel = schemas.get(possiblyConflictingDefinitionName);
 
         if (existingModel != null) {
-            LOGGER.debug("A model for " + existingModel + " already exists");
+            LOGGER.warn("A model for " + existingModel + " already exists");
             if(existingModel.get$ref() != null) {
                 // use the new model
                 existingModel = null;
