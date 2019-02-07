@@ -38,8 +38,169 @@ Parser uses options as a way to personalize the behavior while parsing:
 2. ResolveFully:
 - After references are resolved (brought back from the remote location and added to the internal components location), then maybe it is needed that the resolved objects are no longer referenced, but put at the same place they were referenced initially, meaning that in the spec there will not be anymore referenced objects, all will be put inline in the place they are being called, replacing the reference it self. This will make the spec longer.
 
+```
+ @Test
+    public void referringSpecWithoutComponentsTag() throws Exception {
+        ParseOptions resolve = new ParseOptions();
+        resolve.setResolveFully(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, resolve);
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
+    }
+```
+    
+Spec before resolving:
+
+`a.yaml` 
+```
+openapi: 3.0.1
+paths:
+  "/newPerson":
+    post:
+      summary: Create new person
+      description: Create new person
+      responses:
+        '200':
+          description: ok
+          content:
+            "*/*":
+              schema:
+                "$ref": "./ref-without-component/b.yaml#/components/schemas/CustomerType"
+```
+`b.yaml`
+```
+openapi: 3.0.1
+components:
+  schemas:
+    CustomerType:
+      type: string
+      example: Example value
+```
+
+Spec after Resolving, with option `resolveFully(true)`
+
+`a.yaml`
+```
+openapi: 3.0.1
+servers:
+- url: /
+paths:
+  /newPerson:
+    post:
+      summary: Create new person
+      description: Create new person
+      responses:
+        200:
+          description: ok
+          content:
+            '*/*':
+              schema:
+                type: string
+                example: Example value
+components:
+  schemas:
+    CustomerType:
+      type: string
+      example: Example value
+```
+
+
 3. Flatten: (opposite of resolveFully)
 - This option can be used in case you need to make your object lighter, so you ask parser to flatten all inline references (this only applies to schemas) this will mean that all the schemas will be a local reference to `#/components/schemas/...`
+
+```
+  @Test
+    public void testIssue705() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.yaml",null, options);
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200").getType());
+    }
+```
+
+Spec before flattening:
+
+`flatten.yaml`
+
+```
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listPets
+      responses:
+        '200':
+          description: An paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                 type: object
+                 properties:
+                    id:
+                      type: integer
+                      format: int64
+                    name:
+                      type: string
+                    tag:
+                      type: string
+```
+
+Spec after option flatten(true):
+
+```
+openapi: 3.0.0
+info:
+  title: Swagger Petstore
+  license:
+    name: MIT
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /pets:
+    get:
+      tags:
+      - pets
+      summary: List all pets
+      responses:
+        200:
+          description: An paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              style: simple
+              explode: false
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+components:
+  schemas:
+    inline_response_200:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+```
 
 4. ResolveCombinators:
 - Some users don't want to aggregate anyOf/allOf/oneOf schemas but simply want all refs solved.
