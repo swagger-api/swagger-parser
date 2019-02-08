@@ -1754,15 +1754,6 @@ public class OpenAPIV3ParserTest {
         assertThat(result.getMessages().size(), CoreMatchers.is(0));
     }
 
-    @Test
-    public void testValidationIssueFalseNegative() {
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolveFully(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/validation/path-parameter-validation-ref-invalid.yaml", null, parseOptions);
-        // should detect, but validation misses the error of the content in the ref, in order to avoid false positive
-        // assertThat(result.getMessages().size(), CoreMatchers.is(1));
-    }
-
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
