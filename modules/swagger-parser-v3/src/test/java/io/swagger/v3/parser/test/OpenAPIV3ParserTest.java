@@ -37,6 +37,7 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -51,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.Assert.assertThat;
 import static org.testng.Assert.*;
 
 
@@ -70,7 +72,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNull ( openAPI.getPaths().get("/issue-125").getGet().getResponses().get("200").getContent().get("*/*").getSchema().getFormat());
         Assert.assertNull (openAPI.getPaths().get("/primitiveBody/binary").getPost().getRequestBody().getContent().get("application/octet-stream").getSchema().getFormat());
     }
-  
+
     @Test
     public void testIssue983() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -81,7 +83,7 @@ public class OpenAPIV3ParserTest {
         Yaml.prettyPrint(openAPI);
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("InventoryId"));
     }
-  
+
     @Test
     public void testIssue913() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -162,7 +164,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
     }
-  
+
     @Test
     public void testIssue834() {
         ParseOptions options = new ParseOptions();
@@ -1753,6 +1755,14 @@ public class OpenAPIV3ParserTest {
         Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
         ComposedSchema composed = (ComposedSchema) properties.get("allOfExample");
         assertEquals(composed.getAllOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test
+    public void testValidationIssue() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/validation/path-parameter-validation.yaml", null, parseOptions);
+        assertThat(result.getMessages().size(), CoreMatchers.is(0));
     }
 
     private static int getDynamicPort() {
