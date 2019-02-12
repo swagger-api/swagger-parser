@@ -104,7 +104,6 @@ components:
       example: Example value
 ```
 
-
 3. Flatten: (opposite of resolveFully)
 - This option can be used in case you need to make your object lighter, so you ask parser to flatten all inline references (this only applies to schemas) this will mean that all the schemas will be a local reference to `#/components/schemas/...`
 
@@ -202,9 +201,289 @@ components:
           type: string
 ```
 
-4. ResolveCombinators:
+4. ResolveCombinators: 
 - Some users don't want to aggregate anyOf/allOf/oneOf schemas but simply want all refs solved.
 In case user doesn't want to add the schemas to the properties of the resolved composedSchema, this option generates a new list of subschemas solved and does not aggregated them to the resulting object as properties.
+This option is meant to be used with `resolveFully = true`.
+
+`Unresolved yaml`
+
+```
+openapi: 3.0.1
+servers:
+- url: http://petstore.swagger.io/api
+
+info:
+  description: 'This is a sample server Petstore'
+  version: 1.0.0
+  title: testing source file
+  termsOfService: http://swagger.io/terms/
+
+paths:
+  "/withInvalidComposedModel":
+    post:
+      operationId: withInvalidComposedModel
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/ExtendedAddress"
+        required: false
+      responses:
+        '200':
+          description: success!
+components:
+  schemas:
+    ExtendedAddress:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Address'
+        - type: object
+          required:
+          - gps
+          properties:
+            gps:
+              type: string
+    Address:
+      required:
+      - street
+      type: object
+      properties:
+        street:
+          type: string
+          example: 12345 El Monte Road
+        city:
+          type: string
+          example: Los Altos Hills
+        state:
+          type: string
+          example: CA
+        zip:
+          type: string
+          example: '94022'
+```
+Test - when resolveCombinator is set to true. (default parser behavior)
+
+```
+@Test
+    public void resolveAllOfWithoutAggregatingParameters(@Injectable final List<AuthorizationValue> auths) {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+
+        // Testing components/schemas
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+        
+        ComposedSchema allOf = (ComposedSchema) openAPI.getComponents().getSchemas().get("ExtendedAddress");
+        assertEquals(allOf.getAllOf().size(), 2);
+
+        assertTrue(allOf.getAllOf().get(0).get$ref() != null);
+        assertTrue(allOf.getAllOf().get(1).getProperties().containsKey("gps"));
+
+
+        // Testing path item
+        ObjectSchema schema = (ObjectSchema) openAPI.getPaths().get("/withInvalidComposedModel").getPost().getRequestBody().getContent().get("application/json").getSchema();
+
+        assertEquals(schema.getProperties().size(), 5);
+        assertTrue(schema.getProperties().containsKey("street"));
+        assertTrue(schema.getProperties().containsKey("gps"));
+
+    }
+```
+`Resolved Yaml`
+
+```
+openapi: 3.0.1
+info:
+  title: testing source file
+  description: This is a sample server Petstore
+  termsOfService: http://swagger.io/terms/
+  version: 1.0.0
+servers:
+- url: http://petstore.swagger.io/api
+paths:
+  /withInvalidComposedModel:
+    post:
+      operationId: withInvalidComposedModel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - gps
+              - street
+              type: object
+              properties:
+                street:
+                  type: string
+                  example: 12345 El Monte Road
+                city:
+                  type: string
+                  example: Los Altos Hills
+                state:
+                  type: string
+                  example: CA
+                zip:
+                  type: string
+                  example: "94022"
+                gps:
+                  type: string
+        required: false
+      responses:
+        200:
+          description: success!
+components:
+  schemas:
+    ExtendedAddress:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Address'
+      - required:
+        - gps
+        type: object
+        properties:
+          gps:
+            type: string
+    Address:
+      required:
+      - street
+      type: object
+      properties:
+        street:
+          type: string
+          example: 12345 El Monte Road
+        city:
+          type: string
+          example: Los Altos Hills
+        state:
+          type: string
+          example: CA
+        zip:
+          type: string
+          example: "94022"
+ ```
+ 
+ Test - when resolveCombinator is set to false.
+ 
+ ```
+ @Test
+    public void resolveAllOfWithoutAggregatingParameters(@Injectable final List<AuthorizationValue> auths) {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(false);
+
+        // Testing components/schemas
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("src/test/resources/composed.yaml",auths,options).getOpenAPI();
+       
+        ComposedSchema allOf = (ComposedSchema) openAPI.getComponents().getSchemas().get("ExtendedAddress");
+        assertEquals(allOf.getAllOf().size(), 2);
+        assertTrue(allOf.getAllOf().get(0).getProperties().containsKey("street"));
+        assertTrue(allOf.getAllOf().get(1).getProperties().containsKey("gps"));
+
+        // Testing path item
+        ComposedSchema schema = (ComposedSchema) openAPI.getPaths().get("/withInvalidComposedModel").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        // In fact the schema resolved previously is the same of /withInvalidComposedModel
+        assertEquals(schema, allOf);
+        assertEquals(schema.getAllOf().size(), 2);
+        assertTrue(schema.getAllOf().get(0).getProperties().containsKey("street"));
+        assertTrue(schema.getAllOf().get(1).getProperties().containsKey("gps"));
+
+    }
+  ```
+  `Resolved Yaml`
+  
+  ```
+openapi: 3.0.1
+info:
+  title: testing source file
+  description: This is a sample server Petstore
+  termsOfService: http://swagger.io/terms/
+  version: 1.0.0
+servers:
+- url: http://petstore.swagger.io/api
+paths:
+  /withInvalidComposedModel:
+    post:
+      operationId: withInvalidComposedModel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              allOf:
+              - required:
+                - street
+                type: object
+                properties:
+                  street:
+                    type: string
+                    example: 12345 El Monte Road
+                  city:
+                    type: string
+                    example: Los Altos Hills
+                  state:
+                    type: string
+                    example: CA
+                  zip:
+                    type: string
+                    example: "94022"
+              - required:
+                - gps
+                type: object
+                properties:
+                  gps:
+                    type: string
+        required: false
+      responses:
+        200:
+          description: success!
+components:
+  schemas:
+    ExtendedAddress:
+      type: object
+      allOf:
+      - required:
+        - street
+        type: object
+        properties:
+          street:
+            type: string
+            example: 12345 El Monte Road
+          city:
+            type: string
+            example: Los Altos Hills
+          state:
+            type: string
+            example: CA
+          zip:
+            type: string
+            example: "94022"
+      - required:
+        - gps
+        type: object
+        properties:
+          gps:
+            type: string
+    Address:
+      required:
+      - street
+      type: object
+      properties:
+        street:
+          type: string
+          example: 12345 El Monte Road
+        city:
+          type: string
+          example: Los Altos Hills
+        state:
+          type: string
+          example: CA
+        zip:
+          type: string
+          example: "94022"
+```
+
+
 
 If your OpenAPI definition is protected, you can pass headers in the request:
 ```java
