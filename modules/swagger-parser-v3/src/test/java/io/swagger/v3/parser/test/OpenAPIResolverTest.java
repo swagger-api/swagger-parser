@@ -657,7 +657,6 @@ public class OpenAPIResolverTest {
         ParseOptions resolve = new ParseOptions();
         resolve.setResolveFully(true);
         final OpenAPI openAPI = new OpenAPIV3Parser().read("./ref-without-component/a.yaml", null, resolve);
-        Yaml.prettyPrint(openAPI);
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
         Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
     }
