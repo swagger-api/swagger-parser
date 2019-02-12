@@ -37,6 +37,7 @@ public class InlineModelResolverTest {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("issue-705.yaml",null, options);
+
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200").getType());
     }
