@@ -1657,6 +1657,7 @@ public class OpenAPIDeserializer {
         return header;
     }
 
+
     public Object getAnyExample(String nodeKey,ObjectNode node, String location, ParseResult result ){
         JsonNode example = node.get(nodeKey);
         if (example != null) {
@@ -1673,7 +1674,6 @@ public class OpenAPIDeserializer {
                     BigDecimal bigDecimalExample = getBigDecimal(nodeKey, node, false, location, result);
                     if (bigDecimalExample != null) {
                         return bigDecimalExample;
-
                     }
                 }
             } else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -1685,6 +1685,11 @@ public class OpenAPIDeserializer {
                 ArrayNode arrayValue = getArray(nodeKey, node, false, location, result);
                 if (arrayValue != null) {
                     return arrayValue;
+                }
+            } else if (example.getNodeType().equals(JsonNodeType.BOOLEAN)){
+                Boolean bool = getBoolean(nodeKey,node,false,location,result);
+                if (bool != null){
+                    return bool;
                 }
             }
         }
@@ -2250,12 +2255,36 @@ public class OpenAPIDeserializer {
             schema.setFormat(value);
         }
 
-        value = getString("default", node, false, location, result);
-        if (StringUtils.isNotBlank(value)) {
-            schema.setDefault(value);
+        //sets default value according to the schema type
+        if(node.get("default")!= null) {
+            if(schema.getType().equals("array")) {
+                ArrayNode array = getArray("default", node, false, location, result);
+                if (array != null) {
+                    schema.setDefault(array);
+                }
+            }else if(schema.getType().equals("string")) {
+                value = getString("default", node, false, location, result);
+                if (value != null) {
+                    schema.setDefault(value);
+                }
+            }else if(schema.getType().equals("boolean")) {
+                bool = getBoolean("default", node, false, location, result);
+                if (bool != null) {
+                    schema.setDefault(bool);
+                }
+            }else if(schema.getType().equals("object")) {
+                Object object = getObject("default", node, false, location, result);
+                if (object != null) {
+                    schema.setDefault(object);
+                }
+            }else if(schema.getType().equals("number")) {
+                Integer number = getInteger("default", node, false, location, result);
+                if (number != null) {
+                    schema.setDefault(number);
+                }
+            }
         }
 
-        //discriminator
 
         bool = getBoolean("nullable", node, false, location, result);
         if(bool != null) {
