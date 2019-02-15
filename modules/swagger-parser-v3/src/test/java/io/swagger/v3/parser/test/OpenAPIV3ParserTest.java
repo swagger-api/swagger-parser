@@ -61,6 +61,22 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1015() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1015.json", null, options);
+        if (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty()) {
+            parseResult.getMessages().forEach(s -> System.out.println(s));
+            fail("Error while loading apispec!");
+        }
+
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+    }
+
+    @Test
     public void testIssueIntegerDefault() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -80,7 +96,6 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         final OpenAPI openAPI = parser.readLocation("issue-983.yaml", null, options).getOpenAPI();
         Assert.assertNotNull(openAPI);
-        Yaml.prettyPrint(openAPI);
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("InventoryId"));
     }
 
@@ -827,7 +842,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = parser.readLocation("src/test/resources/petstore.yaml", null, options);
 
         assertNotNull(result);
-        assertTrue(result.getMessages().size()==1);
+        assertTrue(result.getMessages().size()==2);
 
         OpenAPI openAPI = result.getOpenAPI();
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
