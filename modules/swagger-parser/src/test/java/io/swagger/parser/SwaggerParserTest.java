@@ -58,6 +58,13 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue985() {
+        Swagger swagger = new SwaggerParser().read("issue-985.yaml");
+        Yaml.prettyPrint(swagger);
+        assertNotNull(swagger);
+    }
+
+    @Test
     public void testIssueRelativeRefs2(){
         String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
         Swagger swagger = new SwaggerParser().read(location, null, true);

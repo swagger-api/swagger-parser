@@ -1,0 +1,93 @@
+swagger: '2.0'
+info:
+  description: "some text"
+  version: 1.0.0
+  title: other text
+host: fake.com
+basePath: /v1
+schemes:
+  - http
+paths:
+  /route:
+    post:
+      summary: Create a TypeHolderEnum
+      description: ''
+      operationId: createTypeHolderEnum
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: typeHolderEnum
+          description: object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/TypeHolderEnum'
+      responses:
+        200:
+          description: Success
+definitions:
+  TypeHolderEnum:
+    type: object
+    required:
+      - string_item
+      - number_item
+      - integer_item
+      - bool_item_1
+      - array_item
+    properties:
+      string_item:
+        type: string
+        enum:
+          - what
+      number_item:
+        type: number
+        format: double
+        enum:
+          - 1.234
+      integer_item:
+        type: integer
+        format: int32
+        enum:
+          - -2
+      bool_item_1:
+        type: boolean
+        enum:
+          - true
+      bool_item_2:
+        type: boolean
+        enum:
+          - True
+      bool_item_3:
+        type: boolean
+        enum:
+          - TRUE
+      bool_item_4:
+        type: boolean
+        format: int32
+        enum:
+          - True
+      bool_item_5:
+        type: boolean
+        format: int32
+        enum:
+          - true
+      bool_item_6:
+        type: boolean
+        enum: [true]
+      bool_item_7:
+        type: boolean
+        enum: [True]
+      bool_item_8:
+        type: boolean
+        enum: [ true ]
+      bool_item_9:
+        type: boolean
+        enum: [ True ]
+      array_item:
+        type: array
+        enum:
+          - [0, 1, 2, 3]
+        items:
+          type: integer
