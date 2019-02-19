@@ -22,6 +22,7 @@ import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.ComposedProperty;
 import io.swagger.models.properties.IntegerProperty;
@@ -58,10 +59,18 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
-    public void testIssue985() {
-        Swagger swagger = new SwaggerParser().read("issue-985.yaml");
-        Yaml.prettyPrint(swagger);
+    public void testIssue985_971() {
+        Swagger swagger = new SwaggerParser().read("issue-985_971.yaml");
         assertNotNull(swagger);
+        Yaml.prettyPrint(swagger);
+        //assert for 985
+        assertNotNull(((BooleanProperty)swagger.getDefinitions().get("TypeHolderEnum").getProperties().get("bool_item_1")).getEnum());
+
+        //asserts for 971
+        assertNotNull(((IntegerProperty)swagger.getDefinitions().get("TypeHolder").getProperties().get("number_item")).getDefault());
+        assertNotNull(((IntegerProperty)swagger.getDefinitions().get("TypeHolder").getProperties().get("integer_item")).getDefault());
+        //ArrayProperty and ObjectProperty does not have getDefault method
+
     }
 
     @Test

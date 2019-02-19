@@ -54,7 +54,7 @@ definitions:
       bool_item_1:
         type: boolean
         enum:
-          - true
+          - false
       bool_item_2:
         type: boolean
         enum:
@@ -91,3 +91,54 @@ definitions:
           - [0, 1, 2, 3]
         items:
           type: integer
+  TypeHolder:
+    type: object
+    required:
+      - string_item
+      - number_item
+      - integer_item
+      - bool_item
+      - array_item
+      - object_item
+    properties:
+      string_item:
+        type: string
+        default: 'what'
+        example: 'what'
+      number_item:
+        type: number
+        default: 1.234
+        example: 1.234
+      integer_item:
+        type: integer
+        default: -2
+        example: -2
+      bool_item:
+        type: boolean
+        default: true
+        example: true
+      array_item:
+        type: array
+        items:
+          type: integer
+        default:
+          - 0
+          - 1
+          - 2
+          - 3
+        example:
+          - 0
+          - 1
+          - 2
+          - 3
+      object_item:
+        type: object
+        properties:
+          id:
+            type: integer
+            default: 0
+            example: 0
+          name:
+            type: string
+            default: "key_val"
+            example: "key_val"
