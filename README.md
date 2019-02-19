@@ -15,9 +15,9 @@
       - [Flatten](#3-flatten)
       - [ResolveCombinators](#4-resolvecombinators)
     - [Authentication](#authentication)
-    - [Adding to your project](#adding-to-your-project)
     - [Prerequisites](#prerequisites)
     - [Extensions](#extensions)
+    - [Adding to your project](#adding-to-your-project)
   - [License](#license)
    
 ## Overview 
