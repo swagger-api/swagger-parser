@@ -422,6 +422,8 @@ public class InlineModelResolver {
     public Schema modelFromProperty(ObjectSchema object, String path) {
         String description = object.getDescription();
         String example = null;
+        List<String> requiredList = object.getRequired();
+
 
         Object obj = object.getExample();
         if (obj != null) {
@@ -437,6 +439,7 @@ public class InlineModelResolver {
         model.setName(name);
         model.setXml(xml);
         model.setType(object.getType());
+        model.setRequired(requiredList);
 
         if (properties != null) {
             flattenProperties(properties, path);
