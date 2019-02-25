@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class ResolverFully {
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
     private Map<String, Link> links;
-    private Map<String, Schema> resolvedProperties = new HashMap<>();
+    private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
 
     public void resolveFully(OpenAPI openAPI) {
         Components components = openAPI.getComponents();
