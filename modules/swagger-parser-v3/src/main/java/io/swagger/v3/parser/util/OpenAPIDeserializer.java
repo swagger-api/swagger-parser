@@ -2277,8 +2277,13 @@ public class OpenAPIDeserializer {
                 if (object != null) {
                     schema.setDefault(object);
                 }
-            }else if(schema.getType().equals("number")) {
+            } else if(schema.getType().equals("integer")) {
                 Integer number = getInteger("default", node, false, location, result);
+                if (number != null) {
+                    schema.setDefault(number);
+                }
+            } else if(schema.getType().equals("number")) {
+                BigDecimal number = getBigDecimal("default", node, false, location, result);
                 if (number != null) {
                     schema.setDefault(number);
                 }
