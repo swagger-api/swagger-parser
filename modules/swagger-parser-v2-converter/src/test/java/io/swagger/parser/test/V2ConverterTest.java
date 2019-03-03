@@ -775,7 +775,7 @@ public class V2ConverterTest {
         assertNotNull(unixTimestampQueryParameter);
         Schema s = unixTimestampQueryParameter.getSchema();
         assertTrue((s instanceof IntegerSchema), "actual type: " + s);
-        IntegerSchema integerSchema = (IntegerSchema) x;
+        IntegerSchema integerSchema = (IntegerSchema) s;
         assertEquals(INTEGER_TYPE, integerSchema.getType());
         assertEquals(INT64_FORMAT, integerSchema.getFormat());
     }
