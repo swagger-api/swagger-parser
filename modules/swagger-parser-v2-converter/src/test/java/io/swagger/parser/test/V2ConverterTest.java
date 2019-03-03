@@ -155,7 +155,7 @@ public class V2ConverterTest {
     private static final String ARRAY_VALUES = "[{\"id\":-1,\"name\":\"Marvin the Paranoid Android\"}," +
             "{\"id\":1000000,\"name\":\"Zaphod Beeblebrox\",\"friends\":[15]}]";
     private static final String SCHEMAS_A_REF = "#/components/schemas/A";
-    private static final String DATA_PATH = "/data";
+    private static final String UNIX_TIMESTAMP_QUERY_PARAM = "unixTimestampQuery";
     private static final String INTEGER_TYPE = "integer";
     private static final String INT64_FORMAT = "int64";
 
@@ -771,7 +771,7 @@ public class V2ConverterTest {
     public void testIssue1032() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1032_YAML);
         assertNotNull(oas);
-        Parameter unixTimestampQueryParameter = oas.getPaths().get(DATA_PATH).getGet().getParameters().get(0);
+        Parameter unixTimestampQueryParameter = oas.getComponents().getParameters().get(UNIX_TIMESTAMP_QUERY_PARAM);
         assertNotNull(unixTimestampQueryParameter);
         Schema s = unixTimestampQueryParameter.getSchema();
         assertTrue((s instanceof IntegerSchema), "actual type: " + s);
