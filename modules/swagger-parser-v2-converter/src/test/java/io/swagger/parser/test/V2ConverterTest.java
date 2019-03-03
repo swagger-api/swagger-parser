@@ -768,7 +768,7 @@ public class V2ConverterTest {
     }
 
     @Test(description = "OpenAPI v2 converter - proper IntegerSchema parsing")
-    public void testTopLevelExtensions() throws Exception {
+    public void testIssue1032() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1032_YAML);
         assertNotNull(oas);
         Parameter unixTimestampQueryParameter = oas.getPaths().get(DATA_PATH).getGet().getParameters().get(0);
