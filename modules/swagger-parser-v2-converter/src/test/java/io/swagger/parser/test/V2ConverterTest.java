@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -88,6 +89,7 @@ public class V2ConverterTest {
     private static final String ISSUE_765_YAML = "issue-765.yaml";
     private static final String ISSUE_768_JSON = "issue-786.json";
     private static final String ISSUE_820_YAML = "issue-820.yaml";
+    private static final String ISSUE_1032_YAML = "issue-1032.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -153,6 +155,9 @@ public class V2ConverterTest {
     private static final String ARRAY_VALUES = "[{\"id\":-1,\"name\":\"Marvin the Paranoid Android\"}," +
             "{\"id\":1000000,\"name\":\"Zaphod Beeblebrox\",\"friends\":[15]}]";
     private static final String SCHEMAS_A_REF = "#/components/schemas/A";
+    private static final String DATA_PATH = "/data";
+    private static final String INTEGER_TYPE = "integer";
+    private static final String INT64_FORMAT = "int64";
 
     private static final int MAX_LENGTH = 60;
     private static final int REQUIRED_SIZE = 2;
@@ -762,6 +767,18 @@ public class V2ConverterTest {
         assertEquals(baz.getNullable(), Boolean.FALSE);
     }
 
+    @Test(description = "OpenAPI v2 converter - proper IntegerSchema parsing")
+    public void testTopLevelExtensions() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1032_YAML);
+        assertNotNull(oas);
+        Parameter unixTimestampQueryParameter = oas.getPaths().get(DATA_PATH).getGet().getParameters().get(0);
+        assertNotNull(unixTimestampQueryParameter);
+        assertTrue(unixTimestampQueryParameter.getSchema() instanceof IntegerSchema);
+        IntegerSchema integerSchema = (IntegerSchema) unixTimestampQueryParameter.getSchema();
+        assertEquals(INTEGER_TYPE, integerSchema.getType());
+        assertEquals(INT64_FORMAT, integerSchema.getFormat());
+    }
+    
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
         SwaggerConverter converter = new SwaggerConverter();
         String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(file).toURI())));
