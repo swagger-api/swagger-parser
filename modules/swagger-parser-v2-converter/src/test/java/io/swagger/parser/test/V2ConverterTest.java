@@ -773,8 +773,9 @@ public class V2ConverterTest {
         assertNotNull(oas);
         Parameter unixTimestampQueryParameter = oas.getPaths().get(DATA_PATH).getGet().getParameters().get(0);
         assertNotNull(unixTimestampQueryParameter);
-        assertTrue(unixTimestampQueryParameter.getSchema() instanceof IntegerSchema);
-        IntegerSchema integerSchema = (IntegerSchema) unixTimestampQueryParameter.getSchema();
+        Schema s = unixTimestampQueryParameter.getSchema();
+        assertTrue("actual type: " + s, (s instanceof IntegerSchema));
+        IntegerSchema integerSchema = (IntegerSchema) x;
         assertEquals(INTEGER_TYPE, integerSchema.getType());
         assertEquals(INT64_FORMAT, integerSchema.getFormat());
     }
