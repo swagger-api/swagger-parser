@@ -293,4 +293,12 @@ public class RefUtilsTest {
         // relative locations
         assertEquals(ExternalRefProcessor.join("./foo#/definitions/Foo", "./bar#/definitions/Bar"), "./bar#/definitions/Bar");
     }
+    
+    @Test 
+    public void testPathJoin2() {
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../../newFile.yaml"), "http://foo.bar.com/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/newFile.yaml"), "http://foo.bar.com/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/my/newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
+    }
 }
