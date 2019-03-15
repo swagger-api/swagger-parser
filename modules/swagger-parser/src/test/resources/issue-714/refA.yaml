@@ -1,0 +1,3 @@
+properties:
+  helloworld:
+    type: string

@@ -2,8 +2,11 @@ package io.swagger.parser.processors;
 
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.*;
+import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 
+import java.util.List;
 import java.util.Map;
 
 import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
@@ -25,6 +28,8 @@ public class PropertyProcessor  {
             processMapProperty((MapProperty) property);
         } else if (property instanceof ObjectProperty) {
             processObjectProperty((ObjectProperty) property);
+        } else if (property instanceof ComposedProperty) {
+            processComposedProperty((ComposedProperty) property);
         }
     }
 
@@ -34,7 +39,7 @@ public class PropertyProcessor  {
             final String newRef = externalRefProcessor.processRefToExternalDefinition(refProperty.get$ref(), refProperty.getRefFormat());
 
             if (newRef != null) {
-                refProperty.set$ref(newRef);
+                refProperty.set$ref(RefType.DEFINITION.getInternalPrefix()+newRef);
             }
         }
     }
@@ -57,6 +62,13 @@ public class PropertyProcessor  {
         final Map<String, Property> properties = property.getProperties();
         if (properties != null)
             for (Property p : properties.values())
+                processProperty(p);
+    }
+
+    private void processComposedProperty(ComposedProperty property) {
+        final List<Property> properties = property.getAllOf();
+        if (properties != null)
+            for (Property p : properties)
                 processProperty(p);
     }
 }

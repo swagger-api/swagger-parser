@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -386,9 +387,9 @@ public class SwaggerReaderTest {
         Property schema = response.getSchema();
         Object example = schema.getExample();
         assertNotNull(example);
-        assertTrue(example instanceof ObjectNode);
-        ObjectNode objectNode = (ObjectNode) example;
-        assertEquals(objectNode.get("id").intValue(), 42);
-        assertEquals(objectNode.get("name").textValue(), "Arthur Dent");
+        assertTrue(example instanceof LinkedHashMap);
+        LinkedHashMap exampleMap = (LinkedHashMap) example;
+        assertEquals(Integer.parseInt(exampleMap.get("id").toString()), 42);
+        assertEquals(exampleMap.get("name").toString(), "Arthur Dent");
     }
 }

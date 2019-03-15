@@ -1,0 +1,16 @@
+swagger: '2.0'
+
+info:
+  version: "0.0.1"
+  title: Devices API
+
+basePath: /api/v2/devices
+
+definitions:
+  test:
+    type: object
+    properties:
+      property:
+        x-attr: "value"
+        allOf:
+        - $ref: "./child.yaml#/definitions/def.def"

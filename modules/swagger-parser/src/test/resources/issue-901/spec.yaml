@@ -1,0 +1,9 @@
+swagger: '2.0'
+info:
+  version: '1.01'
+  title: testswos55
+  description: testswos55
+basePath: /test
+paths:
+  '/test':
+    $ref: 'ref.yaml/#/pathitems/path-test'

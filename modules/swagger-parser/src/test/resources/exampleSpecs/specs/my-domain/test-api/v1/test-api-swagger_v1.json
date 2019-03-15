@@ -1,0 +1,78 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"description": "APIs to retrieve some data",
+		"version": "1.0",
+		"title": "TEST A NEW API",
+		"contact": {
+			"name": "mine",
+			"email": "mine@me.com"
+		}
+	},
+	"tags": [
+		{
+			"name": "Test",
+			"description": "APIs to retrieve some data"
+		}
+	],
+	"paths": {
+		"/my-domain/v1/test-system": {
+			"get": {
+				"description": "Retrieve relevant data",
+				"tags": [
+					"Test"
+				],
+				"summary": "Retrieve relevant data",
+				"responses": {
+					"200": {
+						"description": "Request was successful",
+						"headers": {
+						},
+						"schema": {
+							"$ref": "./schemas/test-api-schema_v02.json"
+						}
+					},
+					"400": {
+						"$ref": "#/responses/400"
+					}
+				}
+			}
+		}
+	},
+	"definitions": {
+	},
+	"responses": {
+		"200": {
+			"description": "OK",
+			"headers": {
+			}
+		},
+		"400": {
+			"description": "Bad Request",
+			"headers": {
+			},
+			"schema": {
+				"$ref": "../../../common/confirmMessageType_v01.json"
+			}		
+		}
+	},
+	"parameters": {
+		"asOfDate": {
+			"name": "asOfDate",
+			"in": "query",
+			"description": "date",
+			"required": false,
+			"example": "2017-01-01"
+		},
+		"header_Accept-Language": {
+			"name": "Accept-Language",
+			"in": "header",
+			"description": "Accept-Language",
+			"required": false,
+			"schema": {
+				"type": "string"
+			}
+		}
+	}
+
+}

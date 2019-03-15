@@ -1,0 +1,6 @@
+{
+  "title": "date",
+  "description": "The string representation",
+  "type": "string",
+  "format": "date"
+}

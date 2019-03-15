@@ -1,8 +1,10 @@
 package io.swagger.converter;
 
 import io.swagger.models.Method;
+import io.swagger.models.Model;
 import io.swagger.models.Operation;
 import io.swagger.models.ParamType;
+import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.apideclaration.ApiDeclaration;
 import io.swagger.models.apideclaration.ResponseMessage;
@@ -70,10 +72,10 @@ public class OperationConverterTest {
         assertNotNull(response);
         assertEquals(response.getDescription(), "success");
 
-        Property property = response.getSchema();
-        assertNotNull(property);
-        assertTrue(property.getClass().equals(RefProperty.class));
-        RefProperty ref = (RefProperty) property;
+        Model schema = response.getResponseSchema();
+        assertNotNull(schema);
+        assertTrue(schema.getClass().equals(RefModel.class));
+        RefModel ref = (RefModel) schema;
         assertEquals(ref.getSimpleRef(), "Cat");
     }
 

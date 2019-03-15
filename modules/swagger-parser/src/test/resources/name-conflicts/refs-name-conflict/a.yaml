@@ -1,0 +1,43 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Person
+  description: Maintain Person data
+paths:
+ /newPerson:
+  post:
+    summary: Create new person
+    description: Create new person
+    parameters: []
+    responses:
+      200:
+       description: OK
+       schema:
+         $ref: '#/definitions/PersonObj'
+ /oldPerson:
+  post:
+    summary: Create old person
+    description: Create old person
+    parameters: []
+    responses:
+      200:
+       description: OK
+       schema:
+         $ref: "../test-relative/b.yaml#/definitions/PersonObj"
+ /yetAnotherPerson:
+  post:
+    summary: Create yet another person
+    description: Create yet another person
+    parameters: []
+    responses:
+      200:
+       description: OK
+       schema:
+         $ref: "../test-relative/b.yaml#/definitions/PersonObj"
+
+definitions:
+ PersonObj:
+  properties:
+    location:
+      type: string
+      example: local

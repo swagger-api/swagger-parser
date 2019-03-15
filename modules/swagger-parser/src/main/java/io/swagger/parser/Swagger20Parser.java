@@ -61,7 +61,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 ObjectMapper mapper = Json.mapper();
                 rootNode = mapper.readTree(data);
             } else {
-                rootNode = DeserializationUtils.readYamlTree(data);
+                rootNode = deserializeYaml(data);
             }
             return readWithInfo(rootNode);
         }
@@ -77,6 +77,10 @@ public class Swagger20Parser implements SwaggerParserExtension {
             output.message("unable to read location `" + location + "`");
             return output;
         }
+    }
+
+    protected JsonNode deserializeYaml(String data) throws IOException{
+        return DeserializationUtils.readYamlTree(data);
     }
 
     @Override
@@ -118,7 +122,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 ObjectMapper mapper = Json.mapper();
                 rootNode = mapper.readTree(data);
             } else {
-                rootNode = DeserializationUtils.readYamlTree(data);
+                rootNode = deserializeYaml(data);
             }
 
             if (System.getProperty("debugParser") != null) {

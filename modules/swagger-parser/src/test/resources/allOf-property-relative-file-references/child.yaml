@@ -1,0 +1,14 @@
+swagger: '2.0'
+
+info:
+  version: "0.0.1"
+  title: Devices API
+
+basePath: /api/v2/devices
+
+definitions:
+  def.def:
+    type: object
+    properties:
+      name:
+        type: string

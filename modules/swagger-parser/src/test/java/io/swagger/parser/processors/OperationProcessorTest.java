@@ -42,7 +42,7 @@ public class OperationProcessorTest {
         operation.setParameters(inputParameterList);
 
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
-        RefResponse refResponse = new RefResponse(ref);
+        final RefResponse refResponse = new RefResponse(ref);
 
         operation.response(200, refResponse);
         operation.response(400, incomingResponse);
@@ -58,6 +58,9 @@ public class OperationProcessorTest {
             parameterProcessor.processParameters(inputParameterList);
             times = 1;
             result = outputParameterList;
+
+            responseProcessor.processResponse(refResponse);
+            times = 1;
 
             cache.loadRef(ref, RefFormat.URL, Response.class);
             times = 1;

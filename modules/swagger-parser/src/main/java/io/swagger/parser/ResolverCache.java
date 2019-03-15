@@ -3,16 +3,24 @@ package io.swagger.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.RefModel;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.PathUtils;
 import io.swagger.parser.util.RefUtils;
 import io.swagger.parser.util.SwaggerDeserializer;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,10 +45,12 @@ public class ResolverCache {
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("^" + RefType.PARAMETER.getInternalPrefix() + "(?<name>.+)");
     private static final Pattern DEFINITION_PATTERN = Pattern.compile("^" + RefType.DEFINITION.getInternalPrefix() + "(?<name>.+)");
     private static final Pattern RESPONSE_PATTERN = Pattern.compile("^" + RefType.RESPONSE.getInternalPrefix() + "(?<name>.+)");
+    private static final Pattern PATHS_PATTERN = Pattern.compile("^" + RefType.PATH.getInternalPrefix() + "(?<name>.+)");
 
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
+    private final String parentUrl;
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
@@ -48,7 +59,7 @@ public class ResolverCache {
     /*
     a map that stores original external references, and their associated renamed references
      */
-    private Map<String, String> renameCache = new HashMap<>();
+    private Map<String, String> renameCache = new ConcurrentHashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
@@ -65,6 +76,7 @@ public class ResolverCache {
             File file = new File(".");
             parentDirectory = file.toPath();
         }
+        parentUrl = parentFileLocation;
 
     }
 
@@ -118,7 +130,7 @@ public class ResolverCache {
         }
 
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
+        JsonNode tree = deserialize(contents, file);
 
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
@@ -136,12 +148,85 @@ public class ResolverCache {
         } else {
             result = DeserializationUtils.deserialize(tree, file, expectedType);
         }
+
+        updateLocalRefs(file, result);
+
         resolutionCache.put(ref, result);
 
         return result;
     }
 
+    protected JsonNode deserialize(String contents, String file) {
+        return DeserializationUtils.deserializeIntoTree(contents, file);
+    }
+
+    protected <T> void updateLocalRefs(String file, T result) {
+        if(result instanceof Response) {
+            Response response = (Response) result;
+            updateLocalRefs(file, response.getResponseSchema());
+        }
+        else if(result instanceof RefProperty) {
+            RefProperty prop = (RefProperty) result;
+            updateLocalRefs(file, prop);
+        }
+        else if(result instanceof Model) {
+            Model model = (Model) result;
+            updateLocalRefs(file, model);
+        }
+    }
+
+    protected <T> void updateLocalRefs(String file, Model schema) {
+        if(schema instanceof RefModel) {
+            RefModel ref = (RefModel) schema;
+            String updatedLocation = merge(file, ref.get$ref());
+            ref.set$ref(updatedLocation);
+        }
+        else if(schema instanceof ModelImpl) {
+            ModelImpl impl = (ModelImpl) schema;
+            if(impl.getProperties() != null) {
+                for(Property property : schema.getProperties().values()) {
+                    updateLocalRefs(file, property);
+                }
+            }
+        }
+    }
+
+    protected <T> void updateLocalRefs(String file, Property schema) {
+        if(schema instanceof RefProperty) {
+            RefProperty ref = (RefProperty) schema;
+            String updatedLocation = merge(file, ref.get$ref());
+            ref.set$ref(updatedLocation);
+        }
+    }
+
+    protected String merge(String host, String ref) {
+        if(StringUtils.isBlank(host)) {
+            return ref;
+        }
+        if(ref.startsWith("http:") || ref.startsWith("https:")) {
+            // already an absolute ref
+            return ref;
+        }
+        if(!host.startsWith("http:") && !host.startsWith("https:")) {
+            return ref;
+        }
+        if(ref.startsWith(".")) {
+            // relative ref, leave alone
+            return ref;
+        }
+        if(host.endsWith("/") && ref.startsWith("/")) {
+            return host + ref.substring(1);
+        }
+        return host + ref;
+    }
+
     private String unescapePointer(String jsonPathElement) {
+        // URL decode the fragment
+        try {
+            jsonPathElement = URLDecoder.decode(jsonPathElement, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            //
+        }
         // Unescape the JSON Pointer segment using the algorithm described in RFC 6901, section 4:
         // https://tools.ietf.org/html/rfc6901#section-4
         // First transform any occurrence of the sequence '~1' to '/'
@@ -161,6 +246,9 @@ public class ResolverCache {
         }
         else if(ref.startsWith("#/parameters")) {
             result = getFromMap(ref, swagger.getParameters(), PARAMETER_PATTERN);
+        }
+        else if(ref.startsWith("#/paths")) {
+            result = getFromMap(ref, swagger.getPaths(), PATHS_PATTERN);
         }
         if (result == null) {
             result = getFromMap(ref, swagger.getDefinitions(), DEFINITION_PATTERN);
