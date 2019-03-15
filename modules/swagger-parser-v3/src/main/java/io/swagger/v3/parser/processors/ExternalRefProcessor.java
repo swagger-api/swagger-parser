@@ -20,6 +20,8 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+import io.swagger.v3.parser.util.RefUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +29,11 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
 import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.getExternalPath;
 import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
@@ -689,8 +693,10 @@ public final class ExternalRefProcessor {
             return;
         }
         String $ref = subRef.get$ref();
+        String subRefExternalPath = getExternalPath(subRef.get$ref())
+            .orElse(null);
 
-        if (format.equals(RefFormat.RELATIVE)) {
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
             $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
         }else {

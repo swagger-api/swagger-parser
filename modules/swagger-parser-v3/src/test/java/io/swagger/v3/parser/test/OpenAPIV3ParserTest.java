@@ -52,6 +52,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.testng.Assert.*;
 
@@ -1778,6 +1781,24 @@ public class OpenAPIV3ParserTest {
         parseOptions.setResolveFully(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/validation/path-parameter-validation.yaml", null, parseOptions);
         assertThat(result.getMessages().size(), CoreMatchers.is(0));
+    }
+
+    @Test
+    public void shouldParseExternalSchemaModelHavingReferenceToItsLocalModel() {
+        // given
+        String location = "src/test/resources/issue-1040/api.yaml";
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+
+        // when
+        OpenAPI result = tested.read(location);
+
+        // then
+        Components components = result.getComponents();
+        Schema modelSchema = components.getSchemas().get("Value");
+
+        assertThat(modelSchema, notNullValue());
+        assertThat(modelSchema.getProperties().get("id"), instanceOf(Schema.class));
+        assertThat(((Schema) modelSchema.getProperties().get("id")).get$ref(), equalTo("#/components/schemas/ValueId"));
     }
 
     private static int getDynamicPort() {
