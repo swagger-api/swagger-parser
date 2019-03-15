@@ -24,7 +24,12 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -155,7 +160,7 @@ public class RefUtilsTest {
         setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString((FileInputStream) any, "UTF-8");
+            IOUtils.toString((FileInputStream) any, UTF_8);
             times = 1;
             result = expectedResult;
 
@@ -198,7 +203,7 @@ public class RefUtilsTest {
         setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
         new StrictExpectations() {{
-            IOUtils.toString((FileInputStream) any, "UTF-8");
+            IOUtils.toString((FileInputStream) any, UTF_8);
             times = 1;
             result = new IOException();
         }};
@@ -293,6 +298,7 @@ public class RefUtilsTest {
         // relative locations
         assertEquals(ExternalRefProcessor.join("./foo#/definitions/Foo", "./bar#/definitions/Bar"), "./bar#/definitions/Bar");
     }
+
     
     @Test 
     public void testPathJoin2() {
@@ -304,5 +310,80 @@ public class RefUtilsTest {
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/file.yaml", "./newFile.yaml"), "http://foo.bar.com/newFile.yaml");        
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/newFile.yaml"), "http://foo.bar.com/newFile.yaml");
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/my/newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
+
+
+    @Test
+    public void shouldReturnEmptyExternalPathForInternalReference() {
+        // given
+        String ref = "#/components/test";
+
+        // when
+        Optional<String> externalPath = RefUtils.getExternalPath(ref);
+
+        // then
+        assertThat(externalPath.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnEmptyExternalPathForNullReference() {
+        // given
+        String ref = null;
+
+        // when
+        Optional<String> externalPath = RefUtils.getExternalPath(ref);
+
+        // then
+        assertThat(externalPath.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnEmptyExternalPathForEmptyReference() {
+        // given
+        String ref = "";
+
+        // when
+        Optional<String> externalPath = RefUtils.getExternalPath(ref);
+
+        // then
+        assertThat(externalPath.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnEmptyExternalPathForInvalidReference() {
+        // given
+        String ref = "test";
+
+        // when
+        Optional<String> externalPath = RefUtils.getExternalPath(ref);
+
+        // then
+        assertThat(externalPath.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnExternalPathForFileReference() {
+        // given
+        String ref = "test.yaml#/components/test";
+
+        // when
+        Optional<String> externalPath = RefUtils.getExternalPath(ref);
+
+        // then
+        assertThat(externalPath.isPresent(), is(true));
+        assertThat(externalPath.get(), equalTo("test.yaml"));
+    }
+
+    @Test
+    public void shouldReturnExternalPathForHttpReference() {
+        // given
+        String ref = "http://localhost/schema.json#/components/test";
+
+        // when
+        Optional<String> externalPath = RefUtils.getExternalPath(ref);
+
+        // then
+        assertThat(externalPath.isPresent(), is(true));
+        assertThat(externalPath.get(), equalTo("http://localhost/schema.json"));
+
     }
 }

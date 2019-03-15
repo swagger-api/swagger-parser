@@ -101,18 +101,6 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
   <artifactId>swagger-parser</artifactId>
   <version>2.0.10-SNAPSHOT</version>
 </dependency>
-
-```
-
-or
-
-```xml
-<dependency>
-  <groupId>io.swagger.parser.v3</groupId>
-  <artifactId>swagger-parser</artifactId>
-  <version>2.0.10-SNAPSHOT</version>
-</dependency>
-
 ```
 
 

@@ -1,0 +1,13 @@
+components:
+  schemas:
+    ValueId:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+    Value:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ValueId'

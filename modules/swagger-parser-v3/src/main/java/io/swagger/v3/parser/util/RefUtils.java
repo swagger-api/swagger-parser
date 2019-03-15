@@ -5,19 +5,27 @@ import io.swagger.v3.parser.models.RefFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 public class RefUtils {
 
+    private static final String REFERENCE_SEPARATOR = "#/";
+
+    private RefUtils() {
+        // static access only
+    }
+
     public static String computeDefinitionName(String ref) {
 
-        final String[] refParts = ref.split("#/");
+        final String[] refParts = ref.split(REFERENCE_SEPARATOR);
 
         if (refParts.length > 2) {
             throw new RuntimeException("Invalid ref format: " + ref);
@@ -43,6 +51,16 @@ public class RefUtils {
         return plausibleName;
     }
 
+    public static Optional<String> getExternalPath(String ref) {
+        if (ref == null) {
+            return Optional.empty();
+        }
+        return Optional.of(ref.split(REFERENCE_SEPARATOR))
+            .filter(it -> it.length == 2)
+            .map(it -> it[0])
+            .filter(it -> !it.isEmpty());
+    }
+
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
         return refFormat == RefFormat.URL || refFormat == RefFormat.RELATIVE;
     }
@@ -52,9 +70,9 @@ public class RefUtils {
         ref = mungedRef(ref);
         if(ref.startsWith("http")||ref.startsWith("https")) {
             result = RefFormat.URL;
-        } else if(ref.startsWith("#/")) {
+        } else if(ref.startsWith(REFERENCE_SEPARATOR)) {
             result = RefFormat.INTERNAL;
-        } else if(ref.startsWith(".") || ref.startsWith("/") || ref.indexOf("#/") > 0) {
+        } else if(ref.startsWith(".") || ref.startsWith("/") || ref.indexOf(REFERENCE_SEPARATOR) > 0) {
             result = RefFormat.RELATIVE;
         }
 
@@ -162,7 +180,7 @@ public class RefUtils {
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
 
                 if(Files.exists(pathToUse)) {
-                    result = IOUtils.toString(new FileInputStream(pathToUse.toFile()), "UTF-8");
+                    result = readAll(pathToUse);
                 } else {
                     String url = file;
                     if(url.contains("..")) {
@@ -173,7 +191,7 @@ public class RefUtils {
                     final Path pathToUse2 = parentDirectory.resolve(url).normalize();
 
                     if(Files.exists(pathToUse2)) {
-                        result = IOUtils.toString(new FileInputStream(pathToUse2.toFile()), "UTF-8");
+                        result = readAll(pathToUse2);
                     }
                 }
                 if (result == null){
@@ -188,5 +206,11 @@ public class RefUtils {
 
         return result;
 
+    }
+
+    private static String readAll(Path path) throws IOException {
+        try (InputStream inputStream = new FileInputStream(path.toFile())) {
+            return IOUtils.toString(inputStream, UTF_8);
+        }
     }
 }
