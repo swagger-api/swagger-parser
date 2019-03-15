@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Test
+  version: 1.0.0
+
+paths:
+  /value:
+    get:
+      operationId: getValues
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: 'lib/lib.yaml#/components/schemas/Value'
