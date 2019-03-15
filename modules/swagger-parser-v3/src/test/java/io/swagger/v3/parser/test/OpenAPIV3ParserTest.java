@@ -37,6 +37,7 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -51,12 +52,32 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.testng.Assert.*;
 
 
 public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
+
+    @Test
+    public void testIssue1015() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1015.json", null, options);
+        if (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty()) {
+            parseResult.getMessages().forEach(s -> System.out.println(s));
+            fail("Error while loading apispec!");
+        }
+
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+    }
 
     @Test
     public void testIssueIntegerDefault() {
@@ -70,7 +91,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNull ( openAPI.getPaths().get("/issue-125").getGet().getResponses().get("200").getContent().get("*/*").getSchema().getFormat());
         Assert.assertNull (openAPI.getPaths().get("/primitiveBody/binary").getPost().getRequestBody().getContent().get("application/octet-stream").getSchema().getFormat());
     }
-  
+
     @Test
     public void testIssue983() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -78,10 +99,9 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         final OpenAPI openAPI = parser.readLocation("issue-983.yaml", null, options).getOpenAPI();
         Assert.assertNotNull(openAPI);
-        Yaml.prettyPrint(openAPI);
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("InventoryId"));
     }
-  
+
     @Test
     public void testIssue913() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -162,7 +182,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
     }
-  
+
     @Test
     public void testIssue834() {
         ParseOptions options = new ParseOptions();
@@ -825,7 +845,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = parser.readLocation("src/test/resources/petstore.yaml", null, options);
 
         assertNotNull(result);
-        assertTrue(result.getMessages().size()==1);
+        assertTrue(result.getMessages().size()==2);
 
         OpenAPI openAPI = result.getOpenAPI();
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
@@ -1753,6 +1773,32 @@ public class OpenAPIV3ParserTest {
         Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
         ComposedSchema composed = (ComposedSchema) properties.get("allOfExample");
         assertEquals(composed.getAllOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test
+    public void testValidationIssue() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/validation/path-parameter-validation.yaml", null, parseOptions);
+        assertThat(result.getMessages().size(), CoreMatchers.is(0));
+    }
+
+    @Test
+    public void shouldParseExternalSchemaModelHavingReferenceToItsLocalModel() {
+        // given
+        String location = "src/test/resources/issue-1040/api.yaml";
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+
+        // when
+        OpenAPI result = tested.read(location);
+
+        // then
+        Components components = result.getComponents();
+        Schema modelSchema = components.getSchemas().get("Value");
+
+        assertThat(modelSchema, notNullValue());
+        assertThat(modelSchema.getProperties().get("id"), instanceOf(Schema.class));
+        assertThat(((Schema) modelSchema.getProperties().get("id")).get$ref(), equalTo("#/components/schemas/ValueId"));
     }
 
     private static int getDynamicPort() {
