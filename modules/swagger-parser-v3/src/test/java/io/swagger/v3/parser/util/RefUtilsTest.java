@@ -299,6 +299,20 @@ public class RefUtilsTest {
         assertEquals(ExternalRefProcessor.join("./foo#/definitions/Foo", "./bar#/definitions/Bar"), "./bar#/definitions/Bar");
     }
 
+    
+    @Test 
+    public void testPathJoin2() {
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../../newFile.yaml"), "http://foo.bar.com/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "./newFile.yaml"), "http://foo.bar.com/my/dir/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../second/newFile.yaml"), "http://foo.bar.com/my/second/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../../otherDir/newFile.yaml"), "http://foo.bar.com/otherDir/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/file.yaml", "./newFile.yaml"), "http://foo.bar.com/newFile.yaml");        
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/newFile.yaml"), "http://foo.bar.com/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/my/newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
+    }
+
+
     @Test
     public void shouldReturnEmptyExternalPathForInternalReference() {
         // given
@@ -371,5 +385,6 @@ public class RefUtilsTest {
         // then
         assertThat(externalPath.isPresent(), is(true));
         assertThat(externalPath.get(), equalTo("http://localhost/schema.json"));
+
     }
 }
