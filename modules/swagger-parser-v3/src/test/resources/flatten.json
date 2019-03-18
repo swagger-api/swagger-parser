@@ -2,6 +2,26 @@
   "openapi" : "3.0.1",
   "components" : {
     "schemas" : {
+      "ReturnInformation": {
+        "type": "object",
+        "properties": {
+          "manufacturer_signin_credentials": {
+            "type": "object",
+            "properties": {
+              "login": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "login",
+              "password"
+            ]
+          }
+        }
+      },
       "User" : {
         "required" : [ "address" ],
         "properties" : {

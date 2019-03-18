@@ -139,6 +139,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         Swagger swagger = parse.getSwagger();
 
+        if (swagger.getVendorExtensions() != null) {
+            openAPI.setExtensions(convert(swagger.getVendorExtensions()));
+        }
+
         if (swagger.getExternalDocs() != null) {
             openAPI.setExternalDocs(convert(swagger.getExternalDocs()));
         }
@@ -1056,7 +1060,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 schema = a;
             } else {
-                schema = new Schema();
+                schema = SchemaTypeUtil.createSchema(sp.getType(), sp.getFormat());
                 schema.setType(sp.getType());
                 schema.setFormat(sp.getFormat());
 

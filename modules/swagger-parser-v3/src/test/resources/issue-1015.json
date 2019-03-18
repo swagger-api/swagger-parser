@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Testcase",
+    "version": "1.0",
+    "description": "This is a testcase to demonstrate the problem with supplying a list as the default value for an array schema."
+  },
+  "paths": {
+    "/v1/doc/{document_id}/filter": {
+      "post": {
+        "operationId": "filterDocument",
+        "summary": "Filter a document by including only the requested headings and subheadings",
+        "description": "This operation processes the specified stored document by returning a filtered view of the document according to the section heading tags specified in the filter_settings parameter.",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "description": "The id of the stored document to be filtered.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocFilterSettings"
+              }
+            }
+          },
+          "description": "An object that defines the filter settings.",
+          "required": true
+        },
+        "x-codegen-request-body-name": "filterSettings",
+        "responses": {
+          "200": {
+            "description": "It worked."
+          },
+          "default": {
+            "description": "Rut Roh"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DocFilterSettings": {
+        "type": "object",
+        "description": "This model describes the attributes used to filter a document.",
+        "properties": {
+          "tag_list": {
+            "description": "This is the set of tags to include in the output.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "h1",
+              "h2"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

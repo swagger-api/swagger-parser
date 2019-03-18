@@ -20,15 +20,20 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+import io.swagger.v3.parser.util.RefUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
 import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.getExternalPath;
 import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
@@ -177,37 +182,40 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
-    private void processProperties(Map<String,Schema> subProps, String file) {
-        if (subProps != null) {
-            for (Map.Entry<String, Schema> prop : subProps.entrySet()) {
-                if (prop.getValue().get$ref() != null) {
-                    processRefSchema(prop.getValue(), file);
-                } else if (prop.getValue() instanceof ArraySchema) {
-                    ArraySchema arrayProp = (ArraySchema) prop.getValue();
-                    if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
-                            StringUtils.isNotBlank(arrayProp.getItems().get$ref())) {
-                        processRefSchema(arrayProp.getItems(), file);
-                    }
-                    if (arrayProp.getItems() != null && arrayProp.getItems().getProperties() != null ) {
-                        processProperties(arrayProp.getItems().getProperties(), file);
-                    }
-                } else if (prop.getValue().getAdditionalProperties() != null && prop.getValue().getAdditionalProperties() instanceof Schema) {
-                    Schema mapProp =  (Schema) prop.getValue().getAdditionalProperties();
-                    if (mapProp.get$ref() != null) {
-                        processRefSchema(mapProp, file);
-                    } else if (mapProp.getAdditionalProperties() instanceof ArraySchema &&
-                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems()!= null &&
-                            ((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref() != null
-                            && StringUtils.isNotBlank(((ArraySchema) mapProp.getAdditionalProperties()).getItems().get$ref())) {
-                        processRefSchema(((ArraySchema) mapProp.getAdditionalProperties()).getItems(), file);
-                    }
-                }else if (prop.getValue() instanceof ObjectSchema){
-                    ObjectSchema objProp = (ObjectSchema) prop.getValue();
-                    if(objProp.getProperties() != null ){
-                        processProperties(objProp.getProperties(),file);
-                    }
-                }
+    private void processProperty(Schema property, String file) {
+        if (property != null) {
+            if (StringUtils.isNotBlank(property.get$ref())) {
+                processRefSchema(property, file);
             }
+            if (property.getProperties() != null) {
+                processProperties(property.getProperties(), file);
+            }
+            if (property instanceof ArraySchema) {
+                processProperty(((ArraySchema) property).getItems(), file);
+            }
+            if (property.getAdditionalProperties() instanceof Schema) {
+                processProperty(((Schema) property.getAdditionalProperties()), file);
+            }
+            if (property instanceof ComposedSchema) {
+                ComposedSchema composed = (ComposedSchema) property;
+                processProperties(composed.getAllOf(), file);
+                processProperties(composed.getAnyOf(), file);
+                processProperties(composed.getOneOf(), file);
+            }
+        }
+    }
+
+    private void processProperties(Collection<Schema> properties, String file) {
+        if (properties != null) {
+            for (Schema property : properties) {
+                processProperty(property, file);
+            }
+        }
+    }
+
+    private void processProperties(Map<String, Schema> properties, String file) {
+        if (properties != null) {
+            processProperties(properties.values(), file);
         }
     }
 
@@ -685,8 +693,10 @@ public final class ExternalRefProcessor {
             return;
         }
         String $ref = subRef.get$ref();
+        String subRefExternalPath = getExternalPath(subRef.get$ref())
+            .orElse(null);
 
-        if (format.equals(RefFormat.RELATIVE)) {
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
             $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
         }else {

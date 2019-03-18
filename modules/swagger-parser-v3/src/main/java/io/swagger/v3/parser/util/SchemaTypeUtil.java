@@ -56,26 +56,25 @@ public class SchemaTypeUtil {
     public static Schema createSchema(String type, String format) {
 
         if(INTEGER_TYPE.equals(type)) {
-            if(INTEGER64_FORMAT.equals(format)) {
-                return new IntegerSchema().format(INTEGER64_FORMAT);
-            }
-            else {
-                return new IntegerSchema();
+            if(StringUtils.isBlank(format)){
+                return new IntegerSchema().format(null);
+            }else {
+                return new IntegerSchema().format(format);
             }
         }
         else if(NUMBER_TYPE.equals(type)) {
-            if(FLOAT_FORMAT.equals(format)) {
-                return new NumberSchema().format(FLOAT_FORMAT);
-            }
-            else if(DOUBLE_FORMAT.equals(format)) {
-                return new NumberSchema().format(DOUBLE_FORMAT);
-            }
-            else {
+            if (StringUtils.isBlank(format)){
                 return new NumberSchema();
+            } else {
+                return new NumberSchema().format(format);
             }
         }
         else if(BOOLEAN_TYPE.equals(type)) {
-            return new BooleanSchema();
+            if (StringUtils.isBlank(format)){
+                return new BooleanSchema();
+            } else {
+                return new BooleanSchema().format(format);
+            }
         }
         else if(STRING_TYPE.equals(type)) {
             if(BYTE_FORMAT.equals(format)) {
@@ -100,7 +99,11 @@ public class SchemaTypeUtil {
                 return new UUIDSchema();
             }
             else {
-                return new StringSchema();
+                if (StringUtils.isBlank(format)){
+                    return new StringSchema().format(null);
+                }else {
+                    return new StringSchema().format(format);
+                }
             }
         }
         else if(OBJECT_TYPE.equals(type)) {

@@ -30,12 +30,14 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.parser.OpenAPIResolver;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -50,6 +52,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.testng.Assert.*;
 
 
@@ -57,6 +63,44 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1015() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1015.json", null, options);
+        if (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty()) {
+            parseResult.getMessages().forEach(s -> System.out.println(s));
+            fail("Error while loading apispec!");
+        }
+
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+    }
+
+    @Test
+    public void testIssueIntegerDefault() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = parser.readLocation("integerDefault.yaml", null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Assert.assertFalse (((IntegerSchema) openAPI.getPaths().get("/fileUpload").getPost().getRequestBody().getContent().get("multipart/form-data").getSchema().getProperties().get("intMetadata")).getFormat() == "int32");
+        Assert.assertNull ( openAPI.getPaths().get("/mockResponses/primitiveDoubleResponse").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getFormat());
+        Assert.assertNull ( openAPI.getPaths().get("/issue-125").getGet().getResponses().get("200").getContent().get("*/*").getSchema().getFormat());
+        Assert.assertNull (openAPI.getPaths().get("/primitiveBody/binary").getPost().getRequestBody().getContent().get("application/octet-stream").getSchema().getFormat());
+    }
+
+    @Test
+    public void testIssue983() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = parser.readLocation("issue-983.yaml", null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("InventoryId"));
+    }
 
     @Test
     public void testIssue913() {
@@ -138,7 +182,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
     }
-  
+
     @Test
     public void testIssue834() {
         ParseOptions options = new ParseOptions();
@@ -801,7 +845,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = parser.readLocation("src/test/resources/petstore.yaml", null, options);
 
         assertNotNull(result);
-        assertTrue(result.getMessages().isEmpty());
+        assertTrue(result.getMessages().size()==2);
 
         OpenAPI openAPI = result.getOpenAPI();
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
@@ -1608,6 +1652,16 @@ public class OpenAPIV3ParserTest {
 
     }
 
+    @Test
+    public void testIssue948() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("Issue_948.json", null, options);
+        new OpenAPIResolver(result.getOpenAPI()).resolve();
+        assertNotNull(result.getOpenAPI());
+
+    }
+
     public void shouldParseParameters() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolveFully(true);
@@ -1638,6 +1692,113 @@ public class OpenAPIV3ParserTest {
         Map<String, Link> links = openAPI.getPaths().get("/2.0/repositories/{username}").getGet().getResponses().get("200").getLinks();
         Object requestBody = links.get("userRepository").getRequestBody();
         assertEquals(requestBody, "$response.body#/slug");
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Schema> issue975ExtractPropertiesFromTestResource() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-975/contract/openapi.yaml", null, options).getOpenAPI();
+        Schema myResponseSchema = openAPI.getComponents().getSchemas().get("MyResponse");
+        return myResponseSchema.getProperties();
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a reference to a relative file.")
+    public void testIssue975_property() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        assertEquals(properties.get("images").get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an array with a reference to a relative file.")
+    public void testIssue975_array() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesArray");
+        assertEquals(imagesArray.getItems().get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a map with a reference to a relative file.")
+    public void testIssue975_map() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        Schema imagesMap = (Schema) properties.get("imagesMap").getAdditionalProperties();
+        assertEquals(imagesMap.get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an array with a map with a reference to a relative file.")
+    public void testIssue975_array_map() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesArrayMap");
+        Schema imagesdMap = (Schema) imagesArray.getItems().getAdditionalProperties();
+        assertEquals(imagesdMap.get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a map with an array with a reference to a relative file.")
+    public void testIssue975_map_array() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesMapArray").getAdditionalProperties();
+        assertEquals(imagesArray.getItems().get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an array with an array with a reference to a relative file.")
+    public void testIssue975_array_array() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ArraySchema imagesArray = (ArraySchema) properties.get("imagesArrayArray");
+        imagesArray = (ArraySchema) imagesArray.getItems();
+        assertEquals(imagesArray.getItems().get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is a map with a map with a reference to a relative file.")
+    public void testIssue975_map_map() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        Schema imagesMap = (Schema) properties.get("imagesMapMap").getAdditionalProperties();
+        imagesMap = (Schema) imagesMap.getAdditionalProperties();
+        assertEquals(imagesMap.get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an oneOf a reference to a relative file.")
+    public void testIssue975_oneOf() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ComposedSchema composed = (ComposedSchema) properties.get("oneOfExample");
+        assertEquals(composed.getOneOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an anyOf a reference to a relative file.")
+    public void testIssue975_anyOf() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ComposedSchema composed = (ComposedSchema) properties.get("anyOfExample");
+        assertEquals(composed.getAnyOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test(description = "Test that relative references are resolvable when property is an allOf a reference to a relative file.")
+    public void testIssue975_allOf() {
+        Map<String, Schema> properties = issue975ExtractPropertiesFromTestResource();
+        ComposedSchema composed = (ComposedSchema) properties.get("allOfExample");
+        assertEquals(composed.getAllOf().get(0).get$ref(), "#/components/schemas/Image");
+    }
+
+    @Test
+    public void testValidationIssue() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/validation/path-parameter-validation.yaml", null, parseOptions);
+        assertThat(result.getMessages().size(), CoreMatchers.is(0));
+    }
+
+    @Test
+    public void shouldParseExternalSchemaModelHavingReferenceToItsLocalModel() {
+        // given
+        String location = "src/test/resources/issue-1040/api.yaml";
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+
+        // when
+        OpenAPI result = tested.read(location);
+
+        // then
+        Components components = result.getComponents();
+        Schema modelSchema = components.getSchemas().get("Value");
+
+        assertThat(modelSchema, notNullValue());
+        assertThat(modelSchema.getProperties().get("id"), instanceOf(Schema.class));
+        assertThat(((Schema) modelSchema.getProperties().get("id")).get$ref(), equalTo("#/components/schemas/ValueId"));
     }
 
     private static int getDynamicPort() {

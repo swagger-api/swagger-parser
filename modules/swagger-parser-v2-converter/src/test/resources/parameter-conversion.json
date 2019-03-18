@@ -1,5 +1,6 @@
 {
     "swagger": "2.0",
+    "x-some-extensions": "hello",
     "info": {
         "version": "1.0",
         "title": "x-example"

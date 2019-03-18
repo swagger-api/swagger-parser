@@ -1,15 +1,15 @@
-# Swagger Parser
+# Swagger Parser <img src="https://raw.githubusercontent.com/swagger-api/swagger.io/wordpress/images/assets/SW-logo-clr.png" height="50" align="right">
 
-**NOTE:** If you're looking for `swagger-parser` 1.X and OpenApi 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-parser/tree/v1)
+**NOTE:** If you're looking for `swagger-parser` 1.X and OpenAPI 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-parser/tree/v1)
 
 [![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2)
 
 ## Overview 
-This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
+This is the Swagger Parser project, which reads OpenAPI definitions into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
 
 ### Usage
-Using the swagger-parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
+Using the Swagger Parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
 
 ```java
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -59,7 +59,7 @@ Manager.  That's done by setting a system environment variable as such:
 export TRUST_ALL=true
 ```
 
-And then the swagger-parser will _ignore_ invalid certificates.  Of course this is generally a bad idea, but if you're 
+And then the Swagger Parser will _ignore_ invalid certificates.  Of course this is generally a bad idea, but if you're 
 working inside a firewall or really know what you're doing, well, there's your rope.
 
 ### Dealing with Let's Encrypt
@@ -99,27 +99,15 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.8-SNAPSHOT</version>
+  <version>2.0.10-SNAPSHOT</version>
 </dependency>
-
-```
-
-or
-
-```xml
-<dependency>
-  <groupId>io.swagger.parser.v3</groupId>
-  <artifactId>swagger-parser</artifactId>
-  <version>2.0.8-SNAPSHOT</version>
-</dependency>
-
 ```
 
 
 License
 -------
 
-Copyright 2017 SmartBear Software
+Copyright 2018 SmartBear Software
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -132,4 +120,3 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ---
-<img src="http://swagger.io/wp-content/uploads/2016/02/logo.jpg"/>
