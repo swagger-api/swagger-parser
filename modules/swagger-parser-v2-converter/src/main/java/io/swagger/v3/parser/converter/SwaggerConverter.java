@@ -1060,7 +1060,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 schema = a;
             } else {
-                schema = new Schema();
+                schema = SchemaTypeUtil.createSchema(sp.getType(), sp.getFormat());
                 schema.setType(sp.getType());
                 schema.setFormat(sp.getFormat());
 
