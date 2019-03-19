@@ -132,6 +132,9 @@ public class RefUtils {
         if(!"".equals(rootPathParts[rootPathParts.length - 1])) {
             trimRoot = 1;
         }
+        if("".equals(relPathParts[0])) {
+            trimRel = 1; trimRoot = rootPathParts.length-3;
+        }        
         for(int i = 0; i < rootPathParts.length; i++) {
             if("".equals(rootPathParts[i])) {
                 trimRel += 1;
@@ -145,7 +148,7 @@ public class RefUtils {
                 trimRel += 1;
             }
             else if ("..".equals(relPathParts[i])) {
-                trimRel += 1;
+                trimRel += 1; trimRoot += 1;
             }
         }
 
@@ -154,7 +157,7 @@ public class RefUtils {
         System.arraycopy(relPathParts,
                 trimRel,
                 outputParts,
-                rootPathParts.length - trimRoot + trimRel - 1,
+                rootPathParts.length - trimRoot,
                 relPathParts.length - trimRel);
 
         return StringUtils.join(outputParts, "/");

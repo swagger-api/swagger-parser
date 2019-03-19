@@ -1,0 +1,27 @@
+swagger: '2.0'
+basePath: "/"
+info:
+  version: "1"
+  title: "x"
+
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /data:
+    get:
+      operationId: "getData"
+      parameters:
+      - $ref: '#/parameters/unixTimestampQuery'
+      responses:
+        '403':
+          description: Forbidden
+parameters:
+  unixTimestampQuery:
+    in: query
+    name: unixTimestamp
+    type: integer
+    format: int64
