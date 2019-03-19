@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 
 
 public class ExternalRefProcessorTest {
@@ -137,11 +137,11 @@ public class ExternalRefProcessorTest {
     		times = 1;
  		}};
 
-    	String actualRef = new ExternalRefProcessor(cache, testedOpenAPI).processRefToExternalSchema(customerURL, refFormat);
+		new ExternalRefProcessor(cache, testedOpenAPI).processRefToExternalSchema(customerURL, refFormat);
 
-		assertTrue(testedOpenAPI.getComponents().getSchemas().get("Customer") != null);
-    	assertTrue(testedOpenAPI.getComponents().getSchemas().get("Contact") != null);
-    	assertTrue(testedOpenAPI.getComponents().getSchemas().get("Address") != null);
+		assertThat(testedOpenAPI.getComponents().getSchemas().get("Customer"), notNullValue());
+		assertThat(testedOpenAPI.getComponents().getSchemas().get("Contact"), notNullValue());
+		assertThat(testedOpenAPI.getComponents().getSchemas().get("Address"), notNullValue());
     }
 
 
