@@ -138,14 +138,14 @@ public class DeserializationUtils {
             if (options.isValidateYamlInput()) {
                 boolean res = exceedsLimits(o, null, new Integer(0), new IdentityHashMap<Object, Long>());
                 if (res) {
-                    LOGGER.error("Error converting snake-parsed yaml to JsonNode");
+                    LOGGER.warn("Error converting snake-parsed yaml to JsonNode");
                     return Yaml.mapper().readTree(contents);
                 }
             }
             JsonNode n =  Json.mapper().convertValue(o, JsonNode.class);
             return n;
         } catch (Throwable e) {
-            LOGGER.error("Error snake-parsing yaml content", e);
+            LOGGER.warn("Error snake-parsing yaml content", e);
             return Yaml.mapper().readTree(contents);
         }
     }
@@ -155,7 +155,7 @@ public class DeserializationUtils {
         if (o == null) return false;
         if (!(o instanceof List) && !(o instanceof Map)) return false;
         if (depth > options.getMaxYamlDepth()) {
-            LOGGER.error("snake-yaml result exceeds max depth {}; threshold can be increased if needed by setting system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
+            LOGGER.warn("snake-yaml result exceeds max depth {}; threshold can be increased if needed by setting system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
             return true;
         }
         int currentDepth = depth;
@@ -171,7 +171,7 @@ public class DeserializationUtils {
                 }
             }
             if (visited.get(o) > options.getMaxYamlReferences()) {
-                LOGGER.error("snake-yaml result exceeds max references {}; threshold can be increased if needed by setting system property `maxYamlReferences` to a higher value.", options.getMaxYamlReferences());
+                LOGGER.warn("snake-yaml result exceeds max references {}; threshold can be increased if needed by setting system property `maxYamlReferences` to a higher value.", options.getMaxYamlReferences());
                 return true;
             }
             visited.put(o, visited.get(o) + 1);
@@ -211,7 +211,7 @@ public class DeserializationUtils {
         if (!(o instanceof List) && !(o instanceof Map)) return false;
         if (!(target instanceof List) && !(target instanceof Map)) return false;
         if (depth > options.getMaxYamlDepth()) {
-            LOGGER.error("snake-yaml result exceeds max depth {}; threshold can be increased if needed by setting  system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
+            LOGGER.warn("snake-yaml result exceeds max depth {}; threshold can be increased if needed by setting  system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
             return true;
         }
         int currentDepth = depth;
@@ -229,7 +229,7 @@ public class DeserializationUtils {
         }
         for (Object v : children) {
             if (v == target) {
-                 LOGGER.error("detected cycle in snake-yaml result; cycle check can be disabled by setting system property `yamlCycleCheck` to false.");
+                 LOGGER.warn("detected cycle in snake-yaml result; cycle check can be disabled by setting system property `yamlCycleCheck` to false.");
                  return true;
             }
             boolean res = hasReference(v, target, currentDepth + 1, visited);
@@ -280,7 +280,7 @@ public class DeserializationUtils {
                 if (node != null) {
                     if (node instanceof MappingNode) {
                         if (!checkNode((MappingNode) node, new Integer(0))) {
-                            LOGGER.error("yaml tree depth exceeds max depth {}; threshold can be increased if needed by setting  system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
+                            LOGGER.warn("yaml tree depth exceeds max depth {}; threshold can be increased if needed by setting  system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
                             throw new SnakeException("yaml tree depth exceeds max " + options.getMaxYamlDepth());
                         }
                     }
