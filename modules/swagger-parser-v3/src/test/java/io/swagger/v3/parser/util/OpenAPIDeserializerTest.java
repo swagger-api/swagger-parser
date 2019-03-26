@@ -64,7 +64,6 @@ import static org.testng.Assert.assertFalse;
 
 public class OpenAPIDeserializerTest {
 
-
     @Test
     public void testEmptyDefinitions() throws Exception {
         String yaml = "openapi: 3.0.0\n" +
@@ -790,6 +789,7 @@ public class OpenAPIDeserializerTest {
         assertEquals(-1, integerValues.get(0));
         assertEquals(0, integerValues.get(1));
         assertEquals(1, integerValues.get(2));
+        assertEquals(integerImpl.getDefault(), 1);
 
         Schema numberModel = resolved.getComponents().getSchemas().get("NumberEnum");
         assertTrue(numberModel instanceof Schema);
@@ -800,6 +800,7 @@ public class OpenAPIDeserializerTest {
         assertEquals(new BigDecimal("0"), numberValues.get(1));
         assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
         assertEquals(new BigDecimal("3.14"), numberValues.get(3));
+        assertEquals(numberImpl.getDefault(), new BigDecimal("3.14"));
     }
 
     @Test
