@@ -52,6 +52,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -1799,6 +1801,26 @@ public class OpenAPIV3ParserTest {
         assertThat(modelSchema, notNullValue());
         assertThat(modelSchema.getProperties().get("id"), instanceOf(Schema.class));
         assertThat(((Schema) modelSchema.getProperties().get("id")).get$ref(), equalTo("#/components/schemas/ValueId"));
+    }
+
+    @Test
+    public void shouldParseApiWithMultipleParameterReferences() {
+        // given
+        String location = "src/test/resources/issue-1063/api.yaml";
+        ParseOptions options = new ParseOptions();
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+
+        // when
+        SwaggerParseResult result = tested.readLocation(location, emptyList(), options);
+
+        // then
+        OpenAPI api = result.getOpenAPI();
+        Map<String, Parameter> parameters = api.getComponents().getParameters();
+        assertThat(parameters.keySet(), equalTo(new HashSet<>(asList("IdParam", "NameParam"))));
+        assertThat(parameters.get("IdParam").getName(), equalTo("id"));
+        assertThat(parameters.get("NameParam").getName(), equalTo("name"));
+        
+        assertThat(result.getMessages(), equalTo(emptyList()));
     }
 
     private static int getDynamicPort() {
