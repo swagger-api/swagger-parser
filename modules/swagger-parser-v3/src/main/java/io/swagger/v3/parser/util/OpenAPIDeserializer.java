@@ -1367,6 +1367,8 @@ public class OpenAPIDeserializer {
             return null;
         }
         Map<String, Parameter> parameters = new LinkedHashMap<>();
+        Set<String> filter = new HashSet<>();
+        Parameter parameter=null;
 
         Set<String> parameterKeys = getKeys(obj);
         for(String parameterName : parameterKeys) {
@@ -1379,12 +1381,13 @@ public class OpenAPIDeserializer {
             if (parameterValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode parameterObj = (ObjectNode) parameterValue;
                 if(parameterObj != null) {
-                    Parameter parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName), result);
+                     parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName), result);
                     if (parameter != null) {
                         parameters.put(parameterName, parameter);
                     }
                 }
             }
+
         }
         return parameters;
     }
@@ -1401,6 +1404,13 @@ public class OpenAPIDeserializer {
                 if (parameter != null) {
                     parameters.add(parameter);
                 }
+            }
+        }
+        Set<String> filter = new HashSet<>();
+
+        for(Parameter param:parameters) {
+            if(!filter.add(param.getName()+"#"+param.getIn())) {
+                result.warning(location,"There are duplicate parameter values");
             }
         }
         return parameters;

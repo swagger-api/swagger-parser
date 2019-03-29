@@ -470,4 +470,16 @@ public class OpenAPIParserTest {
         assertEquals(ref, "#/components/callbacks/callbackEvent");
     }
 
+    @Test
+    public void testIssue959() {
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        SwaggerParseResult result =  openAPIParser.readLocation("issue959.json",null,null);
+        assertEquals(result.getMessages().get(0),"attribute paths.'/pets/{petId}'(get).parameters.There are duplicate parameter values");
+
+        result =  openAPIParser.readLocation("issue959PathLevelDuplication.json",null,null);
+        assertEquals(result.getMessages().get(0),"attribute paths.'/pets'.There are duplicate parameter values");
+
+    }
+
 }
+
