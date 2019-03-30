@@ -1801,6 +1801,19 @@ public class OpenAPIV3ParserTest {
         assertThat(((Schema) modelSchema.getProperties().get("id")).get$ref(), equalTo("#/components/schemas/ValueId"));
     }
 
+    @Test(description = "Test that extensions can be found on the class classloader in addition to tccl.")
+    public void testIssue1003_ExtensionsClassloader() {
+	ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+	try {
+	    // Temporarily switch tccl to an unproductive cl
+	    final ClassLoader tcclTemp = new java.net.URLClassLoader(new java.net.URL[] {}, ClassLoader.getSystemClassLoader());
+	    Thread.currentThread().setContextClassLoader(tcclTemp);
+	    assertNotNull(new OpenAPIV3Parser().read("src/test/resources/test.yaml"));
+	} finally {
+	    Thread.currentThread().setContextClassLoader(tccl);
+	}
+    }
+
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
