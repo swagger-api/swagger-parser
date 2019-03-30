@@ -202,10 +202,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
      * from this class classloader (as in OSGi), locates extensions from this
      * class classloader as well.
      * 
-     * @return
+     * @return a list of extensions
      */
     protected List<SwaggerParserExtension> getExtensions() {
-	ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         List<SwaggerParserExtension> extensions = getExtensions(tccl);
         ClassLoader cl = SwaggerParserExtension.class.getClassLoader();
         if (cl != tccl) {

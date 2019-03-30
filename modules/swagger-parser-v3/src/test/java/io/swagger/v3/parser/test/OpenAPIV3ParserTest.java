@@ -1803,15 +1803,18 @@ public class OpenAPIV3ParserTest {
 
     @Test(description = "Test that extensions can be found on the class classloader in addition to tccl.")
     public void testIssue1003_ExtensionsClassloader() {
-	ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-	try {
-	    // Temporarily switch tccl to an unproductive cl
-	    final ClassLoader tcclTemp = new java.net.URLClassLoader(new java.net.URL[] {}, ClassLoader.getSystemClassLoader());
-	    Thread.currentThread().setContextClassLoader(tcclTemp);
-	    assertNotNull(new OpenAPIV3Parser().read("src/test/resources/test.yaml"));
-	} finally {
-	    Thread.currentThread().setContextClassLoader(tccl);
-	}
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        OpenAPI api = null;
+        try {
+            // Temporarily switch tccl to an unproductive cl
+            final ClassLoader tcclTemp = new java.net.URLClassLoader(new java.net.URL[] {},
+                ClassLoader.getSystemClassLoader());
+            Thread.currentThread().setContextClassLoader(tcclTemp);
+            api = new OpenAPIV3Parser().read("src/test/resources/test.yaml");
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
+        }
+        assertNotNull(api);
     }
 
     private static int getDynamicPort() {
