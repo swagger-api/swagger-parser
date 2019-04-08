@@ -39,11 +39,15 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import mockit.Injectable;
+import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
@@ -711,6 +715,44 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI resolved = new OpenAPIResolver(result.getOpenAPI(), null).resolve();
         assertTrue(resolved.getPaths().get("/test").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof BinarySchema);
+    }
+
+    @Test
+    public void testDefaultValueWhenUnknownType() throws URISyntaxException, IOException {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/issue-1072/spec.yaml").toURI())));
+
+        final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        final SwaggerParseResult result = deserializer.deserialize(rootNode);
+
+        OpenAPI openAPI = result.getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        Assert.assertNotNull(schemas);
+
+        ComposedSchema componentA = (ComposedSchema)schemas.get("ComponentA");
+        Assert.assertNotNull(componentA.getAllOf());
+        Assert.assertEquals(componentA.getAllOf().size(), 1);
+        Schema subSchema = componentA.getAllOf().get(0);
+        Assert.assertNotNull(subSchema);
+
+        Map properties = subSchema.getProperties();
+        Assert.assertNotNull(properties);
+
+        ComposedSchema attributeWithoutType = (ComposedSchema)properties.get("attributeWithoutType");
+        Assert.assertNotNull(attributeWithoutType);
+        Assert.assertNull(attributeWithoutType.getType());
+        Assert.assertNull(attributeWithoutType.getDefault());
+
+        ComposedSchema attributeWithWrongType =  (ComposedSchema)properties.get("attributeWithWrongType");
+        Assert.assertNotNull(attributeWithWrongType);
+        Assert.assertEquals(attributeWithWrongType.getType(), "object");
+        Assert.assertNull(attributeWithWrongType.getDefault());
+
+        ComposedSchema correctAttribute  = (ComposedSchema)properties.get("correctAttribute");
+        Assert.assertNotNull(correctAttribute);
+        Assert.assertEquals(correctAttribute.getType(), "string");
+        Assert.assertEquals(correctAttribute.getDefault(), "coucou");
     }
 
     @Test

@@ -46,7 +46,9 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -59,7 +61,8 @@ import java.util.stream.Stream;
 
 
 public class OpenAPIDeserializer {
-
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(OpenAPIDeserializer.class);
+    private static final String DEFAULT_KEY = "default";
     protected static Set<String> ROOT_KEYS = new LinkedHashSet<>(Arrays.asList("openapi", "info", "servers", "paths", "components", "security", "tags",  "externalDocs"));
     protected static Set<String> INFO_KEYS = new LinkedHashSet<>(Arrays.asList("title", "description", "termsOfService", "contact", "license", "version"));
     protected static Set<String> CONTACT_KEYS = new LinkedHashSet<>(Arrays.asList("name", "url", "email"));
@@ -2266,40 +2269,10 @@ public class OpenAPIDeserializer {
         }
 
         //sets default value according to the schema type
-        if(node.get("default")!= null) {
-            if(schema.getType().equals("array")) {
-                ArrayNode array = getArray("default", node, false, location, result);
-                if (array != null) {
-                    schema.setDefault(array);
-                }
-            }else if(schema.getType().equals("string")) {
-                value = getString("default", node, false, location, result);
-                if (value != null) {
-                    schema.setDefault(value);
-                }
-            }else if(schema.getType().equals("boolean")) {
-                bool = getBoolean("default", node, false, location, result);
-                if (bool != null) {
-                    schema.setDefault(bool);
-                }
-            }else if(schema.getType().equals("object")) {
-                Object object = getObject("default", node, false, location, result);
-                if (object != null) {
-                    schema.setDefault(object);
-                }
-            } else if(schema.getType().equals("integer")) {
-                Integer number = getInteger("default", node, false, location, result);
-                if (number != null) {
-                    schema.setDefault(number);
-                }
-            } else if(schema.getType().equals("number")) {
-                BigDecimal number = getBigDecimal("default", node, false, location, result);
-                if (number != null) {
-                    schema.setDefault(number);
-                }
-            }
+        String schemaType = schema.getType();
+        if (ObjectUtils.allNotNull(schemaType, node.get("default"))){
+            schema.setDefault(getDefaultValueFromType(node, location, result, schemaType));
         }
-
 
         bool = getBoolean("nullable", node, false, location, result);
         if(bool != null) {
@@ -2847,6 +2820,26 @@ public class OpenAPIDeserializer {
         return type;
     }
 
+    private Object getDefaultValueFromType(ObjectNode node, String location, ParseResult result, final String schemaType) {
+
+        switch (schemaType) {
+            case "array":
+                return getArray(DEFAULT_KEY, node, false, location, result);
+            case "string":
+                return getString(DEFAULT_KEY, node, false, location, result);
+            case "boolean":
+                return getBoolean(DEFAULT_KEY, node, false, location, result);
+            case "object":
+                return getObject(DEFAULT_KEY, node, false, location, result);
+            case "integer":
+                return getInteger(DEFAULT_KEY, node, false, location, result);
+            case "number":
+                return getBigDecimal(DEFAULT_KEY, node, false, location, result);
+            default:
+                LOGGER.warn("Schema type is undefined for {} ", node.toString());
+                return null;
+        }
+    }
 
     protected static class ParseResult {
         private boolean valid = true;

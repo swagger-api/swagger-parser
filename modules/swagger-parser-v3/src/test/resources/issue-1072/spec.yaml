@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Test
+  version: 1.0.0
+
+paths:
+  /value:
+    get:
+      operationId: getValues
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentA'
+components:
+  schemas:
+    ComponentA:
+      description: Component A
+      type: object
+      allOf:
+        - type: object
+          properties:
+            attributeWithoutType:
+              allOf:
+              - $ref: '#/components/schemas/ComponentB'
+              default: "coucou"
+            attributeWithWrongType:
+              type: object
+              allOf:
+                - $ref: '#/components/schemas/ComponentB'
+              default: "coucou"
+            correctAttribute:
+              type: string
+              allOf:
+                - $ref: '#/components/schemas/ComponentB'
+              default: "coucou"
+    ComponentB:
+      description: Component B
+      type: string
