@@ -49,7 +49,11 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.RefUtils;
+
 import org.apache.commons.lang3.StringUtils;
+
+import static io.swagger.v3.core.util.RefUtils.extractSimpleName;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -1417,12 +1421,24 @@ public class OpenAPIDeserializer {
         }
         Set<String> filter = new HashSet<>();
 
-        for(Parameter param:parameters) {
+        parameters.stream().map(this::getParameterDefinition).forEach(param -> {
             if(!filter.add(param.getName()+"#"+param.getIn())) {
                 result.warning(location,"There are duplicate parameter values");
             }
-        }
+        });
         return parameters;
+    }
+    
+    private Parameter getParameterDefinition(Parameter parameter) {
+        if (parameter.get$ref() == null) {
+            return parameter;
+        }
+        Object parameterSchemaName = extractSimpleName(parameter.get$ref()).getLeft();
+        return Optional.ofNullable(components)
+            .map(Components::getParameters)
+            .map(parameters -> parameters.get(parameterSchemaName))
+            .orElse(parameter);
+            
     }
 
     public Parameter getParameter(ObjectNode obj, String location, ParseResult result) {
