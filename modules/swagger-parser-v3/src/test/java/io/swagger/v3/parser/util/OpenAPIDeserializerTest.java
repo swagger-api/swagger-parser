@@ -13,8 +13,11 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BinarySchema;
+import io.swagger.v3.oas.models.media.ByteArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.DateSchema;
+import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -45,10 +48,14 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -794,6 +801,222 @@ public class OpenAPIDeserializerTest {
         assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
         assertEquals(new BigDecimal("3.14"), numberValues.get(3));
         assertEquals(numberImpl.getDefault(), new BigDecimal("3.14"));
+    }
+
+    @Test
+    public void testDeserializeDateString() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: My Title\n" +
+                "paths:\n" +
+                "  /persons:\n" +
+                "    get:\n" +
+                "      description: a test\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: Successful response\n" +
+                "          content:\n" +
+                "            '*/*':\n" +
+                "              schema:\n" +
+                "                type: object\n" +
+                "                properties:\n" +
+                "                  date:\n" +
+                "                    $ref: '#/components/schemas/DateString'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    DateString:\n" +
+                "      type: string\n" +
+                "      format: date\n" +
+                "      default: 2019-01-01\n" +
+                "      enum:\n" +
+                "        - 2019-01-01\n" +
+                "        - Nope\n" +
+                "        - 2018-02-02\n" +
+                "        - 2017-03-03\n" +
+                "        - null\n" +
+                "";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        final OpenAPI resolved = new OpenAPIResolver(result.getOpenAPI(), null).resolve();
+
+        Schema dateModel = resolved.getComponents().getSchemas().get("DateString");
+        assertTrue(dateModel instanceof DateSchema);
+        List<Date> dateValues = dateModel.getEnum();
+        assertEquals(dateValues.size(), 4);
+        assertEquals(
+          dateValues.get(0),
+          new Calendar.Builder().setDate( 2019, 0, 1).build().getTime());
+        assertEquals(
+          dateValues.get(1),
+          new Calendar.Builder().setDate( 2018, 1, 2).build().getTime());
+        assertEquals(
+          dateValues.get(2),
+          new Calendar.Builder().setDate( 2017, 2, 3).build().getTime());
+        assertEquals(
+          dateValues.get(3),
+          null);
+
+        assertEquals(
+          dateModel.getDefault(),
+          new Calendar.Builder().setDate( 2019, 0, 1).build().getTime());
+
+        assertEquals(
+          result.getMessages(),
+          Arrays.asList( "attribute components.schemas.DateString.enum=`Nope` is not of type `date`"));
+    }
+
+    @Test
+    public void testDeserializeDateTimeString() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: My Title\n" +
+                "paths:\n" +
+                "  /persons:\n" +
+                "    get:\n" +
+                "      description: a test\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: Successful response\n" +
+                "          content:\n" +
+                "            '*/*':\n" +
+                "              schema:\n" +
+                "                type: object\n" +
+                "                properties:\n" +
+                "                  dateTime:\n" +
+                "                    $ref: '#/components/schemas/DateTimeString'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    DateTimeString:\n" +
+                "      type: string\n" +
+                "      format: date-time\n" +
+                "      default: 2019-01-01T00:00:00Z\n" +
+                "      enum:\n" +
+                "        - null\n" +
+                "        - Nunh uh\n" +
+                "        - 2019-01-01T00:00:00Z\n" +
+                "        - 2018-02-02T23:59:59.999-05:00\n" +
+                "        - 2017-03-03T11:22:33+06:00\n" +
+                "        - 2016-04-04T22:33:44.555Z\n" +
+                "";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        final OpenAPI resolved = new OpenAPIResolver(result.getOpenAPI(), null).resolve();
+
+        Schema dateTimeModel = resolved.getComponents().getSchemas().get("DateTimeString");
+        assertTrue(dateTimeModel instanceof DateTimeSchema);
+        List<Date> dateTimeValues = dateTimeModel.getEnum();
+        assertEquals(dateTimeValues.size(), 5);
+        assertEquals(
+          dateTimeValues.get(0),
+          null);
+        assertEquals(
+          dateTimeValues.get(1),
+          new Calendar.Builder()
+          .setDate( 2019, 0, 1)
+          .setTimeOfDay( 0, 0, 0, 0)
+          .setTimeZone( TimeZone.getTimeZone( "GMT"))
+          .build()
+          .getTime());
+        assertEquals(
+          dateTimeValues.get(2),
+          new Calendar.Builder()
+          .setDate( 2018, 1, 2)
+          .setTimeOfDay( 23, 59, 59, 999)
+          .setTimeZone( TimeZone.getTimeZone( "GMT-05:00"))
+          .build()
+          .getTime());
+        assertEquals(
+          dateTimeValues.get(3),
+          new Calendar.Builder()
+          .setDate( 2017, 2, 3)
+          .setTimeOfDay( 11, 22, 33, 0)
+          .setTimeZone( TimeZone.getTimeZone( "GMT+06:00"))
+          .build()
+          .getTime());
+        assertEquals(
+          dateTimeValues.get(4),
+          new Calendar.Builder()
+          .setDate( 2016, 3, 4)
+          .setTimeOfDay( 22, 33, 44, 555)
+          .setTimeZone( TimeZone.getTimeZone( "GMT"))
+          .build()
+          .getTime());
+
+        assertEquals(
+          dateTimeModel.getDefault(),
+          new Calendar.Builder()
+          .setDate( 2019, 0, 1)
+          .setTimeOfDay( 0, 0, 0, 0)
+          .setTimeZone( TimeZone.getTimeZone( "GMT"))
+          .build()
+          .getTime());
+
+        assertEquals(
+          result.getMessages(),
+          Arrays.asList( "attribute components.schemas.DateTimeString.enum=`Nunh uh` is not of type `date-time`"));
+    }
+
+    @Test
+    public void testDeserializeByteString() {
+        String yaml = "openapi: 3.0.0\n" +
+                "servers: []\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: My Title\n" +
+                "paths:\n" +
+                "  /persons:\n" +
+                "    get:\n" +
+                "      description: a test\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: Successful response\n" +
+                "          content:\n" +
+                "            '*/*':\n" +
+                "              schema:\n" +
+                "                type: object\n" +
+                "                properties:\n" +
+                "                  bytes:\n" +
+                "                    $ref: '#/components/schemas/ByteString'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    ByteString:\n" +
+                "      type: string\n" +
+                "      format: byte\n" +
+                "      default: W.T.F?\n" +
+                "      enum:\n" +
+                "        - VGhlIHdvcmxk\n" +
+                "        - aXMgYWxs\n" +
+                "        - dGhhdCBpcw==\n" +
+                "        - dGhlIGNhc2U=\n" +
+                "        - W.T.F?\n" +
+                "";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+
+        final OpenAPI resolved = new OpenAPIResolver(result.getOpenAPI(), null).resolve();
+
+        Schema byteModel = resolved.getComponents().getSchemas().get("ByteString");
+        assertTrue(byteModel instanceof ByteArraySchema);
+        List<byte[]> byteValues = byteModel.getEnum();
+        assertEquals(byteValues.size(), 4);
+        assertEquals(new String( byteValues.get(0)), "The world");
+        assertEquals(new String( byteValues.get(1)), "is all");
+        assertEquals(new String( byteValues.get(2)), "that is");
+        assertEquals(new String( byteValues.get(3)), "the case");
+
+        assertEquals( byteModel.getDefault(), null);
+
+        assertEquals(
+          result.getMessages(),
+          Arrays.asList(
+            "attribute components.schemas.ByteString.enum=`W.T.F?` is not of type `byte`",
+            "attribute components.schemas.ByteString.default=`W.T.F?` is not of type `byte`"));
     }
 
     @Test
