@@ -118,6 +118,7 @@ public class OpenAPIDeserializerTest {
     }
 
 
+
     @Test
     public void testEmptyDefinitions() throws Exception {
         String yaml = "openapi: 3.0.0\n" +
