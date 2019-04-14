@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -65,6 +66,59 @@ import static org.testng.Assert.assertFalse;
 public class OpenAPIDeserializerTest {
 
     @Test
+    public void testIssue1072() throws Exception {
+        String yaml = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Test\n" +
+                "  version: 1.0.0\n" +
+                "\n" +
+                "paths:\n" +
+                "  /value:\n" +
+                "    get:\n" +
+                "      operationId: getValues\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: Successful response\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema:\n" +
+                "                $ref: '#/components/schemas/ComponentA'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    ComponentA:\n" +
+                "      description: Component A\n" +
+                "      type: object\n" +
+                "      allOf:\n" +
+                "        - type: object\n" +
+                "          properties:\n" +
+                "            attributeWithoutType:\n" +
+                "              allOf:\n" +
+                "              - $ref: '#/components/schemas/ComponentB'\n" +
+                "              default: \"coucou\"\n" +
+                "            attributeWithWrongType:\n" +
+                "              type: object\n" +
+                "              allOf:\n" +
+                "                - $ref: '#/components/schemas/ComponentB'\n" +
+                "              default: \"coucou\"\n" +
+                "            correctAttribute:\n" +
+                "              type: string\n" +
+                "              allOf:\n" +
+                "                - $ref: '#/components/schemas/ComponentB'\n" +
+                "              default: \"coucou\"\n" +
+                "    ComponentB:\n" +
+                "      description: Component B\n" +
+                "      type: string";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+    }
+
+
+    @Test
     public void testEmptyDefinitions() throws Exception {
         String yaml = "openapi: 3.0.0\n" +
                 "servers:\n" +
@@ -99,8 +153,6 @@ public class OpenAPIDeserializerTest {
         assertNotNull(openAPI);
 
         assertNotNull(openAPI.getComponents().getSchemas().get("mydefinition"));
-
-
 
     }
 

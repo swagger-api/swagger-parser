@@ -2297,40 +2297,41 @@ public class OpenAPIDeserializer {
 
         //sets default value according to the schema type
         if(node.get("default")!= null) {
-            if(schema.getType().equals("array")) {
-                ArrayNode array = getArray("default", node, false, location, result);
-                if (array != null) {
-                    schema.setDefault(array);
-                }
-            }else if(schema.getType().equals("string")) {
-                value = getString("default", node, false, location, result);
-                if (value != null) {
-                    try {
-                        schema.setDefault( getDecodedObject( schema, value));
+            if(!StringUtils.isBlank(schema.getType())) {
+                if (schema.getType().equals("array")) {
+                    ArrayNode array = getArray("default", node, false, location, result);
+                    if (array != null) {
+                        schema.setDefault(array);
                     }
-                    catch( ParseException e) {
-                        result.invalidType( location, String.format( "default=`%s`", e.getMessage()), schema.getFormat(), node);
+                } else if (schema.getType().equals("string")) {
+                    value = getString("default", node, false, location, result);
+                    if (value != null) {
+                        try {
+                            schema.setDefault(getDecodedObject(schema, value));
+                        } catch (ParseException e) {
+                            result.invalidType(location, String.format("default=`%s`", e.getMessage()), schema.getFormat(), node);
+                        }
                     }
-                }
-            }else if(schema.getType().equals("boolean")) {
-                bool = getBoolean("default", node, false, location, result);
-                if (bool != null) {
-                    schema.setDefault(bool);
-                }
-            }else if(schema.getType().equals("object")) {
-                Object object = getObject("default", node, false, location, result);
-                if (object != null) {
-                    schema.setDefault(object);
-                }
-            } else if(schema.getType().equals("integer")) {
-                Integer number = getInteger("default", node, false, location, result);
-                if (number != null) {
-                    schema.setDefault(number);
-                }
-            } else if(schema.getType().equals("number")) {
-                BigDecimal number = getBigDecimal("default", node, false, location, result);
-                if (number != null) {
-                    schema.setDefault(number);
+                } else if (schema.getType().equals("boolean")) {
+                    bool = getBoolean("default", node, false, location, result);
+                    if (bool != null) {
+                        schema.setDefault(bool);
+                    }
+                } else if (schema.getType().equals("object")) {
+                    Object object = getObject("default", node, false, location, result);
+                    if (object != null) {
+                        schema.setDefault(object);
+                    }
+                } else if (schema.getType().equals("integer")) {
+                    Integer number = getInteger("default", node, false, location, result);
+                    if (number != null) {
+                        schema.setDefault(number);
+                    }
+                } else if (schema.getType().equals("number")) {
+                    BigDecimal number = getBigDecimal("default", node, false, location, result);
+                    if (number != null) {
+                        schema.setDefault(number);
+                    }
                 }
             }
         }
