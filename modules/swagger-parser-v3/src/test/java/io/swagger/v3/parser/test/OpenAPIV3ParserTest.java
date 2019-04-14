@@ -65,6 +65,20 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testIssue1039() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue_1039.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        assertEquals(apispec.getPaths().get("/pets").getGet().getParameters().get(0).getSchema().getType(),"array");
+        
+    }
+
     @Test
     public void testIssue1015() {
 
