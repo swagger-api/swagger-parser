@@ -76,7 +76,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI apispec = parseResult.getOpenAPI();
         assertNotNull(apispec);
         assertEquals(apispec.getPaths().get("/pets").getGet().getParameters().get(0).getSchema().getType(),"array");
-        Yaml.prettyPrint(apispec);
+        
     }
 
     @Test

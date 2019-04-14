@@ -2224,7 +2224,7 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("type",node,false,location,result);
-        if (StringUtils.isNotBlank(value)) {
+        if (StringUtils.isNotBlank(value) && StringUtils.isBlank(schema.getType())) {
             schema.setType(value);
         }else{
             // may have an enum where type can be inferred
