@@ -65,6 +65,20 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1071() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1071.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        Schema test = apispec.getPaths().get("/mapschema").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        System.out.println(test.getClass());
+        assertTrue(test instanceof MapSchema);
+
+    }
 
     @Test
     public void testIssue1039() {
@@ -76,7 +90,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI apispec = parseResult.getOpenAPI();
         assertNotNull(apispec);
         assertEquals(apispec.getPaths().get("/pets").getGet().getParameters().get(0).getSchema().getType(),"array");
-        
+
     }
 
     @Test
