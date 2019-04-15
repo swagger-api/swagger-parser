@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.media.DateSchema;
 import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Encoding;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.XML;
@@ -2023,7 +2024,7 @@ public class OpenAPIDeserializer {
         ArrayNode allOfArray = getArray("allOf", node, false, location, result);
         ArrayNode anyOfArray = getArray("anyOf", node, false, location, result);
         ObjectNode itemsNode = getObject("items", node, false, location, result);
-
+        ObjectNode additionalPropertiesNode = getObject("additionalProperties", node, false, location, result);
 
 
         if((allOfArray != null )||(anyOfArray != null)|| (oneOfArray != null)) {
@@ -2074,6 +2075,31 @@ public class OpenAPIDeserializer {
             }
             schema = items;
         }
+
+        if(additionalPropertiesNode != null){
+            MapSchema mapSchema = new MapSchema();
+            if (additionalPropertiesNode.getNodeType().equals(JsonNodeType.OBJECT)) {
+                ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
+                if (additionalPropertiesObj != null) {
+                    Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
+                    if (additionalProperties != null) {
+                        mapSchema.setAdditionalProperties(additionalProperties);
+                    }
+                }
+            } else if (additionalPropertiesNode.getNodeType().equals(JsonNodeType.BOOLEAN)) {
+                Boolean additionalProperties = getBoolean("additionalProperties", node, false, location, result);
+                if (additionalProperties != null) {
+                    if (additionalProperties == true) {
+                        mapSchema.setAdditionalProperties(additionalProperties);
+                    }else{
+                        schema.setAdditionalProperties(additionalProperties);
+                    }
+                }
+            }
+            schema = mapSchema;
+        }
+
+
 
         if (schema == null){
             schema = SchemaTypeUtil.createSchemaByType(node);
@@ -2267,24 +2293,6 @@ public class OpenAPIDeserializer {
             schema.setProperties(properties);
         }
 
-
-        if (node.get("additionalProperties") != null) {
-            if (node.get("additionalProperties").getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
-                if (additionalPropertiesObj != null) {
-                    Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
-                    if (additionalProperties != null) {
-                        schema.setAdditionalProperties(additionalProperties);
-                    }
-                }
-            } else if (node.get("additionalProperties").getNodeType().equals(JsonNodeType.BOOLEAN)) {
-                Boolean additionalProperties = getBoolean("additionalProperties", node, false, location, result);
-                if (additionalProperties != null) {
-                    schema.setAdditionalProperties(additionalProperties);
-                }
-
-            }
-        }
         value = getString("description",node,false,location,result);
         if (StringUtils.isNotBlank(value)) {
             schema.setDescription(value);
