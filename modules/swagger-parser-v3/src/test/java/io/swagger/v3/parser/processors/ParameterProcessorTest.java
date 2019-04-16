@@ -42,14 +42,22 @@ public class ParameterProcessorTest {
                                                                @Injectable final PathParameter pathParameter) throws Exception {
         expectedModelProcessorCreation();
         new Expectations() {
-            {
+            {       
                 headerParameter.getSchema();
+                result = null;
+                headerParameter.getContent();
                 result = null;
                 queryParameter.getSchema();
                 result = null;
+                queryParameter.getContent();
+                result = null;
                 cookieParameter.getSchema();
                 result = null;
+                cookieParameter.getContent();
+                result = null;
                 pathParameter.getSchema();
+                result = null;
+                pathParameter.getContent();
                 result = null;
             }
         };
@@ -89,6 +97,8 @@ public class ParameterProcessorTest {
         new Expectations() {
             {
                 resolvedHeaderParam.getSchema();
+                result = null;
+                resolvedHeaderParam.getContent();
                 result = null;
             }
         };
