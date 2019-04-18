@@ -1869,6 +1869,26 @@ public class OpenAPIV3ParserTest {
 
     }
 
+    @Test
+    public void testIssue1063() {
+        // given
+        String location = "src/test/resources/issue-1063/openapi.yaml";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+
+        // when
+        SwaggerParseResult result = tested.readLocation(location, emptyList(), options);
+
+        // then
+        OpenAPI api = result.getOpenAPI();
+        assertEquals(api.getPaths().get("/anPath").getGet().getParameters().get(0).getName(), "customer-id");
+        assertEquals(api.getPaths().get("/anPath").getGet().getParameters().get(1).getName(), "unit-id");
+
+        assertThat(result.getMessages(), equalTo(emptyList()));
+
+    }
+
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }

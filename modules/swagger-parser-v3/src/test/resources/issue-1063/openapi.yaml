@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: an API
+  description: An API for reproduce a *There are duplicate parameter values*.
+
+paths:
+  /anPath:
+    get:
+      parameters:
+        - $ref: './references.oas3.yaml#/components/parameters/ParamQ_One'
+        - $ref: './references.oas3.yaml#/components/parameters/ParamQ_Two'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
