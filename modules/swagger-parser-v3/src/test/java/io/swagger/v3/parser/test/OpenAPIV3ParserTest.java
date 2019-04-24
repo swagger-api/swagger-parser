@@ -75,8 +75,39 @@ public class OpenAPIV3ParserTest {
         OpenAPI apispec = parseResult.getOpenAPI();
         assertNotNull(apispec);
         Schema test = apispec.getPaths().get("/mapschema").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
-        System.out.println(test.getClass());
         assertTrue(test instanceof MapSchema);
+
+    }
+
+    @Test
+    public void testIssue1071True() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1071-true.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        Schema test = apispec.getPaths().get("/mapschema").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(test instanceof MapSchema);
+        assertTrue(test.getAdditionalProperties() instanceof Boolean);
+        assertTrue((Boolean)test.getAdditionalProperties());
+
+    }
+
+    @Test
+    public void testIssue1071False() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1071-false.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        Schema test = apispec.getPaths().get("/mapschema").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(test instanceof ObjectSchema);
+        assertTrue(test.getAdditionalProperties() instanceof Boolean);
+        assertFalse((Boolean)test.getAdditionalProperties());
 
     }
 

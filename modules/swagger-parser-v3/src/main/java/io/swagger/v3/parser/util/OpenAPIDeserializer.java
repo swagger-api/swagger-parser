@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.security.OAuthFlow;
@@ -50,9 +51,7 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.RefUtils;
 
-import io.swagger.v3.parser.models.RefFormat;
 import org.apache.commons.lang3.StringUtils;
 
 import static io.swagger.v3.core.util.RefUtils.extractSimpleName;
@@ -2034,6 +2033,7 @@ public class OpenAPIDeserializer {
         ArrayNode anyOfArray = getArray("anyOf", node, false, location, result);
         ObjectNode itemsNode = getObject("items", node, false, location, result);
         ObjectNode additionalPropertiesNode = getObject("additionalProperties", node, false, location, result);
+        Boolean additionalPropertiesBoolean = getBoolean("additionalProperties", node, false, location, result);
 
 
         if((allOfArray != null )||(anyOfArray != null)|| (oneOfArray != null)) {
@@ -2085,7 +2085,7 @@ public class OpenAPIDeserializer {
             schema = items;
         }
 
-        if(additionalPropertiesNode != null){
+        if(additionalPropertiesNode != null) {
             MapSchema mapSchema = new MapSchema();
             if (additionalPropertiesNode.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
@@ -2093,19 +2093,20 @@ public class OpenAPIDeserializer {
                     Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
                     if (additionalProperties != null) {
                         mapSchema.setAdditionalProperties(additionalProperties);
-                    }
-                }
-            } else if (additionalPropertiesNode.getNodeType().equals(JsonNodeType.BOOLEAN)) {
-                Boolean additionalProperties = getBoolean("additionalProperties", node, false, location, result);
-                if (additionalProperties != null) {
-                    if (additionalProperties == true) {
-                        mapSchema.setAdditionalProperties(additionalProperties);
-                    }else{
-                        schema.setAdditionalProperties(additionalProperties);
+                        schema = mapSchema;
                     }
                 }
             }
-            schema = mapSchema;
+        } else if(additionalPropertiesBoolean != null){
+            MapSchema mapSchema = new MapSchema();
+            if (additionalPropertiesBoolean) {
+                mapSchema.setAdditionalProperties(additionalPropertiesBoolean);
+                schema = mapSchema;
+            }else{
+                ObjectSchema objectSchema = new ObjectSchema();
+                objectSchema.setAdditionalProperties(additionalPropertiesBoolean);
+                schema = objectSchema;
+            }
         }
 
 
