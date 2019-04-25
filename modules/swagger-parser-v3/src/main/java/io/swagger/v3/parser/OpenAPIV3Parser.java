@@ -204,7 +204,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
      * 
      * @return a list of extensions
      */
-    protected List<SwaggerParserExtension> getExtensions() {
+    public static List<SwaggerParserExtension> getExtensions() {
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         List<SwaggerParserExtension> extensions = getExtensions(tccl);
         ClassLoader cl = SwaggerParserExtension.class.getClassLoader();
@@ -215,7 +215,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return extensions;
     }
 
-    protected List<SwaggerParserExtension> getExtensions(ClassLoader cl) {
+    protected static List<SwaggerParserExtension> getExtensions(ClassLoader cl) {
         List<SwaggerParserExtension> extensions = new ArrayList<>();
 
         ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class, cl);
