@@ -487,6 +487,7 @@ public class SwaggerParserTest {
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
+        assertTrue(swagger.getParameters().get("param2") instanceof HeaderParameter);
     }
 
     @Test
