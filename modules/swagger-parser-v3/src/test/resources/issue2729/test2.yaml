@@ -1,0 +1,18 @@
+components:
+  schemas:
+    Category:
+      description: A category for a pet
+      example:
+        name: name
+        id: 6
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+      title: Pet category
+      type: object
+      xml:
+        name: Category
+

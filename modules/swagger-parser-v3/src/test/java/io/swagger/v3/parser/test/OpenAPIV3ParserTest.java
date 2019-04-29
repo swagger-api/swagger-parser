@@ -1920,6 +1920,19 @@ public class OpenAPIV3ParserTest {
 
     }
 
+    @Test
+    public void testOpenAPIGeneratorIssue2729() {
+        String location = "src/test/resources/issue2729/openapi.yaml";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readLocation(location, emptyList(), options);
+
+        // set breakpoint below
+        OpenAPI api = result.getOpenAPI();
+    }
+
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
