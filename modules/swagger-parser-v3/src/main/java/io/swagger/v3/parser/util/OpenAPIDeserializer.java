@@ -2260,14 +2260,16 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("type",node,false,location,result);
-        if (StringUtils.isNotBlank(value) && StringUtils.isBlank(schema.getType())) {
-            schema.setType(value);
-        }else{
-            // may have an enum where type can be inferred
-            JsonNode enumNode = node.get("enum");
-            if(enumNode != null && enumNode.isArray()) {
-                String type = inferTypeFromArray((ArrayNode) enumNode);
-                schema.setType(type);
+        if (StringUtils.isBlank(schema.getType())) {
+            if (StringUtils.isNotBlank(value)) {
+                schema.setType(value);
+            }else{
+                // may have an enum where type can be inferred
+                JsonNode enumNode = node.get("enum");
+                if(enumNode != null && enumNode.isArray()) {
+                    String type = inferTypeFromArray((ArrayNode) enumNode);
+                    schema.setType(type);
+                }
             }
         }
 
