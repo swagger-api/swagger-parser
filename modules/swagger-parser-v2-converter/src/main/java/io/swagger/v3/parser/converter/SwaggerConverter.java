@@ -71,6 +71,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -921,7 +922,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             result.setExample(schema.getExample());
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
-                Map<String, Schema> properties = new HashMap<>();
+                Map<String, Schema> properties = new LinkedHashMap<>();
 
                 ((ObjectProperty) schema).getProperties().forEach((k, v) -> properties.put(k, convert(v)));
 
