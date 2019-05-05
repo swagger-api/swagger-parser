@@ -856,6 +856,35 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testEnumType() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/issue-1090.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema someObj = openAPI.getComponents().getSchemas().get("SomeObj");
+        assertNotNull(someObj);
+
+        Map<String, Schema> properties = someObj.getProperties();
+        assertNotNull(properties);
+
+        Schema iprop = properties.get("iprop");
+        assertNotNull(iprop);
+        assertEquals(iprop.getType(), "integer");
+        assertEquals(iprop.getFormat(), "int32");
+
+        Schema lprop = properties.get("lprop");
+        assertNotNull(lprop);
+        assertEquals(lprop.getType(), "integer");
+        assertEquals(lprop.getFormat(), "int64");
+
+        Schema nprop = properties.get("nprop");
+        assertNotNull(nprop);
+        assertEquals(nprop.getType(), "number");
+    }
+
+    @Test
     public void testDeserializeDateString() {
         String yaml = "openapi: 3.0.0\n" +
                 "servers: []\n" +
