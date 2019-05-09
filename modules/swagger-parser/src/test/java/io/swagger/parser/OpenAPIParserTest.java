@@ -508,6 +508,15 @@ public class OpenAPIParserTest {
         Schema score = schema.getProperties().get("score");
         assertEquals(score.getMultipleOf().intValue(), 1);
     }
+
+    @Test
+    public void testIssue1070() {
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue1070.yaml", null, null);
+        List required = result.getOpenAPI().getComponents().getSchemas().get("AmountAndCurrency").getRequired();
+        assertEquals(required.size(), 2);
+        assertTrue(required.contains("Amount"));
+        assertTrue(required.contains("Currency"));
+    }
   
 }
 
