@@ -1921,8 +1921,8 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testOpenAPIGeneratorIssue2729() {
-        String location = "src/test/resources/issue2729/openapi.yaml";
+    public void testSchemasSpreadAcrossMultipleFiles() {
+        String location = "src/test/resources/schemas-spread-across-multiple-files/openapi.yaml";
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
