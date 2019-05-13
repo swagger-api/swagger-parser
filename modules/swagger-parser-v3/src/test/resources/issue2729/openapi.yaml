@@ -39,10 +39,10 @@ components:
           type: integer
         category:
           $ref: './test.yaml#/components/schemas/Category'
+        category2:
+          $ref: './test2.yaml#/components/schemas/Category'
         category3:
           $ref: './test3.yaml#/components/schemas/Category'
-        category4:
-          $ref: './test2.yaml#/components/schemas/Category'
         name:
           example: doggie
           type: string

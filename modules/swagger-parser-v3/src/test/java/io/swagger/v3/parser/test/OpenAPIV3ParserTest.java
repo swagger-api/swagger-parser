@@ -1929,8 +1929,13 @@ public class OpenAPIV3ParserTest {
 
         SwaggerParseResult result = parser.readLocation(location, emptyList(), options);
 
-        // set breakpoint below
-        OpenAPI api = result.getOpenAPI();
+        // Pet, Category(test.yaml), Category(test2.yaml), Category(test3.yaml)
+        assertEquals(4, result.getOpenAPI().getComponents().getSchemas().size());
+
+        ObjectSchema pet = (ObjectSchema) result.getOpenAPI().getComponents().getSchemas().get("Pet");
+        // pet.properties.get("category") should point to the Category that defined in test.yaml
+        // pet.properties.get("category2") should point to the Category that defined in test2.yaml
+        // pet.properties.get("category3") should point to the Category that defined in test3.yaml
     }
 
     private static int getDynamicPort() {
