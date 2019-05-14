@@ -52,6 +52,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -62,6 +64,65 @@ import static org.testng.Assert.*;
 public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
+
+    @Test
+    public void testIssue1071() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1071.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        Schema test = apispec.getPaths().get("/mapschema").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(test instanceof MapSchema);
+
+    }
+
+    @Test
+    public void testIssue1071True() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1071-true.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        Schema test = apispec.getPaths().get("/mapschema").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(test instanceof MapSchema);
+        assertTrue(test.getAdditionalProperties() instanceof Boolean);
+        assertTrue((Boolean)test.getAdditionalProperties());
+
+    }
+
+    @Test
+    public void testIssue1071False() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1071-false.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        Schema test = apispec.getPaths().get("/mapschema").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(test instanceof ObjectSchema);
+        assertTrue(test.getAdditionalProperties() instanceof Boolean);
+        assertFalse((Boolean)test.getAdditionalProperties());
+
+    }
+
+    @Test
+    public void testIssue1039() {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue_1039.yaml", null, options);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+        assertEquals(apispec.getPaths().get("/pets").getGet().getParameters().get(0).getSchema().getType(),"array");
+
+    }
 
     @Test
     public void testIssue1015() {
@@ -1799,6 +1860,64 @@ public class OpenAPIV3ParserTest {
         assertThat(modelSchema, notNullValue());
         assertThat(modelSchema.getProperties().get("id"), instanceOf(Schema.class));
         assertThat(((Schema) modelSchema.getProperties().get("id")).get$ref(), equalTo("#/components/schemas/ValueId"));
+    }
+
+
+    @Test(description = "Test that extensions can be found on the class classloader in addition to tccl.")
+    public void testIssue1003_ExtensionsClassloader() {
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        OpenAPI api = null;
+        try {
+            // Temporarily switch tccl to an unproductive cl
+            final ClassLoader tcclTemp = new java.net.URLClassLoader(new java.net.URL[] {},
+                ClassLoader.getSystemClassLoader());
+            Thread.currentThread().setContextClassLoader(tcclTemp);
+            api = new OpenAPIV3Parser().read("src/test/resources/test.yaml");
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
+        }
+        assertNotNull(api);
+    }
+  
+    @Test
+    public void shouldParseApiWithMultipleParameterReferences() {
+        // given
+        String location = "src/test/resources/issue-1063/api.yaml";
+        ParseOptions options = new ParseOptions();
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+
+        // when
+        SwaggerParseResult result = tested.readLocation(location, emptyList(), options);
+
+        // then
+        OpenAPI api = result.getOpenAPI();
+        Map<String, Parameter> parameters = api.getComponents().getParameters();
+        assertThat(parameters.keySet(), equalTo(new HashSet<>(asList("IdParam", "NameParam"))));
+        assertThat(parameters.get("IdParam").getName(), equalTo("id"));
+        assertThat(parameters.get("NameParam").getName(), equalTo("name"));
+        
+        assertThat(result.getMessages(), equalTo(emptyList()));
+
+    }
+
+    @Test
+    public void testIssue1063() {
+        // given
+        String location = "src/test/resources/issue-1063/openapi.yaml";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+
+        // when
+        SwaggerParseResult result = tested.readLocation(location, emptyList(), options);
+
+        // then
+        OpenAPI api = result.getOpenAPI();
+        assertEquals(api.getPaths().get("/anPath").getGet().getParameters().get(0).getName(), "customer-id");
+        assertEquals(api.getPaths().get("/anPath").getGet().getParameters().get(1).getName(), "unit-id");
+
+        assertThat(result.getMessages(), equalTo(emptyList()));
+
     }
 
     private static int getDynamicPort() {
