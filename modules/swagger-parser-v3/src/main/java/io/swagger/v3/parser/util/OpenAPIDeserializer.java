@@ -2032,9 +2032,6 @@ public class OpenAPIDeserializer {
         ArrayNode allOfArray = getArray("allOf", node, false, location, result);
         ArrayNode anyOfArray = getArray("anyOf", node, false, location, result);
         ObjectNode itemsNode = getObject("items", node, false, location, result);
-        ObjectNode additionalPropertiesNode = getObject("additionalProperties", node, false, location, result);
-        Boolean additionalPropertiesBoolean = getBoolean("additionalProperties", node, false, location, result);
-
 
         if((allOfArray != null )||(anyOfArray != null)|| (oneOfArray != null)) {
             ComposedSchema composedSchema = new ComposedSchema();
@@ -2085,31 +2082,25 @@ public class OpenAPIDeserializer {
             schema = items;
         }
 
-        if(additionalPropertiesNode != null) {
-            MapSchema mapSchema = new MapSchema();
-            if (additionalPropertiesNode.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
-                if (additionalPropertiesObj != null) {
-                    Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
-                    if (additionalProperties != null) {
-                        mapSchema.setAdditionalProperties(additionalProperties);
-                        schema = mapSchema;
-                    }
-                }
-            }
-        } else if(additionalPropertiesBoolean != null){
-            MapSchema mapSchema = new MapSchema();
-            if (additionalPropertiesBoolean) {
-                mapSchema.setAdditionalProperties(additionalPropertiesBoolean);
-                schema = mapSchema;
-            }else{
-                ObjectSchema objectSchema = new ObjectSchema();
-                objectSchema.setAdditionalProperties(additionalPropertiesBoolean);
-                schema = objectSchema;
-            }
+        Boolean additionalPropertiesBoolean = getBoolean("additionalProperties", node, false, location, result);
+
+        ObjectNode additionalPropertiesObject =
+            additionalPropertiesBoolean == null
+            ? getObject("additionalProperties", node, false, location, result)
+            : null;
+
+        Object additionalProperties =
+            additionalPropertiesObject != null
+            ? getSchema(additionalPropertiesObject, location, result)
+            : additionalPropertiesBoolean;
+
+        if(additionalProperties != null) {
+            schema =
+                additionalProperties.equals( Boolean.FALSE)
+                ? new ObjectSchema()
+                : new MapSchema();
+            schema.setAdditionalProperties( additionalProperties);
         }
-
-
 
         if (schema == null){
             schema = SchemaTypeUtil.createSchemaByType(node);

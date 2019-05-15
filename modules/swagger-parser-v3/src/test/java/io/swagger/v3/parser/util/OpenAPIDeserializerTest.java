@@ -20,6 +20,7 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.DateSchema;
 import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -58,10 +59,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
 
 public class OpenAPIDeserializerTest {
 
@@ -677,6 +679,44 @@ public class OpenAPIDeserializerTest {
 
         Schema response = openAPI.getPaths().get("/store/inventory").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
         assertTrue(response.getAdditionalProperties() != null);
+    }
+
+    @Test
+    public void testAdditionalPropertiesBoolean() {
+        String yaml =
+            "openapi: 3.0.0\n" +
+            "info:\n" +
+            "  title: Test\n" +
+            "  version: 1.0.0\n" +
+            "paths:\n" +
+            "  \"/store/inventory\":\n" +
+            "    post:\n" +
+            "      requestBody:\n" +
+            "        content:\n" +
+            "          application/json:\n" +
+            "            schema:\n" +
+            "              additionalProperties: true\n" +
+            "      responses:\n" +
+            "        '200':\n" +
+            "          description: successful operation\n" +
+            "          content:\n" +
+            "            application/json:\n" +
+            "              schema:\n" +
+            "                additionalProperties: false\n";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertEquals(result.getMessages(), emptyList());
+        
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertEquals(body.getAdditionalProperties(), Boolean.TRUE);
+        assertEquals(body.getClass(), MapSchema.class);
+
+        Schema response = openAPI.getPaths().get("/store/inventory").getPost().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertEquals(response.getAdditionalProperties(), Boolean.FALSE);
+        assertEquals(response.getClass(), ObjectSchema.class);
     }
 
     @Test
