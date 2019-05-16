@@ -2262,6 +2262,9 @@ public class OpenAPIDeserializer {
                     schema.setType(type);
                 }
             }
+            if("array".equals( schema.getType()) && !(schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null)) {
+                result.missing(location, "items");
+            }
         }
 
         ObjectNode notObj = getObject("not", node, false, location, result);
