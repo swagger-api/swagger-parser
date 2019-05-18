@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Common Data Types
+  version: "1.0"
+paths:
+  /subscriptions:
+    get:
+      summary: read all of the active subscriptions for the app.
+      operationId: getSubscriptionsById
+      parameters:
+        - name: appId
+          in: path
+          description: App ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK (Successful)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        '500':
+          $ref: './common.yaml#/components/responses/E500'
+components:
+  schemas:
+      ProblemDetails:
+        type: object
+        properties:
+          title:
+            type: string
+            description: A short, human-readable summary of the problem
+          status:
+            type: integer
+            description: The HTTP status code for this occurrence of the problem.
+      Subscription:
+        type: string

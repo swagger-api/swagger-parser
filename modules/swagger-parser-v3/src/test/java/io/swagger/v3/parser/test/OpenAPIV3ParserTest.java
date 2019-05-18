@@ -1920,6 +1920,17 @@ public class OpenAPIV3ParserTest {
 
     }
 
+    @Test
+    public void testIssue1081() {
+        String location = "src/test/resources/issue-1081/openapi.yaml";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        Components components = parser.read(location).getComponents();
+
+        assertEquals(components.getSchemas().size(), 2);
+        assertNotNull(components.getSchemas().get("ProblemDetails"));
+        assertNotNull(components.getSchemas().get("Subscription"));
+    }
+
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
