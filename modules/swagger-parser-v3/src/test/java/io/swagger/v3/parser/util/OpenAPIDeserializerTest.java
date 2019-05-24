@@ -2280,6 +2280,7 @@ public class OpenAPIDeserializerTest {
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
 
+
         assertEquals(openAPI.getServers().get(0).getUrl(),"/");
     }
 

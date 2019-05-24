@@ -498,6 +498,8 @@ public class OpenAPIV3ParserTest {
         assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
 
+
+
     @Test
     public void testResolveEmpty(@Injectable final List<AuthorizationValue> auths) throws Exception{
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/empty-oas.yaml"));
@@ -558,9 +560,28 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testRemotePathItemIssue1103(@Injectable final List<AuthorizationValue> auths) throws Exception{
+
+
+        OpenAPI result = new OpenAPIV3Parser().read("issue-1103/remote-pathItem-swagger.yaml");
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getPaths().get("/Translation/{lang}"));
+        Assert.assertEquals(result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0).getName(), "lang");
+    }
+
+
+    @Test
+    public void testRemoteParameterIssue1103(@Injectable final List<AuthorizationValue> auths) throws Exception{
+
+        OpenAPI result = new OpenAPIV3Parser().read("issue-1103/remote-parameter-swagger.yaml");
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0).getName(), "lang");
+
+    }
+
+    @Test
     public void test30NoOptions(@Injectable final List<AuthorizationValue> auths) throws Exception{
-
-
 
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
