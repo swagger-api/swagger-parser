@@ -75,7 +75,6 @@ public class PathsProcessor {
             final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
             pathItem.setParameters(processedPathParameters);
 
-            //addParametersToEachOperation(pathItem);
 
             final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
 

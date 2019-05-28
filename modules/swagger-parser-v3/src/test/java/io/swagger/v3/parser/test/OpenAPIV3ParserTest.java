@@ -66,6 +66,15 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testRemoteParameterIssue1094(@Injectable final List<AuthorizationValue> auths) throws Exception{
+
+        OpenAPI result = new OpenAPIV3Parser().read("issue-1094/swagger.yaml");
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getComponents().getSchemas().get("PlmnId"));
+
+    }
+
+    @Test
     public void testIssue1071() {
 
         ParseOptions options = new ParseOptions();

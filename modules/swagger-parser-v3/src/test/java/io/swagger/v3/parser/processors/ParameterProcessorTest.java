@@ -88,7 +88,10 @@ public class ParameterProcessorTest {
         expectLoadingRefFromCache(ref, RefFormat.INTERNAL, resolvedHeaderParam);
         new Expectations() {
             {
+
                 resolvedHeaderParam.getSchema();
+
+
                 result = null;
             }
         };
