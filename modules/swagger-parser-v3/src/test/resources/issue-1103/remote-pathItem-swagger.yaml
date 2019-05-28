@@ -1,0 +1,8 @@
+openapi: 3.0.0
+info:
+  version: 2.0.0
+  title: Admin Web App Services
+  description: 'Services API'
+paths:
+  '/Translation/{lang}':
+    $ref: './domain.yaml#/components/pathitems/Translation'

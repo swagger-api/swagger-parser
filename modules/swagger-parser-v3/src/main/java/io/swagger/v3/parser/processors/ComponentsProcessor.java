@@ -221,13 +221,13 @@ public class ComponentsProcessor {
 
             schemaProcessor.processSchema(model);
 
-            //if we process a RefModel here, in the #/definitions table, we want to overwrite it with the referenced value
+            //if we process a RefModel here, in the #/components/schemas table, we want to overwrite it with the referenced value
             if (model.get$ref() != null) {
                 final String renamedRef = cache.getRenamedRef(originalRef);
 
                 if (renamedRef != null) {
-                    //we definitely resolved the referenced and shoved it in the definitions map
-                    // because the referenced model may be in the definitions map, we need to remove old instances
+                    //we definitely resolved the referenced and shoved it in the components map
+                    // because the referenced model may be in the components map, we need to remove old instances
                     final Schema resolvedModel = schemas.get(renamedRef);
 
                     // ensure the reference isn't still in use

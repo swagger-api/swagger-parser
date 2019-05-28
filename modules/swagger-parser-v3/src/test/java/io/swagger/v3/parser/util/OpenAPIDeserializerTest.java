@@ -2304,8 +2304,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(server.get(2).getExtensions().get("x-server").toString(),"server extension");
         Assert.assertEquals(server.get(2).getVariables().get("basePath").getDescription(),"testing overwriting");
         Assert.assertEquals(server.get(2).getVariables().get("basePath").getDefault(),"v2");
-
-
     }
 
     @Test
@@ -2320,6 +2318,7 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
+
 
         assertEquals(openAPI.getServers().get(0).getUrl(),"/");
     }
