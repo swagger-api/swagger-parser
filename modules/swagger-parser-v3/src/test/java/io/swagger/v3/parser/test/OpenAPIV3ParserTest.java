@@ -560,8 +560,6 @@ public class OpenAPIV3ParserTest {
     @Test
     public void test30NoOptions(@Injectable final List<AuthorizationValue> auths) throws Exception{
 
-
-
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
@@ -608,6 +606,13 @@ public class OpenAPIV3ParserTest {
         assertNotNull(userAddress);
         assertNotNull(userAddress.getProperties().get("city"));
         assertNotNull(userAddress.getProperties().get("street"));
+    }
+
+    @Test
+    public void testIssue1105() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue-1105/swagger-api.yaml");
+        Assert.assertNotNull(openAPI);
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("ErrorCodeDescription"));
     }
 
     @Test

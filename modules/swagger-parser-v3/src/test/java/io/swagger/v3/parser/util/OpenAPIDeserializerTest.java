@@ -20,6 +20,7 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.DateSchema;
 import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -58,10 +59,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
 
 public class OpenAPIDeserializerTest {
 
@@ -680,6 +682,44 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testAdditionalPropertiesBoolean() {
+        String yaml =
+            "openapi: 3.0.0\n" +
+            "info:\n" +
+            "  title: Test\n" +
+            "  version: 1.0.0\n" +
+            "paths:\n" +
+            "  \"/store/inventory\":\n" +
+            "    post:\n" +
+            "      requestBody:\n" +
+            "        content:\n" +
+            "          application/json:\n" +
+            "            schema:\n" +
+            "              additionalProperties: true\n" +
+            "      responses:\n" +
+            "        '200':\n" +
+            "          description: successful operation\n" +
+            "          content:\n" +
+            "            application/json:\n" +
+            "              schema:\n" +
+            "                additionalProperties: false\n";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertEquals(result.getMessages(), emptyList());
+        
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertEquals(body.getAdditionalProperties(), Boolean.TRUE);
+        assertEquals(body.getClass(), MapSchema.class);
+
+        Schema response = openAPI.getPaths().get("/store/inventory").getPost().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertEquals(response.getAdditionalProperties(), Boolean.FALSE);
+        assertEquals(response.getClass(), ObjectSchema.class);
+    }
+
+    @Test
     public void testArrayQueryParam() throws Exception {
         String yaml = "openapi: 3.0.0\n" +
                 "servers: []\n" +
@@ -723,6 +763,47 @@ public class OpenAPIDeserializerTest {
         assertTrue(((ArraySchema) p).getItems() instanceof StringSchema);
     }
 
+    @Test
+    public void testArrayItems() {
+        String yaml =
+            "openapi: 3.0.0\n" +
+            "info:\n" +
+            "  title: Test\n" +
+            "  version: 1.0.0\n" +
+            "paths:\n" +
+            "  \"/store/inventory\":\n" +
+            "    post:\n" +
+            "      requestBody:\n" +
+            "        content:\n" +
+            "          application/json:\n" +
+            "            schema:\n" +
+            "              type: array\n" +
+            "              minItems: 1\n" +
+            "      responses:\n" +
+            "        '200':\n" +
+            "          description: successful operation\n" +
+            "          content:\n" +
+            "            application/json:\n" +
+            "              schema:\n" +
+            "                items:\n" +
+            "                  type: string"
+            ;
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.schema.items is missing"));
+        
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertFalse(body.getClass().equals( ArraySchema.class), "body is an ArraySchema");
+        assertEquals(body.getType(), "array");
+        assertEquals(body.getMinItems(), Integer.valueOf(1));
+
+        Schema response = openAPI.getPaths().get("/store/inventory").getPost().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(response.getClass().equals( ArraySchema.class), "response is an ArraySchema");
+        assertEquals(body.getType(), "array");
+    }
 
     @Test(description = "it should read a top-level extension per https://github.com/openAPI-api/validator-badge/issues/59")
     public void testToplevelExtension() throws Exception {
@@ -853,6 +934,35 @@ public class OpenAPIDeserializerTest {
         assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
         assertEquals(new BigDecimal("3.14"), numberValues.get(3));
         assertEquals(numberImpl.getDefault(), new BigDecimal("3.14"));
+    }
+
+    @Test
+    public void testEnumType() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./src/test/resources/issue-1090.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema someObj = openAPI.getComponents().getSchemas().get("SomeObj");
+        assertNotNull(someObj);
+
+        Map<String, Schema> properties = someObj.getProperties();
+        assertNotNull(properties);
+
+        Schema iprop = properties.get("iprop");
+        assertNotNull(iprop);
+        assertEquals(iprop.getType(), "integer");
+        assertEquals(iprop.getFormat(), "int32");
+
+        Schema lprop = properties.get("lprop");
+        assertNotNull(lprop);
+        assertEquals(lprop.getType(), "integer");
+        assertEquals(lprop.getFormat(), "int64");
+
+        Schema nprop = properties.get("nprop");
+        assertNotNull(nprop);
+        assertEquals(nprop.getType(), "number");
     }
 
     @Test
