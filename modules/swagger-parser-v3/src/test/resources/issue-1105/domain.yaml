@@ -1,0 +1,30 @@
+openapi: 3.0.2
+info:
+  title: API Components
+  description: Common components
+  version: '1.0'
+components:
+  schemas:
+    ErrorCodeDescription:
+      type: object
+      properties:
+        code:
+          format: int32
+          type: integer
+          description: HTTP error code.
+        description:
+          type: string
+          description: Brief description of the error.
+        details:
+          type: string
+          description: Details about the error.
+  responses:
+    401:
+      description: User is not authorized for this action
+      content:
+        application/json:
+          schema:
+            uniqueItems: false
+            type: array
+            items:
+              $ref: "#/components/schemas/ErrorCodeDescription"

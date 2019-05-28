@@ -763,6 +763,47 @@ public class OpenAPIDeserializerTest {
         assertTrue(((ArraySchema) p).getItems() instanceof StringSchema);
     }
 
+    @Test
+    public void testArrayItems() {
+        String yaml =
+            "openapi: 3.0.0\n" +
+            "info:\n" +
+            "  title: Test\n" +
+            "  version: 1.0.0\n" +
+            "paths:\n" +
+            "  \"/store/inventory\":\n" +
+            "    post:\n" +
+            "      requestBody:\n" +
+            "        content:\n" +
+            "          application/json:\n" +
+            "            schema:\n" +
+            "              type: array\n" +
+            "              minItems: 1\n" +
+            "      responses:\n" +
+            "        '200':\n" +
+            "          description: successful operation\n" +
+            "          content:\n" +
+            "            application/json:\n" +
+            "              schema:\n" +
+            "                items:\n" +
+            "                  type: string"
+            ;
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.schema.items is missing"));
+        
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertFalse(body.getClass().equals( ArraySchema.class), "body is an ArraySchema");
+        assertEquals(body.getType(), "array");
+        assertEquals(body.getMinItems(), Integer.valueOf(1));
+
+        Schema response = openAPI.getPaths().get("/store/inventory").getPost().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(response.getClass().equals( ArraySchema.class), "response is an ArraySchema");
+        assertEquals(body.getType(), "array");
+    }
 
     @Test(description = "it should read a top-level extension per https://github.com/openAPI-api/validator-badge/issues/59")
     public void testToplevelExtension() throws Exception {
