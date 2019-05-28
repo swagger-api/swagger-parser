@@ -190,7 +190,6 @@ public class ComponentsProcessor {
         for (String parametersName : ParametersKey) {
             final Parameter parameter = parameters.get(parametersName);
             parameterProcessor.processParameter(parameter);
-
         }
     }
 
