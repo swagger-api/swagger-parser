@@ -65,6 +65,15 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testIssue1108() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        OpenAPI openAPI = parser.read("issue-1108.yaml");
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getAllowReserved());
+    }
+
     @Test
     public void testRemoteParameterIssue1094(@Injectable final List<AuthorizationValue> auths) throws Exception{
 
