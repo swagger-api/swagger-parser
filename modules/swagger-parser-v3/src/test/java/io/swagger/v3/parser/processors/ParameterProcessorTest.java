@@ -45,16 +45,24 @@ public class ParameterProcessorTest {
             {
                 headerParameter.getSchema();
                 result = null;
+                headerParameter.getContent();
+                result = null;
                 queryParameter.getSchema();
+                result = null;
+                queryParameter.getContent();
                 result = null;
                 cookieParameter.getSchema();
                 result = null;
+                cookieParameter.getContent();
+                result = null;
                 pathParameter.getSchema();
+                result = null;
+                pathParameter.getContent();
                 result = null;
             }
         };
         final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
-                .processParameters(Arrays.<Parameter>asList(headerParameter,
+                .processParameters(Arrays.asList(headerParameter,
                         queryParameter,
                         cookieParameter,
                         pathParameter));
@@ -78,8 +86,7 @@ public class ParameterProcessorTest {
     }
 
     @Test
-    public void testProcessParameters_RefToHeader(
-            @Injectable final HeaderParameter resolvedHeaderParam) throws Exception {
+    public void testProcessParameters_RefToHeader(@Injectable final HeaderParameter resolvedHeaderParam) throws Exception {
         expectedModelProcessorCreation();
 
         final String ref = "#/components/parameters/foo";
@@ -90,11 +97,12 @@ public class ParameterProcessorTest {
             {
                 resolvedHeaderParam.getSchema();
                 result = null;
+                resolvedHeaderParam.getContent();
+                result = null;
             }
         };
 
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
-                .processParameters(Arrays.<Parameter>asList(refParameter));
+        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI).processParameters(Arrays.asList(refParameter));
 
         new FullVerifications(){{}};
 
