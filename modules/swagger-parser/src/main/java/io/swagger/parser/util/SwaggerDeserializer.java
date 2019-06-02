@@ -793,7 +793,13 @@ public class SwaggerDeserializer {
 
             Integer minItems = getInteger("minItems", node, false, location, result);
             am.setMinItems(minItems);
-
+            
+            // add xml specific information if available 
+            JsonNode xml = node.get("xml");
+            if(xml != null) {
+                am.setXml(Json.mapper().convertValue(xml, Xml.class));
+            }
+            
             // extra keys
             Set<String> keys = getKeys(node);
             for(String key : keys) {
