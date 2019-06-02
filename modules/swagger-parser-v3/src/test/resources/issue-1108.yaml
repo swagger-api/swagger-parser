@@ -1,0 +1,22 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.swagger.io/v1
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listpets
+      tags:
+        - pets
+      parameters:
+        - name: limit
+          in: query
+          allowReserved: false
+      responses:
+        '200':
+          description: A paged array of pets

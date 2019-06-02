@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info:
+  version: "1"
+  title: Admin Web App Services
+  description: 'Services'
+paths:
+  '/Translation/{lang}':
+    put:
+      tags:
+        - Translation_Settings
+      summary: Set value of this parameter
+      description: Provide the lookup table for localized strings
+      parameters:
+        - $ref: 'domain.yaml#/components/parameters/param_lang'
