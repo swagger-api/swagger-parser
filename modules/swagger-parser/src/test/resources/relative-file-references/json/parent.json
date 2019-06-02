@@ -5,6 +5,11 @@
       "$ref": "./paths/healthPath.json"
     }
   },
+  "parameters": {
+    "param2": {
+      "$ref": "./parameters/params.json#/param2"
+    }
+  },
   "definitions": {
     "refInDefinitions" : {
       "$ref": "./models/example.json"
