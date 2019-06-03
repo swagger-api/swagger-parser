@@ -420,7 +420,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 servers.add(server);
             }
         } else {
-            if (!"/".equals(baseUrl)) {
+            if (!StringUtils.startsWith(baseUrl, "/") && !"/".equals(baseUrl)) {
                 baseUrl = "//" + baseUrl;
             }
             Server server = new Server();
