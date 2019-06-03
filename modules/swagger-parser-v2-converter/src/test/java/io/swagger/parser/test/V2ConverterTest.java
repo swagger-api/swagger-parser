@@ -781,7 +781,7 @@ public class V2ConverterTest {
         assertEquals(INT64_FORMAT, integerSchema.getFormat());
     }
 
-    @Test(description = "OpenAPI v2 converter - parses URL correctly when no schemes are present")
+    @Test(description = "OpenAPI v2 converter - converts URL correctly when it begins with forward slash")
     public void testIssue1113() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1113_YAML);
         assertNotNull(oas);
