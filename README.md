@@ -132,6 +132,9 @@ To add swagger parsing support for older versions of swagger, add the `compat` m
 
 ```
 
+## Security contact
+
+Please disclose any security-related issues or vulnerabilities by emailing [security@swagger.io](mailto:security@swagger.io), instead of using the public issue tracker.
 
 License
 -------
