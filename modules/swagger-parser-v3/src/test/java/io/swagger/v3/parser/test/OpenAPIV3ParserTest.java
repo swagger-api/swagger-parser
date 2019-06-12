@@ -67,6 +67,14 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
+    public void duplicateSchemas() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        OpenAPI openAPI = parser.read("DuplicateSchemas.json");
+        SwaggerParseResult result = parser.readLocation("DuplicateSchemas.json",null,null);
+        Assert.assertEquals(result.getMessages().size(),1);
+    }
+
+    @Test
     public void testIssue1108() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         OpenAPI openAPI = parser.read("issue-1108.yaml");

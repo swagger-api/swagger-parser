@@ -1,0 +1,96 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "getTimeAfterJson",
+    "description" : "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.",
+    "version" : "0.1.9"
+  },
+   "servers": [
+      {
+        "url": "http://localhost:5555/rest/RestNativeService",
+        "description": "Optional server description, e.g. Main (production) server"
+      },
+      {
+        "url": "http://staging-api.example.com",
+        "description": "Optional server description, e.g. Internal staging server for testing"
+      }
+    ],
+  "paths" : {
+    "/getTimeAfterJson/{time}" : {
+      "get" : {
+        "summary" : "Returns a list of users.",
+        "description" : "Optional extended description in CommonMark or HTML.",
+        "operationId" : "getUserName",
+        "parameters" : [ {
+          "name" : "time",
+          "in" : "path",
+          "required" : true,
+          "allowEmptyValue" : false,
+          "schema" : { }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON array of user names",
+            "headers" : { },
+            "content" : { },
+            "links" : { }
+          }
+        }
+      },
+      "post" : {
+        "parameters" : [{
+          "name" : "time",
+          "in" : "path",
+          "required" : true,
+          "allowEmptyValue" : false,
+          "schema" : { }
+        }],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "title" : "Longitude and Latitude Values",
+                "required" : [ "latitude", "longitude" ],
+                "type" : "object",
+                "properties" : {
+                  "latitude" : {
+                    "maximum" : 90,
+                    "minimum" : -90,
+                    "type" : "number"
+                  },
+                  "longitude" : {
+                    "maximum" : 180,
+                    "minimum" : -180,
+                    "type" : "number"
+                  }
+                },
+                "description" : "A geographical coordinate."
+              },
+              "examples" : { }
+            }
+          }
+        },
+        "responses" : {
+          "200":{
+            "description":"valid response"
+          }
+          
+        }
+      },
+      "parameters" : [ ]
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "sample":{},
+      "sample":{}
+    },
+    "responses" : { },
+    "parameters" : { },
+    "examples" : { },
+    "requestBodies" : { },
+    "headers" : { },
+    "links" : { },
+    "callbacks" : { }
+  }
+}
