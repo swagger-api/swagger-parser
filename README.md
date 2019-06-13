@@ -103,6 +103,9 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 </dependency>
 ```
 
+## Security contact
+
+Please disclose any security-related issues or vulnerabilities by emailing [security@swagger.io](mailto:security@swagger.io), instead of using the public issue tracker.
 
 License
 -------

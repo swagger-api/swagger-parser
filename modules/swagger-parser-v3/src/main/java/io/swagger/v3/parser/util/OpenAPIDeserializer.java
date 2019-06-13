@@ -1568,6 +1568,11 @@ public class OpenAPIDeserializer {
             parameter.setExample(example);
         }
 
+        Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
+        if (allowReserved != null) {
+            parameter.setAllowReserved(allowReserved);
+        }
+
         ObjectNode contentNode = getObject("content",obj,false,location,result);
         if(contentNode!= null) {
             parameter.setContent(getContent(contentNode, String.format("%s.%s", location, "content"), result));
