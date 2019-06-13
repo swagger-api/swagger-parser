@@ -1940,6 +1940,21 @@ public class OpenAPIV3ParserTest {
 
     }
 
+    @Test
+    public void testResolveFullyMap() {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(false);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("resolve-fully-map.yaml", null, options).getOpenAPI();
+        String yaml = Yaml.pretty(openAPI);
+        assertTrue(yaml.contains("$ref"));
+
+        options = new ParseOptions();
+        options.setResolveFully(true);
+        openAPI = new OpenAPIV3Parser().readLocation("resolve-fully-map.yaml", null, options).getOpenAPI();
+        yaml = Yaml.pretty(openAPI);
+        assertFalse(yaml.contains("$ref"));
+    }
+
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
