@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.*;
 import io.swagger.models.*;
 import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
@@ -911,6 +912,9 @@ public class SwaggerDeserializer {
                     if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
                         ObjectNode on = (ObjectNode) propertyNode;
                         Property property = property(on, location, result);
+                        if("array".equals( property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
+                            result.missing(location, "items");
+                        }
                         impl.property(propertyName, property);
                     }
                     else {

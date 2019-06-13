@@ -71,6 +71,13 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue111() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-111.yaml", null, true);
+        assertTrue(result.getMessages().get(0).equals("attribute definitions.Filter.items is missing"));
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
     public void testIssueDefinitionWithDots_2() {
         Swagger swagger = new SwaggerParser().read("SimpleAPI.yaml");
         assertNotNull(swagger);
