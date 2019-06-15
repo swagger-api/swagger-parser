@@ -1,0 +1,14 @@
+swagger: '2.0'
+info:
+  title: Test for Issue 1113
+  version: 1.0.0
+basePath: /test
+paths:
+  /ping:
+    get:
+      summary: test
+      description: 'test'
+      operationId: pingOp
+      responses:
+        '200':
+          description: OK

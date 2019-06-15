@@ -1,0 +1,22 @@
+openapi: "3.0.0"
+info:
+  version: 15.3.0
+  title: test
+paths:
+  /my-app:
+    get:
+      parameters:
+        - name: target-plmn-list
+          in: query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'common.yaml#/components/schemas/PlmnId'
+                  minItems: 1
+      responses:
+        '200':
+          description: Expected response to a valid request
+          schema:
+            type: string

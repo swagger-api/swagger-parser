@@ -182,7 +182,7 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
-    private void processProperty(Schema property, String file) {
+    private void processSchema(Schema property, String file) {
         if (property != null) {
             if (StringUtils.isNotBlank(property.get$ref())) {
                 processRefSchema(property, file);
@@ -191,10 +191,10 @@ public final class ExternalRefProcessor {
                 processProperties(property.getProperties(), file);
             }
             if (property instanceof ArraySchema) {
-                processProperty(((ArraySchema) property).getItems(), file);
+                processSchema(((ArraySchema) property).getItems(), file);
             }
             if (property.getAdditionalProperties() instanceof Schema) {
-                processProperty(((Schema) property.getAdditionalProperties()), file);
+                processSchema(((Schema) property.getAdditionalProperties()), file);
             }
             if (property instanceof ComposedSchema) {
                 ComposedSchema composed = (ComposedSchema) property;
@@ -208,7 +208,7 @@ public final class ExternalRefProcessor {
     private void processProperties(Collection<Schema> properties, String file) {
         if (properties != null) {
             for (Schema property : properties) {
-                processProperty(property, file);
+                processSchema(property, file);
             }
         }
     }
@@ -269,6 +269,8 @@ public final class ExternalRefProcessor {
                             } else {
                                 processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
                             }
+                        }else{
+                            processSchema(schema,file);
                         }
                     }
                 }

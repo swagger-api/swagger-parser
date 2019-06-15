@@ -183,9 +183,17 @@ public class RefUtils {
                     result = readAll(pathToUse);
                 } else {
                     String url = file;
-                    if(url.contains("..")) {
-                        url = parentDirectory + url.substring(url.indexOf(".") + 2);
-                    }else{
+                    if (url.contains("..")) {
+                        int parentCount = 0;
+                        while (url.contains("..")) {
+                            url = url.substring(url.indexOf(".") + 2);
+                            parentCount++;
+                        }
+                        for (int i = 0; i < parentCount - 1; i++) {
+                            parentDirectory = parentDirectory.getParent();
+                        }
+                        url = parentDirectory + url;
+                    } else {
                         url = parentDirectory + url.substring(url.indexOf(".") + 1);
                     }
                     final Path pathToUse2 = parentDirectory.resolve(url).normalize();
