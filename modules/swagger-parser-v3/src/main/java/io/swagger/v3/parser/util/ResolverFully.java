@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +58,7 @@ public class ResolverFully {
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
     private Map<String, Link> links;
-    private Map<String, Schema> resolvedProperties = new HashMap<>();
+    private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
 
     public void resolveFully(OpenAPI openAPI) {
         Components components = openAPI.getComponents();
@@ -306,6 +308,15 @@ public class ResolverFully {
 
             return arrayModel;
         }
+
+        if (schema instanceof MapSchema) {
+            MapSchema mapSchema = (MapSchema) schema;
+            if (mapSchema.getAdditionalProperties() instanceof Schema) {
+                Schema additionalPropertiesSchema = (Schema) mapSchema.getAdditionalProperties();
+                mapSchema.setAdditionalProperties(resolveSchema(additionalPropertiesSchema));
+            }
+        }
+
         if (schema instanceof ObjectSchema) {
             ObjectSchema obj = (ObjectSchema) schema;
             if(obj.getProperties() != null) {

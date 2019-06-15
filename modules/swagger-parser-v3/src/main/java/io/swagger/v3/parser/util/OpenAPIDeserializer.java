@@ -17,11 +17,16 @@ import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ByteArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.DateSchema;
+import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Encoding;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.security.OAuthFlow;
@@ -46,16 +51,22 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
+
 import org.apache.commons.lang3.StringUtils;
+
+import static io.swagger.v3.core.util.RefUtils.extractSimpleName;
 
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import static java.util.Calendar.*;
 
 
 public class OpenAPIDeserializer {
@@ -90,7 +101,10 @@ public class OpenAPIDeserializer {
     private static final String COOKIE_PARAMETER = "cookie";
     private static final String PATH_PARAMETER = "path";
     private static final String HEADER_PARAMETER = "header";
-
+    private static final Pattern RFC3339_DATE_TIME_PATTERN = Pattern.compile( "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(\\.\\d+)?((Z)|([+-]\\d{2}:\\d{2}))$");
+    private static final Pattern RFC3339_DATE_PATTERN = Pattern.compile( "^(\\d{4})-(\\d{2})-(\\d{2})$");
+    private static final String REFERENCE_SEPARATOR = "#/";
+    private Components components;
     private final Set<String> operationIDs = new HashSet<>();
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
@@ -134,17 +148,19 @@ public class OpenAPIDeserializer {
                 openAPI.setInfo(info);
             }
 
+            obj = getObject("components", rootNode, false, location, result);
+            if (obj != null) {
+                Components components = getComponents(obj, "components", result);
+                openAPI.setComponents(components);
+                this.components=components;
+            }
+
             obj = getObject("paths", rootNode, true, location, result);
             if (obj != null) {
                 Paths paths = getPaths(obj, "paths", result);
                 openAPI.setPaths(paths);
             }
 
-            obj = getObject("components", rootNode, false, location, result);
-            if (obj != null) {
-                Components components = getComponents(obj, "components", result);
-                openAPI.setComponents(components);
-            }
 
             ArrayNode array = getArray("servers", rootNode, false, location, result);
             if (array != null && array.size() > 0) {
@@ -558,7 +574,7 @@ public class OpenAPIDeserializer {
             return false;
         } else {
             Parameter pathParamDefined = parameters.stream()
-                            .filter(parameter -> pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn()))
+                            .filter(parameter -> (parameter.get$ref() != null) || (pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn())))
                             .findFirst()
                             .orElse(null);
             if (pathParamDefined == null) {
@@ -1365,6 +1381,8 @@ public class OpenAPIDeserializer {
             return null;
         }
         Map<String, Parameter> parameters = new LinkedHashMap<>();
+        Set<String> filter = new HashSet<>();
+        Parameter parameter=null;
 
         Set<String> parameterKeys = getKeys(obj);
         for(String parameterName : parameterKeys) {
@@ -1377,12 +1395,13 @@ public class OpenAPIDeserializer {
             if (parameterValue.getNodeType().equals(JsonNodeType.OBJECT)) {
                 ObjectNode parameterObj = (ObjectNode) parameterValue;
                 if(parameterObj != null) {
-                    Parameter parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName), result);
+                     parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName), result);
                     if (parameter != null) {
                         parameters.put(parameterName, parameter);
                     }
                 }
             }
+
         }
         return parameters;
     }
@@ -1401,7 +1420,34 @@ public class OpenAPIDeserializer {
                 }
             }
         }
+        Set<String> filter = new HashSet<>();
+
+
+        parameters.stream().map(this::getParameterDefinition).forEach(param -> {
+            String ref = param.get$ref();
+            if(!filter.add(param.getName()+"#"+param.getIn())) {
+                if(ref != null) {
+                    if (ref.startsWith(REFERENCE_SEPARATOR)) {// validate if it's inline param also
+                        result.warning(location, "There are duplicate parameter values");
+                    }
+                }else{
+                    result.warning(location, "There are duplicate parameter values");
+                }
+            }
+        });
         return parameters;
+    }
+    
+    private Parameter getParameterDefinition(Parameter parameter) {
+        if (parameter.get$ref() == null) {
+            return parameter;
+        }
+        Object parameterSchemaName = extractSimpleName(parameter.get$ref()).getLeft();
+        return Optional.ofNullable(components)
+            .map(Components::getParameters)
+            .map(parameters -> parameters.get(parameterSchemaName))
+            .orElse(parameter);
+            
     }
 
     public Parameter getParameter(ObjectNode obj, String location, ParseResult result) {
@@ -1520,6 +1566,11 @@ public class OpenAPIDeserializer {
         Object example = getAnyExample("example", obj, location,result);
         if (example != null){
             parameter.setExample(example);
+        }
+
+        Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
+        if (allowReserved != null) {
+            parameter.setAllowReserved(allowReserved);
         }
 
         ObjectNode contentNode = getObject("content",obj,false,location,result);
@@ -1655,6 +1706,7 @@ public class OpenAPIDeserializer {
         return header;
     }
 
+
     public Object getAnyExample(String nodeKey,ObjectNode node, String location, ParseResult result ){
         JsonNode example = node.get(nodeKey);
         if (example != null) {
@@ -1671,7 +1723,6 @@ public class OpenAPIDeserializer {
                     BigDecimal bigDecimalExample = getBigDecimal(nodeKey, node, false, location, result);
                     if (bigDecimalExample != null) {
                         return bigDecimalExample;
-
                     }
                 }
             } else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -1683,6 +1734,11 @@ public class OpenAPIDeserializer {
                 ArrayNode arrayValue = getArray(nodeKey, node, false, location, result);
                 if (arrayValue != null) {
                     return arrayValue;
+                }
+            } else if (example.getNodeType().equals(JsonNodeType.BOOLEAN)){
+                Boolean bool = getBoolean(nodeKey,node,false,location,result);
+                if (bool != null){
+                    return bool;
                 }
             }
         }
@@ -1982,8 +2038,6 @@ public class OpenAPIDeserializer {
         ArrayNode anyOfArray = getArray("anyOf", node, false, location, result);
         ObjectNode itemsNode = getObject("items", node, false, location, result);
 
-
-
         if((allOfArray != null )||(anyOfArray != null)|| (oneOfArray != null)) {
             ComposedSchema composedSchema = new ComposedSchema();
 
@@ -2033,6 +2087,26 @@ public class OpenAPIDeserializer {
             schema = items;
         }
 
+        Boolean additionalPropertiesBoolean = getBoolean("additionalProperties", node, false, location, result);
+
+        ObjectNode additionalPropertiesObject =
+            additionalPropertiesBoolean == null
+            ? getObject("additionalProperties", node, false, location, result)
+            : null;
+
+        Object additionalProperties =
+            additionalPropertiesObject != null
+            ? getSchema(additionalPropertiesObject, location, result)
+            : additionalPropertiesBoolean;
+
+        if(additionalProperties != null) {
+            schema =
+                additionalProperties.equals( Boolean.FALSE)
+                ? new ObjectSchema()
+                : new MapSchema();
+            schema.setAdditionalProperties( additionalProperties);
+        }
+
         if (schema == null){
             schema = SchemaTypeUtil.createSchemaByType(node);
         }
@@ -2040,6 +2114,25 @@ public class OpenAPIDeserializer {
         JsonNode ref = node.get("$ref");
         if (ref != null) {
             if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+
+                if(location.startsWith("paths")){
+                    try{
+                        String components[]=ref.asText().split("#/components");
+                        if((ref.asText().startsWith("#/components"))&&(components.length>1)) {
+                            String[] childComponents = components[1].split("/");
+                            String[] newChildComponents = Arrays.copyOfRange(childComponents, 1, childComponents.length);
+                            boolean isValidComponent = ReferenceValidator.valueOf(newChildComponents[0])
+                                                                         .validateComponent(this.components,
+                                                                                         newChildComponents[1]);
+                            if (!isValidComponent) {
+                                result.missing(location, ref.asText());
+                            }
+                        }
+                    }catch (Exception e){
+                        result.missing(location, ref.asText());
+                    }
+                }
+
                 String mungedRef = mungedRef(ref.textValue());
                 if (mungedRef != null) {
                     schema.set$ref(mungedRef);
@@ -2149,8 +2242,13 @@ public class OpenAPIDeserializer {
             for (JsonNode n : enumArray) {
                 if (n.isNumber()) {
                     schema.addEnumItemObject(n.numberValue());
-                }else if (n.isValueNode()) {
-                    schema.addEnumItemObject(n.asText());
+                } else if (n.isValueNode()) {
+                    try {
+                        schema.addEnumItemObject( getDecodedObject( schema, n.asText(null)));
+                    }
+                    catch( ParseException e) {
+                        result.invalidType( location, String.format( "enum=`%s`", e.getMessage()), schema.getFormat(), n);
+                    }
                 } else {
                     result.invalidType(location, "enum", "value", n);
                 }
@@ -2158,14 +2256,19 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("type",node,false,location,result);
-        if (StringUtils.isNotBlank(value)) {
-            schema.setType(value);
-        }else{
-            // may have an enum where type can be inferred
-            JsonNode enumNode = node.get("enum");
-            if(enumNode != null && enumNode.isArray()) {
-                String type = inferTypeFromArray((ArrayNode) enumNode);
-                schema.setType(type);
+        if (StringUtils.isBlank(schema.getType())) {
+            if (StringUtils.isNotBlank(value)) {
+                schema.setType(value);
+            }else{
+                // may have an enum where type can be inferred
+                JsonNode enumNode = node.get("enum");
+                if(enumNode != null && enumNode.isArray()) {
+                    String type = inferTypeFromArray((ArrayNode) enumNode);
+                    schema.setType(type);
+                }
+            }
+            if("array".equals( schema.getType()) && !(schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null)) {
+                result.missing(location, "items");
             }
         }
 
@@ -2201,24 +2304,6 @@ public class OpenAPIDeserializer {
             schema.setProperties(properties);
         }
 
-
-        if (node.get("additionalProperties") != null) {
-            if (node.get("additionalProperties").getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
-                if (additionalPropertiesObj != null) {
-                    Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
-                    if (additionalProperties != null) {
-                        schema.setAdditionalProperties(additionalProperties);
-                    }
-                }
-            } else if (node.get("additionalProperties").getNodeType().equals(JsonNodeType.BOOLEAN)) {
-                Boolean additionalProperties = getBoolean("additionalProperties", node, false, location, result);
-                if (additionalProperties != null) {
-                    schema.setAdditionalProperties(additionalProperties);
-                }
-
-            }
-        }
         value = getString("description",node,false,location,result);
         if (StringUtils.isNotBlank(value)) {
             schema.setDescription(value);
@@ -2229,12 +2314,47 @@ public class OpenAPIDeserializer {
             schema.setFormat(value);
         }
 
-        value = getString("default", node, false, location, result);
-        if (StringUtils.isNotBlank(value)) {
-            schema.setDefault(value);
+        //sets default value according to the schema type
+        if(node.get("default")!= null) {
+            if(!StringUtils.isBlank(schema.getType())) {
+                if (schema.getType().equals("array")) {
+                    ArrayNode array = getArray("default", node, false, location, result);
+                    if (array != null) {
+                        schema.setDefault(array);
+                    }
+                } else if (schema.getType().equals("string")) {
+                    value = getString("default", node, false, location, result);
+                    if (value != null) {
+                        try {
+                            schema.setDefault(getDecodedObject(schema, value));
+                        } catch (ParseException e) {
+                            result.invalidType(location, String.format("default=`%s`", e.getMessage()), schema.getFormat(), node);
+                        }
+                    }
+                } else if (schema.getType().equals("boolean")) {
+                    bool = getBoolean("default", node, false, location, result);
+                    if (bool != null) {
+                        schema.setDefault(bool);
+                    }
+                } else if (schema.getType().equals("object")) {
+                    Object object = getObject("default", node, false, location, result);
+                    if (object != null) {
+                        schema.setDefault(object);
+                    }
+                } else if (schema.getType().equals("integer")) {
+                    Integer number = getInteger("default", node, false, location, result);
+                    if (number != null) {
+                        schema.setDefault(number);
+                    }
+                } else if (schema.getType().equals("number")) {
+                    BigDecimal number = getBigDecimal("default", node, false, location, result);
+                    if (number != null) {
+                        schema.setDefault(number);
+                    }
+                }
+            }
         }
 
-        //discriminator
 
         bool = getBoolean("nullable", node, false, location, result);
         if(bool != null) {
@@ -2291,6 +2411,121 @@ public class OpenAPIDeserializer {
 
         return schema;
 
+    }
+
+
+    /**
+     * Decodes the given string and returns an object applicable to the given schema.
+     * Throws a ParseException if no applicable object can be recognized.
+     */
+    private Object getDecodedObject( Schema schema, String objectString) throws ParseException {
+        Object object = 
+            objectString == null?
+            null :
+
+            schema.getClass().equals( DateSchema.class)?
+            toDate( objectString) :
+
+            schema.getClass().equals( DateTimeSchema.class)?
+            toDateTime( objectString) :
+
+            schema.getClass().equals( ByteArraySchema.class)?
+            toBytes( objectString) :
+
+            objectString;
+
+        if( object == null && objectString != null) {
+            throw new ParseException( objectString, 0);
+        }
+
+        return object;
+    }
+
+
+    /**
+     * Returns the Date represented by the given RFC3339 date-time string.
+     * Returns null if this string can't be parsed as Date.
+     */
+    private Date toDateTime( String dateString) {
+        // Note: For this conversion, regex matching is better than SimpleDateFormat, etc.
+        // Optional elements (e.g. milliseconds) are not directly handled by SimpleDateFormat.
+        // Also, SimpleDateFormat is not thread-safe.
+        Matcher matcher = RFC3339_DATE_TIME_PATTERN.matcher( dateString);
+
+        Date dateTime = null;
+        if( matcher.matches()) {
+            try {
+                String year = matcher.group(1);
+                String month = matcher.group(2);
+                String day = matcher.group(3);
+                String hour = matcher.group(4);
+                String min = matcher.group(5);
+                String sec = matcher.group(6);
+                String ms = matcher.group(7);
+                String zone = matcher.group(10);
+
+                Calendar calendar = Calendar.getInstance( TimeZone.getTimeZone( zone == null? "GMT" : "GMT" + zone));
+                calendar.set( YEAR, Integer.parseInt( year));
+                calendar.set( MONTH, Integer.parseInt( month) - 1);
+                calendar.set( DAY_OF_MONTH, Integer.parseInt( day));
+                calendar.set( HOUR_OF_DAY, Integer.parseInt( hour));
+                calendar.set( MINUTE, Integer.parseInt( min));
+                calendar.set( SECOND, Integer.parseInt( sec));
+                calendar.set( MILLISECOND, ms == null? 0 : (int) (Double.parseDouble( ms) * 1000));
+
+                dateTime = calendar.getTime();
+            }
+            catch( Exception ignore) {
+            }
+        }
+
+        return dateTime;
+    }
+    
+
+  /**
+   * Returns the Date represented by the given RFC3339 full-date string.
+   * Returns null if this string can't be parsed as Date.
+   */
+    private Date toDate( String dateString) {
+        Matcher matcher = RFC3339_DATE_PATTERN.matcher( dateString);
+
+        Date date = null;
+        if( matcher.matches()) {
+            String year = matcher.group(1);
+            String month = matcher.group(2);
+            String day = matcher.group(3);
+
+            try {
+                date=
+                    new Calendar.Builder()
+                    .setDate( Integer.parseInt( year), Integer.parseInt( month) - 1, Integer.parseInt( day))
+                    .build()
+                    .getTime();
+            }
+            catch( Exception ignore) {
+            }
+        }
+
+        return date;
+    }
+    
+
+  /**
+   * Returns the byte array represented by the given base64-encoded string.
+   * Returns null if this string is not a valid base64 encoding.
+   */
+    private byte[] toBytes( String byteString) {
+        byte[] bytes;
+        
+        try {
+            bytes = Base64.getDecoder().decode( byteString);
+        }
+        catch( Exception e) {
+            bytes = null;
+        }
+
+        return bytes;
     }
 
 

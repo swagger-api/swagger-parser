@@ -1,8 +1,5 @@
 package io.swagger.parser;
 
-
-
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -28,6 +25,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIParserTest {
+
     @Test
     public void testIssue749() {
         ParseOptions options = new ParseOptions();
@@ -90,6 +88,16 @@ public class OpenAPIParserTest {
     public void testIssue892() {
         SwaggerParseResult result = new OpenAPIParser().readLocation("issue892-main.yaml", null, null);
 
+        assertEquals(result.getMessages().size(),1);
+        assertNotNull(result.getOpenAPI());
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+    }
+
+    @Test
+    public void testIssue934() {
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue-934.yaml", null, null);
+
+        assertNotNull(result);
         assertEquals(result.getMessages().size(),1);
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
@@ -462,4 +470,32 @@ public class OpenAPIParserTest {
         assertEquals(ref, "#/components/callbacks/callbackEvent");
     }
 
+    @Test
+    public void testIssue959() {
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        SwaggerParseResult result =  openAPIParser.readLocation("issue959.json",null,null);
+        assertEquals(result.getMessages().get(0),"attribute paths.'/pets/{petId}'(get).parameters.There are duplicate parameter values");
+
+        result =  openAPIParser.readLocation("issue959PathLevelDuplication.json",null,null);
+        assertEquals(result.getMessages().get(0),"attribute paths.'/pets'.There are duplicate parameter values");
+
+    }
+
+    @Test
+    public void testIssue1003_ExtensionsClassloader() {
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        SwaggerParseResult api = null;
+        try {
+            // Temporarily switch tccl to an unproductive cl
+            final ClassLoader tcclTemp = new java.net.URLClassLoader(new java.net.URL[] {},
+                ClassLoader.getSystemClassLoader());
+            Thread.currentThread().setContextClassLoader(tcclTemp);
+            api = new OpenAPIParser().readLocation("src/test/resources/petstore.yaml",null,null);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
+        }
+        assertNotNull(api);
+    }
+  
 }
+

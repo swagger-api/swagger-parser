@@ -1,0 +1,721 @@
+### Service Domain
+
+info:
+  description: "CDK Open Platform Domain : Service"
+  version: "2.0.0"
+  title: 'CDK Open Platform Domain : Service'
+
+definitions:
+  RepairOrder.RepairOrderJobDetails:
+    description: RepairOrderJobDetails use for Create and Get RepairOrderJob
+    type: object
+    properties:
+      jobId:
+        description: Job Id
+        type: string
+      jobType:
+        description: Job type
+        enum:
+          - SCHEDULED_MAINTENANCE
+          - GOVERNMENT_INSPECTION
+          - REPAIR
+          - OTHER
+        type: string
+      jobSource:
+        description: Job Source
+        enum:
+          - WORKSHOP
+          - VHC
+          - CUSTOMER_REQUEST
+          - MANUFACTURER
+          - OTHER
+        type: string
+      description:
+        description: Description
+        type: string
+      menus:
+        description: Menus
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderMenu
+      laborItems:
+        description: Labor Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderLabor
+      partItems:
+        description: Part Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderPart
+      textItems:
+        description: Text Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderText
+      feeItems:
+        description: Fee Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderFee
+      metadata:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Metadata'
+        description: Gets or Sets metadata
+  RepairOrder.RepairOrderMenu:
+    type: object
+    properties:
+      menuCode:
+        description: Menu code
+        type: string
+      brandCode:
+        description: Brand code of who has issued the menu
+        type: string
+      partItems:
+        description: PartItems belonging to this menu
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderPart
+      laborItems:
+        description: LaborItems belonging to this menu
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderLabor
+      textItems:
+        description: TextItems belonging to this menu
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderText
+      feeItems:
+        description: FeeItems belonging to this menu
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderFee
+      listPrice:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Price'
+        #$ref: '#/definitions/Common.Price'
+        description: Menu list price excluding all discounts
+      itemId:
+        description: Unique item (line) id in question among all repair order lines
+        type: string
+      sequenceNumber:
+        format: int32
+        description: Sequence number of the item in the order of all items.
+        type: integer
+      description:
+        description: Description
+        type: string
+      discountedPrice:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Price'
+        description: Item discounted price including all discounts.
+      notes:
+        description: General notes and comments for this line
+        type: string
+      linePayer:
+        description: "Who is paying the line in question.\r\nNote. Price is shown only if the payer is CUSTOMER."
+        enum:
+          - CUSTOMER
+          - DEALER
+          - WARRANTY
+          - CONTRACT
+          - OTHER
+        type: string
+  RepairOrder.RepairOrderLabor:
+    type: object
+    properties:
+      laborCode:
+        description: Labor code
+        type: string
+      brandCode:
+        description: Brand code of who has issued the labor
+        type: string
+      allowedTimeInMinutes:
+        format: int32
+        description: "Flat rate labor allowance (standard time) time in minutes issued by the provider.\r\nThis is the time how long (in average) it should take to perform the labor operation."
+        type: integer
+      listPrice:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Price'
+        description: "Item list price excluding all discounts.\r\nNote. If the labor is part of menu then the specific labor line might not have any price set."
+      itemId:
+        description: Unique item (line) id in question among all repair order lines
+        type: string
+      sequenceNumber:
+        format: int32
+        description: Sequence number of the item in the order of all items.
+        type: integer
+      description:
+        description: Description
+        type: string
+      discountedPrice:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Price'
+        description: Item discounted price including all discounts.
+      notes:
+        description: General notes and comments for this line
+        type: string
+      linePayer:
+        description: "Who is paying the line in question.\r\nNote. Price is shown only if the payer is CUSTOMER."
+        enum:
+          - CUSTOMER
+          - DEALER
+          - WARRANTY
+          - CONTRACT
+          - OTHER
+        type: string
+  RepairOrder.RepairOrderPart:
+    type: object
+    properties:
+      partId:
+        description: "Unique DMS part reference. This is the identifier used later on in the order process (for instance invoicing).\r\nWhen used in adding a part this field is optional.\r\nIf not given the brandCode+partCode is used to resolve the unique part.\r\nIf multiple parts are found DMS will pick one."
+        type: string
+      partCode:
+        description: Manufacturer part code
+        type: string
+      brandCode:
+        description: Brand code
+        type: string
+      unitOfMeasure:
+        description: Unit of measurement used for the part
+        enum:
+          - OTHER
+          - LITERS
+          - METER
+          - KG
+          - SQUAREMETERS
+          - PIECE
+        type: string
+      quantity:
+        format: double
+        description: Quantity of the part used on service
+        type: number
+      listPrice:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Price'
+        description: Item list price excluding all discounts.
+      itemId:
+        description: Unique item (line) id in question among all repair order lines
+        type: string
+      sequenceNumber:
+        format: int32
+        description: Sequence number of the item in the order of all items.
+        type: integer
+      description:
+        description: Description
+        type: string
+      discountedPrice:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Price'
+        description: Item discounted price including all discounts.
+      notes:
+        description: General notes and comments for this line
+        type: string
+      linePayer:
+        description: "Who is paying the line in question.\r\nNote. Price is shown only if the payer is CUSTOMER."
+        enum:
+          - CUSTOMER
+          - DEALER
+          - WARRANTY
+          - CONTRACT
+          - OTHER
+        type: string
+  RepairOrder.RepairOrderText:
+    type: object
+    properties:
+      itemId:
+        description: >-
+          Unique item (line) id for the Text in question among all repair order
+          lines
+        type: string
+      sequenceNumber:
+        format: int32
+        description: Sequence number of the item in the order of all items.
+        type: integer
+      notes:
+        description: General notes and comments
+        type: string
+  RepairOrder.RepairOrderFee:
+    type: object
+    properties:
+      code:
+        description: Code for fee (if any available)
+        type: string
+      itemId:
+        description: Unique item (line) id in question among all repair order lines
+        type: string
+      sequenceNumber:
+        format: int32
+        description: Sequence number of the item in the order of all items.
+        type: integer
+      description:
+        description: Description
+        type: string
+      discountedPrice:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Price'
+        description: Item discounted price including all discounts.
+      notes:
+        description: General notes and comments for this line
+        type: string
+      linePayer:
+        description: "Who is paying the line in question.\r\nNote. Price is shown only if the payer is CUSTOMER."
+        enum:
+          - CUSTOMER
+          - DEALER
+          - WARRANTY
+          - CONTRACT
+          - OTHER
+        type: string
+  RepairOrder.RepairOrderJobResponse201:
+    description: RepairOrderJobResponse201
+    type: object
+    properties:
+      jobId:
+        type: string
+  RepairOrder.RepairOrderJobResponse200:
+    description: RepairOrderJobResponse200
+    type: object
+    properties:
+      jobId:
+        description: JobId
+        type: string
+      jobType:
+        description: JobType
+        enum:
+          - SCHEDULED_MAINTENANCE
+          - GOVERNMENT_INSPECTION
+          - REPAIR
+          - OTHER
+        type: string
+      jobSource:
+        description: JobSource
+        enum:
+          - WORKSHOP
+          - VHC
+          - CUSTOMER_REQUEST
+          - MANUFACTURER
+          - OTHER
+        type: string
+      description:
+        description: Description
+        type: string
+      menus:
+        description: Menus
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderMenu
+      laborItems:
+        description: Labor Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderLabor
+      partItems:
+        description: Part Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderPart
+      textItems:
+        description: Text Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderText
+      feeItems:
+        description: Fee Items
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderFee
+      links:
+        description: Links to related objects
+        uniqueItems: false
+        type: array
+        items:
+          $ref: '../Domain-Common/1.0.0.yaml#/definitions/Links'
+  RepairOrder.RepairOrderResponse200:
+    description: ''
+    type: object
+    properties:
+      repairOrderId:
+        description: The id of the vehicle assigned to the repair order
+        type: string
+      status:
+        description: The current status of the repair order.
+        enum:
+          - CREATED
+          - ONHOLD
+          - CHECKEDIN
+          - WORKSTARTED
+          - WORKCOMPLETED
+          - CHECKEDOUT
+          - CLOSED
+        type: string
+      details:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderDetails
+        description: Basic information about the repair order
+      vehicle:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Vehicle.VehicleBaseModel'
+        description: Vehicle information
+      customer:
+        $ref: >-
+          #/definitions/RepairOrder.OrderCustomer
+        description: Customer information
+      company:
+        $ref: >-
+          #/definitions/RepairOrder.OrderCompany
+        description: Company information
+      contact:
+        $ref: >-
+          #/definitions/RepairOrder.OrderContact
+        description: Contact information for the customer/company representative
+      resources:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderResources
+        description: >-
+          The human resources (service advisor, etc) associated with the repair
+          order.
+      appointment:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderAppointment
+        description: >-
+          Information about the workshop planning and appointment aspects of the
+          repair-order.
+      planning:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderPlanning
+        description: Planning information related to the service.
+      jobs:
+        description: Collection of job that are performed to the vehicle.
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderJob
+      links:
+        description: Links to related objects
+        uniqueItems: false
+        type: array
+        items:
+          $ref: '../Domain-Common/1.0.0.yaml#/definitions/Links'
+  RepairOrder.RepairOrderDetails:
+    type: object
+    properties:
+      notes:
+        description: Repair order notes/comments information.
+        type: string
+      checkInDateTime:
+        format: date-time
+        description: Date and time when the vehicle was checked in.
+        type: string
+      checkOutDateTime:
+        format: date-time
+        description: Date and time when the vehicle was checked out
+        type: string
+      checkInMileage:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Vehicle.VehicleMileage'
+        description: Mileage when the vehicle was checked in
+      checkOutMileage:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Vehicle.VehicleMileage'
+        description: Mileage when the vehicle was checked out
+      onHoldReason:
+        description: Reason why the repair-order is on hold
+        type: string
+
+  RepairOrder.OrderCustomer:
+    type: object
+    properties:
+      customerId:
+        description: Unique customer id in DMS
+        type: string
+      names:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Customer.CustomerNames'
+        description: Customer names
+      addresses:
+        $ref: >-
+          ../Domain-Common/1.0.0.yaml#/definitions/Customer.CustomerAddresses
+        description: Customer addresses
+      communication:
+        $ref: >-
+          ../Domain-Common/1.0.0.yaml#/definitions/Customer.CustomerCommunication
+        description: Customer communication methods
+  RepairOrder.OrderCompany:
+    type: object
+    properties:
+      companyId:
+        description: The unique id for the company
+        type: string
+      identification:
+        $ref: >-
+          ../Domain-Common/1.0.0.yaml#/definitions/Company.CompanyIdentification
+        description: Company identification
+      addresses:
+        $ref: >-
+          ../Domain-Common/1.0.0.yaml#/definitions/Company.CompanyAddresses
+        description: Company addresses
+      communication:
+        $ref: >-
+          ../Domain-Common/1.0.0.yaml#/definitions/Company.CompanyCommunication
+        description: Company communication
+  RepairOrder.OrderContact:
+    type: object
+    properties:
+      name:
+        description: Contact name
+        type: string
+      phone:
+        description: Contact phone number
+        type: string
+      email:
+        description: Contact e-mail address
+        type: string
+      address:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/AddressPhysical'
+        description: Contact address
+  RepairOrder.RepairOrderResources:
+    type: object
+    properties:
+      assignedAdvisor:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderServiceAdvisor
+        description: Service advisor to whom the order is currently assigned
+      contactAdvisor:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderServiceAdvisor
+        description: Service advisor who is handling the communication with customer
+  RepairOrder.RepairOrderAppointment:
+    type: object
+    properties:
+      notes:
+        description: General notes and comments for the appointment
+        type: string
+      bookingOptions:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderBookingOptions
+        description: Booking options
+      dueInDateTime:
+        format: date-time
+        description: >-
+          Date and time when the customer is supposed to be bringing in the
+          vehicle.
+        type: string
+      dueOutDateTime:
+        format: date-time
+        description: >-
+          Date and time when the customer is supposed to be taking out the
+          vehicle.
+        type: string
+  RepairOrder.RepairOrderPlanning:
+    type: object
+    properties:
+      plannedIn:
+        format: date-time
+        description: >-
+          The date and time when the complete work is planned in the workshop
+          planning.
+        type: string
+      plannedOut:
+        format: date-time
+        description: >-
+          The date and time when the complete work is planned to be finished in
+          the workshop planning.
+        type: string
+  RepairOrder.RepairOrderJob:
+    description: RepairOrderJob use for RepairOrder
+    type: object
+    properties:
+      jobId:
+        description: Job Id
+        type: string
+      jobType:
+        description: Job type
+        enum:
+          - SCHEDULED_MAINTENANCE
+          - GOVERNMENT_INSPECTION
+          - REPAIR
+          - OTHER
+        type: string
+      jobSource:
+        description: Job Source
+        enum:
+          - WORKSHOP
+          - VHC
+          - CUSTOMER_REQUEST
+          - MANUFACTURER
+          - OTHER
+        type: string
+      description:
+        description: Description
+        type: string
+  RepairOrder.RepairOrderServiceAdvisor:
+    type: object
+    properties:
+      serviceAdvisorId:
+        description: Service advisor id
+        type: string
+      name:
+        description: Service advisor name
+        type: string
+  RepairOrder.RepairOrderBookingOptions:
+    type: object
+    properties:
+      type:
+        description: Type of booking option required by the customer.
+        enum:
+          - NONE
+          - WAITER
+          - SHUTTLE
+          - REPLACEMENT_TRANSPORT
+          - COLLECT_DELIVER
+        type: string
+  RepairOrder.RepairOrderSearchResponse200:
+    description: ''
+    type: object
+    properties:
+      totalItems:
+        format: int32
+        description: >-
+          Used to indicate the total number of items in the full result list,
+          not just this page
+        type: integer
+      totalPages:
+        format: int32
+        description: 'Used to indicate how many pages are available, in total'
+        type: integer
+      repairOrders:
+        description: Search results
+        uniqueItems: false
+        type: array
+        items:
+          $ref: >-
+            #/definitions/RepairOrder.RepairOrderSearchResults
+      links:
+        description: Gets or Sets Links
+        uniqueItems: false
+        type: array
+        items:
+          $ref: '../Domain-Common/1.0.0.yaml#/definitions/Links'
+  RepairOrder.RepairOrderSearchResults:
+    type: object
+    properties:
+      repairOrderId:
+        description: The id of the repair order
+        type: string
+      status:
+        description: The status of the repair order
+        enum:
+          - CREATED
+          - ONHOLD
+          - CHECKEDIN
+          - WORKSTARTED
+          - WORKCOMPLETED
+          - CHECKEDOUT
+          - CLOSED
+        type: string
+      vehicle:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Vehicle.VehicleBaseModel'
+        description: The vehicle of the repair order
+      customer:
+        $ref: >-
+          #/definitions/RepairOrder.OrderCustomer
+        description: The customer of the repair order
+      company:
+        $ref: >-
+          #/definitions/RepairOrder.OrderCompany
+        description: The company of the repair order
+      details:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderDetails
+        description: The details of the repair order
+      planning:
+        $ref: >-
+          #/definitions/RepairOrder.RepairOrderPlanning
+        description: The planning of the repair order
+      contact:
+        $ref: >-
+          #/definitions/RepairOrder.OrderContact
+        description: The contact of the repair order
+  Vehicle.InspectionsUpdatePayload:
+    type: object
+    properties:
+      vehicleInspection:
+        $ref: >-
+          #/definitions/Vehicle.InspectionUpdate
+      metadata:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Metadata'
+  Vehicle.InspectionUpdate:
+    type: object
+    properties:
+      dueDate:
+        format: date-time
+        description: The DueDate for the vehicle inspection
+        type: string
+  Vehicle.VehicleNextServicePayload:
+    type: object
+    properties:
+      nextService:
+        $ref: >-
+          #/definitions/Vehicle.VehicleNextService
+      metadata:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Metadata'
+  Vehicle.VehicleNextService:
+    type: object
+    properties:
+      description:
+        type: string
+      dueDate:
+        format: date-time
+        type: string
+      dueMileage:
+        $ref: '../Domain-Common/1.0.0.yaml#/definitions/Vehicle.VehicleMileage'
+  Vehicle.InspectionsResponse200:
+    type: object
+    properties:
+      inspections:
+        $ref: '#/definitions/Vehicle.Inspections'
+        description: The inspections related value
+      links:
+        description: Links to related objects
+        uniqueItems: false
+        type: array
+        items:
+          $ref: '../Domain-Common/1.0.0.yaml#/definitions/Links'
+  Vehicle.Inspections:
+    type: object
+    properties:
+      vehicleInspection:
+        $ref: '#/definitions/Vehicle.Inspection'
+        description: Gets or Sets VehicleInspection
+  Vehicle.Inspection:
+    type: object
+    properties:
+      lastDate:
+        format: date-time
+        description: The date of the last mot of the vehicle
+        type: string
+      dueDate:
+        format: date-time
+        description: The date of the mot due of the vehicle
+        type: string
+
+#end of spec

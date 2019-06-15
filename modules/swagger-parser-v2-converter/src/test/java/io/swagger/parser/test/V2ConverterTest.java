@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -88,6 +89,8 @@ public class V2ConverterTest {
     private static final String ISSUE_765_YAML = "issue-765.yaml";
     private static final String ISSUE_768_JSON = "issue-786.json";
     private static final String ISSUE_820_YAML = "issue-820.yaml";
+    private static final String ISSUE_1032_YAML = "issue-1032.yaml";
+    private static final String ISSUE_1113_YAML = "issue-1113.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -153,6 +156,9 @@ public class V2ConverterTest {
     private static final String ARRAY_VALUES = "[{\"id\":-1,\"name\":\"Marvin the Paranoid Android\"}," +
             "{\"id\":1000000,\"name\":\"Zaphod Beeblebrox\",\"friends\":[15]}]";
     private static final String SCHEMAS_A_REF = "#/components/schemas/A";
+    private static final String UNIX_TIMESTAMP_QUERY_PARAM = "unixTimestampQuery";
+    private static final String INTEGER_TYPE = "integer";
+    private static final String INT64_FORMAT = "int64";
 
     private static final int MAX_LENGTH = 60;
     private static final int REQUIRED_SIZE = 2;
@@ -164,7 +170,7 @@ public class V2ConverterTest {
     private static final int MIN_LENGTH = 3;
     private static final int NUMBER_VALUE_TWENTY = 20;
     private static final double MULTIPLE_OF_VALUE = 0.01D;
-    private static final long DEFAULT_VALUE = 11L;
+    private static final int DEFAULT_VALUE = 11;
     private static final int EXAMPLE_8_NUMBER = 8;
     private static final int EXAMPLE_42_NUMBER = 42;
 
@@ -734,6 +740,13 @@ public class V2ConverterTest {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_755_YAML);
         assertNotNull(oas);
     }
+
+    @Test(description = "OpenAPI v2 converter - top-level extensions should be preserved")
+    public void testTopLevelExtensions() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(PARAMETER_CONVERSION_JSON);
+        assertNotNull(oas);
+        assertEquals((String)oas.getExtensions().get("x-some-extensions"), "hello");
+    }
     
     @Test(description = "OpenAPI v2 converter - Conversion param extensions should be preserved")
     public void testIssue820() throws Exception {
@@ -762,6 +775,29 @@ public class V2ConverterTest {
         assertEquals(baz.getNullable(), Boolean.FALSE);
     }
 
+    @Test(description = "OpenAPI v2 converter - proper IntegerSchema parsing")
+    public void testIssue1032() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1032_YAML);
+        assertNotNull(oas);
+        Parameter unixTimestampQueryParameter = oas.getComponents().getParameters().get(UNIX_TIMESTAMP_QUERY_PARAM);
+        assertNotNull(unixTimestampQueryParameter);
+        Schema s = unixTimestampQueryParameter.getSchema();
+        assertTrue((s instanceof IntegerSchema), "actual type: " + s);
+        IntegerSchema integerSchema = (IntegerSchema) s;
+        assertEquals(INTEGER_TYPE, integerSchema.getType());
+        assertEquals(INT64_FORMAT, integerSchema.getFormat());
+    }
+
+    @Test(description = "OpenAPI v2 converter - converts URL correctly when it begins with forward slash")
+    public void testIssue1113() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1113_YAML);
+        assertNotNull(oas);
+        assertNotNull(oas.getServers());
+        assertFalse(oas.getServers().isEmpty());
+        assertNotNull(oas.getServers().get(0));
+        assertEquals(oas.getServers().get(0).getUrl(), "/test");
+    }
+    
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
         SwaggerConverter converter = new SwaggerConverter();
         String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(file).toURI())));

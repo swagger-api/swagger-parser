@@ -1,0 +1,32 @@
+openapi: 3.0.0
+
+info:
+  title: Sample-Domain
+  description: 'Reusable components for the Notification domain.'
+  contact:
+    url: https://www.url.com/
+    email: url.api.support@url.com
+  license:
+    name: Sample
+  version: "1.0.0"
+
+paths:
+  /na-domain-only:
+    summary: n/a
+    description: n/a
+
+
+components:
+  schemas:
+    InventoryId:
+      description: 'Key information uniquely identifying a inventory.   May be a composite of information'
+      type: string
+
+  parameters:
+    inventory-id:
+      in: path
+      name: inventory-id
+      description: 'Could be composite key'
+      required: true
+      schema:
+        $ref: '#/components/schemas/InventoryId'
