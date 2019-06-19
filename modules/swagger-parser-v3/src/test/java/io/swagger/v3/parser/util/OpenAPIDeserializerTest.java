@@ -878,6 +878,8 @@ public class OpenAPIDeserializerTest {
                 "                    $ref: '#/components/schemas/IntegerEnum'\n" +
                 "                  ne:\n" +
                 "                    $ref: '#/components/schemas/NumberEnum'\n" +
+                "                  be:\n" +
+                "                    $ref: '#/components/schemas/BooleanEnum'\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    StringEnum:\n" +
@@ -886,6 +888,10 @@ public class OpenAPIDeserializerTest {
                 "      enum:\n" +
                 "        - First\n" +
                 "        - Second\n" +
+                "    BooleanEnum:\n" +
+                "      enum:\n" +
+                "        - true \n" +
+                "        - false \n" +
                 "    IntegerEnum:\n" +
                 "      type: integer\n" +
                 "      default: 1\n" +
@@ -934,6 +940,13 @@ public class OpenAPIDeserializerTest {
         assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
         assertEquals(new BigDecimal("3.14"), numberValues.get(3));
         assertEquals(numberImpl.getDefault(), new BigDecimal("3.14"));
+        
+        Schema booleanModel = resolved.getComponents().getSchemas().get("BooleanEnum");
+        assertEquals("boolean", booleanModel.getType());
+        List<Object> booleanValues = booleanModel.getEnum();
+        assertEquals(2, booleanValues.size());
+        assertEquals(Boolean.TRUE, booleanValues.get(0));
+        assertEquals(Boolean.FALSE, booleanValues.get(1));
     }
 
     @Test
