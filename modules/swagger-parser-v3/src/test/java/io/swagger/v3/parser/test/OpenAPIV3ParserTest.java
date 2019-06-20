@@ -234,7 +234,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setFlatten(true);
-        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853/main.yaml", null, options).getOpenAPI();
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853-1131/main.yaml", null, options).getOpenAPI();
 
         Assert.assertNotNull(openAPI);
 
@@ -257,7 +257,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue837() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853/main.yaml", null, options).getOpenAPI();
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853-1131/main.yaml", null, options).getOpenAPI();
 
         Assert.assertNotNull(openAPI);
 
@@ -269,6 +269,38 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asText(), "plain");
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
+    }
+
+    @Test
+    public void testIssue1131() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853-1131/main.yaml", null, options).getOpenAPI();
+
+        Assert.assertNotNull(openAPI);
+
+        Content content = openAPI.getPaths().get("/events").getGet().getRequestBody().getContent();
+        Assert.assertNotNull(content);
+
+        Map<String, Example> examples = content.get("application/json").getExamples();
+        Assert.assertEquals(examples.size(), 3);
+        Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asText(), "plain");
+        Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
+        Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
+
+        // Also cover the case from Issue 853
+        Operation post = openAPI.getPaths().get("/guests").getPost();
+        Assert.assertNotNull(post);
+
+        content = post.getRequestBody().getContent();
+        Assert.assertNotNull(content);
+
+        examples = content.get("application/json").getExamples();
+        Assert.assertEquals(examples.size(), 1);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getExamples());
+        assertNotNull(openAPI.getComponents().getExamples().get("testExample"));
+        assertEquals(((LinkedHashMap<String, Object>)openAPI.getComponents().getExamples().get("testExample").getValue()).get("test"),"value");
     }
 
     @Test
