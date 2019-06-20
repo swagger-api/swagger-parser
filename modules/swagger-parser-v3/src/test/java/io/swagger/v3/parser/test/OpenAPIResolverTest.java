@@ -69,6 +69,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.FileAssert.fail;
 
 
 public class OpenAPIResolverTest {
@@ -432,7 +433,7 @@ public class OpenAPIResolverTest {
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
         ResolverFully resolverUtil = new ResolverFully();
         resolverUtil.resolveFully(openAPI);
-        //System.out.println(openAPI.getPaths().get("/selfRefB").getGet().getRequestBody().getContent().get("application/json"));
+
 
         RequestBody body = openAPI.getPaths().get("/selfRefB").getGet().getRequestBody();
         Schema schema = body.getContent().get("application/json").getSchema();
@@ -595,6 +596,7 @@ public class OpenAPIResolverTest {
         assertTrue(allOf.getAllOf().get(0).getProperties().containsKey("street"));
         assertTrue(allOf.getAllOf().get(1).getProperties().containsKey("gps"));
 
+
         // Testing path item
         ComposedSchema schema = (ComposedSchema) openAPI.getPaths().get("/withInvalidComposedModel").getPost().getRequestBody().getContent().get("application/json").getSchema();
 
@@ -654,7 +656,6 @@ public class OpenAPIResolverTest {
         ParseOptions resolve = new ParseOptions();
         resolve.setResolveFully(true);
         final OpenAPI openAPI = new OpenAPIV3Parser().read("./ref-without-component/a.yaml", null, resolve);
-
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
         Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
     }
@@ -1132,6 +1133,62 @@ public class OpenAPIResolverTest {
         assertEquals(((ArraySchema) commonSchema.getAllOf().get(1).getProperties().get("referenced")).getItems().get$ref(), "#/components/schemas/core");
         Schema coreSchema = openAPI.getComponents().getSchemas().get("core");
         assertEquals(((Schema) coreSchema.getProperties().get("inner")).get$ref(), "#/components/schemas/innerCore");
+    }
+
+    @Test
+    public void recursiveResolving() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("recursive.yaml", null, parseOptions);
+        Assert.assertNotNull(openAPI.getPaths().get("/myPath").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().get("myProp"));
+        try {
+            Json.mapper().writeValueAsString(openAPI);
+        }
+        catch (Exception e) {
+            fail("Recursive loop found");
+        }
+
+    }
+
+    @Test
+    public void recursiveResolving2() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("recursive2.yaml", null, parseOptions);
+        try {
+            Json.mapper().writeValueAsString(openAPI);
+        }
+        catch (Exception e) {
+            fail("Recursive loop found");
+        }
+    }
+
+    @Test
+    public void recursiveIssue984() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue-984-simple.yaml", null, parseOptions);
+        if (openAPI == null) fail("failed parsing issue-984");
+        try {
+            Json.pretty(openAPI);
+            //System.out.println(Json.pretty(openAPI));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Recursive loop found");
+        }
+    }
+
+    @Test
+    public void propertyNameMixup() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("simple.yaml", null, parseOptions);
+        assertEquals(((StringSchema)openAPI.getComponents().getSchemas().get("Manufacturer").getProperties().get("name")).getExample(), "ACME Corporation");
+        Schema schema = openAPI.getPaths().get("/inventory").getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertEquals(((ObjectSchema) ((ArraySchema) schema).getItems().getProperties().get("manufacturer")).getProperties().get("name").getExample(), "ACME Corporation");
     }
 
     public String replacePort(String url){

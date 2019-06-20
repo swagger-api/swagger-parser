@@ -1,0 +1,95 @@
+openapi: 3.0.0
+info:
+  title: Common Image Type
+  version: 5.0.0
+paths:
+  /foo:
+    get:
+      summary: Common JSON objects
+      responses:
+        '204':
+          description: Success
+
+components:
+  schemas:
+    MyResponse:
+      type: object
+      properties:
+
+        # Expected property type = Image
+        images:
+          $ref: './types.yaml#/components/schemas/Image'
+
+        # Expected property type = List<Image>
+        imagesArray:
+          type: array
+          items:
+            $ref: './types.yaml#/components/schemas/Image'
+
+        # Expected property type = Map<String, Image>
+        imagesMap:
+          type: object
+          additionalProperties:
+            $ref: './types.yaml#/components/schemas/Image'
+
+        # Expected property type = List<Map<String, Image>>
+        imagesArrayMap:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              $ref: './types.yaml#/components/schemas/Image'
+
+        # Expected property type = Map<String, List<Image>>
+        imagesMapArray:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: './types.yaml#/components/schemas/Image'
+
+        # Expected property type = List<List<Image>>
+        imagesArrayArray:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: './types.yaml#/components/schemas/Image'
+
+        # Expected property type = Map<String, Map<String, Image>>
+        imagesMapMap:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              $ref: './types.yaml#/components/schemas/Image'
+
+        # Expected property type = Object
+        oneOfExample:
+          type: object
+          oneOf:
+            - $ref: './types.yaml#/components/schemas/Image'
+            - type: object
+              properties:
+                localField:
+                  type: string
+
+        # Expected property type = Object
+        anyOfExample:
+          type: object
+          anyOf:
+            - $ref: './types.yaml#/components/schemas/Image'
+            - type: object
+              properties:
+                localField:
+                  type: string
+
+        # Expected property type = Object
+        allOfExample:
+          type: object
+          allOf:
+            - $ref: './types.yaml#/components/schemas/Image'
+            - type: object
+              properties:
+                localField:
+                  type: string

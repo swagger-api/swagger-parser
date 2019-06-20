@@ -71,6 +71,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -138,6 +139,10 @@ public class SwaggerConverter implements SwaggerParserExtension {
         SwaggerInventory inventory = new SwaggerInventory().process(parse.getSwagger());
 
         Swagger swagger = parse.getSwagger();
+
+        if (swagger.getVendorExtensions() != null) {
+            openAPI.setExtensions(convert(swagger.getVendorExtensions()));
+        }
 
         if (swagger.getExternalDocs() != null) {
             openAPI.setExternalDocs(convert(swagger.getExternalDocs()));
@@ -415,7 +420,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 servers.add(server);
             }
         } else {
-            if (!"/".equals(baseUrl)) {
+            if (!StringUtils.startsWith(baseUrl, "/") && !"/".equals(baseUrl)) {
                 baseUrl = "//" + baseUrl;
             }
             Server server = new Server();
@@ -917,7 +922,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             result.setExample(schema.getExample());
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
-                Map<String, Schema> properties = new HashMap<>();
+                Map<String, Schema> properties = new LinkedHashMap<>();
 
                 ((ObjectProperty) schema).getProperties().forEach((k, v) -> properties.put(k, convert(v)));
 
@@ -1056,7 +1061,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
                 schema = a;
             } else {
-                schema = new Schema();
+                schema = SchemaTypeUtil.createSchema(sp.getType(), sp.getFormat());
                 schema.setType(sp.getType());
                 schema.setFormat(sp.getFormat());
 

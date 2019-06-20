@@ -6,6 +6,15 @@
   },
   "paths": {
     "/pets/{id}": {
+      "parameters" : [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "get": {
         "operationId": "getPetsById",
         "responses": {

@@ -7,6 +7,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class OAIDeserializationTest {
     @Test
@@ -32,6 +33,13 @@ public class OAIDeserializationTest {
         options.setResolve(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(json, null, options);
 
+        assertNotNull(result.getOpenAPI());
+    }
+
+    @Test
+    public void testIssue911() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue_911.yaml", null, null);
+        assertEquals(result.getMessages().size(),1);
         assertNotNull(result.getOpenAPI());
     }
 }

@@ -6,7 +6,7 @@ paths:
       description: Create new person
       responses:
         '200':
-          description: OK
+          description: ok
           content:
             "*/*":
               schema:

@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: API Reuse Common Components
+  description: Definitions of API components to be referred across different API files
+components:
+  pathitems:
+    Translation:
+      put:
+        tags:
+          - Translation
+        summary: Set value of this parameter
+        description: Provide the lookup table for localized strings
+        parameters:
+          - $ref: '#/components/parameters/param_lang'
+  parameters:
+    param_lang:
+      name: lang
+      in: path
+      description: language - 2-letter abbreviation
+      required: true
+      schema:
+        type: string
+        enum:
+          - en
+          - se
+          - dk
+          - fi
+          - false
+          - de
+          - es
+          - et
+          - fr

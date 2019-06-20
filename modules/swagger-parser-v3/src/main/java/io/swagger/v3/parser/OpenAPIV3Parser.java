@@ -180,9 +180,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     if (options.isResolveFully()) {
                         result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
-
-                    }
-                    if (options.isFlatten()) {
+                    } else if (options.isFlatten()) {
                         new InlineModelResolver().flatten(result.getOpenAPI());
                     }
                 }else{
@@ -199,19 +197,36 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return result;
     }
 
-    protected List<SwaggerParserExtension> getExtensions() {
-        List<SwaggerParserExtension> extensions = new ArrayList<>();
-
-        ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class);
-        Iterator<SwaggerParserExtension> itr = loader.iterator();
-        while (itr.hasNext()) {
-            extensions.add(itr.next());
+    /**
+     * Locates extensions on the current thread class loader and then, if it differs
+     * from this class classloader (as in OSGi), locates extensions from this
+     * class classloader as well.
+     * 
+     * @return a list of extensions
+     */
+    public static List<SwaggerParserExtension> getExtensions() {
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        List<SwaggerParserExtension> extensions = getExtensions(tccl);
+        ClassLoader cl = SwaggerParserExtension.class.getClassLoader();
+        if (cl != tccl) {
+            extensions.addAll(getExtensions(cl));
         }
         extensions.add(0, new OpenAPIV3Parser());
         return extensions;
     }
 
-    /**
+    protected static List<SwaggerParserExtension> getExtensions(ClassLoader cl) {
+        List<SwaggerParserExtension> extensions = new ArrayList<>();
+
+        ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class, cl);
+        Iterator<SwaggerParserExtension> itr = loader.iterator();
+        while (itr.hasNext()) {
+            extensions.add(itr.next());
+        }
+        return extensions;
+    }
+
+   /**
      * Transform the swagger-model version of AuthorizationValue into a parser-specific one, to avoid
      * dependencies across extensions
      *

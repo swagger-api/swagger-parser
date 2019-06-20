@@ -50,6 +50,11 @@ components:
     userRepository:
       operationId: getRepository
       requestBody: '$response.body#/slug'
+      headers:
+        X-Rate-Limit:
+          description: The number of allowed requests in the current period
+          schema:
+            type: integer
   schemas:
     user:
       type: object

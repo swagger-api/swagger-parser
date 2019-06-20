@@ -2,6 +2,7 @@ package io.swagger.v3.parser.util;
 
 
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -33,10 +34,22 @@ import static org.testng.AssertJUnit.*;
 public class InlineModelResolverTest {
 
     @Test
+    public void testIssue1018() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.json",null, options);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("ReturnInformation_manufacturer_signin_credentials").getRequired());
+    }
+
+
+    @Test
     public void testIssue705() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("issue-705.yaml",null, options);
+
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200").getType());
     }
