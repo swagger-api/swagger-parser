@@ -8,10 +8,7 @@ import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -87,7 +84,9 @@ public class RemoteUrl {
     }
 
     public static String cleanUrl(String url) {
-        return url.replaceAll("\\{", "%7B").replaceAll("\\}", "%7D");
+        return url.replaceAll("\\{", "%7B").
+                replaceAll("\\}", "%7D").
+                replaceAll(" ", "%20");
     }
 
     public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {
@@ -95,42 +94,47 @@ public class RemoteUrl {
         BufferedReader br = null;
 
         try {
-            final URL inUrl = new URL(cleanUrl(url));
-            final List<AuthorizationValue> query = new ArrayList<>();
-            final List<AuthorizationValue> header = new ArrayList<>();
-            if (auths != null) {
-                for (AuthorizationValue auth : auths) {
-                    if ("query".equals(auth.getType())) {
-                        appendValue(inUrl, auth, query);
-                    } else if ("header".equals(auth.getType())) {
-                        appendValue(inUrl, auth, header);
+            URLConnection conn;
+            do {
+                final URL inUrl = new URL(cleanUrl(url));
+                final List<AuthorizationValue> query = new ArrayList<>();
+                final List<AuthorizationValue> header = new ArrayList<>();
+                if (auths != null) {
+                    for (AuthorizationValue auth : auths) {
+                        if ("query".equals(auth.getType())) {
+                            appendValue(inUrl, auth, query);
+                        } else if ("header".equals(auth.getType())) {
+                            appendValue(inUrl, auth, header);
+                        }
                     }
                 }
-            }
-            final URLConnection conn;
-            if (!query.isEmpty()) {
-                final URI inUri = inUrl.toURI();
-                final StringBuilder newQuery = new StringBuilder(inUri.getQuery() == null ? "" : inUri.getQuery());
-                for (AuthorizationValue item : query) {
-                    if (newQuery.length() > 0) {
-                        newQuery.append("&");
+                if (!query.isEmpty()) {
+                    final URI inUri = inUrl.toURI();
+                    final StringBuilder newQuery = new StringBuilder(inUri.getQuery() == null ? "" : inUri.getQuery());
+                    for (AuthorizationValue item : query) {
+                        if (newQuery.length() > 0) {
+                            newQuery.append("&");
+                        }
+                        newQuery.append(URLEncoder.encode(item.getKeyName(), UTF_8.name())).append("=")
+                                .append(URLEncoder.encode(item.getValue(), UTF_8.name()));
                     }
-                    newQuery.append(URLEncoder.encode(item.getKeyName(), UTF_8.name())).append("=")
-                            .append(URLEncoder.encode(item.getValue(), UTF_8.name()));
+                    conn = new URI(inUri.getScheme(), inUri.getAuthority(), inUri.getPath(), newQuery.toString(),
+                            inUri.getFragment()).toURL().openConnection();
+                } else {
+                    conn = inUrl.openConnection();
                 }
-                conn = new URI(inUri.getScheme(), inUri.getAuthority(), inUri.getPath(), newQuery.toString(),
-                        inUri.getFragment()).toURL().openConnection();
-            } else {
-                conn = inUrl.openConnection();
-            }
-            CONNECTION_CONFIGURATOR.process(conn);
-            for (AuthorizationValue item : header) {
-                conn.setRequestProperty(item.getKeyName(), item.getValue());
-            }
+                CONNECTION_CONFIGURATOR.process(conn);
+                for (AuthorizationValue item : header) {
+                    conn.setRequestProperty(item.getKeyName(), item.getValue());
+                }
 
-            conn.setRequestProperty("Accept", ACCEPT_HEADER_VALUE);
-            conn.setRequestProperty("User-Agent", USER_AGENT_HEADER_VALUE);
-            conn.connect();
+                conn.setRequestProperty("Accept", ACCEPT_HEADER_VALUE);
+                conn.setRequestProperty("User-Agent", USER_AGENT_HEADER_VALUE);
+
+                conn.connect();
+                url = ((HttpURLConnection) conn).getHeaderField("Location");
+            } while (301 == ((HttpURLConnection) conn).getResponseCode());
+
             InputStream in = conn.getInputStream();
 
             StringBuilder contents = new StringBuilder();

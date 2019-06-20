@@ -19,6 +19,8 @@ import io.swagger.parser.util.SwaggerDeserializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +50,7 @@ public class ResolverCache {
     private final Swagger swagger;
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
+    private final String parentUrl;
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
@@ -55,7 +59,7 @@ public class ResolverCache {
     /*
     a map that stores original external references, and their associated renamed references
      */
-    private Map<String, String> renameCache = new HashMap<>();
+    private Map<String, String> renameCache = new ConcurrentHashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
@@ -72,6 +76,7 @@ public class ResolverCache {
             File file = new File(".");
             parentDirectory = file.toPath();
         }
+        parentUrl = parentFileLocation;
 
     }
 
@@ -125,7 +130,7 @@ public class ResolverCache {
         }
 
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
+        JsonNode tree = deserialize(contents, file);
 
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
@@ -149,6 +154,10 @@ public class ResolverCache {
         resolutionCache.put(ref, result);
 
         return result;
+    }
+
+    protected JsonNode deserialize(String contents, String file) {
+        return DeserializationUtils.deserializeIntoTree(contents, file);
     }
 
     protected <T> void updateLocalRefs(String file, T result) {
@@ -212,6 +221,12 @@ public class ResolverCache {
     }
 
     private String unescapePointer(String jsonPathElement) {
+        // URL decode the fragment
+        try {
+            jsonPathElement = URLDecoder.decode(jsonPathElement, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            //
+        }
         // Unescape the JSON Pointer segment using the algorithm described in RFC 6901, section 4:
         // https://tools.ietf.org/html/rfc6901#section-4
         // First transform any occurrence of the sequence '~1' to '/'

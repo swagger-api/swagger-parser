@@ -1,10 +1,10 @@
 {
   "parameters": [
     {
-      "$ref": "./parameters/params.json#/param1"
+      "$ref": "../parameters/params.json#/param1"
     },
     {
-      "$ref": "./parameters/params.json#/param2"
+      "$ref": "../parameters/params.json#/param2"
     }
   ],
   "get": {
@@ -15,17 +15,17 @@
     ],
     "parameters": [
       {
-        "$ref": "./parameters/params.json#/param3"
+        "$ref": "../parameters/params.json#/param3"
       },
       {
-        "$ref": "./parameters/params.json#/param4"
+        "$ref": "../parameters/params.json#/param4"
       },
       {
         "name": "body",
         "in": "body",
         "required": true,
         "schema": {
-          "$ref": "./models/health.json"
+          "$ref": "../models/health.json"
         }
       }
     ],
@@ -33,14 +33,14 @@
       "200": {
         "description": "Health information from the server",
         "schema": {
-          "$ref": "./models/health.json"
+          "$ref": "../models/health.json"
         }
       },
       "400": {
-        "$ref": "./responses/errorResponses.json#/bad-request"
+        "$ref": "../responses/errorResponses.json#/bad-request"
       },
       "500": {
-        "$ref": "./responses/errorResponses.json#/internal-server-error"
+        "$ref": "../responses/errorResponses.json#/internal-server-error"
       }
     }
   }

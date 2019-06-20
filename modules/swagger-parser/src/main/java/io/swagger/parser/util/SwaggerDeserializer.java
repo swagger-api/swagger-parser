@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.*;
 import io.swagger.models.*;
 import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
@@ -31,6 +32,8 @@ public class SwaggerDeserializer {
     protected static Set<String> PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "type", "format", "allowEmptyValue", "items", "collectionFormat", "default", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "enum", "multipleOf", "readOnly", "allowEmptyValue"));
     protected static Set<String> BODY_PARAMETER_KEYS = new LinkedHashSet<String>(Arrays.asList("name", "in", "description", "required", "schema"));
     protected static Set<String> SECURITY_SCHEME_KEYS = new LinkedHashSet<String>(Arrays.asList("type", "name", "in", "description", "flow", "authorizationUrl", "tokenUrl" , "scopes"));
+
+    private final Set<String> operationIDs = new HashSet<>();
 
     public SwaggerDeserializationResult deserialize(JsonNode rootNode) {
         SwaggerDeserializationResult result = new SwaggerDeserializationResult();
@@ -186,6 +189,23 @@ public class SwaggerDeserializer {
                 } else {
                     ObjectNode path = (ObjectNode) pathValue;
                     Path pathObj = path(path, location + ".'" + pathName + "'", result);
+                    String[] eachPart = pathName.split("/");
+                    for (String part : eachPart) {
+                        if (part.startsWith("{") && part.endsWith("}") && part.length() > 2) {
+                            String pathParam = part.substring(1, part.length() - 1);
+                            boolean definedInPathLevel = isPathParamDefined(pathParam, pathObj.getParameters());
+                            if (definedInPathLevel) {
+                                continue;
+                            }
+                            List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
+                            for (Operation operation : operationsInAPath) {
+                                if (!isPathParamDefined(pathParam, operation.getParameters())) {
+                                    result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     output.put(pathName, pathObj);
                 }
             }
@@ -193,12 +213,43 @@ public class SwaggerDeserializer {
         return output;
     }
 
+    private boolean isPathParamDefined(String pathParam, List<Parameter> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return false;
+        } else {
+            for (Parameter parameter : parameters) {
+                if (pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void addToOperationsList(List<Operation> operationsList, Operation operation) {
+        if (operation == null) {
+            return;
+        }
+        operationsList.add(operation);
+    }
+
+    private List<Operation> getAllOperationsInAPath(Path pathObj) {
+        List<Operation> operations = new ArrayList<>();
+        addToOperationsList(operations, pathObj.getGet());
+        addToOperationsList(operations, pathObj.getPut());
+        addToOperationsList(operations, pathObj.getPost());
+        addToOperationsList(operations, pathObj.getPatch());
+        addToOperationsList(operations, pathObj.getDelete());
+        addToOperationsList(operations, pathObj.getOptions());
+        addToOperationsList(operations, pathObj.getHead());
+        return operations;
+    }
+
     public Path path(ObjectNode obj, String location, ParseResult result) {
-        boolean hasRef = false;
-        Path output = null;
         if(obj.get("$ref") != null) {
             JsonNode ref = obj.get("$ref");
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return pathRef((TextNode)ref, location, result);
             }
 
@@ -301,7 +352,7 @@ public class SwaggerDeserializer {
         ExternalDocs docs = externalDocs(externalDocs, location, result);
         output.setExternalDocs(docs);
 
-        value = getString("operationId", obj, false, location, result);
+        value = getString("operationId", obj, false, location, result, operationIDs);
         output.operationId(value);
 
         array = getArray("consumes", obj, false, location, result);
@@ -425,21 +476,6 @@ public class SwaggerDeserializer {
         return output;
     }
 
-    // Refs may need to be massaged slightly to ensure that swagger-core (specifically GenericRef) recognizes
-    // relative refs properly.  This should be done anywhere refs could appear (properties, parameters, schema, etc),
-    // so we have this function to ensure it is done consistently (and hopefully correctly) for all these occurrences.
-    //
-    // Returns a new ref string is change is needed, else returns null
-    public String mungedRef(String refString) {
-        // Ref: IETF RFC 3966, Section 5.2.2
-        if (!refString.contains(":") &&   // No scheme
-                !refString.startsWith("#") && // Path is not empty
-                !refString.startsWith("/") && // Path is not absolute
-                 refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
-            return "./" + refString;
-        }
-        return null;
-    }
 
     public Parameter parameter(ObjectNode obj, String location, ParseResult result) {
         if(obj == null) {
@@ -450,12 +486,6 @@ public class SwaggerDeserializer {
         JsonNode ref = obj.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
-                // work-around for https://github.com/swagger-api/swagger-core/issues/2138
-                String mungedRef = mungedRef(ref.textValue());
-                if (mungedRef != null) {
-                    obj.put("$ref", mungedRef);
-                    ref = obj.get("$ref");
-                }
                 return refParameter((TextNode) ref, location, result);
             }
             else {
@@ -495,12 +525,12 @@ public class SwaggerDeserializer {
 
             if(sp != null) {
                 // type is mandatory when sp != null
-                getString("type", obj, true, location, result);
+                String paramType = getString("type", obj, true, location, result);
                 Map<PropertyBuilder.PropertyId, Object> map = new LinkedHashMap<PropertyBuilder.PropertyId, Object>();
 
                 map.put(TYPE, type);
                 map.put(FORMAT, format);
-                String defaultValue = getString("default", obj, false, location, result);
+                String defaultValue = parameterDefault(obj, paramType, location, result);
                 map.put(DEFAULT, defaultValue);
                 sp.setDefault(defaultValue);
 
@@ -677,6 +707,15 @@ public class SwaggerDeserializer {
         return output;
     }
 
+    private String parameterDefault(ObjectNode node, String type, String location, ParseResult result) {
+        String key = "default";
+        if (type != null && type.equals("array")) {
+            ArrayNode array = getArray(key, node, false, location, result);
+            return array != null ? array.toString() : null;
+        }
+        return getString(key, node, false, location, result);
+    }
+
     private Property schema(Map<String, Object> schemaItems, JsonNode obj, String location, ParseResult result) {
         return Json.mapper().convertValue(obj, Property.class);
     }
@@ -691,6 +730,7 @@ public class SwaggerDeserializer {
 
     public Path pathRef(TextNode ref, String location, ParseResult result) {
         RefPath output = new RefPath();
+
         output.set$ref(ref.textValue());
         return output;
     }
@@ -754,7 +794,13 @@ public class SwaggerDeserializer {
 
             Integer minItems = getInteger("minItems", node, false, location, result);
             am.setMinItems(minItems);
-
+            
+            // add xml specific information if available 
+            JsonNode xml = node.get("xml");
+            if(xml != null) {
+                am.setXml(Json.mapper().convertValue(xml, Xml.class));
+            }
+            
             // extra keys
             Set<String> keys = getKeys(node);
             for(String key : keys) {
@@ -787,6 +833,13 @@ public class SwaggerDeserializer {
             if(bp != null) {
                 impl.setUniqueItems(bp);
             }
+
+
+            BigDecimal bd = getBigDecimal("minimum", node, false, location, result);
+            impl.setMinimum(bd);
+
+            bd = getBigDecimal("maximum", node, false, location, result);
+            impl.setMaximum(bd);
 
             bp = getBoolean("exclusiveMaximum", node, false, location, result);
             if(bp != null) {
@@ -826,6 +879,7 @@ public class SwaggerDeserializer {
                 impl.setMultipleOf(multipleOf);
             }
 
+
             ap = node.get("enum");
             if(ap != null) {
                 ArrayNode arrayNode = getArray("enum", node, false, location, result);
@@ -858,6 +912,9 @@ public class SwaggerDeserializer {
                     if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
                         ObjectNode on = (ObjectNode) propertyNode;
                         Property property = property(on, location, result);
+                        if("array".equals( property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
+                            result.missing(location, "items");
+                        }
                         impl.property(propertyName, property);
                     }
                     else {
@@ -1023,14 +1080,6 @@ public class SwaggerDeserializer {
             }
         }
 
-        // work-around for https://github.com/swagger-api/swagger-core/issues/1977
-        if(node.get("$ref") != null && node.get("$ref").isTextual()) {
-            // check if it's a relative ref
-            String mungedRef = mungedRef(node.get("$ref").textValue());
-            if(mungedRef != null) {
-                node.put("$ref", mungedRef);
-            }
-        }
         return Json.mapper().convertValue(node, Property.class);
     }
 
@@ -1119,6 +1168,7 @@ public class SwaggerDeserializer {
         JsonNode ref = node.get("$ref");
         if(ref != null) {
             if(ref.getNodeType().equals(JsonNodeType.STRING)) {
+
                 return refResponse((TextNode) ref, location, result);
             }
             else {
@@ -1135,14 +1185,6 @@ public class SwaggerDeserializer {
             JsonNode schemaRef = schema.get("$ref");
             if (schemaRef != null) {
                 if (schemaRef.getNodeType().equals(JsonNodeType.STRING)) {
-
-                    // work-around for https://github.com/swagger-api/swagger-core/issues/2138
-                    String mungedRef = mungedRef(schemaRef.textValue());
-                    if (mungedRef != null) {
-                        schema.put("$ref", mungedRef);
-                        schemaRef = schema.get("$ref");
-                    }
-
                     Model schemaProp = new RefModel(schemaRef.textValue());
                     output.responseSchema(schemaProp);
                 } else {
@@ -1578,6 +1620,10 @@ public class SwaggerDeserializer {
     }
 
     public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+        return getString(key, node, required, location, result, null);
+    }
+
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult result, Set<String> uniqueValues) {
         String value = null;
         JsonNode v = node.get(key);
         if (node == null || v == null) {
@@ -1591,6 +1637,10 @@ public class SwaggerDeserializer {
         }
         else {
             value = v.asText();
+            if (uniqueValues != null && !uniqueValues.add(value)) {
+                result.unique(location, "operationId");
+                result.invalid();
+            }
         }
         return value;
     }
@@ -1614,7 +1664,9 @@ public class SwaggerDeserializer {
         private Map<Location, JsonNode> extra = new LinkedHashMap<Location, JsonNode>();
         private Map<Location, JsonNode> unsupported = new LinkedHashMap<Location, JsonNode>();
         private Map<Location, String> invalidType = new LinkedHashMap<Location, String>();
+        private List<Location> warnings = new ArrayList<>();
         private List<Location> missing = new ArrayList<Location>();
+        private List<Location> unique = new ArrayList<>();
 
         public ParseResult() {
         }
@@ -1627,8 +1679,16 @@ public class SwaggerDeserializer {
             extra.put(new Location(location, key), value);
         }
 
+        public void unique(String location, String key) {
+            unique.add(new Location(location, key));
+        }
+
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
+        }
+
+        public void warning(String location, String key) {
+            warnings.add(new Location(location, key));
         }
 
         public void invalidType(String location, String key, String expectedType, JsonNode value){
@@ -1694,6 +1754,16 @@ public class SwaggerDeserializer {
             for(Location l : missing) {
                 String location = l.location.equals("") ? "" : l.location + ".";
                 String message = "attribute " + location + l.key + " is missing";
+                messages.add(message);
+            }
+            for (Location l : warnings) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location +l.key;
+                messages.add(message);
+            }
+            for (Location l : unique) {
+                String location = l.location.equals("") ? "" : l.location + ".";
+                String message = "attribute " + location + l.key + " is repeated";
                 messages.add(message);
             }
             for(Location l : unsupported.keySet()) {

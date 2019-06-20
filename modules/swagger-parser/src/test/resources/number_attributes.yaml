@@ -1,0 +1,45 @@
+---
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Pets Store
+paths: {}
+definitions:
+
+  NumberType:
+    type: number
+    enum:
+      - 1.0
+      - 2.0
+    default: 1.0
+    minimum: 1.0
+    maximum: 2.0
+
+  NumberDoubleType:
+    type: number
+    format: double
+    enum:
+      - 1.0
+      - 2.0
+    default: 1.0
+    minimum: 1.0
+    maximum: 2.0
+
+  IntegerType:
+    type: integer
+    enum:
+      - 1
+      - 2
+    default: 1
+    minimum: 1
+    maximum: 2
+
+  IntegerInt32Type:
+    type: integer
+    format: int32
+    enum:
+      - 1
+      - 2
+    default: 1
+    minimum: 1
+    maximum: 2

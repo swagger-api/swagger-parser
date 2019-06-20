@@ -1,0 +1,6 @@
+title: "AnObject"
+properties:
+  name:
+    type: string
+  severity:
+    type: number

@@ -1,0 +1,14 @@
+# API definition
+
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Discriminator and Resolved YAML
+paths:
+  /pet:
+    get:
+      responses:
+        200:
+          description: A single pet
+          schema:
+            $ref: "remote.yaml/#/definitions/Pet"

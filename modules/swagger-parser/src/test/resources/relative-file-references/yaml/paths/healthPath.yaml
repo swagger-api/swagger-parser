@@ -1,26 +1,26 @@
 ---
 parameters:
-- $ref: "./parameters/params.yaml#/param1"
-- $ref: "./parameters/params.yaml#/param2"
+- $ref: "../parameters/params.yaml#/param1"
+- $ref: "../parameters/params.yaml#/param2"
 get:
   summary: "Returns server health information"
   operationId: "getHealth"
   produces:
   - "application/json"
   parameters:
-  - $ref: "./parameters/params.yaml#/param3"
-  - $ref: "./parameters/params.yaml#/param4"
+  - $ref: "../parameters/params.yaml#/param3"
+  - $ref: "../parameters/params.yaml#/param4"
   - name: "body"
     in: "body"
     required: true
     schema:
-      $ref: "./models/health.yaml"
+      $ref: "../models/health.yaml"
   responses:
     200:
       description: "Health information from the server"
       schema:
-        $ref: "./models/health.yaml"
+        $ref: "../models/health.yaml"
     400:
-      $ref: "./responses/errorResponses.yaml#/bad-request"
+      $ref: "../responses/errorResponses.yaml#/bad-request"
     500:
-      $ref: "./responses/errorResponses.yaml#/internal-server-error"
+      $ref: "../responses/errorResponses.yaml#/internal-server-error"

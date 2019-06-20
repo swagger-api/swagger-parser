@@ -44,6 +44,7 @@ import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.models.properties.UntypedProperty;
+import io.swagger.models.refs.RefFormat;
 import io.swagger.models.resourcelisting.ApiInfo;
 import io.swagger.models.resourcelisting.ApiKeyAuthorization;
 import io.swagger.models.resourcelisting.ApiListingReference;
@@ -208,7 +209,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 jsonNode = Json.mapper().readTree(json);
 
             }
-            if (jsonNode.get("swaggerVersion") == null) {
+            if (jsonNode == null || jsonNode.get("swaggerVersion") == null) {
                 return null;
             }
             ResourceListingMigrator migrator = new ResourceListingMigrator();
@@ -345,9 +346,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                     am.setItems(innerType);
                 }
                 if (items.getRef() != null) {
-                    am.setItems(new RefProperty(items.getRef()));
+                    am.setItems(new RefProperty(items.getRef(),RefFormat.INTERNAL));
                 } else {
-                    am.setItems(new RefProperty(type));
+                    am.setItems(new RefProperty(type,RefFormat.INTERNAL));
                 }
                 output = am;
             } else {
@@ -393,9 +394,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             if (innerType != null && !(innerType instanceof UntypedProperty)) {
                 am.setItems(innerType);
             } else if (items.getRef() != null) {
-                am.setItems(new RefProperty(items.getRef()));
+                am.setItems(new RefProperty(items.getRef(),RefFormat.INTERNAL));
             } else {
-                am.setItems(new RefProperty(type));
+                am.setItems(new RefProperty(type,RefFormat.INTERNAL));
             }
             output = am;
         } else {
@@ -415,9 +416,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 output = i;
             } else {
                 if (obj.getRef() != null) {
-                    output = new RefProperty(obj.getRef());
+                    output = new RefProperty(obj.getRef(),RefFormat.INTERNAL);
                 } else if (type != null && !type.equals("void")) {
-                    output = new RefProperty(type);
+                    output = new RefProperty(type,RefFormat.INTERNAL);
                 }
             }
         }
@@ -472,17 +473,17 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
 
             Model responseModel = null;
             if (message.getResponseModel() != null) {
-                response.responseSchema(new RefModel(message.getResponseModel()));
+                response.setResponseSchema(new RefModel().asDefault(message.getResponseModel()));
             }
             output.response(message.getCode(), response);
         }
 
         // default response type
-        Property responseProperty = propertyFromTypedObject(operation);
+        Model responseProperty = modelFromExtendedTypedObject(operation);
         Response response = new Response()
                 .description("success")
-                .schema(responseProperty);
-        if (output.getResponsesObject() == null) {
+                .responseSchema(responseProperty);
+        if (output.getResponses() == null) {
             output.defaultResponse(response);
         } else if (responseProperty != null) {
             output.response(200, response);

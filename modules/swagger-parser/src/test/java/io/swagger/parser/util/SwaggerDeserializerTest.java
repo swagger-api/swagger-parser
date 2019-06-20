@@ -5,9 +5,7 @@ import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.parameters.*;
 import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
@@ -1557,5 +1555,104 @@ public class SwaggerDeserializerTest {
         Property additionalProperties = ((MapProperty) response).getAdditionalProperties();
         assertTrue(additionalProperties instanceof UntypedProperty);
         assertEquals(additionalProperties.getType(), null);
+    }
+
+    @Test
+    public void testIssue911() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue_911.yaml", null, true);
+        System.out.println(result.getMessages());
+        assertEquals(result.getMessages().size(),1);
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
+    public void testArrayParameterDefaultValue() {
+        String swaggerSpec = "swagger: '2.0'\n" +
+                "basePath: /\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: Simple API\n" +
+                "paths:\n" +
+                "  /test:\n" +
+                "    get:\n" +
+                "      description: Test array query param\n" +
+                "      produces:\n" +
+                "      - application/json\n" +
+                "      parameters:\n" +
+                "      - name: arrayQueryParam\n" +
+                "        in: query\n" +
+                "        description: Test default value of array parameter\n" +
+                "        default: [\"TestValue1\", \"TestValue2\"]\n" +
+                "        required: false\n" +
+                "        type: array\n" +
+                "        collectionFormat: multi\n" +
+                "        items:\n" +
+                "          type: string\n" +
+                "          enum:\n" +
+                "          - TestValue1\n" +
+                "          - TestValue2\n" +
+                "      - name: arrayPathParam\n" +
+                "        in: path\n" +
+                "        description: Test default value of array parameter\n" +
+                "        default: [100]\n" +
+                "        required: false\n" +
+                "        type: array\n" +
+                "        collectionFormat: multi\n" +
+                "        items:\n" +
+                "          type: integer\n" +
+                "      - name: arrayHeaderParam\n" +
+                "        in: header\n" +
+                "        description: Test default value of array parameter\n" +
+                "        default: [100, 200]\n" +
+                "        required: false\n" +
+                "        type: array\n" +
+                "        items:\n" +
+                "          type: number\n" +
+                "      - name: arrayFormParam\n" +
+                "        in: formData\n" +
+                "        description: Test default value of array parameter\n" +
+                "        default: []\n" +
+                "        required: false\n" +
+                "        type: array\n" +
+                "        items:\n" +
+                "          type: boolean\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK";
+
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(swaggerSpec);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        assertEquals(0, messages.size());
+
+        Swagger swagger = result.getSwagger();
+        List<Parameter> parameters = swagger.getPaths().get("/test").getGet().getParameters();
+        assertEquals(4, parameters.size());
+
+        assertTrue(parameters.get(0) instanceof QueryParameter);
+        QueryParameter parameter1 = (QueryParameter) parameters.get(0);
+        assertEquals("arrayQueryParam", parameter1.getName());
+        assertNotNull(parameter1.getDefault());
+        assertNotNull(parameter1.getDefaultValue());
+
+        assertTrue(parameters.get(1) instanceof PathParameter);
+        PathParameter parameter2 = (PathParameter) parameters.get(1);
+        assertEquals("arrayPathParam", parameter2.getName());
+        assertNotNull(parameter2.getDefault());
+        assertNotNull(parameter2.getDefaultValue());
+
+        assertTrue(parameters.get(2) instanceof HeaderParameter);
+        HeaderParameter parameter3 = (HeaderParameter) parameters.get(2);
+        assertEquals("arrayHeaderParam", parameter3.getName());
+        assertNotNull(parameter3.getDefault());
+        assertNotNull(parameter3.getDefaultValue());
+
+        assertTrue(parameters.get(3) instanceof FormParameter);
+        FormParameter parameter4 = (FormParameter) parameters.get(3);
+        assertEquals("arrayFormParam", parameter4.getName());
+        assertNotNull(parameter4.getDefault());
+        assertNotNull(parameter4.getDefaultValue());
     }
 }
