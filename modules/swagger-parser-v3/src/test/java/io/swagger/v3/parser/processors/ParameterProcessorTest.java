@@ -42,7 +42,7 @@ public class ParameterProcessorTest {
                                                                @Injectable final PathParameter pathParameter) throws Exception {
         expectedModelProcessorCreation();
         new Expectations() {
-            {
+            {       
                 headerParameter.getSchema();
                 result = null;
                 headerParameter.getContent();

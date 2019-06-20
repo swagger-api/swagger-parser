@@ -4,6 +4,10 @@
 
 [![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2)
 
+[![Build Status](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2/badge/icon?subject=jenkins%20build%20-%20java%208)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2/)
+
+[![Build Status](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2-java9/badge/icon?subject=jenkins%20build%20-%20java%209)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2-java9/)
+
 ## Overview 
 This is the Swagger Parser project, which reads OpenAPI definitions into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
