@@ -1,0 +1,14 @@
+openapi: "3.0.2"
+info:
+  title: User and Session
+  description: Admin API endpoints.
+  version: "0.1"
+paths:
+  /users:
+    get:
+      responses:
+        "401":
+          $ref: "./domain.yaml#/components/responses/401"
+components: {
+  schemas: {}
+}

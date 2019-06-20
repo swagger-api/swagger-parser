@@ -62,7 +62,7 @@ public class ParameterProcessorTest {
             }
         };
         final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
-                .processParameters(Arrays.<Parameter>asList(headerParameter,
+                .processParameters(Arrays.asList(headerParameter,
                         queryParameter,
                         cookieParameter,
                         pathParameter));
@@ -86,8 +86,7 @@ public class ParameterProcessorTest {
     }
 
     @Test
-    public void testProcessParameters_RefToHeader(
-            @Injectable final HeaderParameter resolvedHeaderParam) throws Exception {
+    public void testProcessParameters_RefToHeader(@Injectable final HeaderParameter resolvedHeaderParam) throws Exception {
         expectedModelProcessorCreation();
 
         final String ref = "#/components/parameters/foo";
@@ -103,8 +102,7 @@ public class ParameterProcessorTest {
             }
         };
 
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
-                .processParameters(Arrays.<Parameter>asList(refParameter));
+        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI).processParameters(Arrays.asList(refParameter));
 
         new FullVerifications(){{}};
 

@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.security.OAuthFlow;
@@ -50,7 +51,6 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.RefUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -103,7 +103,7 @@ public class OpenAPIDeserializer {
     private static final String HEADER_PARAMETER = "header";
     private static final Pattern RFC3339_DATE_TIME_PATTERN = Pattern.compile( "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(\\.\\d+)?((Z)|([+-]\\d{2}:\\d{2}))$");
     private static final Pattern RFC3339_DATE_PATTERN = Pattern.compile( "^(\\d{4})-(\\d{2})-(\\d{2})$");
-
+    private static final String REFERENCE_SEPARATOR = "#/";
     private Components components;
     private final Set<String> operationIDs = new HashSet<>();
 
@@ -1422,9 +1422,17 @@ public class OpenAPIDeserializer {
         }
         Set<String> filter = new HashSet<>();
 
+
         parameters.stream().map(this::getParameterDefinition).forEach(param -> {
+            String ref = param.get$ref();
             if(!filter.add(param.getName()+"#"+param.getIn())) {
-                result.warning(location,"There are duplicate parameter values");
+                if(ref != null) {
+                    if (ref.startsWith(REFERENCE_SEPARATOR)) {// validate if it's inline param also
+                        result.warning(location, "There are duplicate parameter values");
+                    }
+                }else{
+                    result.warning(location, "There are duplicate parameter values");
+                }
             }
         });
         return parameters;
@@ -1558,6 +1566,11 @@ public class OpenAPIDeserializer {
         Object example = getAnyExample("example", obj, location,result);
         if (example != null){
             parameter.setExample(example);
+        }
+
+        Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
+        if (allowReserved != null) {
+            parameter.setAllowReserved(allowReserved);
         }
 
         ObjectNode contentNode = getObject("content",obj,false,location,result);
@@ -2024,8 +2037,6 @@ public class OpenAPIDeserializer {
         ArrayNode allOfArray = getArray("allOf", node, false, location, result);
         ArrayNode anyOfArray = getArray("anyOf", node, false, location, result);
         ObjectNode itemsNode = getObject("items", node, false, location, result);
-        ObjectNode additionalPropertiesNode = getObject("additionalProperties", node, false, location, result);
-
 
         if((allOfArray != null )||(anyOfArray != null)|| (oneOfArray != null)) {
             ComposedSchema composedSchema = new ComposedSchema();
@@ -2076,30 +2087,25 @@ public class OpenAPIDeserializer {
             schema = items;
         }
 
-        if(additionalPropertiesNode != null){
-            MapSchema mapSchema = new MapSchema();
-            if (additionalPropertiesNode.getNodeType().equals(JsonNodeType.OBJECT)) {
-                ObjectNode additionalPropertiesObj = getObject("additionalProperties", node, false, location, result);
-                if (additionalPropertiesObj != null) {
-                    Schema additionalProperties = getSchema(additionalPropertiesObj, location, result);
-                    if (additionalProperties != null) {
-                        mapSchema.setAdditionalProperties(additionalProperties);
-                    }
-                }
-            } else if (additionalPropertiesNode.getNodeType().equals(JsonNodeType.BOOLEAN)) {
-                Boolean additionalProperties = getBoolean("additionalProperties", node, false, location, result);
-                if (additionalProperties != null) {
-                    if (additionalProperties == true) {
-                        mapSchema.setAdditionalProperties(additionalProperties);
-                    }else{
-                        schema.setAdditionalProperties(additionalProperties);
-                    }
-                }
-            }
-            schema = mapSchema;
+        Boolean additionalPropertiesBoolean = getBoolean("additionalProperties", node, false, location, result);
+
+        ObjectNode additionalPropertiesObject =
+            additionalPropertiesBoolean == null
+            ? getObject("additionalProperties", node, false, location, result)
+            : null;
+
+        Object additionalProperties =
+            additionalPropertiesObject != null
+            ? getSchema(additionalPropertiesObject, location, result)
+            : additionalPropertiesBoolean;
+
+        if(additionalProperties != null) {
+            schema =
+                additionalProperties.equals( Boolean.FALSE)
+                ? new ObjectSchema()
+                : new MapSchema();
+            schema.setAdditionalProperties( additionalProperties);
         }
-
-
 
         if (schema == null){
             schema = SchemaTypeUtil.createSchemaByType(node);
@@ -2236,6 +2242,8 @@ public class OpenAPIDeserializer {
             for (JsonNode n : enumArray) {
                 if (n.isNumber()) {
                     schema.addEnumItemObject(n.numberValue());
+                } else if (n.isBoolean()) {
+                    schema.addEnumItemObject(n.booleanValue());
                 } else if (n.isValueNode()) {
                     try {
                         schema.addEnumItemObject( getDecodedObject( schema, n.asText(null)));
@@ -2250,14 +2258,19 @@ public class OpenAPIDeserializer {
         }
 
         value = getString("type",node,false,location,result);
-        if (StringUtils.isNotBlank(value) && StringUtils.isBlank(schema.getType())) {
-            schema.setType(value);
-        }else{
-            // may have an enum where type can be inferred
-            JsonNode enumNode = node.get("enum");
-            if(enumNode != null && enumNode.isArray()) {
-                String type = inferTypeFromArray((ArrayNode) enumNode);
-                schema.setType(type);
+        if (StringUtils.isBlank(schema.getType())) {
+            if (StringUtils.isNotBlank(value)) {
+                schema.setType(value);
+            }else{
+                // may have an enum where type can be inferred
+                JsonNode enumNode = node.get("enum");
+                if(enumNode != null && enumNode.isArray()) {
+                    String type = inferTypeFromArray((ArrayNode) enumNode);
+                    schema.setType(type);
+                }
+            }
+            if("array".equals( schema.getType()) && !(schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null)) {
+                result.missing(location, "items");
             }
         }
 

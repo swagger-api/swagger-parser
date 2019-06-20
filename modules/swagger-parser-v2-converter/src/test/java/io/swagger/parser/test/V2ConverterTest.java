@@ -90,6 +90,7 @@ public class V2ConverterTest {
     private static final String ISSUE_768_JSON = "issue-786.json";
     private static final String ISSUE_820_YAML = "issue-820.yaml";
     private static final String ISSUE_1032_YAML = "issue-1032.yaml";
+    private static final String ISSUE_1113_YAML = "issue-1113.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -778,6 +779,16 @@ public class V2ConverterTest {
         IntegerSchema integerSchema = (IntegerSchema) s;
         assertEquals(INTEGER_TYPE, integerSchema.getType());
         assertEquals(INT64_FORMAT, integerSchema.getFormat());
+    }
+
+    @Test(description = "OpenAPI v2 converter - converts URL correctly when it begins with forward slash")
+    public void testIssue1113() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1113_YAML);
+        assertNotNull(oas);
+        assertNotNull(oas.getServers());
+        assertFalse(oas.getServers().isEmpty());
+        assertNotNull(oas.getServers().get(0));
+        assertEquals(oas.getServers().get(0).getUrl(), "/test");
     }
     
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {

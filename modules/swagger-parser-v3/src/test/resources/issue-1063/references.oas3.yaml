@@ -1,0 +1,15 @@
+components:
+  parameters:
+    ParamQ_One:
+      in: query
+      name: customer-id
+      required: true
+      schema:
+        format: int32
+        type: integer
+    ParamQ_Two:
+      in: query
+      name: unit-id
+      schema:
+        format: int32
+        type: integer

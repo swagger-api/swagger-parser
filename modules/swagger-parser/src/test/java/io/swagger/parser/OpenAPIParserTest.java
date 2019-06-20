@@ -481,5 +481,21 @@ public class OpenAPIParserTest {
 
     }
 
+    @Test
+    public void testIssue1003_ExtensionsClassloader() {
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        SwaggerParseResult api = null;
+        try {
+            // Temporarily switch tccl to an unproductive cl
+            final ClassLoader tcclTemp = new java.net.URLClassLoader(new java.net.URL[] {},
+                ClassLoader.getSystemClassLoader());
+            Thread.currentThread().setContextClassLoader(tcclTemp);
+            api = new OpenAPIParser().readLocation("src/test/resources/petstore.yaml",null,null);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
+        }
+        assertNotNull(api);
+    }
+  
 }
 
