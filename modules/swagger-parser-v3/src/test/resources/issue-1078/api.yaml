@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  title: 'Simple Test'
+  description: 'Test of schema vs content for Query Parameters'
+
+paths:
+  /api-endpoint-1:
+    get:
+      summary: Test Service API Endpoint 1
+      operationId: SimpleTestEndpoint1
+      tags:
+        - SimpleTestEndpoint(1)
+      parameters:
+        - name: target-locations-list
+          in: query
+          description: list of locations to search near
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './common.yaml#/components/schemas/LocationType'
+                minItems: 1
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: './common.yaml#/components/schemas/SearchResult'
+        '404':
+          $ref: './common.yaml#/components/responses/404'
