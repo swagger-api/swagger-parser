@@ -71,6 +71,13 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue111() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-111.yaml", null, true);
+        assertTrue(result.getMessages().get(0).equals("attribute definitions.Filter.items is missing"));
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
     public void testIssueDefinitionWithDots_2() {
         Swagger swagger = new SwaggerParser().read("SimpleAPI.yaml");
         assertNotNull(swagger);
@@ -487,6 +494,7 @@ public class SwaggerParserTest {
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
+        assertTrue(swagger.getParameters().get("param2") instanceof HeaderParameter);
     }
 
     @Test
