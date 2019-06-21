@@ -225,6 +225,12 @@ public class PathsProcessor {
                 if (mediaType.getSchema() != null) {
                     updateLocalRefs(mediaType.getSchema(), pathRef);
                 }
+                Map<String, Example> examples = content.get(key).getExamples();
+                if (examples != null) {
+                    for (Example example : examples.values()) {
+                        updateLocalRefs(example, pathRef);
+                    }
+                }
             }
         }else if(body.get$ref() != null){
 

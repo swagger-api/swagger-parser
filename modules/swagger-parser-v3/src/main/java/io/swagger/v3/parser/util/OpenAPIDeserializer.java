@@ -2242,6 +2242,8 @@ public class OpenAPIDeserializer {
             for (JsonNode n : enumArray) {
                 if (n.isNumber()) {
                     schema.addEnumItemObject(n.numberValue());
+                } else if (n.isBoolean()) {
+                    schema.addEnumItemObject(n.booleanValue());
                 } else if (n.isValueNode()) {
                     try {
                         schema.addEnumItemObject( getDecodedObject( schema, n.asText(null)));

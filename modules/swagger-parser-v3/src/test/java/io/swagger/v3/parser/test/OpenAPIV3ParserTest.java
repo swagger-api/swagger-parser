@@ -11,6 +11,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
@@ -225,7 +226,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setFlatten(true);
-        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853/main.yaml", null, options).getOpenAPI();
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853-1131/main.yaml", null, options).getOpenAPI();
 
         Assert.assertNotNull(openAPI);
 
@@ -248,7 +249,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue837() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853/main.yaml", null, options).getOpenAPI();
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853-1131/main.yaml", null, options).getOpenAPI();
 
         Assert.assertNotNull(openAPI);
 
@@ -260,6 +261,38 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asText(), "plain");
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
+    }
+
+    @Test
+    public void testIssue1131() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue-837-853-1131/main.yaml", null, options).getOpenAPI();
+
+        Assert.assertNotNull(openAPI);
+
+        Content content = openAPI.getPaths().get("/events").getGet().getRequestBody().getContent();
+        Assert.assertNotNull(content);
+
+        Map<String, Example> examples = content.get("application/json").getExamples();
+        Assert.assertEquals(examples.size(), 3);
+        Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asText(), "plain");
+        Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
+        Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
+
+        // Also cover the case from Issue 853
+        Operation post = openAPI.getPaths().get("/guests").getPost();
+        Assert.assertNotNull(post);
+
+        content = post.getRequestBody().getContent();
+        Assert.assertNotNull(content);
+
+        examples = content.get("application/json").getExamples();
+        Assert.assertEquals(examples.size(), 1);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getExamples());
+        assertNotNull(openAPI.getComponents().getExamples().get("testExample"));
+        assertEquals(((LinkedHashMap<String, Object>)openAPI.getComponents().getExamples().get("testExample").getValue()).get("test"),"value");
     }
 
     @Test
@@ -1912,6 +1945,68 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void shouldParseApiWithParametersUsingContentvsSchema() {
+    	// Tests that the content method of specifying the format of a parameter
+    	// gets resolved.
+    	// Test checks if an API's single parameter of array type gets fully resolved to 
+    	// referenced definitions.
+        String location = "src/test/resources/issue-1078/api.yaml";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        // This test uses an Array in the parameters, test if it get's fully resolved.
+        options.setResolveFully(true);
+        OpenAPIV3Parser tested = new OpenAPIV3Parser();
+        
+        // Parse yaml
+        SwaggerParseResult result = tested.readLocation(location, emptyList(), options);
+
+        OpenAPI api = result.getOpenAPI();
+        Paths paths = api.getPaths();
+
+        // First ensure all schemas were resolved, this is important when this library 
+        // is used to generate code
+        Components components = api.getComponents();
+        assertNotNull(components);
+        assertThat(components.getSchemas().size(), equalTo(4));
+        assertNotNull(components.getSchemas().get("LocationType"));
+        assertNotNull(components.getSchemas().get("Lat"));
+        assertNotNull(components.getSchemas().get("Long"));
+        assertNotNull(components.getSchemas().get("SearchResult"));
+        
+        PathItem apiEndpoint = paths.get("/api-endpoint-1");
+        List<Parameter> parameters = apiEndpoint.getGet().getParameters();
+        
+        // Ensure there's only one parameter in this test
+        assertThat(parameters.size(), equalTo(1));
+        
+        // We are testing content for a parameter so make sure its there.
+        Content content = parameters.get(0).getContent();
+        assertNotNull(content);
+        // spec says only one content is permitted in 3.x
+        assertThat( content.size(), equalTo(1));
+
+        // Ensure there's a media type
+        MediaType mediaType = content.entrySet().iterator().next().getValue();
+        assertNotNull(mediaType);
+
+        // This test has a single parameter of type array
+        Schema parameterSchema = mediaType.getSchema();
+        Assert.assertTrue(parameterSchema instanceof ArraySchema);
+        ArraySchema arraySchema = (ArraySchema)parameterSchema;
+
+        // Test if the item schema was resolved properly
+        Schema itemSchema = arraySchema.getItems();
+        assertNotNull(itemSchema);
+        Assert.assertTrue(itemSchema instanceof ObjectSchema);
+
+        // Ensure the referenced item's schema has been resolved.
+        ObjectSchema objSchema = (ObjectSchema)itemSchema;
+        Map<String, Schema> objectItemSchemas = objSchema.getProperties();
+        assertThat( objectItemSchemas.size(), equalTo(2));
+        Assert.assertTrue(objectItemSchemas.get("lat") instanceof IntegerSchema);
+        Assert.assertTrue(objectItemSchemas.get("long") instanceof IntegerSchema);
+        
+   }
     public void testIssue1063() {
         // given
         String location = "src/test/resources/issue-1063/openapi.yaml";
@@ -1929,6 +2024,21 @@ public class OpenAPIV3ParserTest {
 
         assertThat(result.getMessages(), equalTo(emptyList()));
 
+    }
+
+    @Test
+    public void testResolveFullyMap() {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(false);
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("resolve-fully-map.yaml", null, options).getOpenAPI();
+        String yaml = Yaml.pretty(openAPI);
+        assertTrue(yaml.contains("$ref"));
+
+        options = new ParseOptions();
+        options.setResolveFully(true);
+        openAPI = new OpenAPIV3Parser().readLocation("resolve-fully-map.yaml", null, options).getOpenAPI();
+        yaml = Yaml.pretty(openAPI);
+        assertFalse(yaml.contains("$ref"));
     }
 
     private static int getDynamicPort() {
