@@ -7,6 +7,8 @@
 [![PR Stats](https://img.shields.io/github/issues-pr/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/pulls)
 [![Issue Stats](https://img.shields.io/github/issues/swagger-api/swagger-parser.svg)](https://github.com/swagger-api/swagger-parser/issues)
 
+[![Build Status](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v1/badge/icon?subject=jenkins%20build)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v1/)
+
 ## Overview 
 This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
@@ -117,7 +119,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.40-SNAPSHOT</version>
+  <version>1.0.44</version>
 </dependency>
 
 ```
@@ -127,11 +129,14 @@ To add swagger parsing support for older versions of swagger, add the `compat` m
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-compat-spec-parser</artifactId>
-  <version>1.0.40-SNAPSHOT</version>
+  <version>1.0.44</version>
 </dependency>
 
 ```
 
+## Security contact
+
+Please disclose any security-related issues or vulnerabilities by emailing [security@swagger.io](mailto:security@swagger.io), instead of using the public issue tracker.
 
 License
 -------

@@ -1,0 +1,30 @@
+info:
+  description: "This is a sample Domain"
+  version: '1.0.0'
+  title: Sample Domain
+
+definitions:
+  ErrorModel:
+    required:
+      - "code"
+      - "message"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+  Item.Manufacturer:
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        example: ACME Corporation
+      homePage:
+        type: string
+        format: url
+        example:  https://www.acme-corp.com
+      phone:
+        type: string
+        example: 408-867-5309

@@ -7,7 +7,7 @@ info:
 basePath: /api/v2/devices
 
 definitions:
-  def:
+  def.def:
     type: object
     properties:
       name:

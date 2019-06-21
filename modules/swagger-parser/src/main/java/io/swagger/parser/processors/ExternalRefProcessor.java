@@ -208,8 +208,25 @@ public final class ExternalRefProcessor {
                             processRefProperty(new RefProperty(RefType.DEFINITION.getInternalPrefix()+name), file);
                         }
                     }
-
-
+                }else if (prop.getValue() instanceof RefProperty) {
+                    String ref = ((RefProperty) prop.getValue()).getSimpleRef();
+                    Map<String, String> renameCache = cache.getRenameCache();
+                    for (String key : renameCache.keySet()) {
+                        String value = renameCache.get(key);
+                        if (value.equals(ref)) {
+                            Object resolved = cache.getResolutionCache().get(key);
+                            if(resolved != null) {
+                                if (resolved instanceof ModelImpl) {
+                                    ModelImpl schema = (ModelImpl) resolved;
+                                    if (schema.getEnum() != null) {
+                                        for (String name : schema.getEnum()) {
+                                            processRefProperty(new RefProperty(RefType.DEFINITION.getInternalPrefix() + name), file);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -256,8 +273,14 @@ public final class ExternalRefProcessor {
     private void processRefProperty(RefProperty subRef, String externalFile) {
 
         if (isAnExternalRefFormat(subRef.getRefFormat())) {
+
             String joinedRef = join(externalFile, subRef.get$ref());
-            subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
+            String processRef = processRefToExternalDefinition(joinedRef, subRef.getRefFormat());
+            if(processRef.startsWith("http") || processRef.startsWith("https:")) {
+                subRef.set$ref(processRef);
+            }else {
+                subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+processRef);
+            }
         } else {
             String processRef = processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
             subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+processRef);

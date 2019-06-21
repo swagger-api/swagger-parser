@@ -1,0 +1,112 @@
+info:
+  description: "This is a common Domain"
+  version: "1.0"
+  title: Common Domain
+
+responses:
+
+  400-BadRequest:
+    x-dox-Since: v10.2
+    description: Bad Request
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+
+definitions:
+  ErrorResponse:
+    x-dox-Since: v10.2
+    type: object
+    description: |
+      Response containing descriptive error text, error code
+    required:
+      - code
+      - message
+    properties:
+      code:
+        description: |
+          The code associated with the error
+        readOnly: true
+        type: integer
+      message:
+        description: |
+          The message associated with the error
+        readOnly: true
+        type: string
+
+  ChannelType:
+    type: string
+    enum:
+      - selfService
+      - retail
+      - callCenter
+
+  Product:
+    x-dox-Since: '10.2'
+    description: |
+      The respesentation of the product
+    type: object
+    discriminator: productType
+    required:
+      - productType
+    x-dox-discriminator-name: NAME
+    x-dox-discriminator-type:
+      - MobileProduct
+      - InternetProduct
+      - FixedVoiceProduct
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+      name:
+        type: string
+      productType:
+        $ref: '#/definitions/ProductType'
+
+  ProductType:
+    x-dox-Since: '10.2'
+    description: |
+      The different type of products
+    enum:
+      - MobileProduct
+      - FixedVoiceProduct
+      - InternetProduct
+
+  MobileProduct:
+    x-dox-Since: 10.2
+    description: |
+      The instance of the mobile product being added.
+    type: object
+    allOf:
+      - $ref: "#/definitions/Product"
+      - type: object
+        properties:
+          sim:
+            type: string
+          phoneNumber:
+            type: string
+
+  FixedVoiceProduct:
+    x-dox-Since: 10.2
+    description: |
+      The instance of the fixed voice product being added.
+    type: object
+    allOf:
+      - $ref: "#/definitions/Product"
+      - type: object
+        properties:
+          phoneNumber:
+            type: string
+
+  InternetProduct:
+    x-dox-Since: 10.2
+    description: |
+      The instance of the internet product being added.
+    type: object
+    allOf:
+      - $ref: "#/definitions/Product"
+      - type: object
+        properties:
+          userName:
+            type: string
+          speed:
+            type: string

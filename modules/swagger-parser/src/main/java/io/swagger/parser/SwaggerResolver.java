@@ -4,10 +4,15 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.OperationProcessor;
+import io.swagger.parser.processors.ParameterProcessor;
 import io.swagger.parser.processors.PathsProcessor;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,6 +24,7 @@ public class SwaggerResolver {
     private final PathsProcessor pathProcessor;
     private final DefinitionsProcessor definitionsProcessor;
     private final OperationProcessor operationsProcessor;
+    private final ParameterProcessor parametersProcessor;
     private Settings settings = new Settings();
 
     public SwaggerResolver(Swagger swagger) {
@@ -40,11 +46,21 @@ public class SwaggerResolver {
         definitionsProcessor = new DefinitionsProcessor(cache, swagger);
         pathProcessor = new PathsProcessor(cache, swagger, this.settings);
         operationsProcessor = new OperationProcessor(cache, swagger);
+        parametersProcessor = new ParameterProcessor(cache, swagger);
     }
 
     public Swagger resolve() {
         if (swagger == null) {
             return null;
+        }
+
+        if (swagger.getParameters() != null) {
+            for(String paramname : swagger.getParameters().keySet()) {
+                Parameter param = swagger.getParameters().get(paramname);
+                if (param instanceof RefParameter && ((RefParameter) param).getRefFormat() == RefFormat.RELATIVE) {
+                    swagger.getParameters().put(paramname, parametersProcessor.processParameters(Arrays.asList(param)).get(0));
+                }
+            }
         }
 
         pathProcessor.processPaths();

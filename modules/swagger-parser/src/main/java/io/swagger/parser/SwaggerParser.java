@@ -68,7 +68,11 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().read(location, auths);
             if (output != null) {
-                return new SwaggerResolver(output, auths, location).resolve();
+            	if(resolve){
+            		return new SwaggerResolver(output, auths, location).resolve();
+            	} else {
+            		return output;
+            	}
             }
         } catch (IOException e) {
         }
@@ -94,6 +98,10 @@ public class SwaggerParser {
         return readWithInfo(swaggerAsString, Boolean.TRUE);
     }
 
+    protected JsonNode deserializeYaml(String data) throws IOException{
+        return DeserializationUtils.readYamlTree(data);
+    }
+
     public SwaggerDeserializationResult readWithInfo(String swaggerAsString, boolean resolve) {
         if (swaggerAsString == null || swaggerAsString.trim().isEmpty()) {
             return new SwaggerDeserializationResult().message("empty or null swagger supplied");
@@ -104,7 +112,7 @@ public class SwaggerParser {
                 ObjectMapper mapper = Json.mapper();
                 node = mapper.readTree(swaggerAsString);
             } else {
-                node = DeserializationUtils.readYamlTree(swaggerAsString);
+                node = deserializeYaml(swaggerAsString);
             }
 
             SwaggerDeserializationResult result = new Swagger20Parser().readWithInfo(node);

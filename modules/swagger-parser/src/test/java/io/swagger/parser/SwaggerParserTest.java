@@ -72,6 +72,35 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue111() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-111.yaml", null, true);
+        assertTrue(result.getMessages().get(0).equals("attribute definitions.Filter.items is missing"));
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
+    public void testIssueDefinitionWithDots_2() {
+        Swagger swagger = new SwaggerParser().read("SimpleAPI.yaml");
+        assertNotNull(swagger);
+    }
+
+    @Test
+    public void testIssueDefinitionWithDots() {
+        Swagger swagger = new SwaggerParser().read("API-Service-2.0.0-swagger.yaml");
+        assertNotNull(swagger);
+    }
+
+    @Test
+    public void testIssue995() {
+        Swagger swagger = new SwaggerParser().read("issue-995/digitalExp-Product-Unresolved.yaml");
+        assertNotNull(swagger);
+        assertTrue(swagger.getDefinitions().size() == 6);
+        assertNotNull(swagger.getDefinitions().get("MobileProduct"));
+        assertNotNull(swagger.getDefinitions().get("FixedVoiceProduct"));
+        assertNotNull(swagger.getDefinitions().get("InternetProduct"));
+    }
+
+    @Test
     public void testIssue927() {
         Swagger swagger = new SwaggerParser().read("issue-927/issue-927.yaml");
         assertNotNull(swagger);
@@ -466,6 +495,7 @@ public class SwaggerParserTest {
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
+        assertTrue(swagger.getParameters().get("param2") instanceof HeaderParameter);
     }
 
     @Test
@@ -1378,7 +1408,7 @@ public class SwaggerParserTest {
         assertEquals(1, property.getAllOf().size());
 
         RefProperty refProperty = (RefProperty) property.getAllOf().get(0);
-        assertEquals("#/definitions/def", refProperty.get$ref());
+        assertEquals("#/definitions/def.def", refProperty.get$ref());
 
     }
 

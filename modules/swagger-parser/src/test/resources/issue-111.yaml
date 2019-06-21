@@ -1,0 +1,34 @@
+swagger: '2.0'
+info:
+  version: '0.0.2'
+  title: 'Test'
+  description:
+    This is the test API documentation
+produces:
+  - application/json
+paths:
+
+  '/test':
+    get:
+      summary: test
+      description: Test Endpoint
+      produces:
+        - application/json
+      operationId: getTest
+      parameters:
+        - name: query
+          in: query
+          description: Query That Tests
+          required: true
+          type: string
+      responses:
+        200:
+          description: TestResult
+          schema:
+            $ref: '#/definitions/Filter'
+definitions:
+  Filter:
+    description: Contains the the information for filter presentation
+    properties:
+      hints:
+        type: array

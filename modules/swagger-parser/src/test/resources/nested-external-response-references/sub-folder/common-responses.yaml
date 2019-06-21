@@ -22,6 +22,6 @@ responses:
         
 definitions:      
   User:
-    $ref: '../sub-folder/sub-folder2/common-address.yaml#/definitions/Address'      
+    $ref: '../sub-folder/sub-folder2/common-address.yaml#/definitions/Address'
 #Still a BUG: Should take into account that the like is relative to this file!     
 #   $ref: 'sub-folder2/common-address.yaml#/definitions/Address'          

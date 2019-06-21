@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,7 +59,7 @@ public class ResolverCache {
     /*
     a map that stores original external references, and their associated renamed references
      */
-    private Map<String, String> renameCache = new HashMap<>();
+    private Map<String, String> renameCache = new ConcurrentHashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this.swagger = swagger;
@@ -129,7 +130,7 @@ public class ResolverCache {
         }
 
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
+        JsonNode tree = deserialize(contents, file);
 
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
@@ -153,6 +154,10 @@ public class ResolverCache {
         resolutionCache.put(ref, result);
 
         return result;
+    }
+
+    protected JsonNode deserialize(String contents, String file) {
+        return DeserializationUtils.deserializeIntoTree(contents, file);
     }
 
     protected <T> void updateLocalRefs(String file, T result) {
