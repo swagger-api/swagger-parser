@@ -9,6 +9,25 @@ paths:
     get:
       description: A list of events
       operationId: getEvents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - test
+              type: object
+              properties:
+                test:
+                  type: string
+            examples:
+              plain:
+                summary: plain example
+                value:
+                  test: plain
+              local:
+                $ref: '#/components/examples/LocalRef'
+              external:
+                $ref: './issue-837-853-1131/components.yaml#/components/examples/ExternalRef'
       responses:
         '200':
           description: OK
@@ -29,9 +48,9 @@ paths:
                 local:
                   $ref: '#/components/examples/LocalRef'
                 external:
-                  $ref: './issue-837-853/components.yaml#/components/examples/ExternalRef'
+                  $ref: './issue-837-853-1131/components.yaml#/components/examples/ExternalRef'
   /guests:
-    $ref: './issue-837-853/external-operation.yaml'
+    $ref: './issue-837-853-1131/external-operation.yaml'
 
 components:
   examples:

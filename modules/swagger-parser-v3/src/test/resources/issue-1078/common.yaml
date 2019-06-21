@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  title: 'Common Data Types'
+  description: 'Common Data Types for Test'
+
+paths: {}
+components:
+  schemas:
+
+    LocationType:
+      type: object
+      properties:
+        lat:
+          $ref: '#/components/schemas/Lat'
+        long:
+          $ref: '#/components/schemas/Long'
+      required:
+        - lat
+        - long
+
+    Lat:
+      type: integer
+    Long:
+      type: integer
+
+    SearchResult:
+      type: object
+      required:
+        - simpleTestResults
+      properties:
+        resultId:
+          type: integer
+        simpleTestResults:
+          type: array
+          items:
+            type: string
+
+
+  responses:
+    '404':
+      description: Not Found
+      type: string
