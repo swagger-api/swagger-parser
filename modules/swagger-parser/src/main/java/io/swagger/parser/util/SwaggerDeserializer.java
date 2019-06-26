@@ -917,7 +917,7 @@ public class SwaggerDeserializer {
                                 result.missing(location, "items");
                             }
                         }
-                            impl.property(propertyName, property);
+                        impl.property(propertyName, property);
                     }
                     else {
                         result.invalidType(location, "properties", "object", propertyNode);
