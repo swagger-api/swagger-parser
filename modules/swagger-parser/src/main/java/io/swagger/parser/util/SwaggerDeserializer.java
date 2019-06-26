@@ -916,8 +916,8 @@ public class SwaggerDeserializer {
                             if ("array".equals(property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
                                 result.missing(location, "items");
                             }
-                            impl.property(propertyName, property);
                         }
+                            impl.property(propertyName, property);
                     }
                     else {
                         result.invalidType(location, "properties", "object", propertyNode);
