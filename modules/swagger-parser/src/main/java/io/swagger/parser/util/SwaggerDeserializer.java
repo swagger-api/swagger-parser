@@ -912,7 +912,7 @@ public class SwaggerDeserializer {
                     if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
                         ObjectNode on = (ObjectNode) propertyNode;
                         Property property = property(on, location, result);
-                        if (property != null) {
+                        if(property != null) {
                             if ("array".equals(property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
                                 result.missing(location, "items");
                             }
