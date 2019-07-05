@@ -385,6 +385,7 @@ public class OpenAPIV3ParserTest {
 
         final OpenAPI result = parser.read("src/test/resources/sample/SwaggerPetstore.yaml");
         Assert.assertNotNull(result);
+        Yaml.prettyPrint(result.getInfo().getDescription());
         assertEquals("Documentation de l'API élaboré par nos soins", result.getInfo().getDescription());
     }
 
