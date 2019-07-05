@@ -66,6 +66,24 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1119_FAILS() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        OpenAPI openAPI = parser.read("encoding/petstore_fail.yaml");
+        assertNotNull(openAPI);
+        Yaml.prettyPrint(openAPI);
+        assertEquals(openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getDescription(), "Cuántos artículos devolver al mismo tiempo (máximo 100)");
+    }
+
+    @Test
+    public void testIssue1119_OK() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        OpenAPI openAPI = parser.read("encoding/petstore_OK.yaml");
+        assertNotNull(openAPI);
+        Yaml.prettyPrint(openAPI);
+        assertEquals(openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getDescription(), "Cuántos artículos devolver al mismo tiempo (máximo 100)");
+    }
+
 
     @Test
     public void testIssue1108() {
