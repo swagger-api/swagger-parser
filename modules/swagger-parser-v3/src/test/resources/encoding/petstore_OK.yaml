@@ -16,7 +16,7 @@ paths:
       parameters:
         - name: limit
           in: query
-          description: Cuántos artículos devolver al mismo tiempo (máximo 100)
+          description: "Cuántos artículos devolver al mismo tiempo (máximo 100)"
           required: false
           schema:
             type: integer
