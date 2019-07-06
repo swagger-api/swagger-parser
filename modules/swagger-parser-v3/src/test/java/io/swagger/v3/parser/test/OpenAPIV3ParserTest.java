@@ -67,6 +67,29 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
 
+
+    @Test
+    public void testIssue339() throws Exception {
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        OpenAPI api = openAPIV3Parser.read("issue-339.yaml");
+        assertNotNull(api);
+        Parameter param = api.getPaths().get("/store/order/{orderId}").getGet().getParameters().get(0);
+        assertTrue(param instanceof PathParameter);
+        PathParameter pp = (PathParameter) param;
+        assertTrue(pp.getSchema().getMinimum().toString().equals("1"));
+        assertTrue(pp.getSchema().getMaximum().toString().equals("5"));
+    }
+
+    @Test
+    public void testIssue1119() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        parser.setEncoding("ISO-8859-1");
+        OpenAPI openAPI = parser.read("src/test/resources/issue-1119.yaml");
+        assertNotNull(openAPI);
+        assertEquals(openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getDescription(),"Cuántos artículos devolver al mismo tiempo (máximo 100)");
+    }
+
+
     @Test
     public void testIssue1108() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -1335,19 +1358,6 @@ public class OpenAPIV3ParserTest {
 
         BigDecimal minimum = orderIdPathParam.getSchema().getMinimum();
         assertEquals(minimum.toString(), "1");
-    }
-
-    @Test
-    public void testIssue339() throws Exception {
-        OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        final OpenAPI openAPI = parser.read("src/test/resources/issue-339.yaml");
-
-        Parameter param = openAPI.getPaths().get("/store/order/{orderId}").getGet().getParameters().get(0);
-        assertTrue(param instanceof PathParameter);
-        PathParameter pp = (PathParameter) param;
-
-        assertTrue(pp.getSchema().getMinimum().toString().equals("1"));
-        assertTrue(pp.getSchema().getMaximum().toString().equals("5"));
     }
 
     @Test
