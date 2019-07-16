@@ -218,7 +218,7 @@ public class SwaggerDeserializer {
             return false;
         } else {
             for (Parameter parameter : parameters) {
-                if (pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn())) {
+                if (parameter instanceof RefParameter || (pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn()))) {
                     return true;
                 }
             }

@@ -78,6 +78,12 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue1146() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-1146.yaml", null, true);
+        assertEquals(0, result.getMessages().size());
+    }
+
+    @Test
     public void testIssueDefinitionWithDots_2() {
         Swagger swagger = new SwaggerParser().read("SimpleAPI.yaml");
         assertNotNull(swagger);
