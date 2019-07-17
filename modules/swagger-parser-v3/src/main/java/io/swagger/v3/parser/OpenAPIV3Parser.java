@@ -88,12 +88,14 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         SwaggerParseResult parsed;
         for (SwaggerParserExtension extension : parserExtensions) {
             parsed = extension.readLocation(location, auths, resolve);
-            for (String message : parsed.getMessages()) {
-                LOGGER.info("{}: {}", extension, message);
-            }
-            output = parsed.getOpenAPI();
-            if (output != null) {
-                return output;
+            if (parsed != null) {
+                for (String message : parsed.getMessages()) {
+                    LOGGER.info("{}: {}", extension, message);
+                }
+                output = parsed.getOpenAPI();
+                if (output != null) {
+                    return output;
+                }
             }
         }
         return null;

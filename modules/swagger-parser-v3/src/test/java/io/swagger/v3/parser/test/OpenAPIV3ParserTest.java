@@ -76,6 +76,13 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue1155() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        OpenAPI openAPI = parser.read("issue-1155.json");
+        assertNull(openAPI);
+    }
+
+    @Test
     public void testRemoteParameterIssue1094(@Injectable final List<AuthorizationValue> auths) throws Exception{
 
         OpenAPI result = new OpenAPIV3Parser().read("issue-1094/swagger.yaml");
