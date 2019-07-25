@@ -5,6 +5,7 @@ public class ParseOptions {
     private boolean resolveCombinators = true;
     private boolean resolveFully;
     private boolean flatten;
+    private boolean skipMatches;
 
     public boolean isResolve() {
         return resolve;
@@ -33,4 +34,12 @@ public class ParseOptions {
     public boolean isFlatten() { return flatten; }
 
     public void setFlatten(boolean flatten) { this.flatten = flatten; }
+
+    public boolean isSkipMatches() {
+        return skipMatches;
+    }
+
+    public void setSkipMatches(boolean skipMatches) {
+        this.skipMatches = skipMatches;
+    }
 }
