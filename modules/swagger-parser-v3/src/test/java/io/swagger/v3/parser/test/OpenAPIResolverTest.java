@@ -491,6 +491,33 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void testIssue1161(@Injectable final List<AuthorizationValue> auths) {
+        String path = "/issue-1161/swagger.yaml";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+
+        Schema petsSchema = openAPI.getComponents().getSchemas().get("Pets");
+        Schema colouringsSchema = openAPI.getComponents().getSchemas().get("Colouring");
+
+        assertNotNull(petsSchema);
+        assertNotNull(colouringsSchema);
+
+        assertTrue(petsSchema instanceof ComposedSchema);
+        assertTrue(petsSchema.getProperties() != null);
+        assertTrue(((ComposedSchema) petsSchema).getOneOf() != null);
+
+        Schema petsColouringProperty = (Schema) petsSchema.getProperties().get("colouring");
+        assertTrue(petsColouringProperty.get$ref() == null);
+        assertTrue(petsColouringProperty == colouringsSchema);
+    }
+
+    @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
         String yaml = "" +
                 "openapi: 3.0.1\n" +
