@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,11 +31,23 @@ import java.util.ServiceLoader;
 public class OpenAPIV3Parser implements SwaggerParserExtension {
     private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
+    private static String encoding = "UTF-8";
 
     static {
         JSON_MAPPER = ObjectMapperFactory.createJson();
         YAML_MAPPER = ObjectMapperFactory.createYaml();
     }
+
+    public static String getEncoding() {
+        return encoding;
+    }
+
+    public static void setEncoding(String encoding) {
+        if (Charset.isSupported(encoding)) {
+            OpenAPIV3Parser.encoding = encoding;
+        }
+    }
+
     @Override
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
@@ -130,7 +143,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     path = Paths.get(location);
                 }
                 if (Files.exists(path)) {
-                    data = FileUtils.readFileToString(path.toFile(), "UTF-8");
+                    data = FileUtils.readFileToString(path.toFile(), encoding);
                 } else {
                     data = ClasspathHelper.loadFileFromClasspath(location);
                 }
@@ -197,19 +210,36 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return result;
     }
 
-    protected List<SwaggerParserExtension> getExtensions() {
-        List<SwaggerParserExtension> extensions = new ArrayList<>();
-
-        ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class);
-        Iterator<SwaggerParserExtension> itr = loader.iterator();
-        while (itr.hasNext()) {
-            extensions.add(itr.next());
+    /**
+     * Locates extensions on the current thread class loader and then, if it differs
+     * from this class classloader (as in OSGi), locates extensions from this
+     * class classloader as well.
+     * 
+     * @return a list of extensions
+     */
+    public static List<SwaggerParserExtension> getExtensions() {
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        List<SwaggerParserExtension> extensions = getExtensions(tccl);
+        ClassLoader cl = SwaggerParserExtension.class.getClassLoader();
+        if (cl != tccl) {
+            extensions.addAll(getExtensions(cl));
         }
         extensions.add(0, new OpenAPIV3Parser());
         return extensions;
     }
 
-    /**
+    protected static List<SwaggerParserExtension> getExtensions(ClassLoader cl) {
+        List<SwaggerParserExtension> extensions = new ArrayList<>();
+
+        ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class, cl);
+        Iterator<SwaggerParserExtension> itr = loader.iterator();
+        while (itr.hasNext()) {
+            extensions.add(itr.next());
+        }
+        return extensions;
+    }
+
+   /**
      * Transform the swagger-model version of AuthorizationValue into a parser-specific one, to avoid
      * dependencies across extensions
      *

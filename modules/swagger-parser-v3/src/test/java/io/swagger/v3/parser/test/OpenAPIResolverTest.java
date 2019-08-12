@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -492,6 +491,33 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void testIssue1161(@Injectable final List<AuthorizationValue> auths) {
+        String path = "/issue-1161/swagger.yaml";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
+        ResolverFully resolverUtil = new ResolverFully();
+        resolverUtil.resolveFully(openAPI);
+
+        Schema petsSchema = openAPI.getComponents().getSchemas().get("Pets");
+        Schema colouringsSchema = openAPI.getComponents().getSchemas().get("Colouring");
+
+        assertNotNull(petsSchema);
+        assertNotNull(colouringsSchema);
+
+        assertTrue(petsSchema instanceof ComposedSchema);
+        assertTrue(petsSchema.getProperties() != null);
+        assertTrue(((ComposedSchema) petsSchema).getOneOf() != null);
+
+        Schema petsColouringProperty = (Schema) petsSchema.getProperties().get("colouring");
+        assertTrue(petsColouringProperty.get$ref() == null);
+        assertTrue(petsColouringProperty == colouringsSchema);
+    }
+
+    @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
         String yaml = "" +
                 "openapi: 3.0.1\n" +
@@ -657,7 +683,6 @@ public class OpenAPIResolverTest {
         ParseOptions resolve = new ParseOptions();
         resolve.setResolveFully(true);
         final OpenAPI openAPI = new OpenAPIV3Parser().read("./ref-without-component/a.yaml", null, resolve);
-
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
         Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
     }
@@ -1162,6 +1187,23 @@ public class OpenAPIResolverTest {
             Json.mapper().writeValueAsString(openAPI);
         }
         catch (Exception e) {
+            fail("Recursive loop found");
+        }
+    }
+
+    @Test
+    public void recursiveIssue984() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue-984-simple.yaml", null, parseOptions);
+        if (openAPI == null) fail("failed parsing issue-984");
+        try {
+            Json.pretty(openAPI);
+            //System.out.println(Json.pretty(openAPI));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
             fail("Recursive loop found");
         }
     }

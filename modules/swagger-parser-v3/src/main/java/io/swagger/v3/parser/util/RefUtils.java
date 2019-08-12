@@ -2,22 +2,31 @@ package io.swagger.v3.parser.util;
 
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.processors.ExternalRefProcessor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 public class RefUtils {
 
+    private static final String REFERENCE_SEPARATOR = "#/";
+
+    private RefUtils() {
+        // static access only
+    }
+
     public static String computeDefinitionName(String ref) {
 
-        final String[] refParts = ref.split("#/");
+        final String[] refParts = ref.split(REFERENCE_SEPARATOR);
 
         if (refParts.length > 2) {
             throw new RuntimeException("Invalid ref format: " + ref);
@@ -43,6 +52,16 @@ public class RefUtils {
         return plausibleName;
     }
 
+    public static Optional<String> getExternalPath(String ref) {
+        if (ref == null) {
+            return Optional.empty();
+        }
+        return Optional.of(ref.split(REFERENCE_SEPARATOR))
+            .filter(it -> it.length == 2)
+            .map(it -> it[0])
+            .filter(it -> !it.isEmpty());
+    }
+
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
         return refFormat == RefFormat.URL || refFormat == RefFormat.RELATIVE;
     }
@@ -52,9 +71,9 @@ public class RefUtils {
         ref = mungedRef(ref);
         if(ref.startsWith("http")||ref.startsWith("https")) {
             result = RefFormat.URL;
-        } else if(ref.startsWith("#/")) {
+        } else if(ref.startsWith(REFERENCE_SEPARATOR)) {
             result = RefFormat.INTERNAL;
-        } else if(ref.startsWith(".") || ref.startsWith("/") || ref.indexOf("#/") > 0) {
+        } else if(ref.startsWith(".") || ref.startsWith("/") || ref.indexOf(REFERENCE_SEPARATOR) > 0) {
             result = RefFormat.RELATIVE;
         }
 
@@ -100,6 +119,32 @@ public class RefUtils {
 
     }
 
+    public static String readExternalClasspathRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
+                                                  String rootPath) {
+
+        if (!RefUtils.isAnExternalRefFormat(refFormat)) {
+            throw new RuntimeException("Ref is not external");
+        }
+
+        String result;
+
+        try {
+            if (refFormat == RefFormat.URL) {
+                result = RemoteUrl.urlToString(file, auths);
+            } else {
+                //its assumed to be a relative ref
+                String pathRef = ExternalRefProcessor.join(rootPath, file);
+
+                result = ClasspathHelper.loadFileFromClasspath(pathRef);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+        }
+
+        return result;
+
+    }
+
     public static String buildUrl(String rootPath, String relativePath) {
         String[] rootPathParts = rootPath.split("/");
         String [] relPathParts = relativePath.split("/");
@@ -114,6 +159,9 @@ public class RefUtils {
         if(!"".equals(rootPathParts[rootPathParts.length - 1])) {
             trimRoot = 1;
         }
+        if("".equals(relPathParts[0])) {
+            trimRel = 1; trimRoot = rootPathParts.length-3;
+        }        
         for(int i = 0; i < rootPathParts.length; i++) {
             if("".equals(rootPathParts[i])) {
                 trimRel += 1;
@@ -127,7 +175,7 @@ public class RefUtils {
                 trimRel += 1;
             }
             else if ("..".equals(relPathParts[i])) {
-                trimRel += 1;
+                trimRel += 1; trimRoot += 1;
             }
         }
 
@@ -136,7 +184,7 @@ public class RefUtils {
         System.arraycopy(relPathParts,
                 trimRel,
                 outputParts,
-                rootPathParts.length - trimRoot + trimRel - 1,
+                rootPathParts.length - trimRoot,
                 relPathParts.length - trimRel);
 
         return StringUtils.join(outputParts, "/");
@@ -159,18 +207,26 @@ public class RefUtils {
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
 
                 if(Files.exists(pathToUse)) {
-                    result = IOUtils.toString(new FileInputStream(pathToUse.toFile()), "UTF-8");
+                    result = readAll(pathToUse);
                 } else {
                     String url = file;
-                    if(url.contains("..")) {
-                        url = parentDirectory + url.substring(url.indexOf(".") + 2);
-                    }else{
+                    if (url.contains("..")) {
+                        int parentCount = 0;
+                        while (url.contains("..")) {
+                            url = url.substring(url.indexOf(".") + 2);
+                            parentCount++;
+                        }
+                        for (int i = 0; i < parentCount - 1; i++) {
+                            parentDirectory = parentDirectory.getParent();
+                        }
+                        url = parentDirectory + url;
+                    } else {
                         url = parentDirectory + url.substring(url.indexOf(".") + 1);
                     }
                     final Path pathToUse2 = parentDirectory.resolve(url).normalize();
 
                     if(Files.exists(pathToUse2)) {
-                        result = IOUtils.toString(new FileInputStream(pathToUse2.toFile()), "UTF-8");
+                        result = readAll(pathToUse2);
                     }
                 }
                 if (result == null){
@@ -185,5 +241,11 @@ public class RefUtils {
 
         return result;
 
+    }
+
+    private static String readAll(Path path) throws IOException {
+        try (InputStream inputStream = new FileInputStream(path.toFile())) {
+            return IOUtils.toString(inputStream, UTF_8);
+        }
     }
 }

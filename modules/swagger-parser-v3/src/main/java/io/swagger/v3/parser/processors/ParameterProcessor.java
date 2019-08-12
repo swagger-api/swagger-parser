@@ -2,6 +2,7 @@ package io.swagger.v3.parser.processors;
 
 
 import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -142,6 +143,40 @@ public class ParameterProcessor {
             Schema schema = parameter.getSchema();
             if(schema != null){
                 schemaProcessor.processSchema(schema);
+            }else if(parameter.getContent() != null){
+                Map<String,MediaType> content = parameter.getContent();
+                for( String mediaName : content.keySet()) {
+                    MediaType mediaType = content.get(mediaName);
+                    if(mediaType.getSchema()!= null) {
+                        schema = mediaType.getSchema();
+                        if (schema != null) {
+                            schemaProcessor.processSchema(schema);
+                        }
+                    }
+                    if(mediaType.getExamples() != null) {
+                        for(Example ex: mediaType.getExamples().values()){
+                            exampleProcessor.processExample(ex);
+                        }
+                    }
+                }
+
+            }
+            else if(parameter.getContent() != null){
+                Map<String,MediaType> content = parameter.getContent();
+                for( String mediaName : content.keySet()) {
+                    MediaType mediaType = content.get(mediaName);
+                    if(mediaType.getSchema()!= null) {
+                        schema = mediaType.getSchema();
+                        if (schema != null) {
+                            schemaProcessor.processSchema(schema);
+                        }
+                    }
+                    if(mediaType.getExamples() != null) {
+                        for(Example ex: mediaType.getExamples().values()){
+                            exampleProcessor.processExample(ex);
+                        }
+                    }
+                }
             }
         }
 

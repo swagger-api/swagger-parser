@@ -20,6 +20,8 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+import io.swagger.v3.parser.util.RefUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +29,11 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
 import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.getExternalPath;
 import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
@@ -73,7 +77,7 @@ public final class ExternalRefProcessor {
         Schema existingModel = schemas.get(possiblyConflictingDefinitionName);
 
         if (existingModel != null) {
-            LOGGER.debug("A model for " + existingModel + " already exists");
+            LOGGER.warn("A model for " + existingModel + " already exists");
             if(existingModel.get$ref() != null) {
                 // use the new model
                 existingModel = null;
@@ -178,7 +182,7 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
-    private void processProperty(Schema property, String file) {
+    private void processSchema(Schema property, String file) {
         if (property != null) {
             if (StringUtils.isNotBlank(property.get$ref())) {
                 processRefSchema(property, file);
@@ -187,10 +191,10 @@ public final class ExternalRefProcessor {
                 processProperties(property.getProperties(), file);
             }
             if (property instanceof ArraySchema) {
-                processProperty(((ArraySchema) property).getItems(), file);
+                processSchema(((ArraySchema) property).getItems(), file);
             }
             if (property.getAdditionalProperties() instanceof Schema) {
-                processProperty(((Schema) property.getAdditionalProperties()), file);
+                processSchema(((Schema) property.getAdditionalProperties()), file);
             }
             if (property instanceof ComposedSchema) {
                 ComposedSchema composed = (ComposedSchema) property;
@@ -204,7 +208,7 @@ public final class ExternalRefProcessor {
     private void processProperties(Collection<Schema> properties, String file) {
         if (properties != null) {
             for (Schema property : properties) {
-                processProperty(property, file);
+                processSchema(property, file);
             }
         }
     }
@@ -265,6 +269,8 @@ public final class ExternalRefProcessor {
                             } else {
                                 processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
                             }
+                        }else{
+                            processSchema(schema,file);
                         }
                     }
                 }
@@ -689,8 +695,10 @@ public final class ExternalRefProcessor {
             return;
         }
         String $ref = subRef.get$ref();
+        String subRefExternalPath = getExternalPath(subRef.get$ref())
+            .orElse(null);
 
-        if (format.equals(RefFormat.RELATIVE)) {
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
             $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
         }else {
