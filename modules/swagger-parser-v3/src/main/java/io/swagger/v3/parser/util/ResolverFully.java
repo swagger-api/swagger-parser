@@ -291,6 +291,7 @@ public class ResolverFully {
 
                 // if we make it without a resolution loop, we can update the reference
                 resolvedModels.put(ref, model);
+                schemas.put(ref, model);
 
                 return model;
 
