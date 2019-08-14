@@ -66,6 +66,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -491,6 +492,29 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void testIssue1157(@Injectable final List<AuthorizationValue> auths) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPIAnyOf = new OpenAPIV3Parser().readLocation("/issue-1157/anyOf-example.yaml", auths, options).getOpenAPI();
+        Schema petSchemaAnyOf = openAPIAnyOf.getComponents().getSchemas().get("Pet");
+        assertTrue(petSchemaAnyOf instanceof ComposedSchema);
+        assertTrue(((ComposedSchema) petSchemaAnyOf).getAnyOf() != null);
+
+        OpenAPI openAPIOneOf = new OpenAPIV3Parser().readLocation("/issue-1157/oneOf-example.yaml", auths, options).getOpenAPI();
+        Schema petSchemaOneOf = openAPIOneOf.getComponents().getSchemas().get("Pet");
+        assertTrue(petSchemaOneOf instanceof ComposedSchema);
+        assertTrue(((ComposedSchema) petSchemaOneOf).getOneOf() != null);
+
+        OpenAPI openAPIAllOf = new OpenAPIV3Parser().readLocation("/issue-1157/allOf-example.yaml", auths, options).getOpenAPI();
+        Schema petSchemaAllOf = openAPIAllOf.getComponents().getSchemas().get("Pet");
+        assertFalse(petSchemaAllOf instanceof ComposedSchema);
+        assertTrue(petSchemaAllOf.getProperties() != null);
+
+    }
+
+    @Test
     public void testIssue1161(@Injectable final List<AuthorizationValue> auths) {
         String path = "/issue-1161/swagger.yaml";
 
@@ -499,8 +523,6 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
-        ResolverFully resolverUtil = new ResolverFully();
-        resolverUtil.resolveFully(openAPI);
 
         Schema petsSchema = openAPI.getComponents().getSchemas().get("Pets");
         Schema colouringsSchema = openAPI.getComponents().getSchemas().get("Colouring");
