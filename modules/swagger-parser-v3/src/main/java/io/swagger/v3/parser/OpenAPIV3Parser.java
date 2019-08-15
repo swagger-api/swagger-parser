@@ -68,9 +68,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         if (options.isResolveFully()) {
                             result.setOpenAPI(resolver.resolve());
                             new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
-                        }else if (options.isFlatten()){
-                            InlineModelResolver inlineResolver = new InlineModelResolver();
-                            inlineResolver.flatten(result.getOpenAPI());
+                        } else if (options.isFlatten()) {
+                            InlineModelResolver inlineModelResolver = new InlineModelResolver();
+                            inlineModelResolver.setSkipMatches(options.isSkipMatches());
+                            inlineModelResolver.flatten(result.getOpenAPI());
                         }
                     }
                 }
@@ -194,7 +195,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                     } else if (options.isFlatten()) {
-                        new InlineModelResolver().flatten(result.getOpenAPI());
+                        InlineModelResolver inlineModelResolver = new InlineModelResolver();
+                        inlineModelResolver.setSkipMatches(options.isSkipMatches());
+                        inlineModelResolver.flatten(result.getOpenAPI());
                     }
                 }else{
                     JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());

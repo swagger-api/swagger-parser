@@ -2051,6 +2051,48 @@ public class OpenAPIV3ParserTest {
         assertFalse(yaml.contains("$ref"));
     }
 
+    @Test
+    public void testParseOptionsSkipMatchesFalse() {
+        final String location = "src/test/resources/skipMatches.yaml";
+
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setSkipMatches(false);
+
+        final OpenAPIV3Parser parserUnderTest = new OpenAPIV3Parser();
+
+        final SwaggerParseResult result = parserUnderTest.readLocation(location, null, options);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertEquals(4, openAPI.getComponents().getSchemas().size());
+    }
+
+    @Test
+    public void testParseOptionsSkipMatchesTrue() {
+        final String location = "src/test/resources/skipMatches.yaml";
+
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setSkipMatches(true);
+
+        final OpenAPIV3Parser parserUnderTest = new OpenAPIV3Parser();
+
+        final SwaggerParseResult result = parserUnderTest.readLocation(location, null, options);
+
+        final OpenAPI openAPI = result.getOpenAPI();
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertEquals(6, openAPI.getComponents().getSchemas().size());
+    }
+
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
