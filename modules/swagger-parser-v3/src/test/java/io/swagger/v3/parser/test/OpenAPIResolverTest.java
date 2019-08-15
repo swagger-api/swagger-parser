@@ -540,6 +540,51 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void testIssue1170(@Injectable final List<AuthorizationValue> auths) {
+        String path = "/issue-1170/swagger.yaml";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
+
+        // Array schema with items $ref
+        Schema breedsListSchema = openAPI.getComponents().getSchemas().get("BreedsList");
+        Schema breedSchema = openAPI.getComponents().getSchemas().get("Breed");
+
+        assertNotNull(breedsListSchema);
+        assertNotNull(breedSchema);
+
+        assertTrue(breedsListSchema instanceof ArraySchema);
+        Schema breedPropertySchema = ((ArraySchema) breedsListSchema).getItems().getProperties().get("breed");
+        assertNotNull(breedPropertySchema);
+
+        // Verify items resolved fully
+        assertTrue(breedPropertySchema.get$ref() == null);
+        assertTrue(breedPropertySchema == breedSchema);
+
+
+        // Array schema with inline items object with $ref properties
+        Schema petsListSchema = openAPI.getComponents().getSchemas().get("PetsList");
+        Schema colouringsSchema = openAPI.getComponents().getSchemas().get("Colouring");
+        Schema colourSchema = openAPI.getComponents().getSchemas().get("Colour");
+
+        assertNotNull(petsListSchema);
+        assertNotNull(colouringsSchema);
+        assertNotNull(colourSchema);
+
+        assertTrue(petsListSchema instanceof ArraySchema);
+        Schema colouringPropertySchema = ((ArraySchema) petsListSchema).getItems().getProperties().get("colouring");
+        assertNotNull(colouringPropertySchema);
+
+        // Verify inline items resolved fully
+        assertTrue(colouringPropertySchema.get$ref() == null);
+        assertTrue(colouringPropertySchema == colouringsSchema);
+
+    }
+
+    @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
         String yaml = "" +
                 "openapi: 3.0.1\n" +
