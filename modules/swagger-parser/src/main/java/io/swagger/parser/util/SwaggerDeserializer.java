@@ -189,7 +189,7 @@ public class SwaggerDeserializer {
                 } else {
                     ObjectNode path = (ObjectNode) pathValue;
                     Path pathObj = path(path, location + ".'" + pathName + "'", result);
-                    String[] eachPart = pathName.split("/");
+                    String[] eachPart = pathName.split("[-/.]+");
                     for (String part : eachPart) {
                         if (part.startsWith("{") && part.endsWith("}") && part.length() > 2) {
                             String pathParam = part.substring(1, part.length() - 1);
