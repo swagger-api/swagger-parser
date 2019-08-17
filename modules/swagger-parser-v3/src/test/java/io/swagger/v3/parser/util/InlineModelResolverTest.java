@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -426,6 +427,111 @@ public class InlineModelResolverTest {
         assertTrue(model.getProperties().get("name") instanceof StringSchema);
     }
 
+    @Test
+    public void testSkipInlineMatchesFalse() {
+        final OpenAPI openAPI = new OpenAPI();
+
+        final InlineModelResolver inlineModelResolver = new InlineModelResolver();
+        inlineModelResolver.setSkipMatches(false);
+
+        final Schema operationAlphaInAsset = new ObjectSchema();
+        operationAlphaInAsset.setTitle("operationAlphaInAsset");
+        operationAlphaInAsset.addProperties("id1", new IntegerSchema());
+        operationAlphaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationAlphaIn = new ObjectSchema();
+        operationAlphaIn.setTitle("operationAlphaIn");
+        operationAlphaIn.addProperties("asset", operationAlphaInAsset);
+
+        final Schema operationAlphaRequest = new ObjectSchema();
+        operationAlphaRequest.setTitle("operationAlphaRequest");
+        operationAlphaRequest.addProperties("in", operationAlphaIn);
+
+        final Schema operationBetaInAsset = new ObjectSchema();
+        operationBetaInAsset.setTitle("operationBetaInAsset");
+        operationBetaInAsset.addProperties("id1", new IntegerSchema());
+        operationBetaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationBetaIn = new ObjectSchema();
+        operationBetaIn.setTitle("operationBetaIn");
+        operationBetaIn.addProperties("asset", operationBetaInAsset);
+
+        final Schema operationBetaRequest = new ObjectSchema();
+        operationBetaRequest.setTitle("operationBetaRequest");
+        operationBetaRequest.addProperties("in", operationBetaIn);
+
+        openAPI.path("/operationAlpha", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationAlphaRequest))))));
+
+        openAPI.path("/operationBeta", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationBetaRequest))))));
+
+        inlineModelResolver.flatten(openAPI);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertEquals(4, openAPI.getComponents().getSchemas().size());
+    }
+
+    @Test
+    public void testSkipInlineMatchesTrue() {
+        final OpenAPI openAPI = new OpenAPI();
+
+        final InlineModelResolver inlineModelResolver = new InlineModelResolver();
+        inlineModelResolver.setSkipMatches(true);
+
+        final Schema operationAlphaInAsset = new ObjectSchema();
+        operationAlphaInAsset.setTitle("operationAlphaInAsset");
+        operationAlphaInAsset.addProperties("id1", new IntegerSchema());
+        operationAlphaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationAlphaIn = new ObjectSchema();
+        operationAlphaIn.setTitle("operationAlphaIn");
+        operationAlphaIn.addProperties("asset", operationAlphaInAsset);
+
+        final Schema operationAlphaRequest = new ObjectSchema();
+        operationAlphaRequest.setTitle("operationAlphaRequest");
+        operationAlphaRequest.addProperties("in", operationAlphaIn);
+
+        final Schema operationBetaInAsset = new ObjectSchema();
+        operationBetaInAsset.setTitle("operationBetaInAsset");
+        operationBetaInAsset.addProperties("id1", new IntegerSchema());
+        operationBetaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationBetaIn = new ObjectSchema();
+        operationBetaIn.setTitle("operationBetaIn");
+        operationBetaIn.addProperties("asset", operationBetaInAsset);
+
+        final Schema operationBetaRequest = new ObjectSchema();
+        operationBetaRequest.setTitle("operationBetaRequest");
+        operationBetaRequest.addProperties("in", operationBetaIn);
+
+        openAPI.path("/operationAlpha", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationAlphaRequest))))));
+
+        openAPI.path("/operationBeta", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationBetaRequest))))));
+
+        inlineModelResolver.flatten(openAPI);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertEquals(6, openAPI.getComponents().getSchemas().size());
+    }
 
     @Test
     public void resolveInlineArrayModelWithTitle() throws Exception {

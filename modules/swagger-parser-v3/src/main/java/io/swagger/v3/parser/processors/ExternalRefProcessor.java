@@ -173,9 +173,13 @@ public final class ExternalRefProcessor {
                 }
 
             }
-            if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null && ((ArraySchema) schema).getItems().get$ref() != null
-                    && StringUtils.isNotBlank(((ArraySchema) schema).getItems().get$ref())) {
-                processRefSchema(((ArraySchema) schema).getItems(), file);
+            if (schema instanceof ArraySchema && ((ArraySchema) schema).getItems() != null) {
+                ArraySchema arraySchema = (ArraySchema) schema;
+                if (StringUtils.isNotBlank(arraySchema.getItems().get$ref())) {
+                    processRefSchema(((ArraySchema) schema).getItems(), file);
+                } else {
+                    processProperties(arraySchema.getItems().getProperties() ,file);
+                }
             }
         }
 

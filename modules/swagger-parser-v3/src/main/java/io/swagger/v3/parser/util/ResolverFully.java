@@ -1,5 +1,19 @@
 package io.swagger.v3.parser.util;
 
+import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
+import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -22,19 +36,6 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.models.RefFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
-import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
-import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public class ResolverFully {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResolverFully.class);
@@ -290,6 +291,7 @@ public class ResolverFully {
 
                 // if we make it without a resolution loop, we can update the reference
                 resolvedModels.put(ref, model);
+                schemas.put(ref, model);
 
                 return model;
 
@@ -300,12 +302,7 @@ public class ResolverFully {
 
         if(schema instanceof ArraySchema) {
             ArraySchema arrayModel = (ArraySchema) schema;
-            if(arrayModel.getItems().get$ref() != null) {
-                arrayModel.setItems(resolveSchema(arrayModel.getItems()));
-            } else {
-                arrayModel.setItems(arrayModel.getItems());
-            }
-
+            arrayModel.setItems(resolveSchema(arrayModel.getItems()));
             return arrayModel;
         }
 
@@ -325,14 +322,7 @@ public class ResolverFully {
                     Schema innerProperty = obj.getProperties().get(propertyName);
                     // reference check
                     if(schema != innerProperty) {
-                        if(resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != innerProperty) {
-                            LOGGER.debug("avoiding infinite loop");
-                            Schema resolved = resolveSchema(innerProperty);
-                            updated.put(propertyName, resolved);
-                            resolvedProperties.put(propertyName, resolved);
-                        }else {
-                            updated.put(propertyName, resolvedProperties.get(propertyName));
-                        }
+                        updated.put(propertyName, resolveSchemaProperty(propertyName, innerProperty));
                     }
                 }
                 obj.setProperties(updated);
@@ -341,191 +331,59 @@ public class ResolverFully {
         }
 
 
-        if(schema instanceof ComposedSchema) {
+        Schema result = schema;
+
+        if (schema instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schema;
-            boolean adjacent = false;
-            if (aggregateCombinators) {
-                Schema model = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
-                Set<String> requiredProperties = new HashSet<>();
+
+            boolean hasAllOf = composedSchema.getAllOf() != null;
+            boolean hasAnyOf = composedSchema.getAnyOf() != null;
+            boolean hasOneOf = composedSchema.getOneOf() != null;
+            boolean adjacent = (hasAllOf && hasAnyOf) || (hasAllOf && hasOneOf) || (hasAnyOf && hasOneOf);
+
+            if (aggregateCombinators && (hasAllOf || adjacent)) {
+                Schema combinedModel = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
                 Set<Object> examples = new HashSet<>();
 
-                if ((composedSchema.getAllOf() != null && composedSchema.getAnyOf() != null && composedSchema.getOneOf() != null)||
-                        (composedSchema.getAllOf() != null && composedSchema.getAnyOf() != null) ||
-                        (composedSchema.getAllOf() != null && composedSchema.getOneOf() != null)||
-                        (composedSchema.getOneOf() != null && composedSchema.getAnyOf() != null)){
-
-                    adjacent = true;
-
+                if (hasAllOf) {
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAllOf(), examples);
+                }
+                if (hasOneOf) {
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getOneOf(), examples);
+                }
+                if (hasAnyOf) {
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples);
                 }
 
-                if (composedSchema.getAllOf() != null) {
-                    for (Schema innerModel : composedSchema.getAllOf()) {
-                        Schema resolved = resolveSchema(innerModel);
-                        Map<String, Schema> properties = resolved.getProperties();
-                        if (resolved.getProperties() != null) {
-                            for (String key : properties.keySet()) {
-                                Schema prop = (Schema) resolved.getProperties().get(key);
-                                if(resolvedProperties.get(key) == null || resolvedProperties.get(key) != prop) {
-                                    LOGGER.debug("avoiding infinite loop");
-                                    Schema resolvedProp = resolveSchema(prop);
-                                    model.addProperties(key,resolvedProp );
-                                    resolvedProperties.put(key, resolvedProp);
-                                }else {
-                                    model.addProperties(key,resolvedProperties.get(key));
-                                }
-                            }
-                            if (resolved.getRequired() != null) {
-                                for (int i = 0; i < resolved.getRequired().size(); i++) {
-                                    if (resolved.getRequired().get(i) != null) {
-                                        requiredProperties.add(resolved.getRequired().get(i).toString());
-                                    }
-                                }
-                            }
-                        }
-                        if (requiredProperties.size() > 0) {
-                            model.setRequired(new ArrayList<>(requiredProperties));
-                        }
-                        if (resolved.getExample() != null) {
-                            examples.add(resolved.getExample());
-                        }
-                        if (composedSchema.getExtensions() != null) {
-                            Map<String, Object> extensions = composedSchema.getExtensions();
-                            for (String key : extensions.keySet()) {
-                                model.addExtension(key, composedSchema.getExtensions().get(key));
-                            }
-                        }
-                    }
-
-                } if (composedSchema.getOneOf() != null) {
-                    if(adjacent == false) {
-                        Schema resolved;
-                        List<Schema> list = new ArrayList<>();
-                        for (Schema innerModel : composedSchema.getOneOf()) {
-                            resolved = resolveSchema(innerModel);
-                            list.add(resolved);
-                        }
-                        composedSchema.setOneOf(list);
-                        return composedSchema;
-                    }else {
-                        for (Schema innerModel : composedSchema.getOneOf()) {
-                            Schema resolved = resolveSchema(innerModel);
-                            Map<String, Schema> properties = resolved.getProperties();
-                            if (resolved.getProperties() != null) {
-                                for (String key : properties.keySet()) {
-                                    Schema prop = (Schema) resolved.getProperties().get(key);
-                                    if(resolvedProperties.get(key) == null || resolvedProperties.get(key) != prop) {
-                                        LOGGER.debug("avoiding infinite loop");
-                                        Schema resolvedProp = resolveSchema(prop);
-                                        model.addProperties(key,resolvedProp );
-                                        resolvedProperties.put(key, resolvedProp);
-                                    }else {
-                                        model.addProperties(key,resolvedProperties.get(key));
-                                    }
-                                }
-                                if (resolved.getRequired() != null) {
-                                    for (int i = 0; i < resolved.getRequired().size(); i++) {
-                                        if (resolved.getRequired().get(i) != null) {
-                                            requiredProperties.add(resolved.getRequired().get(i).toString());
-                                        }
-                                    }
-                                }
-                            }
-                            if (requiredProperties.size() > 0) {
-                                model.setRequired(new ArrayList<>(requiredProperties));
-                            }
-                            if (resolved.getExample() != null) {
-                                examples.add(resolved.getExample());
-                            }
-                            if (composedSchema.getExtensions() != null) {
-                                Map<String, Object> extensions = composedSchema.getExtensions();
-                                for (String key : extensions.keySet()) {
-                                    model.addExtension(key, composedSchema.getExtensions().get(key));
-                                }
-                            }
-                        }
-                    }
-
-                } if (composedSchema.getAnyOf() != null) {
-                    if(adjacent == false) {
-                        Schema resolved;
-                        List<Schema> list = new ArrayList<>();
-                        for (Schema innerModel : composedSchema.getAnyOf()) {
-                            resolved = resolveSchema(innerModel);
-                            list.add(resolved);
-                        }
-                        composedSchema.setAnyOf(list);
-                        return composedSchema;
-                    }else {
-                        for (Schema innerModel : composedSchema.getAnyOf()) {
-                            Schema resolved = resolveSchema(innerModel);
-                            Map<String, Schema> properties = resolved.getProperties();
-                            if (resolved.getProperties() != null) {
-                                for (String key : properties.keySet()) {
-                                    Schema prop = (Schema) resolved.getProperties().get(key);
-                                    if(resolvedProperties.get(key) == null || resolvedProperties.get(key) != prop) {
-                                        LOGGER.debug("avoiding infinite loop");
-                                        Schema resolvedProp = resolveSchema(prop);
-                                        model.addProperties(key,resolvedProp );
-                                        resolvedProperties.put(key, resolvedProp);
-                                    }else {
-                                        model.addProperties(key,resolvedProperties.get(key));
-                                    }
-                                }
-                                if (resolved.getRequired() != null) {
-                                    for (int i = 0; i < resolved.getRequired().size(); i++) {
-                                        if (resolved.getRequired().get(i) != null) {
-                                            requiredProperties.add(resolved.getRequired().get(i).toString());
-                                        }
-                                    }
-                                }
-                            }
-                            if (requiredProperties.size() > 0) {
-                                model.setRequired(new ArrayList<>(requiredProperties));
-                            }
-                            if (resolved.getExample() != null) {
-                                examples.add(resolved.getExample());
-                            }
-                            if (composedSchema.getExtensions() != null) {
-                                Map<String, Object> extensions = composedSchema.getExtensions();
-                                for (String key : extensions.keySet()) {
-                                    model.addExtension(key, composedSchema.getExtensions().get(key));
-                                }
-                            }
-                        }
-                    }
-                }
                 if (schema.getExample() != null) {
-                    model.setExample(schema.getExample());
+                    combinedModel.setExample(schema.getExample());
                 } else if (!examples.isEmpty()) {
-                    model.setExample(examples);
+                    combinedModel.setExample(examples);
                 }
-                return model;
+
+                result = combinedModel;
+
             } else {
-                // User don't want to aggregate composed schema, we only solve refs
-                if (composedSchema.getAllOf() != null)
+                // User doesn't need or want to aggregate composed schema, we only solve refs
+                if (hasAllOf) {
                     composedSchema.allOf(composedSchema.getAllOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
-                if (composedSchema.getOneOf() != null)
+                }
+                if (hasOneOf) {
                     composedSchema.oneOf(composedSchema.getOneOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
-                if (composedSchema.getAnyOf() != null)
+                }
+                if (hasAnyOf) {
                     composedSchema.anyOf(composedSchema.getAnyOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
-                return composedSchema;
+                }
             }
         }
 
-        if (schema.getProperties() != null) {
-            Schema model = schema;
+        if (result.getProperties() != null) {
+            Schema model = result;
             Map<String, Schema> updated = new LinkedHashMap<>();
             Map<String, Schema> properties = model.getProperties();
             for (String propertyName : properties.keySet()) {
                 Schema property = (Schema) model.getProperties().get(propertyName);
-                if(resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != property) {
-                    LOGGER.debug("avoiding infinite loop");
-                    Schema resolved = resolveSchema(property);
-                    updated.put(propertyName, resolved);
-                    resolvedProperties.put(propertyName, resolved);
-                }else {
-                    updated.put(propertyName, resolvedProperties.get(propertyName));
-                }
+                updated.put(propertyName, resolveSchemaProperty(propertyName, property));
             }
 
             for (String key : updated.keySet()) {
@@ -549,7 +407,7 @@ public class ResolverFully {
             return model;
         }
 
-        return schema;
+        return result;
     }
 
     public Map<String,Example> resolveExample(Map<String,Example> examples){
@@ -570,5 +428,59 @@ public class ResolverFully {
 
         return resolveExamples;
 
+    }
+
+    private void aggregateSchemaCombinators(ComposedSchema sourceSchema, Schema targetSchema,
+                                            List<Schema> schemasToAggregate, Set<Object> examples) {
+
+        Set<String> requiredProperties = new HashSet<>();
+
+        for (Schema innerModel : schemasToAggregate) {
+            Schema resolved = resolveSchema(innerModel);
+            Map<String, Schema> properties = resolved.getProperties();
+            if (resolved.getProperties() != null) {
+                for (String key : properties.keySet()) {
+                    Schema prop = (Schema) resolved.getProperties().get(key);
+                    targetSchema.addProperties(key, resolveSchemaProperty(key, prop));
+                }
+
+                if (resolved.getRequired() != null) {
+                    for (Object required : resolved.getRequired()) {
+                        if (required != null) {
+                            requiredProperties.add(required.toString());
+                        }
+                    }
+                }
+            }
+            if (resolved.getExample() != null) {
+                examples.add(resolved.getExample());
+            }
+            if (sourceSchema.getExtensions() != null) {
+                Map<String, Object> extensions = sourceSchema.getExtensions();
+                for (String key : extensions.keySet()) {
+                    targetSchema.addExtension(key, sourceSchema.getExtensions().get(key));
+                }
+            }
+        }
+
+        if (requiredProperties.size() > 0) {
+            List<String> required = new ArrayList<>();
+            if (targetSchema.getRequired() != null) {
+                required.addAll(targetSchema.getRequired());
+            }
+            required.addAll(requiredProperties);
+            targetSchema.setRequired(required);
+        }
+    }
+
+    private Schema resolveSchemaProperty(String propertyName, Schema innerProperty) {
+        if (resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != innerProperty) {
+            LOGGER.debug("avoiding infinite loop");
+            Schema resolved = resolveSchema(innerProperty);
+            resolvedProperties.put(propertyName, resolved);
+            return resolved;
+        } else {
+            return resolvedProperties.get(propertyName);
+        }
     }
 }

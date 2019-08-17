@@ -1,0 +1,47 @@
+openapi: "3.0.2"
+info:
+  version: 15.3.0
+  title: "Common Data Types"
+paths: {}
+components:
+  schemas:
+    BreedsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/BreedsListItems'
+
+    BreedsListItems:
+      type: object
+      properties:
+        breed:
+          $ref: '#/components/schemas/Breed'
+
+    Breed:
+      type: object
+      properties:
+        name:
+          type: string
+        family:
+          type: string
+
+    PetsList:
+      type: array
+      items:
+        type: object
+        properties:
+          petType:
+            type: string
+          colouring:
+            $ref: '#/components/schemas/Colouring'
+
+    Colouring:
+      type: object
+      properties:
+        primary:
+          $ref: '#/components/schemas/Colour'
+        secondary:
+          $ref: '#/components/schemas/Colour'
+
+    Colour:
+      type: string
+      enum: ['black', 'white', 'tan', 'red', 'blue']
