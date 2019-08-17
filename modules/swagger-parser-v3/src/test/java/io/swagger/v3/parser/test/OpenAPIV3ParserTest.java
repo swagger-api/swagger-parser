@@ -67,6 +67,16 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
 
+    @Test
+    public void testIssue1169() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue1169.yaml", null, options);
+        assertTrue(parseResult.getMessages().size() == 0);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+    }
+
 
     @Test
     public void testIssue339() throws Exception {
