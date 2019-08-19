@@ -32,6 +32,7 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.PrimitiveType;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -692,9 +693,20 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
             schema = as;
         } else {
-            schema = new Schema();
-            schema.setType(sp.getType());
-            schema.setFormat(sp.getFormat());
+            PrimitiveType ptype = PrimitiveType.fromTypeAndFormat(sp.getType(), sp.getFormat());
+            if (ptype != null) {
+                schema = ptype.createProperty();
+            } else {
+                ptype = PrimitiveType.fromTypeAndFormat(sp.getType(), null);
+                if (ptype != null) {
+                    schema = ptype.createProperty();
+                    schema.setFormat(sp.getFormat());
+                } else {
+                    schema = new Schema();
+                    schema.setType(sp.getType());
+                    schema.setFormat(sp.getFormat());
+                }
+            }
         }
 
         schema.setDescription(sp.getDescription());
