@@ -546,7 +546,7 @@ public class OpenAPIDeserializer {
                     }
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path,String.format("%s.'%s'", location,pathName), result);
-                    String[] eachPart = pathName.split("/");
+                    String[] eachPart = pathName.split("[-/.]+");
                     Arrays.stream(eachPart)
                             .filter(part -> part.startsWith("{") && part.endsWith("}") && part.length() > 2)
                             .forEach(part -> {
