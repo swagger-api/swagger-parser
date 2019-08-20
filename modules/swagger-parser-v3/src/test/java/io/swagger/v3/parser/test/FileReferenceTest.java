@@ -202,8 +202,6 @@ public class FileReferenceTest {
     public void testAllOfFlatAndNested() {
         for (String path : Arrays.asList("./src/test/resources/allOf-properties-ext-ref/models/swagger.json",
                 "./src/test/resources/allOf-properties-ext-ref/swagger.json")) {
-            //ParseOptions options = new ParseOptions();
-            //options.setResolve(true);
             OpenAPI swagger = new OpenAPIV3Parser().read(path);
 
             assertEquals(3, swagger.getComponents().getSchemas().size());
