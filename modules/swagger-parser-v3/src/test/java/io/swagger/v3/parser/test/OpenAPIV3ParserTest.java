@@ -2047,6 +2047,34 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue1177(@Injectable final List<AuthorizationValue> auths) {
+        String path = "/issue-1177/swagger.yaml";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
+
+        // $ref response with $ref header
+        ApiResponse petsListApiResponse = openAPI.getPaths().get("/update-pets").getPost().getResponses().get("200");
+        assertNotNull(petsListApiResponse);
+
+        Header sessionIdHeader = petsListApiResponse.getHeaders().get("x-session-id");
+        assertNotNull(sessionIdHeader);
+
+        Schema petsListSchema = openAPI.getComponents().getSchemas().get("PetsList");
+        assertNotNull(petsListSchema);
+
+        assertNotNull(openAPI.getComponents().getHeaders());
+        Header sessionIdHeaderComponent = openAPI.getComponents().getHeaders().get("x-session-id");
+        assertTrue(sessionIdHeader == sessionIdHeaderComponent);
+
+        assertTrue(petsListApiResponse.getContent().get("application/json").getSchema() == petsListSchema);
+
+    }
+
+    @Test
     public void testResolveFullyMap() {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(false);
