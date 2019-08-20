@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -50,6 +49,8 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -57,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
@@ -1085,52 +1085,30 @@ public class OpenAPIDeserializerTest {
 
         Schema dateTimeModel = resolved.getComponents().getSchemas().get("DateTimeString");
         assertTrue(dateTimeModel instanceof DateTimeSchema);
-        List<Date> dateTimeValues = dateTimeModel.getEnum();
+        List<OffsetDateTime> dateTimeValues = dateTimeModel.getEnum();
         assertEquals(dateTimeValues.size(), 5);
         assertEquals(
           dateTimeValues.get(0),
           null);
         assertEquals(
-          dateTimeValues.get(1),
-          new Calendar.Builder()
-          .setDate( 2019, 0, 1)
-          .setTimeOfDay( 0, 0, 0, 0)
-          .setTimeZone( TimeZone.getTimeZone( "GMT"))
-          .build()
-          .getTime());
-        assertEquals(
-          dateTimeValues.get(2),
-          new Calendar.Builder()
-          .setDate( 2018, 1, 2)
-          .setTimeOfDay( 23, 59, 59, 999)
-          .setTimeZone( TimeZone.getTimeZone( "GMT-05:00"))
-          .build()
-          .getTime());
-        assertEquals(
-          dateTimeValues.get(3),
-          new Calendar.Builder()
-          .setDate( 2017, 2, 3)
-          .setTimeOfDay( 11, 22, 33, 0)
-          .setTimeZone( TimeZone.getTimeZone( "GMT+06:00"))
-          .build()
-          .getTime());
-        assertEquals(
-          dateTimeValues.get(4),
-          new Calendar.Builder()
-          .setDate( 2016, 3, 4)
-          .setTimeOfDay( 22, 33, 44, 555)
-          .setTimeZone( TimeZone.getTimeZone( "GMT"))
-          .build()
-          .getTime());
+            dateTimeValues.get(1),
+            OffsetDateTime.of(2019,1,1,0,0,0,0, ZoneOffset.UTC));
 
         assertEquals(
-          dateTimeModel.getDefault(),
-          new Calendar.Builder()
-          .setDate( 2019, 0, 1)
-          .setTimeOfDay( 0, 0, 0, 0)
-          .setTimeZone( TimeZone.getTimeZone( "GMT"))
-          .build()
-          .getTime());
+            dateTimeValues.get(2),
+            OffsetDateTime.of(2018,2,2,23,59,59,999000000, ZoneOffset.ofHours(-5)));
+
+        assertEquals(
+            dateTimeValues.get(3),
+            OffsetDateTime.of(2017,3,3,11,22,33,0, ZoneOffset.ofHours(6)));
+
+        assertEquals(
+            dateTimeValues.get(4),
+            OffsetDateTime.of(2016,4,4,22,33,44,555000000, ZoneOffset.UTC));
+
+        assertEquals(
+                dateTimeModel.getDefault(),
+                OffsetDateTime.of(2019,1,1,0,0,0,0, ZoneOffset.UTC));
 
         assertEquals(
           result.getMessages(),
