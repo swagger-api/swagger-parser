@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  version: "1.0"
+  title: Swagger Parser Issue
+paths:
+  /:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/RefRequestBody'
+      responses:
+        default:
+          description: "Error"
+components:
+  requestBodies:
+    RefRequestBody:
+      content:
+        'application/json':
+          schema:
+            $ref: 'common.yaml#/components/schemas/StringObject'
