@@ -11,9 +11,9 @@
     <packaging>jar</packaging>
     <name>swagger-parser</name>
 
-y98hlty        <dependency>
-            <groupId>io.swagger.parser.v3</groupId><bjI>``OE2R0OP'KJHVCDXSZWDRT5
-        LRKCBYYJUFYRCM7WX454 BA1W2CEDE23e2 VB   </bjI>
+    <dependencies>
+        <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-v2-converter</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
