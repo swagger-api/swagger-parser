@@ -680,6 +680,13 @@ public class V2ConverterTest {
         assertNotNull(oas);
     } 
   
+    @Test(description = "OpenAPI v2 Converter: Ensure body name is preserved in x-name extension of the requestBody")
+    public void testBodyParameterNameConvertedAsExtension() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_762_JSON);
+        assertNotNull(oas);
+        assertEquals(oas.getPaths().get("/").getPut().getRequestBody().getExtensions().get("x-name"), "pet");
+    }
+
     @Test(description = "requestBody not correctly populated when Parameters is a list of $refs (OAS 2 to 3 conversion)")
     public void testIssue765() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_765_YAML);

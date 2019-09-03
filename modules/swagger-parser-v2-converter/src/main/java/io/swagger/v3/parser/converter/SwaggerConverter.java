@@ -808,6 +808,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
         convertExamples(((BodyParameter) param).getExamples(), content);
         body.content(content);
+        if(param.getName() != null) {
+            body.addExtension("x-name", param.getName());
+        }
         return body;
     }
 
