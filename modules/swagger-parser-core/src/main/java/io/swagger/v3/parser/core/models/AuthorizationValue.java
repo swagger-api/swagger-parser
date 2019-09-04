@@ -1,15 +1,24 @@
 package io.swagger.v3.parser.core.models;
 
+import java.net.URL;
+import java.util.List;
+
 public class AuthorizationValue {
     private String value, type, keyName;
+    private List<URL> urls;
 
     public AuthorizationValue() {
     }
 
-    public AuthorizationValue(String keyName, String value, String type) {
+    public AuthorizationValue(String keyName, String value, String type, List<URL> urls) {
         this.setKeyName(keyName);
         this.setValue(value);
         this.setType(type);
+        this.setUrls(urls);
+    }
+
+    public AuthorizationValue(String keyName, String value, String type) {
+        this(keyName, value, type, null);
     }
 
     public AuthorizationValue value(String value) {
@@ -24,6 +33,11 @@ public class AuthorizationValue {
 
     public AuthorizationValue keyName(String keyName) {
         this.keyName = keyName;
+        return this;
+    }
+
+    public AuthorizationValue urls(List<URL> urls) {
+        this.urls = urls;
         return this;
     }
 
@@ -51,6 +65,14 @@ public class AuthorizationValue {
         this.keyName = keyName;
     }
 
+    public List<URL> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(List<URL> urls) {
+        this.urls = urls;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -58,6 +80,7 @@ public class AuthorizationValue {
         result = prime * result + ((keyName == null) ? 0 : keyName.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + ((urls == null) ? 0 : urls.hashCode());
         return result;
     }
 
@@ -92,6 +115,13 @@ public class AuthorizationValue {
                 return false;
             }
         } else if (!value.equals(other.value)) {
+            return false;
+        }
+        if (urls == null) {
+            if (other.urls != null) {
+                return false;
+            }
+        } else if (!urls.equals(other.urls)) {
             return false;
         }
         return true;

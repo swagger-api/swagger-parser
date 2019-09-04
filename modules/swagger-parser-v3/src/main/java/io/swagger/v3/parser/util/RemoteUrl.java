@@ -115,10 +115,12 @@ public class RemoteUrl {
                 final List<AuthorizationValue> header = new ArrayList<>();
                 if (auths != null && auths.size() > 0) {
                     for (AuthorizationValue auth : auths) {
-                        if ("query".equals(auth.getType())) {
-                            appendValue(inUrl, auth, query);
-                        } else if ("header".equals(auth.getType())) {
-                            appendValue(inUrl, auth, header);
+                        if (auth.getUrls() == null || auth.getUrls().contains(inUrl)) {
+                            if ("query".equals(auth.getType())) {
+                                appendValue(inUrl, auth, query);
+                            } else if ("header".equals(auth.getType())) {
+                                appendValue(inUrl, auth, header);
+                            }
                         }
                     }
                 }
