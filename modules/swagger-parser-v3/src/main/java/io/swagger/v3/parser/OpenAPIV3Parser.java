@@ -262,7 +262,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             v.setKeyName(value.getKeyName());
             v.setValue(value.getValue());
             v.setType(value.getType());
-            v.setUrls(value.getUrls());
+            v.setUrlMatcher(value.getUrlMatcher());
 
             output.add(v);
         }

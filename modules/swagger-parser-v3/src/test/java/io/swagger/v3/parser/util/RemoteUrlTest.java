@@ -8,9 +8,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -87,10 +85,9 @@ public class RemoteUrlTest {
 
         final String headerName = "Authorization";
         final String headerValue = "foobar";
-        String url = getUrl();
         final AuthorizationValue authorizationValue = new AuthorizationValue(headerName, headerValue, "header",
-            Collections.singletonList(new URL(url)));
-        final String actualBody = RemoteUrl.urlToString(url, Arrays.asList(authorizationValue));
+            url -> url.toString().startsWith("http://localhost"));
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
 
         assertEquals(actualBody, expectedBody);
 
@@ -106,11 +103,10 @@ public class RemoteUrlTest {
         final String expectedBody = setupStub();
 
         final String headerValue = "foobar";
-        String url = getUrl();
         String authorization = "Authorization";
         final AuthorizationValue authorizationValue = new AuthorizationValue(authorization,
-            headerValue, "header", Collections.singletonList(new URL("http://foo.com")));
-        final String actualBody = RemoteUrl.urlToString(url, Arrays.asList(authorizationValue));
+            headerValue, "header", u -> false);
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
 
         assertEquals(actualBody, expectedBody);
 
