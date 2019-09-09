@@ -124,13 +124,13 @@ public class OpenAPIParserTest {
 
     @Test
     public void test30Url() {
-        String location = "http://petstore.swagger.io/v2/swagger.json";
+        String location = "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml";
 
         SwaggerParseResult result = new OpenAPIParser().readLocation(location, null, null);
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
     }
 
     @Test
