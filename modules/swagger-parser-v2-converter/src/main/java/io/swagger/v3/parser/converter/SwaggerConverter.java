@@ -32,6 +32,8 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.PrimitiveType;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -59,6 +61,7 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -106,7 +109,23 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 result.setSwagger(resolved);
             }
         }
-        return convert(result);
+        SwaggerParseResult out = convert(result);
+        if (out != null && options != null && options.isFlatten()) {
+            try {
+                SwaggerParseResult resultV3 = new OpenAPIV3Parser().readContents(Yaml.pretty(out.getOpenAPI()), auth, options);
+                out.setOpenAPI(resultV3.getOpenAPI());
+                if (out.getMessages() != null) {
+                    out.getMessages().addAll(resultV3.getMessages());
+                    out.messages(out.getMessages().stream()
+                            .distinct()
+                            .collect(Collectors.toList()));
+                } else {
+                    out.messages(resultV3.getMessages());
+                }
+            } catch (Exception ignore) {}
+        }
+        return out;
+
     }
 
     public List<io.swagger.models.auth.AuthorizationValue> convert(List<AuthorizationValue> auths) {
@@ -692,9 +711,20 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
             schema = as;
         } else {
-            schema = new Schema();
-            schema.setType(sp.getType());
-            schema.setFormat(sp.getFormat());
+            PrimitiveType ptype = PrimitiveType.fromTypeAndFormat(sp.getType(), sp.getFormat());
+            if (ptype != null) {
+                schema = ptype.createProperty();
+            } else {
+                ptype = PrimitiveType.fromTypeAndFormat(sp.getType(), null);
+                if (ptype != null) {
+                    schema = ptype.createProperty();
+                    schema.setFormat(sp.getFormat());
+                } else {
+                    schema = new Schema();
+                    schema.setType(sp.getType());
+                    schema.setFormat(sp.getFormat());
+                }
+            }
         }
 
         schema.setDescription(sp.getDescription());

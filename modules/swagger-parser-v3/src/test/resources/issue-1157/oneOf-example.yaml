@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  version: 15.3.0
+  title: test
+paths:
+  /pets:
+    get:
+      description: "Test"
+      responses:
+        200:
+          description: Parameters missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    Dog:
+      type: object
+      properties:
+        bark:
+          type: boolean
+        breed:
+          type: string
+    Cat:
+      type: object
+      properties:
+        hunts:
+          type: boolean
+        age:
+          type: integer
+    Pet:
+      oneOf:
+        - $ref: '#/components/schemas/Cat'
+        - $ref: '#/components/schemas/Dog'

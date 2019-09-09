@@ -125,13 +125,55 @@ public class OpenAPIParserTest {
 
     @Test
     public void test30Url() {
-        String location = "http://petstore.swagger.io/v2/swagger.json";
+        String location = "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml";
 
         SwaggerParseResult result = new OpenAPIParser().readLocation(location, null, null);
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+    }
+
+    @Test
+    public void testConverterWithFlatten() {
+        String yaml = "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  description: \"Foo\"\n" +
+                "  version: \"1.0.0\"\n" +
+                "host: \"something.com\"\n" +
+                "basePath: \"/\"\n" +
+                "schemes:\n" +
+                "  - \"https\"\n" +
+                "consumes:\n" +
+                "  - \"application/json\"\n" +
+                "produces:\n" +
+                "  - \"application/json\"\n" +
+                "paths:\n" +
+                "  /example:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: \"OK\"\n" +
+                "          schema:\n" +
+                "            $ref: \"#/definitions/Foo\"\n" +
+                "    parameters: []\n" +
+                "definitions:\n" +
+                "  Foo:\n" +
+                "    type: \"object\"\n" +
+                "    required:\n" +
+                "    properties:\n" +
+                "      nested:\n" +
+                "        type: \"object\"\n" +
+                "        properties:\n" +
+                "          color:\n" +
+                "            type: \"string\"";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        SwaggerParseResult result = new OpenAPIParser().readContents(yaml, null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(openAPI.getComponents().getSchemas().size(), 2);
     }
 
     @Test
