@@ -13,11 +13,12 @@ import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RemoteUrl;
 import io.swagger.v3.parser.util.ResolverFully;
 import org.apache.commons.io.FileUtils;
-import javax.net.ssl.SSLHandshakeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,11 +31,23 @@ import java.util.ServiceLoader;
 public class OpenAPIV3Parser implements SwaggerParserExtension {
     private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
+    private static String encoding = "UTF-8";
 
     static {
         JSON_MAPPER = ObjectMapperFactory.createJson();
         YAML_MAPPER = ObjectMapperFactory.createYaml();
     }
+
+    public static String getEncoding() {
+        return encoding;
+    }
+
+    public static void setEncoding(String encoding) {
+        if (Charset.isSupported(encoding)) {
+            OpenAPIV3Parser.encoding = encoding;
+        }
+    }
+
     @Override
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult result = new SwaggerParseResult();
@@ -55,9 +68,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         if (options.isResolveFully()) {
                             result.setOpenAPI(resolver.resolve());
                             new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
-                        }else if (options.isFlatten()){
-                            InlineModelResolver inlineResolver = new InlineModelResolver();
-                            inlineResolver.flatten(result.getOpenAPI());
+                        } else if (options.isFlatten()) {
+                            InlineModelResolver inlineModelResolver = new InlineModelResolver();
+                            inlineModelResolver.setSkipMatches(options.isSkipMatches());
+                            inlineModelResolver.flatten(result.getOpenAPI());
                         }
                     }
                 }
@@ -113,7 +127,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
       }
       return mapper;
     }
-    
+
     public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
         String data;
 
@@ -130,7 +144,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     path = Paths.get(location);
                 }
                 if (Files.exists(path)) {
-                    data = FileUtils.readFileToString(path.toFile(), "UTF-8");
+                    data = FileUtils.readFileToString(path.toFile(), encoding);
                 } else {
                     data = ClasspathHelper.loadFileFromClasspath(location);
                 }
@@ -161,7 +175,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         SwaggerParseResult result = new SwaggerParseResult();
         if(swaggerAsString != null && !"".equals(swaggerAsString.trim())) {
             ObjectMapper mapper = getRightMapper(swaggerAsString);
-            
+
             if(auth == null) {
                 auth = new ArrayList<>();
             }
@@ -181,7 +195,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                     } else if (options.isFlatten()) {
-                        new InlineModelResolver().flatten(result.getOpenAPI());
+                        InlineModelResolver inlineModelResolver = new InlineModelResolver();
+                        inlineModelResolver.setSkipMatches(options.isSkipMatches());
+                        inlineModelResolver.flatten(result.getOpenAPI());
                     }
                 }else{
                     JsonNode rootNode = mapper.readTree(swaggerAsString.getBytes());
@@ -201,7 +217,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
      * Locates extensions on the current thread class loader and then, if it differs
      * from this class classloader (as in OSGi), locates extensions from this
      * class classloader as well.
-     * 
+     *
      * @return a list of extensions
      */
     public static List<SwaggerParserExtension> getExtensions() {
@@ -246,6 +262,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             v.setKeyName(value.getKeyName());
             v.setValue(value.getValue());
             v.setType(value.getType());
+            v.setUrlMatcher(value.getUrlMatcher());
 
             output.add(v);
         }

@@ -20,17 +20,32 @@ public class PathUtils {
                 file = Paths.get(location).toAbsolutePath();
             }
             if (!Files.exists(file)) {
-                URL url = PathUtils.class.getClassLoader().getResource(location);
-                file = Paths.get((URI.create(url.toExternalForm())));
-                return file.getParent();
+                return getParentDirectoryFromUrl(location);
             }
-
-
 
         } catch (Exception e) {
             e.getMessage();
         }
 
         return file.toAbsolutePath().getParent();
+    }
+
+    private static Path getParentDirectoryFromUrl(String location){
+        try {
+            URL url = PathUtils.class.getResource(location);
+            if (url == null){
+                url = PathUtils.class.getClassLoader().getResource(location);
+            }
+            if(url == null) {
+                url = ClassLoader.getSystemResource(location);
+            }
+
+            Path file = Paths.get((URI.create(url.toExternalForm())));
+            return file.getParent();
+
+        } catch (Exception e) {
+            e.getMessage();
+            return null;
+        }
     }
 }

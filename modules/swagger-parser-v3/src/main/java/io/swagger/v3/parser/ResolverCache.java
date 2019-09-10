@@ -118,8 +118,12 @@ public class ResolverCache {
             if(parentDirectory != null) {
                 contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
             }
-            else if(rootPath != null) {
+            else if(rootPath != null && rootPath.startsWith("http")) {
                 contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath);
+            }
+            else if (rootPath != null) {
+                contents = RefUtils.readExternalClasspathRef(file, refFormat, auths, rootPath);
+
             }
             externalFileCache.put(file, contents);
         }
