@@ -7,8 +7,10 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -91,6 +93,7 @@ public class V2ConverterTest {
     private static final String ISSUE_820_YAML = "issue-820.yaml";
     private static final String ISSUE_1032_YAML = "issue-1032.yaml";
     private static final String ISSUE_1113_YAML = "issue-1113.yaml";
+    private static final String ISSUE_1164_YAML = "issue-1164.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -797,7 +800,37 @@ public class V2ConverterTest {
         assertNotNull(oas.getServers().get(0));
         assertEquals(oas.getServers().get(0).getUrl(), "/test");
     }
-    
+
+    @Test(description = "OpenAPI v2 converter - uses specialized schema subclasses where available")
+    public void testIssue1164() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1164_YAML);
+        assertNotNull(oas);
+        assertNotNull(oas.getPaths());
+        assertNotNull(oas.getPaths().get("/foo"));
+        assertNotNull(oas.getPaths().get("/foo").getGet());
+        assertNotNull(oas.getPaths().get("/foo").getGet().getRequestBody());
+        assertNotNull(oas.getPaths().get("/foo").getGet().getRequestBody().getContent());
+        assertNotNull(oas.getPaths().get("/foo").getGet().getRequestBody().getContent().get("multipart/form-data"));
+        Schema formSchema = oas.getPaths().get("/foo").getGet().getRequestBody().getContent().get("multipart/form-data").getSchema();
+        assertNotNull(formSchema);
+        assertNotNull(formSchema.getProperties());
+        assertEquals(4, formSchema.getProperties().size());
+        assertTrue(formSchema.getProperties().get("first") instanceof StringSchema);
+
+        assertTrue(formSchema.getProperties().get("second") instanceof BooleanSchema);
+
+        assertTrue(formSchema.getProperties().get("third") instanceof StringSchema);
+        StringSchema third = (StringSchema) formSchema.getProperties().get("third");
+        assertNotNull(third.getFormat());
+        assertTrue("password".equals(third.getFormat()));
+
+        assertTrue(formSchema.getProperties().get("fourth") instanceof BooleanSchema);
+        Schema fourth = (Schema) formSchema.getProperties().get("fourth");
+        assertNotNull(fourth.getType());
+        assertNotNull(fourth.getFormat());
+        assertTrue("completely-custom".equals(fourth.getFormat()));
+    }
+
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
         SwaggerConverter converter = new SwaggerConverter();
         String swaggerAsString = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(file).toURI())));

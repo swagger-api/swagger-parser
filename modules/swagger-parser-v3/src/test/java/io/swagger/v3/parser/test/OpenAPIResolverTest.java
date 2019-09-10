@@ -66,6 +66,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -488,6 +489,99 @@ public class OpenAPIResolverTest {
         assertNotNull(am);
         Schema prop = am.getItems();
         assertTrue(prop instanceof Schema);
+    }
+
+    @Test
+    public void testIssue1157(@Injectable final List<AuthorizationValue> auths) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPIAnyOf = new OpenAPIV3Parser().readLocation("/issue-1157/anyOf-example.yaml", auths, options).getOpenAPI();
+        Schema petSchemaAnyOf = openAPIAnyOf.getComponents().getSchemas().get("Pet");
+        assertTrue(petSchemaAnyOf instanceof ComposedSchema);
+        assertTrue(((ComposedSchema) petSchemaAnyOf).getAnyOf() != null);
+
+        OpenAPI openAPIOneOf = new OpenAPIV3Parser().readLocation("/issue-1157/oneOf-example.yaml", auths, options).getOpenAPI();
+        Schema petSchemaOneOf = openAPIOneOf.getComponents().getSchemas().get("Pet");
+        assertTrue(petSchemaOneOf instanceof ComposedSchema);
+        assertTrue(((ComposedSchema) petSchemaOneOf).getOneOf() != null);
+
+        OpenAPI openAPIAllOf = new OpenAPIV3Parser().readLocation("/issue-1157/allOf-example.yaml", auths, options).getOpenAPI();
+        Schema petSchemaAllOf = openAPIAllOf.getComponents().getSchemas().get("Pet");
+        assertFalse(petSchemaAllOf instanceof ComposedSchema);
+        assertTrue(petSchemaAllOf.getProperties() != null);
+
+    }
+
+    @Test
+    public void testIssue1161(@Injectable final List<AuthorizationValue> auths) {
+        String path = "/issue-1161/swagger.yaml";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
+
+        Schema petsSchema = openAPI.getComponents().getSchemas().get("Pets");
+        Schema colouringsSchema = openAPI.getComponents().getSchemas().get("Colouring");
+
+        assertNotNull(petsSchema);
+        assertNotNull(colouringsSchema);
+
+        assertTrue(petsSchema instanceof ComposedSchema);
+        assertTrue(petsSchema.getProperties() != null);
+        assertTrue(((ComposedSchema) petsSchema).getOneOf() != null);
+
+        Schema petsColouringProperty = (Schema) petsSchema.getProperties().get("colouring");
+        assertTrue(petsColouringProperty.get$ref() == null);
+        assertTrue(petsColouringProperty == colouringsSchema);
+    }
+
+    @Test
+    public void testIssue1170(@Injectable final List<AuthorizationValue> auths) {
+        String path = "/issue-1170/swagger.yaml";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
+
+        // Array schema with items $ref
+        Schema breedsListSchema = openAPI.getComponents().getSchemas().get("BreedsList");
+        Schema breedSchema = openAPI.getComponents().getSchemas().get("Breed");
+
+        assertNotNull(breedsListSchema);
+        assertNotNull(breedSchema);
+
+        assertTrue(breedsListSchema instanceof ArraySchema);
+        Schema breedPropertySchema = ((ArraySchema) breedsListSchema).getItems().getProperties().get("breed");
+        assertNotNull(breedPropertySchema);
+
+        // Verify items resolved fully
+        assertTrue(breedPropertySchema.get$ref() == null);
+        assertTrue(breedPropertySchema == breedSchema);
+
+
+        // Array schema with inline items object with $ref properties
+        Schema petsListSchema = openAPI.getComponents().getSchemas().get("PetsList");
+        Schema colouringsSchema = openAPI.getComponents().getSchemas().get("Colouring");
+        Schema colourSchema = openAPI.getComponents().getSchemas().get("Colour");
+
+        assertNotNull(petsListSchema);
+        assertNotNull(colouringsSchema);
+        assertNotNull(colourSchema);
+
+        assertTrue(petsListSchema instanceof ArraySchema);
+        Schema colouringPropertySchema = ((ArraySchema) petsListSchema).getItems().getProperties().get("colouring");
+        assertNotNull(colouringPropertySchema);
+
+        // Verify inline items resolved fully
+        assertTrue(colouringPropertySchema.get$ref() == null);
+        assertTrue(colouringPropertySchema == colouringsSchema);
+
     }
 
     @Test

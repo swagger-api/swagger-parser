@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.parser.models.RefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -340,7 +341,7 @@ public class InlineModelResolver {
                 if (existing != null) {
                     propsToUpdate.put(key, new Schema().$ref(existing));
                 } else {
-                    propsToUpdate.put(key, new Schema().$ref(modelName));
+                    propsToUpdate.put(key, new Schema().$ref(RefType.SCHEMAS.getInternalPrefix()+modelName));
                     modelsToAdd.put(modelName, model);
                     addGenerated(modelName, model);
                     openAPI.getComponents().addSchemas(modelName, model);
