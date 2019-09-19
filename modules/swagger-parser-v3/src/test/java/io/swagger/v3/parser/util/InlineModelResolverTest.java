@@ -1337,4 +1337,17 @@ public class InlineModelResolverTest {
         ObjectSchema op = (ObjectSchema) inlineProp;
         assertNull(op.getProperties());
     }
+
+
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/1200")
+    public void testInlineItemsSchema() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.json",null, options);
+
+        System.out.println(openAPI);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
+    }
 }
