@@ -2100,10 +2100,12 @@ public class OpenAPIDeserializer {
             : additionalPropertiesBoolean;
 
         if(additionalProperties != null) {
-            schema =
-                additionalProperties.equals( Boolean.FALSE)
-                ? new ObjectSchema()
-                : new MapSchema();
+            if (schema == null) {
+                schema =
+                        additionalProperties.equals(Boolean.FALSE)
+                                ? new ObjectSchema()
+                                : new MapSchema();
+            }
             schema.setAdditionalProperties( additionalProperties);
         }
 
