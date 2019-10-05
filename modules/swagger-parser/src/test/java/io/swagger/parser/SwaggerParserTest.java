@@ -73,6 +73,15 @@ public class SwaggerParserTest {
 
     }
 
+     @Test
+    public void testIssue1169() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1169.yaml", null, true);
+        assertTrue(result.getMessages().size() == 0);
+        assertNotNull(result.getSwagger());
+    }
+
+
+
     @Test
     public void testIssueRelativeRefs2(){
         String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
@@ -84,6 +93,19 @@ public class SwaggerParserTest {
         ObjectProperty prop = (ObjectProperty) arraySchema.getItems();
         RefProperty refProperty = (RefProperty) prop.getProperties().get("resourceID");
         assertEquals(refProperty.get$ref(),"#/definitions/simpleIDType_v01");
+    }
+
+    @Test
+    public void testIssue111() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-111.yaml", null, true);
+        assertTrue(result.getMessages().get(0).equals("attribute definitions.Filter.items is missing"));
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
+    public void testIssue1146() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-1146.yaml", null, true);
+        assertEquals(0, result.getMessages().size());
     }
 
     @Test
@@ -503,6 +525,7 @@ public class SwaggerParserTest {
                 "src/test/resources/relative-file-references/yaml");
         final Swagger swagger = doRelativeFileTest("src/test/resources/relative-file-references/yaml/parent.yaml");
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
+        assertTrue(swagger.getParameters().get("param2") instanceof HeaderParameter);
     }
 
     @Test

@@ -3,6 +3,9 @@ swagger: "2.0"
 paths:
   /health:
     $ref: "./paths/healthPath.yaml"
+parameters:
+  param2:
+    $ref: "./parameters/params.yaml#/param2"
 definitions:
   refInDefinitions:
     $ref: "./models/example.yaml"
