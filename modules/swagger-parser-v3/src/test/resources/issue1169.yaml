@@ -1,0 +1,83 @@
+---
+openapi: 3.0.0
+servers:
+  - description: Production
+    url: https://apps.gov.bc.ca/pub/bcgnws
+  - description: Test
+    url: https://test.apps.gov.bc.ca/pub/bcgnws
+  - description: Delivery
+    url: https://delivery.apps.gov.bc.ca/pub/bcgnws
+info:
+  contact:
+    email: geographical.names@gov.bc.ca
+    name: BC Geographical Names Office
+    url: https://www2.gov.bc.ca/gov/content?id=A3C60F17CE934B1ABFA366F28C66E370
+  description: "This REST API provides searchable access to information about geographical
+    names in the province of British Columbia, including name status and details about
+    the corresponding geographic feature. \n\nPlease note that you may experience
+    issues when submitting requests to the delivery or test environment if using this
+    [OpenAPI specification](https://github.com/bcgov/api-specs) in other API console
+    viewers."
+  license:
+    name: Crown Copyright
+    url: https://www2.gov.bc.ca/gov/content?id=1AAACC9C65754E4D89A118B875E0FBDA
+  title: BC Geographical Names Web Service -
+  version: 3.x.x
+  x-apisguru-categories:
+    - open_data
+  x-logo:
+    url: https://api.apis.guru/v2/cache/logo/https_avatars1.githubusercontent.com_u_916280.jpeg
+  x-origin:
+    - converter:
+        url: https://github.com/lucybot/api-spec-converter
+        version: 2.7.31
+      format: openapi
+      url: https://raw.githubusercontent.com/bcgov/api-specs/master/bcgnws/bcgnws.json
+      version: '3.0'
+  x-preferred: true
+  x-providerName: gov.bc.ca
+  x-serviceName: bcgnws
+tags:
+  - name: search
+  - name: name
+  - name: feature
+  - name: feature taxonomy
+  - name: name authority
+paths:
+  "/names/{nameId}.{outputFormat}":
+    get:
+      description: Get information about the geographical name with the specified
+        nameId.
+      parameters:
+        - description: The unique identifier for a name
+          example: 22474
+          in: path
+          name: nameId
+          required: true
+          schema:
+            type: integer
+        - description: The format of the output.
+          example: json
+          in: path
+          name: outputFormat
+          required: true
+          schema:
+            default: json
+            enum:
+              - json
+              - xml
+              - kml
+              - csv
+              - html
+            type: string
+      responses:
+        '200':
+          description: Information about the name with the specified nameId
+        '404':
+          description: The name with the given nameId doesn't exist, or the output
+            format is invalid.
+      summary: Get a name by its nameId
+      tags:
+        - name
+components:
+  schemas: {}

@@ -1,0 +1,27 @@
+openapi: "3.0.2"
+info:
+  version: 15.3.0
+  title: "Common Data Types"
+paths: {}
+components:
+  schemas:
+    PetsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Pet'
+
+    Pet:
+      type: object
+      properties:
+        petType:
+          type: string
+        breed:
+          $ref: '#/components/schemas/Breed'
+
+    Breed:
+      type: object
+      properties:
+        name:
+          type: string
+        family:
+          type: string
