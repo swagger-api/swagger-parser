@@ -58,6 +58,15 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
+    public void testIssue1204() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1204.yaml", null, true);
+        System.out.println(result.getMessages());
+        assertTrue(result.getMessages().size() == 0);
+        assertNotNull(result.getSwagger());
+
+    }
+
+    @Test
     public void testIssue1169() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1169.yaml", null, true);
         assertTrue(result.getMessages().size() == 0);
