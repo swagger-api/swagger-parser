@@ -356,8 +356,7 @@ public class SwaggerDeserializerTest {
         assertEquals(contact.getName(), "tony");
         assertEquals(contact.getUrl(), "url");
         assertEquals(contact.getEmail(), "email");
-
-        //assertTrue(messages.contains("attribute info.contact.x-fun is unexpected"));
+        
         assertTrue(messages.contains("attribute info.bad is unexpected"));
         assertTrue(messages.contains("attribute info.contact.invalid is unexpected"));
 
