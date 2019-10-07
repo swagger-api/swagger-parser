@@ -49,6 +49,7 @@ public class OpenAPIResolver {
         pathProcessor.processPaths();
         componentsProcessor.processComponents();
 
+
         if(openApi.getPaths() != null) {
             for(String pathname : openApi.getPaths().keySet()) {
                 PathItem pathItem = openApi.getPaths().get(pathname);

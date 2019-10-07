@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info:
+  version: "1.0"
+  title: Swagger Parser Issue
+paths: {}
+components:
+  schemas:
+    String:
+      type: string
+    StringObject:
+      type: object
+      properties:
+        val:
+          $ref: '#/components/schemas/String'

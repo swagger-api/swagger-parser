@@ -1,0 +1,16 @@
+openapi: "3.0.2"
+info:
+  version: 15.3.0
+  title: test
+paths:
+  /update-pets:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'common/common-types.yaml#/components/schemas/PetsList'
+      responses:
+        '200':
+          $ref: 'common/responses/common-responses.yaml#/components/responses/PetsListResponse'
+
