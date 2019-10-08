@@ -1958,9 +1958,9 @@ public class OpenAPIDeserializer {
             JsonNode scopeValue = scopesObject.get(name);
             if (scopesObject!= null){
                 scope.addString(name,scopeValue.asText());
-                oAuthFlow.setScopes(scope);
             }
         }
+        oAuthFlow.setScopes(scope);
 
         Map <String,Object> extensions = getExtensions(node);
         if(extensions != null && extensions.size() > 0) {
@@ -2100,10 +2100,12 @@ public class OpenAPIDeserializer {
             : additionalPropertiesBoolean;
 
         if(additionalProperties != null) {
-            schema =
-                additionalProperties.equals( Boolean.FALSE)
-                ? new ObjectSchema()
-                : new MapSchema();
+            if (schema == null) {
+                schema =
+                        additionalProperties.equals(Boolean.FALSE)
+                                ? new ObjectSchema()
+                                : new MapSchema();
+            }
             schema.setAdditionalProperties( additionalProperties);
         }
 
