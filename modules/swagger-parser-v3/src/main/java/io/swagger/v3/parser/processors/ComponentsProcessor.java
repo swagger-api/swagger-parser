@@ -55,7 +55,7 @@ public class ComponentsProcessor {
             return;
         }
 
-        final Map<String, Schema> schemas = openApi.getComponents().getSchemas();
+
         final Map<String, ApiResponse> responses = openApi.getComponents().getResponses();
         final Map<String, RequestBody> requestBodies = openApi.getComponents().getRequestBodies();
         final Map<String, Parameter> parameters = openApi.getComponents().getParameters();
@@ -65,13 +65,7 @@ public class ComponentsProcessor {
         final Map<String, Callback> callbacks = openApi.getComponents().getCallbacks();
         final Map<String, SecurityScheme> securitySchemes = openApi.getComponents().getSecuritySchemes();
 
-        //schemas
-        if (schemas != null) {
-            Set<String> keySet = new LinkedHashSet<>();
-            while(schemas.keySet().size() > keySet.size()) {
-                processSchemas(keySet, schemas);
-            }
-        }
+
 
         //responses
         if (responses != null) {
@@ -134,6 +128,16 @@ public class ComponentsProcessor {
             Set<String> keySet = new LinkedHashSet<>();
             while(securitySchemes.keySet().size() > keySet.size()) {
                 processSecuritySchemes(keySet, securitySchemes);
+            }
+        }
+
+        final Map<String, Schema> schemas = openApi.getComponents().getSchemas();
+
+        //schemas
+        if (schemas != null) {
+            Set<String> keySet = new LinkedHashSet<>();
+            while(schemas.keySet().size() > keySet.size()) {
+                processSchemas(keySet, schemas);
             }
         }
     }
@@ -221,13 +225,13 @@ public class ComponentsProcessor {
 
             schemaProcessor.processSchema(model);
 
-            //if we process a RefModel here, in the #/definitions table, we want to overwrite it with the referenced value
+            //if we process a RefModel here, in the #/components/schemas table, we want to overwrite it with the referenced value
             if (model.get$ref() != null) {
                 final String renamedRef = cache.getRenamedRef(originalRef);
 
                 if (renamedRef != null) {
-                    //we definitely resolved the referenced and shoved it in the definitions map
-                    // because the referenced model may be in the definitions map, we need to remove old instances
+                    //we definitely resolved the referenced and shoved it in the components map
+                    // because the referenced model may be in the components map, we need to remove old instances
                     final Schema resolvedModel = schemas.get(renamedRef);
 
                     // ensure the reference isn't still in use

@@ -2,6 +2,7 @@ package io.swagger.v3.parser.util;
 
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.processors.ExternalRefProcessor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -118,6 +119,32 @@ public class RefUtils {
 
     }
 
+    public static String readExternalClasspathRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
+                                                  String rootPath) {
+
+        if (!RefUtils.isAnExternalRefFormat(refFormat)) {
+            throw new RuntimeException("Ref is not external");
+        }
+
+        String result;
+
+        try {
+            if (refFormat == RefFormat.URL) {
+                result = RemoteUrl.urlToString(file, auths);
+            } else {
+                //its assumed to be a relative ref
+                String pathRef = ExternalRefProcessor.join(rootPath, file);
+
+                result = ClasspathHelper.loadFileFromClasspath(pathRef);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
+        }
+
+        return result;
+
+    }
+
     public static String buildUrl(String rootPath, String relativePath) {
         String[] rootPathParts = rootPath.split("/");
         String [] relPathParts = relativePath.split("/");
@@ -183,9 +210,17 @@ public class RefUtils {
                     result = readAll(pathToUse);
                 } else {
                     String url = file;
-                    if(url.contains("..")) {
-                        url = parentDirectory + url.substring(url.indexOf(".") + 2);
-                    }else{
+                    if (url.contains("..")) {
+                        int parentCount = 0;
+                        while (url.contains("..")) {
+                            url = url.substring(url.indexOf(".") + 2);
+                            parentCount++;
+                        }
+                        for (int i = 0; i < parentCount - 1; i++) {
+                            parentDirectory = parentDirectory.getParent();
+                        }
+                        url = parentDirectory + url;
+                    } else {
                         url = parentDirectory + url.substring(url.indexOf(".") + 1);
                     }
                     final Path pathToUse2 = parentDirectory.resolve(url).normalize();

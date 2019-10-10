@@ -1,0 +1,34 @@
+openapi: "3.0.2"
+info:
+  version: 15.3.0
+  title: test
+paths:
+  /add-pets:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pets'
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Pets:
+      type: object
+      oneOf:
+        - required: [petType, colouring]
+        - required: [breed, colouring]
+      properties:
+        petType:
+          type: string
+        breed:
+          $ref: 'common.yaml#/components/schemas/Breed'
+        colouring:
+          $ref: 'common.yaml#/components/schemas/Colouring'
+

@@ -61,12 +61,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static java.util.Calendar.*;
 
 
 public class OpenAPIDeserializer {
@@ -546,7 +546,7 @@ public class OpenAPIDeserializer {
                     }
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path,String.format("%s.'%s'", location,pathName), result);
-                    String[] eachPart = pathName.split("/");
+                    String[] eachPart = pathName.split("[-/.]+");
                     Arrays.stream(eachPart)
                             .filter(part -> part.startsWith("{") && part.endsWith("}") && part.length() > 2)
                             .forEach(part -> {
@@ -1568,6 +1568,11 @@ public class OpenAPIDeserializer {
             parameter.setExample(example);
         }
 
+        Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
+        if (allowReserved != null) {
+            parameter.setAllowReserved(allowReserved);
+        }
+
         ObjectNode contentNode = getObject("content",obj,false,location,result);
         if(contentNode!= null) {
             parameter.setContent(getContent(contentNode, String.format("%s.%s", location, "content"), result));
@@ -1953,9 +1958,9 @@ public class OpenAPIDeserializer {
             JsonNode scopeValue = scopesObject.get(name);
             if (scopesObject!= null){
                 scope.addString(name,scopeValue.asText());
-                oAuthFlow.setScopes(scope);
             }
         }
+        oAuthFlow.setScopes(scope);
 
         Map <String,Object> extensions = getExtensions(node);
         if(extensions != null && extensions.size() > 0) {
@@ -2095,10 +2100,12 @@ public class OpenAPIDeserializer {
             : additionalPropertiesBoolean;
 
         if(additionalProperties != null) {
-            schema =
-                additionalProperties.equals( Boolean.FALSE)
-                ? new ObjectSchema()
-                : new MapSchema();
+            if (schema == null) {
+                schema =
+                        additionalProperties.equals(Boolean.FALSE)
+                                ? new ObjectSchema()
+                                : new MapSchema();
+            }
             schema.setAdditionalProperties( additionalProperties);
         }
 
@@ -2237,6 +2244,8 @@ public class OpenAPIDeserializer {
             for (JsonNode n : enumArray) {
                 if (n.isNumber()) {
                     schema.addEnumItemObject(n.numberValue());
+                } else if (n.isBoolean()) {
+                    schema.addEnumItemObject(n.booleanValue());
                 } else if (n.isValueNode()) {
                     try {
                         schema.addEnumItemObject( getDecodedObject( schema, n.asText(null)));
@@ -2366,6 +2375,12 @@ public class OpenAPIDeserializer {
             schema.setWriteOnly(bool);
         }
 
+        bool = Optional.ofNullable(getBoolean("writeOnly", node, false, location, result)).orElse(false) &&  Optional.ofNullable(getBoolean("readOnly", node, false, location, result)).orElse(false);
+        if(bool == true){
+            result.warning(location," writeOnly and readOnly are both present");
+
+        }
+
         ObjectNode xmlNode = getObject("xml", node, false, location, result);
         if (xmlNode != null) {
             XML xml = getXml(xmlNode, location, result);
@@ -2441,37 +2456,12 @@ public class OpenAPIDeserializer {
      * Returns the Date represented by the given RFC3339 date-time string.
      * Returns null if this string can't be parsed as Date.
      */
-    private Date toDateTime( String dateString) {
-        // Note: For this conversion, regex matching is better than SimpleDateFormat, etc.
-        // Optional elements (e.g. milliseconds) are not directly handled by SimpleDateFormat.
-        // Also, SimpleDateFormat is not thread-safe.
-        Matcher matcher = RFC3339_DATE_TIME_PATTERN.matcher( dateString);
+    private OffsetDateTime toDateTime(String dateString) {
 
-        Date dateTime = null;
-        if( matcher.matches()) {
-            try {
-                String year = matcher.group(1);
-                String month = matcher.group(2);
-                String day = matcher.group(3);
-                String hour = matcher.group(4);
-                String min = matcher.group(5);
-                String sec = matcher.group(6);
-                String ms = matcher.group(7);
-                String zone = matcher.group(10);
-
-                Calendar calendar = Calendar.getInstance( TimeZone.getTimeZone( zone == null? "GMT" : "GMT" + zone));
-                calendar.set( YEAR, Integer.parseInt( year));
-                calendar.set( MONTH, Integer.parseInt( month) - 1);
-                calendar.set( DAY_OF_MONTH, Integer.parseInt( day));
-                calendar.set( HOUR_OF_DAY, Integer.parseInt( hour));
-                calendar.set( MINUTE, Integer.parseInt( min));
-                calendar.set( SECOND, Integer.parseInt( sec));
-                calendar.set( MILLISECOND, ms == null? 0 : (int) (Double.parseDouble( ms) * 1000));
-
-                dateTime = calendar.getTime();
-            }
-            catch( Exception ignore) {
-            }
+        OffsetDateTime dateTime = null;
+        try {
+            dateTime = OffsetDateTime.parse(dateString);
+        } catch (Exception ignore) {
         }
 
         return dateTime;

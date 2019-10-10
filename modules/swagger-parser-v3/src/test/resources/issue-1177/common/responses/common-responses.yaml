@@ -1,0 +1,17 @@
+openapi: "3.0.2"
+info:
+  version: 15.3.0
+  title: "Common Responses"
+paths: {}
+components:
+  responses:
+    PetsListResponse:
+      description: returns a list of pets
+      headers:
+        x-session-id:
+          $ref: '../../headers/common-headers.yaml#/components/headers/x-session-id'
+      content:
+        application/json:
+          schema:
+            $ref: '../common-types.yaml#/components/schemas/PetsList'
+

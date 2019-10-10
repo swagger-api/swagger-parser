@@ -1,0 +1,35 @@
+openapi: "3.0.2"
+info:
+  version: 15.3.0
+  title: test
+paths:
+  /add-breeds:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'common.yaml#/components/schemas/BreedsList'
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /add-pets:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'common.yaml#/components/schemas/PetsList'
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            text/plain:
+              schema:
+                type: string
+
