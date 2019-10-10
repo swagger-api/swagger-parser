@@ -67,6 +67,17 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssueResolveCallBacks() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("callbacks-issue/swagger.yaml", null, options);
+        OpenAPI spec = parseResult.getOpenAPI();
+        assertNotNull(spec);
+        assertEquals(spec.getPaths().get("/webhook").getPost().getCallbacks().get("WebhookVerificationEvent").get$ref(),"#/components/callbacks/WebhookVerificationEvent");
+    }
+
+    @Test
     public void testIssue1190() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
