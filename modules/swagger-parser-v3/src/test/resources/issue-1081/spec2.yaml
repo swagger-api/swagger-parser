@@ -1,0 +1,15 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: spec2
+components:
+  schemas:
+    FlowDescription:
+      type: string
+    EthFlowDescription:
+      type: object
+      properties:
+        fDesc:
+          $ref: '#/components/schemas/FlowDescription'
+        fDir:
+          $ref: 'spec1.yaml#/components/schemas/FlowDirection'
