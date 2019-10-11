@@ -322,6 +322,8 @@ public final class ExternalRefProcessor {
                 } else {
                     processRefToExternalRequestBody(file + body.get$ref(), RefFormat.RELATIVE);
                 }
+            }else if(body.getContent() != null){
+                processRefContent(body.getContent(), $ref);
             }
         }
 
