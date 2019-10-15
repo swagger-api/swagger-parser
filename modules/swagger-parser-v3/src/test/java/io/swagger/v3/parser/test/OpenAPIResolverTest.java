@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -347,7 +348,7 @@ public class OpenAPIResolverTest {
         //callback pathItem -> operation ->requestBody
         assertEquals(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody3");
         //remote callback ref
-        assertEquals(callbacks.get("remoteCallback").get$ref(),"http://localhost:" + serverPort + "/remote/callback");
+        assertEquals(callbacks.get("remoteCallback").get$ref(),"#/components/callbacks/callback");
 
     }
 

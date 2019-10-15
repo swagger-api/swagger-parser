@@ -256,30 +256,17 @@ public final class ExternalRefProcessor {
         cache.putRenamedRef($ref, newRef);
 
         if(response != null) {
-
-        String file = $ref.split("#/")[0];
-
-            Schema schema = null;
             if(response.getContent() != null){
-                Map<String, MediaType> content = response.getContent();
-                for( String mediaName : content.keySet()) {
-                    MediaType mediaType = content.get(mediaName);
-                    if(mediaType.getSchema()!= null) {
-                        schema = mediaType.getSchema();
-                        if (schema.get$ref() != null) {
-                            RefFormat ref = computeRefFormat(schema.get$ref());
-                            if (isAnExternalRefFormat(ref)) {
-                               processRefSchema(schema, $ref);
-                            } else {
-                                processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
-                            }
-                        }else{
-                            processSchema(schema,file);
-                        }
-                    }
-                }
+                processRefContent(response.getContent(), $ref);
+            }
+            if(response.getHeaders() != null){
+                processRefHeaders(response.getHeaders(), $ref);
+            }
+            if(response.getLinks() != null){
+                processRefLinks(response.getLinks(), $ref);
             }
         }
+
         return newRef;
     }
 
@@ -335,6 +322,8 @@ public final class ExternalRefProcessor {
                 } else {
                     processRefToExternalRequestBody(file + body.get$ref(), RefFormat.RELATIVE);
                 }
+            }else if(body.getContent() != null){
+                processRefContent(body.getContent(), $ref);
             }
         }
 
@@ -393,6 +382,15 @@ public final class ExternalRefProcessor {
                 } else {
                     processRefToExternalHeader(file + header.get$ref(), RefFormat.RELATIVE);
                 }
+            }
+        }
+
+        if(header != null) {
+            if(header.getContent() != null){
+                processRefContent(header.getContent(), $ref);
+            }
+            if(header.getSchema() != null){
+                processRefSchemaObject(header.getSchema(), $ref);
             }
         }
 
@@ -628,6 +626,15 @@ public final class ExternalRefProcessor {
             }
         }
 
+        if(parameter != null) {
+            if(parameter.getContent() != null){
+                processRefContent(parameter.getContent(), $ref);
+            }
+            if(parameter.getSchema() != null){
+                processRefSchemaObject(parameter.getSchema(), $ref);
+            }
+        }
+
         return newRef;
     }
 
@@ -662,7 +669,7 @@ public final class ExternalRefProcessor {
 
         if (existingCallback != null) {
             LOGGER.debug("A model for " + existingCallback + " already exists");
-            if(existingCallback.get("$ref").get$ref() != null) {
+            if(existingCallback.get$ref() != null) {
                 // use the new model
                 existingCallback = null;
             }
@@ -676,19 +683,69 @@ public final class ExternalRefProcessor {
             cache.addReferencedKey(newRef);
 
             String file = $ref.split("#/")[0];
-            if(callback.get("$ref") != null){
-                if (callback.get("$ref").get$ref() != null) {
-                    RefFormat format = computeRefFormat(callback.get("$ref").get$ref());
+            if(callback.get$ref() != null){
+                if (callback.get$ref() != null) {
+                    RefFormat format = computeRefFormat(callback.get$ref());
                     if (isAnExternalRefFormat(format)) {
-                        callback.get("$ref").set$ref(processRefToExternalCallback(callback.get("$ref").get$ref(), format));
+                        callback.set$ref(processRefToExternalCallback(callback.get$ref(), format));
                     } else {
-                        processRefToExternalCallback(file + callback.get("$ref").get$ref(), RefFormat.RELATIVE);
+                        processRefToExternalCallback(file + callback.get$ref(), RefFormat.RELATIVE);
                     }
                 }
             }
         }
 
         return newRef;
+    }
+
+    private void processRefContent(Map<String, MediaType> content, String $ref) {
+        for(MediaType mediaType : content.values()) {
+            if(mediaType.getSchema() != null) {
+                processRefSchemaObject(mediaType.getSchema(), $ref);
+            }
+        }
+    }
+
+    private void processRefSchemaObject(Schema schema, String $ref) {
+        String file = $ref.split("#/")[0];
+        if (schema.get$ref() != null) {
+            RefFormat ref = computeRefFormat(schema.get$ref());
+            if (isAnExternalRefFormat(ref)) {
+                processRefSchema(schema, $ref);
+            } else {
+                processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
+            }
+        }else{
+            processSchema(schema,file);
+        }
+    }
+
+    private void processRefHeaders(Map<String, Header> headers, String $ref) {
+        String file = $ref.split("#/")[0];
+        for(Header header : headers.values()) {
+            if (header.get$ref() != null) {
+                RefFormat ref = computeRefFormat(header.get$ref());
+                if (isAnExternalRefFormat(ref)) {
+                    processRefHeader(header, $ref);
+                } else {
+                    processRefToExternalHeader(file + header.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+        }
+    }
+
+    private void processRefLinks(Map<String, Link> links, String $ref) {
+        String file = $ref.split("#/")[0];
+        for(Link link : links.values()) {
+            if (link.get$ref() != null) {
+                RefFormat ref = computeRefFormat(link.get$ref());
+                if (isAnExternalRefFormat(ref)) {
+                    processRefLink(link, $ref);
+                } else {
+                    processRefToExternalLink(file + link.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+        }
     }
 
     private void processRefSchema(Schema subRef, String externalFile) {
@@ -715,6 +772,45 @@ public final class ExternalRefProcessor {
         String ref = refProperty.get$ref();
         return join(rootLocation, ref);
     }
+
+    private void processRefHeader(Header subRef, String externalFile) {
+        RefFormat format = computeRefFormat(subRef.get$ref());
+
+        if (!isAnExternalRefFormat(format)) {
+            subRef.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
+            return;
+        }
+        String $ref = subRef.get$ref();
+        String subRefExternalPath = getExternalPath(subRef.get$ref())
+                .orElse(null);
+
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
+            $ref = join(externalFile, subRef.get$ref());
+            subRef.set$ref($ref);
+        }else {
+            processRefToExternalHeader($ref, format);
+        }
+    }
+
+    private void processRefLink(Link subRef, String externalFile) {
+        RefFormat format = computeRefFormat(subRef.get$ref());
+
+        if (!isAnExternalRefFormat(format)) {
+            subRef.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
+            return;
+        }
+        String $ref = subRef.get$ref();
+        String subRefExternalPath = getExternalPath(subRef.get$ref())
+                .orElse(null);
+
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
+            $ref = join(externalFile, subRef.get$ref());
+            subRef.set$ref($ref);
+        }else {
+            processRefToExternalLink($ref, format);
+        }
+    }
+
 
     // visible for testing
     public static String join(String source, String fragment) {

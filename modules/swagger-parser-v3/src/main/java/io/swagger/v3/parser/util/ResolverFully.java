@@ -1,19 +1,5 @@
 package io.swagger.v3.parser.util;
 
-import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
-import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
-import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -36,6 +22,20 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.models.RefFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
+import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public class ResolverFully {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResolverFully.class);
@@ -275,10 +275,14 @@ public class ResolverFully {
     }
 
     public Schema resolveSchema(Schema schema) {
+        if (schema == null) {
+            return null;
+        }
+
         if(schema.get$ref() != null) {
             String ref= schema.get$ref();
             ref = ref.substring(ref.lastIndexOf("/") + 1);
-            Schema resolved = schemas.get(ref);
+            Schema resolved = schemas != null ? schemas.get(ref) : null;
 
             if (resolved != null) {
 

@@ -55,7 +55,7 @@ public class ComponentsProcessor {
             return;
         }
 
-        final Map<String, Schema> schemas = openApi.getComponents().getSchemas();
+
         final Map<String, ApiResponse> responses = openApi.getComponents().getResponses();
         final Map<String, RequestBody> requestBodies = openApi.getComponents().getRequestBodies();
         final Map<String, Parameter> parameters = openApi.getComponents().getParameters();
@@ -65,13 +65,7 @@ public class ComponentsProcessor {
         final Map<String, Callback> callbacks = openApi.getComponents().getCallbacks();
         final Map<String, SecurityScheme> securitySchemes = openApi.getComponents().getSecuritySchemes();
 
-        //schemas
-        if (schemas != null) {
-            Set<String> keySet = new LinkedHashSet<>();
-            while(schemas.keySet().size() > keySet.size()) {
-                processSchemas(keySet, schemas);
-            }
-        }
+
 
         //responses
         if (responses != null) {
@@ -134,6 +128,16 @@ public class ComponentsProcessor {
             Set<String> keySet = new LinkedHashSet<>();
             while(securitySchemes.keySet().size() > keySet.size()) {
                 processSecuritySchemes(keySet, securitySchemes);
+            }
+        }
+
+        final Map<String, Schema> schemas = openApi.getComponents().getSchemas();
+
+        //schemas
+        if (schemas != null) {
+            Set<String> keySet = new LinkedHashSet<>();
+            while(schemas.keySet().size() > keySet.size()) {
+                processSchemas(keySet, schemas);
             }
         }
     }
