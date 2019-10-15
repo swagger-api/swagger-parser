@@ -5,6 +5,7 @@ import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
 import io.swagger.parser.SwaggerResolver;
 
@@ -143,12 +144,12 @@ public class PathsProcessor {
 
     protected void updateLocalRefs(Model model, String pathRef) {
         if(model instanceof RefModel) {
-            RefModel refModel = (RefModel) model;
-            if(isLocalRef(refModel.get$ref())) {
-                refModel.set$ref(computeLocalRef(refModel.get$ref(), pathRef));
-            }/*else if(isLocalRef(refModel.getOriginalRef())) {
-                    refModel.set$ref(computeLocalRef(refModel.getOriginalRef(), pathRef));
-            }*/
+            RefModel ref = (RefModel) model;
+            if(ref.getRefFormat() == RefFormat.INTERNAL) {
+                ref.set$ref(computeLocalRef(ref.get$ref(), pathRef));
+            } else if (ref.getRefFormat() == RefFormat.RELATIVE) {
+                ref.set$ref(computeRelativeRef(ref.get$ref(), pathRef));
+            }
         }
         else if(model instanceof ModelImpl) {
             // process properties
@@ -176,22 +177,23 @@ public class PathsProcessor {
     protected void updateLocalRefs(Property property, String pathRef) {
         if(property instanceof RefProperty) {
             RefProperty ref = (RefProperty) property;
-            if(isLocalRef(ref.get$ref())) {
+            if(ref.getRefFormat() == RefFormat.INTERNAL) {
                 ref.set$ref(computeLocalRef(ref.get$ref(), pathRef));
-            }/*else if(isLocalRef(ref.getOriginalRef())) {
-                ref.set$ref(computeLocalRef(ref.getOriginalRef(), pathRef));
-            }*/
+            } else if (ref.getRefFormat() == RefFormat.RELATIVE) {
+                ref.set$ref(computeRelativeRef(ref.get$ref(), pathRef));
+            }
         }
-    }
-
-    protected boolean isLocalRef(String ref) {
-        if(ref.startsWith("#")) {
-            return true;
-        }
-        return false;
     }
 
     protected String computeLocalRef(String ref, String prefix) {
         return prefix + ref;
+    }
+
+    protected String computeRelativeRef(String ref, String prefix) {
+        int index = prefix.lastIndexOf('/');
+        if (index > 1) {
+            return prefix.substring(0, index + 1) + ref;
+        }
+        return ref;
     }
 }

@@ -1306,7 +1306,10 @@ public class SwaggerDeserializer {
         // extra keys
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            if(!CONTACT_KEYS.contains(key)) {
+            if(key.startsWith("x-")) {
+                contact.setVendorExtension(key, extension(node.get(key)));
+            }
+            else if(!CONTACT_KEYS.contains(key)) {
                 result.extra(location + ".contact", key, node.get(key));
             }
         }

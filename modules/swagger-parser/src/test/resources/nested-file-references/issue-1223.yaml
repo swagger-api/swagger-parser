@@ -1,0 +1,22 @@
+swagger: '2.0'
+info:
+  title: Test API
+  version: '1'
+host: example.com
+basePath: /api/v1
+schemes:
+  - https
+consumes:
+  - application/json; charset=utf-8
+produces:
+  - application/json; charset=utf-8
+
+paths:
+  /events:
+    $ref: './common/eventsWithPagingInSubdir.yaml'
+
+definitions:
+  StatusResponse:
+    properties:
+      http_code:
+        type: integer

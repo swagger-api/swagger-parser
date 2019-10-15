@@ -118,6 +118,29 @@ public class FileReferenceTest {
     }
 
     @Test
+    public void testIssue1223() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-1223.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/events"));
+        Path path = swagger.getPath("/events");
+        assertNotNull(path.getGet());
+        Operation get = path.getGet();
+        assertEquals(get.getOperationId(), "getEvents");
+        assertEquals(swagger.getDefinitions().size(),3);
+        assertEquals(swagger.getDefinitions().get("Foobar").getProperties().size(), 1);
+        assertEquals(swagger.getDefinitions().get("StatusResponse").getProperties().size(), 1);
+        assertEquals(swagger.getDefinitions().get("Paging2").getProperties().size(), 2);
+        Model model = swagger.getDefinitions().get("Paging2");
+
+        Property property = model.getProperties().get("foobar");
+        assertTrue(property instanceof RefProperty);
+        RefProperty ref = (RefProperty) property;
+        assertEquals(ref.get$ref(), "#/definitions/Foobar");
+    }
+
+    @Test
     public void testIssue323() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-323.yaml", null, true);
         assertNotNull(result.getSwagger());
