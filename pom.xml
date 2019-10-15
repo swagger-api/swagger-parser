@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>1.0.45-SNAPSHOT</version>
+    <version>1.0.48-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
     <developers>
@@ -268,8 +268,8 @@
     <properties>
         <commons-io-version>2.4</commons-io-version>
         <snakeyaml-version>1.23</snakeyaml-version>
-        <slf4j-version>1.6.3</slf4j-version>
-        <swagger-core-version>1.5.22</swagger-core-version>
+        <slf4j-version>1.7.28</slf4j-version>
+        <swagger-core-version>1.5.25-SNAPSHOT</swagger-core-version>
         <junit-version>4.8.1</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>

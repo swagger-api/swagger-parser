@@ -58,7 +58,6 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
-
     public void testIssue719() {
         final Swagger swagger = new SwaggerParser().readWithInfo("extensions-responses/extensions.yaml", null, true).getSwagger();
 
@@ -67,6 +66,23 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger.getPaths().get("/something").getGet().getResponsesObject().getVendorExtensions());
 
     }
+    public void testIssue1204() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1204.yaml", null, true);
+        System.out.println(result.getMessages());
+        assertTrue(result.getMessages().size() == 0);
+        assertNotNull(result.getSwagger());
+
+    }
+
+    @Test
+    public void testIssue1169() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1169.yaml", null, true);
+        assertTrue(result.getMessages().size() == 0);
+        assertNotNull(result.getSwagger());
+    }
+
+
+    @Test
     public void testIssueRelativeRefs2(){
         String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
         Swagger swagger = new SwaggerParser().read(location, null, true);
@@ -84,6 +100,12 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-111.yaml", null, true);
         assertTrue(result.getMessages().get(0).equals("attribute definitions.Filter.items is missing"));
         assertNotNull(result.getSwagger());
+    }
+
+    @Test
+    public void testIssue1146() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-1146.yaml", null, true);
+        assertEquals(0, result.getMessages().size());
     }
 
     @Test

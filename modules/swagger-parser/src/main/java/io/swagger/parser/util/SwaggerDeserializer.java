@@ -189,7 +189,7 @@ public class SwaggerDeserializer {
                 } else {
                     ObjectNode path = (ObjectNode) pathValue;
                     Path pathObj = path(path, location + ".'" + pathName + "'", result);
-                    String[] eachPart = pathName.split("/");
+                    String[] eachPart = pathName.split("[-/.]+");
                     for (String part : eachPart) {
                         if (part.startsWith("{") && part.endsWith("}") && part.length() > 2) {
                             String pathParam = part.substring(1, part.length() - 1);
@@ -218,7 +218,7 @@ public class SwaggerDeserializer {
             return false;
         } else {
             for (Parameter parameter : parameters) {
-                if (pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn())) {
+                if (parameter instanceof RefParameter || (pathParam.equals(parameter.getName()) && "path".equals(parameter.getIn()))) {
                     return true;
                 }
             }
@@ -912,8 +912,10 @@ public class SwaggerDeserializer {
                     if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
                         ObjectNode on = (ObjectNode) propertyNode;
                         Property property = property(on, location, result);
-                        if("array".equals( property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
-                            result.missing(location, "items");
+                        if(property != null) {
+                            if ("array".equals(property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
+                                result.missing(location, "items");
+                            }
                         }
                         impl.property(propertyName, property);
                     }
@@ -1305,7 +1307,10 @@ public class SwaggerDeserializer {
         // extra keys
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            if(!CONTACT_KEYS.contains(key)) {
+            if(key.startsWith("x-")) {
+                contact.setVendorExtension(key, extension(node.get(key)));
+            }
+            else if(!CONTACT_KEYS.contains(key)) {
                 result.extra(location + ".contact", key, node.get(key));
             }
         }
