@@ -2187,4 +2187,21 @@ public class OpenAPIV3ParserTest {
         assertEquals(result.getMessages().get(0).contains("attribute components.schemas.Pet. writeOnly and readOnly are both present"), true);
 
     }
+
+    @Test
+    public void testissue1191() {
+
+        final String location = "src/test/resources/issue1191/customerservice.yaml";
+
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        System.out.println(result.getMessages());
+        OpenAPI openAPI = result.getOpenAPI();
+        System.out.println(openAPI.getComponents().getSchemas());
+        System.out.println(result.getMessages());
+
+    }
 }

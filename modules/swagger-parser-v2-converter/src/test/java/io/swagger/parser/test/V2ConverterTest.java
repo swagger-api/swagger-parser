@@ -94,6 +94,8 @@ public class V2ConverterTest {
     private static final String ISSUE_1032_YAML = "issue-1032.yaml";
     private static final String ISSUE_1113_YAML = "issue-1113.yaml";
     private static final String ISSUE_1164_YAML = "issue-1164.yaml";
+    private static final String ISSUE_1228_YAML = "issue-1228.json";
+
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -839,5 +841,14 @@ public class V2ConverterTest {
         SwaggerParseResult result = converter.readContents(swaggerAsString, null, parseOptions);
         assertNotNull(result);
         return result.getOpenAPI();
+    }
+
+    @Test(description = "OpenAPI v2 converter - uses minimum and maximum fields")
+    public void testissue1228() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1228_YAML);
+        assertNotNull(oas);
+        assertNotNull(oas.getPaths().get("/pet/{petId}").getGet().getParameters().get(0).getSchema().getMinimum());
+        assertNotNull(oas.getPaths().get("/pet/{petId}").getGet().getParameters().get(0).getSchema().getMaximum());
+
     }
 }

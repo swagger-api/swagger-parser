@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Customer Service - demonstrating a request validation
+  version: 1.0.0
+paths:
+  /customers:
+    post:
+      summary: Adds a new Customer
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/postCustomer'
+      responses:
+        '200':
+          description: The new customer's data
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/getCustomer'
+  '/customers/{customerId}':
+    get:
+      summary: Retrieves a single customer's data
+      parameters:
+        - $ref: '#/components/parameters/customerId'
+      responses:
+        '200':
+          description: The matching customer data
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/getCustomer'
+components:
+  schemas:
+    postCustomer:
+      $ref: './api-customers-singleSchemaFile.json#/definitions/post'
+      description: customer schema definition
+      title: customer data
+      multipleOf: 1
+      maximum: 10
+      minimum: 2
+      exclusiveMaximum: 2
+      exclusiveMinimum: 1
+      maxLenght: 10
+      minLength: 1
+      pattern: ^[a-zA-Z0-9\.\-_]+$
+      required: true
+  parameters:
+    customerId:
+      name: customerId
+      in: path
+      description: The id of the customer
+      required: true
+      schema:
+        type: string
