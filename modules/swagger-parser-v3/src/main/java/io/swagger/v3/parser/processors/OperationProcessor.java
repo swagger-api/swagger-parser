@@ -75,13 +75,13 @@ public class OperationProcessor {
             for (String name : callbacks.keySet()) {
                 Callback callback = callbacks.get(name);
                 if(callback != null) {
-                    if (callback.get("$ref") != null){
-                        String $ref = callback.get("$ref").get$ref();
+                    if (callback.get$ref() != null){
+                        String $ref = callback.get$ref();
                         RefFormat refFormat = computeRefFormat($ref);
                         if (isAnExternalRefFormat(refFormat)){
                             final String newRef = externalRefProcessor.processRefToExternalCallback($ref, refFormat);
                             if (newRef != null) {
-                                callback.get("$ref").set$ref(newRef);
+                                callback.set$ref(newRef);
                             }
                         }
                     }

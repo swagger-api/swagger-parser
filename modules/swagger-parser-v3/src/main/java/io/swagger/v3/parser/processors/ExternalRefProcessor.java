@@ -322,6 +322,8 @@ public final class ExternalRefProcessor {
                 } else {
                     processRefToExternalRequestBody(file + body.get$ref(), RefFormat.RELATIVE);
                 }
+            }else if(body.getContent() != null){
+                processRefContent(body.getContent(), $ref);
             }
         }
 
@@ -667,7 +669,7 @@ public final class ExternalRefProcessor {
 
         if (existingCallback != null) {
             LOGGER.debug("A model for " + existingCallback + " already exists");
-            if(existingCallback.get("$ref").get$ref() != null) {
+            if(existingCallback.get$ref() != null) {
                 // use the new model
                 existingCallback = null;
             }
@@ -681,13 +683,13 @@ public final class ExternalRefProcessor {
             cache.addReferencedKey(newRef);
 
             String file = $ref.split("#/")[0];
-            if(callback.get("$ref") != null){
-                if (callback.get("$ref").get$ref() != null) {
-                    RefFormat format = computeRefFormat(callback.get("$ref").get$ref());
+            if(callback.get$ref() != null){
+                if (callback.get$ref() != null) {
+                    RefFormat format = computeRefFormat(callback.get$ref());
                     if (isAnExternalRefFormat(format)) {
-                        callback.get("$ref").set$ref(processRefToExternalCallback(callback.get("$ref").get$ref(), format));
+                        callback.set$ref(processRefToExternalCallback(callback.get$ref(), format));
                     } else {
-                        processRefToExternalCallback(file + callback.get("$ref").get$ref(), RefFormat.RELATIVE);
+                        processRefToExternalCallback(file + callback.get$ref(), RefFormat.RELATIVE);
                     }
                 }
             }
