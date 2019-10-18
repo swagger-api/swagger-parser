@@ -69,7 +69,11 @@ public class InlineModelResolver {
                                             mediaType.setSchema(new Schema().$ref(modelName));
                                             addGenerated(modelName, model);
                                             openAPI.getComponents().addSchemas(modelName, model);
-
+                                        } else if (model instanceof ComposedSchema) {
+                                            String modelName = resolveModelName(model.getTitle(), "body");
+                                            mediaType.setSchema(new Schema().$ref(modelName));
+                                            addGenerated(modelName, model);
+                                            openAPI.getComponents().addSchemas(modelName, model);
                                         } else if (model instanceof ArraySchema) {
                                             ArraySchema am = (ArraySchema) model;
                                             Schema inner = am.getItems();
