@@ -2375,12 +2375,6 @@ public class OpenAPIDeserializer {
             schema.setWriteOnly(bool);
         }
 
-        bool = Optional.ofNullable(getBoolean("writeOnly", node, false, location, result)).orElse(false) &&  Optional.ofNullable(getBoolean("readOnly", node, false, location, result)).orElse(false);
-        if(bool == true){
-            result.warning(location," writeOnly and readOnly are both present");
-
-        }
-
         ObjectNode xmlNode = getObject("xml", node, false, location, result);
         if (xmlNode != null) {
             XML xml = getXml(xmlNode, location, result);

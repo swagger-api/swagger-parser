@@ -1,0 +1,49 @@
+{
+    "swagger":"2.0",
+    "info":{
+
+    },
+    "host":"localhost:51552",
+    "basePath":"/",
+    "tags":[
+        {
+            "name":"foo-controller",
+            "description":"Foo Controller"
+        }
+    ],
+    "paths":{
+        "/foobar":{
+            "get":{
+                "tags":[
+                    "foo-controller"
+                ],
+                "summary":"foo",
+                "operationId":"fooUsingGET",
+                "produces":[
+                    "*/*"
+                ],
+                "parameters":[
+                    {
+                        "name":"bars",
+                        "in":"query",
+                        "required":true,
+                        "type":"array",
+                        "items":{
+                            "type":"integer",
+                            "format":"int32"
+                        },
+                        "collectionFormat":"multi",
+                        "maximum":2.0,
+                        "minimum":1.0
+                    }
+                ],
+                "responses":{
+                    "200":{
+                        "description":"OK"
+                    }
+                },
+                "deprecated":false
+            }
+        }
+    }
+}
