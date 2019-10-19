@@ -95,6 +95,7 @@ public class V2ConverterTest {
     private static final String ISSUE_1113_YAML = "issue-1113.yaml";
     private static final String ISSUE_1164_YAML = "issue-1164.yaml";
     private static final String ISSUE_1228_YAML = "issue-1228.json";
+    private static final String ISSUE_1232_JSON = "issue-1232.json";
 
 
     private static final String API_BATCH_PATH = "/api/batch/";
@@ -849,6 +850,17 @@ public class V2ConverterTest {
         assertNotNull(oas);
         assertNotNull(oas.getPaths().get("/foobar").getGet().getParameters().get(2).getSchema().getMinimum());
         assertNotNull(oas.getPaths().get("/foobar").getGet().getParameters().get(2).getSchema().getMaximum());
+
+    }
+
+    @Test(description = "OpenAPI v2 converter misses")
+    public void testissue1232() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1232_JSON);
+        assertNotNull(oas);
+        assertTrue(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getExclusiveMaximum());
+        assertFalse(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getExclusiveMinimum());
+        assertTrue(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getMaxLength()==10);
+        assertTrue(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getMinLength()==1);
 
     }
 }

@@ -1,0 +1,53 @@
+{
+  "swagger":"2.0",
+  "info":{
+    "title":"sample",
+    "version":"1.0"
+  },
+  "host":"localhost:51552",
+  "basePath":"/",
+  "tags":[
+    {
+      "name":"foo-controller",
+      "description":"Foo Controller"
+    }
+  ],
+  "paths":{
+    "/foobar":{
+      "get":{
+        "tags":[
+          "foo-controller"
+        ],
+        "summary":"foo",
+        "operationId":"fooUsingGET",
+        "produces":[
+          "*/*"
+        ],
+        "parameters":[
+          {
+            "name":"bars",
+            "in":"query",
+            "required":true,
+            "type":"array",
+            "items":{
+              "type":"integer",
+              "format":"int32"
+            },
+            "collectionFormat":"multi",
+            "exclusiveMaximum": true,
+            "exclusiveMinimum": false,
+            "maxLength":10,
+            "minLength":1,
+            "uniqueItems":true
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"OK"
+          }
+        },
+        "deprecated":false
+      }
+    }
+  }
+}
