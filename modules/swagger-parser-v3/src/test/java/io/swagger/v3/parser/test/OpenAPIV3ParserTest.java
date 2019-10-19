@@ -2192,22 +2192,4 @@ public class OpenAPIV3ParserTest {
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
-
-    @Test
-    public void testSampleParser() {
-        final String location = "src/test/resources/issue-1211.json";
-
-        final ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-
-        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        final SwaggerParseResult result = parser.readLocation(location, null, options);
-        System.out.println(result.getMessages());
-        OpenAPI openAPI = result.getOpenAPI();
-
-        assertNotNull(result.getOpenAPI());
-        assertTrue(result.getMessages().size() > 0);
-        assertEquals(result.getMessages().get(0).contains("attribute components.schemas.Pet. writeOnly and readOnly are both present"), true);
-
-    }
 }
