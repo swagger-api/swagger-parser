@@ -24,27 +24,6 @@
                 ],
                 "parameters":[
                     {
-                        "name":"bar",
-                        "in":"query",
-                        "required":false,
-                        "type":"integer",
-                        "maximum":4.0,
-                        "exclusiveMaximum":false,
-                        "minimum":3.0,
-                        "exclusiveMinimum":false,
-                        "format":"int32"
-                    },
-                    {
-                        "in":"body",
-                        "name":"bar",
-                        "description":"bar",
-                        "required":false,
-                        "schema":{
-                            "type":"integer",
-                            "format":"int32"
-                        }
-                    },
-                    {
                         "name":"bars",
                         "in":"query",
                         "required":true,
@@ -54,52 +33,13 @@
                             "format":"int32"
                         },
                         "collectionFormat":"multi",
-                        "maximum":2,
-                        "minimum":1
-                    },
-                    {
-                        "in":"body",
-                        "name":"bars",
-                        "description":"bars",
-                        "required":true,
-                        "schema":{
-                            "type":"array",
-                            "items":{
-                                "type":"integer",
-                                "format":"int32"
-                            }
-                        }
-                    },
-                    {
-                        "name":"foo",
-                        "in":"query",
-                        "required":false,
-                        "type":"string",
-                        "pattern":"foo"
-                    },
-                    {
-                        "in":"body",
-                        "name":"foo",
-                        "description":"foo",
-                        "required":false,
-                        "pattern":"foo",
-                        "schema":{
-                            "type":"string"
-                        }
+                        "maximum":2.0,
+                        "minimum":1.0
                     }
                 ],
                 "responses":{
                     "200":{
                         "description":"OK"
-                    },
-                    "401":{
-                        "description":"Unauthorized"
-                    },
-                    "403":{
-                        "description":"Forbidden"
-                    },
-                    "404":{
-                        "description":"Not Found"
                     }
                 },
                 "deprecated":false

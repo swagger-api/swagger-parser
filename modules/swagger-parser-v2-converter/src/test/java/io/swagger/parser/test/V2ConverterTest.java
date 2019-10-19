@@ -847,8 +847,10 @@ public class V2ConverterTest {
     public void testissue1228() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1228_YAML);
         assertNotNull(oas);
-        assertNotNull(oas.getPaths().get("/foobar").getGet().getParameters().get(2).getSchema().getMinimum());
-        assertNotNull(oas.getPaths().get("/foobar").getGet().getParameters().get(2).getSchema().getMaximum());
+        assertNotNull(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getMinimum());
+        assertNotNull(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getMaximum());
+        assertTrue(String.valueOf(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getMinimum()).equals("1.0"));
+        assertTrue(String.valueOf(oas.getPaths().get("/foobar").getGet().getParameters().get(0).getSchema().getMaximum()).equals("2.0"));
 
     }
 }
