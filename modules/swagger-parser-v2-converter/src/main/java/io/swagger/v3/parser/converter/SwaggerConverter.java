@@ -1089,6 +1089,22 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     a.setUniqueItems(sp.isUniqueItems());
                 }
 
+                if(sp.isExclusiveMaximum()!=null) {
+                    a.setExclusiveMaximum(sp.isExclusiveMaximum());
+                }
+
+                if(sp.isExclusiveMinimum()!=null) {
+                    a.setExclusiveMinimum(sp.isExclusiveMinimum());
+                }
+
+                if(sp.getMaxLength()!=null) {
+                    a.setMaxLength(sp.getMaxLength());
+                }
+                if(sp.getMinLength()!=null) {
+                    a.setMinLength(sp.getMinLength());
+                }
+
+
                 schema = a;
             } else {
                 schema = SchemaTypeUtil.createSchema(sp.getType(), sp.getFormat());
