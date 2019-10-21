@@ -1089,9 +1089,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     a.setUniqueItems(sp.isUniqueItems());
                 }
 
-                a.setMaximum(sp.getMaximum());
-                a.setMinimum(sp.getMinimum());
-
                 schema = a;
             } else {
                 schema = SchemaTypeUtil.createSchema(sp.getType(), sp.getFormat());
