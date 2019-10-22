@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -82,14 +83,13 @@ public class InlineModelResolver {
                                                 if (inner.getProperties() != null && inner.getProperties().size() > 0) {
                                                     flattenProperties(inner.getProperties(), pathname);
                                                     String modelName = resolveModelName(inner.getTitle(), "body");
-                                                    Schema innerModel = createModelFromProperty(inner, modelName);
-                                                    String existing = matchGenerated(innerModel);
+                                                    String existing = matchGenerated(inner);
                                                     if (existing != null) {
                                                         am.setItems(new Schema().$ref(existing));
                                                     } else {
                                                         am.setItems(new Schema().$ref(modelName));
-                                                        addGenerated(modelName, innerModel);
-                                                        openAPI.getComponents().addSchemas(modelName, innerModel);
+                                                        addGenerated(modelName, inner);
+                                                        openAPI.getComponents().addSchemas(modelName, inner);
                                                     }
                                                 }
                                             }
@@ -114,22 +114,25 @@ public class InlineModelResolver {
                                             openAPI.getComponents().addSchemas(modelName, model);
                                         }
                                     }
-                                } else if (model instanceof ArraySchema) {
+                                }else if (model instanceof ComposedSchema) {
+                                    String modelName = resolveModelName(model.getTitle(), parameter.getName());
+                                    parameter.setSchema(new Schema().$ref(modelName));
+                                    addGenerated(modelName, model);
+                                    openAPI.getComponents().addSchemas(modelName, model);
+                                }else if (model instanceof ArraySchema) {
                                     ArraySchema am = (ArraySchema) model;
                                     Schema inner = am.getItems();
-
                                     if (isObjectSchema(inner)) {
                                         if (inner.getProperties() != null && inner.getProperties().size() > 0) {
                                             flattenProperties(inner.getProperties(), pathname);
                                             String modelName = resolveModelName(inner.getTitle(), parameter.getName());
-                                            Schema innerModel = createModelFromProperty(inner, modelName);
-                                            String existing = matchGenerated(innerModel);
+                                            String existing = matchGenerated(inner);
                                             if (existing != null) {
                                                 am.setItems(new Schema().$ref(existing));
                                             } else {
                                                 am.setItems(new Schema().$ref(modelName));
-                                                addGenerated(modelName, innerModel);
-                                                openAPI.getComponents().addSchemas(modelName, innerModel);
+                                                addGenerated(modelName, am);
+                                                openAPI.getComponents().addSchemas(modelName, am);
                                             }
                                         }
                                     }
@@ -151,17 +154,27 @@ public class InlineModelResolver {
                                             if (isObjectSchema(mediaSchema)) {
                                                 if (mediaSchema.getProperties() != null && mediaSchema.getProperties().size() > 0) {
                                                     String modelName = resolveModelName(mediaSchema.getTitle(), "inline_response_" + key);
-                                                    Schema model = createModelFromProperty(mediaSchema, modelName);
-                                                    String existing = matchGenerated(model);
+                                                    String existing = matchGenerated(mediaSchema);
                                                     if (existing != null) {
                                                         media.setSchema(this.makeRefProperty(existing, mediaSchema));
                                                     } else {
                                                         media.setSchema(this.makeRefProperty(modelName, mediaSchema));
-                                                        addGenerated(modelName, model);
-                                                        openAPI.getComponents().addSchemas(modelName, model);
+                                                        addGenerated(modelName, mediaSchema);
+                                                        openAPI.getComponents().addSchemas(modelName, mediaSchema);
                                                     }
                                                 }
-                                            } else if (mediaSchema instanceof ArraySchema) {
+                                            } else if (mediaSchema instanceof ComposedSchema ){
+                                                String modelName = resolveModelName(mediaSchema.getTitle(), "inline_response_" + key);
+                                                String existing = matchGenerated(mediaSchema);
+                                                if (existing != null) {
+                                                    media.setSchema(this.makeRefProperty(existing, mediaSchema));
+                                                } else {
+                                                    media.setSchema(this.makeRefProperty(modelName, mediaSchema));
+                                                    addGenerated(modelName, mediaSchema);
+                                                    openAPI.getComponents().addSchemas(modelName, mediaSchema);
+                                                }
+
+                                            }else if (mediaSchema instanceof ArraySchema) {
                                                 ArraySchema ap = (ArraySchema) mediaSchema;
                                                 Schema inner = ap.getItems();
 
@@ -170,14 +183,13 @@ public class InlineModelResolver {
                                                         flattenProperties(inner.getProperties(), pathname);
                                                         String modelName = resolveModelName(inner.getTitle(),
                                                                 "inline_response_" + key);
-                                                        Schema innerModel = createModelFromProperty(inner, modelName);
-                                                        String existing = matchGenerated(innerModel);
+                                                        String existing = matchGenerated(inner);
                                                         if (existing != null) {
                                                             ap.setItems(this.makeRefProperty(existing, inner));
                                                         } else {
                                                             ap.setItems(this.makeRefProperty(modelName, inner));
-                                                            addGenerated(modelName, innerModel);
-                                                            openAPI.getComponents().addSchemas(modelName, innerModel);
+                                                            addGenerated(modelName, inner);
+                                                            openAPI.getComponents().addSchemas(modelName, inner);
                                                         }
                                                     }
                                                 }
@@ -189,14 +201,13 @@ public class InlineModelResolver {
                                                         flattenProperties(innerProperty.getProperties(), pathname);
                                                         String modelName = resolveModelName(innerProperty.getTitle(),
                                                                 "inline_response_" + key);
-                                                        Schema innerModel = createModelFromProperty(innerProperty, modelName);
-                                                        String existing = matchGenerated(innerModel);
+                                                        String existing = matchGenerated(innerProperty);
                                                         if (existing != null) {
                                                             mediaSchema.setAdditionalProperties(new Schema().$ref(existing));
                                                         } else {
                                                             mediaSchema.setAdditionalProperties(new Schema().$ref(modelName));
-                                                            addGenerated(modelName, innerModel);
-                                                            openAPI.getComponents().addSchemas(modelName, innerModel);
+                                                            addGenerated(modelName, innerProperty);
+                                                            openAPI.getComponents().addSchemas(modelName, innerProperty);
                                                         }
                                                     }
                                                 }
@@ -226,11 +237,10 @@ public class InlineModelResolver {
                     if (isObjectSchema(inner)) {
                         if (inner.getProperties() != null && inner.getProperties().size() > 0) {
                             String innerModelName = resolveModelName(inner.getTitle(), modelName + "_inner");
-                            Schema innerModel = createModelFromProperty(inner, innerModelName);
-                            String existing = matchGenerated(innerModel);
+                            String existing = matchGenerated(inner);
                             if (existing == null) {
-                                openAPI.getComponents().addSchemas(innerModelName, innerModel);
-                                addGenerated(innerModelName, innerModel);
+                                openAPI.getComponents().addSchemas(innerModelName, inner);
+                                addGenerated(innerModelName, inner);
                                 m.setItems(new Schema().$ref(innerModelName));
                             } else {
                                 m.setItems(new Schema().$ref(existing));

@@ -1345,8 +1345,6 @@ public class InlineModelResolverTest {
         options.setFlatten(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.json",null, options);
 
-        System.out.println(openAPI);
-
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
     }
