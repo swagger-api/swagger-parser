@@ -289,7 +289,7 @@
         <commons-io-version>2.4</commons-io-version>
         <slf4j-version>1.7.28</slf4j-version>
         <swagger-core-version>2.0.11-SNAPSHOT</swagger-core-version>
-        <junit-version>4.8.1</junit-version>
+        <junit-version>4.13-rc-1</junit-version>
         <testng-version>6.14.2</testng-version>
         <jmockit-version>1.35</jmockit-version>
         <wiremock-version>2.15.0</wiremock-version>
@@ -297,5 +297,5 @@
         <commons-lang-version>3.2.1</commons-lang-version>
         <jackson-version>2.9.10</jackson-version>
     </properties>
-    
+
 </project>
