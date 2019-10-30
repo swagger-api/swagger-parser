@@ -32,7 +32,6 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.TestUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.parser.util.TestUtils;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.testng.Assert;
@@ -56,6 +55,13 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SwaggerParserTest {
+
+    @Test
+    public void testIssue1143(){
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1143.json", null, true);
+        assertNotNull(result.getSwagger().getDefinitions().get("RedisResource"));
+        assertNotNull(result.getSwagger().getDefinitions().get("identificacion_usuario_aplicacion"));
+    }
 
     @Test
     public void testIssue1204() {
