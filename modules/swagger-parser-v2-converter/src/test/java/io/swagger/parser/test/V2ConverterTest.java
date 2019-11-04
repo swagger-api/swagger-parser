@@ -94,6 +94,7 @@ public class V2ConverterTest {
     private static final String ISSUE_1032_YAML = "issue-1032.yaml";
     private static final String ISSUE_1113_YAML = "issue-1113.yaml";
     private static final String ISSUE_1164_YAML = "issue-1164.yaml";
+    private static final String ISSUE_1237_JSON = "issue-1237.json";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -642,7 +643,7 @@ public class V2ConverterTest {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_745_YAML);
         assertTrue(oas.getServers().get(0).getUrl().startsWith("//"));
     }
-  
+
     @Test(description = "OpenAPIParser.readLocation fails when fetching valid Swagger 2.0 resource with AuthorizationValues provided")
     public void testIssue785() {
         AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
@@ -673,7 +674,7 @@ public class V2ConverterTest {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_758_JSON);
         assertNotNull(oas);
     }
-  
+
     @Test(description = "OpenAPI v2 Converter: NPE when type is array and 'items' field is missing in array property")
     public void testIssue762() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_762_JSON);
@@ -730,7 +731,7 @@ public class V2ConverterTest {
         assertNotNull(result.getMessages());
     }
 
-    
+
     @Test(description = "OpenAPI v2 converter - Migrate minLength, maxLength and pattern of String property")
     public void testIssue786() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_768_JSON);
@@ -750,7 +751,7 @@ public class V2ConverterTest {
         assertNotNull(oas);
         assertEquals((String)oas.getExtensions().get("x-some-extensions"), "hello");
     }
-    
+
     @Test(description = "OpenAPI v2 converter - Conversion param extensions should be preserved")
     public void testIssue820() throws Exception {
         final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_820_YAML);
@@ -829,6 +830,13 @@ public class V2ConverterTest {
         assertNotNull(fourth.getType());
         assertNotNull(fourth.getFormat());
         assertTrue("completely-custom".equals(fourth.getFormat()));
+    }
+
+    @Test(description = "OpenAPI v2 converter - keeps original Swagger version")
+    public void testIssue1237() throws Exception {
+        final OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1237_JSON);
+        assertNotNull(oas);
+        assertEquals(oas.getOpenapi(), "2.0");
     }
 
     private OpenAPI getConvertedOpenAPIFromJsonFile(String file) throws IOException, URISyntaxException {
