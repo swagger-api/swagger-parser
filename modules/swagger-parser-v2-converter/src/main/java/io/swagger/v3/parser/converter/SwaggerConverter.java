@@ -110,19 +110,24 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
         SwaggerParseResult out = convert(result);
-        if (out != null && options != null && options.isFlatten()) {
-            try {
-                SwaggerParseResult resultV3 = new OpenAPIV3Parser().readContents(Yaml.pretty(out.getOpenAPI()), auth, options);
-                out.setOpenAPI(resultV3.getOpenAPI());
-                if (out.getMessages() != null) {
-                    out.getMessages().addAll(resultV3.getMessages());
-                    out.messages(out.getMessages().stream()
-                            .distinct()
-                            .collect(Collectors.toList()));
-                } else {
-                    out.messages(resultV3.getMessages());
-                }
-            } catch (Exception ignore) {}
+        if (out != null) {
+            if (options != null && options.isFlatten()) {
+                try {
+                    SwaggerParseResult resultV3 = new OpenAPIV3Parser().readContents(Yaml.pretty(out.getOpenAPI()), auth, options);
+                    out.setOpenAPI(resultV3.getOpenAPI());
+                    if (out.getMessages() != null) {
+                        out.getMessages().addAll(resultV3.getMessages());
+                        out.messages(out.getMessages().stream()
+                                .distinct()
+                                .collect(Collectors.toList()));
+                    } else {
+                        out.messages(resultV3.getMessages());
+                    }
+                } catch (Exception ignore) {}
+            }
+            if (out.getOpenAPI() != null) {
+                out.getOpenAPI().setOpenapi(result.getSwagger().getSwagger());
+            }
         }
         return out;
 
