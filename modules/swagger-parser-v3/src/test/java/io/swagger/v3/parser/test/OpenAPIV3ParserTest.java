@@ -1323,6 +1323,17 @@ public class OpenAPIV3ParserTest {
         assertEquals(refModel.get$ref(), "#/components/schemas/Pet");
     }
 
+    @Test
+    public void testRelativePath() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/relative-issue/api.yaml", null, options);
+        if (readResult.getMessages().size() > 0) {
+            fail(Json.pretty(readResult.getMessages()));
+        }
+    }
+
     private OpenAPI doRelativeFileTest(String location) {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
