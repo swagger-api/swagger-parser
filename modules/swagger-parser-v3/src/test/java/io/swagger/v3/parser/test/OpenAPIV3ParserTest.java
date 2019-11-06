@@ -1329,7 +1329,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         SwaggerParseResult readResult = parser.readLocation("src/test/resources/relative-issue/api.yaml", null, options);
-        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/scans").getGet().getResponses().get("500").getDescription(), "An error has occurred");
+        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/scans").getGet().getResponses().get("500").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorMessage");
 
     }
 
@@ -1339,7 +1339,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         SwaggerParseResult readResult = parser.readLocation("src/test/resources/codegen-remote-responses/openapi.yaml", null, options);
-        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getDescription(), "An error occurred");
+        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorModel");
     }
 
     private OpenAPI doRelativeFileTest(String location) {
