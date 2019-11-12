@@ -8,7 +8,6 @@ import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
-import io.swagger.models.properties.RefProperty;
 import io.swagger.util.Json;
 
 import java.math.BigDecimal;
@@ -904,26 +903,7 @@ public class SwaggerDeserializer {
             ExternalDocs docs = externalDocs(externalDocs, location, result);
             impl.setExternalDocs(docs);
 
-            ObjectNode properties = getObject("properties", node, false, location, result);
-            if(properties != null) {
-                Set<String> propertyNames = getKeys(properties);
-                for(String propertyName : propertyNames) {
-                    JsonNode propertyNode = properties.get(propertyName);
-                    if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
-                        ObjectNode on = (ObjectNode) propertyNode;
-                        Property property = property(on, location, result);
-                        if(property != null) {
-                            if ("array".equals(property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
-                                result.missing(location, "items");
-                            }
-                        }
-                        impl.property(propertyName, property);
-                    }
-                    else {
-                        result.invalidType(location, "properties", "object", propertyNode);
-                    }
-                }
-            }
+            addProperties(location,node,result,impl);
 
             // need to set properties first
             ArrayNode required = getArray("required", node, false, location, result);
@@ -1045,9 +1025,34 @@ public class SwaggerDeserializer {
                 }
             }
 
+            addProperties(location,node,result,model);
+
             return model;
         }
         return null;
+    }
+
+    private void addProperties(String location, ObjectNode node, ParseResult result, AbstractModel model) {
+        ObjectNode properties = getObject("properties", node, false, location, result);
+        if(properties != null) {
+            Set<String> propertyNames = getKeys(properties);
+            for(String propertyName : propertyNames) {
+                JsonNode propertyNode = properties.get(propertyName);
+                if(propertyNode.getNodeType().equals(JsonNodeType.OBJECT)) {
+                    ObjectNode on = (ObjectNode) propertyNode;
+                    Property property = property(on, location, result);
+                    if(property != null) {
+                        if ("array".equals(property.getType()) && !(property instanceof ArrayProperty && ((ArrayProperty) property).getItems() != null)) {
+                            result.missing(location, "items");
+                        }
+                    }
+                    model.addProperty(propertyName, property);
+                }
+                else {
+                    result.invalidType(location, "properties", "object", propertyNode);
+                }
+            }
+        }
     }
 
     public Map<String, Property> properties(ObjectNode node, String location, ParseResult result) {
