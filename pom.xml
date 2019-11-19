@@ -285,7 +285,7 @@
         </repository>
     </repositories>
     <properties>
-        <swagger-parser-v2-version>1.0.48</swagger-parser-v2-version>
+        <swagger-parser-v2-version>1.0.49-SNAPSHOT</swagger-parser-v2-version>
         <commons-io-version>2.4</commons-io-version>
         <slf4j-version>1.7.28</slf4j-version>
         <swagger-core-version>2.1.0</swagger-core-version>
