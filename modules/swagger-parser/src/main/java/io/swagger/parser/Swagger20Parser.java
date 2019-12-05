@@ -161,7 +161,17 @@ public class Swagger20Parser implements SwaggerParserExtension {
         if (node == null) {
             return null;
         }
-
-        return Json.mapper().convertValue(node, Swagger.class);
+        try {
+            // try first core deserializer, to ensure unchanged behaviour for working specs
+            return Json.mapper().convertValue(node, Swagger.class);
+        } catch (Exception e) {
+            LOGGER.error("Exception deserializing via core Json.mapper(), trying parser deserialization");
+            SwaggerDeserializationResult result = (new SwaggerDeserializer()).deserialize(node);
+            Swagger convertValue = result.getSwagger();
+            if (System.getProperty("debugParser") != null) {
+                LOGGER.info("\n\nSwagger Tree convertValue : \n" + ReflectionToStringBuilder.toString(convertValue, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");
+            }
+            return convertValue;
+        }
     }
 }
