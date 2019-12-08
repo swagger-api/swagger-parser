@@ -633,6 +633,54 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testArrayModelWithUniqueItems() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"info\": {\n" +
+                "    \"title\": \"foo\"\n" +
+                "  },\n" +
+                "  \"paths\": {\n" +
+                "    \"/test\": {\n" +
+                "      \"post\": {\n" +
+                "        \"parameters\": [\n" +
+                "          {\n" +
+                "            \"name\": \"AnyName\",\n" +
+                "            \"in\": \"body\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"array\",\n" +
+                "              \"uniqueItems\": true,\n" +
+                "              \"items\": {\n" +
+                "                \"type\": \"string\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"ok\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        Parameter parameter = result.getSwagger().getPath("/test")
+                .getPost().getParameters().get(0);
+
+        assertTrue(parameter instanceof BodyParameter);
+        BodyParameter bodyParameter = (BodyParameter) parameter;
+
+        Model model = bodyParameter.getSchema();
+        assertTrue(model instanceof ArrayModel);
+        ArrayModel arrayModel = (ArrayModel) model;
+        assertNotNull(arrayModel.getUniqueItems());
+        assertTrue(arrayModel.getUniqueItems());
+    }
+
+    @Test
     public void testArrayQueryParam() throws Exception {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
