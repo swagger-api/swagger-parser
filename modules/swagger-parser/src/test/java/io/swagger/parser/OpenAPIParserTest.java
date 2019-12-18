@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import io.swagger.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -26,6 +27,16 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIParserTest {
+
+    @Test
+    public void testIssue1143(){
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue-1143.json",null,options);
+        assertNotNull(result.getOpenAPI());
+        assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("RedisResource"));
+        assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("identificacion_usuario_aplicacion"));
+    }
 
     @Test
     public void testIssue749() {

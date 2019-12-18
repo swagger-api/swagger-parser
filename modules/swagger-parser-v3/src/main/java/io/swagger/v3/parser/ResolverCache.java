@@ -162,14 +162,6 @@ public class ResolverCache {
     }
 
     protected <T> void updateLocalRefs(String file, T result) {
-        if(result instanceof ApiResponse) {
-            ApiResponse response = (ApiResponse) result;
-            if (response.getContent() != null) {
-                for (String mediaType : response.getContent().keySet()) {
-                    updateLocalRefs(file, response.getContent().get(mediaType).getSchema());
-                }
-            }
-        }
         if(result instanceof Parameter){
             Parameter parameter = (Parameter)result;
             if (parameter.getSchema() != null){

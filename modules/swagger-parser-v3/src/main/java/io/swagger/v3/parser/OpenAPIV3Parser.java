@@ -1,5 +1,6 @@
 package io.swagger.v3.parser;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -160,6 +161,17 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             output.setMessages(Arrays.asList("unable to read location `" + location + "` due to a SSL configuration error.  " +
                     "It is possible that the server SSL certificate is invalid, self-signed, or has an untrusted " +
                     "Certificate Authority."));
+            return output;
+        }
+        catch (JsonParseException e) {
+            LOGGER.warn("Exception while parsing:", e);
+            SwaggerParseResult output = new SwaggerParseResult();
+            String message = e.getOriginalMessage();
+            if ((message != null) && (message.startsWith("Duplicate field"))) {
+                output.setMessages(Arrays.asList(message + " in `" + location + "`"));
+            } else {
+                output.setMessages(Arrays.asList("unable to parse `" + location + "`"));
+            }
             return output;
         }
         catch (Exception e) {

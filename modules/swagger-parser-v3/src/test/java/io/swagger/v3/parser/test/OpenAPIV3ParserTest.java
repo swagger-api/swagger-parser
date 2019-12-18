@@ -1323,6 +1323,25 @@ public class OpenAPIV3ParserTest {
         assertEquals(refModel.get$ref(), "#/components/schemas/Pet");
     }
 
+    @Test
+    public void testRelativePath() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/relative-issue/api.yaml", null, options);
+        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/scans").getGet().getResponses().get("500").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorMessage");
+
+    }
+
+    @Test
+    public void testRelativePath2() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/codegen-remote-responses/openapi.yaml", null, options);
+        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorModel");
+    }
+
     private OpenAPI doRelativeFileTest(String location) {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -2226,5 +2245,20 @@ public class OpenAPIV3ParserTest {
         assertTrue(result.getMessages().size() > 0);
         assertEquals(result.getMessages().get(0).contains("attribute components.schemas.Pet. writeOnly and readOnly are both present"), true);
 
+    }
+
+    @Test
+    public void testDuplicateHttpStatusCodes() {
+        final String location = "src/test/resources/duplicateHttpStatusCodes.json";
+
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        assertNull(result.getOpenAPI());
+        List<String> messages = result.getMessages();
+        assertEquals(1, messages.size());
+        assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.json`");
     }
 }
