@@ -793,7 +793,12 @@ public class SwaggerDeserializer {
 
             Integer minItems = getInteger("minItems", node, false, location, result);
             am.setMinItems(minItems);
-            
+
+            Boolean uniqueItems = getBoolean("uniqueItems", node, false, location, result);
+            if(uniqueItems != null) {
+                am.setUniqueItems(uniqueItems);
+            }
+
             // add xml specific information if available 
             JsonNode xml = node.get("xml");
             if(xml != null) {
