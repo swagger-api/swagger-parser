@@ -2,6 +2,8 @@ package io.swagger.v3.parser;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -25,7 +27,7 @@ public class ObjectMapperFactory {
     }
 
     private static ObjectMapper create(JsonFactory jsonFactory, boolean includePathDeserializer, boolean includeResponseDeserializer) {
-        ObjectMapper mapper = jsonFactory == null ? new ObjectMapper() : new ObjectMapper(jsonFactory);
+        ObjectMapper mapper = jsonFactory == null ? new ObjectMapper(createJsonFactory()) : new ObjectMapper(jsonFactory);
 
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -33,5 +35,11 @@ public class ObjectMapperFactory {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         return mapper;
+    }
+
+    private static JsonFactory createJsonFactory() {
+        return new JsonFactoryBuilder()
+          .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+          .build();
     }
 }
