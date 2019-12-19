@@ -5,6 +5,7 @@ public class ParseOptions {
     private boolean resolveCombinators = true;
     private boolean resolveFully;
     private boolean flatten;
+    private boolean flattenComposedSchemas;
     private boolean skipMatches;
 
     public boolean isResolve() {
@@ -41,5 +42,13 @@ public class ParseOptions {
 
     public void setSkipMatches(boolean skipMatches) {
         this.skipMatches = skipMatches;
+    }
+
+    public boolean isFlattenComposedSchemas() {
+        return flattenComposedSchemas;
+    }
+
+    public void setFlattenComposedSchemas(boolean flattenComposedSchemas) {
+        this.flattenComposedSchemas = flattenComposedSchemas;
     }
 }

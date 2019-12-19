@@ -1347,5 +1347,6 @@ public class InlineModelResolverTest {
 
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
+        Yaml.prettyPrint(openAPI);
     }
 }

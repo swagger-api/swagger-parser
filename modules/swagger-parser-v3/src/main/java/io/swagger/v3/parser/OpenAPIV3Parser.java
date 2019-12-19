@@ -70,7 +70,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                             result.setOpenAPI(resolver.resolve());
                             new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                         } else if (options.isFlatten()) {
-                            InlineModelResolver inlineModelResolver = new InlineModelResolver();
+                            InlineModelResolver inlineModelResolver = new InlineModelResolver(options.isFlattenComposedSchemas());
                             inlineModelResolver.setSkipMatches(options.isSkipMatches());
                             inlineModelResolver.flatten(result.getOpenAPI());
                         }
