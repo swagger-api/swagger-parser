@@ -75,7 +75,6 @@ public class PathsProcessor {
             final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
             pathItem.setParameters(processedPathParameters);
 
-            //addParametersToEachOperation(pathItem);
 
             final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
 
@@ -162,6 +161,11 @@ public class PathsProcessor {
     }
 
     protected void updateLocalRefs(ApiResponse response, String pathRef) {
+        if (response.get$ref() != null){
+            if(isLocalRef(response.get$ref())) {
+                response.set$ref(computeLocalRef(response.get$ref(), pathRef));
+            }
+        }
         if(response.getContent() != null) {
             Map<String, MediaType> content = response.getContent();
             for (String key: content.keySet()) {
@@ -188,6 +192,11 @@ public class PathsProcessor {
     }
 
     protected void updateLocalRefs(Parameter param, String pathRef) {
+        if (param.get$ref() != null){
+            if(isLocalRef(param.get$ref())) {
+                param.set$ref(computeLocalRef(param.get$ref(), pathRef));
+            }
+        }
         if(param.getSchema() != null) {
             updateLocalRefs(param.getSchema(), pathRef);
         }
@@ -204,12 +213,23 @@ public class PathsProcessor {
     }
 
     protected void updateLocalRefs(RequestBody body, String pathRef) {
+        if (body.get$ref() != null){
+            if(isLocalRef(body.get$ref())) {
+                body.set$ref(computeLocalRef(body.get$ref(), pathRef));
+            }
+        }
         if(body.getContent() != null) {
             Map<String, MediaType> content = body.getContent();
             for (String key: content.keySet()) {
                 MediaType mediaType = content.get(key);
                 if (mediaType.getSchema() != null) {
                     updateLocalRefs(mediaType.getSchema(), pathRef);
+                }
+                Map<String, Example> examples = content.get(key).getExamples();
+                if (examples != null) {
+                    for (Example example : examples.values()) {
+                        updateLocalRefs(example, pathRef);
+                    }
                 }
             }
         }else if(body.get$ref() != null){

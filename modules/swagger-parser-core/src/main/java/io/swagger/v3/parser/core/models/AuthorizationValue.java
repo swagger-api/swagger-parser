@@ -1,15 +1,26 @@
 package io.swagger.v3.parser.core.models;
 
+import java.net.URL;
+import java.util.Objects;
+import java.util.function.Predicate;
+
+
 public class AuthorizationValue {
     private String value, type, keyName;
+    private Predicate<URL> urlMatcher;
 
     public AuthorizationValue() {
     }
 
-    public AuthorizationValue(String keyName, String value, String type) {
+    public AuthorizationValue(String keyName, String value, String type, Predicate<URL> urlMatcher) {
         this.setKeyName(keyName);
         this.setValue(value);
         this.setType(type);
+        this.setUrlMatcher(urlMatcher);
+    }
+
+    public AuthorizationValue(String keyName, String value, String type) {
+        this(keyName, value, type, url -> true);
     }
 
     public AuthorizationValue value(String value) {
@@ -24,6 +35,11 @@ public class AuthorizationValue {
 
     public AuthorizationValue keyName(String keyName) {
         this.keyName = keyName;
+        return this;
+    }
+
+    public AuthorizationValue urlMatcher(Predicate<URL> urlMatcher) {
+        setUrlMatcher(urlMatcher);
         return this;
     }
 
@@ -51,6 +67,14 @@ public class AuthorizationValue {
         this.keyName = keyName;
     }
 
+    public Predicate<URL> getUrlMatcher() {
+        return urlMatcher;
+    }
+
+    public void setUrlMatcher(Predicate<URL> urlMatcher) {
+        this.urlMatcher = Objects.requireNonNull(urlMatcher);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -58,6 +82,7 @@ public class AuthorizationValue {
         result = prime * result + ((keyName == null) ? 0 : keyName.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + urlMatcher.hashCode();
         return result;
     }
 
@@ -92,6 +117,9 @@ public class AuthorizationValue {
                 return false;
             }
         } else if (!value.equals(other.value)) {
+            return false;
+        }
+        if (!urlMatcher.equals(other.urlMatcher)) {
             return false;
         }
         return true;

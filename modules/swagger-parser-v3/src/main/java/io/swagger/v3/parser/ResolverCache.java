@@ -118,8 +118,12 @@ public class ResolverCache {
             if(parentDirectory != null) {
                 contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
             }
-            else if(rootPath != null) {
+            else if(rootPath != null && rootPath.startsWith("http")) {
                 contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath);
+            }
+            else if (rootPath != null) {
+                contents = RefUtils.readExternalClasspathRef(file, refFormat, auths, rootPath);
+
             }
             externalFileCache.put(file, contents);
         }
@@ -158,14 +162,6 @@ public class ResolverCache {
     }
 
     protected <T> void updateLocalRefs(String file, T result) {
-        if(result instanceof ApiResponse) {
-            ApiResponse response = (ApiResponse) result;
-            if (response.getContent() != null) {
-                for (String mediaType : response.getContent().keySet()) {
-                    updateLocalRefs(file, response.getContent().get(mediaType).getSchema());
-                }
-            }
-        }
         if(result instanceof Parameter){
             Parameter parameter = (Parameter)result;
             if (parameter.getSchema() != null){

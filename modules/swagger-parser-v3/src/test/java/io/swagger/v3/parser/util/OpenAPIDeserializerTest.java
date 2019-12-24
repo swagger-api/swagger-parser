@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -50,6 +49,8 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -57,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
@@ -763,6 +763,47 @@ public class OpenAPIDeserializerTest {
         assertTrue(((ArraySchema) p).getItems() instanceof StringSchema);
     }
 
+    @Test
+    public void testArrayItems() {
+        String yaml =
+            "openapi: 3.0.0\n" +
+            "info:\n" +
+            "  title: Test\n" +
+            "  version: 1.0.0\n" +
+            "paths:\n" +
+            "  \"/store/inventory\":\n" +
+            "    post:\n" +
+            "      requestBody:\n" +
+            "        content:\n" +
+            "          application/json:\n" +
+            "            schema:\n" +
+            "              type: array\n" +
+            "              minItems: 1\n" +
+            "      responses:\n" +
+            "        '200':\n" +
+            "          description: successful operation\n" +
+            "          content:\n" +
+            "            application/json:\n" +
+            "              schema:\n" +
+            "                items:\n" +
+            "                  type: string"
+            ;
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.schema.items is missing"));
+        
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertFalse(body.getClass().equals( ArraySchema.class), "body is an ArraySchema");
+        assertEquals(body.getType(), "array");
+        assertEquals(body.getMinItems(), Integer.valueOf(1));
+
+        Schema response = openAPI.getPaths().get("/store/inventory").getPost().getResponses().get("200").getContent().get("application/json").getSchema();
+        assertTrue(response.getClass().equals( ArraySchema.class), "response is an ArraySchema");
+        assertEquals(body.getType(), "array");
+    }
 
     @Test(description = "it should read a top-level extension per https://github.com/openAPI-api/validator-badge/issues/59")
     public void testToplevelExtension() throws Exception {
@@ -837,6 +878,8 @@ public class OpenAPIDeserializerTest {
                 "                    $ref: '#/components/schemas/IntegerEnum'\n" +
                 "                  ne:\n" +
                 "                    $ref: '#/components/schemas/NumberEnum'\n" +
+                "                  be:\n" +
+                "                    $ref: '#/components/schemas/BooleanEnum'\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    StringEnum:\n" +
@@ -845,6 +888,10 @@ public class OpenAPIDeserializerTest {
                 "      enum:\n" +
                 "        - First\n" +
                 "        - Second\n" +
+                "    BooleanEnum:\n" +
+                "      enum:\n" +
+                "        - true \n" +
+                "        - false \n" +
                 "    IntegerEnum:\n" +
                 "      type: integer\n" +
                 "      default: 1\n" +
@@ -893,6 +940,13 @@ public class OpenAPIDeserializerTest {
         assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
         assertEquals(new BigDecimal("3.14"), numberValues.get(3));
         assertEquals(numberImpl.getDefault(), new BigDecimal("3.14"));
+        
+        Schema booleanModel = resolved.getComponents().getSchemas().get("BooleanEnum");
+        assertEquals("boolean", booleanModel.getType());
+        List<Object> booleanValues = booleanModel.getEnum();
+        assertEquals(2, booleanValues.size());
+        assertEquals(Boolean.TRUE, booleanValues.get(0));
+        assertEquals(Boolean.FALSE, booleanValues.get(1));
     }
 
     @Test
@@ -1031,52 +1085,30 @@ public class OpenAPIDeserializerTest {
 
         Schema dateTimeModel = resolved.getComponents().getSchemas().get("DateTimeString");
         assertTrue(dateTimeModel instanceof DateTimeSchema);
-        List<Date> dateTimeValues = dateTimeModel.getEnum();
+        List<OffsetDateTime> dateTimeValues = dateTimeModel.getEnum();
         assertEquals(dateTimeValues.size(), 5);
         assertEquals(
           dateTimeValues.get(0),
           null);
         assertEquals(
-          dateTimeValues.get(1),
-          new Calendar.Builder()
-          .setDate( 2019, 0, 1)
-          .setTimeOfDay( 0, 0, 0, 0)
-          .setTimeZone( TimeZone.getTimeZone( "GMT"))
-          .build()
-          .getTime());
-        assertEquals(
-          dateTimeValues.get(2),
-          new Calendar.Builder()
-          .setDate( 2018, 1, 2)
-          .setTimeOfDay( 23, 59, 59, 999)
-          .setTimeZone( TimeZone.getTimeZone( "GMT-05:00"))
-          .build()
-          .getTime());
-        assertEquals(
-          dateTimeValues.get(3),
-          new Calendar.Builder()
-          .setDate( 2017, 2, 3)
-          .setTimeOfDay( 11, 22, 33, 0)
-          .setTimeZone( TimeZone.getTimeZone( "GMT+06:00"))
-          .build()
-          .getTime());
-        assertEquals(
-          dateTimeValues.get(4),
-          new Calendar.Builder()
-          .setDate( 2016, 3, 4)
-          .setTimeOfDay( 22, 33, 44, 555)
-          .setTimeZone( TimeZone.getTimeZone( "GMT"))
-          .build()
-          .getTime());
+            dateTimeValues.get(1),
+            OffsetDateTime.of(2019,1,1,0,0,0,0, ZoneOffset.UTC));
 
         assertEquals(
-          dateTimeModel.getDefault(),
-          new Calendar.Builder()
-          .setDate( 2019, 0, 1)
-          .setTimeOfDay( 0, 0, 0, 0)
-          .setTimeZone( TimeZone.getTimeZone( "GMT"))
-          .build()
-          .getTime());
+            dateTimeValues.get(2),
+            OffsetDateTime.of(2018,2,2,23,59,59,999000000, ZoneOffset.ofHours(-5)));
+
+        assertEquals(
+            dateTimeValues.get(3),
+            OffsetDateTime.of(2017,3,3,11,22,33,0, ZoneOffset.ofHours(6)));
+
+        assertEquals(
+            dateTimeValues.get(4),
+            OffsetDateTime.of(2016,4,4,22,33,44,555000000, ZoneOffset.UTC));
+
+        assertEquals(
+                dateTimeModel.getDefault(),
+                OffsetDateTime.of(2019,1,1,0,0,0,0, ZoneOffset.UTC));
 
         assertEquals(
           result.getMessages(),
@@ -2263,8 +2295,6 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(server.get(2).getExtensions().get("x-server").toString(),"server extension");
         Assert.assertEquals(server.get(2).getVariables().get("basePath").getDescription(),"testing overwriting");
         Assert.assertEquals(server.get(2).getVariables().get("basePath").getDefault(),"v2");
-
-
     }
 
     @Test
@@ -2279,6 +2309,7 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
+
 
         assertEquals(openAPI.getServers().get(0).getUrl(),"/");
     }

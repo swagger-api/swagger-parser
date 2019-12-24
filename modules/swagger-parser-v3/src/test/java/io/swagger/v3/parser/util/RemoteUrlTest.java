@@ -2,12 +2,14 @@ package io.swagger.v3.parser.util;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -15,9 +17,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 public class RemoteUrlTest {
 
@@ -74,6 +76,43 @@ public class RemoteUrlTest {
                         .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
                         .withHeader(headerName, equalTo(headerValue))
         );
+    }
+
+    @Test
+    public void testAuthorizationHeaderWithMatchingUrl() throws Exception {
+
+        final String expectedBody = setupStub();
+
+        final String headerName = "Authorization";
+        final String headerValue = "foobar";
+        final AuthorizationValue authorizationValue = new AuthorizationValue(headerName, headerValue, "header",
+            url -> url.toString().startsWith("http://localhost"));
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
+
+        assertEquals(actualBody, expectedBody);
+
+        verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
+                        .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+                        .withHeader(headerName, equalTo(headerValue))
+        );
+    }
+
+    @Test
+    public void testAuthorizationHeaderWithNonMatchingUrl() throws Exception {
+
+        final String expectedBody = setupStub();
+
+        final String headerValue = "foobar";
+        String authorization = "Authorization";
+        final AuthorizationValue authorizationValue = new AuthorizationValue(authorization,
+            headerValue, "header", u -> false);
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
+
+        assertEquals(actualBody, expectedBody);
+
+        List<LoggedRequest> requests = WireMock.findAll(getRequestedFor(urlEqualTo("/v2/pet/1")));
+        assertEquals(1, requests.size());
+        assertFalse(requests.get(0).containsHeader(authorization));
     }
 
     private String getUrl() {

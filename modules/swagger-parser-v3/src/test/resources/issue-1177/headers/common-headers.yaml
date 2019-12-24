@@ -1,0 +1,10 @@
+openapi: "3.0.2"
+info:
+  version: 15.3.0
+  title: "Common Headers"
+paths: {}
+components:
+  headers:
+    x-session-id:
+      schema:
+        type: string

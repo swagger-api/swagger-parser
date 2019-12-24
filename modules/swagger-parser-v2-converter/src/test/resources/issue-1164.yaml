@@ -1,0 +1,30 @@
+swagger: '2.0'
+info:
+  title: Test for Issue 1164
+  version: 1.0.0
+paths:
+  /foo:
+    get:
+      operationId: doFoo
+      parameters:
+        - in: formData
+          name: first
+          type: string
+          required: true
+        - in: formData
+          name: second
+          type: boolean
+          required: true
+        - in: formData
+          name: third
+          type: string
+          format: password
+          required: true
+        - in: formData
+          name: fourth
+          type: boolean
+          format: completely-custom
+          required: true
+      responses:
+        '200':
+          description: OK

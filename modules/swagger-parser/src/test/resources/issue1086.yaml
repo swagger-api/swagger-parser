@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  version: 0.0.0
+  title: "test"
+components:
+  schemas:
+    AssessCandidate:
+      type: object
+      properties:
+        candidate:
+          type: object
+          properties:
+            id:
+              type: string
+          required:
+            - id
+        test_results:
+          type: object
+          properties:
+            id:
+              type: string
+            status:
+              type: string
+            score:
+              type: number
+              multipleOf: 1
+            date:
+              type: string
+              format: date
+            comment:
+              type: string
+            result_url:
+              type: string
+      required:
+        - candidate
+        - test_results
