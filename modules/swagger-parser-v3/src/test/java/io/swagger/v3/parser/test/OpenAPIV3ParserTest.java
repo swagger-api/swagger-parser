@@ -66,6 +66,37 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testFlattenComposedSchema() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+
+    }
+
+    @Test
+    public void testNotFlattenComposedSchema() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+
+    }
+
     @Test
     public void testCodegenIssue8601() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();

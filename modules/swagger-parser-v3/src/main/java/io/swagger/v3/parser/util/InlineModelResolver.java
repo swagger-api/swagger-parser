@@ -32,6 +32,15 @@ public class InlineModelResolver {
     Map<String, Schema> addedModels = new HashMap<>();
     Map<String, String> generatedSignature = new HashMap<>();
 
+    private boolean flattenComposedSchemas;
+
+
+    public InlineModelResolver(){this(false);}
+
+    public InlineModelResolver(boolean flattenComposedSchemas) {
+        this.flattenComposedSchemas = flattenComposedSchemas;
+    }
+
     public void flatten(OpenAPI openAPI) {
         this.openAPI = openAPI;
 
@@ -368,7 +377,34 @@ public class InlineModelResolver {
                             addGenerated(modelName, innerModel);
                             openAPI.getComponents().addSchemas(modelName, innerModel);
                         }
+                    }else if(inner instanceof ComposedSchema && this.flattenComposedSchemas){
+                        ComposedSchema composedSchema = (ComposedSchema) inner;
+                        String modelName = resolveModelName(inner.getTitle(), path + "_" + key);
+                        List<Schema> list = null;
+                        if (composedSchema.getAllOf() != null) {
+                            list  = composedSchema.getAllOf();
+                        }else if (composedSchema.getAnyOf() != null) {
+                            list  = composedSchema.getAnyOf();
+                        }else if (composedSchema.getOneOf() != null) {
+                            list  = composedSchema.getOneOf();
+                        }
+                        for(int i= 0; i<list.size();i++){
+                            if(list.get(i).getProperties()!= null){
+                                flattenProperties(list.get(i).getProperties(), modelName);
+                            }
+                        }
+
+                        Schema innerModel = createModelFromProperty(inner, modelName);
+                        String existing = matchGenerated(innerModel);
+                        if (existing != null) {
+                            ap.setItems(new Schema().$ref(existing));
+                        } else {
+                            ap.setItems(new Schema().$ref(modelName));
+                            addGenerated(modelName, innerModel);
+                            openAPI.getComponents().addSchemas(modelName, innerModel);
+                        }
                     }
+
                 }
             } else if (property.getAdditionalProperties() != null && property.getAdditionalProperties() instanceof Schema) {
                 Schema inner = (Schema) property.getAdditionalProperties();
@@ -437,20 +473,36 @@ public class InlineModelResolver {
         XML xml = schema.getXml();
         Map<String, Schema> properties = schema.getProperties();
 
-        Schema model = new Schema();//TODO Verify this!
-        model.setDescription(description);
-        model.setExample(example);
-        model.setName(name);
-        model.setXml(xml);
-        model.setType(schema.getType());
-        model.setRequired(requiredList);
 
-        if (properties != null) {
-            flattenProperties(properties, path);
-            model.setProperties(properties);
+        if (schema instanceof ComposedSchema && this.flattenComposedSchemas){
+            ComposedSchema composedModel = (ComposedSchema) schema;
+
+            composedModel.setDescription(description);
+            composedModel.setExample(example);
+            composedModel.setName(name);
+            composedModel.setXml(xml);
+            composedModel.setType(schema.getType());
+            composedModel.setRequired(requiredList);
+
+            return composedModel;
+
+
+        } else {
+            Schema model = new Schema();//TODO Verify this!
+            model.setDescription(description);
+            model.setExample(example);
+            model.setName(name);
+            model.setXml(xml);
+            model.setType(schema.getType());
+            model.setRequired(requiredList);
+
+            if (properties != null) {
+                flattenProperties(properties, path);
+                model.setProperties(properties);
+            }
+
+            return model;
         }
-
-        return model;
     }
 
     @SuppressWarnings("static-method")
