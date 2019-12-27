@@ -74,7 +74,7 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         options.setFlatten(true);
         options.setFlattenComposedSchemas(true);
-        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchema.yaml", null, options);
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
 
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertNotNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
@@ -89,11 +89,11 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         options.setFlatten(true);
 
-        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchema.yaml", null, options);
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
 
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
-        assertNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
 
     }
 
