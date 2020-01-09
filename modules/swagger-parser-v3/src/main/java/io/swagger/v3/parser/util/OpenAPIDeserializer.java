@@ -2669,7 +2669,7 @@ public class OpenAPIDeserializer {
                     apiResponses.setExtensions(extensions);
                 }
             } else {
-                ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
+                ObjectNode obj = getObject(key, node, false, location, result);
                 if (obj != null) {
                     ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
                     if (response != null) {
