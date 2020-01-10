@@ -955,7 +955,7 @@ public class OpenAPIDeserializer {
 
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            MediaType mediaType = getMediaType((ObjectNode) node.get(key), location, result);
+            MediaType mediaType = getMediaType((ObjectNode) node.get(key), String.format("%s.'%s'", location, key), result);
             if (mediaType != null) {
                 content.addMediaType(key, mediaType);
             }
