@@ -8,6 +8,7 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
@@ -152,9 +153,26 @@ public class ResolverCache {
         updateLocalRefs(file, result);
 
         resolutionCache.put(ref, result);
+        
+        if (result instanceof BodyParameter) {
+        	loadRef(ref, refFormat, (BodyParameter) result);
+        }
 
         return result;
     }
+
+	private void loadRef(String ref, RefFormat refFormat, final BodyParameter bodyParameter) {
+		final Model schema = bodyParameter.getSchema();
+		if (schema instanceof RefModel && refFormat != RefFormat.INTERNAL) {
+			loadRef(ref, refFormat, (RefModel) schema);
+		}
+	}
+
+	private void loadRef(String ref, RefFormat refFormat, final RefModel refModel) {
+		final String rootRef = ref.substring(0, ref.indexOf('#')); 
+		final Model derefModel = loadRef(rootRef + refModel.getReference(), refFormat, Model.class);
+		swagger.addDefinition(refModel.getSimpleRef(), derefModel);
+	}
 
     protected JsonNode deserialize(String contents, String file) {
         return DeserializationUtils.deserializeIntoTree(contents, file);
