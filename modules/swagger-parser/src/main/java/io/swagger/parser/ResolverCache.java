@@ -169,8 +169,10 @@ public class ResolverCache {
 	}
 
 	private void loadRef(String ref, RefFormat refFormat, final RefModel refModel) {
-		final String rootRef = ref.substring(0, ref.indexOf('#')); 
-		final Model derefModel = loadRef(rootRef + refModel.getReference(), refFormat, Model.class);
+		final String rootRef = ref.substring(0, ref.indexOf('#'));
+		final String externalRef = RefUtils.isAnExternalRefFormat(refModel.getRefFormat()) ? refModel.getReference()
+				: rootRef + refModel.getReference();
+		final Model derefModel = loadRef(externalRef, refFormat, Model.class);
 		swagger.addDefinition(refModel.getSimpleRef(), derefModel);
 	}
 

@@ -1,6 +1,27 @@
 package io.swagger.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.io.File;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.testng.reporters.Files;
+
 import com.fasterxml.jackson.databind.JsonNode;
+
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
 import io.swagger.models.Model;
@@ -30,29 +51,10 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
-import io.swagger.parser.util.TestUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.parser.util.TestUtils;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import org.testng.reporters.Files;
-
-import java.io.File;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 public class SwaggerParserTest {
 
@@ -1232,35 +1234,71 @@ public class SwaggerParserTest {
     }
 
 	@Test
-	public void testExternalParameters() {
+	public void testExternalParametersRealExample() {
 		SwaggerParser parser = new SwaggerParser();
 		final Swagger swagger = parser.read(
 				"src/test/resources/parameters-external/data-plane/ComputerVision/stable/v1.0/ComputerVision.json");
-		Assert.assertNotNull(swagger);
+		assertNotNull(swagger);
 		final Path path = swagger.getPath("/analyze");
-		Assert.assertNotNull(path);
-		final Operation post = path.getPost();
-		Assert.assertNotNull(post);
-		final List<Parameter> parameters = post.getParameters();
-		Assert.assertNotNull(parameters);
+		assertNotNull(path);
+		final Operation operation = path.getPost();
+		assertNotNull(operation);
+		final List<Parameter> parameters = operation.getParameters();
+		assertNotNull(parameters);
 		final BodyParameter parameter = (BodyParameter) parameters.get(3);
-		Assert.assertNotNull(parameter);
-		Assert.assertEquals(parameter.getName(), "ImageUrl");
+		assertNotNull(parameter);
+		assertEquals(parameter.getName(), "ImageUrl");
 		final RefModel schema = (RefModel) parameter.getSchema();
-		Assert.assertNotNull(schema);
+		assertNotNull(schema);
 		final String simpleRef = schema.getSimpleRef();
-		Assert.assertNotNull(simpleRef);
+		assertNotNull(simpleRef);
 		final String message = "Where is " + simpleRef + "?";
 		if (schema.getReference().startsWith("#/definitions/")) {
-			Assert.assertNotNull(swagger.getDefinitions().get(simpleRef), message);
+			assertNotNull(message, swagger.getDefinitions().get(simpleRef));
 		} else if (schema.getReference().startsWith("#/parameters/")) {
-			Assert.assertNotNull(swagger.getParameters().get(simpleRef), message);
+			assertNotNull(message, swagger.getParameters().get(simpleRef));
 		} else {
 			Assert.fail(message);
 		}
 	}
 
-    @Test
+	@Test
+	public void testExternalParametersSimpleExample() {
+		SwaggerParser parser = new SwaggerParser();
+		final Swagger swagger = parser.read(
+				"src/test/resources/parameters-external/simple/externals-level-0.json");
+		checkExternalParameters(swagger, 1, ModelImpl.class, null);
+		checkExternalParameters(swagger, 2, RefModel.class, "#/definitions/D-Level1Thing3");
+		checkExternalParameters(swagger, 3, RefModel.class, "#/definitions/P-Level2Thing3");
+	}
+
+	private void checkExternalParameters(Swagger swagger, int id, Class<? extends Model> expectedClass, String expectedRef) {
+		assertNotNull(swagger);
+		final String pathKey = "/path-" + id;
+		final Path path = swagger.getPath(pathKey);
+		assertNotNull(pathKey, path);
+		final Operation operation = path.getGet();
+		assertNotNull(operation);
+		final List<Parameter> parameters = operation.getParameters();
+		assertNotNull(parameters);
+		final BodyParameter bodyParameter = (BodyParameter) parameters.get(0);
+		assertNotNull(bodyParameter);
+		final String expectedName = "Level1Thing" + id;
+		assertEquals(expectedName, bodyParameter.getName());
+		final Model schema = bodyParameter.getSchema();
+		assertNotNull(schema);
+		if (expectedClass == ModelImpl.class) {
+			assertEquals("string", ((ModelImpl) schema).getType());
+		} else if (expectedClass == RefModel.class) {
+			final RefModel refSchema = (RefModel) schema;
+			final String ref = refSchema.get$ref();
+			assertEquals(expectedRef, ref);
+			final Model model = swagger.getDefinitions().get(refSchema.getSimpleRef());
+			assertNotNull(model);
+		}
+	}
+
+	@Test
     public void testIssue357() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue_357.yaml");
