@@ -2192,4 +2192,14 @@ public class OpenAPIV3ParserTest {
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
+
+    @Test
+    public void testIssue1236() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue-1236/petstore.json",null,options);
+        assertEquals(result.getMessages().get(0),"attribute .servers. invalid url : /te st/sample.yaml");
+    }
 }
