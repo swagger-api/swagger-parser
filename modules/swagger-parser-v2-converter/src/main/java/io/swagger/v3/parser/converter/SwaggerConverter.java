@@ -1089,9 +1089,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     a.setUniqueItems(sp.isUniqueItems());
                 }
 
-                a.setMaximum(sp.getMaximum());
-                a.setMinimum(sp.getMinimum());
-
                 schema = a;
             } else {
                 schema = SchemaTypeUtil.createSchema(sp.getType(), sp.getFormat());
@@ -1175,6 +1172,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
             composed.setTitle(composedModel.getTitle());
             composed.setExtensions(convert(composedModel.getVendorExtensions()));
             composed.setAllOf(composedModel.getAllOf().stream().map(this::convert).collect(Collectors.toList()));
+
+            addProperties(v2Model, composed);
+
             result = composed;
         } else {
             String v2discriminator = null;
@@ -1188,14 +1188,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             result = Json.mapper().convertValue(v2Model, Schema.class);
 
-            if ((v2Model.getProperties() != null) && (v2Model.getProperties().size() > 0)) {
-                Map<String, Property> properties = v2Model.getProperties();
-
-                properties.forEach((k, v) -> {
-                    result.addProperties(k, convert(v));
-                });
-
-            }
+            addProperties(v2Model, result);
 
             if (v2Model instanceof ModelImpl) {
                 ModelImpl model = (ModelImpl) v2Model;
@@ -1227,6 +1220,17 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         return result;
+    }
+
+    private void addProperties(Model v2Model, Schema schema) {
+        if ((v2Model.getProperties() != null) && (v2Model.getProperties().size() > 0)) {
+            Map<String, Property> properties = v2Model.getProperties();
+
+            properties.forEach((k, v) -> {
+                schema.addProperties(k, convert(v));
+            });
+
+        }
     }
 }
 
