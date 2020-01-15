@@ -960,7 +960,7 @@ public class OpenAPIDeserializer {
 
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            MediaType mediaType = getMediaType((ObjectNode) node.get(key), location, result);
+            MediaType mediaType = getMediaType((ObjectNode) node.get(key), String.format("%s.'%s'", location, key), result);
             if (mediaType != null) {
                 content.addMediaType(key, mediaType);
             }
@@ -2380,6 +2380,12 @@ public class OpenAPIDeserializer {
             schema.setWriteOnly(bool);
         }
 
+        bool = Optional.ofNullable(getBoolean("writeOnly", node, false, location, result)).orElse(false) &&  Optional.ofNullable(getBoolean("readOnly", node, false, location, result)).orElse(false);
+        if(bool == true){
+            result.warning(location," writeOnly and readOnly are both present");
+
+        }
+
         ObjectNode xmlNode = getObject("xml", node, false, location, result);
         if (xmlNode != null) {
             XML xml = getXml(xmlNode, location, result);
@@ -2668,7 +2674,7 @@ public class OpenAPIDeserializer {
                     apiResponses.setExtensions(extensions);
                 }
             } else {
-                ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
+                ObjectNode obj = getObject(key, node, false, location, result);
                 if (obj != null) {
                     ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
                     if (response != null) {

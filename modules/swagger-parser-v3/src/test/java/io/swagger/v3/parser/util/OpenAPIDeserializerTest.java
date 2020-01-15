@@ -791,7 +791,7 @@ public class OpenAPIDeserializerTest {
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
-        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.schema.items is missing"));
+        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.'application/json'.schema.items is missing"));
         
         OpenAPI openAPI = result.getOpenAPI();
 

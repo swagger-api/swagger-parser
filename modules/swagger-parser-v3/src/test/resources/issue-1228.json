@@ -1,0 +1,66 @@
+{
+    "openapi":"3.0.0",
+    "info":{
+        "title":"data",
+        "version":"1"
+    },
+
+    "tags":[
+        {
+            "name":"foo-controller",
+            "description":"Foo Controller"
+        }
+    ],
+
+
+    "paths":{
+        "/foobar":{
+            "get":{
+                "tags":[
+                    "foo-controller"
+                ],
+                "summary":"foo",
+                "operationId":"fooUsingGET",
+
+                "parameters":[
+                    {
+                        "name":"bars",
+                        "in":"path",
+                        "required":true,
+                        "schema": {
+                            "type": "string",
+                            "format": "byte"
+                        }
+                    }
+                ],
+                "responses":{
+                    "200":{
+                        "description":"OK"
+                    }
+                },
+                "deprecated":false
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sample":{
+                "type": "oauth2",
+                "flows": {
+                    "implicit": {
+                        "authorizationUrl": "https://example.com/api/oauth/dialog",
+                        "scopes": {
+                            "write:pets": "modify pets in your account",
+                            "read:pets": "read your pets"
+                        }
+                    },
+                    "authorizationCode": {
+                        "authorizationUrl": "https://example.com/api/oauth/dialog",
+                        "tokenUrl": "https://example.com/api/oauth/token"
+
+                    }
+                }
+            }
+        }
+    }
+}
