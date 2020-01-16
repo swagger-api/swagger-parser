@@ -2303,35 +2303,5 @@ public class OpenAPIV3ParserTest {
 
     }
   
-    public void testSampleParser() {
-        final String location = "src/test/resources/issue-1211.json";
-
-        final ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-
-        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        final SwaggerParseResult result = parser.readLocation(location, null, options);
-        System.out.println(result.getMessages());
-        OpenAPI openAPI = result.getOpenAPI();
-
-        assertNotNull(result.getOpenAPI());
-        assertTrue(result.getMessages().size() > 0);
-        assertEquals(result.getMessages().get(0).contains("attribute components.schemas.Pet. writeOnly and readOnly are both present"), true);
-
-    }
-
-    @Test
-    public void testDuplicateHttpStatusCodes() {
-        final String location = "src/test/resources/duplicateHttpStatusCodes.json";
-
-        final ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-
-        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        final SwaggerParseResult result = parser.readLocation(location, null, options);
-        assertNull(result.getOpenAPI());
-        List<String> messages = result.getMessages();
-        assertEquals(1, messages.size());
-        assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.json`");
-    }
+    
 }
