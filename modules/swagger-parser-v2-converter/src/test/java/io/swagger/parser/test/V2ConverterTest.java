@@ -96,7 +96,6 @@ public class V2ConverterTest {
     private static final String ISSUE_1164_YAML = "issue-1164.yaml";
     private static final String ISSUE_1261_YAML = "issue-1261.yaml";
 
-
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
     private static final String PET_FIND_BY_STATUS_PATH = "/pet/findByStatus";
