@@ -413,7 +413,12 @@ public class OpenAPIDeserializer {
 					if("http".equals(absURI.getScheme()) || "https".equals(absURI.getScheme())){
 						value = absURI.resolve(new URI(value)).toString();
 					}
+                    else {
+                        result.warning(location," invalid url : "+value);
+                    }
+
 				} catch (URISyntaxException e) {
+                    result.warning(location,"invalid url : "+value);
 					e.printStackTrace();
 				}
 
@@ -955,7 +960,7 @@ public class OpenAPIDeserializer {
 
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            MediaType mediaType = getMediaType((ObjectNode) node.get(key), location, result);
+            MediaType mediaType = getMediaType((ObjectNode) node.get(key), String.format("%s.'%s'", location, key), result);
             if (mediaType != null) {
                 content.addMediaType(key, mediaType);
             }
@@ -2669,7 +2674,7 @@ public class OpenAPIDeserializer {
                     apiResponses.setExtensions(extensions);
                 }
             } else {
-                ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
+                ObjectNode obj = getObject(key, node, false, location, result);
                 if (obj != null) {
                     ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
                     if (response != null) {

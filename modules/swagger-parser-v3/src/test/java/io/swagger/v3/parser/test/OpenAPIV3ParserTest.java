@@ -66,6 +66,37 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testFlattenComposedSchema() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+
+    }
+
+    @Test
+    public void testNotFlattenComposedSchema() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+
+    }
+
     @Test
     public void testCodegenIssue8601() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
@@ -1323,6 +1354,25 @@ public class OpenAPIV3ParserTest {
         assertEquals(refModel.get$ref(), "#/components/schemas/Pet");
     }
 
+    @Test
+    public void testRelativePath() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/relative-issue/api.yaml", null, options);
+        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/scans").getGet().getResponses().get("500").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorMessage");
+
+    }
+
+    @Test
+    public void testRelativePath2() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/codegen-remote-responses/openapi.yaml", null, options);
+        Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorModel");
+    }
+
     private OpenAPI doRelativeFileTest(String location) {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -2211,6 +2261,15 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue1236() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue-1236/petstore.json",null,options);
+        assertEquals(result.getMessages().get(0),"attribute .servers. invalid url : /te st/sample.yaml");
+    }
+  
     public void testSampleParser() {
         final String location = "src/test/resources/issue-1211.json";
 
@@ -2226,5 +2285,20 @@ public class OpenAPIV3ParserTest {
         assertTrue(result.getMessages().size() > 0);
         assertEquals(result.getMessages().get(0).contains("attribute components.schemas.Pet. writeOnly and readOnly are both present"), true);
 
+    }
+
+    @Test
+    public void testDuplicateHttpStatusCodes() {
+        final String location = "src/test/resources/duplicateHttpStatusCodes.json";
+
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        assertNull(result.getOpenAPI());
+        List<String> messages = result.getMessages();
+        assertEquals(1, messages.size());
+        assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.json`");
     }
 }
