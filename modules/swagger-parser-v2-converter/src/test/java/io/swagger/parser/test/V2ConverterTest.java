@@ -842,7 +842,7 @@ public class V2ConverterTest {
         return result.getOpenAPI();
     }
 
-    @Test(description = "")
+    @Test(description = "OpenAPI v2 converter - verifies the references inside composed schema is resolved")
     public void testissue1261() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1261_YAML);
         assertNotNull(oas);
