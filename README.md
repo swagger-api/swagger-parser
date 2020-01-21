@@ -24,7 +24,7 @@ import io.swagger.v3.oas.models.OpenAPI;
   // read a swagger description from the petstore
   
   
-  OpenAPI openAPI = new OpenAPIV3Parser().read("http://petstore.swagger.io/v3/openapi.json");
+  OpenAPI openAPI = new OpenAPIV3Parser().read("https://petstore3.swagger.io/api/v3/openapi.json");
 
 ```
 
