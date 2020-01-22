@@ -225,6 +225,36 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testSecurityWithEmpty() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"security\": [\n" +
+                "    {},\n" +
+                "    {\n" +
+                "      \"petstore_auth\": [\n" +
+                "        \"write:pets\",\n" +
+                "        \"read:pets\"\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+
+        Swagger swagger = result.getSwagger();
+
+        assertNotNull(swagger.getSecurity());
+        List<SecurityRequirement> security = swagger.getSecurity();
+        Assert.assertTrue(security.size() == 2);
+        Assert.assertTrue(security.get(0).getRequirements().size() == 0);
+        Assert.assertTrue(security.get(1).getRequirements().size() == 1);
+
+        List<String> requirement = security.get(1).getRequirements().get("petstore_auth");
+        Assert.assertTrue(requirement.size() == 2);
+    }
+
+    @Test
     public void testSecurityDefinition() {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
@@ -565,6 +595,52 @@ public class SwaggerDeserializerTest {
         Set<String> scopes = new HashSet<String>(scopesList);
         assertTrue(scopes.contains("read:pets"));
         assertTrue(scopes.contains("write:pets"));
+    }
+
+    @Test
+    public void testOperationSecurityWithEmpty() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"foo\": \"bar\",\n" +
+                "      \"get\": {\n" +
+                "        \"security\": [\n" +
+                "          {},\n" +
+                "          {\n" +
+                "            \"petstore_auth\": [\n" +
+                "              \"write:pets\",\n" +
+                "              \"read:pets\"\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        assertTrue(messages.contains("attribute paths.'/pet'.foo is unexpected"));
+        Swagger swagger = result.getSwagger();
+
+        Path path = swagger.getPath("/pet");
+        assertNotNull(path);
+        Operation operation = path.getGet();
+        assertNotNull(operation);
+        List<Map<String, List<String>>> security = operation.getSecurity();
+
+        assertTrue(security.size() == 2);
+
+        Map<String, List<String>> requirement1 = security.get(0);
+        assertTrue(requirement1.containsKey("none"));
+        assertTrue(requirement1.get("none").isEmpty());
+
+        Map<String, List<String>> requirement2 = security.get(1);
+        assertTrue(requirement2.containsKey("petstore_auth"));
+        assertFalse(requirement2.get("petstore_auth").isEmpty());
     }
     
     @Test

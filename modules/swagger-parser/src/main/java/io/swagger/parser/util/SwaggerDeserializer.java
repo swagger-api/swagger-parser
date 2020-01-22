@@ -417,8 +417,12 @@ public class SwaggerDeserializer {
         if(security != null) {
             List<Map<String, List<String>>> ss = new ArrayList<>();
             for(SecurityRequirement s : security) {
-                if(s.getRequirements() != null && s.getRequirements().size() > 0) {
-                    ss.add(s.getRequirements());
+                if(s.getRequirements() != null) {
+                    if (s.getRequirements().size() > 0) {
+                        ss.add(s.getRequirements());
+                    } else {
+                        ss.add(Collections.singletonMap("none", Collections.<String>emptyList()));
+                    }
                 }
             }
             output.setSecurity(ss);
