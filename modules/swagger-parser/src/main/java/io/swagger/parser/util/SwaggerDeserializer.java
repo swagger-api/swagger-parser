@@ -421,7 +421,7 @@ public class SwaggerDeserializer {
                     if (s.getRequirements().size() > 0) {
                         ss.add(s.getRequirements());
                     } else {
-                        ss.add(Collections.singletonMap("none", Collections.<String>emptyList()));
+                        ss.add(Collections.<String, List<String>>emptyMap());
                     }
                 }
             }

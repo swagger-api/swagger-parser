@@ -635,8 +635,7 @@ public class SwaggerDeserializerTest {
         assertTrue(security.size() == 2);
 
         Map<String, List<String>> requirement1 = security.get(0);
-        assertTrue(requirement1.containsKey("none"));
-        assertTrue(requirement1.get("none").isEmpty());
+        assertTrue(requirement1.isEmpty());
 
         Map<String, List<String>> requirement2 = security.get(1);
         assertTrue(requirement2.containsKey("petstore_auth"));
