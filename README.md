@@ -24,7 +24,7 @@ import io.swagger.v3.oas.models.OpenAPI;
   // read a swagger description from the petstore
   
   
-  OpenAPI openAPI = new OpenAPIV3Parser().read("http://petstore.swagger.io/v3/openapi.json");
+  OpenAPI openAPI = new OpenAPIV3Parser().read("https://petstore3.swagger.io/api/v3/openapi.json");
 
 ```
 
@@ -50,7 +50,7 @@ import io.swagger.v3.parser.core.models.AuthorizationValue;
   // or in a single constructor
   AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
   OpenAPI openAPI = new OpenAPIV3Parser().readWithInfo(
-    "http://petstore.swagger.io/v2/swagger.json",
+    "https://petstore3.swagger.io/api/v3/openapi.json",
     Arrays.asList(mySpecialHeader, apiKey)
   );
 ```
