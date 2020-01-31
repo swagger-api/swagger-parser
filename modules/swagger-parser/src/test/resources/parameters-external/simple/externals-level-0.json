@@ -1,0 +1,51 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Some Store"
+  },
+  "paths": {
+    "/path-1": {
+      "get": {
+        "parameters": [ 
+          { 
+            "$ref": "externals-level-1.json#/parameters/P-Level1Thing1" 
+          }          
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all the stuff."
+          }
+        }
+      }
+    },
+    "/path-2": {
+      "get": {
+        "parameters": [ 
+          { 
+            "$ref": "externals-level-1.json#/parameters/P-Level1Thing2" 
+          }          
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all the stuff."
+          }
+        }
+      }
+    },
+    "/path-3": {
+      "get": {
+        "parameters": [ 
+          { 
+            "$ref": "externals-level-1.json#/parameters/P-Level1Thing3" 
+          }          
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all the stuff."
+          }
+        }
+      }
+    }    
+  }
+}
