@@ -199,6 +199,9 @@ public final class ExternalRefProcessor {
     }
 
     private void processDiscriminator(String discriminator, Map<String, Property> properties, String file) {
+    	if (properties == null || properties.isEmpty()) {
+    		return;
+    	}
         for (Map.Entry<String, Property> prop : properties.entrySet()) {
             if (prop.getKey().equals(discriminator)){
                 if (prop.getValue() instanceof StringProperty){
