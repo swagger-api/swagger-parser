@@ -1672,7 +1672,7 @@ public class SwaggerDeserializerTest {
         SwaggerDeserializationResult result = parser.readWithInfo(swaggerSpec);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
-        assertEquals(0, messages.size());
+        assertEquals(1, messages.size());
 
         Swagger swagger = result.getSwagger();
         List<Parameter> parameters = swagger.getPaths().get("/test").getGet().getParameters();
