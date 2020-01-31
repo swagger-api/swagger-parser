@@ -57,7 +57,7 @@ import static org.testng.Assert.fail;
 public class SwaggerParserTest {
 
     @Test
-    public void testIssue1143(){
+    public void testIssue1143() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1143.json", null, true);
         assertNotNull(result.getSwagger().getDefinitions().get("RedisResource"));
         assertNotNull(result.getSwagger().getDefinitions().get("identificacion_usuario_aplicacion"));
@@ -79,9 +79,17 @@ public class SwaggerParserTest {
         assertNotNull(result.getSwagger());
     }
 
+    @Test
+    public void testIssue1249() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-1249.json", null, true);
+        Assert.assertEquals(result.getMessages().size(), 1);
+        assertEquals("attribute paths.'user'. For path parameter 'user' the required value should be true", result.getMessages().get(0));
+        assertNotNull(result.getSwagger());
+    }
+
 
     @Test
-    public void testIssueRelativeRefs2(){
+    public void testIssueRelativeRefs2() {
         String location = "exampleSpecs/specs/my-domain/test-api/v1/test-api-swagger_v1.json";
         Swagger swagger = new SwaggerParser().read(location, null, true);
         assertNotNull(swagger);
@@ -90,7 +98,7 @@ public class SwaggerParserTest {
         ArrayProperty arraySchema = (ArrayProperty) definitions.get("confirmMessageType_v01").getProperties().get("resources");
         ObjectProperty prop = (ObjectProperty) arraySchema.getItems();
         RefProperty refProperty = (RefProperty) prop.getProperties().get("resourceID");
-        assertEquals(refProperty.get$ref(),"#/definitions/simpleIDType_v01");
+        assertEquals(refProperty.get$ref(), "#/definitions/simpleIDType_v01");
     }
 
     @Test
@@ -145,15 +153,15 @@ public class SwaggerParserTest {
         assertNotNull(swagger.getDefinitions());
         ArrayProperty arraySchema = (ArrayProperty) swagger.getDefinitions().get("Test.Definition").getProperties().get("stuff");
         String internalRef = ((RefProperty) arraySchema.getItems()).get$ref();
-        assertEquals(internalRef,"#/definitions/TEST.THING.OUT.Stuff");
+        assertEquals(internalRef, "#/definitions/TEST.THING.OUT.Stuff");
     }
 
     @Test
     public void testIssue901() {
         Swagger swagger = new SwaggerParser().read("issue-901/spec.yaml");
         assertNotNull(swagger);
-        String internalRef = ((RefModel)swagger.getPaths().get("/test").getPut().getResponses().get("200").getResponseSchema()).get$ref();
-        assertEquals(internalRef,"#/definitions/Test.Definition");
+        String internalRef = ((RefModel) swagger.getPaths().get("/test").getPut().getResponses().get("200").getResponseSchema()).get$ref();
+        assertEquals(internalRef, "#/definitions/Test.Definition");
         assertNotNull(swagger.getDefinitions());
 
     }
@@ -171,13 +179,13 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult swaggerDeserializationResult = new SwaggerParser().readWithInfo("");
         assertEquals(swaggerDeserializationResult.getMessages().get(0), "empty or null swagger supplied");
     }
-  
+
     @Test
     public void testIssue834() {
         Swagger swagger = new SwaggerParser().read("issue-834/index.yaml", null, true);
         assertNotNull(swagger);
 
-        Response foo200 =swagger.getPaths().get("/foo").getGet().getResponses().get("200");
+        Response foo200 = swagger.getPaths().get("/foo").getGet().getResponses().get("200");
         assertNotNull(foo200);
         RefModel model200 = (RefModel) foo200.getResponseSchema();
         String foo200SchemaRef = model200.get$ref();
@@ -201,7 +209,7 @@ public class SwaggerParserTest {
         final Swagger swagger = new SwaggerParser().read("oapi-reference-test2/index.yaml", null, true);
         Assert.assertNotNull(swagger);
         RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema();
-        Assert.assertEquals(model.get$ref() ,"#/definitions/schema-with-reference");
+        Assert.assertEquals(model.get$ref(), "#/definitions/schema-with-reference");
     }
 
     @Test
@@ -211,7 +219,7 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger);
         assertTrue(swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema() instanceof RefModel);
         RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema();
-        Assert.assertEquals(model.get$ref(),"#/definitions/schema-with-reference");
+        Assert.assertEquals(model.get$ref(), "#/definitions/schema-with-reference");
 
     }
 
@@ -297,10 +305,11 @@ public class SwaggerParserTest {
 
         Swagger swagger = parser.parse(yaml);
 
-        assertEquals(swagger.getPaths().get("foo"),swagger.getPaths().get("foo2"));
-        
+        assertEquals(swagger.getPaths().get("foo"), swagger.getPaths().get("foo2"));
+
 
     }
+
     @Test
     public void testModelParameters() throws Exception {
         String yaml = "swagger: '2.0'\n" +
@@ -463,7 +472,6 @@ public class SwaggerParserTest {
     }
 
 
-
     @Test
     public void testPetstore() throws Exception {
         SwaggerParser parser = new SwaggerParser();
@@ -531,7 +539,7 @@ public class SwaggerParserTest {
         final Swagger swagger = doRelativeResponseFileTest("src/test/resources/nested-external-response-references/swagger-root.yaml");
         assertNotNull(Yaml.mapper().writeValueAsString(swagger));
     }
-    
+
     @Test
     public void testLoadRecursiveExternalDef() throws Exception {
         SwaggerParser parser = new SwaggerParser();
@@ -721,7 +729,7 @@ public class SwaggerParserTest {
         QueryParameter qp = (QueryParameter) param;
         assertEquals(qp.getCollectionFormat(), "csv");
     }
-    
+
     @Test
     public void testIssue286() {
         SwaggerParser parser = new SwaggerParser();
@@ -740,7 +748,7 @@ public class SwaggerParserTest {
         Swagger swagger = parser.read("issue_286.yaml");
         Model response = swagger.getPath("/").getGet().getResponses().get("200").getResponseSchema();
         assertTrue(response instanceof RefModel);
-        assertEquals( "issue_286_PetList", ((RefModel) response).getSimpleRef());
+        assertEquals("issue_286_PetList", ((RefModel) response).getSimpleRef());
         assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
     }
 
@@ -870,14 +878,14 @@ public class SwaggerParserTest {
     private Swagger doRelativeResponseFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult readResult = parser.readWithInfo(location, null, true);
-        
+
         if (readResult.getMessages().size() > 0) {
             Json.prettyPrint(readResult.getMessages());
         }
         final Swagger swagger = readResult.getSwagger();
-        
+
         Json.prettyPrint(swagger);
-        
+
         final Path path = swagger.getPath("/users");
         assertEquals(path.getClass(), Path.class); //we successfully converted the RefPath to a Path
 
@@ -901,12 +909,12 @@ public class SwaggerParserTest {
         expectedPropertiesInModel(refInDefinitionsAddress_2, "postal", "country");
 
         final ModelImpl refInDefinitionsCountry_2 = (ModelImpl) definitions.get("Country_2");
-        expectedPropertiesInModel(refInDefinitionsCountry_2, "name");        
-        
+        expectedPropertiesInModel(refInDefinitionsCountry_2, "name");
+
         return swagger;
     }
-    
-    
+
+
     private void expectedPropertiesInModel(ModelImpl model, String... expectedProperties) {
         assertEquals(model.getProperties().size(), expectedProperties.length);
         for (String expectedProperty : expectedProperties) {
@@ -941,7 +949,7 @@ public class SwaggerParserTest {
         assertTrue(swagger.getDefinitions().containsKey("externalObject"));
         assertTrue(swagger.getDefinitions().containsKey("referencedByLocalElement"));
         assertTrue(swagger.getDefinitions().containsKey("referencedBy"));
-        assertEquals(((RefProperty)swagger.getDefinitions().get("externalObject").getProperties().get("hello1")).get$ref(),
+        assertEquals(((RefProperty) swagger.getDefinitions().get("externalObject").getProperties().get("hello1")).get$ref(),
                 "#/definitions/referencedByLocalElement"); //issue #434
     }
 
@@ -1048,12 +1056,12 @@ public class SwaggerParserTest {
                         "        collectionFormat: csv\n" +
                         "      responses:\n" +
                         "        200:\n" +
-                        "          description: Successful response\n"+
+                        "          description: Successful response\n" +
                         "          schema:\n" +
                         "            $ref: '#/definitions/Content'\n" +
                         "definitions:\n" +
-                                "  Content:\n" +
-                                "    type: object";
+                        "  Content:\n" +
+                        "    type: object";
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml, Boolean.FALSE);
 
         assertNotNull(result.getSwagger());
@@ -1132,12 +1140,13 @@ public class SwaggerParserTest {
         assertEquals(queryParameter.getCollectionFormat(), "multi");
         assertEquals(queryParameter.isUniqueItems(), true);
     }
+
     @Test
     public void testNumberAttributes() throws Exception {
         SwaggerParser parser = new SwaggerParser();
         Swagger swagger = parser.read(TestUtils.getResourceAbsolutePath("/number_attributes.yaml"));
 
-        ModelImpl numberType = (ModelImpl)swagger.getDefinitions().get("NumberType");
+        ModelImpl numberType = (ModelImpl) swagger.getDefinitions().get("NumberType");
         assertNotNull(numberType);
         assertNotNull(numberType.getEnum());
         assertEquals(numberType.getEnum().size(), 2);
@@ -1148,7 +1157,7 @@ public class SwaggerParserTest {
         assertEquals(numberType.getMinimum(), new BigDecimal("1.0"));
         assertEquals(numberType.getMaximum(), new BigDecimal("2.0"));
 
-        ModelImpl numberDoubleType = (ModelImpl)swagger.getDefinitions().get("NumberDoubleType");
+        ModelImpl numberDoubleType = (ModelImpl) swagger.getDefinitions().get("NumberDoubleType");
         assertNotNull(numberDoubleType);
         assertNotNull(numberDoubleType.getEnum());
         assertEquals(numberDoubleType.getEnum().size(), 2);
@@ -1159,7 +1168,7 @@ public class SwaggerParserTest {
         assertEquals(numberDoubleType.getMinimum(), new BigDecimal("1.0"));
         assertEquals(numberDoubleType.getMaximum(), new BigDecimal("2.0"));
 
-        ModelImpl integerType = (ModelImpl)swagger.getDefinitions().get("IntegerType");
+        ModelImpl integerType = (ModelImpl) swagger.getDefinitions().get("IntegerType");
         assertNotNull(integerType);
         assertNotNull(integerType.getEnum());
         assertEquals(integerType.getEnum().size(), 2);
@@ -1170,7 +1179,7 @@ public class SwaggerParserTest {
         assertEquals(integerType.getMinimum(), new BigDecimal("1"));
         assertEquals(integerType.getMaximum(), new BigDecimal("2"));
 
-        ModelImpl integerInt32Type = (ModelImpl)swagger.getDefinitions().get("IntegerInt32Type");
+        ModelImpl integerInt32Type = (ModelImpl) swagger.getDefinitions().get("IntegerInt32Type");
         assertNotNull(integerInt32Type);
         assertNotNull(integerInt32Type.getEnum());
         assertEquals(integerInt32Type.getEnum().size(), 2);
@@ -1192,43 +1201,43 @@ public class SwaggerParserTest {
         ModelImpl model;
         ArrayModel arrayModel;
 
-        model = (ModelImpl)swagger.getDefinitions().get("NumberType");
-        assertEquals((Double)model.getExample(), 2.0d, 0d);
+        model = (ModelImpl) swagger.getDefinitions().get("NumberType");
+        assertEquals((Double) model.getExample(), 2.0d, 0d);
 
-        model = (ModelImpl)swagger.getDefinitions().get("IntegerType");
-        assertEquals((int)model.getExample(), 2);
+        model = (ModelImpl) swagger.getDefinitions().get("IntegerType");
+        assertEquals((int) model.getExample(), 2);
 
-        model = (ModelImpl)swagger.getDefinitions().get("StringType");
-        assertEquals((String)model.getExample(), "2");
+        model = (ModelImpl) swagger.getDefinitions().get("StringType");
+        assertEquals((String) model.getExample(), "2");
 
-        model = (ModelImpl)swagger.getDefinitions().get("ObjectType");
+        model = (ModelImpl) swagger.getDefinitions().get("ObjectType");
         assertTrue(model.getExample() instanceof Map);
         Map objectExample = (Map) model.getExample();
-        assertEquals((String)objectExample.get("propertyA"), "valueA");
-        assertEquals((Integer)objectExample.get("propertyB"), new Integer(123));
+        assertEquals((String) objectExample.get("propertyA"), "valueA");
+        assertEquals((Integer) objectExample.get("propertyB"), new Integer(123));
 
-        arrayModel = (ArrayModel)swagger.getDefinitions().get("ArrayType");
+        arrayModel = (ArrayModel) swagger.getDefinitions().get("ArrayType");
         assertTrue(arrayModel.getExample() instanceof List);
         List<Map> arrayExample = (List<Map>) arrayModel.getExample();
-        assertEquals((String)arrayExample.get(0).get("propertyA"), "valueA1");
-        assertEquals((Integer)arrayExample.get(0).get("propertyB"), new Integer(123));
-        assertEquals((String)arrayExample.get(1).get("propertyA"), "valueA2");
-        assertEquals((Integer)arrayExample.get(1).get("propertyB"), new Integer(456));
+        assertEquals((String) arrayExample.get(0).get("propertyA"), "valueA1");
+        assertEquals((Integer) arrayExample.get(0).get("propertyB"), new Integer(123));
+        assertEquals((String) arrayExample.get(1).get("propertyA"), "valueA2");
+        assertEquals((Integer) arrayExample.get(1).get("propertyB"), new Integer(456));
 
-        model = (ModelImpl)swagger.getDefinitions().get("NumberTypeStringExample");
-        assertEquals((String)model.getExample(), "2.0");
+        model = (ModelImpl) swagger.getDefinitions().get("NumberTypeStringExample");
+        assertEquals((String) model.getExample(), "2.0");
 
-        model = (ModelImpl)swagger.getDefinitions().get("IntegerTypeStringExample");
-        assertEquals((String)model.getExample(), "2");
+        model = (ModelImpl) swagger.getDefinitions().get("IntegerTypeStringExample");
+        assertEquals((String) model.getExample(), "2");
 
-        model = (ModelImpl)swagger.getDefinitions().get("StringTypeStringExample");
-        assertEquals((String)model.getExample(), "2");
+        model = (ModelImpl) swagger.getDefinitions().get("StringTypeStringExample");
+        assertEquals((String) model.getExample(), "2");
 
-        model = (ModelImpl)swagger.getDefinitions().get("ObjectTypeStringExample");
-        assertEquals((String)model.getExample(), "{\"propertyA\": \"valueA\", \"propertyB\": 123}");
+        model = (ModelImpl) swagger.getDefinitions().get("ObjectTypeStringExample");
+        assertEquals((String) model.getExample(), "{\"propertyA\": \"valueA\", \"propertyB\": 123}");
 
         arrayModel = (ArrayModel) swagger.getDefinitions().get("ArrayTypeStringExample");
-        assertEquals((String)arrayModel.getExample(), "[{\"propertyA\": \"valueA1\", \"propertyB\": 123}, {\"propertyA\": \"valueA2\", \"propertyB\": 456}]");
+        assertEquals((String) arrayModel.getExample(), "[{\"propertyA\": \"valueA1\", \"propertyB\": 123}, {\"propertyA\": \"valueA2\", \"propertyB\": 456}]");
     }
 
     @Test
@@ -1339,8 +1348,8 @@ public class SwaggerParserTest {
                         "          description: 'OK'\n";
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(yaml);
         assertNotNull(result.getSwagger());
-        ArrayModel schema = (ArrayModel)((BodyParameter)result.getSwagger().getPaths().get("/test").getPost().getParameters().get(0)).getSchema();
-        assertEquals(((RefProperty)schema.getItems()).get$ref(),"#/definitions/Pet");
+        ArrayModel schema = (ArrayModel) ((BodyParameter) result.getSwagger().getPaths().get("/test").getPost().getParameters().get(0)).getSchema();
+        assertEquals(((RefProperty) schema.getItems()).get$ref(), "#/definitions/Pet");
         assertNotNull(schema.getMaxItems());
         assertNotNull(schema.getMinItems());
 
@@ -1454,7 +1463,7 @@ public class SwaggerParserTest {
         String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         SwaggerParser parser = new SwaggerParser();
-        Swagger swagger = parser.read(rootNode,true);
+        Swagger swagger = parser.read(rootNode, true);
 
         Map<String, Model> definitions = swagger.getDefinitions();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
@@ -1480,7 +1489,7 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger);
 
         Assert.assertTrue(swagger.getDefinitions().size() == 3);
-        
+
         Assert.assertNotNull(swagger.getDefinitions().get("link-object"));
         Assert.assertNotNull(swagger.getDefinitions().get("rel-data"));
         Assert.assertNotNull(swagger.getDefinitions().get("result"));
@@ -1562,6 +1571,6 @@ public class SwaggerParserTest {
         final Swagger swagger = parser.read("src/test/resources/issue-913/BS/ApiSpecification.yaml");
         Assert.assertNotNull(swagger);
         Assert.assertNotNull(swagger.getDefinitions().get("indicatorType"));
-        Assert.assertEquals(swagger.getDefinitions().get("indicatorType").getProperties().size(),1);
+        Assert.assertEquals(swagger.getDefinitions().get("indicatorType").getProperties().size(), 1);
     }
 }
