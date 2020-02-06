@@ -2152,6 +2152,8 @@ public class OpenAPIV3ParserTest {
         Assert.assertTrue(objectItemSchemas.get("long") instanceof IntegerSchema);
         
    }
+  
+    @Test
     public void testIssue1063() {
         // given
         String location = "src/test/resources/issue-1063/openapi.yaml";
@@ -2171,6 +2173,25 @@ public class OpenAPIV3ParserTest {
 
     }
 
+    @Test
+    public void testSchemasSpreadAcrossMultipleFiles() {
+        String location = "src/test/resources/schemas-spread-across-multiple-files/openapi.yaml";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readLocation(location, emptyList(), options);
+
+        // Pet, Category(test.yaml), Category(test2.yaml), Category(test3.yaml)
+        assertEquals(4, result.getOpenAPI().getComponents().getSchemas().size());
+
+        ObjectSchema pet = (ObjectSchema) result.getOpenAPI().getComponents().getSchemas().get("Pet");
+        // pet.properties.get("category") should point to the Category that defined in test.yaml
+        // pet.properties.get("category2") should point to the Category that defined in test2.yaml
+        // pet.properties.get("category3") should point to the Category that defined in test3.yaml
+
+    }
+  
     @Test
     public void testIssue1177(@Injectable final List<AuthorizationValue> auths) {
         String path = "/issue-1177/swagger.yaml";
@@ -2254,6 +2275,7 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI.getComponents());
         assertNotNull(openAPI.getComponents().getSchemas());
         assertEquals(6, openAPI.getComponents().getSchemas().size());
+
     }
 
     private static int getDynamicPort() {
