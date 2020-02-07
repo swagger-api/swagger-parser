@@ -125,6 +125,9 @@ public class SwaggerDeserializer {
                     JsonNode paramNode = obj.get(key);
                     if (paramNode instanceof ObjectNode) {
                         Parameter parameter = this.parameter((ObjectNode) paramNode, location, result);
+                        if ("path".equalsIgnoreCase(parameter.getIn()) && !parameter.getRequired()) {
+                            result.warning(location + ".'" + parameter.getName() + "'", " For path parameter '" + parameter.getName() + "' the required value should be true");
+                        }
                         parameters.put(key, parameter);
                     }
                 }
