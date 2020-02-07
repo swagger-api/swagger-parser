@@ -450,7 +450,6 @@ paths:
       summary: Logs user into the system
       description: ''
       operationId: loginUser
-      security: []
       parameters:
         - name: username
           in: query

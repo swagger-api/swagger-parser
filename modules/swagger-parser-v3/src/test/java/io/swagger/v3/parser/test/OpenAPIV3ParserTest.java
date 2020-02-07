@@ -2256,7 +2256,7 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testDuplicateHttpStatusCodes() {
+    public void testDuplicateHttpStatusCodesJson() {
         final String location = "src/test/resources/duplicateHttpStatusCodes.json";
 
         final ParseOptions options = new ParseOptions();
@@ -2268,6 +2268,22 @@ public class OpenAPIV3ParserTest {
         List<String> messages = result.getMessages();
         assertEquals(1, messages.size());
         assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.json`");
+
+    }
+
+    @Test
+    public void testDuplicateHttpStatusCodesYaml() {
+        final String location = "src/test/resources/duplicateHttpStatusCodes.yaml";
+
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        assertNull(result.getOpenAPI());
+        List<String> messages = result.getMessages();
+        assertEquals(1, messages.size());
+        assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.yaml`");
 
     }
 
