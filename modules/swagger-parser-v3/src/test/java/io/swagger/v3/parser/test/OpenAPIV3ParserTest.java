@@ -180,7 +180,6 @@ public class OpenAPIV3ParserTest {
         assertNotNull(apispec);
     }
 
-
     @Test
     public void testIssue339() throws Exception {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
@@ -521,7 +520,6 @@ public class OpenAPIV3ParserTest {
         Schema s = openAPI.getComponents().getSchemas().get("SomeObj");
         Assert.assertEquals(s.getPattern(),"^[A-Z]+$"); //ERROR: got null
     }
-
 
     @BeforeClass
     private void setUpWireMockServer() throws IOException {
@@ -866,7 +864,6 @@ public class OpenAPIV3ParserTest {
         IntegerSchema date = ((IntegerSchema) openAPI.getPaths().get("/foo").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().get("date"));
         Assert.assertEquals("1516042231144", date.getExample().toString());
     }
-
 
     @Test
     public void testRefPaths() throws Exception {
@@ -1234,9 +1231,7 @@ public class OpenAPIV3ParserTest {
 
         assertEquals(((Map) openAPI.getExtensions().get("x-some-vendor")).get("sometesting"), "bye!");
         assertEquals(openAPI.getPaths().get("/foo").getExtensions().get("x-something"), "yes, it is supported");
-       
     }
-
 
     @Test
     public void testIssue292WithCSVCollectionFormat() {
@@ -1898,7 +1893,7 @@ public class OpenAPIV3ParserTest {
         assertEquals(parameter.getIn(), "path");
         assertEquals(parameter.getName(), "playerId");
     }
-  
+
     @Test
     public void testIssue884() {
         ParseOptions parseOptions = new ParseOptions();
@@ -1910,7 +1905,7 @@ public class OpenAPIV3ParserTest {
         assertEquals(operationId, "getRepository");
         assertNotNull(userRepository.getHeaders());
     }
-  
+
     @Test
     public void testLinkIssue() {
         ParseOptions parseOptions = new ParseOptions();
@@ -2067,10 +2062,10 @@ public class OpenAPIV3ParserTest {
 
     @Test
     public void shouldParseApiWithParametersUsingContentvsSchema() {
-    	// Tests that the content method of specifying the format of a parameter
-    	// gets resolved.
-    	// Test checks if an API's single parameter of array type gets fully resolved to 
-    	// referenced definitions.
+        // Tests that the content method of specifying the format of a parameter
+        // gets resolved.
+        // Test checks if an API's single parameter of array type gets fully resolved to 
+        // referenced definitions.
         String location = "src/test/resources/issue-1078/api.yaml";
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
