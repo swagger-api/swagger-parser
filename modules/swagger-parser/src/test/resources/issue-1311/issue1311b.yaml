@@ -1,0 +1,8 @@
+$schema: http://json-schema.org/draft-04/schema#
+description: json schema for replicating issue 1311
+definitions:
+  Test:
+    description: should not cause an exception when deserialized
+    type: object
+    patternProperties:
+      '^x-': {}

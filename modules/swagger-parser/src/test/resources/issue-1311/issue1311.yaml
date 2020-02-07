@@ -1,0 +1,8 @@
+openapi: 3.0.0
+info:
+  title: test
+  version: 0.0.0
+components:
+  schemas:
+    Test:
+      $ref: 'issue1311b.yaml#/definitions/Test'

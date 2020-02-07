@@ -561,6 +561,19 @@ public class OpenAPIParserTest {
         Schema score = schema.getProperties().get("score");
         assertEquals(score.getMultipleOf().intValue(), 1);
     }
+
+    @Test
+    public void testIssue1311() {
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve( true );
+        options.setFlatten( true );
+        OpenAPI openAPI = openApiParser.readLocation("issue-1311/issue1311.yaml", null, options).getOpenAPI();
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        ObjectSchema schema = (ObjectSchema) schemas.get("Test");
+        String description = schema.getDescription();
+        assertNotNull( description );
+    }
   
 }
 
