@@ -3,6 +3,8 @@ package io.swagger.v3.parser.processors;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -26,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -221,6 +224,83 @@ public final class ExternalRefProcessor {
         if (properties != null) {
             processProperties(properties.values(), file);
         }
+    }
+
+    public PathItem processRefToExternalPathItem(String $ref, RefFormat refFormat) {
+
+        final PathItem pathItem = cache.loadRef($ref, refFormat, PathItem.class);
+
+        String newRef;
+
+        Map<String, PathItem> paths = openAPI.getPaths();
+
+        if (paths == null) {
+            paths = new LinkedHashMap<>();
+        }
+
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
+
+        PathItem existingPathItem = paths.get(possiblyConflictingDefinitionName);
+
+        if (existingPathItem != null) {
+            LOGGER.debug("A model for " + existingPathItem + " already exists");
+            if(existingPathItem.get$ref() != null) {
+                // use the new model
+                existingPathItem = null;
+            }
+        }
+        newRef = possiblyConflictingDefinitionName;
+        cache.putRenamedRef($ref, newRef);
+
+        if(pathItem != null) {
+            if(pathItem.readOperationsMap() != null) {
+                final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
+                for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
+                    Operation operation = operationMap.get(httpMethod);
+                    if (operation.getResponses() != null) {
+                        final Map<String, ApiResponse> responses = operation.getResponses();
+                        if (responses != null) {
+                            for (String responseCode : responses.keySet()) {
+                                ApiResponse response = responses.get(responseCode);
+                                if (response != null) {
+                                    Schema schema = null;
+                                    if (response.getContent() != null) {
+                                        Map<String, MediaType> content = response.getContent();
+                                        for (String mediaName : content.keySet()) {
+                                            MediaType mediaType = content.get(mediaName);
+                                            if (mediaType.getSchema() != null) {
+                                                schema = mediaType.getSchema();
+                                                if (schema != null) {
+                                                    processRefSchemaObject(mediaType.getSchema(), $ref);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (operation.getRequestBody() != null) {
+                        RequestBody body = operation.getRequestBody();
+                        Schema schema = null;
+                        if (body.getContent() != null) {
+                            Map<String, MediaType> content = body.getContent();
+                            for (String mediaName : content.keySet()) {
+                                MediaType mediaType = content.get(mediaName);
+                                if (mediaType.getSchema() != null) {
+                                    schema = mediaType.getSchema();
+                                    if (schema != null) {
+                                        processRefSchemaObject(mediaType.getSchema(), $ref);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return pathItem;
     }
 
     public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
@@ -698,6 +778,7 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
+
     private void processRefContent(Map<String, MediaType> content, String $ref) {
         for(MediaType mediaType : content.values()) {
             if(mediaType.getSchema() != null) {
@@ -747,6 +828,8 @@ public final class ExternalRefProcessor {
             }
         }
     }
+
+
 
     private void processRefSchema(Schema subRef, String externalFile) {
         RefFormat format = computeRefFormat(subRef.get$ref());
@@ -841,6 +924,7 @@ public final class ExternalRefProcessor {
             return source;
         }
     }
+
 
 
 }

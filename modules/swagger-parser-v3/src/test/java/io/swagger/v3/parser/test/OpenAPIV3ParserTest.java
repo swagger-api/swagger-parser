@@ -68,6 +68,21 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
+    public void testIssue_1292() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1292/petstore.yml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        //assertNotNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
+        //assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+
+    }
+
+    @Test
     public void testFlattenComposedSchema() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
