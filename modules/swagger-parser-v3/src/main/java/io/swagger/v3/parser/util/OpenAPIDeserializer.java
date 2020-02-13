@@ -1033,7 +1033,7 @@ public class OpenAPIDeserializer {
 
         Encoding encoding = new Encoding();
 
-        String value = getString("contentType", node, true, location, result);
+        String value = getString("contentType", node, false, location, result);
         encoding.setContentType(value);
 
         value = getString("style", node, false, location, result);
