@@ -560,6 +560,11 @@ public class OpenAPIDeserializer {
                                 if (!definedInPathLevel) {
                                     List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
                                     operationsInAPath.forEach(operation -> {
+                                        operation.getParameters().forEach(parameter -> {
+                                            if("path".equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())){
+                                                result.warning(location, "For path parameter "+ parameter.getName() + " the required value should be true");
+                                            }
+                                        });
                                         if (!isPathParamDefined(pathParam, operation.getParameters())) {
                                             result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
                                             return;
@@ -1402,6 +1407,9 @@ public class OpenAPIDeserializer {
                 if(parameterObj != null) {
                      parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName), result);
                     if (parameter != null) {
+                        if("path".equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())){
+                            result.warning(location, "For path parameter "+ parameterName + " the required value should be true");
+                        }
                         parameters.put(parameterName, parameter);
                     }
                 }
