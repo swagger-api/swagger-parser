@@ -1815,7 +1815,17 @@ public class OpenAPIV3ParserTest {
     public void checkAllOfAreTaken() {
         OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/allOf-example/allOf.yaml");
         assertEquals(2, openAPI.getComponents().getSchemas().size());
+    }
 
+    @Test
+    public void checkPathParameterRequiredValue() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("src/test/resources/issue-1319.yaml", null, options);
+        assertEquals(2, swaggerParseResult.getMessages().size());
+        assertEquals(2, swaggerParseResult.getOpenAPI().getComponents().getSchemas().size());
+        assertEquals(2, swaggerParseResult.getOpenAPI().getPaths().size());
+        assertEquals(1, swaggerParseResult.getOpenAPI().getComponents().getParameters().size());
     }
 
     @Test(description = "Issue #616 Relative references inside of 'allOf'")

@@ -110,11 +110,11 @@ public class OpenAPIDeserializer {
     public SwaggerParseResult deserialize(JsonNode rootNode) {
     	return deserialize(rootNode, null);
     }
-    
+
     public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            
+
             ParseResult rootParse = new ParseResult();
             OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.setOpenAPI(api);
@@ -389,7 +389,7 @@ public class OpenAPIDeserializer {
         }
         return servers;
     }
-    
+
     public List<Server> getServersList(ArrayNode obj, String location, ParseResult result) {
 		return getServersList(obj, location, result, null);
 	}
@@ -454,7 +454,7 @@ public class OpenAPIDeserializer {
 
         return server;
     }
-    
+
     boolean isValidURL(String urlString){
 		try {
 			URL url = new URL(urlString);
@@ -560,6 +560,11 @@ public class OpenAPIDeserializer {
                                 if (!definedInPathLevel) {
                                     List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
                                     operationsInAPath.forEach(operation -> {
+                                        operation.getParameters().forEach(parameter -> {
+                                            if(PATH_PARAMETER.equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())){
+                                                result.warning(location, "For path parameter "+ parameter.getName() + " the required value should be true");
+                                            }
+                                        });
                                         if (!isPathParamDefined(pathParam, operation.getParameters())) {
                                             result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
                                             return;
@@ -1402,6 +1407,9 @@ public class OpenAPIDeserializer {
                 if(parameterObj != null) {
                      parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName), result);
                     if (parameter != null) {
+                        if(PATH_PARAMETER.equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())){
+                            result.warning(location, "For path parameter "+ parameterName + " the required value should be true");
+                        }
                         parameters.put(parameterName, parameter);
                     }
                 }
@@ -1442,7 +1450,7 @@ public class OpenAPIDeserializer {
         });
         return parameters;
     }
-    
+
     private Parameter getParameterDefinition(Parameter parameter) {
         if (parameter.get$ref() == null) {
             return parameter;
@@ -1452,7 +1460,7 @@ public class OpenAPIDeserializer {
             .map(Components::getParameters)
             .map(parameters -> parameters.get(parameterSchemaName))
             .orElse(parameter);
-            
+
     }
 
     public Parameter getParameter(ObjectNode obj, String location, ParseResult result) {
@@ -1556,7 +1564,7 @@ public class OpenAPIDeserializer {
         } else {
             parameter.setExplode(Boolean.FALSE);
         }
-        
+
 
         ObjectNode parameterObject = getObject("schema",obj,false,location,result);
         if (parameterObject!= null) {
@@ -1801,7 +1809,7 @@ public class OpenAPIDeserializer {
 
         boolean descriptionRequired, bearerFormatRequired, nameRequired, inRequired, schemeRequired, flowsRequired, openIdConnectRequired;
         descriptionRequired = bearerFormatRequired = nameRequired = inRequired = schemeRequired = flowsRequired = openIdConnectRequired = false;
-        
+
         String value = getString("type", node, true, location, result);
         if (StringUtils.isNotBlank(value)) {
             if (SecurityScheme.Type.APIKEY.toString().equals(value)) {
@@ -1939,7 +1947,7 @@ public class OpenAPIDeserializer {
             authorizationUrlRequired = tokenUrlRequired=true;
             break;
         }
-        
+
         String value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setAuthorizationUrl(value);
@@ -2434,7 +2442,7 @@ public class OpenAPIDeserializer {
      * Throws a ParseException if no applicable object can be recognized.
      */
     private Object getDecodedObject( Schema schema, String objectString) throws ParseException {
-        Object object = 
+        Object object =
             objectString == null?
             null :
 
@@ -2471,7 +2479,7 @@ public class OpenAPIDeserializer {
 
         return dateTime;
     }
-    
+
 
   /**
    * Returns the Date represented by the given RFC3339 full-date string.
@@ -2499,7 +2507,7 @@ public class OpenAPIDeserializer {
 
         return date;
     }
-    
+
 
   /**
    * Returns the byte array represented by the given base64-encoded string.
@@ -2507,7 +2515,7 @@ public class OpenAPIDeserializer {
    */
     private byte[] toBytes( String byteString) {
         byte[] bytes;
-        
+
         try {
             bytes = Base64.getDecoder().decode( byteString);
         }
@@ -3032,11 +3040,11 @@ public class OpenAPIDeserializer {
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
         }
-      
+
         public void warning(String location, String key) {
             warnings.add(new Location(location, key));
         }
-      
+
         public void unique(String location, String key) {
             unique.add(new Location(location, key));
 
