@@ -260,7 +260,7 @@ public class OpenAPIDeserializer {
         }
         node = getObject("examples",obj,false,location,result);
         if(node != null) {
-            components.setExamples(getExamples(node, String.format("%s.%s", location, "examples"),result));
+            components.setExamples(getExamples(node, String.format("%s.%s", location, "examples"),result,true));
         }
 
         node = getObject("requestBodies",obj,false,location,result);
@@ -992,7 +992,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode examplesObject = getObject("examples",contentNode,false,location,result);
         if(examplesObject!=null) {
-            mediaType.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result));
+            mediaType.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result, false));
         }
 
         Object example = getAnyExample("example",contentNode, location,result);
@@ -1565,7 +1565,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode examplesObject = getObject("examples",obj,false,location,result);
         if(examplesObject!=null) {
-            parameter.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result));
+            parameter.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result,false));
         }
 
         Object example = getAnyExample("example", obj, location,result);
@@ -1683,7 +1683,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode examplesObject = getObject("examples",headerNode,false,location,result);
         if(examplesObject!=null) {
-            header.setExamples(getExamples(examplesObject, location, result));
+            header.setExamples(getExamples(examplesObject, location, result, false));
         }
 
         Object example = getAnyExample("example", headerNode, location,result);
@@ -2521,7 +2521,7 @@ public class OpenAPIDeserializer {
 
 
 
-    public Map<String, Example> getExamples(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, Example> getExamples(ObjectNode obj, String location, ParseResult result, boolean  UnderComponents) {
         if (obj == null) {
             return null;
         }
@@ -2529,9 +2529,11 @@ public class OpenAPIDeserializer {
 
         Set<String> exampleKeys = getKeys(obj);
         for(String exampleName : exampleKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            exampleName)) {
-                result.warning(location, "Example name "+ exampleName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(UnderComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        exampleName)) {
+                    result.warning(location, "Example name " + exampleName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
 
             JsonNode exampleValue = obj.get(exampleName);

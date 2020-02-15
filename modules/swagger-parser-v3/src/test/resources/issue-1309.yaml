@@ -1,0 +1,27 @@
+---
+openapi: 3.0.1
+info:
+  title: Regular Expression Issue
+  version: 0.0.2
+paths:
+  "/test":
+    get:
+      responses:
+        '200':
+          description: It works
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Entity not found:
+                  summary: Item not existing
+components:
+  schemas:
+    customer-not-found:
+      type: object
+      examples:
+        Customer not found:
+          summary: Customer not existing
