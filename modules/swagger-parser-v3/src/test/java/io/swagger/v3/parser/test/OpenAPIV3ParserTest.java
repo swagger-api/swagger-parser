@@ -67,6 +67,18 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1309() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1309.yaml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI);
+        assertEquals(parseResult.getMessages().get(0),"attribute components.schemas.customer-not-found.examples is unexpected");
+    }
+
+    @Test
     public void testIssue1316() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -76,7 +88,6 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertNotNull(openAPI);
         assertTrue(parseResult.getMessages().size() == 0);
-
     }
 
 
