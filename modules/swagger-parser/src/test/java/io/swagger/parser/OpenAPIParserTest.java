@@ -83,7 +83,7 @@ public class OpenAPIParserTest {
         System.out.println(result.getMessages());
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getMessages().get(0), "attribute tags.sample is repeated");
+        assertEquals(result.getMessages().get(1), "attribute tags.sample is repeated");
     }
 
     @Test
