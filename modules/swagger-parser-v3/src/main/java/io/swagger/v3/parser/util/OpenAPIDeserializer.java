@@ -413,13 +413,8 @@ public class OpenAPIDeserializer {
 					if("http".equals(absURI.getScheme()) || "https".equals(absURI.getScheme())){
 						value = absURI.resolve(new URI(value)).toString();
 					}
-                    else {
-                        result.warning(location," invalid url : "+value);
-                    }
-
 				} catch (URISyntaxException e) {
                     result.warning(location,"invalid url : "+value);
-					e.printStackTrace();
 				}
 
 			}
