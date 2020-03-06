@@ -2262,13 +2262,14 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testIssue1236() {
+    public void testRegressionIssue1236() {
         final ParseOptions options = new ParseOptions();
         options.setResolve(true);
 
         SwaggerParseResult result = new OpenAPIV3Parser()
-                .readLocation("src/test/resources/issue-1236/petstore.json", null, options);
-        assertEquals(result.getMessages().get(0), "attribute .servers. invalid url : /te st/sample.yaml");
+                .readLocation("src/test/resources/testRegressionIssue1236.yaml", null, options);
+        assertTrue(result.getMessages().size() == 0);
+
     }
 
     @Test
