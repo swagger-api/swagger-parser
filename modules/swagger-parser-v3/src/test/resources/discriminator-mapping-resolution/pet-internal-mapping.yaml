@@ -1,0 +1,30 @@
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+      - pet_type
+      properties:
+        pet_type:
+          type: string
+      discriminator:
+        propertyName: pet_type
+        mapping:
+          Cat: '#/components/schemas/Cat'
+          Dog: '#/components/schemas/Dog'
+    Cat:
+      allOf:
+      - $ref: '#/components/schemas/Pet'
+      # all other properties specific to a `Cat`
+      type: object
+      properties:
+        name:
+          type: string
+    Dog:
+      allOf:
+      - $ref: '#/components/schemas/Pet'
+      # all other properties specific to a `Dog`
+      type: object
+      properties:
+        bark:
+          type: string

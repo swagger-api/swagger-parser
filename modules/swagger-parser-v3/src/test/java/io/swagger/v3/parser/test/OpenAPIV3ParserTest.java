@@ -2325,4 +2325,69 @@ public class OpenAPIV3ParserTest {
     private static int getDynamicPort() {
         return new Random().ints(10000, 20000).findFirst().getAsInt();
     }
+
+    @Test
+    public void testDiscriminatorSingleFileNoMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/single-file-no-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFileNoMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-no-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNull(cat); // FIXME, issue #970 still exists in this form
+    }
+
+    @Test
+    public void testDiscriminatorSingleFilePlainMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/single-file-plain-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFilePlainMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-plain-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSingleFileInternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/single-file-internal-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFileInternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-internal-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSameFileExternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-external-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFileExternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-external-mapping-3files.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
 }

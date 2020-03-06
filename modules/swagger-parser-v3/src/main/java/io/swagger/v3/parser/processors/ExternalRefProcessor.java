@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -150,6 +151,8 @@ public final class ExternalRefProcessor {
 
             processProperties(subProps,file);
 
+            processDiscriminator(schema.getDiscriminator(),file);
+
             if(schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema){
                 Schema additionalProperty = (Schema) schema.getAdditionalProperties();
                 if (additionalProperty.get$ref() != null) {
@@ -220,6 +223,21 @@ public final class ExternalRefProcessor {
     private void processProperties(Map<String, Schema> properties, String file) {
         if (properties != null) {
             processProperties(properties.values(), file);
+        }
+    }
+
+    private void processDiscriminator(Discriminator d, String file) {
+        if (d != null && d.getMapping() != null) {
+            processDiscriminatorMapping(d.getMapping(), file);
+        }
+    }
+
+    private void processDiscriminatorMapping(Map<String, String> mapping, String file) {
+        for (String key : mapping.keySet()) {
+            String ref = mapping.get(key);
+            Schema subtype = new Schema().$ref(ref);
+            processSchema(subtype, file);
+            mapping.put(key, subtype.get$ref());
         }
     }
 
