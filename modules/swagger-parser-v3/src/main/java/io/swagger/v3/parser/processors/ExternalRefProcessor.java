@@ -721,6 +721,42 @@ public final class ExternalRefProcessor {
             if(mediaType.getSchema() != null) {
                 processRefSchemaObject(mediaType.getSchema(), $ref);
             }
+            if(mediaType.getExamples() != null) {
+                processRefExamples(mediaType.getExamples(), $ref);
+            }
+        }
+    }
+
+    private void processRefExamples(Map<String, Example> examples, String $ref) {
+        String file = $ref.split("#/")[0];
+        for(Example example : examples.values()) {
+            if (example.get$ref() != null) {
+                RefFormat ref = computeRefFormat(example.get$ref());
+                if (isAnExternalRefFormat(ref)) {
+                    processRefExample(example, $ref);
+                } else {
+                    processRefToExternalExample(file + example.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+        }
+    }
+
+    private void processRefExample(Example example, String externalFile) {
+        RefFormat format = computeRefFormat(example.get$ref());
+
+        if (!isAnExternalRefFormat(format)) {
+            example.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + example.get$ref(), RefFormat.RELATIVE));
+            return;
+        }
+        String $ref = example.get$ref();
+        String subRefExternalPath = getExternalPath(example.get$ref())
+                .orElse(null);
+
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
+            $ref = join(externalFile, example.get$ref());
+            example.set$ref($ref);
+        }else {
+            processRefToExternalExample($ref, format);
         }
     }
 

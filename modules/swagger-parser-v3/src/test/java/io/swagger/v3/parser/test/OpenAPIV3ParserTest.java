@@ -2262,6 +2262,16 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue1335() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue1335.yaml", null, options);
+        assertNotNull(result.getOpenAPI().getComponents().getExamples().get("ex1"));
+    }
+
+    @Test
     public void testRegressionIssue1236() {
         final ParseOptions options = new ParseOptions();
         options.setResolve(true);

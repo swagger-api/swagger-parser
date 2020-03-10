@@ -1,0 +1,15 @@
+components:
+  responses:
+    200ok:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: string
+          examples:
+            ex1:
+              $ref: '#/components/examples/ex1'
+
+  examples:
+    ex1:
+      value: hello
