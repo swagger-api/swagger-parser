@@ -690,6 +690,20 @@ public class OpenAPIV3ParserTest {
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
         assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
+    
+    @Test
+    public void testResolveFully2() throws Exception{
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/appgate_sdp_controller.json"));
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, new ArrayList<>(), options  );
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+        assertEquals(result.getOpenAPI().getPaths().get("/login").getPost().getResponses().get("422").get$ref(),"");
+    }
 
     @Test
     public void testResolveEmpty(@Injectable final List<AuthorizationValue> auths) throws Exception{
