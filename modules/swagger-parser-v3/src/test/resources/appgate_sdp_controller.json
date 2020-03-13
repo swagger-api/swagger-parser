@@ -1,0 +1,1225 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Simplified Login",
+        "description": "First step for any API call is retrieving AuthToken using Login API. All other calls require the AuthToken. Client is advised to **securely store** the AuthToken and reuse until it expires. Multi-Factor Authentication is not supported by Login call, API user must be exempt from Admin MFA requirement. It is important to restrict API user's permissions strictly as-needed basis and restrict IP access to API port to trusted networks.",
+        "tags": [
+          "Login"
+        ],
+        "responses": {
+          "200": {
+            "description": "Login Response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "description": "The controller version",
+                      "example": "4.3.0-20000"
+                    },
+                    "user": {
+                      "type": "object",
+                      "description": "Information about logged in user, such as username and email address, if exists.",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Username.",
+                          "example": "admin"
+                        },
+                        "needTwoFactorAuth": {
+                          "type": "boolean",
+                          "description": "If true, it is not possible to complete login process without providing MFA.",
+                          "example": false
+                        },
+                        "canAccessAuditLogs": {
+                          "type": "boolean",
+                          "description": "Whether there is a LogServer deployed and the user has privileges to access to it."
+                        },
+                        "privileges": {
+                          "type": "array",
+                          "description": "The privileges the user has.",
+                          "items": {
+                            "type": "object",
+                            "description": "Administrative Privilege item. Use type-target-map API to get the details on which types are valid for which targets and their scopes.",
+                            "required": [
+                              "type",
+                              "target"
+                            ],
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "description": "The type of the Privilege defines the possible administrator actions.",
+                                "enum": [
+                                  "All",
+                                  "View",
+                                  "Create",
+                                  "Edit",
+                                  "Tag",
+                                  "Delete",
+                                  "Revoke",
+                                  "Export",
+                                  "Upgrade",
+                                  "RenewCertificate",
+                                  "DownloadLogs",
+                                  "Test",
+                                  "GetUserAttributes",
+                                  "Backup",
+                                  "CheckStatus",
+                                  "Reevaluate"
+                                ]
+                              },
+                              "target": {
+                                "type": "string",
+                                "description": "The target of the Privilege defines the possible target objects for that type.",
+                                "enum": [
+                                  "All",
+                                  "Appliance",
+                                  "Condition",
+                                  "CriteriaScript",
+                                  "Entitlement",
+                                  "AdministrativeRole",
+                                  "IdentityProvider",
+                                  "MfaProvider",
+                                  "IpPool",
+                                  "LocalUser",
+                                  "Policy",
+                                  "Site",
+                                  "DeviceScript",
+                                  "EntitlementScript",
+                                  "RingfenceRule",
+                                  "ApplianceCustomization",
+                                  "OtpSeed",
+                                  "TokenRecord",
+                                  "Blacklist",
+                                  "UserLicense",
+                                  "OnBoardedDevice",
+                                  "AllocatedIp",
+                                  "SessionInfo",
+                                  "AuditLog",
+                                  "AdminMessage",
+                                  "GlobalSetting",
+                                  "CaCertificate",
+                                  "File",
+                                  "FailedAuthentication"
+                                ]
+                              },
+                              "scope": {
+                                "type": "object",
+                                "description": "The scope of the Privilege. Only applicable to certain type-target combinations. Some types depends on the IdP/MFA type, such as GetUserAttributes. This field must be omitted if not applicable.",
+                                "properties": {
+                                  "all": {
+                                    "type": "boolean",
+                                    "description": "'If \"true\", all objects are accessible. For example, \"type: Edit - target: Condition - scope.all: true\" means the administrator can edit all Conditions in the system.'"
+                                  },
+                                  "ids": {
+                                    "type": "array",
+                                    "description": "Specific object IDs this Privilege would have access to.",
+                                    "items": {
+                                      "type": "string",
+                                      "format": "uuid",
+                                      "example": "4c07bc67-57ea-42dd-b702-c2d6c45419fc"
+                                    }
+                                  },
+                                  "tags": {
+                                    "type": "array",
+                                    "description": "Object tags this privilege would have access to.",
+                                    "items": {
+                                      "type": "string",
+                                      "example": "tag"
+                                    }
+                                  }
+                                }
+                              },
+                              "defaultTags": {
+                                "type": "array",
+                                "description": "The items in this list would be added automatically to the newly created objects' tags. Only applicable on \"Create\" type and targets with tagging capability. This field must be omitted if not applicable.",
+                                "items": {
+                                  "type": "string",
+                                  "example": "api-created"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "The AuthToken required for subsequent API calls."
+                    },
+                    "expires": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Token expiration time."
+                    },
+                    "messageOfTheDay": {
+                      "type": "string",
+                      "description": "Message of the day configured by an admin.",
+                      "example": "Welcome to AppGate SDP."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON error. Check the JSON format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/paths/~1authorization/get/responses/403/content/application~1json/schema"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Login Failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/paths/~1authorization/get/responses/403/content/application~1json/schema"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "reason": {
+                          "type": "string",
+                          "description": "The authentication failure reason.",
+                          "example": "Invalid username or password."
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/paths/~1files/put/responses/422"
+          },
+          "500": {
+            "$ref": "#/paths/~1sites/get/responses/500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerName",
+                  "deviceId"
+                ],
+                "properties": {
+                  "providerName": {
+                    "type": "string",
+                    "description": "Display name of the Identity Provider name.",
+                    "example": "ldap"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "Username. Required if a credentials based Identity Provider is used.",
+                    "example": "user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password. Required if a credentials based Identity Provider is used.",
+                    "example": "tSW3!QBv(rj{UuLY"
+                  },
+                  "deviceId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID to distinguish the Client device making the request. It is supposed to be same for every login request from the same server.",
+                    "example": "4c07bc67-57ea-42dd-b702-c2d6c45419fc"
+                  },
+                  "samlResponse": {
+                    "type": "string",
+                    "description": "SAMLResponse received from SAML provider. Required if a SAML based Identity Provider is used."
+                  }
+                }
+              }
+            }
+          },
+          "description": "Login Credentials.",
+          "required": true
+        }
+      }
+    },
+    "/ringfence-rules": {
+      "get": {
+        "summary": "List all Ringfence Rules.",
+        "description": "List all Ringfence Rules visible to current user.",
+        "tags": [
+          "Ringfence Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1sites/get/parameters/0"
+          },
+          {
+            "$ref": "#/paths/~1sites/get/parameters/1"
+          },
+          {
+            "$ref": "#/paths/~1sites/get/parameters/2"
+          },
+          {
+            "$ref": "#/paths/~1sites/get/parameters/3"
+          },
+          {
+            "$ref": "#/paths/~1sites/get/parameters/4"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Ringfence Rules.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/paths/~1stats~1app-discovery/get/responses/200/content/application~1json/schema/allOf/1"
+                    },
+                    {
+                      "type": "object",
+                      "description": "Represents a list of Ringfence Rules.",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "description": "List of Ringfence Rules.",
+                          "items": {
+                            "$ref": "#/paths/~1ringfence-rules/post/responses/200/content/application~1json/schema"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/paths/~1sites/get/responses/401"
+          },
+          "403": {
+            "$ref": "#/paths/~1files/put/responses/403"
+          },
+          "500": {
+            "$ref": "#/paths/~1sites/get/responses/500"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new Ringfence Rule.",
+        "description": "Create a new Ringfence Rule.",
+        "tags": [
+          "Ringfence Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1sites/get/parameters/0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created Ringfence Rule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/IoTConnectorProvider/allOf/0"
+                    },
+                    {
+                      "type": "object",
+                      "description": "Represents an Ringfence Rule.",
+                      "required": [
+                        "actions"
+                      ],
+                      "properties": {
+                        "actions": {
+                          "type": "object",
+                          "description": "List of all ringfence actions in this Ringfence Rule.",
+                          "required": [
+                            "protocol",
+                            "direction",
+                            "action",
+                            "hosts"
+                          ],
+                          "properties": {
+                            "protocol": {
+                              "type": "string",
+                              "description": "Protocol of the ringfence action.",
+                              "enum": [
+                                "icmp",
+                                "icmpv6",
+                                "udp",
+                                "tcp"
+                              ]
+                            },
+                            "direction": {
+                              "type": "string",
+                              "description": "The direction of the action",
+                              "enum": [
+                                "up",
+                                "down"
+                              ]
+                            },
+                            "action": {
+                              "type": "string",
+                              "description": "Applied action to the traffic.",
+                              "enum": [
+                                "allow",
+                                "block"
+                              ]
+                            },
+                            "hosts": {
+                              "type": "array",
+                              "description": "Destination address. IP address or hostname.",
+                              "items": {
+                                "type": "string",
+                                "example": "10.0.2.0/24"
+                              }
+                            },
+                            "ports": {
+                              "type": "array",
+                              "description": "Destination port. Multiple ports can be entered comma separated. Port ranges can be entered dash separated. Only valid for tcp and udp subtypes.",
+                              "items": {
+                                "type": "string"
+                              },
+                              "example": [
+                                80,
+                                443,
+                                "1024-2048"
+                              ]
+                            },
+                            "types": {
+                              "type": "array",
+                              "description": "ICMP type. Only valid for icmp protocol.",
+                              "items": {
+                                "type": "string",
+                                "example": "0-255"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1login/post/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1sites/get/responses/401"
+          },
+          "403": {
+            "$ref": "#/paths/~1files/put/responses/403"
+          },
+          "409": {
+            "$ref": "#/paths/~1files/put/responses/409"
+          },
+          "422": {
+            "$ref": "#/paths/~1files/put/responses/422"
+          },
+          "500": {
+            "$ref": "#/paths/~1sites/get/responses/500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/paths/~1ringfence-rules/post/responses/200/content/application~1json/schema"
+              }
+            }
+          },
+          "description": "Ringfence Rule object.",
+          "required": true
+        }
+      }
+    },
+    "/sites": {
+      "get": {
+        "summary": "List all Sites.",
+        "description": "List all Sites visible to current user.",
+        "tags": [
+          "Sites"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "The Token from the LoginResponse.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Bearer <base64 token>"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Query string to filter the result list. It's used for various fields depending on the object type.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "range",
+            "in": "query",
+            "description": "'Range string to limit the result list. Format: -. 3-10 means he items between the (including) 3rd and the 10th\n will be returned. Defaults to all objects.'",
+            "schema": {
+              "type": "string",
+              "example": "0-10"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "description": "The field name to sort the result list. Defaults to certain field depending on the object type.",
+            "schema": {
+              "type": "string",
+              "example": "name"
+            }
+          },
+          {
+            "name": "descending",
+            "in": "query",
+            "description": "Whether the sorting is applied descending or ascending. Defaults to certain field depending on the object type.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Sites.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/paths/~1stats~1app-discovery/get/responses/200/content/application~1json/schema/allOf/1"
+                    },
+                    {
+                      "type": "object",
+                      "description": "Represents a list of Sites.",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "description": "List of Sites.",
+                          "items": {
+                            "$ref": "#/paths/~1sites/post/responses/200/content/application~1json/schema"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token error. Login again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/paths/~1authorization/get/responses/403/content/application~1json/schema"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/paths/~1files/put/responses/403"
+          },
+          "500": {
+            "description": "Unexpected server side error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/paths/~1authorization/get/responses/403/content/application~1json/schema"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new Site.",
+        "description": "Create a new Site.",
+        "tags": [
+          "Sites"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1sites/get/parameters/0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created Site.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/IoTConnectorProvider/allOf/0"
+                    },
+                    {
+                      "type": "object",
+                      "description": "Represents a Site.",
+                      "properties": {
+                        "shortName": {
+                          "type": "string",
+                          "example": "AZU1",
+                          "description": "A short 4 letter name for the site"
+                        },
+                        "networkSubnets": {
+                          "type": "array",
+                          "description": "Network subnets in CIDR format to define the Site's boundaries. They are added as routes by the Client.",
+                          "items": {
+                            "type": "string",
+                            "example": "10.0.0.0/16"
+                          }
+                        },
+                        "ipPoolMappings": {
+                          "type": "array",
+                          "description": "List of IP Pool mappings for this specific Site. When IPs are allocated this Site, they will be mapped to a new one using this setting.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "from": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "IP Pool ID to map from. If a user is authorizing with this IP Pool via Identity Provider assignment and has access to this Site, mapping will occur for that user.",
+                                "example": "4c07bc67-57ea-42dd-b702-c2d6c45419fc"
+                              },
+                              "to": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "IP Pool ID to map to.",
+                                "example": "8c07bc67-5711-42dd-b702-c2d6c45419f8"
+                              }
+                            }
+                          }
+                        },
+                        "defaultGateway": {
+                          "type": "object",
+                          "description": "Default Gateway configuration.",
+                          "properties": {
+                            "enabledV4": {
+                              "type": "boolean",
+                              "description": "When enabled, the Client uses this Site as the Default Default for all IPV4 traffic.",
+                              "default": false
+                            },
+                            "enabledV6": {
+                              "type": "boolean",
+                              "description": "When enabled, the Client uses this Site as the Default Default for all IPv6 traffic.",
+                              "default": false
+                            },
+                            "excludedSubnets": {
+                              "type": "array",
+                              "description": "Network subnets to exclude when Default Gateway is enabled. The traffic for these subnets will not go through the Gateway in this Site.",
+                              "items": {
+                                "type": "string",
+                                "example": "10.0.10.0/24"
+                              }
+                            }
+                          }
+                        },
+                        "entitlementBasedRouting": {
+                          "type": "boolean",
+                          "description": "When enabled, the routes are sent to the Client by the Gateways according to the user's Entitlements \"networkSubnets\" should be left be empty if it's enabled.",
+                          "default": false
+                        },
+                        "vpn": {
+                          "type": "object",
+                          "description": "VPN configuration for this Site.",
+                          "properties": {
+                            "stateSharing": {
+                              "type": "boolean",
+                              "description": "Configuration for keeping track of states.",
+                              "default": false
+                            },
+                            "snat": {
+                              "type": "boolean",
+                              "description": "Source NAT.",
+                              "default": false
+                            },
+                            "tls": {
+                              "type": "object",
+                              "description": "VPN over TLS protocol configuration.",
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean",
+                                  "default": true
+                                }
+                              }
+                            },
+                            "dtls": {
+                              "type": "object",
+                              "description": "VPN over DTLS protocol configuration.",
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean",
+                                  "default": false
+                                }
+                              }
+                            },
+                            "routeVia": {
+                              "type": "object",
+                              "description": "Override routing for tunnel traffic.",
+                              "properties": {
+                                "ipv4": {
+                                  "type": "string",
+                                  "description": "IPv4 address for routing tunnel traffic.",
+                                  "example": "10.0.0.2"
+                                },
+                                "ipv6": {
+                                  "type": "string",
+                                  "description": "IPv6 address for routing tunnel traffic.",
+                                  "example": "2001:db8:0:0:0:ff00:42:8329"
+                                }
+                              }
+                            },
+                            "webProxyEnabled": {
+                              "type": "boolean",
+                              "description": "Flag for manipulating web proxy p12 file. Setting this false will delete the existing p12 file from database."
+                            },
+                            "webProxyKeyStore": {
+                              "type": "string",
+                              "format": "byte",
+                              "writeOnly": true,
+                              "description": "The PKCS12 package to be used for web proxy. The file must be with no password and must include the full certificate chain and a private key. In Base64 format."
+                            },
+                            "webProxyCertificateSubjectName": {
+                              "type": "string",
+                              "readOnly": true,
+                              "description": "The subject name of the certificate with private key in the PKCS12 file for web proxy assigned to this site."
+                            },
+                            "ipAccessLogIntervalSeconds": {
+                              "type": "number",
+                              "description": "Frequency configuration for generating IP Access audit logs for a connection.",
+                              "default": 120
+                            }
+                          }
+                        },
+                        "nameResolution": {
+                          "type": "object",
+                          "description": "Settings for asset name resolution.",
+                          "properties": {
+                            "useHostsFile": {
+                              "type": "boolean",
+                              "description": "Name resolution to use Appliance's /etc/hosts file.",
+                              "default": false
+                            },
+                            "dnsResolvers": {
+                              "type": "array",
+                              "description": "Resolver to resolve hostnames using DNS servers.",
+                              "items": {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "servers"
+                                ],
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Identifier name. Has no functional effect.",
+                                    "example": "DNS Resolver 1"
+                                  },
+                                  "updateInterval": {
+                                    "type": "integer",
+                                    "description": "How often will the resolver poll the server. In seconds.",
+                                    "default": 60
+                                  },
+                                  "servers": {
+                                    "type": "array",
+                                    "description": "DNS Server addresses that will be used to resolve hostnames within the Site.",
+                                    "items": {
+                                      "type": "string",
+                                      "example": "10.0.0.2"
+                                    }
+                                  },
+                                  "searchDomains": {
+                                    "type": "array",
+                                    "description": "DNS search domains that will be used to resolve hostnames within the Site.",
+                                    "items": {
+                                      "type": "string",
+                                      "example": "company.com"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "awsResolvers": {
+                              "type": "array",
+                              "description": "Resolvers to resolve Amazon machines by querying Amazon Web Services.",
+                              "items": {
+                                "type": "object",
+                                "required": [
+                                  "name"
+                                ],
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Identifier name. Has no functional effect.",
+                                    "example": "AWS Resolver 1"
+                                  },
+                                  "updateInterval": {
+                                    "type": "integer",
+                                    "description": "How often will the resolver poll the server. In seconds.",
+                                    "default": 60
+                                  },
+                                  "vpcs": {
+                                    "type": "array",
+                                    "description": "VPC IDs to resolve names.",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "vpcAutoDiscovery": {
+                                    "type": "boolean",
+                                    "description": "Use VPC auto discovery."
+                                  },
+                                  "regions": {
+                                    "type": "array",
+                                    "description": "Amazon regions.",
+                                    "items": {
+                                      "type": "string",
+                                      "example": "eu-west-2"
+                                    }
+                                  },
+                                  "useIAMRole": {
+                                    "type": "boolean",
+                                    "description": "Uses the built-in IAM role in AWS instances to authenticate against the API."
+                                  },
+                                  "accessKeyId": {
+                                    "type": "string",
+                                    "description": "ID of the access key."
+                                  },
+                                  "secretAccessKey": {
+                                    "type": "string",
+                                    "description": "Secret access key for accessKeyId.",
+                                    "writeOnly": true
+                                  },
+                                  "httpsProxy": {
+                                    "type": "string",
+                                    "description": "Proxy address to use while communicating with AWS. format: username:password@ip/hostname:port"
+                                  },
+                                  "resolveWithMasterCredentials": {
+                                    "type": "boolean",
+                                    "description": "Use master credentials to resolve names in addition to any assumed roles."
+                                  },
+                                  "assumedRoles": {
+                                    "type": "array",
+                                    "description": "Roles to be assumed to perform AWS name resolution.",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "accountId": {
+                                          "type": "string",
+                                          "description": "AWS account ID."
+                                        },
+                                        "roleName": {
+                                          "type": "string",
+                                          "description": "AWS role name"
+                                        },
+                                        "externalId": {
+                                          "type": "string",
+                                          "description": "AWS role external id."
+                                        },
+                                        "regions": {
+                                          "type": "array",
+                                          "description": "AWS regions.",
+                                          "items": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "azureResolvers": {
+                              "type": "array",
+                              "description": "Resolvers to resolve Azure machines by querying Azure App Service.",
+                              "items": {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "subscriptionId",
+                                  "tenantId",
+                                  "clientId"
+                                ],
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Identifier name. Has no functional effect."
+                                  },
+                                  "updateInterval": {
+                                    "type": "integer",
+                                    "description": "How often will the resolver poll the server. In seconds.",
+                                    "default": 60
+                                  },
+                                  "subscriptionId": {
+                                    "type": "string",
+                                    "description": "Azure subscription id, visible with the azure cli command `azure account show`."
+                                  },
+                                  "tenantId": {
+                                    "type": "string",
+                                    "description": "Azure tenant id, visible with the azure cli command `azure account show`."
+                                  },
+                                  "clientId": {
+                                    "type": "string",
+                                    "description": "Azure client id, also called app id. Visible for a given application using the azure cli command `azure ad app show`."
+                                  },
+                                  "secret": {
+                                    "type": "string",
+                                    "description": "Azure client secret. For Azure AD Apps this is done by creating a key for the app.",
+                                    "writeOnly": true
+                                  }
+                                }
+                              }
+                            },
+                            "esxResolvers": {
+                              "type": "array",
+                              "description": "Resolvers to resolve VMware vSphere machines by querying the vCenter.",
+                              "items": {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "hostname",
+                                  "username"
+                                ],
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Identifier name. Has no functional effect."
+                                  },
+                                  "updateInterval": {
+                                    "type": "integer",
+                                    "description": "How often will the resolver poll the server. In seconds.",
+                                    "default": 60
+                                  },
+                                  "hostname": {
+                                    "type": "string",
+                                    "description": "Hostname of the vCenter."
+                                  },
+                                  "username": {
+                                    "type": "string",
+                                    "description": "Username with admin access to the vCenter."
+                                  },
+                                  "password": {
+                                    "type": "string",
+                                    "description": "Password for the username.",
+                                    "writeOnly": true
+                                  }
+                                }
+                              }
+                            },
+                            "gcpResolvers": {
+                              "type": "array",
+                              "description": "Resolvers to resolve GCP machine by querying Google web services.",
+                              "items": {
+                                "type": "object",
+                                "required": [
+                                  "name"
+                                ],
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Identifier name. Has no functional effect."
+                                  },
+                                  "updateInterval": {
+                                    "type": "integer",
+                                    "description": "How often will the resolver poll the server. In seconds.",
+                                    "default": 60
+                                  },
+                                  "projectFilter": {
+                                    "type": "string",
+                                    "description": "GCP project filter."
+                                  },
+                                  "instanceFilter": {
+                                    "type": "string",
+                                    "description": "GCP instance filter."
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1login/post/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1sites/get/responses/401"
+          },
+          "402": {
+            "description": "Insufficient license.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/paths/~1authorization/get/responses/403/content/application~1json/schema"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/paths/~1files/put/responses/403"
+          },
+          "409": {
+            "$ref": "#/paths/~1files/put/responses/409"
+          },
+          "422": {
+            "$ref": "#/paths/~1files/put/responses/422"
+          },
+          "500": {
+            "$ref": "#/paths/~1sites/get/responses/500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/paths/~1sites/post/responses/200/content/application~1json/schema"
+              }
+            }
+          },
+          "description": "Site object.",
+          "required": true
+        }
+      }
+    },
+    "/files": {
+      "get": {
+        "summary": "List all Files.",
+        "description": "List all Files uploaded to the current Controller and their details.",
+        "tags": [
+          "Appliance Upgrade"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1sites/get/parameters/0"
+          },
+          {
+            "name": "checksum",
+            "in": "query",
+            "description": "Whether to calculate checksum of the File(s) and include in the response. If true, response take may long depending on the File sizes.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Files and their statuses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Represents a list of Files and their details.",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "description": "List of Files.",
+                      "items": {
+                        "$ref": "#/paths/~1files~1%7Bfilename%7D/get/responses/200/content/application~1json/schema"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/paths/~1sites/get/responses/401"
+          },
+          "403": {
+            "$ref": "#/paths/~1files/put/responses/403"
+          },
+          "500": {
+            "$ref": "#/paths/~1sites/get/responses/500"
+          }
+        }
+      },
+      "post": {
+        "summary": "Make Controller download a File from a given URL.",
+        "description": "Make the current Controller download a File from a given URL. Note that the File is downloaded and stored only on the current Controller, not synced between Controllers.",
+        "tags": [
+          "Appliance Upgrade"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1sites/get/parameters/0"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The request is accepted and the download has started. The status of the File can be followed via 'GET files/{filename}' call after this."
+          },
+          "400": {
+            "$ref": "#/paths/~1login/post/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1sites/get/responses/401"
+          },
+          "403": {
+            "$ref": "#/paths/~1files/put/responses/403"
+          },
+          "409": {
+            "$ref": "#/paths/~1files/put/responses/409"
+          },
+          "422": {
+            "$ref": "#/paths/~1files/put/responses/422"
+          },
+          "500": {
+            "$ref": "#/paths/~1sites/get/responses/500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url",
+                  "filename"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "The URL for Controller to download the File from.",
+                    "example": "https://s3.eu-central-1.amazonaws.com/appgate/appgate-appliance.img.zip"
+                  },
+                  "filename": {
+                    "type": "string",
+                    "description": "The filename to save the File as.",
+                    "example": "appgate-appliance.img.zip"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Upload a File directly to the Controller.",
+        "description": "Upload a File directly to the current Controller. Note that the File is stored only on the current Controller, not synced between Controllers.",
+        "tags": [
+          "Appliance Upgrade"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1sites/get/parameters/0"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The File was uploaded successfully."
+          },
+          "401": {
+            "$ref": "#/paths/~1sites/get/responses/401"
+          },
+          "403": {
+            "description": "Insufficient permissions to access this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/paths/~1authorization/get/responses/403/content/application~1json/schema"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The submitted resource conflicts with another.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/paths/~1authorization/get/responses/403/content/application~1json/schema"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request validation error. Check \"errors\" array for details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Http 422 error for object validation.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Machine readable error code."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Human readable error details."
+                    },
+                    "errors": {
+                      "type": "array",
+                      "description": "List of fields with validation errors.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "description": "Name of the field that failed validation.",
+                            "example": "name"
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Failure reason.",
+                            "example": "may not be null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/paths/~1sites/get/responses/500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The File to upload. \"filename\"w must be included in in Content-Disposition."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
