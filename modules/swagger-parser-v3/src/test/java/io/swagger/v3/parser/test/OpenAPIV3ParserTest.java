@@ -1106,9 +1106,9 @@ public class OpenAPIV3ParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
-        assertEquals( definitions.get("i").get$ref(),"#/components/schemas/k_2");
+        assertEquals( definitions.get("i").get$ref(),"#/components/schemas/k");
         assertEquals( definitions.get("k").getTitle(), "k-definition");
-        assertEquals( definitions.get("k_2").getTitle(), "k-definition");
+
     }
 
     @Test

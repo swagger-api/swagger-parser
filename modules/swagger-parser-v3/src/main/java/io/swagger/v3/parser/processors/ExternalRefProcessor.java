@@ -85,13 +85,15 @@ public final class ExternalRefProcessor {
                 // use the new model
                 existingModel = null;
             }else{
-                //We add a number at the end of the definition name
-                int i = 2;
-                for (String name : schemas.keySet()) {
-                    if (name.equals(possiblyConflictingDefinitionName)) {
-                        tryName = possiblyConflictingDefinitionName + "_" + i;
-                        existingModel = schemas.get(tryName);
-                        i++;
+                if (!schema.equals(existingModel)){
+                    //We add a number at the end of the definition name
+                    int i = 2;
+                    for (String name : schemas.keySet()) {
+                        if (name.equals(possiblyConflictingDefinitionName)) {
+                            tryName = possiblyConflictingDefinitionName + "_" + i;
+                            existingModel = schemas.get(tryName);
+                            i++;
+                        }
                     }
                 }
             }
@@ -117,6 +119,7 @@ public final class ExternalRefProcessor {
                     processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
                 }
             }
+
 
             if(schema instanceof ComposedSchema){
                 ComposedSchema composedSchema = (ComposedSchema) schema;

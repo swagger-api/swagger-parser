@@ -14,4 +14,3 @@ components:
       properties:
         http_code:
           type: integer
-º
