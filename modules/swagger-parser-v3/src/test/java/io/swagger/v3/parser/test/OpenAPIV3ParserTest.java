@@ -92,6 +92,23 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
+    public void testIssue_1292() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1292/petstore.yml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertNotNull(openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/Pets");
+        assertNotNull(openAPI.getPaths().get("/pets").getGet().getResponses().getDefault().getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/Error");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pets"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Error"));
+    }
+
+    @Test
     public void testFlattenComposedSchema() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -1089,9 +1106,9 @@ public class OpenAPIV3ParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
-        assertEquals( definitions.get("i").get$ref(),"#/components/schemas/k_2");
+        assertEquals( definitions.get("i").get$ref(),"#/components/schemas/k");
         assertEquals( definitions.get("k").getTitle(), "k-definition");
-        assertEquals( definitions.get("k_2").getTitle(), "k-definition");
+
     }
 
     @Test

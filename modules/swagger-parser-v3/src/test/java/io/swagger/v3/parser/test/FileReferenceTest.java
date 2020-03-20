@@ -2,6 +2,7 @@ package io.swagger.v3.parser.test;
 
 
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -78,6 +79,7 @@ public class FileReferenceTest {
 
         Operation get = path.getGet();
         assertEquals(get.getOperationId(), "getEvents");
+        Yaml.prettyPrint(swagger);
         assertTrue(swagger.getComponents().getSchemas().size() == 2);
         assertTrue(swagger.getComponents().getSchemas().get("Paging").getProperties().size() == 1);
     }

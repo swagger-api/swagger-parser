@@ -64,6 +64,8 @@ tags:
     description: Find out more about our store
     url: http://swagger.io
 paths:
+  "/pathItemRef2":
+    "$ref": '#/paths/~1pet'
   "/mockResponses/objectMultipleExamples":
     get:
       responses:
@@ -96,8 +98,6 @@ paths:
                  $ref: '#/components/examples/Trillian'
   "/pathItemRef":
     "$ref": 'http://localhost:${dynamicPort}/remote/path#/paths/~1pet'
-  "/pathItemRef2":
-      "$ref": '#/paths/~1pet'
   "/pet":
     summary: summary
     description: description

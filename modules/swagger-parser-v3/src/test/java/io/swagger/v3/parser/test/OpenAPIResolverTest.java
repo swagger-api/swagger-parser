@@ -232,7 +232,7 @@ public class OpenAPIResolverTest {
 
         //remote url schema
         Schema user = (Schema) pet.getProperties().get("user");
-        assertEquals(user.get$ref(),"#/components/schemas/User_2");
+        assertEquals(user.get$ref(),"#/components/schemas/User");
 
 
         //ArraySchema items
@@ -247,7 +247,7 @@ public class OpenAPIResolverTest {
         //Schema additionalProperties
         assertTrue(schemas.get("OrderRef").getAdditionalProperties() instanceof Schema);
         Schema additionalProperties = (Schema) schemas.get("OrderRef").getAdditionalProperties();
-        assertEquals(additionalProperties.get$ref(), "#/components/schemas/User_2");
+        assertEquals(additionalProperties.get$ref(), "#/components/schemas/User");
 
         //AllOfSchema
         ComposedSchema extended = (ComposedSchema) schemas.get("ExtendedErrorModel");
@@ -307,7 +307,7 @@ public class OpenAPIResolverTest {
         //internal Schema header
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
         //header remote schema ref
-        assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User_2");
+        assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User");
 
         //header examples
         assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get("headerExample").get$ref(), "#/components/examples/dog" );
