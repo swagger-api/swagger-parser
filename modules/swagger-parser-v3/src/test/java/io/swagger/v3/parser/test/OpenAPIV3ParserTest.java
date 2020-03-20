@@ -76,10 +76,12 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult parseResult = openApiParser.readLocation("issue-1292/petstore.yml", null, options);
 
         OpenAPI openAPI = parseResult.getOpenAPI();
-        Yaml.prettyPrint(openAPI);
-        //assertNotNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
-        //assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
 
+        assertNotNull(openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/Pets");
+        assertNotNull(openAPI.getPaths().get("/pets").getGet().getResponses().getDefault().getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/Error");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pets"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Error"));
     }
 
     @Test
