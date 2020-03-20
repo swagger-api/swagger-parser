@@ -59,12 +59,8 @@ public class PathsProcessor {
             addParametersToEachOperation(pathItem);
 
             if (pathItem.get$ref() != null) {
-                RefFormat refFormat = computeRefFormat(pathItem.get$ref());
 
-                //PathItem resolvedPath = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
                 PathItem resolvedPath = processReferencePath(pathItem);
-
-                // TODO: update references to the parent location // doing it now 07-02-2020
 
                 String pathRef = pathItem.get$ref().split("#")[0];
 
@@ -301,6 +297,8 @@ public class PathsProcessor {
         String $ref = pathItem.get$ref();
         if (isAnExternalRefFormat(refFormat)){
               pathItem = externalRefProcessor.processRefToExternalPathItem($ref, refFormat);
+        }else{
+             pathItem = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
         }
 
         return pathItem;
