@@ -15,7 +15,7 @@ public class ObjectMapperFactory {
     }
 
     protected static ObjectMapper createJson(boolean includePathDeserializer, boolean includeResponseDeserializer) {
-        return create(null, includePathDeserializer, includeResponseDeserializer);
+        return create(createJsonFactory(), includePathDeserializer, includeResponseDeserializer);
     }
 
     public static ObjectMapper createYaml() {
@@ -23,11 +23,11 @@ public class ObjectMapperFactory {
     }
 
     protected static ObjectMapper createYaml(boolean includePathDeserializer, boolean includeResponseDeserializer) {
-        return create(new YAMLFactory(), includePathDeserializer, includeResponseDeserializer);
+        return create(createYamlFactory(), includePathDeserializer, includeResponseDeserializer);
     }
 
     private static ObjectMapper create(JsonFactory jsonFactory, boolean includePathDeserializer, boolean includeResponseDeserializer) {
-        ObjectMapper mapper = jsonFactory == null ? new ObjectMapper(createJsonFactory()) : new ObjectMapper(jsonFactory);
+        ObjectMapper mapper = new ObjectMapper(jsonFactory);
 
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -39,6 +39,12 @@ public class ObjectMapperFactory {
 
     private static JsonFactory createJsonFactory() {
         return new JsonFactoryBuilder()
+          .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+          .build();
+    }
+
+    private static JsonFactory createYamlFactory() {
+        return YAMLFactory.builder()
           .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
           .build();
     }

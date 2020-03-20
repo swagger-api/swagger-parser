@@ -1,0 +1,10 @@
+openapi: 3.0.2
+info:
+  title: Example references
+  version: 1.0.0
+paths:
+  /foo:
+    get:
+      responses:
+        '200':
+          $ref: './domain-issue-1335.yaml#/components/responses/200ok'

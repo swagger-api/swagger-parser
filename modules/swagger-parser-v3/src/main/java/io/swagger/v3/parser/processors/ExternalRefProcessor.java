@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -156,6 +157,8 @@ public final class ExternalRefProcessor {
 
             processProperties(subProps,file);
 
+            processDiscriminator(schema.getDiscriminator(),file);
+
             if(schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema){
                 Schema additionalProperty = (Schema) schema.getAdditionalProperties();
                 if (additionalProperty.get$ref() != null) {
@@ -228,6 +231,7 @@ public final class ExternalRefProcessor {
             processProperties(properties.values(), file);
         }
     }
+
 
     public PathItem processRefToExternalPathItem(String $ref, RefFormat refFormat) {
 
@@ -304,6 +308,22 @@ public final class ExternalRefProcessor {
         }
 
         return pathItem;
+    }
+
+    private void processDiscriminator(Discriminator d, String file) {
+        if (d != null && d.getMapping() != null) {
+            processDiscriminatorMapping(d.getMapping(), file);
+        }
+    }
+
+    private void processDiscriminatorMapping(Map<String, String> mapping, String file) {
+        for (String key : mapping.keySet()) {
+            String ref = mapping.get(key);
+            Schema subtype = new Schema().$ref(ref);
+            processSchema(subtype, file);
+            mapping.put(key, subtype.get$ref());
+        }
+
     }
 
     public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
@@ -787,6 +807,42 @@ public final class ExternalRefProcessor {
             if(mediaType.getSchema() != null) {
                 processRefSchemaObject(mediaType.getSchema(), $ref);
             }
+            if(mediaType.getExamples() != null) {
+                processRefExamples(mediaType.getExamples(), $ref);
+            }
+        }
+    }
+
+    private void processRefExamples(Map<String, Example> examples, String $ref) {
+        String file = $ref.split("#/")[0];
+        for(Example example : examples.values()) {
+            if (example.get$ref() != null) {
+                RefFormat ref = computeRefFormat(example.get$ref());
+                if (isAnExternalRefFormat(ref)) {
+                    processRefExample(example, $ref);
+                } else {
+                    processRefToExternalExample(file + example.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+        }
+    }
+
+    private void processRefExample(Example example, String externalFile) {
+        RefFormat format = computeRefFormat(example.get$ref());
+
+        if (!isAnExternalRefFormat(format)) {
+            example.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + example.get$ref(), RefFormat.RELATIVE));
+            return;
+        }
+        String $ref = example.get$ref();
+        String subRefExternalPath = getExternalPath(example.get$ref())
+                .orElse(null);
+
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
+            $ref = join(externalFile, example.get$ref());
+            example.set$ref($ref);
+        }else {
+            processRefToExternalExample($ref, format);
         }
     }
 
