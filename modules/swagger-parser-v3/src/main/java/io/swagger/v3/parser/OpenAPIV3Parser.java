@@ -70,7 +70,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                             result.setOpenAPI(resolver.resolve());
                             new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                         } else if (options.isFlatten()) {
-                            InlineModelResolver inlineModelResolver = new InlineModelResolver(options.isFlattenComposedSchemas());
+                            InlineModelResolver inlineModelResolver = new InlineModelResolver(options.isFlattenComposedSchemas(), options.isCamelCaseFlattenNaming());
                             inlineModelResolver.setSkipMatches(options.isSkipMatches());
                             inlineModelResolver.flatten(result.getOpenAPI());
                         }
@@ -207,7 +207,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                         result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                     } else if (options.isFlatten()) {
-                        InlineModelResolver inlineModelResolver = new InlineModelResolver(options.isFlattenComposedSchemas());
+                        InlineModelResolver inlineModelResolver = new InlineModelResolver(options.isFlattenComposedSchemas(), options.isCamelCaseFlattenNaming());
                         inlineModelResolver.setSkipMatches(options.isSkipMatches());
                         inlineModelResolver.flatten(result.getOpenAPI());
                     }
