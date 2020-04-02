@@ -14,6 +14,11 @@
     <dependencies>
         <dependency>
             <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>${swagger-core-v2-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
             <version>${swagger-parser-v2-version}</version>
         </dependency>
