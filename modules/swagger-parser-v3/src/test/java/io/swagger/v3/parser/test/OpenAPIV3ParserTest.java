@@ -67,6 +67,78 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1309() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1309.yaml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI);
+        assertEquals(parseResult.getMessages().get(0),"attribute components.schemas.customer-not-found.examples is unexpected");
+    }
+
+    @Test
+    public void testIssue1316() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("Issue1316.yaml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI);
+        assertTrue(parseResult.getMessages().size() == 0);
+    }
+
+
+    @Test
+    public void testIssue_1292() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1292/petstore.yml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertNotNull(openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/Pets");
+        assertNotNull(openAPI.getPaths().get("/pets").getGet().getResponses().getDefault().getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/Error");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pets"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Error"));
+    }
+
+    @Test
+    public void testFlattenComposedSchema() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+
+    }
+
+    @Test
+    public void testNotFlattenComposedSchema() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenComposedSchemaComplete.json", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNull(openAPI.getComponents().getSchemas().get("val_Members_val_member"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("val_MemberProducts_val_product"));
+
+    }
+
+    @Test
     public void testCodegenIssue8601() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -118,8 +190,6 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI.getComponents().getSchemas().get("SomeObj_lorem"));
     }
 
-
-
     @Test
     public void testIssue1147() {
         ParseOptions options = new ParseOptions();
@@ -141,7 +211,6 @@ public class OpenAPIV3ParserTest {
         assertEquals(((Schema)apispec.getComponents().getSchemas().get("Some.User").getProperties().get("address")).get$ref(),"#/components/schemas/Some.User_address");
     }
 
-
     @Test
     public void testIssue1169() {
         ParseOptions options = new ParseOptions();
@@ -151,7 +220,6 @@ public class OpenAPIV3ParserTest {
         OpenAPI apispec = parseResult.getOpenAPI();
         assertNotNull(apispec);
     }
-
 
     @Test
     public void testIssue339() throws Exception {
@@ -173,7 +241,6 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI);
         assertEquals(openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getDescription(),"Cuántos artículos devolver al mismo tiempo (máximo 100)");
     }
-
 
     @Test
     public void testIssue1108() {
@@ -311,11 +378,6 @@ public class OpenAPIV3ParserTest {
         ArraySchema arraySchema = (ArraySchema) openAPI.getComponents().getSchemas().get("Test.Definition").getProperties().get("stuff");
         String internalRef = arraySchema.getItems().get$ref();
         assertEquals(internalRef,"#/components/schemas/TEST.THING.OUT.Stuff");
-
-
-
-
-
     }
 
     @Test
@@ -500,7 +562,6 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(s.getPattern(),"^[A-Z]+$"); //ERROR: got null
     }
 
-
     @BeforeClass
     private void setUpWireMockServer() throws IOException {
         this.wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
@@ -616,12 +677,8 @@ public class OpenAPIV3ParserTest {
         this.wireMockServer.stop();
     }
 
-
-
     @Test
     public void test30(@Injectable final List<AuthorizationValue> auths) throws Exception{
-
-
 
        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
@@ -650,8 +707,6 @@ public class OpenAPIV3ParserTest {
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
         assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
     }
-
-
 
     @Test
     public void testResolveEmpty(@Injectable final List<AuthorizationValue> auths) throws Exception{
@@ -685,7 +740,6 @@ public class OpenAPIV3ParserTest {
     @Test
     public void testInlineModelResolver(@Injectable final List<AuthorizationValue> auths) throws Exception{
 
-
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/flatten.json"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
         ParseOptions options = new ParseOptions();
@@ -717,14 +771,11 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0).getName(), "lang");
     }
 
-
-
     @Test
     public void testRemoteParameterIssue1103(@Injectable final List<AuthorizationValue> auths) throws Exception{
         OpenAPI result = new OpenAPIV3Parser().read("issue-1103/remote-parameter-swagger.yaml");
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0).getName(), "lang");
-
     }
 
     @Test
@@ -821,8 +872,6 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Lion"));
         Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Bear"));
-
-
     }
 
     @Test
@@ -857,7 +906,6 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals("1516042231144", date.getExample().toString());
     }
 
-
     @Test
     public void testRefPaths() throws Exception {
         String yaml = "openapi: '3.0.0'\n" +
@@ -876,9 +924,8 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         OpenAPI openAPI = (parser.readContents(yaml,null,null)).getOpenAPI();
         assertEquals(openAPI.getPaths().get("foo"),openAPI.getPaths().get("foo2"));
-
-
     }
+
     @Test
     public void testModelParameters() throws Exception {
         String yaml = "openapi: '2.0'\n" +
@@ -903,7 +950,6 @@ public class OpenAPIV3ParserTest {
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         OpenAPI openAPI = (parser.readContents(yaml,null,null)).getOpenAPI();
-
     }
 
     @Test
@@ -1060,9 +1106,9 @@ public class OpenAPIV3ParserTest {
         assertTrue(definitions.containsKey("x"));
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
-        assertEquals( definitions.get("i").get$ref(),"#/components/schemas/k_2");
+        assertEquals( definitions.get("i").get$ref(),"#/components/schemas/k");
         assertEquals( definitions.get("k").getTitle(), "k-definition");
-        assertEquals( definitions.get("k_2").getTitle(), "k-definition");
+
     }
 
     @Test
@@ -1226,9 +1272,7 @@ public class OpenAPIV3ParserTest {
 
         assertEquals(((Map) openAPI.getExtensions().get("x-some-vendor")).get("sometesting"), "bye!");
         assertEquals(openAPI.getPaths().get("/foo").getExtensions().get("x-something"), "yes, it is supported");
-       
     }
-
 
     @Test
     public void testIssue292WithCSVCollectionFormat() {
@@ -1799,7 +1843,17 @@ public class OpenAPIV3ParserTest {
     public void checkAllOfAreTaken() {
         OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/allOf-example/allOf.yaml");
         assertEquals(2, openAPI.getComponents().getSchemas().size());
+    }
 
+    @Test
+    public void checkPathParameterRequiredValue() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("src/test/resources/issue-1319.yaml", null, options);
+        assertEquals(2, swaggerParseResult.getMessages().size());
+        assertEquals(2, swaggerParseResult.getOpenAPI().getComponents().getSchemas().size());
+        assertEquals(2, swaggerParseResult.getOpenAPI().getPaths().size());
+        assertEquals(1, swaggerParseResult.getOpenAPI().getComponents().getParameters().size());
     }
 
     @Test(description = "Issue #616 Relative references inside of 'allOf'")
@@ -1878,9 +1932,9 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("Issue_948.json", null, options);
         new OpenAPIResolver(result.getOpenAPI()).resolve();
         assertNotNull(result.getOpenAPI());
-
     }
 
+    @Test
     public void shouldParseParameters() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolveFully(true);
@@ -1890,7 +1944,7 @@ public class OpenAPIV3ParserTest {
         assertEquals(parameter.getIn(), "path");
         assertEquals(parameter.getName(), "playerId");
     }
-  
+
     @Test
     public void testIssue884() {
         ParseOptions parseOptions = new ParseOptions();
@@ -1902,7 +1956,7 @@ public class OpenAPIV3ParserTest {
         assertEquals(operationId, "getRepository");
         assertNotNull(userRepository.getHeaders());
     }
-  
+
     @Test
     public void testLinkIssue() {
         ParseOptions parseOptions = new ParseOptions();
@@ -2020,7 +2074,6 @@ public class OpenAPIV3ParserTest {
         assertThat(((Schema) modelSchema.getProperties().get("id")).get$ref(), equalTo("#/components/schemas/ValueId"));
     }
 
-
     @Test(description = "Test that extensions can be found on the class classloader in addition to tccl.")
     public void testIssue1003_ExtensionsClassloader() {
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
@@ -2036,7 +2089,7 @@ public class OpenAPIV3ParserTest {
         }
         assertNotNull(api);
     }
-  
+
     @Test
     public void shouldParseApiWithMultipleParameterReferences() {
         // given
@@ -2060,10 +2113,10 @@ public class OpenAPIV3ParserTest {
 
     @Test
     public void shouldParseApiWithParametersUsingContentvsSchema() {
-    	// Tests that the content method of specifying the format of a parameter
-    	// gets resolved.
-    	// Test checks if an API's single parameter of array type gets fully resolved to 
-    	// referenced definitions.
+        // Tests that the content method of specifying the format of a parameter
+        // gets resolved.
+        // Test checks if an API's single parameter of array type gets fully resolved to 
+        // referenced definitions.
         String location = "src/test/resources/issue-1078/api.yaml";
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -2119,8 +2172,9 @@ public class OpenAPIV3ParserTest {
         assertThat( objectItemSchemas.size(), equalTo(2));
         Assert.assertTrue(objectItemSchemas.get("lat") instanceof IntegerSchema);
         Assert.assertTrue(objectItemSchemas.get("long") instanceof IntegerSchema);
-        
-   }
+    }
+
+    @Test
     public void testIssue1063() {
         // given
         String location = "src/test/resources/issue-1063/openapi.yaml";
@@ -2165,7 +2219,6 @@ public class OpenAPIV3ParserTest {
         assertTrue(sessionIdHeader == sessionIdHeaderComponent);
 
         assertTrue(petsListApiResponse.getContent().get("application/json").getSchema() == petsListSchema);
-
     }
 
     @Test
@@ -2225,8 +2278,25 @@ public class OpenAPIV3ParserTest {
         assertEquals(6, openAPI.getComponents().getSchemas().size());
     }
 
-    private static int getDynamicPort() {
-        return new Random().ints(10000, 20000).findFirst().getAsInt();
+    @Test
+    public void testIssue1335() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue1335.yaml", null, options);
+        assertNotNull(result.getOpenAPI().getComponents().getExamples().get("ex1"));
+    }
+
+    @Test
+    public void testRegressionIssue1236() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/testRegressionIssue1236.yaml", null, options);
+        assertTrue(result.getMessages().size() == 0);
+
     }
 
     @Test
@@ -2248,7 +2318,7 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testDuplicateHttpStatusCodes() {
+    public void testDuplicateHttpStatusCodesJson() {
         final String location = "src/test/resources/duplicateHttpStatusCodes.json";
 
         final ParseOptions options = new ParseOptions();
@@ -2260,5 +2330,91 @@ public class OpenAPIV3ParserTest {
         List<String> messages = result.getMessages();
         assertEquals(1, messages.size());
         assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.json`");
+
     }
+
+    @Test
+    public void testDuplicateHttpStatusCodesYaml() {
+        final String location = "src/test/resources/duplicateHttpStatusCodes.yaml";
+
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final SwaggerParseResult result = parser.readLocation(location, null, options);
+        assertNull(result.getOpenAPI());
+        List<String> messages = result.getMessages();
+        assertEquals(1, messages.size());
+        assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.yaml`");
+
+    }
+
+    private static int getDynamicPort() {
+        return new Random().ints(10000, 20000).findFirst().getAsInt();
+    }
+
+    @Test
+    public void testDiscriminatorSingleFileNoMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/single-file-no-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFileNoMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-no-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNull(cat); // FIXME, issue #970 still exists in this form
+    }
+
+    @Test
+    public void testDiscriminatorSingleFilePlainMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/single-file-plain-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFilePlainMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-plain-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSingleFileInternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/single-file-internal-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFileInternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-internal-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSameFileExternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-external-mapping.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testDiscriminatorSeparateFileExternalMapping() throws Exception {
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./discriminator-mapping-resolution/main-external-mapping-3files.yaml");
+        Assert.assertNotNull(openAPI);
+        Schema cat = openAPI.getComponents().getSchemas().get("Cat");
+        Assert.assertNotNull(cat);
+    }
+
 }

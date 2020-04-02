@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "test",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/validation": {
+      "post": {
+        "tags": [
+          "mytag"
+        ],
+        "summary": "summary",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mtg_Message"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "desc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mtg_Message"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "mtg_Message": {
+        "type": "object"
+      },
+      "val_MemberProducts": {
+        "additionalProperties": false,
+        "description": "val_MemberProducts desc",
+        "properties": {
+          "val_product": {
+            "items": {
+              "type": "object",
+              "properties": {
+                "val_unique_reference1": {
+                  "type": "string"
+                }
+              }
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "val_product"
+        ],
+        "type": "object"
+      },
+      "val_Members": {
+        "additionalProperties": false,
+        "description": "valmembers desc",
+        "properties": {
+          "val_member": {
+            "description": "valmember desc",
+            "items": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/val_MemberChoice1"
+                },
+                {
+                  "$ref": "#/components/schemas/val_MemberChoice2"
+                }
+              ]
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "val_member"
+        ],
+        "type": "object"
+      },
+      "val_MemberChoice1": {
+        "additionalProperties": false,
+        "description": "val_MemberChoice1 desc",
+        "properties": {
+          "val_unique_reference1": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "val_MemberChoice2": {
+        "additionalProperties": false,
+        "description": "val_MemberChoice2 desc",
+        "properties": {
+          "val_unique_reference2": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  }
+}

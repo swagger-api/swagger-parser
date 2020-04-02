@@ -3,12 +3,15 @@ package io.swagger.v3.parser.processors;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -26,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -82,13 +86,15 @@ public final class ExternalRefProcessor {
                 // use the new model
                 existingModel = null;
             }else{
-                //We add a number at the end of the definition name
-                int i = 2;
-                for (String name : schemas.keySet()) {
-                    if (name.equals(possiblyConflictingDefinitionName)) {
-                        tryName = possiblyConflictingDefinitionName + "_" + i;
-                        existingModel = schemas.get(tryName);
-                        i++;
+                if (!schema.equals(existingModel)){
+                    //We add a number at the end of the definition name
+                    int i = 2;
+                    for (String name : schemas.keySet()) {
+                        if (name.equals(possiblyConflictingDefinitionName)) {
+                            tryName = possiblyConflictingDefinitionName + "_" + i;
+                            existingModel = schemas.get(tryName);
+                            i++;
+                        }
                     }
                 }
             }
@@ -114,6 +120,7 @@ public final class ExternalRefProcessor {
                     processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
                 }
             }
+
 
             if(schema instanceof ComposedSchema){
                 ComposedSchema composedSchema = (ComposedSchema) schema;
@@ -149,6 +156,8 @@ public final class ExternalRefProcessor {
             Map<String, Schema> subProps = schema.getProperties();
 
             processProperties(subProps,file);
+
+            processDiscriminator(schema.getDiscriminator(),file);
 
             if(schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema){
                 Schema additionalProperty = (Schema) schema.getAdditionalProperties();
@@ -221,6 +230,100 @@ public final class ExternalRefProcessor {
         if (properties != null) {
             processProperties(properties.values(), file);
         }
+    }
+
+
+    public PathItem processRefToExternalPathItem(String $ref, RefFormat refFormat) {
+
+        final PathItem pathItem = cache.loadRef($ref, refFormat, PathItem.class);
+
+        String newRef;
+
+        Map<String, PathItem> paths = openAPI.getPaths();
+
+        if (paths == null) {
+            paths = new LinkedHashMap<>();
+        }
+
+        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
+
+        PathItem existingPathItem = paths.get(possiblyConflictingDefinitionName);
+
+        if (existingPathItem != null) {
+            LOGGER.debug("A model for " + existingPathItem + " already exists");
+            if(existingPathItem.get$ref() != null) {
+                // use the new model
+                existingPathItem = null;
+            }
+        }
+        newRef = possiblyConflictingDefinitionName;
+        cache.putRenamedRef($ref, newRef);
+
+        if(pathItem != null) {
+            if(pathItem.readOperationsMap() != null) {
+                final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
+                for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
+                    Operation operation = operationMap.get(httpMethod);
+                    if (operation.getResponses() != null) {
+                        final Map<String, ApiResponse> responses = operation.getResponses();
+                        if (responses != null) {
+                            for (String responseCode : responses.keySet()) {
+                                ApiResponse response = responses.get(responseCode);
+                                if (response != null) {
+                                    Schema schema = null;
+                                    if (response.getContent() != null) {
+                                        Map<String, MediaType> content = response.getContent();
+                                        for (String mediaName : content.keySet()) {
+                                            MediaType mediaType = content.get(mediaName);
+                                            if (mediaType.getSchema() != null) {
+                                                schema = mediaType.getSchema();
+                                                if (schema != null) {
+                                                    processRefSchemaObject(mediaType.getSchema(), $ref);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (operation.getRequestBody() != null) {
+                        RequestBody body = operation.getRequestBody();
+                        Schema schema = null;
+                        if (body.getContent() != null) {
+                            Map<String, MediaType> content = body.getContent();
+                            for (String mediaName : content.keySet()) {
+                                MediaType mediaType = content.get(mediaName);
+                                if (mediaType.getSchema() != null) {
+                                    schema = mediaType.getSchema();
+                                    if (schema != null) {
+                                        processRefSchemaObject(mediaType.getSchema(), $ref);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return pathItem;
+    }
+
+    private void processDiscriminator(Discriminator d, String file) {
+        if (d != null && d.getMapping() != null) {
+            processDiscriminatorMapping(d.getMapping(), file);
+        }
+    }
+
+    private void processDiscriminatorMapping(Map<String, String> mapping, String file) {
+        for (String key : mapping.keySet()) {
+            String ref = mapping.get(key);
+            Schema subtype = new Schema().$ref(ref);
+            processSchema(subtype, file);
+            mapping.put(key, subtype.get$ref());
+        }
+
     }
 
     public String processRefToExternalResponse(String $ref, RefFormat refFormat) {
@@ -698,11 +801,48 @@ public final class ExternalRefProcessor {
         return newRef;
     }
 
+
     private void processRefContent(Map<String, MediaType> content, String $ref) {
         for(MediaType mediaType : content.values()) {
             if(mediaType.getSchema() != null) {
                 processRefSchemaObject(mediaType.getSchema(), $ref);
             }
+            if(mediaType.getExamples() != null) {
+                processRefExamples(mediaType.getExamples(), $ref);
+            }
+        }
+    }
+
+    private void processRefExamples(Map<String, Example> examples, String $ref) {
+        String file = $ref.split("#/")[0];
+        for(Example example : examples.values()) {
+            if (example.get$ref() != null) {
+                RefFormat ref = computeRefFormat(example.get$ref());
+                if (isAnExternalRefFormat(ref)) {
+                    processRefExample(example, $ref);
+                } else {
+                    processRefToExternalExample(file + example.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+        }
+    }
+
+    private void processRefExample(Example example, String externalFile) {
+        RefFormat format = computeRefFormat(example.get$ref());
+
+        if (!isAnExternalRefFormat(format)) {
+            example.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + example.get$ref(), RefFormat.RELATIVE));
+            return;
+        }
+        String $ref = example.get$ref();
+        String subRefExternalPath = getExternalPath(example.get$ref())
+                .orElse(null);
+
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
+            $ref = join(externalFile, example.get$ref());
+            example.set$ref($ref);
+        }else {
+            processRefToExternalExample($ref, format);
         }
     }
 
@@ -747,6 +887,8 @@ public final class ExternalRefProcessor {
             }
         }
     }
+
+
 
     private void processRefSchema(Schema subRef, String externalFile) {
         RefFormat format = computeRefFormat(subRef.get$ref());
@@ -841,6 +983,7 @@ public final class ExternalRefProcessor {
             return source;
         }
     }
+
 
 
 }
