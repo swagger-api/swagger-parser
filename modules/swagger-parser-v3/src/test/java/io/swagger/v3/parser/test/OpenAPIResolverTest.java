@@ -493,6 +493,17 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void testIssue1352(@Injectable final List<AuthorizationValue> auths) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI= new OpenAPIV3Parser().readLocation("issue-1352.json", auths, options).getOpenAPI();
+        assertNull(openAPI.getPaths().get("/responses").getPatch().getResponses().get("200").getHeaders().get("x-my-secret-header").getSchema().get$ref());
+
+    }
+
+    @Test
     public void testIssue1157(@Injectable final List<AuthorizationValue> auths) {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);

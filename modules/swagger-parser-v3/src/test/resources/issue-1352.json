@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Responses",
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/responses": {
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "It's a secret",
+            "headers": {
+              "x-my-secret-header": {
+                "required": true,
+                "schema": {
+                  "$ref": "#/components/schemas/secrets"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "maxProperties": 1,
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                }
+              },
+              "text/javascript": {
+                "schema": {
+                  "type": "object",
+                  "minProperties": 1,
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/failure"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "success": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/successContent"
+            }
+          }
+        }
+      },
+      "failure": {
+        "description": "Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "secrets": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

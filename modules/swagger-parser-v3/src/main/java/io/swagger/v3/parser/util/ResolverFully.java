@@ -217,6 +217,13 @@ public class ResolverFully {
                 Map<String,Example> resolved = resolveExample(examples);
                 resolvedValue.setExamples(resolved);
             }
+            Schema schema = resolvedValue.getSchema();
+            if(schema != null) {
+                Schema resolvedSchema = resolveSchema( schema);
+                if(resolvedSchema != null) {
+                    resolvedValue.setSchema( resolvedSchema);
+                }
+            }
             header.setValue(resolvedValue);
         }
     }
