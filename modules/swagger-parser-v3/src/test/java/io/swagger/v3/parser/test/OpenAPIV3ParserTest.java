@@ -719,6 +719,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+        assertEquals(result.getOpenAPI().getPaths().get("/login").getPost().getResponses().get("422").getDescription(),"Request validation error. Check \"errors\" array for details.");
         assertEquals(result.getOpenAPI().getPaths().get("/login").getPost().getResponses().get("422").get$ref(),"");
     }
 
