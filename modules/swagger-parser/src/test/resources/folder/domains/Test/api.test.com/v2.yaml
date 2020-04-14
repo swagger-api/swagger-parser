@@ -1,0 +1,47 @@
+### Domains, a place to put your reusable components
+
+responses:
+  GeneralError:
+    description: Occurs when something goes wrong
+    schema:
+      $ref: 'v2.yaml#/definitions/Test.Common.ErrorResponseMessage'
+
+
+definitions:
+
+  Test.Common.DocUrl:
+    type: string
+    format: uri
+    description: The documentation related to this operation.
+    example: 'https://api-docs.test.com/#operation/EnableChannelCatalog'
+
+
+  Test.Common.ErrorResponseMessage:
+    type: object
+    required:
+      - errors
+    properties:
+      errors:
+        type: array
+        uniqueItems: false
+        items:
+          $ref: 'v2.yaml#/definitions/Test.Common.UserErrorMessage'
+
+  Test.Common.UserErrorMessage:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      docUrl:
+        $ref: 'v2.yaml#/definitions/Test.Common.DocUrl'
+      code:
+        type: string
+        description: the error code. The error code can be a pattern containing the argument's name
+        example: Here goes an example text
+      message:
+        type: string
+        description: The error message
+        example: |
+          There is already an importation in progress: 12345-XYZBN-00122-44444
+

@@ -58,6 +58,14 @@ import io.swagger.util.Yaml;
 
 public class SwaggerParserTest {
 
+
+    @Test
+    public void testIssueRelativeRefs3() {
+        String location = "swagger-reference-response.yaml";
+        Swagger swagger = new SwaggerParser().read(location, null, true);
+        assertNotNull(swagger);
+    }
+
     @Test
     public void testIssue1143() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1143.json", null, true);
