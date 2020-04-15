@@ -33,12 +33,13 @@ public class InlineModelResolver {
     Map<String, String> generatedSignature = new HashMap<>();
 
     private boolean flattenComposedSchemas;
+    private boolean camelCaseFlattenNaming;
 
+    public InlineModelResolver(){this(false,false);}
 
-    public InlineModelResolver(){this(false);}
-
-    public InlineModelResolver(boolean flattenComposedSchemas) {
+    public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming) {
         this.flattenComposedSchemas = flattenComposedSchemas;
+        this.camelCaseFlattenNaming = camelCaseFlattenNaming;
     }
 
     public void flatten(OpenAPI openAPI) {
@@ -53,7 +54,7 @@ public class InlineModelResolver {
 
         // operations
         Map<String, PathItem> paths = openAPI.getPaths();
-        if(openAPI.getComponents()== null){
+        if (openAPI.getComponents()== null){
             openAPI.setComponents(new Components());
         }
         Map<String, Schema> models = openAPI.getComponents().getSchemas();
@@ -71,7 +72,7 @@ public class InlineModelResolver {
                             for(String key: content.keySet()) {
                                 if (content.get(key) != null) {
                                     MediaType mediaType = content.get(key);
-                                    if(mediaType.getSchema() != null) {
+                                    if (mediaType.getSchema() != null) {
                                         Schema model = mediaType.getSchema();
                                         if (model.getProperties() != null && model.getProperties().size() > 0) {
                                             flattenProperties(model.getProperties(), pathname);
@@ -258,23 +259,41 @@ public class InlineModelResolver {
                     }
                 } else if (model instanceof ComposedSchema) {
                     ComposedSchema composedSchema = (ComposedSchema) model;
+                    String inlineModelName = "";
+
                     List<Schema> list = null;
                     if (composedSchema.getAllOf() != null) {
-                      list  = composedSchema.getAllOf();
+                        list  = composedSchema.getAllOf();
+                        inlineModelName = "AllOf";
                     }else if (composedSchema.getAnyOf() != null) {
                         list  = composedSchema.getAnyOf();
+                        inlineModelName = "AnyOf";
                     }else if (composedSchema.getOneOf() != null) {
                         list  = composedSchema.getOneOf();
+                        inlineModelName = "OneOf";
                     }
+
                     for(int i= 0; i<list.size();i++){
-                        if(list.get(i).getProperties()!= null){
-                            flattenProperties(list.get(i).getProperties(), modelName);
+                        if (list.get(i).get$ref() == null){
+                            Schema inline = list.get(i);
+                            if (inline.getProperties()!= null){
+                                flattenProperties(inline.getProperties(), modelName);
+                            }
+                            if (this.flattenComposedSchemas) {
+                                int position = i+1;
+                                inlineModelName = resolveModelName(inline.getTitle(),  modelName + inlineModelName + "_" + position);
+                                list.set(i,new Schema().$ref(inlineModelName));
+                                addGenerated(inlineModelName, inline);
+                                openAPI.getComponents().addSchemas(inlineModelName, inline);
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+
 
     /**
      * This function fix models that are string (mostly enum). Before this fix, the example
@@ -317,7 +336,18 @@ public class InlineModelResolver {
     public String uniqueName(String key) {
         int count = 0;
         boolean done = false;
-        key = key.replaceAll("[^a-z_\\.A-Z0-9 ]", ""); // FIXME: a parameter
+        if (camelCaseFlattenNaming) {
+            String uniqueKey;
+            String concatenated = "";
+            for (int i = 0; i < key.split("-").length; i++) {
+                uniqueKey = key.split("-")[i];
+                uniqueKey = uniqueKey.substring(0, 1).toUpperCase() + uniqueKey.substring(1);
+                concatenated = concatenated.concat(uniqueKey);
+            }
+            key = concatenated.replaceAll("[^a-z_\\.A-Z0-9 ]", ""); // FIXME: a parameter
+        }else {
+            key = key.replaceAll("[^a-z_\\.A-Z0-9 ]", ""); // FIXME: a parameter
+        }
         // should not be
         // assigned. Also declare
         // the methods parameters
@@ -336,6 +366,7 @@ public class InlineModelResolver {
         }
         return key;
     }
+
 
     public void flattenProperties(Map<String, Schema> properties, String path) {
         if (properties == null) {
@@ -377,7 +408,7 @@ public class InlineModelResolver {
                             addGenerated(modelName, innerModel);
                             openAPI.getComponents().addSchemas(modelName, innerModel);
                         }
-                    }else if(inner instanceof ComposedSchema && this.flattenComposedSchemas){
+                    }else if (inner instanceof ComposedSchema && this.flattenComposedSchemas){
                         ComposedSchema composedSchema = (ComposedSchema) inner;
                         String modelName = resolveModelName(inner.getTitle(), path + "_" + key);
                         List<Schema> list = null;
@@ -389,7 +420,7 @@ public class InlineModelResolver {
                             list  = composedSchema.getOneOf();
                         }
                         for(int i= 0; i<list.size();i++){
-                            if(list.get(i).getProperties()!= null){
+                            if (list.get(i).getProperties()!= null){
                                 flattenProperties(list.get(i).getProperties(), modelName);
                             }
                         }
@@ -546,7 +577,7 @@ public class InlineModelResolver {
      * @param target target property
      */
     public void copyVendorExtensions(Schema source, Schema target) {
-        if(source.getExtensions() != null) {
+        if (source.getExtensions() != null) {
             Map<String, Object> vendorExtensions = source.getExtensions();
             for (String extName : vendorExtensions.keySet()) {
                 target.addExtension(extName, vendorExtensions.get(extName));
@@ -566,6 +597,5 @@ public class InlineModelResolver {
         return schema instanceof ObjectSchema
                 || "object".equalsIgnoreCase(schema.getType())
                 || (schema.getType() == null && schema.getProperties() != null && !schema.getProperties().isEmpty());
-
     }
 }
