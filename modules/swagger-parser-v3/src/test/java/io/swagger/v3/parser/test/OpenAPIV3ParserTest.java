@@ -2276,9 +2276,7 @@ public class OpenAPIV3ParserTest {
         options.setSkipMatches(true);
 
         final OpenAPIV3Parser parserUnderTest = new OpenAPIV3Parser();
-
         final SwaggerParseResult result = parserUnderTest.readLocation(location, null, options);
-
         final OpenAPI openAPI = result.getOpenAPI();
 
         assertNotNull(openAPI);
