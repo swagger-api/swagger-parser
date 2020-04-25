@@ -1,5 +1,6 @@
 package io.swagger.parser.test;
 
+import io.swagger.util.Yaml;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -848,6 +849,25 @@ public class V2ConverterTest {
         assertNotNull(oas);
         ComposedSchema schema = (ComposedSchema) oas.getComponents().getSchemas().get("Bar").getProperties().get("bar2");
         assertEquals(schema.getAllOf().get(0).get$ref(),"#/components/schemas/Foo");
+
+    }
+
+    @Test()
+    public void testInlineDefinitionProperty() throws Exception {
+        SwaggerConverter converter = new SwaggerConverter();
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setFlatten(true);
+        SwaggerParseResult result = converter.readLocation("src/test/resources/issue-1359.yaml", null, parseOptions);
+        OpenAPI oas = result.getOpenAPI();
+        assertNotNull(oas);
+
+        Schema pet = oas.getComponents().getSchemas().get("Pet");
+        Schema property = (Schema) pet.getProperties().get("categoryInline");
+        assertEquals("#/components/schemas/Pet_categoryInline", property.get$ref());
+
+        Schema petCategoryInline = oas.getComponents().getSchemas().get("Pet_categoryInline");
+        assertNotNull(petCategoryInline);
 
     }
 }

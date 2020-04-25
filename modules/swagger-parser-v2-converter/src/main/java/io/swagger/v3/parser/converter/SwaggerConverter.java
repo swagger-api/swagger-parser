@@ -88,7 +88,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(url, convert(auths), resolve);
 
-        return convert(result);
+        return readResult(result, auths, options);
     }
 
     @Override
@@ -102,6 +102,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 result.setSwagger(resolved);
             }
         }
+        return readResult(result, auth, options);
+
+    }
+
+    private SwaggerParseResult readResult(SwaggerDeserializationResult result, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult out = convert(result);
         if (out != null && options != null && options.isFlatten()) {
             try {
@@ -118,7 +123,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
             } catch (Exception ignore) {}
         }
         return out;
-
     }
 
     public List<io.swagger.models.auth.AuthorizationValue> convert(List<AuthorizationValue> auths) {
