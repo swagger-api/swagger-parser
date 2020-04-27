@@ -1,6 +1,13 @@
 package io.swagger.v3.parser.processors;
 
 
+import java.net.URI;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -13,27 +20,16 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
-import io.swagger.v3.parser.util.RefUtils;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
 
 import static io.swagger.v3.parser.util.RefUtils.computeDefinitionName;
 import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
@@ -280,8 +276,15 @@ public final class ExternalRefProcessor {
                                                 if (schema != null) {
                                                     processRefSchemaObject(mediaType.getSchema(), $ref);
                                                 }
+                                                if (mediaType.getExamples() != null) {
+                                                    processRefExamples(mediaType.getExamples(), $ref);
+                                                }
+
                                             }
                                         }
+                                    }
+                                    if (response.getLinks() != null) {
+                                        processRefLinks(response.getLinks(), $ref);
                                     }
                                 }
                             }
@@ -289,8 +292,8 @@ public final class ExternalRefProcessor {
                     }
                     if (operation.getRequestBody() != null) {
                         RequestBody body = operation.getRequestBody();
-                        Schema schema = null;
                         if (body.getContent() != null) {
+                            Schema schema;
                             Map<String, MediaType> content = body.getContent();
                             for (String mediaName : content.keySet()) {
                                 MediaType mediaType = content.get(mediaName);
@@ -302,6 +305,13 @@ public final class ExternalRefProcessor {
                                 }
                             }
                         }
+                    }
+
+                    final List<Parameter> parameters = operation.getParameters();
+                    if (parameters != null) {
+                        parameters.stream()
+                            .filter(parameter -> parameter.getSchema() != null)
+                            .forEach(parameter -> this.processRefSchemaObject(parameter.getSchema(), $ref));
                     }
                 }
             }

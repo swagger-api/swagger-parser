@@ -1,6 +1,19 @@
 package io.swagger.v3.parser.test;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -11,17 +24,19 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
-import io.swagger.v3.oas.models.media.*;
-import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ByteArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
@@ -45,21 +60,22 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 
 public class OpenAPIV3ParserTest {
@@ -145,6 +161,21 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI.getComponents().getSchemas().get("Pet"));
         assertNotNull(openAPI.getComponents().getSchemas().get("Pets"));
         assertNotNull(openAPI.getComponents().getSchemas().get("Error"));
+    }
+
+    @Test
+    public void testIssue_505() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-505/petstore.yml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertNotNull(openAPI.getComponents().getSchemas().get("DateWithExample"));
+        assertNotNull(openAPI.getComponents().getExamples().get("DateWithExample"));
+        assertNotNull(openAPI.getComponents().getLinks().get("userRepository"));
+
+        assertEquals(3, openAPI.getPaths().get("/pets").getGet().getParameters().size());
     }
 
     @Test
