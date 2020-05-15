@@ -911,7 +911,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             FileSchema fileSchema = Json.mapper().convertValue(schema, FileSchema.class);
             result = fileSchema;
 
-        }else {
+        } else {
 
             result = Json.mapper().convertValue(schema, Schema.class);
             result.setExample(schema.getExample());
