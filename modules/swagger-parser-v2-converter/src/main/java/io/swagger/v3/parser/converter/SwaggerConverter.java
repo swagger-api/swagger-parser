@@ -160,7 +160,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             openAPI.setExtensions(convert(swagger.getVendorExtensions()));
         }
         // Set extension to retain original version of OAS document.
-        openAPI.addExtension("x-original-version", swagger.getSwagger());
+        openAPI.addExtension("x-original-swagger-version", swagger.getSwagger());
 
         if (swagger.getExternalDocs() != null) {
             openAPI.setExternalDocs(convert(swagger.getExternalDocs()));
