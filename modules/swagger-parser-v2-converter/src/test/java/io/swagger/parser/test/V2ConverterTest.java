@@ -88,10 +88,6 @@ public class V2ConverterTest {
     private static final String ISSUE_765_YAML = "issue-765.yaml";
     private static final String ISSUE_768_JSON = "issue-786.json";
     private static final String ISSUE_820_YAML = "issue-820.yaml";
-    private static final String ISSUE_1032_YAML = "issue-1032.yaml";
-    private static final String ISSUE_1113_YAML = "issue-1113.yaml";
-    private static final String ISSUE_1164_YAML = "issue-1164.yaml";
-    private static final String ISSUE_1261_YAML = "issue-1261.yaml";
     private static final String ISSUE_1369_YAML = "issue-1369.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
@@ -770,15 +766,6 @@ public class V2ConverterTest {
         return result.getOpenAPI();
     }
 
-    @Test(description = "OpenAPI v2 converter - verifies the references inside composed schema is resolved")
-    public void testissue1261() throws Exception {
-        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1261_YAML);
-        assertNotNull(oas);
-        ComposedSchema schema = (ComposedSchema) oas.getComponents().getSchemas().get("Bar").getProperties().get("bar2");
-        assertEquals(schema.getAllOf().get(0).get$ref(),"#/components/schemas/Foo");
-
-    }
-
     @Test(description = "OpenAPI v2 converter - verifies the additionalProperties")
     public void testissue1369() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1369_YAML);
@@ -800,24 +787,5 @@ public class V2ConverterTest {
         schema = (Schema) oas.getComponents().getSchemas().get("Foo4");
         assertNotNull(schema);
         assertNotNull(schema.getAdditionalProperties());
-    }
-
-    @Test()
-    public void testInlineDefinitionProperty() throws Exception {
-        SwaggerConverter converter = new SwaggerConverter();
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setFlatten(true);
-        SwaggerParseResult result = converter.readLocation("src/test/resources/issue-1359.yaml", null, parseOptions);
-        OpenAPI oas = result.getOpenAPI();
-        assertNotNull(oas);
-
-        Schema pet = oas.getComponents().getSchemas().get("Pet");
-        Schema property = (Schema) pet.getProperties().get("categoryInline");
-        assertEquals("#/components/schemas/Pet_categoryInline", property.get$ref());
-
-        Schema petCategoryInline = oas.getComponents().getSchemas().get("Pet_categoryInline");
-        assertNotNull(petCategoryInline);
-
     }
 }
