@@ -1,0 +1,25 @@
+swagger: '2.0'
+info:
+  title: additionalProperties test
+  version: '1.0.0'
+paths: {}
+
+definitions:
+  S1:
+    type: object
+    properties:
+      foo:
+        type: string
+    additionalProperties: false
+  S2:
+    type: object
+    properties:
+      bar:
+        type: string
+    additionalProperties:
+      type: string
+  S3:
+    type: object
+    properties:
+      bar:
+        type: string
