@@ -857,12 +857,23 @@ public class V2ConverterTest {
     public void testissue1369() throws Exception {
         OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1369_YAML);
         assertNotNull(oas);
-        Schema schema = (Schema) oas.getComponents().getSchemas().get("S1");
-        assertNotNull(schema.getAdditionalProperties());
-        schema = (Schema) oas.getComponents().getSchemas().get("S2");
-        assertNotNull(schema.getAdditionalProperties());
-        schema = (Schema) oas.getComponents().getSchemas().get("S3");
+        Schema schema = (Schema) oas.getComponents().getSchemas().get("Foo1");
+        assertNotNull(schema);
         assertNull(schema.getAdditionalProperties());
+
+        schema = (Schema) oas.getComponents().getSchemas().get("Foo2");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertEquals(schema.getAdditionalProperties(), Boolean.TRUE);
+
+        schema = (Schema) oas.getComponents().getSchemas().get("Foo3");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertEquals(schema.getAdditionalProperties(), Boolean.FALSE);
+
+        schema = (Schema) oas.getComponents().getSchemas().get("Foo4");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
     }
 
     @Test()
