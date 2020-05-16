@@ -1727,10 +1727,7 @@ public class OpenAPIDeserializer {
         JsonNode example = node.get(nodeKey);
         if (example != null) {
             if (example.getNodeType().equals(JsonNodeType.STRING)) {
-                String value = getString(nodeKey, node, false, location, result);
-                if (StringUtils.isNotBlank(value)) {
-                    return value;
-                }
+                return getString(nodeKey, node, false, location, result);
             } if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
                 Integer integerExample = getInteger(nodeKey, node, false, location, result);
                 if (integerExample != null) {
