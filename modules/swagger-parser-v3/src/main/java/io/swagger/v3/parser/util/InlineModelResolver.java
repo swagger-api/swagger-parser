@@ -26,20 +26,21 @@ import java.util.Map;
 
 public class InlineModelResolver {
     private OpenAPI openAPI;
-    private boolean skipMatches;
     static Logger LOGGER = LoggerFactory.getLogger(InlineModelResolver.class);
 
     Map<String, Schema> addedModels = new HashMap<>();
     Map<String, String> generatedSignature = new HashMap<>();
 
-    private boolean flattenComposedSchemas;
-    private boolean camelCaseFlattenNaming;
+    private final boolean flattenComposedSchemas;
+    private final boolean camelCaseFlattenNaming;
+    private final boolean skipMatches;
 
-    public InlineModelResolver(){this(false,false);}
+    public InlineModelResolver(){this(false, false, false);}
 
-    public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming) {
+    public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming, boolean skipMatches) {
         this.flattenComposedSchemas = flattenComposedSchemas;
         this.camelCaseFlattenNaming = camelCaseFlattenNaming;
+        this.skipMatches = skipMatches;
     }
 
     public void flatten(OpenAPI openAPI) {
@@ -319,7 +320,7 @@ public class InlineModelResolver {
     }
 
     public String matchGenerated(Schema model) {
-        if (this.skipMatches) {
+        if (skipMatches) {
             return null;
         }
         String json = Json.pretty(model);
@@ -583,14 +584,6 @@ public class InlineModelResolver {
                 target.addExtension(extName, vendorExtensions.get(extName));
             }
         }
-    }
-
-    public boolean isSkipMatches() {
-        return skipMatches;
-    }
-
-    public void setSkipMatches(boolean skipMatches) {
-        this.skipMatches = skipMatches;
     }
 
     private boolean isObjectSchema(Schema schema) {
