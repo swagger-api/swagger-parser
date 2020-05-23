@@ -33,9 +33,13 @@ public class InlineModelResolver {
 
     private final boolean flattenComposedSchemas;
     private final boolean camelCaseFlattenNaming;
-    private final boolean skipMatches;
+    private boolean skipMatches;
 
     public InlineModelResolver(){this(false, false, false);}
+
+    public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming) {
+        this(flattenComposedSchemas, camelCaseFlattenNaming, false);
+    }
 
     public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming, boolean skipMatches) {
         this.flattenComposedSchemas = flattenComposedSchemas;
@@ -590,5 +594,13 @@ public class InlineModelResolver {
         return schema instanceof ObjectSchema
                 || "object".equalsIgnoreCase(schema.getType())
                 || (schema.getType() == null && schema.getProperties() != null && !schema.getProperties().isEmpty());
+    }
+
+    public boolean isSkipMatches() {
+        return skipMatches;
+    }
+
+    public void setSkipMatches(boolean skipMatches) {
+        this.skipMatches = skipMatches;
     }
 }

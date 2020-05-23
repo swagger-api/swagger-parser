@@ -22,9 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -97,7 +95,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
 
     @Override
     public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth,
-            ParseOptions options) {
+                                           ParseOptions options) {
         return readContents(swaggerAsString, auth, options, null);
     }
 
@@ -127,6 +125,11 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return null;
     }
 
+    @Deprecated
+    public SwaggerParseResult readWithInfo(String path, JsonNode node) {
+        return parseJsonNode(path, node);
+    }
+
     public SwaggerParseResult parseJsonNode(String path, JsonNode node) {
         return new OpenAPIDeserializer().deserialize(node, path);
     }
@@ -138,30 +141,35 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     private SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options,
-            String parentFileLocation) {
+                                            String location) {
         if (swaggerAsString == null || swaggerAsString.trim().isEmpty()) {
-            return SwaggerParseResult.ofError("No swagger supplied");
+            return SwaggerParseResult.ofError("Null or empty definition");
         }
 
         try {
             final ObjectMapper mapper = getRightMapper(swaggerAsString);
             final JsonNode rootNode = mapper.readTree(swaggerAsString);
-            final SwaggerParseResult result = parseJsonNode(parentFileLocation, rootNode);
-            return resolve(result, auth, options, parentFileLocation);
+            final SwaggerParseResult result = parseJsonNode(location, rootNode);
+            return resolve(result, auth, options, location);
         } catch (JsonProcessingException e) {
             LOGGER.warn("Exception while parsing:", e);
-            final String message = getParseErrorMessage(e.getOriginalMessage(), parentFileLocation);
+            final String message = getParseErrorMessage(e.getOriginalMessage(), location);
             return SwaggerParseResult.ofError(message);
         }
     }
 
+    @Deprecated
+    public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
+        return readContents(readContentFromLocation(location, auths), auths, null);
+    }
+
     private SwaggerParseResult resolve(SwaggerParseResult result, List<AuthorizationValue> auth, ParseOptions options,
-            String parentFileLocation) {
+            String location) {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
                     result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
-                            parentFileLocation).resolve());
+                            location).resolve());
                     if (options.isResolveFully()) {
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                     }
@@ -180,12 +188,12 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return result;
     }
 
-    private String getParseErrorMessage(String originalMessage, String parentFileLocation) {
+    private String getParseErrorMessage(String originalMessage, String location) {
         if (Objects.isNull(originalMessage)) {
-            return String.format("Unable to parse `%s`", parentFileLocation);
+            return String.format("Unable to parse `%s`", location);
         }
         if (originalMessage.startsWith("Duplicate field")) {
-            return String.format(originalMessage + " in `%s`", parentFileLocation);
+            return String.format(originalMessage + " in `%s`", location);
         }
         return originalMessage;
     }
@@ -225,4 +233,35 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             throw new ReadContentException(String.format("Unable to read location `%s`", adjustedLocation), e);
         }
     }
+
+    /**
+     * Transform the swagger-model version of AuthorizationValue into a parser-specific one, to avoid
+     * dependencies across extensions
+     *
+     * @param input
+     * @return
+     */
+    @Deprecated
+    protected List<AuthorizationValue> transform(List<AuthorizationValue> input) {
+        if(input == null) {
+            return null;
+        }
+
+        List<AuthorizationValue> output = new ArrayList<>();
+
+        for(AuthorizationValue value : input) {
+            AuthorizationValue v = new AuthorizationValue();
+
+            v.setKeyName(value.getKeyName());
+            v.setValue(value.getValue());
+            v.setType(value.getType());
+            v.setUrlMatcher(value.getUrlMatcher());
+
+            output.add(v);
+        }
+
+        return output;
+    }
+
+
 }
