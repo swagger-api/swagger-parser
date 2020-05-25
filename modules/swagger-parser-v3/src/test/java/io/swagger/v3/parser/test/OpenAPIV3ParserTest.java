@@ -1924,7 +1924,7 @@ public class OpenAPIV3ParserTest {
         String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        OpenAPI openAPI = (parser.readWithInfo(null, rootNode)).getOpenAPI();
+        OpenAPI openAPI = (parser.parseJsonNode(null, rootNode)).getOpenAPI();
 
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
@@ -2324,6 +2324,26 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser()
                 .readLocation("src/test/resources/issue1335.yaml", null, options);
         assertNotNull(result.getOpenAPI().getComponents().getExamples().get("ex1"));
+    }
+
+    @Test
+    public void testEmptyQueryParameterExample() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/emptyQueryParameter.yaml", null, options);
+        assertEquals("", result.getOpenAPI().getPaths().get("/foo").getGet().getParameters().get(0).getExample());
+    }
+
+    @Test
+    public void testBlankQueryParameterExample() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/blankQueryParameter.yaml", null, options);
+        assertEquals(" ", result.getOpenAPI().getPaths().get("/foo").getGet().getParameters().get(0).getExample());
     }
 
     @Test

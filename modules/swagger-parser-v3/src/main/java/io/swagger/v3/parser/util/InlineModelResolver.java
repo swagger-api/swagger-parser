@@ -26,20 +26,25 @@ import java.util.Map;
 
 public class InlineModelResolver {
     private OpenAPI openAPI;
-    private boolean skipMatches;
     static Logger LOGGER = LoggerFactory.getLogger(InlineModelResolver.class);
 
     Map<String, Schema> addedModels = new HashMap<>();
     Map<String, String> generatedSignature = new HashMap<>();
 
-    private boolean flattenComposedSchemas;
-    private boolean camelCaseFlattenNaming;
+    private final boolean flattenComposedSchemas;
+    private final boolean camelCaseFlattenNaming;
+    private boolean skipMatches;
 
-    public InlineModelResolver(){this(false,false);}
+    public InlineModelResolver(){this(false, false, false);}
 
     public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming) {
+        this(flattenComposedSchemas, camelCaseFlattenNaming, false);
+    }
+
+    public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming, boolean skipMatches) {
         this.flattenComposedSchemas = flattenComposedSchemas;
         this.camelCaseFlattenNaming = camelCaseFlattenNaming;
+        this.skipMatches = skipMatches;
     }
 
     public void flatten(OpenAPI openAPI) {
@@ -319,7 +324,7 @@ public class InlineModelResolver {
     }
 
     public String matchGenerated(Schema model) {
-        if (this.skipMatches) {
+        if (skipMatches) {
             return null;
         }
         String json = Json.pretty(model);
@@ -585,17 +590,17 @@ public class InlineModelResolver {
         }
     }
 
+    private boolean isObjectSchema(Schema schema) {
+        return schema instanceof ObjectSchema
+                || "object".equalsIgnoreCase(schema.getType())
+                || (schema.getType() == null && schema.getProperties() != null && !schema.getProperties().isEmpty());
+    }
+
     public boolean isSkipMatches() {
         return skipMatches;
     }
 
     public void setSkipMatches(boolean skipMatches) {
         this.skipMatches = skipMatches;
-    }
-
-    private boolean isObjectSchema(Schema schema) {
-        return schema instanceof ObjectSchema
-                || "object".equalsIgnoreCase(schema.getType())
-                || (schema.getType() == null && schema.getProperties() != null && !schema.getProperties().isEmpty());
     }
 }
