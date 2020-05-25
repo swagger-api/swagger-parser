@@ -2327,6 +2327,26 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testEmptyQueryParameterExample() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/emptyQueryParameter.yaml", null, options);
+        assertEquals("", result.getOpenAPI().getPaths().get("/foo").getGet().getParameters().get(0).getExample());
+    }
+
+    @Test
+    public void testBlankQueryParameterExample() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/blankQueryParameter.yaml", null, options);
+        assertEquals(" ", result.getOpenAPI().getPaths().get("/foo").getGet().getParameters().get(0).getExample());
+    }
+
+    @Test
     public void testRegressionIssue1236() {
         final ParseOptions options = new ParseOptions();
         options.setResolve(true);
