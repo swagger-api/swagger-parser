@@ -1,0 +1,41 @@
+swagger: '2.0'
+info:
+  version: "2.0"
+  title: Marketplaces - Orders - Subscriptions
+  description: The order subscription management
+
+  contact:
+    email: help@test.com
+
+  license:
+    name: Test
+    url: http://www.test.com
+
+
+security:
+  - api_key: []
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+
+paths:
+
+  '/':
+    get:
+      tags:
+        - Subscriptions
+      operationId: GetSubscriptionList
+      summary: Get the subscription list
+      responses:
+        200:
+          $ref: 'folder/domains/Test/api.test.com/v2.yaml#/responses/GeneralError'
+      deprecated: false
+
+
+definitions: {}
+
+host: api.test.com
+basePath: /v2/user/marketplaces/orders

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 import static io.swagger.parser.util.RefUtils.computeDefinitionName;
@@ -180,25 +181,70 @@ public final class ExternalRefProcessor {
 
         if(response != null) {
 
-            String file = $ref.split("#/")[0];
-
             Model model = null;
             if (response.getResponseSchema() != null) {
-                model = response.getResponseSchema();
-                if (model instanceof RefModel) {
-                    RefModel refModel = (RefModel) model;
-                    if (RefUtils.isAnExternalRefFormat(refModel.getRefFormat())) {
-                        processRefModel(refModel, $ref);
-                    } else {
-                        processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
-                    }
-                }
+                processRefSchemaObject(response.getResponseSchema(), $ref);
             }
         }
         return newRef;
     }
 
+    private void processRefSchemaObject(Model schema, String $ref) {
+        String file = $ref.split("#/")[0];
+
+        if (schema instanceof RefModel) {
+            RefModel refModel = (RefModel) schema;
+            RefFormat ref = refModel.getRefFormat();
+            if (isAnExternalRefFormat(ref)) {
+                processRefModel(refModel, $ref);
+            } else {
+                processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
+            }
+        }else{
+            processSchema(schema,file);
+        }
+    }
+
+    private void processSchema(Model property, String file) {
+        if (property != null) {
+            if (property instanceof RefModel) {
+                processRefModel((RefModel)property, file);
+            }
+            if (property.getProperties() != null) {
+                processProperties(property.getProperties(), file);
+            }
+            if (property instanceof ArrayModel) {
+                processProperty(((ArrayModel) property).getItems(), file);
+            }
+            if (property instanceof MapProperty){
+                MapProperty mapProperty = (MapProperty) property;
+                if (mapProperty.getAdditionalProperties() instanceof Model) {
+                    processProperty(mapProperty.getAdditionalProperties(), file);
+                }
+            }
+            if (property instanceof ComposedModel) {
+                ComposedModel composed = (ComposedModel) property;
+                processComposedProperties(composed.getAllOf(), file);
+            }
+        }
+    }
+
+    private void processProperty(Property property, String file) {
+    }
+
+    private void processComposedProperties(Collection<Model> properties, String file) {
+        if (properties != null) {
+            for (Model property : properties) {
+                processSchema(property, file);
+            }
+        }
+    }
+
+
     private void processDiscriminator(String discriminator, Map<String, Property> properties, String file) {
+    	if (properties == null || properties.isEmpty()) {
+    		return;
+    	}
         for (Map.Entry<String, Property> prop : properties.entrySet()) {
             if (prop.getKey().equals(discriminator)){
                 if (prop.getValue() instanceof StringProperty){
@@ -289,14 +335,42 @@ public final class ExternalRefProcessor {
 
     private void processRefModel(RefModel subRef, String externalFile) {
 
-        if (isAnExternalRefFormat(subRef.getRefFormat())) {
-            String joinedRef = join(externalFile, subRef.get$ref());
-            subRef.set$ref(processRefToExternalDefinition(joinedRef, subRef.getRefFormat()));
-        } else {
-            processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
+        RefFormat format = subRef.getRefFormat();
+
+        if (!isAnExternalRefFormat(format)) {
+            subRef.set$ref(RefType.DEFINITION.getInternalPrefix()+ processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
+            return;
+        }
+        String $ref = subRef.get$ref();
+        String subRefExternalPath = getExternalPath(subRef.get$ref());
+
+        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
+            $ref = constructRef(subRef, externalFile);
+            subRef.set$ref($ref);
+        }else {
+            processRefToExternalDefinition($ref, format);
         }
     }
-    
+
+    protected String constructRef(Model refProperty, String rootLocation) {
+        RefModel refModel = (RefModel) refProperty;
+        String ref = refModel.get$ref();
+        return join(rootLocation, ref);
+    }
+
+    public static String getExternalPath(String ref) {
+        if (ref == null) {
+            return null;
+        }
+        String[] elements = ref.split("#/");
+        String element = null;
+        for (int i = 0; i < elements.length; i++ ) {
+            if (elements[i].length() == 2){
+                 element  = elements[i];
+            }
+        }
+        return element;
+    }
 
     public static String join(String source, String fragment) {
         try {

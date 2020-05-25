@@ -8,4 +8,4 @@ target/
 .classpath
 .project
 .settings/
-**/test-output/*
+**/test-output/
