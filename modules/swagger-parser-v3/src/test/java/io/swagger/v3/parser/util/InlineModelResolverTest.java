@@ -432,7 +432,6 @@ public class InlineModelResolverTest {
         final OpenAPI openAPI = new OpenAPI();
 
         final InlineModelResolver inlineModelResolver = new InlineModelResolver();
-        inlineModelResolver.setSkipMatches(false);
 
         final Schema operationAlphaInAsset = new ObjectSchema();
         operationAlphaInAsset.setTitle("operationAlphaInAsset");
@@ -484,8 +483,7 @@ public class InlineModelResolverTest {
     public void testSkipInlineMatchesTrue() {
         final OpenAPI openAPI = new OpenAPI();
 
-        final InlineModelResolver inlineModelResolver = new InlineModelResolver();
-        inlineModelResolver.setSkipMatches(true);
+        final InlineModelResolver inlineModelResolver = new InlineModelResolver(false, false, true);
 
         final Schema operationAlphaInAsset = new ObjectSchema();
         operationAlphaInAsset.setTitle("operationAlphaInAsset");
