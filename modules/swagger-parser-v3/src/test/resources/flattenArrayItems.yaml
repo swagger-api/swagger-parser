@@ -1,0 +1,83 @@
+openapi: 3.0.2
+info:
+  title: test - OAS3
+  version: 1.0.0
+paths:
+  "/parameters":
+    get:
+      description: ...
+      parameters:
+        - name: bodylimit
+          in: query
+          schema:
+            type: array
+            items:
+              anyOf:
+                - "$ref": "#/components/schemas/Macaw1"
+                - "$ref": "#/components/schemas/Parakeet1"
+        - name: pagelimit
+          in: query
+          schema:
+            oneOf:
+              - "$ref": "#/components/schemas/Macaw2"
+              - "$ref": "#/components/schemas/Parakeet2"
+  /responses:
+    get:
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  anyOf:
+                    - "$ref": "#/components/schemas/Macaw"
+                    - "$ref": "#/components/schemas/Parakeet"
+        '400':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - "$ref": "#/components/schemas/Macaw3"
+                  - "$ref": "#/components/schemas/Parakeet3"
+  /requestBodies:
+    post:
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/components/schemas/Address'
+                - type: object
+                  required:
+                    - gps
+                  properties:
+                    gps:
+                      type: string
+          "application/xml":
+            schema:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/Address2'
+                  - type: object
+                    required:
+                      - gps2
+                    properties:
+                      gps2:
+                        type: string
+components:
+  schemas:
+    ArrayTest:
+      type: array
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/Foo"
+          - type: object
+            properties:
+              foo:
+                type: string
+
