@@ -938,12 +938,9 @@ public class InlineModelResolverTest {
 
         ApiResponses apiResponses = new ApiResponses().addApiResponse("200",apiResponse);
 
-
-
         openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
                         .responses(apiResponses)));
-
 
         new InlineModelResolver().flatten(openAPI);
 
