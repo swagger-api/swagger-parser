@@ -42,6 +42,26 @@ paths:
                 anyOf:
                   - "$ref": "#/components/schemas/Macaw3"
                   - "$ref": "#/components/schemas/Parakeet3"
+        '404':
+          description: it works!
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                    oneOf:
+                      - "$ref": "#/components/schemas/Macaw4"
+                      - "$ref": "#/components/schemas/Parakeet4"
+        '500':
+          description: it works!
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: array
+                  items:
+                    anyOf:
+                      - "$ref": "#/components/schemas/Macaw5"
+                      - "$ref": "#/components/schemas/Parakeet5"
   /requestBodies:
     post:
       requestBody:

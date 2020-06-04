@@ -951,7 +951,7 @@ public class InlineModelResolverTest {
         assertEquals("ext-prop", property.getExtensions().get("x-ext"));
         assertTrue(openAPI.getComponents().getSchemas().size() == 1);
 
-        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_200");
+        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_map200");
         assertTrue(inline instanceof Schema);
         assertNotNull(inline.getProperties().get("name"));
         assertTrue(inline.getProperties().get("name") instanceof StringSchema);
