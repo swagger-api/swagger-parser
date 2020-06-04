@@ -82,6 +82,27 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testIssueFlattenAdditionalPropertiesSchemaInlineModelTrue() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(true);
+        options.setCamelCaseFlattenNaming(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("additionalPropertiesFlatten.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        //responses
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_map200"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map200")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw1");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_map_items404"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map_items404")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw2");
+
+    }
+
+
     @Test
     public void testIssueFlattenArraySchemaItemsInlineModelFalse() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
