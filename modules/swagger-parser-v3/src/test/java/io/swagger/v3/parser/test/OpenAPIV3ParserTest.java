@@ -84,6 +84,19 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
+    public void testIssue1367() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        options.setResolveFully(true);
+        options.setFlatten(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1367.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("TestDTO").getProperties().get("choice")).getEnum() != null);
+    }
+
+    @Test
     public void testIssueFlattenAdditionalPropertiesSchemaInlineModelTrue() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -99,7 +112,6 @@ public class OpenAPIV3ParserTest {
         assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map200")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw1");
         assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_map_items404"));
         assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map_items404")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw2");
-
     }
 
 
