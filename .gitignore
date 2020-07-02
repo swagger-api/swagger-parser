@@ -11,3 +11,4 @@ target/
 modules/swagger-parser/src/test/resources/relative-file-references/yaml
 **/test-output/*
 dependency-reduced-pom.xml
+
