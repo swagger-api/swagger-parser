@@ -84,6 +84,101 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
+    public void testIssue1367() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        options.setResolveFully(true);
+        options.setFlatten(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1367.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("TestDTO").getProperties().get("choice")).getEnum() != null);
+    }
+
+    @Test
+    public void testIssueFlattenAdditionalPropertiesSchemaInlineModelTrue() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(true);
+        options.setCamelCaseFlattenNaming(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("additionalPropertiesFlatten.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        //responses
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_map200"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map200")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw1");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_map_items404"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map_items404")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw2");
+    }
+
+
+    @Test
+    public void testIssueFlattenArraySchemaItemsInlineModelFalse() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(false);
+        options.setCamelCaseFlattenNaming(false);
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenArrayItems.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        //responses
+        assertNull(openAPI.getComponents().getSchemas().get("Inline_response_items200"));
+        assertNull(openAPI.getComponents().getSchemas().get("Inline_response_400"));
+
+        //parameters
+        assertNull(openAPI.getComponents().getSchemas().get("Inline_parameter_items_bodylimit"));
+        assertNull(openAPI.getComponents().getSchemas().get("Pagelimit"));
+
+        //requestBodies
+        assertNull(openAPI.getComponents().getSchemas().get("Body"));
+        assertNull(openAPI.getComponents().getSchemas().get("Inline_response_items200"));
+
+        //components
+        assertNull(openAPI.getComponents().getSchemas().get("Inline_array_items_ArrayTest"));
+
+    }
+
+    @Test
+    public void testIssueFlattenArraySchemaItemsInlineModelTrue() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(true);
+        options.setCamelCaseFlattenNaming(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("flattenArrayItems.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        //responses
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_items200"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_items200")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_400"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_400")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw3");
+
+        //parameters
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_parameter_items_bodylimit"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_parameter_items_bodylimit")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw1");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pagelimit"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Pagelimit")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw2");
+
+        //requestBodies
+        assertNotNull(openAPI.getComponents().getSchemas().get("Body"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Body")).getAllOf().get(1).get$ref(),"#/components/schemas/requestBodiesAllOf_2");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_items200"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_body_items_applicationxml_requestBodies")).getAllOf().get(1).get$ref(),"#/components/schemas/ApplicationxmlAllOf_2");
+
+        //components
+        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_array_items_ArrayTest"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_array_items_ArrayTest")).getOneOf().get(1).get$ref(),"#/components/schemas/ArrayTestOneOf_2");
+    }
+
+
+    @Test
     public void testCamelCaseFlattenNamingFalse() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -1924,7 +2019,7 @@ public class OpenAPIV3ParserTest {
         String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        OpenAPI openAPI = (parser.readWithInfo(null, rootNode)).getOpenAPI();
+        OpenAPI openAPI = (parser.parseJsonNode(null, rootNode)).getOpenAPI();
 
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
         assertEquals("NoQuotePlease", definitions.get("CustomerType").getExample());
@@ -2324,6 +2419,26 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser()
                 .readLocation("src/test/resources/issue1335.yaml", null, options);
         assertNotNull(result.getOpenAPI().getComponents().getExamples().get("ex1"));
+    }
+
+    @Test
+    public void testEmptyQueryParameterExample() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/emptyQueryParameter.yaml", null, options);
+        assertEquals("", result.getOpenAPI().getPaths().get("/foo").getGet().getParameters().get(0).getExample());
+    }
+
+    @Test
+    public void testBlankQueryParameterExample() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/blankQueryParameter.yaml", null, options);
+        assertEquals(" ", result.getOpenAPI().getPaths().get("/foo").getGet().getParameters().get(0).getExample());
     }
 
     @Test
