@@ -97,6 +97,31 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testDeserializeExampleFlag() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        options.setResolveFully(true);
+        options.setFlatten(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("exampleFlag.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertTrue(openAPI.getComponents().getSchemas().get("TestDTO").getExampleSetFlag());
+        assertNull(openAPI.getComponents().getSchemas().get("TestDTO").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("TestString").getExampleSetFlag());
+        assertNull(openAPI.getComponents().getSchemas().get("TestString").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("TestNumber").getExampleSetFlag());
+        assertNull(openAPI.getComponents().getSchemas().get("TestNumber").getExample());
+
+        assertFalse(openAPI.getComponents().getSchemas().get("TestDTOMissing").getExampleSetFlag());
+        assertNull(openAPI.getComponents().getSchemas().get("TestDTOMissing").getExample());
+        assertFalse(openAPI.getComponents().getSchemas().get("TestStringMissing").getExampleSetFlag());
+        assertNull(openAPI.getComponents().getSchemas().get("TestStringMissing").getExample());
+        assertFalse(openAPI.getComponents().getSchemas().get("TestNumberMissing").getExampleSetFlag());
+        assertNull(openAPI.getComponents().getSchemas().get("TestNumberMissing").getExample());
+    }
+
+    @Test
     public void testIssueFlattenAdditionalPropertiesSchemaInlineModelTrue() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -2241,7 +2266,7 @@ public class OpenAPIV3ParserTest {
         assertThat(parameters.keySet(), equalTo(new HashSet<>(asList("IdParam", "NameParam"))));
         assertThat(parameters.get("IdParam").getName(), equalTo("id"));
         assertThat(parameters.get("NameParam").getName(), equalTo("name"));
-        
+
         assertThat(result.getMessages(), equalTo(emptyList()));
 
     }
@@ -2250,7 +2275,7 @@ public class OpenAPIV3ParserTest {
     public void shouldParseApiWithParametersUsingContentvsSchema() {
         // Tests that the content method of specifying the format of a parameter
         // gets resolved.
-        // Test checks if an API's single parameter of array type gets fully resolved to 
+        // Test checks if an API's single parameter of array type gets fully resolved to
         // referenced definitions.
         String location = "src/test/resources/issue-1078/api.yaml";
         ParseOptions options = new ParseOptions();
@@ -2258,14 +2283,14 @@ public class OpenAPIV3ParserTest {
         // This test uses an Array in the parameters, test if it get's fully resolved.
         options.setResolveFully(true);
         OpenAPIV3Parser tested = new OpenAPIV3Parser();
-        
+
         // Parse yaml
         SwaggerParseResult result = tested.readLocation(location, emptyList(), options);
 
         OpenAPI api = result.getOpenAPI();
         Paths paths = api.getPaths();
 
-        // First ensure all schemas were resolved, this is important when this library 
+        // First ensure all schemas were resolved, this is important when this library
         // is used to generate code
         Components components = api.getComponents();
         assertNotNull(components);
@@ -2274,13 +2299,13 @@ public class OpenAPIV3ParserTest {
         assertNotNull(components.getSchemas().get("Lat"));
         assertNotNull(components.getSchemas().get("Long"));
         assertNotNull(components.getSchemas().get("SearchResult"));
-        
+
         PathItem apiEndpoint = paths.get("/api-endpoint-1");
         List<Parameter> parameters = apiEndpoint.getGet().getParameters();
-        
+
         // Ensure there's only one parameter in this test
         assertThat(parameters.size(), equalTo(1));
-        
+
         // We are testing content for a parameter so make sure its there.
         Content content = parameters.get(0).getContent();
         assertNotNull(content);
