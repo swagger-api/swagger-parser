@@ -20,18 +20,13 @@ import io.swagger.models.parameters.AbstractSerializableParameter;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
-import io.swagger.models.properties.AbstractNumericProperty;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.FileProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
+import io.swagger.models.properties.*;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.PrimitiveType;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -59,6 +54,7 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -92,7 +88,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(url, convert(auths), resolve);
 
-        return convert(result);
+        return readResult(result, auths, options);
     }
 
     @Override
@@ -106,7 +102,27 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 result.setSwagger(resolved);
             }
         }
-        return convert(result);
+        return readResult(result, auth, options);
+
+    }
+
+    private SwaggerParseResult readResult(SwaggerDeserializationResult result, List<AuthorizationValue> auth, ParseOptions options) {
+        SwaggerParseResult out = convert(result);
+        if (out != null && options != null && options.isFlatten()) {
+            try {
+                SwaggerParseResult resultV3 = new OpenAPIV3Parser().readContents(Yaml.pretty(out.getOpenAPI()), auth, options);
+                out.setOpenAPI(resultV3.getOpenAPI());
+                if (out.getMessages() != null) {
+                    out.getMessages().addAll(resultV3.getMessages());
+                    out.messages(out.getMessages().stream()
+                            .distinct()
+                            .collect(Collectors.toList()));
+                } else {
+                    out.messages(resultV3.getMessages());
+                }
+            } catch (Exception ignore) {}
+        }
+        return out;
     }
 
     public List<io.swagger.models.auth.AuthorizationValue> convert(List<AuthorizationValue> auths) {
@@ -143,6 +159,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (swagger.getVendorExtensions() != null) {
             openAPI.setExtensions(convert(swagger.getVendorExtensions()));
         }
+        // Set extension to retain original version of OAS document.
+        openAPI.addExtension("x-original-swagger-version", swagger.getSwagger());
 
         if (swagger.getExternalDocs() != null) {
             openAPI.setExternalDocs(convert(swagger.getExternalDocs()));
@@ -191,9 +209,27 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     ref.set$ref(updatedRef);
                 }
             }
+
+            if (property instanceof ComposedProperty) {
+                ComposedProperty comprop = (ComposedProperty) property;
+                if (comprop.getAllOf() != null) {
+                    for (Property item : comprop.getAllOf()) {
+                        if (item instanceof RefProperty) {
+                            RefProperty ref = (RefProperty) item;
+                            if (ref.get$ref().indexOf("#/definitions") == 0) {
+                                String updatedRef = "#/components/schemas" + ref.get$ref().substring("#/definitions".length());
+                                ref.set$ref(updatedRef);
+                            }
+
+
+                        }
+
+                    }
+                }
+            }
         }
 
-        if (swagger.getParameters() != null) {
+            if (swagger.getParameters() != null) {
             globalV2Parameters.putAll(swagger.getParameters());
             swagger.getParameters().forEach((k, v) -> {
                 if ("body".equals(v.getIn())) {
@@ -555,6 +591,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
         operation.setDeprecated(v2Operation.isDeprecated());
         operation.setOperationId(v2Operation.getOperationId());
+        operation.setExtensions(convert(v2Operation.getVendorExtensions()));
 
         operation.setTags(v2Operation.getTags());
 
@@ -566,6 +603,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                     formParams.add(param);
                 } else if ("body".equals(param.getIn())) {
                     operation.setRequestBody(convertParameterToRequestBody(param, v2Operation.getConsumes()));
+                    operation.addExtension("x-codegen-request-body-name", param.getName());
                 } else {
                     Parameter convert = convert(param);
                     String $ref = convert.get$ref();
@@ -611,8 +649,6 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (v2Operation.getSecurity() != null && v2Operation.getSecurity().size() > 0) {
             operation.setSecurity(convertSecurityRequirementsMap(v2Operation.getSecurity()));
         }
-
-        operation.setExtensions(convert(v2Operation.getVendorExtensions()));
 
         return operation;
     }
@@ -692,9 +728,20 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
             schema = as;
         } else {
-            schema = new Schema();
-            schema.setType(sp.getType());
-            schema.setFormat(sp.getFormat());
+            PrimitiveType ptype = PrimitiveType.fromTypeAndFormat(sp.getType(), sp.getFormat());
+            if (ptype != null) {
+                schema = ptype.createProperty();
+            } else {
+                ptype = PrimitiveType.fromTypeAndFormat(sp.getType(), null);
+                if (ptype != null) {
+                    schema = ptype.createProperty();
+                    schema.setFormat(sp.getFormat());
+                } else {
+                    schema = new Schema();
+                    schema.setType(sp.getType());
+                    schema.setFormat(sp.getFormat());
+                }
+            }
         }
 
         schema.setDescription(sp.getDescription());
@@ -1142,6 +1189,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
             composed.setTitle(composedModel.getTitle());
             composed.setExtensions(convert(composedModel.getVendorExtensions()));
             composed.setAllOf(composedModel.getAllOf().stream().map(this::convert).collect(Collectors.toList()));
+
+            addProperties(v2Model, composed);
+
             result = composed;
         } else {
             String v2discriminator = null;
@@ -1155,14 +1205,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             result = Json.mapper().convertValue(v2Model, Schema.class);
 
-            if ((v2Model.getProperties() != null) && (v2Model.getProperties().size() > 0)) {
-                Map<String, Property> properties = v2Model.getProperties();
-
-                properties.forEach((k, v) -> {
-                    result.addProperties(k, convert(v));
-                });
-
-            }
+            addProperties(v2Model, result);
 
             if (v2Model instanceof ModelImpl) {
                 ModelImpl model = (ModelImpl) v2Model;
@@ -1194,6 +1237,17 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
 
         return result;
+    }
+
+    private void addProperties(Model v2Model, Schema schema) {
+        if ((v2Model.getProperties() != null) && (v2Model.getProperties().size() > 0)) {
+            Map<String, Property> properties = v2Model.getProperties();
+
+            properties.forEach((k, v) -> {
+                schema.addProperties(k, convert(v));
+            });
+
+        }
     }
 }
 

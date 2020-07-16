@@ -3,6 +3,7 @@ package io.swagger.v3.parser.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.v3.oas.models.Components;
@@ -61,12 +62,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static java.util.Calendar.*;
 
 
 public class OpenAPIDeserializer {
@@ -110,11 +111,11 @@ public class OpenAPIDeserializer {
     public SwaggerParseResult deserialize(JsonNode rootNode) {
     	return deserialize(rootNode, null);
     }
-    
+
     public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
         SwaggerParseResult result = new SwaggerParseResult();
         try {
-            
+
             ParseResult rootParse = new ParseResult();
             OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.setOpenAPI(api);
@@ -246,46 +247,46 @@ public class OpenAPIDeserializer {
 
         ObjectNode node = getObject("schemas",obj,false, location ,result);
         if(node != null) {
-            components.setSchemas(getSchemas(node,String.format("%s.%s", location, "schemas"),result));
+            components.setSchemas(getSchemas(node,String.format("%s.%s", location, "schemas"),result, true));
         }
 
         node = getObject("responses",obj,false, location,result);
         if(node != null) {
-            components.setResponses(getResponses(node, String.format("%s.%s", location, "responses"),result));
+            components.setResponses(getResponses(node, String.format("%s.%s", location, "responses"),result, true));
         }
 
         node = getObject("parameters",obj,false, location ,result);
         if(node != null) {
-            components.setParameters(getParameters(node, String.format("%s.%s", location, "parameters"),result));
+            components.setParameters(getParameters(node, String.format("%s.%s", location, "parameters"),result, true));
         }
         node = getObject("examples",obj,false,location,result);
         if(node != null) {
-            components.setExamples(getExamples(node, String.format("%s.%s", location, "examples"),result));
+            components.setExamples(getExamples(node, String.format("%s.%s", location, "examples"),result,true));
         }
 
         node = getObject("requestBodies",obj,false,location,result);
         if(node != null) {
-            components.setRequestBodies(getRequestBodies(node, String.format("%s.%s", location, "requestBodies"),result));
+            components.setRequestBodies(getRequestBodies(node, String.format("%s.%s", location, "requestBodies"),result, true));
         }
 
         node = getObject("headers",obj,false,location,result);
         if(node != null) {
-            components.setHeaders(getHeaders(node, String.format("%s.%s", location, "headers"),result));
+            components.setHeaders(getHeaders(node, String.format("%s.%s", location, "headers"),result, true));
         }
 
         node = getObject("securitySchemes",obj,false,location,result);
         if(node != null) {
-            components.setSecuritySchemes(getSecuritySchemes(node, String.format("%s.%s", location, "securitySchemes"),result));
+            components.setSecuritySchemes(getSecuritySchemes(node, String.format("%s.%s", location, "securitySchemes"),result, true));
         }
 
         node = getObject("links",obj,false,location,result);
         if(node != null) {
-            components.setLinks(getLinks(node, String.format("%s.%s", location, "links"),result));
+            components.setLinks(getLinks(node, String.format("%s.%s", location, "links"),result, true));
         }
 
         node = getObject("callbacks",obj,false,location,result);
         if(node != null) {
-            components.setCallbacks(getCallbacks(node, String.format("%s.%s", location, "callbacks"),result));
+            components.setCallbacks(getCallbacks(node, String.format("%s.%s", location, "callbacks"),result, true));
         }
         components.setExtensions(new LinkedHashMap<>());
 
@@ -389,7 +390,7 @@ public class OpenAPIDeserializer {
         }
         return servers;
     }
-    
+
     public List<Server> getServersList(ArrayNode obj, String location, ParseResult result) {
 		return getServersList(obj, location, result, null);
 	}
@@ -414,7 +415,7 @@ public class OpenAPIDeserializer {
 						value = absURI.resolve(new URI(value)).toString();
 					}
 				} catch (URISyntaxException e) {
-					e.printStackTrace();
+                    result.warning(location,"invalid url : "+value);
 				}
 
 			}
@@ -449,7 +450,7 @@ public class OpenAPIDeserializer {
 
         return server;
     }
-    
+
     boolean isValidURL(String urlString){
 		try {
 			URL url = new URL(urlString);
@@ -546,7 +547,7 @@ public class OpenAPIDeserializer {
                     }
                     ObjectNode path = (ObjectNode) pathValue;
                     PathItem pathObj = getPathItem(path,String.format("%s.'%s'", location,pathName), result);
-                    String[] eachPart = pathName.split("/");
+                    String[] eachPart = pathName.split("[-/.]+");
                     Arrays.stream(eachPart)
                             .filter(part -> part.startsWith("{") && part.endsWith("}") && part.length() > 2)
                             .forEach(part -> {
@@ -555,6 +556,11 @@ public class OpenAPIDeserializer {
                                 if (!definedInPathLevel) {
                                     List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
                                     operationsInAPath.forEach(operation -> {
+                                        operation.getParameters().forEach(parameter -> {
+                                            if(PATH_PARAMETER.equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())){
+                                                result.warning(location, "For path parameter "+ parameter.getName() + " the required value should be true");
+                                            }
+                                        });
                                         if (!isPathParamDefined(pathParam, operation.getParameters())) {
                                             result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
                                             return;
@@ -955,7 +961,7 @@ public class OpenAPIDeserializer {
 
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            MediaType mediaType = getMediaType((ObjectNode) node.get(key), location, result);
+            MediaType mediaType = getMediaType((ObjectNode) node.get(key), String.format("%s.'%s'", location, key), result);
             if (mediaType != null) {
                 content.addMediaType(key, mediaType);
             }
@@ -987,12 +993,12 @@ public class OpenAPIDeserializer {
 
         ObjectNode examplesObject = getObject("examples",contentNode,false,location,result);
         if(examplesObject!=null) {
-            mediaType.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result));
+            mediaType.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result, false));
         }
 
         Object example = getAnyExample("example",contentNode, location,result);
         if (example != null){
-            mediaType.setExample(example);
+            mediaType.setExample(example instanceof NullNode ? null : example);
         }
 
 
@@ -1028,7 +1034,7 @@ public class OpenAPIDeserializer {
 
         Encoding encoding = new Encoding();
 
-        String value = getString("contentType", node, true, location, result);
+        String value = getString("contentType", node, false, location, result);
         encoding.setContentType(value);
 
         value = getString("style", node, false, location, result);
@@ -1060,7 +1066,7 @@ public class OpenAPIDeserializer {
         }
         ObjectNode headersObject = getObject("headers", node, false, location, result);
         if (headersObject!= null){
-            encoding.setHeaders(getHeaders(headersObject, location, result));
+            encoding.setHeaders(getHeaders(headersObject, location, result, false));
         }
 
         Map <String,Object> extensions = getExtensions(node);
@@ -1078,7 +1084,7 @@ public class OpenAPIDeserializer {
         return encoding;
     }
 
-    public Map<String, Link> getLinks(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, Link> getLinks(ObjectNode obj, String location, ParseResult result, boolean underComponents) {
         if (obj == null) {
             return null;
         }
@@ -1087,9 +1093,11 @@ public class OpenAPIDeserializer {
 
         Set<String> linkKeys = getKeys(obj);
         for(String linkName : linkKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            linkName)) {
-                result.warning(location, "Link name "+ linkName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        linkName)) {
+                    result.warning(location, "Link name " + linkName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
 
             JsonNode linkValue = obj.get(linkName);
@@ -1153,7 +1161,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode headerObject = getObject("headers",linkNode,false,location,result);
         if (headerObject!= null) {
-            link.setHeaders(getHeaders(headerObject, location, result));
+            link.setHeaders(getHeaders(headerObject, location, result, false));
         }
 
         ObjectNode serverObject = getObject("server",linkNode,false,location,result);
@@ -1194,16 +1202,18 @@ public class OpenAPIDeserializer {
         return linkParameters;
     }
 
-    public Map <String,Callback> getCallbacks(ObjectNode node, String location, ParseResult result){
+    public Map <String,Callback> getCallbacks(ObjectNode node, String location, ParseResult result, boolean underComponents){
         if (node == null) {
             return null;
         }
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         Set<String> keys = getKeys(node);
         for(String key : keys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            key)) {
-                result.warning(location, "Callback key "+ key + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        key)) {
+                    result.warning(location, "Callback key " + key + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
             Callback callback = getCallback((ObjectNode) node.get(key), location, result);
             if (callback != null) {
@@ -1376,7 +1386,7 @@ public class OpenAPIDeserializer {
         return value;
     }
 
-    public Map<String, Parameter> getParameters(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, Parameter> getParameters(ObjectNode obj, String location, ParseResult result, boolean underComponents) {
         if (obj == null) {
             return null;
         }
@@ -1386,9 +1396,11 @@ public class OpenAPIDeserializer {
 
         Set<String> parameterKeys = getKeys(obj);
         for(String parameterName : parameterKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            parameterName)) {
-                result.warning(location, "Parameter name "+ parameterName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        parameterName)) {
+                    result.warning(location, "Parameter name " + parameterName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
 
             JsonNode parameterValue = obj.get(parameterName);
@@ -1397,6 +1409,9 @@ public class OpenAPIDeserializer {
                 if(parameterObj != null) {
                      parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName), result);
                     if (parameter != null) {
+                        if(PATH_PARAMETER.equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())){
+                            result.warning(location, "For path parameter "+ parameterName + " the required value should be true");
+                        }
                         parameters.put(parameterName, parameter);
                     }
                 }
@@ -1437,7 +1452,7 @@ public class OpenAPIDeserializer {
         });
         return parameters;
     }
-    
+
     private Parameter getParameterDefinition(Parameter parameter) {
         if (parameter.get$ref() == null) {
             return parameter;
@@ -1447,7 +1462,7 @@ public class OpenAPIDeserializer {
             .map(Components::getParameters)
             .map(parameters -> parameters.get(parameterSchemaName))
             .orElse(parameter);
-            
+
     }
 
     public Parameter getParameter(ObjectNode obj, String location, ParseResult result) {
@@ -1551,7 +1566,7 @@ public class OpenAPIDeserializer {
         } else {
             parameter.setExplode(Boolean.FALSE);
         }
-        
+
 
         ObjectNode parameterObject = getObject("schema",obj,false,location,result);
         if (parameterObject!= null) {
@@ -1560,12 +1575,12 @@ public class OpenAPIDeserializer {
 
         ObjectNode examplesObject = getObject("examples",obj,false,location,result);
         if(examplesObject!=null) {
-            parameter.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result));
+            parameter.setExamples(getExamples(examplesObject, String.format("%s.%s", location, "examples"), result,false));
         }
 
         Object example = getAnyExample("example", obj, location,result);
         if (example != null){
-            parameter.setExample(example);
+            parameter.setExample(example instanceof NullNode ? null : example);
         }
 
         Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
@@ -1594,7 +1609,7 @@ public class OpenAPIDeserializer {
     }
 
 
-    public Map<String, Header> getHeaders(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, Header> getHeaders(ObjectNode obj, String location, ParseResult result, boolean underComponents) {
         if (obj == null) {
             return null;
         }
@@ -1602,9 +1617,11 @@ public class OpenAPIDeserializer {
 
         Set<String> headerKeys = getKeys(obj);
         for(String headerName : headerKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            headerName)) {
-                result.warning(location, "Header name "+ headerName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        headerName)) {
+                    result.warning(location, "Header name " + headerName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
             JsonNode headerValue = obj.get(headerName);
             if (!headerValue.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -1678,12 +1695,12 @@ public class OpenAPIDeserializer {
 
         ObjectNode examplesObject = getObject("examples",headerNode,false,location,result);
         if(examplesObject!=null) {
-            header.setExamples(getExamples(examplesObject, location, result));
+            header.setExamples(getExamples(examplesObject, location, result, false));
         }
 
         Object example = getAnyExample("example", headerNode, location,result);
         if (example != null){
-            header.setExample(example);
+            header.setExample(example instanceof NullNode ? null : example);
         }
 
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
@@ -1711,10 +1728,7 @@ public class OpenAPIDeserializer {
         JsonNode example = node.get(nodeKey);
         if (example != null) {
             if (example.getNodeType().equals(JsonNodeType.STRING)) {
-                String value = getString(nodeKey, node, false, location, result);
-                if (StringUtils.isNotBlank(value)) {
-                    return value;
-                }
+                return getString(nodeKey, node, false, location, result);
             } if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
                 Integer integerExample = getInteger(nodeKey, node, false, location, result);
                 if (integerExample != null) {
@@ -1740,12 +1754,14 @@ public class OpenAPIDeserializer {
                 if (bool != null){
                     return bool;
                 }
+            } else if (example.getNodeType().equals(JsonNodeType.NULL)){
+                return example;
             }
         }
         return null;
     }
 
-    public Map<String, SecurityScheme> getSecuritySchemes(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, SecurityScheme> getSecuritySchemes(ObjectNode obj, String location, ParseResult result, boolean underComponents) {
         if (obj == null) {
             return null;
         }
@@ -1753,9 +1769,11 @@ public class OpenAPIDeserializer {
 
         Set<String> securitySchemeKeys = getKeys(obj);
         for(String securitySchemeName : securitySchemeKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            securitySchemeName)) {
-                result.warning(location, "SecurityScheme name "+ securitySchemeName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        securitySchemeName)) {
+                    result.warning(location, "SecurityScheme name " + securitySchemeName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
             JsonNode securitySchemeValue = obj.get(securitySchemeName);
             if (!securitySchemeValue.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -1796,7 +1814,7 @@ public class OpenAPIDeserializer {
 
         boolean descriptionRequired, bearerFormatRequired, nameRequired, inRequired, schemeRequired, flowsRequired, openIdConnectRequired;
         descriptionRequired = bearerFormatRequired = nameRequired = inRequired = schemeRequired = flowsRequired = openIdConnectRequired = false;
-        
+
         String value = getString("type", node, true, location, result);
         if (StringUtils.isNotBlank(value)) {
             if (SecurityScheme.Type.APIKEY.toString().equals(value)) {
@@ -1934,7 +1952,7 @@ public class OpenAPIDeserializer {
             authorizationUrlRequired = tokenUrlRequired=true;
             break;
         }
-        
+
         String value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
         if (StringUtils.isNotBlank(value)) {
             oAuthFlow.setAuthorizationUrl(value);
@@ -1958,9 +1976,9 @@ public class OpenAPIDeserializer {
             JsonNode scopeValue = scopesObject.get(name);
             if (scopesObject!= null){
                 scope.addString(name,scopeValue.asText());
-                oAuthFlow.setScopes(scope);
             }
         }
+        oAuthFlow.setScopes(scope);
 
         Map <String,Object> extensions = getExtensions(node);
         if(extensions != null && extensions.size() > 0) {
@@ -1977,7 +1995,7 @@ public class OpenAPIDeserializer {
         return oAuthFlow;
     }
 
-    public Map<String, Schema> getSchemas(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, Schema> getSchemas(ObjectNode obj, String location, ParseResult result, boolean underComponents) {
         if (obj == null) {
             return null;
         }
@@ -1985,9 +2003,11 @@ public class OpenAPIDeserializer {
 
         Set<String> schemaKeys = getKeys(obj);
         for (String schemaName : schemaKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            schemaName)) {
-                result.warning(location, "Schema name "+ schemaName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        schemaName)) {
+                    result.warning(location, "Schema name " + schemaName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
             JsonNode schemaValue = obj.get(schemaName);
                 if (!schemaValue.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -2100,10 +2120,12 @@ public class OpenAPIDeserializer {
             : additionalPropertiesBoolean;
 
         if(additionalProperties != null) {
-            schema =
-                additionalProperties.equals( Boolean.FALSE)
-                ? new ObjectSchema()
-                : new MapSchema();
+            if (schema == null) {
+                schema =
+                        additionalProperties.equals(Boolean.FALSE)
+                                ? new ObjectSchema()
+                                : new MapSchema();
+            }
             schema.setAdditionalProperties( additionalProperties);
         }
 
@@ -2373,6 +2395,12 @@ public class OpenAPIDeserializer {
             schema.setWriteOnly(bool);
         }
 
+        bool = Optional.ofNullable(getBoolean("writeOnly", node, false, location, result)).orElse(false) &&  Optional.ofNullable(getBoolean("readOnly", node, false, location, result)).orElse(false);
+        if(bool == true){
+            result.warning(location," writeOnly and readOnly are both present");
+
+        }
+
         ObjectNode xmlNode = getObject("xml", node, false, location, result);
         if (xmlNode != null) {
             XML xml = getXml(xmlNode, location, result);
@@ -2390,8 +2418,8 @@ public class OpenAPIDeserializer {
         }
 
         Object example = getAnyExample("example", node, location,result);
-        if (example != null){
-            schema.setExample(example);
+        if (example != null ){
+            schema.setExample(example instanceof NullNode ? null : example);
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
@@ -2421,7 +2449,7 @@ public class OpenAPIDeserializer {
      * Throws a ParseException if no applicable object can be recognized.
      */
     private Object getDecodedObject( Schema schema, String objectString) throws ParseException {
-        Object object = 
+        Object object =
             objectString == null?
             null :
 
@@ -2448,42 +2476,17 @@ public class OpenAPIDeserializer {
      * Returns the Date represented by the given RFC3339 date-time string.
      * Returns null if this string can't be parsed as Date.
      */
-    private Date toDateTime( String dateString) {
-        // Note: For this conversion, regex matching is better than SimpleDateFormat, etc.
-        // Optional elements (e.g. milliseconds) are not directly handled by SimpleDateFormat.
-        // Also, SimpleDateFormat is not thread-safe.
-        Matcher matcher = RFC3339_DATE_TIME_PATTERN.matcher( dateString);
+    private OffsetDateTime toDateTime(String dateString) {
 
-        Date dateTime = null;
-        if( matcher.matches()) {
-            try {
-                String year = matcher.group(1);
-                String month = matcher.group(2);
-                String day = matcher.group(3);
-                String hour = matcher.group(4);
-                String min = matcher.group(5);
-                String sec = matcher.group(6);
-                String ms = matcher.group(7);
-                String zone = matcher.group(10);
-
-                Calendar calendar = Calendar.getInstance( TimeZone.getTimeZone( zone == null? "GMT" : "GMT" + zone));
-                calendar.set( YEAR, Integer.parseInt( year));
-                calendar.set( MONTH, Integer.parseInt( month) - 1);
-                calendar.set( DAY_OF_MONTH, Integer.parseInt( day));
-                calendar.set( HOUR_OF_DAY, Integer.parseInt( hour));
-                calendar.set( MINUTE, Integer.parseInt( min));
-                calendar.set( SECOND, Integer.parseInt( sec));
-                calendar.set( MILLISECOND, ms == null? 0 : (int) (Double.parseDouble( ms) * 1000));
-
-                dateTime = calendar.getTime();
-            }
-            catch( Exception ignore) {
-            }
+        OffsetDateTime dateTime = null;
+        try {
+            dateTime = OffsetDateTime.parse(dateString);
+        } catch (Exception ignore) {
         }
 
         return dateTime;
     }
-    
+
 
   /**
    * Returns the Date represented by the given RFC3339 full-date string.
@@ -2511,7 +2514,7 @@ public class OpenAPIDeserializer {
 
         return date;
     }
-    
+
 
   /**
    * Returns the byte array represented by the given base64-encoded string.
@@ -2519,7 +2522,7 @@ public class OpenAPIDeserializer {
    */
     private byte[] toBytes( String byteString) {
         byte[] bytes;
-        
+
         try {
             bytes = Base64.getDecoder().decode( byteString);
         }
@@ -2533,7 +2536,7 @@ public class OpenAPIDeserializer {
 
 
 
-    public Map<String, Example> getExamples(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, Example> getExamples(ObjectNode obj, String location, ParseResult result, boolean  underComponents) {
         if (obj == null) {
             return null;
         }
@@ -2541,9 +2544,11 @@ public class OpenAPIDeserializer {
 
         Set<String> exampleKeys = getKeys(obj);
         for(String exampleName : exampleKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            exampleName)) {
-                result.warning(location, "Example name "+ exampleName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        exampleName)) {
+                    result.warning(location, "Example name " + exampleName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
 
             JsonNode exampleValue = obj.get(exampleName);
@@ -2612,7 +2617,7 @@ public class OpenAPIDeserializer {
 
         Object sample = getAnyExample("value", node, location,result);
         if (sample != null){
-            example.setValue(sample);
+            example.setValue(sample instanceof NullNode ? null : sample);
         }
 
 
@@ -2666,7 +2671,7 @@ public class OpenAPIDeserializer {
         }
     }
 
-    public ApiResponses getResponses(ObjectNode node, String location, ParseResult result) {
+    public ApiResponses getResponses(ObjectNode node, String location, ParseResult result, boolean underComponents) {
         if (node == null) {
             return null;
         }
@@ -2675,9 +2680,11 @@ public class OpenAPIDeserializer {
         Set<String> keys = getKeys(node);
 
         for (String key : keys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            key)) {
-                result.warning(location, "Response key "+ key + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        key)) {
+                    result.warning(location, "Response key " + key + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
 
             if (key.startsWith("x-")) {
@@ -2686,7 +2693,7 @@ public class OpenAPIDeserializer {
                     apiResponses.setExtensions(extensions);
                 }
             } else {
-                ObjectNode obj = getObject(key, node, false, String.format("%s.%s", location, "responses"), result);
+                ObjectNode obj = getObject(key, node, false, location, result);
                 if (obj != null) {
                     ApiResponse response = getResponse(obj, String.format("%s.%s", location, key), result);
                     if (response != null) {
@@ -2729,7 +2736,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode headerObject = getObject("headers", node, false, location, result);
         if (headerObject != null) {
-            Map<String, Header> headers = getHeaders(headerObject, location, result);
+            Map<String, Header> headers = getHeaders(headerObject, location, result, false);
             if (headers != null &&  headers.size() > 0) {
                 apiResponse.setHeaders(headers);
             }
@@ -2737,7 +2744,7 @@ public class OpenAPIDeserializer {
 
         ObjectNode linksObj = getObject("links", node, false, location, result);
         if (linksObj != null) {
-             Map<String,Link> links = getLinks(linksObj, location, result);
+             Map<String,Link> links = getLinks(linksObj, location, result, false);
              if(links != null && links.size() > 0) {
                  apiResponse.setLinks(links);
              }
@@ -2823,13 +2830,13 @@ public class OpenAPIDeserializer {
         }
 
         ObjectNode responsesNode = getObject("responses", obj, true, location, result);
-        ApiResponses responses = getResponses(responsesNode, String.format("%s.%s", location, "responses"), result);
+        ApiResponses responses = getResponses(responsesNode, String.format("%s.%s", location, "responses"), result, false);
         if(responses != null) {
             operation.setResponses(responses);
         }
 
         ObjectNode callbacksNode = getObject("callbacks", obj, false, location, result);
-        Map<String,Callback> callbacks = getCallbacks(callbacksNode, String.format("%s.%s", location, "callbacks"), result);
+        Map<String,Callback> callbacks = getCallbacks(callbacksNode, String.format("%s.%s", location, "callbacks"), result, false);
         if(callbacks != null){
             operation.setCallbacks(callbacks);
         }
@@ -2905,7 +2912,7 @@ public class OpenAPIDeserializer {
 
     }
 
-    public Map<String, RequestBody> getRequestBodies(ObjectNode obj, String location, ParseResult result) {
+    public Map<String, RequestBody> getRequestBodies(ObjectNode obj, String location, ParseResult result, boolean underComponents) {
         if (obj == null) {
             return null;
         }
@@ -2913,9 +2920,11 @@ public class OpenAPIDeserializer {
 
         Set<String> bodyKeys = getKeys(obj);
         for(String bodyName : bodyKeys) {
-            if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
-                            bodyName)) {
-                result.warning(location, "RequestBody name "+ bodyName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+            if(underComponents) {
+                if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+                        bodyName)) {
+                    result.warning(location, "RequestBody name " + bodyName + " doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$");
+                }
             }
             JsonNode bodyValue = obj.get(bodyName);
             if (!bodyValue.getNodeType().equals(JsonNodeType.OBJECT)) {
@@ -3044,11 +3053,11 @@ public class OpenAPIDeserializer {
         public void missing(String location, String key) {
             missing.add(new Location(location, key));
         }
-      
+
         public void warning(String location, String key) {
             warnings.add(new Location(location, key));
         }
-      
+
         public void unique(String location, String key) {
             unique.add(new Location(location, key));
 

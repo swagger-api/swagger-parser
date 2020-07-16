@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -426,6 +427,109 @@ public class InlineModelResolverTest {
         assertTrue(model.getProperties().get("name") instanceof StringSchema);
     }
 
+    @Test
+    public void testSkipInlineMatchesFalse() {
+        final OpenAPI openAPI = new OpenAPI();
+
+        final InlineModelResolver inlineModelResolver = new InlineModelResolver();
+
+        final Schema operationAlphaInAsset = new ObjectSchema();
+        operationAlphaInAsset.setTitle("operationAlphaInAsset");
+        operationAlphaInAsset.addProperties("id1", new IntegerSchema());
+        operationAlphaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationAlphaIn = new ObjectSchema();
+        operationAlphaIn.setTitle("operationAlphaIn");
+        operationAlphaIn.addProperties("asset", operationAlphaInAsset);
+
+        final Schema operationAlphaRequest = new ObjectSchema();
+        operationAlphaRequest.setTitle("operationAlphaRequest");
+        operationAlphaRequest.addProperties("in", operationAlphaIn);
+
+        final Schema operationBetaInAsset = new ObjectSchema();
+        operationBetaInAsset.setTitle("operationBetaInAsset");
+        operationBetaInAsset.addProperties("id1", new IntegerSchema());
+        operationBetaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationBetaIn = new ObjectSchema();
+        operationBetaIn.setTitle("operationBetaIn");
+        operationBetaIn.addProperties("asset", operationBetaInAsset);
+
+        final Schema operationBetaRequest = new ObjectSchema();
+        operationBetaRequest.setTitle("operationBetaRequest");
+        operationBetaRequest.addProperties("in", operationBetaIn);
+
+        openAPI.path("/operationAlpha", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationAlphaRequest))))));
+
+        openAPI.path("/operationBeta", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationBetaRequest))))));
+
+        inlineModelResolver.flatten(openAPI);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertEquals(4, openAPI.getComponents().getSchemas().size());
+    }
+
+    @Test
+    public void testSkipInlineMatchesTrue() {
+        final OpenAPI openAPI = new OpenAPI();
+
+        final InlineModelResolver inlineModelResolver = new InlineModelResolver(false, false, true);
+
+        final Schema operationAlphaInAsset = new ObjectSchema();
+        operationAlphaInAsset.setTitle("operationAlphaInAsset");
+        operationAlphaInAsset.addProperties("id1", new IntegerSchema());
+        operationAlphaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationAlphaIn = new ObjectSchema();
+        operationAlphaIn.setTitle("operationAlphaIn");
+        operationAlphaIn.addProperties("asset", operationAlphaInAsset);
+
+        final Schema operationAlphaRequest = new ObjectSchema();
+        operationAlphaRequest.setTitle("operationAlphaRequest");
+        operationAlphaRequest.addProperties("in", operationAlphaIn);
+
+        final Schema operationBetaInAsset = new ObjectSchema();
+        operationBetaInAsset.setTitle("operationBetaInAsset");
+        operationBetaInAsset.addProperties("id1", new IntegerSchema());
+        operationBetaInAsset.addProperties("id2", new IntegerSchema());
+
+        final Schema operationBetaIn = new ObjectSchema();
+        operationBetaIn.setTitle("operationBetaIn");
+        operationBetaIn.addProperties("asset", operationBetaInAsset);
+
+        final Schema operationBetaRequest = new ObjectSchema();
+        operationBetaRequest.setTitle("operationBetaRequest");
+        operationBetaRequest.addProperties("in", operationBetaIn);
+
+        openAPI.path("/operationAlpha", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationAlphaRequest))))));
+
+        openAPI.path("/operationBeta", new PathItem()
+                .get(new Operation()
+                        .requestBody(new RequestBody()
+                                .content(new Content().addMediaType("*/*", new MediaType()
+                                        .schema(operationBetaRequest))))));
+
+        inlineModelResolver.flatten(openAPI);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertEquals(6, openAPI.getComponents().getSchemas().size());
+    }
 
     @Test
     public void resolveInlineArrayModelWithTitle() throws Exception {
@@ -834,12 +938,9 @@ public class InlineModelResolverTest {
 
         ApiResponses apiResponses = new ApiResponses().addApiResponse("200",apiResponse);
 
-
-
         openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
                         .responses(apiResponses)));
-
 
         new InlineModelResolver().flatten(openAPI);
 
@@ -850,7 +951,7 @@ public class InlineModelResolverTest {
         assertEquals("ext-prop", property.getExtensions().get("x-ext"));
         assertTrue(openAPI.getComponents().getSchemas().size() == 1);
 
-        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_200");
+        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_map200");
         assertTrue(inline instanceof Schema);
         assertNotNull(inline.getProperties().get("name"));
         assertTrue(inline.getProperties().get("name") instanceof StringSchema);
@@ -1230,5 +1331,16 @@ public class InlineModelResolverTest {
         assertTrue(inlineProp instanceof ObjectSchema);
         ObjectSchema op = (ObjectSchema) inlineProp;
         assertNull(op.getProperties());
+    }
+
+
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/1200")
+    public void testInlineItemsSchema() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.json",null, options);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
     }
 }

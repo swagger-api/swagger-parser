@@ -1,8 +1,10 @@
 package io.swagger.parser;
 
+import io.swagger.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.PathItem;
 
@@ -25,6 +27,16 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIParserTest {
+
+    @Test
+    public void testIssue1143(){
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue-1143.json",null,options);
+        assertNotNull(result.getOpenAPI());
+        assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("RedisResource"));
+        assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("identificacion_usuario_aplicacion"));
+    }
 
     @Test
     public void testIssue749() {
@@ -71,7 +83,7 @@ public class OpenAPIParserTest {
         System.out.println(result.getMessages());
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getMessages().get(0), "attribute tags.sample is repeated");
+        assertEquals(result.getMessages().get(1), "attribute tags.sample is repeated");
     }
 
     @Test
@@ -124,13 +136,55 @@ public class OpenAPIParserTest {
 
     @Test
     public void test30Url() {
-        String location = "http://petstore.swagger.io/v2/swagger.json";
+        String location = "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml";
 
         SwaggerParseResult result = new OpenAPIParser().readLocation(location, null, null);
 
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
+        assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+    }
+
+    @Test
+    public void testConverterWithFlatten() {
+        String yaml = "swagger: \"2.0\"\n" +
+                "info:\n" +
+                "  description: \"Foo\"\n" +
+                "  version: \"1.0.0\"\n" +
+                "host: \"something.com\"\n" +
+                "basePath: \"/\"\n" +
+                "schemes:\n" +
+                "  - \"https\"\n" +
+                "consumes:\n" +
+                "  - \"application/json\"\n" +
+                "produces:\n" +
+                "  - \"application/json\"\n" +
+                "paths:\n" +
+                "  /example:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: \"OK\"\n" +
+                "          schema:\n" +
+                "            $ref: \"#/definitions/Foo\"\n" +
+                "    parameters: []\n" +
+                "definitions:\n" +
+                "  Foo:\n" +
+                "    type: \"object\"\n" +
+                "    required:\n" +
+                "    properties:\n" +
+                "      nested:\n" +
+                "        type: \"object\"\n" +
+                "        properties:\n" +
+                "          color:\n" +
+                "            type: \"string\"";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        SwaggerParseResult result = new OpenAPIParser().readContents(yaml, null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(openAPI.getComponents().getSchemas().size(), 2);
     }
 
     @Test
@@ -504,6 +558,16 @@ public class OpenAPIParserTest {
         assertEquals(required.size(), 2);
         assertTrue(required.contains("Amount"));
         assertTrue(required.contains("Currency"));
+    }
+  
+    public void testIssue1086() {
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        OpenAPI openAPI = openApiParser.readLocation("issue1086.yaml", null, options).getOpenAPI();
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        ObjectSchema schema = (ObjectSchema) schemas.get("AssessCandidate").getProperties().get("test_results");
+        Schema score = schema.getProperties().get("score");
+        assertEquals(score.getMultipleOf().intValue(), 1);
     }
   
 }
