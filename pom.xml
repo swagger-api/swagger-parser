@@ -288,15 +288,15 @@
         <swagger-parser-v2-version>1.0.52-SNAPSHOT</swagger-parser-v2-version>
         <commons-io-version>2.6</commons-io-version>
         <slf4j-version>1.7.30</slf4j-version>
-        <swagger-core-version>2.1.2</swagger-core-version>
-        <swagger-core-v2-version>1.6.1</swagger-core-v2-version>
+        <swagger-core-version>2.1.4-SNAPSHOT</swagger-core-version>
+        <swagger-core-v2-version>1.6.2</swagger-core-v2-version>
         <junit-version>4.13</junit-version>
         <testng-version>6.14.2</testng-version>
         <jmockit-version>1.35</jmockit-version>
         <wiremock-version>2.15.0</wiremock-version>
         <surefire-version>2.22.2</surefire-version>
         <commons-lang-version>3.2.1</commons-lang-version>
-        <jackson-version>2.10.2</jackson-version>
+        <jackson-version>2.11.1</jackson-version>
     </properties>
 
 </project>
