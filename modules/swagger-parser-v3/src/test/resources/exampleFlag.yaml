@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  version: 1.0.1
+  title: Products API definition for the 4th Platform
+paths:
+  '/TestDTO':
+    get:
+      operationId: description
+components:
+  schemas:
+    TestDTO:
+      type: object
+      example: null
+    TestString:
+      type: string
+      example: null
+    TestNumber:
+      type: integer
+      example: null
+    TestDTOMissing:
+      type: object
+    TestStringMissing:
+      type: string
+    TestNumberMissing:
+      type: integer

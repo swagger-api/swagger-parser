@@ -3,6 +3,7 @@ package io.swagger.v3.parser.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.v3.oas.models.Components;
@@ -997,7 +998,7 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example",contentNode, location,result);
         if (example != null){
-            mediaType.setExample(example);
+            mediaType.setExample(example instanceof NullNode ? null : example);
         }
 
 
@@ -1579,7 +1580,7 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example", obj, location,result);
         if (example != null){
-            parameter.setExample(example);
+            parameter.setExample(example instanceof NullNode ? null : example);
         }
 
         Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
@@ -1699,7 +1700,7 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example", headerNode, location,result);
         if (example != null){
-            header.setExample(example);
+            header.setExample(example instanceof NullNode ? null : example);
         }
 
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
@@ -1753,6 +1754,8 @@ public class OpenAPIDeserializer {
                 if (bool != null){
                     return bool;
                 }
+            } else if (example.getNodeType().equals(JsonNodeType.NULL)){
+                return example;
             }
         }
         return null;
@@ -2415,8 +2418,8 @@ public class OpenAPIDeserializer {
         }
 
         Object example = getAnyExample("example", node, location,result);
-        if (example != null){
-            schema.setExample(example);
+        if (example != null ){
+            schema.setExample(example instanceof NullNode ? null : example);
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
@@ -2614,7 +2617,7 @@ public class OpenAPIDeserializer {
 
         Object sample = getAnyExample("value", node, location,result);
         if (sample != null){
-            example.setValue(sample);
+            example.setValue(sample instanceof NullNode ? null : sample);
         }
 
 
