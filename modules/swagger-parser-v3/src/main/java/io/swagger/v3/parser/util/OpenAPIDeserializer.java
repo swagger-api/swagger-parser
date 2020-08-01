@@ -1569,7 +1569,7 @@ public class OpenAPIDeserializer {
         Boolean explode = getBoolean("explode", obj, false, location, result);
         if (explode != null) {
             parameter.setExplode(explode);
-        } else if(parameter.getStyle().equals(StyleEnum.FORM)){
+        } else if(StyleEnum.FORM.equals(parameter.getStyle())){
             parameter.setExplode(Boolean.TRUE);
         } else {
             parameter.setExplode(Boolean.FALSE);
@@ -2674,7 +2674,7 @@ public class OpenAPIDeserializer {
             } else if (value.equals(Parameter.StyleEnum.SPACEDELIMITED.toString())) {
                 parameter.setStyle(Parameter.StyleEnum.SPACEDELIMITED);
             } else {
-                result.invalidType(location, "style", "string", obj);
+                result.invalidType(location, "style", "StyleEnum", obj);
             }
         }
     }
