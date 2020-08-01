@@ -7,14 +7,17 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 
 public class RelativeReferenceTest {
@@ -25,6 +28,14 @@ public class RelativeReferenceTest {
             "openapi: 3.0.0\n" +
             "servers:\n" +
             "  - url: /\n" +
+            "  - url: https://localhost:8080/{version}\n" +
+            "    description: The local server\n" +
+            "    variables:\n" +
+            "      version:\n" +
+            "        default: v2\n" +
+            "        enum:\n" +
+            "          - v1\n" +
+            "          - v2\n"+
             "info:\n" +
             "  description: It works.\n" +
             "  version: 1.0.0\n" +
@@ -43,6 +54,19 @@ public class RelativeReferenceTest {
             "        schema:\n" +
             "          type: object\n" +
             "    required: true";
+
+    @Test
+    public void testIssueServerUrlValidation() throws Exception {
+        new Expectations() {{
+            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}));
+            times = 1;
+            result = spec;
+        }};
+        
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("http://foo.bar.com/swagger.json", null, new ParseOptions());
+        assertNotNull(swaggerParseResult.getOpenAPI());
+        assertTrue(swaggerParseResult.getMessages().isEmpty());
+    }
 
     @Test
     public void testIssue213() throws Exception {

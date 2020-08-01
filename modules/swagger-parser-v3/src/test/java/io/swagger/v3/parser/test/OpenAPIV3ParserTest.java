@@ -82,7 +82,6 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
-
     @Test
     public void testIssue1367() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
