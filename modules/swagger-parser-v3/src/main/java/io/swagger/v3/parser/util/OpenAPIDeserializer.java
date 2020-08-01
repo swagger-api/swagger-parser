@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -431,7 +430,6 @@ public class OpenAPIDeserializer {
                         }
                     }
 				}
-
 			}
             server.setUrl(value);
         }
@@ -440,8 +438,6 @@ public class OpenAPIDeserializer {
         if(StringUtils.isNotBlank(value)) {
             server.setDescription(value);
         }
-
-
 
         Map <String,Object> extensions = getExtensions(obj);
         if(extensions != null && extensions.size() > 0) {
@@ -454,7 +450,6 @@ public class OpenAPIDeserializer {
                 result.extra(location, key, obj.get(key));
             }
         }
-
 
         return server;
     }

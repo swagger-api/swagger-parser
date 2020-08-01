@@ -62,7 +62,7 @@ public class RelativeReferenceTest {
             times = 1;
             result = spec;
         }};
-        
+
         SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("http://foo.bar.com/swagger.json", null, new ParseOptions());
         assertNotNull(swaggerParseResult.getOpenAPI());
         assertTrue(swaggerParseResult.getMessages().isEmpty());

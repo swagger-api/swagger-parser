@@ -28,35 +28,6 @@ import static org.testng.Assert.assertTrue;
 
 public class OpenAPIParserTest {
 
-    @org.testng.annotations.Test
-    public void testRemoteUrlServer(){
-        String definitionPath = "https://api.swaggerhub.com/apis/AlexanderSviridov/meine-reisen_service/1.0.2";
-        String local = "local.yaml";
-
-        try {
-            OpenAPIParser parser = new OpenAPIParser();
-            ParseOptions options = new ParseOptions();
-            options.setResolveFully(true);
-            options.setResolve(true);
-
-            SwaggerParseResult result = parser.readLocation(definitionPath, null, options);
-
-            List<String> messages = result.getMessages();
-            if ((messages != null) && !messages.isEmpty()) {
-                messages.forEach(message -> System.out.println(message));
-            }
-
-            OpenAPI openAPI = result.getOpenAPI();
-            if (openAPI == null) {
-                return;
-            }
-            System.out.println(openAPI.getOpenapi());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Test
     public void testIssue1143(){
         ParseOptions options = new ParseOptions();
