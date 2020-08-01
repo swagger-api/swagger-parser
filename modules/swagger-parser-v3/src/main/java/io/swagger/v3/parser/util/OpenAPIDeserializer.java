@@ -406,6 +406,14 @@ public class OpenAPIDeserializer {
 
         Server server = new Server();
 
+        if (obj.get("variables") != null) {
+            ObjectNode variables = getObject("variables", obj, false, location, result);
+            ServerVariables serverVariables = getServerVariables(variables, String.format("%s.%s", location, "variables"), result);
+            if (serverVariables != null && serverVariables.size() > 0) {
+                server.setVariables(serverVariables);
+            }
+        }
+
         String value = getString("url", obj, true, location, result);
         if(StringUtils.isNotBlank(value)) {
 			if(!isValidURL(value) && path != null){
@@ -415,9 +423,13 @@ public class OpenAPIDeserializer {
 						value = absURI.resolve(new URI(value)).toString();
 					}
 				} catch (URISyntaxException e) {
-                    result.warning(location,"invalid url : "+value);
+                    String variable = value.substring(value.indexOf("{")+1,value.indexOf("}"));
+                    if (server.getVariables() != null) {
+                        if (!server.getVariables().containsKey(variable)) {
+                            result.warning(location, "invalid url : " + value);
+                        }
+                    }
 				}
-
 			}
             server.setUrl(value);
         }
@@ -426,14 +438,6 @@ public class OpenAPIDeserializer {
         if(StringUtils.isNotBlank(value)) {
             server.setDescription(value);
         }
-        if (obj.get("variables") != null) {
-            ObjectNode variables = getObject("variables", obj, false, location, result);
-            ServerVariables serverVariables = getServerVariables(variables, String.format("%s.%s", location, "variables"), result);
-            if (serverVariables != null && serverVariables.size() > 0) {
-                server.setVariables(serverVariables);
-            }
-        }
-
 
         Map <String,Object> extensions = getExtensions(obj);
         if(extensions != null && extensions.size() > 0) {
