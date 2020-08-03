@@ -820,7 +820,7 @@ public class SwaggerDeserializer {
             JsonNode ap = node.get("additionalProperties");
             if (ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
-            } else if (ap == null || "true".equalsIgnoreCase((String) ap.asText())) {
+            } else if ("object".equalsIgnoreCase(type) && (ap == null || "true".equalsIgnoreCase((String) ap.asText()))) {
                 JsonNodeFactory factory = new JsonNodeFactory(true);
                 ap = (JsonNode) factory.objectNode();
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
