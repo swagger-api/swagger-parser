@@ -3,6 +3,7 @@ package io.swagger.v3.parser.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.swagger.v3.oas.models.Components;
@@ -405,6 +406,14 @@ public class OpenAPIDeserializer {
 
         Server server = new Server();
 
+        if (obj.get("variables") != null) {
+            ObjectNode variables = getObject("variables", obj, false, location, result);
+            ServerVariables serverVariables = getServerVariables(variables, String.format("%s.%s", location, "variables"), result);
+            if (serverVariables != null && serverVariables.size() > 0) {
+                server.setVariables(serverVariables);
+            }
+        }
+
         String value = getString("url", obj, true, location, result);
         if(StringUtils.isNotBlank(value)) {
 			if(!isValidURL(value) && path != null){
@@ -414,9 +423,13 @@ public class OpenAPIDeserializer {
 						value = absURI.resolve(new URI(value)).toString();
 					}
 				} catch (URISyntaxException e) {
-                    result.warning(location,"invalid url : "+value);
+                    String variable = value.substring(value.indexOf("{")+1,value.indexOf("}"));
+                    if (server.getVariables() != null) {
+                        if (!server.getVariables().containsKey(variable)) {
+                            result.warning(location, "invalid url : " + value);
+                        }
+                    }
 				}
-
 			}
             server.setUrl(value);
         }
@@ -425,14 +438,6 @@ public class OpenAPIDeserializer {
         if(StringUtils.isNotBlank(value)) {
             server.setDescription(value);
         }
-        if (obj.get("variables") != null) {
-            ObjectNode variables = getObject("variables", obj, false, location, result);
-            ServerVariables serverVariables = getServerVariables(variables, String.format("%s.%s", location, "variables"), result);
-            if (serverVariables != null && serverVariables.size() > 0) {
-                server.setVariables(serverVariables);
-            }
-        }
-
 
         Map <String,Object> extensions = getExtensions(obj);
         if(extensions != null && extensions.size() > 0) {
@@ -555,12 +560,16 @@ public class OpenAPIDeserializer {
                                 if (!definedInPathLevel) {
                                     List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
                                     operationsInAPath.forEach(operation -> {
-                                        operation.getParameters().forEach(parameter -> {
+                                        List<Parameter> operationParameters = operation.getParameters();
+                                        if (operationParameters == null) {
+                                            operationParameters = Collections.<Parameter>emptyList();
+                                        }
+                                        operationParameters.forEach(parameter -> {
                                             if(PATH_PARAMETER.equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())){
                                                 result.warning(location, "For path parameter "+ parameter.getName() + " the required value should be true");
                                             }
                                         });
-                                        if (!isPathParamDefined(pathParam, operation.getParameters())) {
+                                        if (!isPathParamDefined(pathParam, operationParameters)) {
                                             result.warning(location + ".'" + pathName + "'"," Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
                                             return;
                                         }
@@ -997,7 +1006,7 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example",contentNode, location,result);
         if (example != null){
-            mediaType.setExample(example);
+            mediaType.setExample(example instanceof NullNode ? null : example);
         }
 
 
@@ -1560,7 +1569,7 @@ public class OpenAPIDeserializer {
         Boolean explode = getBoolean("explode", obj, false, location, result);
         if (explode != null) {
             parameter.setExplode(explode);
-        } else if(parameter.getStyle().equals(StyleEnum.FORM)){
+        } else if(StyleEnum.FORM.equals(parameter.getStyle())){
             parameter.setExplode(Boolean.TRUE);
         } else {
             parameter.setExplode(Boolean.FALSE);
@@ -1579,7 +1588,7 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example", obj, location,result);
         if (example != null){
-            parameter.setExample(example);
+            parameter.setExample(example instanceof NullNode ? null : example);
         }
 
         Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
@@ -1699,7 +1708,7 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example", headerNode, location,result);
         if (example != null){
-            header.setExample(example);
+            header.setExample(example instanceof NullNode ? null : example);
         }
 
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
@@ -1753,6 +1762,8 @@ public class OpenAPIDeserializer {
                 if (bool != null){
                     return bool;
                 }
+            } else if (example.getNodeType().equals(JsonNodeType.NULL)){
+                return example;
             }
         }
         return null;
@@ -2415,8 +2426,8 @@ public class OpenAPIDeserializer {
         }
 
         Object example = getAnyExample("example", node, location,result);
-        if (example != null){
-            schema.setExample(example);
+        if (example != null ){
+            schema.setExample(example instanceof NullNode ? null : example);
         }
 
         bool = getBoolean("deprecated", node, false, location, result);
@@ -2614,7 +2625,7 @@ public class OpenAPIDeserializer {
 
         Object sample = getAnyExample("value", node, location,result);
         if (sample != null){
-            example.setValue(sample);
+            example.setValue(sample instanceof NullNode ? null : sample);
         }
 
 
@@ -2663,7 +2674,7 @@ public class OpenAPIDeserializer {
             } else if (value.equals(Parameter.StyleEnum.SPACEDELIMITED.toString())) {
                 parameter.setStyle(Parameter.StyleEnum.SPACEDELIMITED);
             } else {
-                result.invalidType(location, "style", "string", obj);
+                result.invalidType(location, "style", "StyleEnum", obj);
             }
         }
     }
