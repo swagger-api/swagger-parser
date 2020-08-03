@@ -1,6 +1,7 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.*;
 import io.swagger.models.*;
 import io.swagger.models.auth.*;
@@ -818,6 +819,10 @@ public class SwaggerDeserializer {
 
             JsonNode ap = node.get("additionalProperties");
             if (ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
+                impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
+            } else if (ap == null || "true".equalsIgnoreCase((String) ap.asText())) {
+                JsonNodeFactory factory = new JsonNodeFactory(true);
+                ap = (JsonNode) factory.objectNode();
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
             }
 

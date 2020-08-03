@@ -1648,4 +1648,36 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger.getDefinitions().get("indicatorType"));
         Assert.assertEquals(swagger.getDefinitions().get("indicatorType").getProperties().size(), 1);
     }
+
+    @Test(description = "additionalProperties values")
+    public void testIssue1369() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("issue-1369.yaml");
+        assertNotNull(swagger);
+        ModelImpl schema;
+
+        schema = (ModelImpl) swagger.getDefinitions().get("NoAdditionalProperties");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertNull(schema.getAdditionalProperties().getType());
+
+        schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsTrue");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertNull(schema.getAdditionalProperties().getType());
+
+        schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsFalse");
+        assertNotNull(schema);
+        assertNull(schema.getAdditionalProperties());
+
+        schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsString");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertEquals(schema.getAdditionalProperties().getType(), "string");
+
+        schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsRef");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertEquals(schema.getAdditionalProperties().getType(), "ref");
+    }
 }
