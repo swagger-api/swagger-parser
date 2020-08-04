@@ -1,14 +1,14 @@
 package io.swagger.parser;
 
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Path;
-import io.swagger.models.Response;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.util.RemoteUrl;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
@@ -31,15 +31,18 @@ public class NetworkReferenceTest {
     @Mocked
     public RemoteUrl remoteUrl = new RemoteUrl();
 
+    private static String issue_136_json;
     private static String issue_323_yaml, issue_323_events_yaml, issue_323_paging_yaml, issue_323_bar_yaml;
     private static String issue_328_yaml, issue_328_events_yaml, issue_328_paging_yaml, issue_328_bar_yaml;
     private static String issue_330_yaml, issue_330_users_yaml, issue_330_paging_yaml, issue_330_entities_yaml;
     private static String issue_335_json, issue_335_bar_json;
     private static String issue_407_json;
     private static String issue_411_server, issue_411_components;
+    private static String issue_421_json;
 
     static {
         try {
+            issue_136_json          = readFile("src/test/resources/petstore.json");
             issue_323_yaml          = readFile("src/test/resources/nested-file-references/issue-323.yaml");
             issue_323_events_yaml   = readFile("src/test/resources/nested-file-references/eventsCase9.yaml");
             issue_323_paging_yaml   = readFile("src/test/resources/nested-file-references/common/pagingWithFolderRef.yaml");
@@ -62,10 +65,41 @@ public class NetworkReferenceTest {
 
             issue_411_server        = readFile("src/test/resources/nested-network-references/issue-411-server.yaml");
             issue_411_components    = readFile("src/test/resources/nested-network-references/issue-411-remote2.yaml");
+
+            issue_421_json          = readFile("src/test/resources/petstore.json");
         }
         catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testIssue136() throws Exception {
+        new Expectations() {{
+            remoteUrl.urlToString("http://petstore.swagger.io/v2/swagger.json", new ArrayList<AuthorizationValue>());
+            result = issue_136_json;
+        }};
+
+        String spec =
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  title: issue 136\n" +
+                        "paths:\n" +
+                        "  /foo:\n" +
+                        "    get:\n" +
+                        "      parameters: []\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: 'the pet'\n" +
+                        "          schema:\n" +
+                        "            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+
+        Swagger swagger = result.getSwagger();
+        Property property = swagger.getPath("/foo").getGet().getResponses().get("200").getSchema();
+        assertNotNull(property);
+        assertTrue(property instanceof RefProperty);
     }
 
     @Test
@@ -247,5 +281,44 @@ public class NetworkReferenceTest {
 
     static String readFile(String name) throws Exception {
         return new String(Files.readAllBytes(new File(name).toPath()), Charset.forName("UTF-8"));
+    }
+
+    @Test
+    public void testIssue421() throws Exception {
+        new Expectations() {{
+            remoteUrl.urlToString("http://petstore.swagger.io/v2/swagger.json", new ArrayList<AuthorizationValue>());
+            result = issue_421_json;
+        }};
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-421.yaml", null, true);
+        assertNotNull(result.getSwagger());
+
+        Swagger swagger = result.getSwagger();
+        assertNotNull(swagger.getPath("/pet/{petId}"));
+        assertNotNull(swagger.getPath("/pet/{petId}").getGet());
+        assertNotNull(swagger.getPath("/pet/{petId}").getGet().getParameters());
+        assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().size() == 1);
+        assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().get(0).getName().equals("petId"));
+        assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
+        assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 6);
+
+        assertNotNull(swagger.getPath("/pet/{petId}").getPost());
+        assertNotNull(swagger.getPath("/pet/{petId}").getPost().getParameters());
+        assertTrue(swagger.getPath("/pet/{petId}").getPost().getParameters().size() == 3);
+        assertTrue(swagger.getPath("/pet/{petId}").getPost().getParameters().get(1) instanceof RefParameter);
+        assertTrue(((RefParameter)swagger.getPath("/pet/{petId}").getPost().getParameters().get(1)).getRefFormat() == RefFormat.INTERNAL);
+        assertTrue(((RefParameter)swagger.getPath("/pet/{petId}").getPost().getParameters().get(1)).getSimpleRef().equals("name"));
+
+        assertNotNull(swagger.getPath("/store/order"));
+        assertNotNull(swagger.getPath("/store/order").getPost());
+        assertNotNull(swagger.getPath("/store/order").getPost().getParameters());
+        assertTrue(swagger.getPath("/store/order").getPost().getParameters().size() == 1);
+        assertTrue(swagger.getPath("/store/order").getPost().getParameters().get(0) instanceof BodyParameter);
+        assertNotNull(((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema());
+        assertTrue(((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema() instanceof RefModel);
+        assertTrue(((RefModel)((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema()).getSimpleRef().equals("Order"));
+
+        assertTrue(swagger.getDefinitions().get("Order") instanceof ModelImpl);
+        assertTrue(swagger.getDefinitions().get("Order").getProperties().size() == 6);
     }
 }
