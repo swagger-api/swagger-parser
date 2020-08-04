@@ -1,6 +1,5 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.*;
 import io.swagger.models.parameters.Parameter;
@@ -20,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.testng.Assert.*;
+
 
 public class SwaggerReaderTest {
     @Test(description = "it should read the uber api with file scheme")
@@ -265,31 +265,6 @@ public class SwaggerReaderTest {
         Model definition = swagger.getDefinitions().get("Empty");
         assertNotNull(definition);
         assertTrue(definition instanceof ModelImpl);
-    }
-
-
-    @Test
-    public void testIssue136() {
-        String spec =
-            "swagger: '2.0'\n" +
-            "info:\n" +
-            "  title: issue 136\n" +
-            "paths:\n" +
-            "  /foo:\n" +
-            "    get:\n" +
-            "      parameters: []\n" +
-            "      responses:\n" +
-            "        200:\n" +
-            "          description: 'the pet'\n" +
-            "          schema:\n" +
-            "            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
-
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
-
-        Swagger swagger = result.getSwagger();
-        Property property = swagger.getPath("/foo").getGet().getResponses().get("200").getSchema();
-        assertNotNull(property);
-        assertTrue(property instanceof RefProperty);
     }
 
     @Test

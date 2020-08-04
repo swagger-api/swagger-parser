@@ -217,40 +217,6 @@ public class FileReferenceTest {
     }
 
     @Test
-    public void testIssue421() {
-        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/nested-file-references/issue-421.yaml", null, true);
-        assertNotNull(result.getSwagger());
-
-        Swagger swagger = result.getSwagger();
-        assertNotNull(swagger.getPath("/pet/{petId}"));
-        assertNotNull(swagger.getPath("/pet/{petId}").getGet());
-        assertNotNull(swagger.getPath("/pet/{petId}").getGet().getParameters());
-        assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().size() == 1);
-        assertTrue(swagger.getPath("/pet/{petId}").getGet().getParameters().get(0).getName().equals("petId"));
-        assertTrue(swagger.getDefinitions().get("Pet") instanceof ModelImpl);
-        assertTrue(swagger.getDefinitions().get("Pet").getProperties().size() == 6);
-
-        assertNotNull(swagger.getPath("/pet/{petId}").getPost());
-        assertNotNull(swagger.getPath("/pet/{petId}").getPost().getParameters());
-        assertTrue(swagger.getPath("/pet/{petId}").getPost().getParameters().size() == 3);
-        assertTrue(swagger.getPath("/pet/{petId}").getPost().getParameters().get(1) instanceof RefParameter);
-        assertTrue(((RefParameter)swagger.getPath("/pet/{petId}").getPost().getParameters().get(1)).getRefFormat() == RefFormat.INTERNAL);
-        assertTrue(((RefParameter)swagger.getPath("/pet/{petId}").getPost().getParameters().get(1)).getSimpleRef().equals("name"));
-
-        assertNotNull(swagger.getPath("/store/order"));
-        assertNotNull(swagger.getPath("/store/order").getPost());
-        assertNotNull(swagger.getPath("/store/order").getPost().getParameters());
-        assertTrue(swagger.getPath("/store/order").getPost().getParameters().size() == 1);
-        assertTrue(swagger.getPath("/store/order").getPost().getParameters().get(0) instanceof BodyParameter);
-        assertNotNull(((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema());
-        assertTrue(((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema() instanceof RefModel);
-        assertTrue(((RefModel)((BodyParameter)swagger.getPath("/store/order").getPost().getParameters().get(0)).getSchema()).getSimpleRef().equals("Order"));
-
-        assertTrue(swagger.getDefinitions().get("Order") instanceof ModelImpl);
-        assertTrue(swagger.getDefinitions().get("Order").getProperties().size() == 6);
-    }
-
-    @Test
     public void testRelativeRefIssue421() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("./src/test/resources/main.yaml", null, true);
         assertNotNull(result.getSwagger());
