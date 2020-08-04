@@ -819,6 +819,7 @@ public class SwaggerDeserializer {
             JsonNode ap = node.get("additionalProperties");
             if (ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
+                // useless comment
             }
 
             value = getString("default", node, false, location, result);
