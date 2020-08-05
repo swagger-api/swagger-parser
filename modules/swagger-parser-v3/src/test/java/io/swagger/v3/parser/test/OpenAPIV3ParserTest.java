@@ -82,6 +82,12 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1398() {
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue1398.yaml", null, options);
+        assertEquals(result.getMessages().get(0), "attribute paths.'/pet/{petId}'(get).parameters.[petId].schemas.multipleOf value must be > 0");
+    }
 
     @Test
     public void testIssue1367() {

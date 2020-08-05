@@ -2189,7 +2189,11 @@ public class OpenAPIDeserializer {
 
         BigDecimal bigDecimal = getBigDecimal("multipleOf",node,false,location,result);
         if(bigDecimal != null) {
-            schema.setMultipleOf(bigDecimal);
+            if(bigDecimal.intValue() > 0) {
+                schema.setMultipleOf(bigDecimal);
+            }else{
+                result.warning(location,"multipleOf value must be > 0");
+            }
         }
 
         bigDecimal = getBigDecimal("maximum", node, false, location, result);
