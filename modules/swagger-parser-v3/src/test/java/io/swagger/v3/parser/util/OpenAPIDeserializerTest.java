@@ -1173,6 +1173,56 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testStyleInvalid() {
+        String json =
+            "{"
+            + "    \"openapi\": \"3.0.0\","
+            + "    \"info\": {"
+            + "        \"title\": \"realize\","
+            + "        \"version\": \"0.0.0\""
+            + "    },"
+            + "    \"paths\": {"
+            + "        \"/realize/{param}\": {"
+            + "            \"post\": {"
+            + "                \"parameters\": ["
+            + "                    {"
+            + "                        \"name\": \"param\","
+            + "                        \"in\": \"path\","
+            + ""
+            + "                        \"style\": \"DERP\","
+            + "                        \"required\": true,"
+            + ""
+            + "                        \"schema\": {"
+            + "                            \"type\": \"string\","
+            + "                            \"nullable\": false,"
+            + "                            \"minLength\": 1"
+            + "                        }"
+            + "                    }"
+            + "                ],"
+            + "                \"responses\": {"
+            + "                    \"200\": {"
+            + "                        \"description\": \"Success\","
+            + "                        \"content\": {"
+            + "                            \"application/json\": {"
+            + "                                \"schema\": {"
+            + "                                    \"type\": \"object\""
+            + "                                }"
+            + "                            }"
+            + "                        }"
+            + "                    }"
+            + "                }"
+            + "            }"
+            + "        }"
+            + "    }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        assertTrue(result.getMessages().size() == 1);
+        assertEquals(result.getMessages().get(0), "attribute paths.'/realize/{param}'(post).parameters.[param].style is not of type `StyleEnum`");
+    }
+
+    @Test
     public void testDeserializeWithMessages() {
         String yaml = "openapi: '3.0.0'\n" +
                 "info:\n" +
