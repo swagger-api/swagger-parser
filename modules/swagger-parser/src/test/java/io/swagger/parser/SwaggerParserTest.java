@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
 import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
@@ -53,6 +52,7 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.parser.util.TestUtils;
+import io.swagger.parser.util.ModelImpl;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 
@@ -1655,29 +1655,31 @@ public class SwaggerParserTest {
         final Swagger swagger = parser.read("issue-1369.yaml");
         assertNotNull(swagger);
         ModelImpl schema;
+        Property addProps;
 
         schema = (ModelImpl) swagger.getDefinitions().get("NoAdditionalProperties");
         assertNotNull(schema);
-        assertNotNull(schema.getAdditionalProperties());
-        assertNull(schema.getAdditionalProperties().getType());
+        assertNull(schema.getAdditionalProperties());
 
         schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsTrue");
         assertNotNull(schema);
         assertNotNull(schema.getAdditionalProperties());
-        assertNull(schema.getAdditionalProperties().getType());
+        assertTrue((Boolean) schema.getAdditionalProperties());
 
         schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsFalse");
         assertNotNull(schema);
-        assertNull(schema.getAdditionalProperties());
+        assertFalse((Boolean) schema.getAdditionalProperties());
 
         schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsString");
         assertNotNull(schema);
-        assertNotNull(schema.getAdditionalProperties());
-        assertEquals(schema.getAdditionalProperties().getType(), "string");
+        addProps = (Property) schema.getAdditionalProperties();
+        assertNotNull(addProps);
+        assertEquals(addProps.getType(), "string");
 
         schema = (ModelImpl) swagger.getDefinitions().get("AdditionalPropertiesIsRef");
         assertNotNull(schema);
-        assertNotNull(schema.getAdditionalProperties());
-        assertEquals(schema.getAdditionalProperties().getType(), "ref");
+        addProps = (Property) schema.getAdditionalProperties();
+        assertNotNull(addProps);
+        assertEquals(addProps.getType(), "ref");
     }
 }

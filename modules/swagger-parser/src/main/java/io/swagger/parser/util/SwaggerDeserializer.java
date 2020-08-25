@@ -3,7 +3,25 @@ package io.swagger.parser.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.*;
-import io.swagger.models.*;
+import io.swagger.models.Swagger;
+import io.swagger.models.Path;
+import io.swagger.models.Operation;
+import io.swagger.models.RefResponse;
+import io.swagger.models.Response;
+import io.swagger.models.Model;
+import io.swagger.models.AbstractModel;
+import io.swagger.models.RefModel;
+import io.swagger.models.License;
+import io.swagger.models.Contact;
+import io.swagger.models.SecurityRequirement;
+import io.swagger.models.Info;
+import io.swagger.models.Tag;
+import io.swagger.models.ExternalDocs;
+import io.swagger.models.Scheme;
+import io.swagger.models.RefPath;
+import io.swagger.models.ArrayModel;
+import io.swagger.models.Xml;
+import io.swagger.models.ComposedModel;
 import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
@@ -818,12 +836,14 @@ public class SwaggerDeserializer {
             impl.setType(type);
 
             JsonNode ap = node.get("additionalProperties");
-            if (ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
-                impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
-            } else if ("object".equalsIgnoreCase(type) && (ap == null || "true".equalsIgnoreCase((String) ap.asText()))) {
-                JsonNodeFactory factory = new JsonNodeFactory(true);
-                ap = (JsonNode) factory.objectNode();
-                impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
+            if (ap != null) {
+                if (ap.getNodeType().equals(JsonNodeType.OBJECT)) {
+                    impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
+                } else if ("object".equalsIgnoreCase(type) && "true".equalsIgnoreCase(ap.asText())) {
+                    impl.setAdditionalProperties(Boolean.TRUE);
+                } else if ("object".equalsIgnoreCase(type) && "false".equalsIgnoreCase(ap.asText())) {
+                    impl.setAdditionalProperties(Boolean.FALSE);
+                }
             }
 
             value = getString("default", node, false, location, result);
