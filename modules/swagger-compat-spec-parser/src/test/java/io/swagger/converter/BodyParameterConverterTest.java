@@ -6,7 +6,7 @@ import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
 
 import io.swagger.models.Format;
-import io.swagger.models.ModelImpl;
+import io.swagger.parser.ModelImpl;
 import io.swagger.models.ParamType;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;

@@ -1,6 +1,10 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.models.Model;
+import io.swagger.models.Swagger;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.slf4j.Logger;
@@ -109,6 +113,16 @@ public class DeserializationUtils {
                 }
             } else {
                 result = Json.mapper().convertValue(contents, expectedType);
+                JsonNode jn = (JsonNode) contents;
+                ObjectNode sc = (ObjectNode) jn.get("schema");
+                if (sc != null && sc.get("$ref") == null) {
+                    // the Json.mapper conversion omits additionalProperties true/false conversion
+                    // so use the code in SwaggerDeserializer.definition to get additionalProperties
+                    SwaggerDeserializer sd = new SwaggerDeserializer();
+                    SwaggerDeserializer.ParseResult pr = new SwaggerDeserializer.ParseResult();
+                    Model model = sd.definition(sc, "", pr);
+                    ((BodyParameter) result).setSchema(model);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into type " + expectedType, e);

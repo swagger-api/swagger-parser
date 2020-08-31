@@ -7,6 +7,7 @@ import io.swagger.models.auth.In;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.*;
+import io.swagger.parser.ModelImpl;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.SwaggerResolver;
 import io.swagger.util.Json;
@@ -477,9 +478,9 @@ public class SwaggerDeserializerTest {
         Set<String> messages = new HashSet<String>(messageList);
 
         assertTrue(messages.contains("attribute definitions.invalid is not of type `object`"));
-        assertTrue(result.getSwagger().getDefinitions().get("Person") instanceof ModelImpl);
+        assertTrue(result.getSwagger().getDefinitions().get("Person") instanceof io.swagger.parser.ModelImpl);
 
-        List<String> required = ((ModelImpl)result.getSwagger().getDefinitions().get("Person")).getRequired();
+        List<String> required = ((io.swagger.parser.ModelImpl)result.getSwagger().getDefinitions().get("Person")).getRequired();
         Set<String> requiredKeys = new HashSet<String>(required);
         assertTrue(requiredKeys.contains("id"));
         assertTrue(requiredKeys.contains("name"));
@@ -534,14 +535,14 @@ public class SwaggerDeserializerTest {
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
 
-        assertTrue(result.getSwagger().getDefinitions().get("Person") instanceof ModelImpl);
-        assertTrue(result.getSwagger().getDefinitions().get("Address") instanceof ModelImpl);
+        assertTrue(result.getSwagger().getDefinitions().get("Person") instanceof io.swagger.parser.ModelImpl);
+        assertTrue(result.getSwagger().getDefinitions().get("Address") instanceof io.swagger.parser.ModelImpl);
 
-        ModelImpl person = (ModelImpl) result.getSwagger().getDefinitions().get("Person");
+        io.swagger.parser.ModelImpl person = (io.swagger.parser.ModelImpl) result.getSwagger().getDefinitions().get("Person");
         Property property = person.getProperties().get("address");
         assertTrue(property instanceof RefProperty);
 
-        Property zip = ((ModelImpl)result.getSwagger().getDefinitions().get("Address")).getProperties().get("zip");
+        Property zip = ((io.swagger.parser.ModelImpl)result.getSwagger().getDefinitions().get("Address")).getProperties().get("zip");
         assertTrue(zip instanceof IntegerProperty);
 
         IntegerProperty zipProperty = (IntegerProperty) zip;
@@ -919,16 +920,16 @@ public class SwaggerDeserializerTest {
         final Swagger resolved = new SwaggerResolver(result.getSwagger(), null).resolve();
 
         Model stringModel = resolved.getDefinitions().get("StringEnum");
-        assertTrue(stringModel instanceof ModelImpl);
-        ModelImpl stringImpl = (ModelImpl) stringModel;
+        assertTrue(stringModel instanceof io.swagger.parser.ModelImpl);
+        io.swagger.parser.ModelImpl stringImpl = (io.swagger.parser.ModelImpl) stringModel;
         List<String> stringValues = stringImpl.getEnum();
         assertEquals(2, stringValues.size());
         assertEquals("First", stringValues.get(0));
         assertEquals("Second", stringValues.get(1));
 
         Model integerModel = resolved.getDefinitions().get("IntegerEnum");
-        assertTrue(integerModel instanceof ModelImpl);
-        ModelImpl integerImpl = (ModelImpl) integerModel;
+        assertTrue(integerModel instanceof io.swagger.parser.ModelImpl);
+        io.swagger.parser.ModelImpl integerImpl = (io.swagger.parser.ModelImpl) integerModel;
         List<String> integerValues = integerImpl.getEnum();
         assertEquals(3, integerValues.size());
         assertEquals("-1", integerValues.get(0));
@@ -936,8 +937,8 @@ public class SwaggerDeserializerTest {
         assertEquals("1", integerValues.get(2));
 
         Model numberModel = resolved.getDefinitions().get("NumberEnum");
-        assertTrue(numberModel instanceof ModelImpl);
-        ModelImpl numberImpl = (ModelImpl) numberModel;
+        assertTrue(numberModel instanceof io.swagger.parser.ModelImpl);
+        io.swagger.parser.ModelImpl numberImpl = (io.swagger.parser.ModelImpl) numberModel;
         List<String> numberValues = numberImpl.getEnum();
         assertEquals(4, numberValues.size());
         assertEquals("-1.151", numberValues.get(0));
@@ -1321,7 +1322,7 @@ public class SwaggerDeserializerTest {
         dogInterfaceRef = dogComposed.getInterfaces().get(1);
         dogInterface = definitions.get(dogInterfaceRef.getSimpleRef());
         assertEquals("Dog does not implement Furry;", furry, dogInterface);
-        assertTrue("Dog does not have child properties", dogComposed.getChild() instanceof ModelImpl);
+        assertTrue("Dog does not have child properties", dogComposed.getChild() instanceof io.swagger.parser.ModelImpl);
     }
 
     @Test
@@ -1377,7 +1378,7 @@ public class SwaggerDeserializerTest {
         assertTrue(dog instanceof ComposedModel);
         ComposedModel composed = (ComposedModel) dog;
 
-        assertTrue(composed.getChild() instanceof ModelImpl);
+        assertTrue(composed.getChild() instanceof io.swagger.parser.ModelImpl);
         assertTrue(composed.getInterfaces().size() == 2);
     }
 
@@ -1465,7 +1466,7 @@ public class SwaggerDeserializerTest {
         assertEquals(qp.getMultipleOf(), 3.0);
 
         BodyParameter bp = (BodyParameter) swagger.getPath("/foo").getPost().getParameters().get(1);
-        ModelImpl schema = (ModelImpl)bp.getSchema();
+        io.swagger.parser.ModelImpl schema = (io.swagger.parser.ModelImpl)bp.getSchema();
         assertTrue(schema.getAdditionalProperties() != null);
 
         IntegerProperty id = (IntegerProperty)swagger.getDefinitions().get("Fun").getProperties().get("id");
@@ -1632,7 +1633,7 @@ public class SwaggerDeserializerTest {
     public void testIssue360() {
         Swagger swagger = new Swagger();
 
-        ModelImpl model = new ModelImpl()._enum((String) null);
+        io.swagger.parser.ModelImpl model = new ModelImpl()._enum((String) null);
         swagger.addDefinition("modelWithNullEnum", model);
 
         String json = Json.pretty(swagger);

@@ -1,4 +1,4 @@
-package io.swagger.parser.util;
+package io.swagger.parser;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

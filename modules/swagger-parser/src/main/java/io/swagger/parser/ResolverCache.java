@@ -3,7 +3,6 @@ package io.swagger.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
 import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
@@ -17,6 +16,7 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.PathUtils;
 import io.swagger.parser.util.RefUtils;
 import io.swagger.parser.util.SwaggerDeserializer;
+import io.swagger.parser.ModelImpl;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;

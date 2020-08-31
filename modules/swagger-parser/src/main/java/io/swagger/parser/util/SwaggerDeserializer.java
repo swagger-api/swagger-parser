@@ -1,7 +1,6 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.*;
 import io.swagger.models.Swagger;
 import io.swagger.models.Path;
@@ -27,6 +26,7 @@ import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
+import io.swagger.parser.ModelImpl;
 import io.swagger.util.Json;
 
 import java.math.BigDecimal;
@@ -833,18 +833,18 @@ public class SwaggerDeserializer {
             model = am;
         } else {
             ModelImpl impl = new ModelImpl();
-            impl.setType(type);
 
             JsonNode ap = node.get("additionalProperties");
             if (ap != null) {
                 if (ap.getNodeType().equals(JsonNodeType.OBJECT)) {
                     impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
-                } else if ("object".equalsIgnoreCase(type) && "true".equalsIgnoreCase(ap.asText())) {
+                } else if ("true".equalsIgnoreCase(ap.asText())) {
                     impl.setAdditionalProperties(Boolean.TRUE);
-                } else if ("object".equalsIgnoreCase(type) && "false".equalsIgnoreCase(ap.asText())) {
+                } else if ("false".equalsIgnoreCase(ap.asText())) {
                     impl.setAdditionalProperties(Boolean.FALSE);
                 }
             }
+            impl.setType(type);
 
             value = getString("default", node, false, location, result);
             impl.setDefaultValue(value);

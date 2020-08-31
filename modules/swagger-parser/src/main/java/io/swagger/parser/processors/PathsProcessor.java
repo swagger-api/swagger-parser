@@ -8,6 +8,7 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
 import io.swagger.parser.SwaggerResolver;
+import io.swagger.parser.ModelImpl;
 
 import java.util.ArrayList;
 import java.util.List;
