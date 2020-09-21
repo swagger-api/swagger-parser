@@ -150,7 +150,8 @@ public class RemoteUrl {
                 conn.setRequestProperty("User-Agent", USER_AGENT_HEADER_VALUE);
                 conn.connect();
                 url = ((HttpURLConnection) conn).getHeaderField("Location");
-            } while (301 == ((HttpURLConnection) conn).getResponseCode());
+            } while ((301 == ((HttpURLConnection) conn).getResponseCode())||(302 == ((HttpURLConnection) conn).getResponseCode())
+                    || (307 == ((HttpURLConnection) conn).getResponseCode())||(308 == ((HttpURLConnection) conn).getResponseCode()));
             InputStream in = conn.getInputStream();
 
             StringBuilder contents = new StringBuilder();
