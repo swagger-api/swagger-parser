@@ -282,7 +282,7 @@ public class SwaggerReaderTest {
             "        200:\n" +
             "          description: 'the pet'\n" +
             "          schema:\n" +
-            "            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
+            "            $ref: 'https://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
 
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
 
