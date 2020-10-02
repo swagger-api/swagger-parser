@@ -1144,7 +1144,7 @@ public class SwaggerDeserializer {
 
             } else {
                 ObjectNode obj = getObject(key, node, false, location + ".responses", result);
-                Response response = response(obj, location + "." + key, result);
+                Response response = response(obj, location + "." +"responses."+key, result);
                 output.put(key, response);
             }
         }

@@ -1,0 +1,10 @@
+swagger: "2.0"
+info:
+  description:
+    some description
+paths:
+  /tickets:
+    get:
+      responses:
+        200:
+          title: abc
