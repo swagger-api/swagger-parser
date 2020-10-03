@@ -28,7 +28,7 @@ mvn versions:commit
 #####################
 ### update all other versions in files around to the new release, including readme ###
 #####################
-sc_find="\<version\>$SC_LAST_RELEASE"
+sc_find="<version>$SC_LAST_RELEASE"
 sc_replace="<version>$SC_NEXT_VERSION"
 sed -i -e "s/$sc_find/$sc_replace/g" $CUR/README.md
 
