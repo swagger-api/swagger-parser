@@ -406,6 +406,7 @@ public class SwaggerDeserializer {
             Iterator<JsonNode> it = array.iterator();
             while (it.hasNext()) {
                 JsonNode n = it.next();
+
                 String s = getString(n, location + ".schemes", result);
                 if (s != null) {
                     Scheme scheme = Scheme.forValue(s);
@@ -1143,7 +1144,7 @@ public class SwaggerDeserializer {
             if (key.startsWith("x-")) {
 
             } else {
-                ObjectNode obj = getObject(key, node, false, location + ".responses", result);
+                ObjectNode obj = getObject(key, node, false, location, result);
                 Response response = response(obj, location + "."+key, result);
                 output.put(key, response);
             }
