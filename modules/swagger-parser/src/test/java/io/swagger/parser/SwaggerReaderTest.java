@@ -266,8 +266,7 @@ public class SwaggerReaderTest {
         assertNotNull(definition);
         assertTrue(definition instanceof ModelImpl);
     }
-
-
+    
     @Test
     public void testIssue136() {
         String spec =
