@@ -1648,4 +1648,14 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger.getDefinitions().get("indicatorType"));
         Assert.assertEquals(swagger.getDefinitions().get("indicatorType").getProperties().size(), 1);
     }
+
+    @Test
+    public void testIssuei432() {
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("src/test/resources/issue-1432.yaml", null, true);
+        assertNotNull(result);
+        assertEquals("attribute paths.'/tickets'(get).responses.200.title is unexpected",result.getMessages().get(0));
+
+
+    }
 }
