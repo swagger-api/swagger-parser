@@ -1,0 +1,29 @@
+openapi: 3.0.2
+info:
+  title: test - OAS3
+  version: 1.0.0
+paths:
+  /responses:
+    get:
+      responses:
+        '200':
+          description: it works!
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  oneOf:
+                    - "$ref": "#/components/schemas/Macaw1"
+                    - "$ref": "#/components/schemas/Parakeet1"
+        '404':
+          description: it works!
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: array
+                  items:
+                    anyOf:
+                      - "$ref": "#/components/schemas/Macaw2"
+                      - "$ref": "#/components/schemas/Parakeet2"
+

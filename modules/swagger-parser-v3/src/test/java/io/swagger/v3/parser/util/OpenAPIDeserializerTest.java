@@ -791,7 +791,7 @@ public class OpenAPIDeserializerTest {
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
-        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.schema.items is missing"));
+        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.'application/json'.schema.items is missing"));
         
         OpenAPI openAPI = result.getOpenAPI();
 
@@ -1170,6 +1170,56 @@ public class OpenAPIDeserializerTest {
           Arrays.asList(
             "attribute components.schemas.ByteString.enum=`W.T.F?` is not of type `byte`",
             "attribute components.schemas.ByteString.default=`W.T.F?` is not of type `byte`"));
+    }
+
+    @Test
+    public void testStyleInvalid() {
+        String json =
+            "{"
+            + "    \"openapi\": \"3.0.0\","
+            + "    \"info\": {"
+            + "        \"title\": \"realize\","
+            + "        \"version\": \"0.0.0\""
+            + "    },"
+            + "    \"paths\": {"
+            + "        \"/realize/{param}\": {"
+            + "            \"post\": {"
+            + "                \"parameters\": ["
+            + "                    {"
+            + "                        \"name\": \"param\","
+            + "                        \"in\": \"path\","
+            + ""
+            + "                        \"style\": \"DERP\","
+            + "                        \"required\": true,"
+            + ""
+            + "                        \"schema\": {"
+            + "                            \"type\": \"string\","
+            + "                            \"nullable\": false,"
+            + "                            \"minLength\": 1"
+            + "                        }"
+            + "                    }"
+            + "                ],"
+            + "                \"responses\": {"
+            + "                    \"200\": {"
+            + "                        \"description\": \"Success\","
+            + "                        \"content\": {"
+            + "                            \"application/json\": {"
+            + "                                \"schema\": {"
+            + "                                    \"type\": \"object\""
+            + "                                }"
+            + "                            }"
+            + "                        }"
+            + "                    }"
+            + "                }"
+            + "            }"
+            + "        }"
+            + "    }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        assertTrue(result.getMessages().size() == 1);
+        assertEquals(result.getMessages().get(0), "attribute paths.'/realize/{param}'(post).parameters.[param].style is not of type `StyleEnum`");
     }
 
     @Test
@@ -2384,7 +2434,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
-        Assert.assertNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
 
         PathItem petEndpoint = paths.get("/pet");
         Assert.assertNotNull(petEndpoint.getPut());

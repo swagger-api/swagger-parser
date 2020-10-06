@@ -61,7 +61,19 @@ public class SchemaProcessor {
             processAdditionalProperties(schema);
             
         }
+        if (schema.getDiscriminator() != null) {
+            processDiscriminatorSchema(schema);
+        }
 
+    }
+
+    private void processDiscriminatorSchema(Schema schema) {
+        if (schema.getDiscriminator() != null && schema.getDiscriminator().getMapping() != null) {
+            Map<String, String> mapping = schema.getDiscriminator().getMapping();
+            for (String ref : mapping.values()) {
+                processReferenceSchema(new Schema().$ref(ref));
+            }
+        }
     }
 
     private void processAdditionalProperties(Object additionalProperties) {

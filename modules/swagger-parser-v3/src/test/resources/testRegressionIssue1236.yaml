@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Issue with server
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://{server}.swagger.io:{port}/v2
+    description: petstore server
+    variables:
+      server:
+        default: petstore
+        enum:
+          - petstore
+          - qa-petstore
+          - dev-petstore
+      port:
+        default: "80"
+        enum:
+          - "80"
+          - "8080"
+  - url: https://localhost:8080/{version}
+    description: The local server
+    variables:
+      version:
+        default: v2
+        enum:
+          - v1
+          - v2
+  - url: /api/v1
+    description: The local server
+    variables:
+      version:
+        default: v2
+        enum:
+          - v1
+          - v2
+paths:
+  /ping:
+    get:
+      operationId: pingGet
+      responses:
+        '201':
+          description: OK

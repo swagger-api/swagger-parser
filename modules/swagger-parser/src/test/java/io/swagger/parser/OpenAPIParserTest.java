@@ -1,6 +1,5 @@
 package io.swagger.parser;
 
-import io.swagger.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -8,6 +7,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.PathItem;
 
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
@@ -83,7 +83,7 @@ public class OpenAPIParserTest {
         System.out.println(result.getMessages());
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getMessages().get(0), "attribute tags.sample is repeated");
+        assertEquals(result.getMessages().get(1), "attribute tags.sample is repeated");
     }
 
     @Test
@@ -561,6 +561,32 @@ public class OpenAPIParserTest {
         Schema score = schema.getProperties().get("score");
         assertEquals(score.getMultipleOf().intValue(), 1);
     }
-  
+
+    @Test
+    public void testIssue1433_ResolveSchemaWithoutType() {
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = openApiParser.readLocation("issue_1433-resolve-schema-without-type.yaml", null, options).getOpenAPI();
+        final Schema requestBodySchema = openAPI.getPaths().get("/foo").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertNotNull(requestBodySchema);
+
+        final Map properties = requestBodySchema.getProperties();
+        assertEquals(properties.size(), 2);
+
+        final Object bar = properties.get("bar");
+        assertEquals(bar.getClass(), StringSchema.class);
+
+        final Object input = properties.get("input");
+        assertEquals(input.getClass(), Schema.class);
+
+        final Map inputProperties = ((Schema) input).getProperties();
+        assertNotNull(inputProperties);
+        assertEquals(inputProperties.size(),1);
+
+        final Object baz = inputProperties.get("baz");
+        assertEquals(baz.getClass(), StringSchema.class);
+    }
 }
 

@@ -1,0 +1,14 @@
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+      - pet_type
+      properties:
+        pet_type:
+          type: string
+      discriminator:
+        propertyName: pet_type
+        mapping:
+          Cat: 'Cat.yaml'
+          Dog: 'Dog.yaml'

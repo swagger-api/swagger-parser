@@ -2,7 +2,7 @@
 
 **NOTE:** If you're looking for `swagger-parser` 1.X and OpenAPI 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-parser/tree/v1)
 
-[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2)
+[![Build Status](https://img.shields.io/jenkins/build.svg?jobUrl=https://jenkins.swagger.io/job/oss-swagger-parser-v2/)](https://jenkins.swagger.io/job/oss-swagger-parser-v2/)
 
 [![Build Status](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2/badge/icon?subject=jenkins%20build%20-%20java%208)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2/)
 
@@ -24,7 +24,7 @@ import io.swagger.v3.oas.models.OpenAPI;
   // read a swagger description from the petstore
   
   
-  OpenAPI openAPI = new OpenAPIV3Parser().read("http://petstore.swagger.io/v3/openapi.json");
+  OpenAPI openAPI = new OpenAPIV3Parser().read("https://petstore3.swagger.io/api/v3/openapi.json");
 
 ```
 
@@ -50,7 +50,7 @@ import io.swagger.v3.parser.core.models.AuthorizationValue;
   // or in a single constructor
   AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
   OpenAPI openAPI = new OpenAPIV3Parser().readWithInfo(
-    "http://petstore.swagger.io/v2/swagger.json",
+    "https://petstore3.swagger.io/api/v3/openapi.json",
     Arrays.asList(mySpecialHeader, apiKey)
   );
 ```
@@ -103,27 +103,10 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.16</version>
+  <version>2.0.22</version>
 </dependency>
 ```
 
 ## Security contact
 
 Please disclose any security-related issues or vulnerabilities by emailing [security@swagger.io](mailto:security@swagger.io), instead of using the public issue tracker.
-
-License
--------
-
-Copyright 2018 SmartBear Software
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at [apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
----

@@ -15,4 +15,4 @@ get:
               paging:
                 $ref: './common/paging.yaml#/Paging'
               items:
-                $ref: '#/components/schemas/StatusResponse'
+                $ref: './issue-312.yaml#/components/schemas/StatusResponse'

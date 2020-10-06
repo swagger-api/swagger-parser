@@ -115,11 +115,13 @@ public class RemoteUrl {
                 final List<AuthorizationValue> header = new ArrayList<>();
                 if (auths != null && auths.size() > 0) {
                     for (AuthorizationValue auth : auths) {
-                        if (auth.getUrlMatcher().test(inUrl)) {
-                            if ("query".equals(auth.getType())) {
-                                appendValue(inUrl, auth, query);
-                            } else if ("header".equals(auth.getType())) {
-                                appendValue(inUrl, auth, header);
+                        if (auth.getUrlMatcher()!= null) {
+                            if (auth.getUrlMatcher().test(inUrl)) {
+                                if ("query".equals(auth.getType())) {
+                                    appendValue(inUrl, auth, query);
+                                } else if ("header".equals(auth.getType())) {
+                                    appendValue(inUrl, auth, header);
+                                }
                             }
                         }
                     }
@@ -148,7 +150,8 @@ public class RemoteUrl {
                 conn.setRequestProperty("User-Agent", USER_AGENT_HEADER_VALUE);
                 conn.connect();
                 url = ((HttpURLConnection) conn).getHeaderField("Location");
-            } while (301 == ((HttpURLConnection) conn).getResponseCode());
+            } while ((301 == ((HttpURLConnection) conn).getResponseCode())||(302 == ((HttpURLConnection) conn).getResponseCode())
+                    || (307 == ((HttpURLConnection) conn).getResponseCode())||(308 == ((HttpURLConnection) conn).getResponseCode()));
             InputStream in = conn.getInputStream();
 
             StringBuilder contents = new StringBuilder();
