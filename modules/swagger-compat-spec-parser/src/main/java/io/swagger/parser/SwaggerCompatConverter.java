@@ -552,7 +552,7 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             Contact contact = null;
             if (apiInfo.getContact() != null) {
                 contact = new Contact()
-                        .url(apiInfo.getContact());
+                        .email(apiInfo.getContact());
             }
             License license = null;
             if (apiInfo.getLicense() != null) {
