@@ -2601,4 +2601,21 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(cat);
     }
 
+    @Test
+    public void testParser() {
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options =  new ParseOptions();
+        options.setResolve(Boolean.TRUE);
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/issue-1419.yaml", null, options);
+        System.out.println(result.getMessages());
+        Assert.assertNotNull(result);
+        ArraySchema schema   = (ArraySchema) result.getOpenAPI().getComponents().getSchemas().get("Vehicle").getProperties().get("arrayG");
+        ArraySchema schema1 = (ArraySchema) schema.getItems();
+        ArrayList enum1 = (ArrayList) schema1.getEnum();
+
+        Assert.assertEquals(enum1.get(0),"[[1,2],[2,6]]");
+
+    }
+
 }
