@@ -879,6 +879,22 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void issue1455_testResolveFullyV2_shouldNotThrowNPE() throws Exception{
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/swagger.json"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, new ArrayList<>(), options  );
+
+        Assert.assertNotNull(result);
+        Assert.assertNull(result.getOpenAPI());
+        Assert.assertNotNull(result.getMessages());
+        Assert.assertEquals(result.getMessages().size(), 1);
+        Assert.assertEquals(result.getMessages().get(0), "attribute openapi is missing");
+    }
+
+    @Test
     public void testResolveEmpty(@Injectable final List<AuthorizationValue> auths) throws Exception{
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/empty-oas.yaml"));
         ParseOptions options = new ParseOptions();
