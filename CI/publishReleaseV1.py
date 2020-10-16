@@ -15,7 +15,7 @@ def publishRelease(tag):
     id = lastReleaseId(tag)
     payload = "{\"tag_name\":\"" + tag + "\", "
     payload += "\"draft\":" + "false" + ", "
-    payload += "\"target_commitish\":\"" + "master" + "\"}"
+    payload += "\"target_commitish\":\"" + "v1" + "\"}"
     content = ghApiClient.postUrl('repos/swagger-api/swagger-parser/releases/' + str(id), payload)
     return content
 
