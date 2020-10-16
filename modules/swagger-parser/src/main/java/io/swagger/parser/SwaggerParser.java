@@ -49,7 +49,7 @@ public class SwaggerParser {
                         .message("The swagger definition could not be read");
             }
         }catch (Exception e) {
-                output.setMessages(Arrays.asList(e.getMessage()));
+                output.message(e.getMessage());
             }
         return output;
     }
@@ -99,7 +99,7 @@ public class SwaggerParser {
     }
 
     protected JsonNode deserializeYaml(String data) throws IOException{
-        return DeserializationUtils.readYamlTree(data);
+        return DeserializationUtils.readYamlTree(data, null);
     }
 
     public SwaggerDeserializationResult readWithInfo(String swaggerAsString, boolean resolve) {

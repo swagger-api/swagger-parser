@@ -114,13 +114,17 @@ public class DeserializationUtils {
     }
 
     public static JsonNode deserializeIntoTree(String contents, String fileOrHost) {
+        return deserializeIntoTree(contents, fileOrHost, null);
+    }
+
+    public static JsonNode deserializeIntoTree(String contents, String fileOrHost, SwaggerDeserializationResult errorOutput) {
         JsonNode result;
 
         try {
             if (isJson(contents)) {
                 result = Json.mapper().readTree(contents);
             } else {
-                result = readYamlTree(contents);
+                result = readYamlTree(contents, errorOutput);
             }
         } catch (IOException e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into a JsonNode tree", e);
@@ -130,6 +134,9 @@ public class DeserializationUtils {
     }
 
     public static <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType) {
+        return deserialize(contents, fileOrHost, expectedType, null);
+    }
+    public static <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType, SwaggerDeserializationResult errorOutput) {
         T result;
 
         boolean isJson = false;
@@ -143,7 +150,7 @@ public class DeserializationUtils {
                 if (isJson) {
                     result = Json.mapper().readValue((String) contents, expectedType);
                 } else {
-                    result = Yaml.mapper().convertValue(readYamlTree((String) contents), expectedType);
+                    result = Yaml.mapper().convertValue(readYamlTree((String) contents, errorOutput), expectedType);
                 }
             } else {
                 result = Json.mapper().convertValue(contents, expectedType);
@@ -182,7 +189,7 @@ public class DeserializationUtils {
     }
 
 
-    public static JsonNode readYamlTree(String contents) throws IOException {
+    public static JsonNode readYamlTree(String contents, SwaggerDeserializationResult errorOutput) throws IOException {
 
         if (!options.isSupportYamlAnchors()) {
             return Yaml.mapper().readTree(contents);
@@ -197,7 +204,7 @@ public class DeserializationUtils {
 
             Object o = yaml.load(contents);
             if (options.isValidateYamlInput()) {
-                boolean res = exceedsLimits(o, null, new Integer(0), new IdentityHashMap<Object, Long>());
+                boolean res = exceedsLimits(o, null, new Integer(0), new IdentityHashMap<Object, Long>(), errorOutput);
                 if (res) {
                     LOGGER.warn("Error converting snake-parsed yaml to JsonNode");
                     return Yaml.mapper().readTree(contents);
@@ -207,16 +214,23 @@ public class DeserializationUtils {
             return n;
         } catch (Throwable e) {
             LOGGER.warn("Error snake-parsing yaml content", e);
+            if (errorOutput != null) {
+                errorOutput.message(e.getMessage());
+            }
             return Yaml.mapper().readTree(contents);
         }
     }
 
-    private static boolean exceedsLimits(Object o, Object parent, Integer depth, Map<Object, Long> visited) {
+    private static boolean exceedsLimits(Object o, Object parent, Integer depth, Map<Object, Long> visited, SwaggerDeserializationResult errorOutput) {
 
         if (o == null) return false;
         if (!(o instanceof List) && !(o instanceof Map)) return false;
         if (depth > options.getMaxYamlDepth()) {
-            LOGGER.warn("snake-yaml result exceeds max depth {}; threshold can be increased if needed by setting system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
+            String msg = String.format("snake-yaml result exceeds max depth %d; threshold can be increased if needed by setting system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
+            LOGGER.warn(msg);
+            if (errorOutput != null) {
+                errorOutput.message(msg);
+            }
             return true;
         }
         int currentDepth = depth;
@@ -226,13 +240,17 @@ public class DeserializationUtils {
                 target = o;
             }
             if (options.isYamlCycleCheck()) {
-                boolean res = hasReference(o, target, new Integer(0), new IdentityHashMap<Object, Long>());
+                boolean res = hasReference(o, target, new Integer(0), new IdentityHashMap<Object, Long>(), errorOutput);
                 if (res) {
                     return true;
                 }
             }
             if (visited.get(o) > options.getMaxYamlReferences()) {
-                LOGGER.warn("snake-yaml result exceeds max references {}; threshold can be increased if needed by setting system property `maxYamlReferences` to a higher value.", options.getMaxYamlReferences());
+                String msg = String.format("snake-yaml result exceeds max references %d; threshold can be increased if needed by setting system property `maxYamlReferences` to a higher value.", options.getMaxYamlReferences());
+                LOGGER.warn(msg);
+                if (errorOutput != null) {
+                    errorOutput.message(msg);
+                }
                 return true;
             }
             visited.put(o, visited.get(o) + 1);
@@ -243,13 +261,13 @@ public class DeserializationUtils {
 
         if (o instanceof Map) {
             for (Object k : ((Map) o).keySet()) {
-                boolean res = exceedsLimits(k, o, currentDepth + 1, visited);
+                boolean res = exceedsLimits(k, o, currentDepth + 1, visited, errorOutput);
                 if (res) {
                     return true;
                 }
             }
             for (Object v : ((Map) o).values()) {
-                boolean res = exceedsLimits(v, o, currentDepth + 1, visited);
+                boolean res = exceedsLimits(v, o, currentDepth + 1, visited, errorOutput);
                 if (res) {
                     return true;
                 }
@@ -257,7 +275,7 @@ public class DeserializationUtils {
 
         } else if (o instanceof List) {
             for (Object v: ((List)o)) {
-                boolean res = exceedsLimits(v, o, currentDepth + 1, visited);
+                boolean res = exceedsLimits(v, o, currentDepth + 1, visited, errorOutput);
                 if (res) {
                     return true;
                 }
@@ -266,13 +284,17 @@ public class DeserializationUtils {
         return false;
     }
 
-    private static boolean hasReference(Object o, Object target, Integer depth, Map<Object, Long> visited) {
+    private static boolean hasReference(Object o, Object target, Integer depth, Map<Object, Long> visited, SwaggerDeserializationResult errorOutput) {
 
         if (o == null || target == null) return false;
         if (!(o instanceof List) && !(o instanceof Map)) return false;
         if (!(target instanceof List) && !(target instanceof Map)) return false;
         if (depth > options.getMaxYamlDepth()) {
-            LOGGER.warn("snake-yaml result exceeds max depth {}; threshold can be increased if needed by setting  system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
+            String msg = String.format("snake-yaml result exceeds max depth %d; threshold can be increased if needed by setting system property `maxYamlDepth` to a higher value.", options.getMaxYamlDepth());
+            LOGGER.warn(msg);
+            if (errorOutput != null) {
+                errorOutput.message(msg);
+            }
             return true;
         }
         int currentDepth = depth;
@@ -290,10 +312,14 @@ public class DeserializationUtils {
         }
         for (Object v : children) {
             if (v == target) {
-                 LOGGER.warn("detected cycle in snake-yaml result; cycle check can be disabled by setting system property `yamlCycleCheck` to false.");
-                 return true;
+                String msg = "detected cycle in snake-yaml result; cycle check can be disabled by setting system property `yamlCycleCheck` to false.";
+                LOGGER.warn(msg);
+                if (errorOutput != null) {
+                    errorOutput.message(msg);
+                }
+                return true;
             }
-            boolean res = hasReference(v, target, currentDepth + 1, visited);
+            boolean res = hasReference(v, target, currentDepth + 1, visited, errorOutput);
             if (res) {
                 return true;
             }
