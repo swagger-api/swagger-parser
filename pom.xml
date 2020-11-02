@@ -365,7 +365,7 @@
         </repository>
     </repositories>
     <properties>
-        <swagger-parser-v2-version>1.0.52-SNAPSHOT</swagger-parser-v2-version>
+        <swagger-parser-v2-version>1.0.52</swagger-parser-v2-version>
         <commons-io-version>2.6</commons-io-version>
         <slf4j-version>1.7.30</slf4j-version>
         <swagger-core-version>2.1.5</swagger-core-version>
