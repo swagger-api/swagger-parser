@@ -375,7 +375,7 @@
         <junit-version>4.13.1</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>
-        <wiremock-version>2.4.1</wiremock-version>
+        <wiremock-version>2.25.0</wiremock-version>
         <surefire-version>2.18.1</surefire-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
