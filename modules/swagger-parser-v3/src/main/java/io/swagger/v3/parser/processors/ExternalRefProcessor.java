@@ -1,7 +1,9 @@
 package io.swagger.v3.parser.processors;
 
 
+import java.io.File;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -111,7 +113,12 @@ public final class ExternalRefProcessor {
             if (schema.get$ref() != null) {
                 RefFormat ref = computeRefFormat(schema.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    schema.set$ref(processRefToExternalSchema(schema.get$ref(), ref));
+                    String schemaFullRef = schema.get$ref();
+                    String parent = file.substring(0, file.lastIndexOf(File.separatorChar));
+                    if (!parent.isEmpty()) {
+                        schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
+                    }
+                    schema.set$ref(processRefToExternalSchema(schemaFullRef, ref));
                 } else {
                     processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
                 }
