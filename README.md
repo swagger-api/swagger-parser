@@ -2,11 +2,7 @@
 
 **NOTE:** If you're looking for `swagger-parser` 1.X and OpenAPI 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-parser/tree/v1)
 
-[![Build Status](https://img.shields.io/jenkins/build.svg?jobUrl=https://jenkins.swagger.io/job/oss-swagger-parser-v2/)](https://jenkins.swagger.io/job/oss-swagger-parser-v2/)
-
-[![Build Status](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2/badge/icon?subject=jenkins%20build%20-%20java%208)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2/)
-
-[![Build Status](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2-java9/badge/icon?subject=jenkins%20build%20-%20java%209)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-parser-v2-java9/)
+![Build Master - Java 8, 11, and 14](https://github.com/swagger-api/swagger-parser/workflows/Build%20Test%20Deploy%20master/badge.svg?branch=master)
 
 ## Overview 
 This is the Swagger Parser project, which reads OpenAPI definitions into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
@@ -103,7 +99,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.22</version>
+  <version>2.0.23</version>
 </dependency>
 ```
 

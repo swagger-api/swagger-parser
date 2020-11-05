@@ -24,7 +24,6 @@ be more maintainable e.g. implementing a custom JavaScript or Docker Container G
 1. execute `prepare-release.yml` / `Prepare Release` for `master` branch
 1. check and merge the Prepare Release PR pushed by previous step. Delete the branch
 1. execute `release.yml` / `Release` for `master` branch
-1. check and merge the `v1` branch Readme update PR pushed by previous step. Delete the branch
 1. check and merge the next snaphot PR pushed by previous step. Delete the branch
 
 #### Prepare Release

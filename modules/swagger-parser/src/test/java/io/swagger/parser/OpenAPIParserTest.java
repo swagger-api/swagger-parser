@@ -14,6 +14,8 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import org.junit.Test;
 import org.testng.Assert;
 
@@ -587,6 +589,32 @@ public class OpenAPIParserTest {
 
         final Object baz = inputProperties.get("baz");
         assertEquals(baz.getClass(), StringSchema.class);
+    }
+
+    @Test
+    public void testMultipleOfBetweenZeroAndOne() {
+        String spec =
+                "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: \"test\"\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Test:\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        decimal_value:\n" +
+                "          type: number\n" +
+                "          multipleOf: 0.3\n";
+
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+
+        OpenAPI openAPI = openApiParser.readContents(spec, null, options).getOpenAPI();
+        ObjectSchema schema = (ObjectSchema) openAPI.getComponents().getSchemas().get("Test");
+        Schema decimalValue = schema.getProperties().get("decimal_value");
+        BigDecimal multipleOf = decimalValue.getMultipleOf();
+        assertEquals(multipleOf, new BigDecimal("0.3", new MathContext(multipleOf.precision())));
     }
 }
 
