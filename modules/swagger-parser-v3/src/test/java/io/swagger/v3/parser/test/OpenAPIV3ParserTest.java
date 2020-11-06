@@ -1297,6 +1297,69 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testLoadExternalNestedDefinitionsWithReferenceWithinSubfolder() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final OpenAPI openAPI = parser.read("src/test/resources/nested-references-2/main.yaml");
+
+        Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
+        assertTrue(definitions.containsKey("GreetingResponse"));
+        assertTrue(definitions.containsKey("GreetingMessage"));
+        assertTrue(definitions.containsKey("greeting-message"));
+
+        String greetingMessageRef = ((Schema) definitions.get("GreetingResponse")
+                .getProperties().get("GreetingMessage")).get$ref();
+
+        assertEquals(greetingMessageRef,"#/components/schemas/GreetingMessage");
+        assertEquals(definitions.get("GreetingMessage").get$ref(),"#/components/schemas/greeting-message");
+
+        String description = ((Schema)definitions.get("greeting-message")
+                .getProperties().get("Text")).getDescription();
+        assertEquals(description,"Text message");
+    }
+
+    @Test
+    public void testLoadExternalNestedDefinitionsWithReferenceWithinSameFolder() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final OpenAPI openAPI = parser.read("src/test/resources/nested-references-3/main.yaml");
+
+        Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
+        assertTrue(definitions.containsKey("GreetingResponse"));
+        assertTrue(definitions.containsKey("GreetingMessage"));
+        assertTrue(definitions.containsKey("greeting-message"));
+
+        String greetingMessageRef = ((Schema) definitions.get("GreetingResponse")
+                .getProperties().get("GreetingMessage")).get$ref();
+
+        assertEquals(greetingMessageRef,"#/components/schemas/GreetingMessage");
+        assertEquals(definitions.get("GreetingMessage").get$ref(),"#/components/schemas/greeting-message");
+
+        String description = ((Schema)definitions.get("greeting-message")
+                .getProperties().get("Text")).getDescription();
+        assertEquals(description,"Text message");
+    }
+
+    @Test
+    public void testLoadExternalNestedDefinitionsWithReferenceOnDifferentFolderLevels() throws Exception {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        final OpenAPI openAPI = parser.read("src/test/resources/nested-references-4/main.yaml");
+
+        Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
+        assertTrue(definitions.containsKey("GreetingResponse"));
+        assertTrue(definitions.containsKey("GreetingMessage"));
+        assertTrue(definitions.containsKey("greeting-message"));
+
+        String greetingMessageRef = ((Schema) definitions.get("GreetingResponse")
+                .getProperties().get("GreetingMessage")).get$ref();
+
+        assertEquals(greetingMessageRef,"#/components/schemas/GreetingMessage");
+        assertEquals(definitions.get("GreetingMessage").get$ref(),"#/components/schemas/greeting-message");
+
+        String description = ((Schema)definitions.get("greeting-message")
+                .getProperties().get("Text")).getDescription();
+        assertEquals(description,"Text message");
+    }
+
+    @Test
     public void testPetstore() throws Exception {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
