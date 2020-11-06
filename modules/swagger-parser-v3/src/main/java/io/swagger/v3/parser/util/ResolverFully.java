@@ -395,18 +395,15 @@ public class ResolverFully {
             for (String key : updated.keySet()) {
                 Schema property = updated.get(key);
 
-                if(property instanceof ObjectSchema) {
-                    ObjectSchema op = (ObjectSchema) property;
-                    if (op.getProperties() != model.getProperties()) {
-                        if (property.getType() == null) {
-                            property.setType("object");
-                        }
-                        model.addProperties(key, property);
-                    } else {
-                        LOGGER.debug("not adding recursive properties, using generic object");
-                        ObjectSchema newSchema = new ObjectSchema();
-                        model.addProperties(key, newSchema);
+                if (property.getProperties() != model.getProperties()) {
+                    if (property.getType() == null) {
+                        property.setType("object");
                     }
+                    model.addProperties(key, property);
+                } else {
+                    LOGGER.debug("not adding recursive properties, using generic object");
+                    ObjectSchema newSchema = new ObjectSchema();
+                    model.addProperties(key, newSchema);
                 }
 
             }

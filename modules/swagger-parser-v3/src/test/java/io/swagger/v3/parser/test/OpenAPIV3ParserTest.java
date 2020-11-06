@@ -82,6 +82,12 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1398() {
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue1398.yaml", null, options);
+        assertEquals(result.getMessages().get(0), "attribute paths.'/pet/{petId}'(get).parameters.[petId].schemas.multipleOf value must be > 0");
+    }
 
     @Test
     public void testIssue1367() {
@@ -870,6 +876,22 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.1");
         assertEquals(result.getOpenAPI().getComponents().getSchemas().get("OrderRef").getType(),"object");
+    }
+
+    @Test
+    public void issue1455_testResolveFullyV2_shouldNotThrowNPE() throws Exception{
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/swagger.json"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, new ArrayList<>(), options  );
+
+        Assert.assertNotNull(result);
+        Assert.assertNull(result.getOpenAPI());
+        Assert.assertNotNull(result.getMessages());
+        Assert.assertEquals(result.getMessages().size(), 1);
+        Assert.assertEquals(result.getMessages().get(0), "attribute openapi is missing");
     }
 
     @Test
@@ -2593,6 +2615,23 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI);
         Schema cat = openAPI.getComponents().getSchemas().get("Cat");
         Assert.assertNotNull(cat);
+    }
+
+    @Test
+    public void testParser() {
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options =  new ParseOptions();
+        options.setResolve(Boolean.TRUE);
+        final SwaggerParseResult result = parser.readLocation("src/test/resources/issue-1419.yaml", null, options);
+        System.out.println(result.getMessages());
+        Assert.assertNotNull(result);
+        ArraySchema schema   = (ArraySchema) result.getOpenAPI().getComponents().getSchemas().get("Vehicle").getProperties().get("arrayG");
+        ArraySchema schema1 = (ArraySchema) schema.getItems();
+        ArrayList enum1 = (ArrayList) schema1.getEnum();
+
+        Assert.assertEquals(enum1.get(0),"[[1,2],[2,6]]");
+
     }
 
 }

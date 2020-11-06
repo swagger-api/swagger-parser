@@ -1,6 +1,5 @@
 package io.swagger.parser;
 
-import io.swagger.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -8,12 +7,15 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.PathItem;
 
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import org.junit.Test;
 import org.testng.Assert;
 
@@ -569,6 +571,58 @@ public class OpenAPIParserTest {
         Schema score = schema.getProperties().get("score");
         assertEquals(score.getMultipleOf().intValue(), 1);
     }
-  
+
+    @Test
+    public void testIssue1433_ResolveSchemaWithoutType() {
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = openApiParser.readLocation("issue_1433-resolve-schema-without-type.yaml", null, options).getOpenAPI();
+        final Schema requestBodySchema = openAPI.getPaths().get("/foo").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertNotNull(requestBodySchema);
+
+        final Map properties = requestBodySchema.getProperties();
+        assertEquals(properties.size(), 2);
+
+        final Object bar = properties.get("bar");
+        assertEquals(bar.getClass(), StringSchema.class);
+
+        final Object input = properties.get("input");
+        assertEquals(input.getClass(), Schema.class);
+
+        final Map inputProperties = ((Schema) input).getProperties();
+        assertNotNull(inputProperties);
+        assertEquals(inputProperties.size(),1);
+
+        final Object baz = inputProperties.get("baz");
+        assertEquals(baz.getClass(), StringSchema.class);
+    }
+
+    @Test
+    public void testMultipleOfBetweenZeroAndOne() {
+        String spec =
+                "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  version: 0.0.0\n" +
+                "  title: \"test\"\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Test:\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        decimal_value:\n" +
+                "          type: number\n" +
+                "          multipleOf: 0.3\n";
+
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+
+        OpenAPI openAPI = openApiParser.readContents(spec, null, options).getOpenAPI();
+        ObjectSchema schema = (ObjectSchema) openAPI.getComponents().getSchemas().get("Test");
+        Schema decimalValue = schema.getProperties().get("decimal_value");
+        BigDecimal multipleOf = decimalValue.getMultipleOf();
+        assertEquals(multipleOf, new BigDecimal("0.3", new MathContext(multipleOf.precision())));
+    }
 }
 

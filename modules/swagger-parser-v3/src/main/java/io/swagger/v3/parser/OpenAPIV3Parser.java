@@ -150,7 +150,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             final ObjectMapper mapper = getRightMapper(swaggerAsString);
             final JsonNode rootNode = mapper.readTree(swaggerAsString);
             final SwaggerParseResult result = parseJsonNode(location, rootNode);
-            return resolve(result, auth, options, location);
+            if (result.getOpenAPI() != null) {
+                return resolve(result, auth, options, location);
+            }
+            return result;
         } catch (JsonProcessingException e) {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getOriginalMessage(), location);
@@ -178,7 +181,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     final InlineModelResolver inlineModelResolver =
                             new InlineModelResolver(options.isFlattenComposedSchemas(),
                                     options.isCamelCaseFlattenNaming(), options.isSkipMatches());
-                    inlineModelResolver.flatten(result.getOpenAPI());
+                    if (result.getOpenAPI()!= null) {
+                        inlineModelResolver.flatten(result.getOpenAPI());
+                    }
                 }
             }
         } catch (Exception e) {
