@@ -554,6 +554,14 @@ public class OpenAPIParserTest {
     }
 
     @Test
+    public void testIssue1070() {
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue1070.yaml", null, null);
+        List required = result.getOpenAPI().getComponents().getSchemas().get("AmountAndCurrency").getRequired();
+        assertEquals(required.size(), 2);
+        assertTrue(required.contains("Amount"));
+        assertTrue(required.contains("Currency"));
+    }
+  
     public void testIssue1086() {
         OpenAPIParser openApiParser = new OpenAPIParser();
         ParseOptions options = new ParseOptions();
