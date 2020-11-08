@@ -1658,4 +1658,18 @@ public class SwaggerParserTest {
 
 
     }
+
+    @Test
+    public void testRequiredItemsInComposedModel() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("src/test/resources/allOf-example/allOf.yaml", null, true);
+        assertNotNull(result);
+        final Swagger swagger = result.getSwagger();
+        final Model model = swagger.getDefinitions().get("UserRegister");
+        final ComposedModel composedModel = (ComposedModel) model;
+
+        assertNotNull(composedModel.getRequired());
+        assertFalse(composedModel.getRequired().isEmpty());
+
+        assertEquals("password", composedModel.getRequired().get(0));
+    }
 }
