@@ -1,0 +1,129 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Simplified Login",
+        "responses": {
+          "422": {
+            "$ref": "#/paths/~1files/put/responses/422"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerName",
+                  "deviceId"
+                ],
+                "properties": {
+                  "providerName": {
+                    "type": "string",
+                    "description": "Display name of the Identity Provider name.",
+                    "example": "ldap"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "Username. Required if a credentials based Identity Provider is used.",
+                    "example": "user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password. Required if a credentials based Identity Provider is used.",
+                    "example": "tSW3!QBv(rj{UuLY"
+                  },
+                  "deviceId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID to distinguish the Client device making the request. It is supposed to be same for every login request from the same server.",
+                    "example": "4c07bc67-57ea-42dd-b702-c2d6c45419fc"
+                  },
+                  "samlResponse": {
+                    "type": "string",
+                    "description": "SAMLResponse received from SAML provider. Required if a SAML based Identity Provider is used."
+                  }
+                }
+              }
+            }
+          },
+          "description": "Login Credentials.",
+          "required": true
+        }
+      }
+    },
+    "/files": {
+      "put": {
+        "summary": "Upload a File directly to the Controller.",
+        "description": "Upload a File directly to the current Controller. Note that the File is stored only on the current Controller, not synced between Controllers.",
+        "tags": [
+          "Appliance Upgrade"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1sites/get/parameters/0"
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Request validation error. Check \"errors\" array for details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Http 422 error for object validation.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Machine readable error code."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Human readable error details."
+                    },
+                    "errors": {
+                      "type": "array",
+                      "description": "List of fields with validation errors.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "description": "Name of the field that failed validation.",
+                            "example": "name"
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Failure reason.",
+                            "example": "may not be null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The File to upload. \"filename\"w must be included in in Content-Disposition."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
