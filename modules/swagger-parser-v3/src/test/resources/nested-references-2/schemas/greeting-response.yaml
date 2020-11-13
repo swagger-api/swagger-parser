@@ -1,0 +1,4 @@
+type: object
+properties:
+  GreetingMessage:
+    $ref: ./shared-defs.yaml#/components/schemas/GreetingMessage
