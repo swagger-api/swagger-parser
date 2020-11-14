@@ -2,6 +2,7 @@ package io.swagger.v3.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
@@ -880,6 +881,10 @@ public class OpenAPIDeserializerTest {
                 "                    $ref: '#/components/schemas/NumberEnum'\n" +
                 "                  be:\n" +
                 "                    $ref: '#/components/schemas/BooleanEnum'\n" +
+                "                  ae:\n" +
+                "                    $ref: '#/components/schemas/ArrayEnum'\n" +
+                "                  oe:\n" +
+                "                    $ref: '#/components/schemas/ObjectEnum'\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    StringEnum:\n" +
@@ -906,7 +911,30 @@ public class OpenAPIDeserializerTest {
                 "        - -1.151\n" +
                 "        - 0\n" +
                 "        - 1.6161\n" +
-                "        - 3.14";
+                "        - 3.14\n" +
+                "    ArrayEnum:\n" +
+                "      type: array\n" +
+                "      items:\n" +
+                "        type: string\n" +
+                "      enum:\n" +
+                "        - - Camry\n" +
+                "          - Prius\n" +
+                "        - null\n" +
+                "        - - Pilot\n" +
+                "          - Passport\n" +
+                "        - - Rogue\n" +
+                "          - Leaf\n" +
+                "    ObjectEnum:\n" +
+                "      type: object\n" +
+                "      enum:\n" +
+                "        - make: Toyota\n" + 
+                "          model: Prius\n" +
+                "        - make: Honda\n" + 
+                "          model: Pilot\n" +
+                "        - make: Nissan\n" + 
+                "          model: Leaf\n" +
+                "        - null\n";
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
 
@@ -947,6 +975,24 @@ public class OpenAPIDeserializerTest {
         assertEquals(2, booleanValues.size());
         assertEquals(Boolean.TRUE, booleanValues.get(0));
         assertEquals(Boolean.FALSE, booleanValues.get(1));
+        
+        Schema arrayModel = resolved.getComponents().getSchemas().get("ArrayEnum");
+        assertEquals("array", arrayModel.getType());
+        List<Object> arrayValues = arrayModel.getEnum();
+        assertEquals(arrayValues.size(),4);
+        assertEquals(arrayValues.get(0), JsonNodeFactory.instance.arrayNode().add( "Camry").add( "Prius"));
+        assertEquals(arrayValues.get(1), null);
+        assertEquals(arrayValues.get(2), JsonNodeFactory.instance.arrayNode().add( "Pilot").add( "Passport"));
+        assertEquals(arrayValues.get(3), JsonNodeFactory.instance.arrayNode().add( "Rogue").add( "Leaf"));
+        
+        Schema objectModel = resolved.getComponents().getSchemas().get("ObjectEnum");
+        assertEquals("object", objectModel.getType());
+        List<Object> objectValues = objectModel.getEnum();
+        assertEquals(objectValues.size(),4);
+        assertEquals(objectValues.get(0), JsonNodeFactory.instance.objectNode().put( "make", "Toyota").put( "model", "Prius"));
+        assertEquals(objectValues.get(1), JsonNodeFactory.instance.objectNode().put( "make", "Honda").put( "model", "Pilot"));
+        assertEquals(objectValues.get(2), JsonNodeFactory.instance.objectNode().put( "make", "Nissan").put( "model", "Leaf"));
+        assertEquals(objectValues.get(3), null);
     }
 
     @Test

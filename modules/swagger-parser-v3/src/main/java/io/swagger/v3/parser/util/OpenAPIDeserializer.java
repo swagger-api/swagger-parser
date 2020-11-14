@@ -2285,6 +2285,8 @@ public class OpenAPIDeserializer {
                     catch( ParseException e) {
                         result.invalidType( location, String.format( "enum=`%s`", e.getMessage()), schema.getFormat(), n);
                     }
+                } else if (n.isContainerNode()) {
+                    schema.addEnumItemObject(n.isNull()? null : n);
                 } else {
                     result.invalidType(location, "enum", "value", n);
                 }
