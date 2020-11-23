@@ -1,0 +1,20 @@
+swagger: '2.0'
+info:
+  title: Conversion test
+  version: '1.0.0'
+paths: {}
+
+definitions:
+  Foo:
+    type: object
+    properties:
+      foo:
+        type: string
+  Bar:
+    type: object
+    properties:
+      bar1:
+        $ref: '#/definitions/Foo'     # This $ref is converted properly to `#/components/schemas`
+      bar2:
+        allOf:
+          - $ref: '#/definitions/Foo' # This $ref remains as `#/definitions`

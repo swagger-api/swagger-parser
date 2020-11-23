@@ -1,0 +1,14 @@
+openapi: 3.0.2
+info:
+  title: Example references
+  version: 1.0.0
+paths:
+  /foo:
+    get:
+      parameters:
+        - name: paramName
+          in: query
+          example: " "
+      responses:
+        '200':
+          description: success

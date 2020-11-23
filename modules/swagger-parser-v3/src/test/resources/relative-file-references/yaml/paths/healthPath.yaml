@@ -14,13 +14,13 @@ get:
         schema:
           $ref: ../models/health.yaml
   responses:
-    200:
+    "200":
       description: Health information from the server
       content:
         application/json:
           schema:
             $ref: ../models/health.yaml
-    400:
+    "400":
       $ref: ../responses/errorResponses.yaml#/bad-request
-    500:
+    "500":
       $ref: ../responses/errorResponses.yaml#/internal-server-error

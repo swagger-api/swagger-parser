@@ -5,6 +5,8 @@ public class ParseOptions {
     private boolean resolveCombinators = true;
     private boolean resolveFully;
     private boolean flatten;
+    private boolean flattenComposedSchemas;
+    private boolean camelCaseFlattenNaming;
     private boolean skipMatches;
 
     public boolean isResolve() {
@@ -41,5 +43,20 @@ public class ParseOptions {
 
     public void setSkipMatches(boolean skipMatches) {
         this.skipMatches = skipMatches;
+    }
+
+    public boolean isFlattenComposedSchemas() {
+        return flattenComposedSchemas;
+    }
+
+    public void setFlattenComposedSchemas(boolean flattenComposedSchemas) {
+        this.flattenComposedSchemas = flattenComposedSchemas;
+    }
+    public boolean isCamelCaseFlattenNaming() {
+        return camelCaseFlattenNaming;
+    }
+
+    public void setCamelCaseFlattenNaming(boolean camelCaseFlattenNaming) {
+        this.camelCaseFlattenNaming = camelCaseFlattenNaming;
     }
 }

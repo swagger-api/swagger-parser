@@ -1,0 +1,21 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.swagger.io/v1
+paths:
+  /pets:
+    $ref: "./pets/pets.yml"
+
+components:
+  schemas:
+    Date:
+      type: string
+      format: date
+    DateWithExample:
+      $ref: '#/components/schemas/Date'
+      description: Date schema extended with a `default` value... Or not?
+      default: 2000-01-01

@@ -34,7 +34,7 @@ public class CallbackProcessor {
     }
 
     public void processCallback(Callback callback) {
-        if (callback.get("$ref") != null){
+        if (callback.get$ref() != null){
             processReferenceCallback(callback);
         }
         //Resolver PathItem
@@ -57,12 +57,12 @@ public class CallbackProcessor {
     }
 
     public void processReferenceCallback(Callback callback ){
-        String $ref = callback.get("$ref").get$ref();
+        String $ref = callback.get$ref();
         RefFormat refFormat = computeRefFormat($ref);
         if (isAnExternalRefFormat(refFormat)){
             final String newRef = externalRefProcessor.processRefToExternalCallback($ref, refFormat);
             if (newRef != null) {
-                callback.get("$ref").set$ref("#/components/callbacks/"+newRef);
+                callback.set$ref("#/components/callbacks/"+newRef);
             }
         }
     }

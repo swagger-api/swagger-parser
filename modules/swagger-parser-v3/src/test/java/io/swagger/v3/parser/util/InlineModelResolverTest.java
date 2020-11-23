@@ -432,7 +432,6 @@ public class InlineModelResolverTest {
         final OpenAPI openAPI = new OpenAPI();
 
         final InlineModelResolver inlineModelResolver = new InlineModelResolver();
-        inlineModelResolver.setSkipMatches(false);
 
         final Schema operationAlphaInAsset = new ObjectSchema();
         operationAlphaInAsset.setTitle("operationAlphaInAsset");
@@ -484,8 +483,7 @@ public class InlineModelResolverTest {
     public void testSkipInlineMatchesTrue() {
         final OpenAPI openAPI = new OpenAPI();
 
-        final InlineModelResolver inlineModelResolver = new InlineModelResolver();
-        inlineModelResolver.setSkipMatches(true);
+        final InlineModelResolver inlineModelResolver = new InlineModelResolver(false, false, true);
 
         final Schema operationAlphaInAsset = new ObjectSchema();
         operationAlphaInAsset.setTitle("operationAlphaInAsset");
@@ -940,12 +938,9 @@ public class InlineModelResolverTest {
 
         ApiResponses apiResponses = new ApiResponses().addApiResponse("200",apiResponse);
 
-
-
         openAPI.path("/foo/baz", new PathItem()
                 .get(new Operation()
                         .responses(apiResponses)));
-
 
         new InlineModelResolver().flatten(openAPI);
 
@@ -956,7 +951,7 @@ public class InlineModelResolverTest {
         assertEquals("ext-prop", property.getExtensions().get("x-ext"));
         assertTrue(openAPI.getComponents().getSchemas().size() == 1);
 
-        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_200");
+        Schema inline = openAPI.getComponents().getSchemas().get("inline_response_map200");
         assertTrue(inline instanceof Schema);
         assertNotNull(inline.getProperties().get("name"));
         assertTrue(inline.getProperties().get("name") instanceof StringSchema);
@@ -1344,8 +1339,6 @@ public class InlineModelResolverTest {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.json",null, options);
-
-        System.out.println(openAPI);
 
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));

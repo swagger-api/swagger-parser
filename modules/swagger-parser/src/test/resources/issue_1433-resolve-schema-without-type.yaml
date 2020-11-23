@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: no type resolution
+  version: 1.0.0
+paths:
+  /foo:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FooInput'
+      responses:
+        '200':
+          description: subscription successfully created
+components:
+  schemas:
+    FooInput:
+      properties:
+        bar:
+          type: string
+        input:
+          $ref: '#/components/schemas/BazInput'
+    BazInput:
+      properties:
+        baz:
+          type: string

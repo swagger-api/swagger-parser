@@ -2,6 +2,7 @@ package io.swagger.v3.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
@@ -791,7 +792,7 @@ public class OpenAPIDeserializerTest {
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
-        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.schema.items is missing"));
+        assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.'application/json'.schema.items is missing"));
         
         OpenAPI openAPI = result.getOpenAPI();
 
@@ -880,6 +881,10 @@ public class OpenAPIDeserializerTest {
                 "                    $ref: '#/components/schemas/NumberEnum'\n" +
                 "                  be:\n" +
                 "                    $ref: '#/components/schemas/BooleanEnum'\n" +
+                "                  ae:\n" +
+                "                    $ref: '#/components/schemas/ArrayEnum'\n" +
+                "                  oe:\n" +
+                "                    $ref: '#/components/schemas/ObjectEnum'\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    StringEnum:\n" +
@@ -906,7 +911,30 @@ public class OpenAPIDeserializerTest {
                 "        - -1.151\n" +
                 "        - 0\n" +
                 "        - 1.6161\n" +
-                "        - 3.14";
+                "        - 3.14\n" +
+                "    ArrayEnum:\n" +
+                "      type: array\n" +
+                "      items:\n" +
+                "        type: string\n" +
+                "      enum:\n" +
+                "        - - Camry\n" +
+                "          - Prius\n" +
+                "        - null\n" +
+                "        - - Pilot\n" +
+                "          - Passport\n" +
+                "        - - Rogue\n" +
+                "          - Leaf\n" +
+                "    ObjectEnum:\n" +
+                "      type: object\n" +
+                "      enum:\n" +
+                "        - make: Toyota\n" + 
+                "          model: Prius\n" +
+                "        - make: Honda\n" + 
+                "          model: Pilot\n" +
+                "        - make: Nissan\n" + 
+                "          model: Leaf\n" +
+                "        - null\n";
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
 
@@ -947,6 +975,24 @@ public class OpenAPIDeserializerTest {
         assertEquals(2, booleanValues.size());
         assertEquals(Boolean.TRUE, booleanValues.get(0));
         assertEquals(Boolean.FALSE, booleanValues.get(1));
+        
+        Schema arrayModel = resolved.getComponents().getSchemas().get("ArrayEnum");
+        assertEquals("array", arrayModel.getType());
+        List<Object> arrayValues = arrayModel.getEnum();
+        assertEquals(arrayValues.size(),4);
+        assertEquals(arrayValues.get(0), JsonNodeFactory.instance.arrayNode().add( "Camry").add( "Prius"));
+        assertEquals(arrayValues.get(1), null);
+        assertEquals(arrayValues.get(2), JsonNodeFactory.instance.arrayNode().add( "Pilot").add( "Passport"));
+        assertEquals(arrayValues.get(3), JsonNodeFactory.instance.arrayNode().add( "Rogue").add( "Leaf"));
+        
+        Schema objectModel = resolved.getComponents().getSchemas().get("ObjectEnum");
+        assertEquals("object", objectModel.getType());
+        List<Object> objectValues = objectModel.getEnum();
+        assertEquals(objectValues.size(),4);
+        assertEquals(objectValues.get(0), JsonNodeFactory.instance.objectNode().put( "make", "Toyota").put( "model", "Prius"));
+        assertEquals(objectValues.get(1), JsonNodeFactory.instance.objectNode().put( "make", "Honda").put( "model", "Pilot"));
+        assertEquals(objectValues.get(2), JsonNodeFactory.instance.objectNode().put( "make", "Nissan").put( "model", "Leaf"));
+        assertEquals(objectValues.get(3), null);
     }
 
     @Test
@@ -1170,6 +1216,56 @@ public class OpenAPIDeserializerTest {
           Arrays.asList(
             "attribute components.schemas.ByteString.enum=`W.T.F?` is not of type `byte`",
             "attribute components.schemas.ByteString.default=`W.T.F?` is not of type `byte`"));
+    }
+
+    @Test
+    public void testStyleInvalid() {
+        String json =
+            "{"
+            + "    \"openapi\": \"3.0.0\","
+            + "    \"info\": {"
+            + "        \"title\": \"realize\","
+            + "        \"version\": \"0.0.0\""
+            + "    },"
+            + "    \"paths\": {"
+            + "        \"/realize/{param}\": {"
+            + "            \"post\": {"
+            + "                \"parameters\": ["
+            + "                    {"
+            + "                        \"name\": \"param\","
+            + "                        \"in\": \"path\","
+            + ""
+            + "                        \"style\": \"DERP\","
+            + "                        \"required\": true,"
+            + ""
+            + "                        \"schema\": {"
+            + "                            \"type\": \"string\","
+            + "                            \"nullable\": false,"
+            + "                            \"minLength\": 1"
+            + "                        }"
+            + "                    }"
+            + "                ],"
+            + "                \"responses\": {"
+            + "                    \"200\": {"
+            + "                        \"description\": \"Success\","
+            + "                        \"content\": {"
+            + "                            \"application/json\": {"
+            + "                                \"schema\": {"
+            + "                                    \"type\": \"object\""
+            + "                                }"
+            + "                            }"
+            + "                        }"
+            + "                    }"
+            + "                }"
+            + "            }"
+            + "        }"
+            + "    }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        assertTrue(result.getMessages().size() == 1);
+        assertEquals(result.getMessages().get(0), "attribute paths.'/realize/{param}'(post).parameters.[param].style is not of type `StyleEnum`");
     }
 
     @Test
@@ -2384,7 +2480,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
-        Assert.assertNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
 
         PathItem petEndpoint = paths.get("/pet");
         Assert.assertNotNull(petEndpoint.getPut());

@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  version: 0.0.0
+  title: "test"
+components:
+  schemas:
+    AmountAndCurrency:
+      additionalProperties: false
+      description: >-
+        Amount with a currency.
+      properties:
+        Amount:
+          $ref: '#/components/schemas/AssessCandidate'
+        Currency:
+          description: >-
+            Representation of currencies and funds".
+          pattern: '^[A-Z]{3,3}$'
+          type: string
+      required:
+        - Amount
+        - Currency
+      type: object
+    AssessCandidate:
+      type: object
+      properties:
+        candidate:
+          type: object
+          properties:
+            id:
+              type: string
+          required:
+            - id
+        test_results:
+          type: object
+          properties:
+            id:
+              type: string
+            status:
+              type: string
+            score:
+              type: number
+              multipleOf: 1
+            date:
+              type: string
+              format: date
+            comment:
+              type: string
+            result_url:
+              type: string
+      required:
+        - candidate
+        - test_results

@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -231,7 +232,7 @@ public class OpenAPIResolverTest {
 
         //remote url schema
         Schema user = (Schema) pet.getProperties().get("user");
-        assertEquals(user.get$ref(),"#/components/schemas/User_2");
+        assertEquals(user.get$ref(),"#/components/schemas/User");
 
 
         //ArraySchema items
@@ -246,7 +247,7 @@ public class OpenAPIResolverTest {
         //Schema additionalProperties
         assertTrue(schemas.get("OrderRef").getAdditionalProperties() instanceof Schema);
         Schema additionalProperties = (Schema) schemas.get("OrderRef").getAdditionalProperties();
-        assertEquals(additionalProperties.get$ref(), "#/components/schemas/User_2");
+        assertEquals(additionalProperties.get$ref(), "#/components/schemas/User");
 
         //AllOfSchema
         ComposedSchema extended = (ComposedSchema) schemas.get("ExtendedErrorModel");
@@ -306,7 +307,7 @@ public class OpenAPIResolverTest {
         //internal Schema header
         Map<String, Header> headers = openAPI.getComponents().getHeaders();
         //header remote schema ref
-        assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User_2");
+        assertEquals(headers.get("X-Rate-Limit-Remaining").getSchema().get$ref(),"#/components/schemas/User");
 
         //header examples
         assertEquals(headers.get("X-Rate-Limit-Reset").getExamples().get("headerExample").get$ref(), "#/components/examples/dog" );
@@ -347,7 +348,7 @@ public class OpenAPIResolverTest {
         //callback pathItem -> operation ->requestBody
         assertEquals(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody3");
         //remote callback ref
-        assertEquals(callbacks.get("remoteCallback").get$ref(),"http://localhost:" + serverPort + "/remote/callback");
+        assertEquals(callbacks.get("remoteCallback").get$ref(),"#/components/callbacks/callback");
 
     }
 
@@ -489,6 +490,17 @@ public class OpenAPIResolverTest {
         assertNotNull(am);
         Schema prop = am.getItems();
         assertTrue(prop instanceof Schema);
+    }
+
+    @Test
+    public void testIssue1352(@Injectable final List<AuthorizationValue> auths) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI= new OpenAPIV3Parser().readLocation("issue-1352.json", auths, options).getOpenAPI();
+        assertNull(openAPI.getPaths().get("/responses").getPatch().getResponses().get("200").getHeaders().get("x-my-secret-header").getSchema().get$ref());
+
     }
 
     @Test

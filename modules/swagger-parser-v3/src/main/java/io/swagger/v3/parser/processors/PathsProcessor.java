@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public class PathsProcessor {
 
@@ -31,6 +32,7 @@ public class PathsProcessor {
     private final OpenAPIResolver.Settings settings;
     private final ParameterProcessor parameterProcessor;
     private final OperationProcessor operationProcessor;
+    private final ExternalRefProcessor externalRefProcessor;
 
     public PathsProcessor(ResolverCache cache, OpenAPI openAPI) {
         this(cache, openAPI, new OpenAPIResolver.Settings());
@@ -41,6 +43,7 @@ public class PathsProcessor {
         this.settings = settings;
         parameterProcessor = new ParameterProcessor(cache, openAPI);
         operationProcessor = new OperationProcessor(cache, openAPI);
+        this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
     public void processPaths() {
@@ -56,10 +59,8 @@ public class PathsProcessor {
             addParametersToEachOperation(pathItem);
 
             if (pathItem.get$ref() != null) {
-                RefFormat refFormat = computeRefFormat(pathItem.get$ref());
-                PathItem resolvedPath = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
 
-                // TODO: update references to the parent location
+                PathItem resolvedPath = processReferencePath(pathItem);
 
                 String pathRef = pathItem.get$ref().split("#")[0];
 
@@ -289,5 +290,17 @@ public class PathsProcessor {
 
     protected String computeLocalRef(String ref, String prefix) {
         return prefix + ref;
+    }
+
+    public PathItem processReferencePath(PathItem pathItem){
+        RefFormat refFormat = computeRefFormat(pathItem.get$ref());
+        String $ref = pathItem.get$ref();
+        if (isAnExternalRefFormat(refFormat)){
+              pathItem = externalRefProcessor.processRefToExternalPathItem($ref, refFormat);
+        }else{
+             pathItem = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
+        }
+
+        return pathItem;
     }
 }

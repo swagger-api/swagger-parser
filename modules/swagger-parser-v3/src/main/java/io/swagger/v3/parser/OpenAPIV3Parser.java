@@ -1,5 +1,6 @@
 package io.swagger.v3.parser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -7,223 +8,51 @@ import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.exception.EncodingNotSupportedException;
+import io.swagger.v3.parser.exception.ReadContentException;
 import io.swagger.v3.parser.util.ClasspathHelper;
 import io.swagger.v3.parser.util.InlineModelResolver;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RemoteUrl;
 import io.swagger.v3.parser.util.ResolverFully;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.net.ssl.SSLHandshakeException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.ServiceLoader;
+import javax.net.ssl.SSLHandshakeException;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OpenAPIV3Parser implements SwaggerParserExtension {
-    private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
-    private static String encoding = "UTF-8";
+    private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
+    /**
+     * Encoding of the resource content with OpenAPI spec to parse.
+     */
+    private static String encoding = StandardCharsets.UTF_8.displayName();
 
     static {
         JSON_MAPPER = ObjectMapperFactory.createJson();
         YAML_MAPPER = ObjectMapperFactory.createYaml();
     }
 
-    public static String getEncoding() {
-        return encoding;
-    }
-
-    public static void setEncoding(String encoding) {
-        if (Charset.isSupported(encoding)) {
-            OpenAPIV3Parser.encoding = encoding;
-        }
-    }
-
-    @Override
-    public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
-        SwaggerParseResult result = new SwaggerParseResult();
-        try {
-            if (auth == null) {
-                auth = new ArrayList<>();
-            }
-            result = readWithInfo(url,auth);
-
-            if (result.getOpenAPI() != null) {
-                String version = result.getOpenAPI().getOpenapi();
-                if (version != null && version.startsWith("3.0")) {
-                    if (options != null) {
-                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, url);
-                        if (options.isResolve()) {
-                            result.setOpenAPI(resolver.resolve());
-                        }
-                        if (options.isResolveFully()) {
-                            result.setOpenAPI(resolver.resolve());
-                            new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
-                        } else if (options.isFlatten()) {
-                            InlineModelResolver inlineModelResolver = new InlineModelResolver();
-                            inlineModelResolver.setSkipMatches(options.isSkipMatches());
-                            inlineModelResolver.flatten(result.getOpenAPI());
-                        }
-                    }
-                }
-            }
-
-        }
-
-        catch (Exception e) {
-            LOGGER.warn("Exception while reading:", e);
-            result.setMessages(Arrays.asList(e.getMessage()));
-        }
-        return result;
-    }
-
-    public OpenAPI read(String location) {
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        return read(location,  null, options);
-    }
-    public OpenAPI read(String location, List<AuthorizationValue> auths, ParseOptions resolve) {
-        if (location == null) {
-            return null;
-        }
-        location = location.replaceAll("\\\\","/");
-        OpenAPI output;
-
-        List<SwaggerParserExtension> parserExtensions = getExtensions();
-        SwaggerParseResult parsed;
-        for (SwaggerParserExtension extension : parserExtensions) {
-            parsed = extension.readLocation(location, auths, resolve);
-            for (String message : parsed.getMessages()) {
-                LOGGER.info("{}: {}", extension, message);
-            }
-            output = parsed.getOpenAPI();
-            if (output != null) {
-                return output;
-            }
-        }
-        return null;
-    }
-
-    public SwaggerParseResult readWithInfo(String path, JsonNode node) {
-        OpenAPIDeserializer ser = new OpenAPIDeserializer();
-        return ser.deserialize(node, path);
-    }
-
-    private ObjectMapper getRightMapper(String data) {
-      ObjectMapper mapper;
-      if(data.trim().startsWith("{")) {
-          mapper = JSON_MAPPER;
-      } else {
-          mapper = YAML_MAPPER;
-      }
-      return mapper;
-    }
-
-    public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
-        String data;
-
-        try {
-            location = location.replaceAll("\\\\","/");
-            if (location.toLowerCase().startsWith("http")) {
-                data = RemoteUrl.urlToString(location, auths);
-            } else {
-                final String fileScheme = "file:";
-                Path path;
-                if (location.toLowerCase().startsWith(fileScheme)) {
-                    path = Paths.get(URI.create(location));
-                } else {
-                    path = Paths.get(location);
-                }
-                if (Files.exists(path)) {
-                    data = FileUtils.readFileToString(path.toFile(), encoding);
-                } else {
-                    data = ClasspathHelper.loadFileFromClasspath(location);
-                }
-            }
-            LOGGER.debug("Loaded raw data: {}", data);
-            ObjectMapper mapper = getRightMapper(data);
-            JsonNode rootNode = mapper.readTree(data);
-            LOGGER.debug("Parsed rootNode: {}", rootNode);
-            return readWithInfo(location, rootNode);
-        }
-        catch (SSLHandshakeException e) {
-            SwaggerParseResult output = new SwaggerParseResult();
-            output.setMessages(Arrays.asList("unable to read location `" + location + "` due to a SSL configuration error.  " +
-                    "It is possible that the server SSL certificate is invalid, self-signed, or has an untrusted " +
-                    "Certificate Authority."));
-            return output;
-        }
-        catch (Exception e) {
-            LOGGER.warn("Exception while reading:", e);
-            SwaggerParseResult output = new SwaggerParseResult();
-            output.setMessages(Arrays.asList("unable to read location `" + location + "`"));
-            return output;
-        }
-    }
-
-    @Override
-    public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options) {
-        SwaggerParseResult result = new SwaggerParseResult();
-        if(swaggerAsString != null && !"".equals(swaggerAsString.trim())) {
-            ObjectMapper mapper = getRightMapper(swaggerAsString);
-
-            if(auth == null) {
-                auth = new ArrayList<>();
-            }
-            try{
-                if(options != null) {
-                    if (options.isResolve()) {
-                        OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-                        JsonNode rootNode = mapper.readTree(swaggerAsString);
-                        result = deserializer.deserialize(rootNode);
-                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), auth, null);
-                        result.setOpenAPI(resolver.resolve());
-                    }else{
-                        JsonNode rootNode = mapper.readTree(swaggerAsString);
-                        result = new OpenAPIDeserializer().deserialize(rootNode);
-                    }
-                    if (options.isResolveFully()) {
-                        result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), auth, null).resolve());
-                        new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
-                    } else if (options.isFlatten()) {
-                        InlineModelResolver inlineModelResolver = new InlineModelResolver();
-                        inlineModelResolver.setSkipMatches(options.isSkipMatches());
-                        inlineModelResolver.flatten(result.getOpenAPI());
-                    }
-                }else{
-                    JsonNode rootNode = mapper.readTree(swaggerAsString);
-                    result = new OpenAPIDeserializer().deserialize(rootNode);
-                }
-            } catch (Exception e) {
-                result.setMessages(Arrays.asList(e.getMessage()));
-            }
-        }
-        else {
-            result.setMessages(Arrays.asList("No swagger supplied"));
-        }
-        return result;
-    }
-
     /**
-     * Locates extensions on the current thread class loader and then, if it differs
-     * from this class classloader (as in OSGi), locates extensions from this
-     * class classloader as well.
-     *
+     * Locates extensions on the current thread class loader and then, if it differs from this class classloader (as in
+     * OSGi), locates extensions from this class classloader as well.
      * @return a list of extensions
      */
     public static List<SwaggerParserExtension> getExtensions() {
-        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-        List<SwaggerParserExtension> extensions = getExtensions(tccl);
-        ClassLoader cl = SwaggerParserExtension.class.getClassLoader();
+        final ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        final List<SwaggerParserExtension> extensions = getExtensions(tccl);
+        final ClassLoader cl = SwaggerParserExtension.class.getClassLoader();
         if (cl != tccl) {
             extensions.addAll(getExtensions(cl));
         }
@@ -232,23 +61,192 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     protected static List<SwaggerParserExtension> getExtensions(ClassLoader cl) {
-        List<SwaggerParserExtension> extensions = new ArrayList<>();
+        final List<SwaggerParserExtension> extensions = new ArrayList<>();
 
-        ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class, cl);
-        Iterator<SwaggerParserExtension> itr = loader.iterator();
-        while (itr.hasNext()) {
-            extensions.add(itr.next());
+        final ServiceLoader<SwaggerParserExtension> loader = ServiceLoader.load(SwaggerParserExtension.class, cl);
+        for (SwaggerParserExtension extension : loader) {
+            extensions.add(extension);
         }
         return extensions;
     }
 
-   /**
+    public static String getEncoding() {
+        return encoding;
+    }
+
+    public static void setEncoding(String encoding) {
+        if (!Charset.isSupported(encoding)) {
+            throw new EncodingNotSupportedException(encoding);
+        }
+        OpenAPIV3Parser.encoding = encoding;
+    }
+
+    @Override
+    public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
+        try {
+            final String content = readContentFromLocation(url, emptyListIfNull(auth));
+            LOGGER.debug("Loaded raw data: {}", content);
+            return readContents(content, auth, options, url);
+        } catch (ReadContentException e) {
+            LOGGER.warn("Exception while reading:", e);
+            return SwaggerParseResult.ofError(e.getMessage());
+        }
+    }
+
+    @Override
+    public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth,
+                                           ParseOptions options) {
+        return readContents(swaggerAsString, auth, options, null);
+    }
+
+    public OpenAPI read(String location) {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        return read(location, null, options);
+    }
+
+    public OpenAPI read(String location, List<AuthorizationValue> auths, ParseOptions resolve) {
+        if (location == null) {
+            return null;
+        }
+
+        final List<SwaggerParserExtension> parserExtensions = getExtensions();
+        SwaggerParseResult parsed;
+        for (SwaggerParserExtension extension : parserExtensions) {
+            parsed = extension.readLocation(location, auths, resolve);
+            for (String message : parsed.getMessages()) {
+                LOGGER.info("{}: {}", extension, message);
+            }
+            final OpenAPI result = parsed.getOpenAPI();
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public SwaggerParseResult readWithInfo(String path, JsonNode node) {
+        return parseJsonNode(path, node);
+    }
+
+    public SwaggerParseResult parseJsonNode(String path, JsonNode node) {
+        return new OpenAPIDeserializer().deserialize(node, path);
+    }
+
+    public SwaggerParseResult readContents(String yaml) {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        return readContents(yaml, null, options);
+    }
+
+    private SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options,
+                                            String location) {
+        if (swaggerAsString == null || swaggerAsString.trim().isEmpty()) {
+            return SwaggerParseResult.ofError("Null or empty definition");
+        }
+
+        try {
+            final ObjectMapper mapper = getRightMapper(swaggerAsString);
+            final JsonNode rootNode = mapper.readTree(swaggerAsString);
+            final SwaggerParseResult result = parseJsonNode(location, rootNode);
+            if (result.getOpenAPI() != null) {
+                return resolve(result, auth, options, location);
+            }
+            return result;
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Exception while parsing:", e);
+            final String message = getParseErrorMessage(e.getOriginalMessage(), location);
+            return SwaggerParseResult.ofError(message);
+        }
+    }
+
+    @Deprecated
+    public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
+        return readContents(readContentFromLocation(location, auths), auths, null);
+    }
+
+    private SwaggerParseResult resolve(SwaggerParseResult result, List<AuthorizationValue> auth, ParseOptions options,
+            String location) {
+        try {
+            if (options != null) {
+                if (options.isResolve() || options.isResolveFully()) {
+                    result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
+                            location).resolve());
+                    if (options.isResolveFully()) {
+                        new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                    }
+                }
+                if (options.isFlatten()) {
+                    final InlineModelResolver inlineModelResolver =
+                            new InlineModelResolver(options.isFlattenComposedSchemas(),
+                                    options.isCamelCaseFlattenNaming(), options.isSkipMatches());
+                    if (result.getOpenAPI()!= null) {
+                        inlineModelResolver.flatten(result.getOpenAPI());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Exception while resolving:", e);
+            result.setMessages(Collections.singletonList(e.getMessage()));
+        }
+        return result;
+    }
+
+    private String getParseErrorMessage(String originalMessage, String location) {
+        if (Objects.isNull(originalMessage)) {
+            return String.format("Unable to parse `%s`", location);
+        }
+        if (originalMessage.startsWith("Duplicate field")) {
+            return String.format(originalMessage + " in `%s`", location);
+        }
+        return originalMessage;
+    }
+
+    private <T> List<T> emptyListIfNull(List<T> list) {
+        return Objects.isNull(list) ? new ArrayList<>() : list;
+    }
+
+    private ObjectMapper getRightMapper(String data) {
+        if (data.trim().startsWith("{")) {
+            return JSON_MAPPER;
+        }
+        return YAML_MAPPER;
+    }
+
+    private String readContentFromLocation(String location, List<AuthorizationValue> auth) {
+        final String adjustedLocation = location.replaceAll("\\\\", "/");
+        try {
+            if (adjustedLocation.toLowerCase().startsWith("http")) {
+                return RemoteUrl.urlToString(adjustedLocation, auth);
+            } else {
+                final String fileScheme = "file:";
+                final Path path = adjustedLocation.toLowerCase().startsWith(fileScheme) ?
+                        Paths.get(URI.create(adjustedLocation)) : Paths.get(adjustedLocation);
+                if (Files.exists(path)) {
+                    return FileUtils.readFileToString(path.toFile(), encoding);
+                } else {
+                    return ClasspathHelper.loadFileFromClasspath(adjustedLocation);
+                }
+            }
+        } catch (SSLHandshakeException e) {
+            final String message = String.format(
+                    "Unable to read location `%s` due to a SSL configuration error. It is possible that the server SSL certificate is invalid, self-signed, or has an untrusted Certificate Authority.",
+                    adjustedLocation);
+            throw new ReadContentException(message, e);
+        } catch (Exception e) {
+            throw new ReadContentException(String.format("Unable to read location `%s`", adjustedLocation), e);
+        }
+    }
+
+    /**
      * Transform the swagger-model version of AuthorizationValue into a parser-specific one, to avoid
      * dependencies across extensions
      *
      * @param input
      * @return
      */
+    @Deprecated
     protected List<AuthorizationValue> transform(List<AuthorizationValue> input) {
         if(input == null) {
             return null;
@@ -270,9 +268,5 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return output;
     }
 
-    public SwaggerParseResult readContents(String yaml) {
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        return readContents(yaml,null, options);
-    }
+
 }
