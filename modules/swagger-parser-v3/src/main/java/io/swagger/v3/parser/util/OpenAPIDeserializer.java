@@ -1006,7 +1006,12 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example",contentNode, location,result);
         if (example != null){
-            mediaType.setExample(example instanceof NullNode ? null : example);
+            if (examplesObject != null) {
+                result.warning( location, "examples already defined -- ignoring \"example\" field");
+            }
+            else {
+                mediaType.setExample(example instanceof NullNode ? null : example);
+            }
         }
 
 
@@ -1588,7 +1593,12 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example", obj, location,result);
         if (example != null){
-            parameter.setExample(example instanceof NullNode ? null : example);
+            if (examplesObject != null) {
+                result.warning( location, "examples already defined -- ignoring \"example\" field");
+            }
+            else {
+                parameter.setExample(example instanceof NullNode ? null : example);
+            }
         }
 
         Boolean allowReserved = getBoolean("allowReserved", obj, false, location, result);
@@ -1708,7 +1718,12 @@ public class OpenAPIDeserializer {
 
         Object example = getAnyExample("example", headerNode, location,result);
         if (example != null){
-            header.setExample(example instanceof NullNode ? null : example);
+            if (examplesObject != null) {
+                result.warning( location, "examples already defined -- ignoring \"example\" field");
+            }
+            else {
+                header.setExample(example instanceof NullNode ? null : example);
+            }
         }
 
         ObjectNode contentNode = getObject("content",headerNode,false,location,result);
