@@ -76,6 +76,7 @@ jobs:
         branch: bump-snap-${{ env.SC_NEXT_VERSION }}-SNAPSHOT
 
     env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS:  true
       MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
       MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
