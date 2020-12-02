@@ -38,6 +38,17 @@ paths:
             '*/*':
               schema:
                 $ref: './refs-name-conflict/b.yaml#/components/schemas/PersonObj'
+  /thisAintAnotherPerson:
+    post:
+      summary: Create no more persons
+      description: Create no more persons
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: './refs-name-conflict/c.yaml#/components/schemas/PersonObj'
 components:
   schemas:
     PersonObj:

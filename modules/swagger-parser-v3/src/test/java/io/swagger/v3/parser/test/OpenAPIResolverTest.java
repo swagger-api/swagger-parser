@@ -777,7 +777,8 @@ public class OpenAPIResolverTest {
         assertEquals("referred", ((Schema)openAPI.getPaths().get("/oldPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
         assertEquals("referred", ((Schema)openAPI.getPaths().get("/yetAnotherPerson").getPost().getResponses().get("200").getContent().get("*/*").getSchema().getProperties().get("location")).getExample());
         assertEquals("local", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj").getProperties().get("location")).getExample());
-        assertEquals("referred", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj_2").getProperties().get("location")).getExample());
+        assertEquals("referred", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj_1").getProperties().get("location")).getExample());
+        assertEquals("referred-again", ((Schema) openAPI.getComponents().getSchemas().get("PersonObj_2").getProperties().get("location")).getExample());
     }
 
 
