@@ -49,6 +49,23 @@ public final class ExternalRefProcessor {
         this.openAPI = openAPI;
     }
 
+    private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newScema,
+        int iteration) {
+        String tryName =
+            iteration == 0 ? possiblyConflictingDefinitionName : possiblyConflictingDefinitionName + "_" + iteration;
+        Schema existingModel = schemas.get(tryName);
+        if (existingModel != null) {
+            if (existingModel.get$ref() != null) {
+                // use the new model
+                existingModel = null;
+            } else if (!newScema.equals(existingModel)) {
+                LOGGER.debug("A model for " + existingModel + " already exists");
+                return finalNameRec(schemas, possiblyConflictingDefinitionName, newScema, ++iteration);
+            }
+        }
+        return tryName;
+    }
+
     public String processRefToExternalSchema(String $ref, RefFormat refFormat) {
         String renamedRef = cache.getRenamedRef($ref);
         if(renamedRef != null) {
@@ -75,34 +92,13 @@ public final class ExternalRefProcessor {
         }
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-        String tryName = null;
-        Schema existingModel = schemas.get(possiblyConflictingDefinitionName);
-
-        if (existingModel != null) {
-            LOGGER.warn("A model for " + existingModel + " already exists");
-            if(existingModel.get$ref() != null) {
-                // use the new model
-                existingModel = null;
-            }else{
-                if (!schema.equals(existingModel)){
-                    //We add a number at the end of the definition name
-                    int i = 2;
-                    for (String name : schemas.keySet()) {
-                        if (name.equals(possiblyConflictingDefinitionName)) {
-                            tryName = possiblyConflictingDefinitionName + "_" + i;
-                            existingModel = schemas.get(tryName);
-                            i++;
-                        }
-                    }
-                }
-            }
-        }
-        if (StringUtils.isNotBlank(tryName)){
-            newRef = tryName;
-        }else{
-            newRef = possiblyConflictingDefinitionName;
-        }
+        newRef = finalNameRec(schemas, possiblyConflictingDefinitionName, schema, 0);
         cache.putRenamedRef($ref, newRef);
+        Schema existingModel = schemas.get(newRef);
+        if(existingModel != null && existingModel.get$ref() != null) {
+            // use the new model
+            existingModel = null;
+        }
 
         if(existingModel == null) {
             // don't overwrite existing model reference

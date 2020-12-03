@@ -1082,7 +1082,7 @@ public class OpenAPIV3ParserTest {
         Schema pet = openAPI.getComponents().getSchemas().get("Pet");
         Assert.assertNotNull(pet);
         Assert.assertTrue(pet.getDiscriminator().getMapping().containsKey("Cat"));
-        Assert.assertTrue(pet.getDiscriminator().getMapping().get("Cat").equals("#/components/schemas/Cat_2"));
+        Assert.assertTrue(pet.getDiscriminator().getMapping().get("Cat").equals("#/components/schemas/Cat_1"));
     }
 
     @Test
@@ -1687,7 +1687,7 @@ public class OpenAPIV3ParserTest {
 
         assertEquals(composedCat.getAllOf().size(), 3);
         assertEquals(composedCat.getAllOf().get(0).get$ref(), "#/components/schemas/pet");
-        assertEquals(composedCat.getAllOf().get(1).get$ref(), "#/components/schemas/foo_2");
+        assertEquals(composedCat.getAllOf().get(1).get$ref(), "#/components/schemas/foo_1");
 
         return openAPI;
     }
