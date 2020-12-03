@@ -62,8 +62,10 @@ import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIDeserializerTest {
@@ -2186,6 +2188,148 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(stateSchemaProperty.getExample(),"CA" );
     }
 
+    @Test   
+    public void testExampleVsExamples(){
+        String json =
+            "{" +
+            "\"openapi\": \"3.0.0\"," +
+            "\"info\": {\"title\": \"Examples\", \"version\": \"0.0.0\"}," +
+            "\"paths\": {}," +
+            "\"components\": {" +
+            "  \"parameters\": {" +
+            "    \"withExample\": {" +
+            "      \"name\": \"withExample\"," +
+            "      \"in\": \"query\"," +
+            "      \"schema\": {\"type\": \"string\"}," +
+            "      \"example\": \"Hello\"}," +
+            "    \"withExamples\": {" +
+            "      \"name\": \"withExamples\"," +
+            "      \"in\": \"query\"," +
+            "      \"schema\": {\"type\": \"string\"}," +
+            "      \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}}," +
+            "    \"withBoth\": {" +
+            "      \"name\": \"withBoth\"," +
+            "      \"in\": \"query\"," +
+            "      \"schema\": {\"type\": \"string\"}," +
+            "      \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}," +
+            "      \"example\": \"Hello\"}," +
+            "    \"withContentExample\": {" +
+            "      \"name\": \"withContentExample\"," +
+            "      \"in\": \"query\"," +
+            "      \"content\": {" +
+            "        \"application/json\": {" +
+            "          \"schema\": {\"type\": \"string\"}," +
+            "          \"example\": \"Hello\"}}}," +
+            "    \"withContentExamples\": {" +
+            "      \"name\": \"withContentExamples\"," +
+            "      \"in\": \"query\"," +
+            "      \"content\": {" +
+            "        \"application/json\": {" +
+            "          \"schema\": {\"type\": \"string\"}," +
+            "          \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}}}}," +
+            "    \"withContentBoth\": {" +
+            "      \"name\": \"withContentBoth\"," +
+            "      \"in\": \"query\"," +
+            "      \"content\": {" +
+            "        \"application/json\": {" +
+            "          \"schema\": {\"type\": \"string\"}," +
+            "          \"example\": \"Hello\"," +
+            "          \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}}}}}," +
+            "  \"headers\": {" +
+            "    \"withExample\": {" +
+            "      \"schema\": {\"type\": \"string\"}," +
+            "      \"example\": \"Hello\"}," +
+            "    \"withExamples\": {" +
+            "      \"schema\": {\"type\": \"string\"}," +
+            "      \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}}," +
+            "    \"withBoth\": {" +
+            "      \"schema\": {\"type\": \"string\"}," +
+            "      \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}," +
+            "      \"example\": \"Hello\"}}," +
+            "  \"requestBodies\": {" +
+            "    \"withBodyExample\": {" +
+            "      \"content\": {" +
+            "        \"application/json\": {" +
+            "          \"schema\": {\"type\": \"string\"}," +
+            "          \"example\": \"Hello\"}}}," +
+            "    \"withBodyExamples\": {" +
+            "      \"content\": {" +
+            "        \"application/json\": {" +
+            "          \"schema\": {\"type\": \"string\"}," +
+            "          \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}}}}," +
+            "    \"withBodyBoth\": {" +
+            "      \"content\": {" +
+            "        \"application/json\": {" +
+            "          \"schema\": {\"type\": \"string\"}," +
+            "          \"example\": \"Hello\"," +
+            "          \"examples\": {\"Texan\": {\"value\": \"Howdy\"}}}}}}}}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        assertEqualsNoOrder
+            (result.getMessages().toArray(),
+             new Object[] {
+                "attribute components.parameters.withBoth.[withBoth].examples already defined -- ignoring \"example\" field",
+                "attribute components.parameters.withContentBoth.[withContentBoth].content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "attribute components.requestBodies.withBodyBoth.content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "attribute components.headers.withBoth.examples already defined -- ignoring \"example\" field"
+             },
+             "Expected warnings not found");
+        
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Parameter param;
+        param = openAPI.getComponents().getParameters().get("withExample");
+        assertNull( param.getExamples(), "Examples,");
+        assertNotNull( param.getExample(), "Example,");
+        
+        param = openAPI.getComponents().getParameters().get("withExamples");
+        assertNotNull( param.getExamples(), "Examples,");
+        assertNull( param.getExample(), "Example,");
+        
+        param = openAPI.getComponents().getParameters().get("withBoth");
+        assertNotNull( param.getExamples(), "Examples,");
+        assertNull( param.getExample(), "Example,");
+
+        Header header;
+        header = openAPI.getComponents().getHeaders().get("withExample");
+        assertNull( header.getExamples(), "Examples,");
+        assertNotNull( header.getExample(), "Example,");
+        
+        header = openAPI.getComponents().getHeaders().get("withExamples");
+        assertNotNull( header.getExamples(), "Examples,");
+        assertNull( header.getExample(), "Example,");
+        
+        header = openAPI.getComponents().getHeaders().get("withBoth");
+        assertNotNull( header.getExamples(), "Examples,");
+        assertNull( header.getExample(), "Example,");
+        
+        MediaType mediaType;
+        mediaType = openAPI.getComponents().getParameters().get("withContentExample").getContent().get( "application/json");
+        assertNull( mediaType.getExamples(), "Examples,");
+        assertNotNull( mediaType.getExample(), "Example,");
+        
+        mediaType = openAPI.getComponents().getParameters().get("withContentExamples").getContent().get( "application/json");
+        assertNotNull( mediaType.getExamples(), "Examples,");
+        assertNull( mediaType.getExample(), "Example,");
+        
+        mediaType = openAPI.getComponents().getParameters().get("withContentBoth").getContent().get( "application/json");
+        assertNotNull( mediaType.getExamples(), "Examples,");
+        assertNull( mediaType.getExample(), "Example,");
+
+        mediaType = openAPI.getComponents().getRequestBodies().get("withBodyExample").getContent().get( "application/json");
+        assertNull( mediaType.getExamples(), "Examples,");
+        assertNotNull( mediaType.getExample(), "Example,");
+        
+        mediaType = openAPI.getComponents().getRequestBodies().get("withBodyExamples").getContent().get( "application/json");
+        assertNotNull( mediaType.getExamples(), "Examples,");
+        assertNull( mediaType.getExample(), "Example,");
+
+        mediaType = openAPI.getComponents().getRequestBodies().get("withBodyBoth").getContent().get( "application/json");
+        assertNotNull( mediaType.getExamples(), "Examples,");
+        assertNull( mediaType.getExample(), "Example,");
+    }
+
     @Test
     public void testOptionalParameter(@Injectable List<AuthorizationValue> auths) {
         String yaml = "openapi: 3.0.1\n" +
@@ -2465,7 +2609,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent());
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),3);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),"example string");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),null);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExamples().get("list").getSummary(),"List of Names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
 
