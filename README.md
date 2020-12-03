@@ -97,7 +97,7 @@ But... this is all standard SSL configuration stuff and is well documented acros
 ### Prerequisites
 You need the following installed and available in your $PATH:
 
-* [Java 1.7](http://java.oracle.com)
+* [Java 8](http://java.oracle.com)
 * [Apache maven 3.0.3 or greater](http://maven.apache.org/)
 
 After cloning the project, you can build it from source with this command:
