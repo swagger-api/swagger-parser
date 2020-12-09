@@ -9,24 +9,89 @@
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
-    - [Options](#options)
-      - [Resolve](#1-resolve)
-      - [ResolveFully](#2-resolvefully)
-      - [Flatten](#3-flatten)
-      - [ResolveCombinators](#4-resolvecombinators)
-    - [Authentication](#authentication)
+  - [Adding to your project](#adding-to-your-project)
     - [Prerequisites](#prerequisites)
-    - [Extensions](#extensions)
-    - [Adding to your project](#adding-to-your-project)
+  - [Authentication](#authentication)  
+  - [Options](#options)
+    - [Resolve](#1-resolve)
+    - [ResolveFully](#2-resolvefully)
+    - [Flatten](#3-flatten)
+    - [ResolveCombinators](#4-resolvecombinators)
+  - [Extensions](#extensions)
   - [License](#license)
 
 
 ## Overview 
-This is the Swagger Parser project, which reads OpenAPI definitions into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
+
+This is the Swagger Parser project, which parses OpenAPI definitions in JSON or YAML format into [swagger-core](https://github.com/swagger-api/swagger-core) representation as [Java POJO](https://github.com/swagger-api/swagger-core/blob/master/modules/swagger-models/src/main/java/io/swagger/v3/oas/models/OpenAPI.java#L36), returning any validation warnings/errors.  
+
+It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
 
 
 ### Usage
 Using the Swagger Parser is simple.  Once included in your project, you can read a OpenAPI Specification from any location:
+
+```java
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.oas.models.OpenAPI;
+
+// ... your code
+
+  // parse a swagger description from the petstore and get the result
+  SwaggerParseResult result = new OpenAPIParser().readLocation("https://petstore3.swagger.io/api/v3/openapi.json", null, null);
+  
+  // or from a file
+  //   SwaggerParseResult result = new OpenAPIParser().readLocation("./path/to/openapi.yaml", null, null);
+  
+  // the parsed POJO
+  OpenAPI openAPI = result.getOpenAPI();
+  
+  if (result.getMessages() != null) result.getMessages().forEach(System.err::println); // validation errors and warnings
+  
+  if (openAPI != null) {
+    ...
+  }
+  
+```
+
+or from a string:
+
+```java
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.oas.models.OpenAPI;
+
+// ... your code
+
+  // parse a swagger description from the petstore and get the result
+  SwaggerParseResult result = new OpenAPIParser().readContents("https://petstore3.swagger.io/api/v3/openapi.json", null, null);
+  
+  // or from a file
+  //   SwaggerParseResult result = new OpenAPIParser().readContents("./path/to/openapi.yaml", null, null);
+  
+  // the parsed POJO
+  OpenAPI openAPI = result.getOpenAPI();
+  
+  if (result.getMessages() != null) result.getMessages().forEach(System.err::println); // validation errors and warnings
+  
+  if (openAPI != null) {
+    ...
+  }
+  
+```
+
+If you are providing a Swagger/OpenAPI 2.0 document to the parser , e.g.:
+
+```java
+SwaggerParseResult result = new OpenAPIParser().readContents("./path/to/swagger.yaml", null, null);
+```
+
+the Swagger/OpenAPI 2.0 document will be first converted into a comparable OpenAPI 3.0 one.
+
+You can also directly use `OpenAPIV3Parser` which only handles OpenAPI 3.0 documents, and provides a convenience method to get directly the parsed `OpenAPI object:
 
 ```java
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -35,38 +100,114 @@ import io.swagger.v3.oas.models.OpenAPI;
 // ... your code
 
   // read a swagger description from the petstore
-  
-  
-  OpenAPI openAPI = new OpenAPIV3Parser().read("https://petstore3.swagger.io/api/v3/openapi.json");
-
-```
-
-You can read from a file location as well:
-```java
-  OpenAPI openAPI = new OpenAPIV3Parser().read("./path/to/openapi.yaml");
-
-```
-### Options
-Parser uses options as a way to personalize the behavior while parsing:
-
-#### 1. Resolve:
-- When remote or relative references are found, parser will find the reference in the (remote/relative) location and add the     object to the main openapi object under the components part of the spec and changing the previous remote/local reference for a local one e.g. : `#/components/schemas/NameOfRemoteSchema`. This applies to schemas, parameters, responses, pretty much everything containing a ref.
-
-#### 2. ResolveFully:
-- After references are resolved (brought back from the remote location and added to the internal components location), then maybe it is needed that the resolved objects are no longer referenced, but put at the same place they were referenced initially, meaning that in the spec there will not be anymore referenced objects, all will be put inline in the place they are being called, replacing the reference it self. This will make the spec longer.
-
-```
- @Test
-    public void referringSpecWithoutComponentsTag() throws Exception {
-        ParseOptions resolve = new ParseOptions();
-        resolve.setResolveFully(true);
-        final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, resolve);
-        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
-        Assert.assertEquals("Example value", schemas.get("CustomerType").getExample());
-    }
-```
     
-Spec before resolving:
+  OpenAPI openAPI = new OpenAPIV3Parser().read("https://petstore3.swagger.io/api/v3/openapi.json");
+  
+```
+
+### Adding to your project
+You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central for releases.  In your dependencies:
+
+```xml
+<dependency>
+  <groupId>io.swagger.parser.v3</groupId>
+  <artifactId>swagger-parser</artifactId>
+  <version>2.0.24</version>
+</dependency>
+```
+
+#### Prerequisites
+You need the following installed and available in your $PATH:
+
+* [Java 1.8](http://java.oracle.com)
+* [Apache maven 3.x](http://maven.apache.org/)
+
+After cloning the project, you can build it from source with this command:
+
+```
+mvn package
+```
+
+### Authentication
+
+If your OpenAPI definition is protected, you can pass headers in the request:
+```java
+import io.swagger.v3.parser.core.models.AuthorizationValue;
+
+// ... your code
+
+  // build a authorization value
+  AuthorizationValue mySpecialHeader = new AuthorizationValue()
+    .keyName("x-special-access")  //  the name of the authorization to pass
+    .value("i-am-special")        //  the value of the authorization
+    .type("header");              //  the location, as either `header` or `query`
+
+  // or in a single constructor
+  AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
+  OpenAPI openAPI = new OpenAPIV3Parser().readWithInfo(
+    "https://petstore3.swagger.io/api/v3/openapi.json",
+    Arrays.asList(mySpecialHeader, apiKey)
+  );
+```
+
+#### Dealing with self-signed SSL certificates
+If you're dealing with self-signed SSL certificates, or those signed by GoDaddy, you'll need to disable SSL Trust 
+Manager.  That's done by setting a system environment variable as such:
+
+```
+export TRUST_ALL=true
+```
+
+And then the Swagger Parser will _ignore_ invalid certificates.  Of course this is generally a bad idea, but if you're 
+working inside a firewall or really know what you're doing, well, there's your rope.
+
+#### Dealing with Let's Encrypt
+Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_ by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
+JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
+not accepting Let's Encrypt signed certificates.
+
+Your options include:
+
+* Accepting all certificates per above
+* Installing the certificate manually in your JVM using the keystore using the `keytool` command
+* Configuring the JVM on startup to load your certificate
+
+But... this is all standard SSL configuration stuff and is well documented across the web.
+
+
+### Options
+Parser uses options as a way to customize the behavior while parsing:
+
+#### 1. resolve:
+
+```java
+ParseOptions parseOptions = new ParseOptions();
+parseOptions.setResolve(true); 
+final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions);
+```
+
+
+- When remote or relative references are found in the parsed document, parser will attempt to:
+
+1. resolve the reference in the remote or relative location 
+1. parse the resolved reference
+1. add the resolved "component" (e.g. parameter, schema, response, etc.) to the resolved `OpenAPI` POJO components section
+1. replace the remote/relative reference with a local reference,  e.g. : `#/components/schemas/NameOfRemoteSchema`. 
+
+This applies to schemas, parameters, responses, pretty much everything containing a ref.
+
+#### 2. resolveFully:
+
+```java
+ParseOptions parseOptions = new ParseOptions();
+parseOptions.setResolve(true); // implicit
+parseOptions.setResolveFully(true);
+final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions);
+```
+
+- In some scenarios, after references are resolved (with `resolve`, see above), you might need to have all local references removed replacing the reference with the content of the referenced element. This is for example used in [Swagger Inflector](https://github.com/swagger-api/swagger-inflector). Be aware that the result could be more heavy/long due to duplication
+    
+Original document:
 
 `a.yaml` 
 ```
@@ -94,7 +235,7 @@ components:
       example: Example value
 ```
 
-Spec after Resolving, with option `resolveFully(true)`
+Serialized result after parsing with option `resolveFully(true)`
 
 `a.yaml`
 ```
@@ -121,22 +262,20 @@ components:
       example: Example value
 ```
 
-#### 3. Flatten: 
-(opposite of resolveFully)
-- This option can be used in case you need to make your object lighter, so you ask parser to flatten all inline references (this only applies to schemas) this will mean that all the schemas will be a local reference to `#/components/schemas/...`
+#### 3. flatten : 
 
-```
-  @Test
-    public void testIssue705() throws Exception {
-        ParseOptions options = new ParseOptions();
-        options.setFlatten(true);
-        OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.yaml",null, options);
-        assertNotNull(openAPI);
-        assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200").getType());
-    }
+```java
+ParseOptions parseOptions = new ParseOptions();
+parseOptions.setFlatten(true); 
+final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions);
 ```
 
-Spec before flattening:
+
+This is kind of the opposite of resolveFully, limited to defined schemas.
+
+In some scenarios, you might need to have all schemas defined inline (e.g. a response schema) moved to the `components/schemas` section and replaced with a reference to the newly added schema within `components/schemas`. This is for example used in [Swagger Codegen](https://github.com/swagger-api/swagger-codegen).
+
+Original document:
 
 `flatten.yaml`
 
@@ -174,7 +313,7 @@ paths:
                       type: string
 ```
 
-Spec after option flatten(true):
+Serialized result after parsing with option `flatten(true)`
 
 ```
 openapi: 3.0.0
@@ -219,12 +358,22 @@ components:
           type: string
 ```
 
-#### 4. ResolveCombinators: 
-- Some users don't want to aggregate anyOf/allOf/oneOf schemas but simply want all refs solved.
-In case user doesn't want to add the schemas to the properties of the resolved composedSchema, this option generates a new list of subschemas solved and does not aggregated them to the resulting object as properties.
-This option is meant to be used with `resolveFully = true`.
+#### 4. resolveCombinators: 
 
-`Unresolved yaml`
+```java
+ParseOptions parseOptions = new ParseOptions();
+parseOptions.setResolve(true); // implicit
+parseOptions.setResolveFully(true);
+parseOptions.setResolveCombinators(false); // default is true 
+final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions);
+```
+
+This option (only available with `resolveFully = true`) allows to customize behaviour related to `allOf/anyOf/oneOf` (composed schemas)  processing. With option set to `true` (default), composed schemas are transformed into "non composed" ones, by having all properties merged into a single resulting schema (see example below).
+If option is set to `false`, the resulting schema will instead maintain its "composed" nature, keeping properties within e.g. the `allOf` members.
+
+Please see examples below:
+
+**Unresolved yaml**
 
 ```
 openapi: 3.0.1
@@ -280,7 +429,8 @@ components:
           type: string
           example: '94022'
 ```
-Test - when resolveCombinator is set to true. (default parser behavior)
+
+**resolvedCombinator = true (default) - Test case**
 
 ```
 @Test
@@ -308,7 +458,8 @@ Test - when resolveCombinator is set to true. (default parser behavior)
 
     }
 ```
-`Resolved Yaml`
+
+**resolvedCombinator = true (default) - Resolved Yaml**
 
 ```
 openapi: 3.0.1
@@ -381,7 +532,7 @@ components:
           example: "94022"
  ```
  
- Test - when resolveCombinator is set to false.
+ **resolvedCombinator = false - Test case**
  
  ```
  @Test
@@ -408,7 +559,8 @@ components:
 
     }
   ```
-  `Resolved Yaml`
+  
+  **resolvedCombinator = false - Resolved Yaml**
   
   ```
 openapi: 3.0.1
@@ -501,79 +653,10 @@ components:
           example: "94022"
 ```
 
-### Authentication
-
-If your OpenAPI definition is protected, you can pass headers in the request:
-```java
-import io.swagger.v3.parser.core.models.AuthorizationValue;
-
-// ... your code
-
-  // build a authorization value
-  AuthorizationValue mySpecialHeader = new AuthorizationValue()
-    .keyName("x-special-access")  //  the name of the authorization to pass
-    .value("i-am-special")        //  the value of the authorization
-    .type("header");              //  the location, as either `header` or `query`
-
-  // or in a single constructor
-  AuthorizationValue apiKey = new AuthorizationValue("api_key", "special-key", "header");
-  OpenAPI openAPI = new OpenAPIV3Parser().readWithInfo(
-    "https://petstore3.swagger.io/api/v3/openapi.json",
-    Arrays.asList(mySpecialHeader, apiKey)
-  );
-```
-
-### Dealing with self-signed SSL certificates
-If you're dealing with self-signed SSL certificates, or those signed by GoDaddy, you'll need to disable SSL Trust 
-Manager.  That's done by setting a system environment variable as such:
-
-```
-export TRUST_ALL=true
-```
-
-And then the Swagger Parser will _ignore_ invalid certificates.  Of course this is generally a bad idea, but if you're 
-working inside a firewall or really know what you're doing, well, there's your rope.
-
-### Dealing with Let's Encrypt
-Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_ by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
-JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
-not accepting Let's Encrypt signed certificates.
-
-Your options include:
-
-* Accepting all certificates per above
-* Installing the certificate manually in your JVM using the keystore using the `keytool` command
-* Configuring the JVM on startup to load your certificate
-
-But... this is all standard SSL configuration stuff and is well documented across the web.
-
-### Prerequisites
-You need the following installed and available in your $PATH:
-
-* [Java 1.8](http://java.oracle.com)
-* [Apache maven 3.x](http://maven.apache.org/)
-
-After cloning the project, you can build it from source with this command:
-
-```
-mvn package
-```
-
 ### Extensions
 This project has a core artifact--`swagger-parser`, which uses Java Service Provider Inteface (SPI) so additional extensions can be added. 
 
 To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.parser.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.parser.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
-
-### Adding to your project
-You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central for releases.  In your dependencies:
-
-```xml
-<dependency>
-  <groupId>io.swagger.parser.v3</groupId>
-  <artifactId>swagger-parser</artifactId>
-  <version>2.0.24</version>
-</dependency>
-```
 
 ## Security contact
 
