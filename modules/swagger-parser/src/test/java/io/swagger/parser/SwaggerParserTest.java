@@ -57,6 +57,16 @@ import io.swagger.util.Yaml;
 
 public class SwaggerParserTest {
 
+    @Test
+    public void testArrayRelativeRefs() {
+        String location = "arrayItemsResolving/Swagger.yaml";
+        Swagger swagger = new SwaggerParser().read(location, null, true);
+        assertNotNull(swagger);
+        assertTrue(swagger.getDefinitions().size() == 3);
+        assertNotNull(swagger.getDefinitions().get("InventoryDataItems"));
+        assertNotNull(swagger.getDefinitions().get("InventoryItem"));
+        assertNotNull(swagger.getDefinitions().get("Manufacturer"));
+    }
 
     @Test
     public void testIssueRelativeRefs3() {

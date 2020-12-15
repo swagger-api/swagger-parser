@@ -1,0 +1,38 @@
+info:
+  description: This is a sample Domain
+  version: '1.0'
+  title: Sample Domain
+
+definitions:
+  InventoryDataItems: 
+    type: array
+    items: 
+      type: object
+      properties:
+        items: 
+          $ref: '#/definitions/InventoryItem'
+        manufacturer:
+          $ref: '#/definitions/Manufacturer'
+  InventoryItem:
+    type: object
+    required:
+    - id
+    - name
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: Widget Adapter
+  Manufacturer:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+        example: ACME Corporation
+      phone:
+        type: string
+        example: 408-867-5309
