@@ -12,6 +12,7 @@ import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 import io.swagger.parser.util.RefUtils;
+import jdk.nashorn.internal.ir.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -139,6 +140,18 @@ public final class ExternalRefProcessor {
             }
             if (model instanceof ArrayModel && ((ArrayModel) model).getItems() instanceof RefProperty) {
                 processRefProperty((RefProperty) ((ArrayModel) model).getItems(), file);
+            }
+
+            if (model instanceof ArrayModel && ((ArrayModel) model).getItems() != null) {
+                ArrayModel arraySchema = (ArrayModel) model;
+                if (arraySchema.getItems() instanceof RefModel) {
+                    processRefProperty((RefProperty) ((ArrayModel) model).getItems(), file);
+                } else {
+                    Property properties = arraySchema.getItems();
+                    if (properties instanceof ObjectProperty) {
+                        processProperties(((ObjectProperty) properties).getProperties(), file);
+                    }
+                }
             }
         }
 
