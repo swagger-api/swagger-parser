@@ -83,6 +83,16 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testServerRelativeUrl(){
+        String url = "https://petstore3.swagger.io/api/v3/openapi.json";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url,new ArrayList<>(),options);
+        assertTrue(result.getMessages().isEmpty());
+    }
+
+
+    @Test
     public void testIssue1398() {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue1398.yaml", null, options);
