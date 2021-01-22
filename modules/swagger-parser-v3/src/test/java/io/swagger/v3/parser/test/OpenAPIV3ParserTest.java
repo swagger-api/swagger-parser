@@ -69,6 +69,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -83,6 +84,29 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testCantReadDeepProperties() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+
+        final SwaggerParseResult parseResult = parser.readLocation("src/test/resources/cant-read-deep-properties.yaml", null, options);
+        assertEquals(parseResult.getMessages().size(), 0);
+        Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
+        assertEquals(projects.getType(), "integer");
+    }
+
+    @Test
+    public void testCantReadDeepPropertiesWorkaround() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+
+        final SwaggerParseResult parseResult = parser.readLocation("src/test/resources/cant-read-deep-properties-workaround.yaml", null, options);
+        assertEquals(parseResult.getMessages().size(), 0);
+        Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
+        assertEquals(projects.getType(), "integer");
+    }
+
     public void testIssue1398() {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue1398.yaml", null, options);
