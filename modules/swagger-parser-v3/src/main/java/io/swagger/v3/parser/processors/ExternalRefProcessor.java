@@ -864,7 +864,7 @@ public final class ExternalRefProcessor {
         if (schema.get$ref() != null) {
             RefFormat ref = computeRefFormat(schema.get$ref());
             if (isAnExternalRefFormat(ref)) {
-                processRefSchema(schema, $ref);
+                processRefSchema(schema, file);
             } else {
                 processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
             }
