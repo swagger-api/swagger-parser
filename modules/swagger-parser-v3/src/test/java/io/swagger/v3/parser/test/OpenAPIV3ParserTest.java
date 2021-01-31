@@ -98,8 +98,11 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveFully(true);
 
         final SwaggerParseResult openAPI = parser.readContents(pathFile, null, options);
+        Yaml.prettyPrint(openAPI);
+
         assertEquals(openAPI.getMessages().size(), 0);
     }
 
@@ -108,8 +111,10 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveFully(true);
 
         final SwaggerParseResult openAPI = parser.readLocation("src/test/resources/same-refs-different-model-valid.yaml", null, options);
+        Yaml.prettyPrint(openAPI);
         assertEquals(openAPI.getMessages().size(), 0);
     }
 
