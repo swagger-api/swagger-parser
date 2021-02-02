@@ -98,10 +98,11 @@ public class OpenAPIV3ParserTest {
 
     @Test
     public void testServerRelativeUrlLocal(){
-        String url = "openapilocal.json";
+        String url = "issue-1509/openapilocal.json";
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url,new ArrayList<>(),options);
+        Yaml.prettyPrint(result.getOpenAPI());
         assertTrue(result.getMessages().isEmpty());
     }
 
