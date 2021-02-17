@@ -479,7 +479,7 @@ public class InlineModelResolverTest {
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents());
         assertNotNull(openAPI.getComponents().getSchemas());
-        assertEquals(4, openAPI.getComponents().getSchemas().size());
+        assertEquals(openAPI.getComponents().getSchemas().size(), 6);
     }
 
     @Test

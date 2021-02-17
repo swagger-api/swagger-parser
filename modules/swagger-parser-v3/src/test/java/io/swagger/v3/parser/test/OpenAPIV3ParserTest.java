@@ -2535,7 +2535,7 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents());
         assertNotNull(openAPI.getComponents().getSchemas());
-        assertEquals(openAPI.getComponents().getSchemas().size(), 4);
+        assertEquals(openAPI.getComponents().getSchemas().size(), 6);
     }
 
     @Test
