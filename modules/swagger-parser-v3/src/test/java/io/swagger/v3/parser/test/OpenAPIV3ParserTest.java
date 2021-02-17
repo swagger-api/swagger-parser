@@ -175,10 +175,10 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
 
         //responses
-        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_map200"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map200")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw1");
-        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_map_items404"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_map_items404")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw2");
+        assertNotNull(openAPI.getComponents().getSchemas().get("InlineResponseMap200"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineResponseMap200")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw1");
+        assertNotNull(openAPI.getComponents().getSchemas().get("InlineResponseMapItems404"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineResponseMapItems404")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw2");
     }
 
 
@@ -222,26 +222,26 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
 
         //responses
-        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_items200"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_items200")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw");
-        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_400"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_response_400")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw3");
+        assertNotNull(openAPI.getComponents().getSchemas().get("InlineResponseItems200"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineResponseItems200")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw");
+        assertNotNull(openAPI.getComponents().getSchemas().get("InlineResponse400"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineResponse400")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw3");
 
         //parameters
-        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_parameter_items_bodylimit"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_parameter_items_bodylimit")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw1");
+        assertNotNull(openAPI.getComponents().getSchemas().get("InlineParameterItemsBodylimit"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineParameterItemsBodylimit")).getAnyOf().get(0).get$ref(),"#/components/schemas/Macaw1");
         assertNotNull(openAPI.getComponents().getSchemas().get("Pagelimit"));
         assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Pagelimit")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw2");
 
         //requestBodies
         assertNotNull(openAPI.getComponents().getSchemas().get("Body"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Body")).getAllOf().get(1).get$ref(),"#/components/schemas/requestBodiesAllOf_2");
-        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_response_items200"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_body_items_applicationxml_requestBodies")).getAllOf().get(1).get$ref(),"#/components/schemas/ApplicationxmlAllOf_2");
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Body")).getAllOf().get(1).get$ref(),"#/components/schemas/requestBodiesAllOf2");
+        assertNotNull(openAPI.getComponents().getSchemas().get("InlineResponseItems200"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineBodyItemsApplicationxmlrequestBodies")).getAllOf().get(1).get$ref(),"#/components/schemas/ApplicationxmlAllOf2");
 
         //components
-        assertNotNull(openAPI.getComponents().getSchemas().get("Inline_array_items_ArrayTest"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Inline_array_items_ArrayTest")).getOneOf().get(1).get$ref(),"#/components/schemas/ArrayTestOneOf_2");
+        assertNotNull(openAPI.getComponents().getSchemas().get("InlineArrayItemsArrayTest"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineArrayItemsArrayTest")).getOneOf().get(1).get$ref(),"#/components/schemas/ArrayTestOneOf2");
     }
 
 
@@ -270,8 +270,8 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult parseResult = openApiParser.readLocation("FlattenComposedSchemasAtComponents.yaml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertNotNull(openAPI);
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("contact-base-model")).getAllOf().get(0).get$ref(),"#/components/schemas/ContactBaseModelAllOf_1");
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Test")).getOneOf().get(1).get$ref(),"#/components/schemas/TestOneOf_2");
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("contact-base-model")).getAllOf().get(0).get$ref(),"#/components/schemas/ContactBaseModelAllOf1");
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Test")).getOneOf().get(1).get$ref(),"#/components/schemas/TestOneOf2");
     }
 
     @Test
@@ -2535,7 +2535,7 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents());
         assertNotNull(openAPI.getComponents().getSchemas());
-        assertEquals(4, openAPI.getComponents().getSchemas().size());
+        assertEquals(openAPI.getComponents().getSchemas().size(), 4);
     }
 
     @Test
