@@ -83,6 +83,42 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssueSameRefsDifferentModel() throws IOException {
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-refs-different-model-domain.yaml"), "UTF-8");
+        WireMock.stubFor(get(urlPathMatching("/issue-domain"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/json")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/same-refs-different-model.yaml"), "UTF-8");
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        final SwaggerParseResult openAPI = parser.readContents(pathFile, null, options);
+        Yaml.prettyPrint(openAPI);
+
+        assertEquals(openAPI.getMessages().size(), 0);
+    }
+
+    @Test
+    public void testIssueSameRefsDifferentModelValid() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        final SwaggerParseResult openAPI = parser.readLocation("src/test/resources/same-refs-different-model-valid.yaml", null, options);
+        Yaml.prettyPrint(openAPI);
+        assertEquals(openAPI.getMessages().size(), 0);
+    }
+
+    @Test
     public void testIssue1398() {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue1398.yaml", null, options);
