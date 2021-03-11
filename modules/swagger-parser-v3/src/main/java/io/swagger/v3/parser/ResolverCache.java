@@ -3,6 +3,7 @@ package io.swagger.v3.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -107,7 +108,13 @@ public class ResolverCache {
         Object previouslyResolvedEntity = resolutionCache.get(ref);
 
         if (previouslyResolvedEntity != null) {
-            return expectedType.cast(previouslyResolvedEntity);
+            if(expectedType.equals(Header.class)){
+                if (expectedType.getClass().equals(previouslyResolvedEntity.getClass())) {
+                    return expectedType.cast(previouslyResolvedEntity);
+                }
+            }else {
+                return expectedType.cast(previouslyResolvedEntity);
+            }
         }
 
         //we have not resolved this particular ref
