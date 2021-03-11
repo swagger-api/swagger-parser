@@ -1,0 +1,78 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: http://host.docker.internal:8081/p.siudy2/awfsdgrfhtgh/1.0
+
+info:
+  version: '1.0'
+  title: issue
+  description: TypeProject/properties/id is not resolved
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: issue
+    description: issue
+paths:
+  /projects:
+    get:
+      tags:
+        - project
+      description: list projects
+      responses:
+        '200':
+          description: results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+        '400':
+          description: Invalid
+        '401':
+          description: You are not authorized
+        '500':
+          description: Internal Server Error
+components:
+  schemas:
+    ProjectId:
+      type: integer
+      enum: [1, 2]
+      description: one of project type ids
+    Project:
+      type: object
+      required:
+        - user
+        - project_type
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        project_type:
+          $ref: '#/components/schemas/TypeProject/properties/id'
+    User:
+      type: object
+      required:
+        - full_name
+        - id
+      properties:
+        full_name:
+          type: string
+          example: ful lname
+        id:
+          type: string
+          format: uuid
+    TypeProject:
+      type: object
+      properties:
+        id:
+          type: integer
+          enum: [1, 2]
+          description: one of project type ids
+        name:
+          type: string
+          enum: ['project1', 'project2']
