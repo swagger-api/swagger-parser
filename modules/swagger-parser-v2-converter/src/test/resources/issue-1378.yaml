@@ -1,0 +1,13 @@
+swagger: '2.0'
+info:
+  title: AnyType test
+  version: '1.0.0'
+paths: {}
+definitions:
+  Foo:
+    type: object
+    properties:
+      p1:
+        type: object
+      p2:
+        description: test
