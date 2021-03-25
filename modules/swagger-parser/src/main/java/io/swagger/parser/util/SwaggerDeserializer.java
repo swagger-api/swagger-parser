@@ -1199,7 +1199,7 @@ public class SwaggerDeserializer {
                     result.invalidType(location, "$ref", "string", node);
                 }
             } else {
-                output.responseSchema(Json.mapper().convertValue(schema, Model.class));
+                output.responseSchema(definition(schema, location + ".schema", result));
             }
 
         }
