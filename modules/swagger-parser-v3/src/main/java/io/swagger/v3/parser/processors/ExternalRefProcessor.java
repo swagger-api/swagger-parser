@@ -110,7 +110,11 @@ public final class ExternalRefProcessor {
                 RefFormat ref = computeRefFormat(schema.get$ref());
                 if (isAnExternalRefFormat(ref)) {
                     String schemaFullRef = schema.get$ref();
-                    String parent = file.substring(0, file.lastIndexOf(File.separatorChar));
+                    String parent = "";
+                    int separator = file.lastIndexOf('/');
+                    if (separator >= 0) {
+                        parent = file.substring(0, separator);
+                    }
                     if (!parent.isEmpty()) {
                         schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
                     }
