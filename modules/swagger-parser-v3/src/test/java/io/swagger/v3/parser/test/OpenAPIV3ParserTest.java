@@ -2729,4 +2729,17 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(cat);
     }
 
+    // Relative external refs failed on windows due to \ issue
+    @Test
+    public void testRelativePathIssue1543() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/issue-1543/openapi.yaml", null, options);
+
+        if (readResult.getMessages().size() > 0) {
+        	Assert.assertFalse(readResult.getMessages().get(0).contains("end -1"));
+        }
+    }
 }

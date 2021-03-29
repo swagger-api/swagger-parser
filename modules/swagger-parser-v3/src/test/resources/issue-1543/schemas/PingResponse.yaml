@@ -1,0 +1,6 @@
+# schemas/PingResponse.yaml
+type: object
+properties:
+  answer:
+    type: string
+    maxLength: 255
