@@ -98,7 +98,7 @@ public class RemoteUrl {
                      replaceAll("\\}", "%7D").
                      replaceAll(" ", "%20");
         }catch (Exception t){
-            t.printStackTrace();
+            LOGGER.log("context", t);
         }
         return result;
     }
