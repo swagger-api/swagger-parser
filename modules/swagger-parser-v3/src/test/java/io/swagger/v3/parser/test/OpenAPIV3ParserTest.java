@@ -85,6 +85,30 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue251() throws IOException {
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/domain.yaml"), "UTF-8");
+        WireMock.stubFor(get(urlPathMatching("/domain"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/json")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/issue251.yaml"), "UTF-8");
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        final SwaggerParseResult parseResult = parser.readContents(pathFile, null, options);
+
+        assertEquals(parseResult.getMessages().size(), 0);
+        assertTrue(parseResult.getOpenAPI().getComponents().getSchemas().size() == 2);
+        assertTrue(parseResult.getOpenAPI().getPaths().get("/parse").getGet().getParameters().get(0).getSchema().get$ref().equals("#/components/schemas/Parse"));
+    }
+    
+    @Test
     public void testCantReadDeepProperties() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
