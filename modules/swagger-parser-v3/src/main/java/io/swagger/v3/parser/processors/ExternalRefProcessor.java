@@ -109,12 +109,14 @@ public final class ExternalRefProcessor {
             if (schema.get$ref() != null) {
                 RefFormat ref = computeRefFormat(schema.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    String schemaFullRef = schema.get$ref();
-                    String parent = file.substring(0, file.lastIndexOf(File.separatorChar));
-                    if (!parent.isEmpty()) {
-                        schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
+                    if (!ref.equals(RefFormat.URL)) {
+                        String schemaFullRef = schema.get$ref();
+                        String parent = file.substring(0, file.lastIndexOf(File.separatorChar));
+                        if (!parent.isEmpty()) {
+                            schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
+                        }
+                        schema.set$ref(processRefToExternalSchema(schemaFullRef, ref));
                     }
-                    schema.set$ref(processRefToExternalSchema(schemaFullRef, ref));
                 } else {
                     processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
                 }
