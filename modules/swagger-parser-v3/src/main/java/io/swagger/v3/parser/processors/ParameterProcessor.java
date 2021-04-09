@@ -161,23 +161,6 @@ public class ParameterProcessor {
                 }
 
             }
-            else if(parameter.getContent() != null){
-                Map<String,MediaType> content = parameter.getContent();
-                for( String mediaName : content.keySet()) {
-                    MediaType mediaType = content.get(mediaName);
-                    if(mediaType.getSchema()!= null) {
-                        schema = mediaType.getSchema();
-                        if (schema != null) {
-                            schemaProcessor.processSchema(schema);
-                        }
-                    }
-                    if(mediaType.getExamples() != null) {
-                        for(Example ex: mediaType.getExamples().values()){
-                            exampleProcessor.processExample(ex);
-                        }
-                    }
-                }
-            }
         }
 
         return processedPathLevelParameters;
