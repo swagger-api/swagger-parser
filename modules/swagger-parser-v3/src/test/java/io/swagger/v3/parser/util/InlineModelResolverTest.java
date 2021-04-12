@@ -2,7 +2,20 @@ package io.swagger.v3.parser.util;
 
 
 
-import io.swagger.v3.core.util.Yaml;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertNull;
+import static org.testng.AssertJUnit.assertTrue;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.testng.annotations.Test;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -20,18 +33,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import org.testng.annotations.Test;
 
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.AssertJUnit.*;
-
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "rawtypes"})
 public class InlineModelResolverTest {
 
     @Test
@@ -476,7 +479,7 @@ public class InlineModelResolverTest {
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents());
         assertNotNull(openAPI.getComponents().getSchemas());
-        assertEquals(4, openAPI.getComponents().getSchemas().size());
+        assertEquals(openAPI.getComponents().getSchemas().size(), 6);
     }
 
     @Test
@@ -1334,7 +1337,7 @@ public class InlineModelResolverTest {
     }
 
 
-    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/1200")
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/1527")
     public void testInlineItemsSchema() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
@@ -1342,5 +1345,77 @@ public class InlineModelResolverTest {
 
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
+    }
+
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/1200")
+    public void testSchemaPropertiesBeingPassedToFlattenedModel() {
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
+
+        Schema address = new ObjectSchema();
+        address.setDeprecated(false);
+        address.setDescription("My address");
+        address.setExclusiveMaximum(true);
+        address.setExclusiveMinimum(true);
+        address.setFormat("format");
+        address.setMinLength(Integer.getInteger("10"));
+        address.setMaximum(BigDecimal.valueOf(50));
+        address.setMaxItems(Integer.getInteger("1"));
+        address.setMaxLength(Integer.getInteger("100"));
+        address.setMaxProperties(Integer.getInteger("1"));
+        address.setMinimum(BigDecimal.ZERO);
+        address.setMinItems(Integer.getInteger("0"));
+        address.setMinLength(Integer.getInteger("10"));
+        address.setMinProperties(Integer.getInteger("0"));
+        address.setMultipleOf(BigDecimal.valueOf(2));
+        address.setName("Address");
+        address.setNullable(true);
+        address.setPattern("%dd");
+        address.setReadOnly(false);
+        address.setTitle("my address");
+        address.setUniqueItems(true);
+        address.setWriteOnly(false);
+        address.addProperties("city", new StringSchema());
+
+
+        Schema user = new ObjectSchema();
+        user.setTitle("InnerUserTitle");
+        user.setDefault("default");
+        user.setReadOnly(false);
+        user.setDescription("user description");
+        user.setName("user name");
+        user.addProperties("address", address);
+
+        openAPI.getComponents().addSchemas("User", user);
+
+        new InlineModelResolver(true, true).flatten(openAPI);
+
+        Schema model = openAPI.getComponents().getSchemas().get("User");
+        assertTrue(model instanceof ObjectSchema);
+
+        Schema userAddress = openAPI.getComponents().getSchemas().get("MyAddress");
+        assertNotNull(userAddress);
+        assertEquals(userAddress.getDeprecated(), Boolean.FALSE);
+        assertEquals(userAddress.getDescription(), "My address");
+        assertEquals(userAddress.getExclusiveMaximum(), Boolean.TRUE);
+        assertEquals(userAddress.getExclusiveMinimum(), Boolean.TRUE);
+        assertEquals(userAddress.getFormat(), "format");
+        assertEquals(userAddress.getMaximum(), BigDecimal.valueOf(50));
+        assertEquals(userAddress.getMaxItems(), Integer.getInteger("1"));
+        assertEquals(userAddress.getMaxLength(), Integer.getInteger("100"));
+        assertEquals(userAddress.getMaxProperties(), Integer.getInteger("1"));
+        assertEquals(userAddress.getMinimum(), BigDecimal.ZERO);
+        assertEquals(userAddress.getMinItems(), Integer.getInteger("1"));
+        assertEquals(userAddress.getMinLength(), Integer.getInteger("100"));
+        assertEquals(userAddress.getMinProperties(), Integer.getInteger("0"));
+        assertEquals(userAddress.getMultipleOf(), BigDecimal.valueOf(2));
+        assertEquals(userAddress.getName(), "Address");
+        assertEquals(userAddress.getNullable(), Boolean.TRUE);
+        assertEquals(userAddress.getPattern(), "%dd");
+        assertEquals(userAddress.getReadOnly(), Boolean.FALSE);
+        assertEquals(userAddress.getTitle(), "my address");
+        assertEquals(userAddress.getUniqueItems(), Boolean.TRUE);
+        assertEquals(userAddress.getWriteOnly(), Boolean.FALSE);
+
     }
 }

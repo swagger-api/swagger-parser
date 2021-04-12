@@ -1,5 +1,14 @@
 package io.swagger.v3.parser.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -9,24 +18,16 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.parser.models.RefType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+@SuppressWarnings("rawtypes")
 public class InlineModelResolver {
     private OpenAPI openAPI;
-    static Logger LOGGER = LoggerFactory.getLogger(InlineModelResolver.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(InlineModelResolver.class);
 
     Map<String, Schema> addedModels = new HashMap<>();
     Map<String, String> generatedSignature = new HashMap<>();
@@ -394,8 +395,8 @@ public class InlineModelResolver {
         if (camelCaseFlattenNaming) {
             String uniqueKey;
             String concatenated = "";
-            for (int i = 0; i < key.split("-").length; i++) {
-                uniqueKey = key.split("-")[i];
+            for (int i = 0; i < key.split("[-|\\s|_]").length; i++) {
+                uniqueKey = key.split("[-|\\s|_]")[i];
                 uniqueKey = uniqueKey.substring(0, 1).toUpperCase() + uniqueKey.substring(1);
                 concatenated = concatenated.concat(uniqueKey);
             }
@@ -588,13 +589,37 @@ public class InlineModelResolver {
 
 
         } else {
-            Schema model = new Schema();//TODO Verify this!
+			Schema model = new Schema();
+			model.setAdditionalProperties(schema.getAdditionalProperties());
             model.setDescription(description);
+            model.setDeprecated(schema.getDeprecated());
+            model.setDiscriminator(schema.getDiscriminator());
+            model.setEnum(schema.getEnum());
             model.setExample(example);
+            model.setExclusiveMaximum(schema.getExclusiveMaximum());
+            model.setExclusiveMinimum(schema.getExclusiveMinimum());
+            model.setFormat(schema.getFormat());
+            model.setMinLength(schema.getMinLength());
+            model.setMaximum(schema.getMaximum());
+            model.setMaxItems(schema.getMaxItems());
+            model.setMaxProperties(schema.getMaxProperties());
+            model.setMaxLength(schema.getMaxLength());
+            model.setMinimum(schema.getMinimum());
+            model.setMinItems(schema.getMinItems());
+            model.setMinLength(schema.getMinLength());
+            model.setMinProperties(schema.getMinProperties());
+            model.setMultipleOf(schema.getMultipleOf());
             model.setName(name);
-            model.setXml(xml);
-            model.setType(schema.getType());
+            model.setNullable(schema.getNullable());
+            model.setNot(schema.getNot());
+            model.setPattern(schema.getPattern());
+            model.setReadOnly(schema.getReadOnly());
             model.setRequired(requiredList);
+            model.setUniqueItems(schema.getUniqueItems());
+            model.setTitle(schema.getTitle());
+            model.setType(schema.getType());
+            model.setXml(xml);
+            model.setWriteOnly(schema.getWriteOnly());
 
             if (properties != null) {
                 flattenProperties(properties, path);
