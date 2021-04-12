@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: issue
+  version: 1.0.01
+
+paths:
+  /bar:
+    parameters:
+      - $ref: 'http://localhost:${dynamicPort}/issue-domain/#/components/parameters/requestid'
+    delete:
+      responses:
+        '204':
+          description: Deleted
+          headers:
+            X-requestid:
+              $ref: 'http://localhost:${dynamicPort}/issue-domain/#/components/parameters/requestid'
