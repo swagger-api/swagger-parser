@@ -1199,7 +1199,19 @@ public class SwaggerDeserializer {
                     result.invalidType(location, "$ref", "string", node);
                 }
             } else {
-                output.responseSchema(Json.mapper().convertValue(schema, Model.class));
+                String l = null;
+                JsonNode ln = schema.get("name");
+                if (ln != null) {
+                    l = ln.asText();
+                } else {
+                    l = "['unknown']";
+                }
+                location += ".[" + l + "]";
+
+                Model model = definition(schema, location, result);
+                if (model != null) {
+                    output.responseSchema(model);
+                }
             }
 
         }

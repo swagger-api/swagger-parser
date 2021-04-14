@@ -1,0 +1,34 @@
+swagger: '2.0'
+info:
+  title: Some API
+  description: >-
+    This is the Som Api
+  version: 2.0.0
+basePath: /somepath
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /somepath:
+    get:
+      description: >
+        my description
+      operationId: MyGet
+      responses:
+        '200':
+          $ref: '#/responses/Response'
+responses:
+  Response:
+    description: Response
+    schema:
+      type: object
+      required:
+        - Report
+      properties:
+        Report:
+          type: string
+      additionalProperties: false
+
