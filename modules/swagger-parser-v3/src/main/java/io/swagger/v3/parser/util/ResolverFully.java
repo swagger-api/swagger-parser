@@ -283,8 +283,18 @@ public class ResolverFully {
 
         if(schema.get$ref() != null) {
             String ref= schema.get$ref();
-            ref = ref.substring(ref.lastIndexOf("/") + 1);
-            Schema resolved = schemas != null ? schemas.get(ref) : null;
+            Schema resolved;
+            //This validation is done to solve deep properties eg. '#/components/schemas/TypeProject/properties/id'
+            if (ref.contains("/properties/")){
+                String split[] = ref.split("/");
+                String refSchema = split[3];
+                Schema parentSchema = schemas.get(refSchema);
+                ref = ref.substring(ref.lastIndexOf("/") + 1);
+                resolved = (Schema)parentSchema.getProperties().get(ref);
+            }else {
+                ref = ref.substring(ref.lastIndexOf("/") + 1);
+                resolved = schemas != null ? schemas.get(ref) : null;
+            }
 
             if (resolved != null) {
 

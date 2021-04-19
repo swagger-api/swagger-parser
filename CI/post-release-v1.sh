@@ -8,7 +8,7 @@ SC_RELEASE_TAG="v$SC_VERSION"
 #####################
 ### publish pre-prepared release (tag is created)
 #####################
-$CUR/CI/publishReleaseV1.py "$SC_RELEASE_TAG"
+python $CUR/CI/publishReleaseV1.py "$SC_RELEASE_TAG"
 
 #####################
 ### update the version to next snapshot in maven project with set version

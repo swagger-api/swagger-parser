@@ -1,0 +1,11 @@
+openapi: 3.0.0
+
+components:
+  parameters:
+    requestid:
+      name: X-requestid
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
