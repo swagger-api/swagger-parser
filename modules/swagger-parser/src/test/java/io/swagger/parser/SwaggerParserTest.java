@@ -1667,6 +1667,39 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue1541() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue-1541/main.yaml");
+        assertNotNull(swagger);
+
+        Model inlineSchema = swagger.getPaths()
+                .get("/inline_response")
+                .getGet()
+                .getResponses()
+                .get("200")
+                .getResponseSchema();
+
+        assertNotNull(inlineSchema);
+        assertNotNull(inlineSchema.getProperties());
+        assertNotNull(inlineSchema.getProperties().get("a"));
+        assertEquals("number", inlineSchema.getProperties().get("a").getType());
+
+        Model responseRef = swagger.getPaths()
+                .get("/ref_response")
+                .getGet()
+                .getResponses()
+                .get("200")
+                .getResponseSchema();
+
+        assertEquals("#/definitions/ref_response_object", responseRef.getReference());
+
+        Model refSchema = swagger.getDefinitions()
+                .get("ref_response_object");
+
+        assertEquals("number", refSchema.getProperties().get("a").getType());
+    }
+
+    @Test
     public void testRequiredItemsInComposedModel() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("src/test/resources/allOf-example/allOf.yaml", null, true);
         assertNotNull(result);
