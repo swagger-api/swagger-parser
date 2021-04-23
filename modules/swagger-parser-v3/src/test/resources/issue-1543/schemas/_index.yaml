@@ -1,0 +1,3 @@
+# schemas/_index.yaml
+pingResponse:
+  $ref: 'PingResponse.yaml'

@@ -1,0 +1,658 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "com.jusdaglobal.registerService",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8086",
+            "description": "Inferred Url"
+        }
+    ],
+    "tags": [
+        {
+            "name": "test-controller",
+            "extensions": {
+                "x-order": "2147483647"
+            }
+        }
+    ],
+    "paths": {
+        "/test": {
+            "put": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "simplePut",
+                "operationId": "simplePutUsingPUT_1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PersonInputDTO"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/business-exception": {
+            "get": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "businessException",
+                "operationId": "businessExceptionUsingGET_1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/no-package": {
+            "get": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "noPackage",
+                "operationId": "noPackageUsingGET_1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/simple-get": {
+            "get": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "get",
+                "operationId": "getUsingGET_1",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "name",
+                        "required": true,
+                        "style": "form",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/simple-post": {
+            "post": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "simplePost",
+                "operationId": "simplePostUsingPOST_1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PersonInputDTO"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/system-exception": {
+            "get": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "systemException",
+                "operationId": "systemExceptionUsingGET_1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/user-context": {
+            "get": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "getUserContext",
+                "operationId": "getUserContextUsingGET_1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserContext"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/write-time-out": {
+            "get": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "responseTimeOut",
+                "operationId": "responseTimeOutUsingGET_1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/{id}": {
+            "delete": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "delete",
+                "operationId": "deleteUsingDELETE_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "style": "simple",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        },
+        "/test/{userId}/detail": {
+            "get": {
+                "tags": [
+                    "test-controller"
+                ],
+                "summary": "detail",
+                "operationId": "detailUsingGET_1",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "userId",
+                        "required": true,
+                        "style": "simple",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "extensions": {
+                    "x-order": "2147483647"
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CompanyDto": {
+                "title": "CompanyDto",
+                "type": "object",
+                "properties": {
+                    "companyCode": {
+                        "type": "string"
+                    },
+                    "companyId": {
+                        "type": "string"
+                    },
+                    "companyName": {
+                        "type": "string"
+                    },
+                    "crmCode": {
+                        "type": "string"
+                    },
+                    "srmCode": {
+                        "type": "string"
+                    }
+                }
+            },
+            "OrganizationDto": {
+                "title": "OrganizationDto",
+                "type": "object",
+                "properties": {
+                    "company": {
+                        "$ref": "#/components/schemas/CompanyDto"
+                    },
+                    "orgType": {
+                        "type": "string",
+                        "enum": [
+                            "CHILD_COMPANY",
+                            "DEPARTMENT",
+                            "EXTERNAL_COMPANY",
+                            "MASTER_COMPANY"
+                        ]
+                    },
+                    "organizationId": {
+                        "type": "string"
+                    },
+                    "organizationName": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PersonInputDTO": {
+                "title": "PersonInputDTO",
+                "type": "object",
+                "properties": {
+                    "age": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "RoleDto": {
+                "title": "RoleDto",
+                "type": "object",
+                "properties": {
+                    "isSuperAdmin": {
+                        "type": "boolean"
+                    },
+                    "roleCode": {
+                        "type": "string"
+                    },
+                    "roleId": {
+                        "type": "string"
+                    },
+                    "roleName": {
+                        "type": "string"
+                    },
+                    "roleType": {
+                        "type": "string",
+                        "enum": [
+                            "CUSTOM",
+                            "PLATFORM",
+                            "SYSTEM"
+                        ]
+                    }
+                }
+            },
+            "TenantDto": {
+                "title": "TenantDto",
+                "type": "object",
+                "properties": {
+                    "proxyUserId": {
+                        "type": "string"
+                    },
+                    "tenantCode": {
+                        "type": "string"
+                    },
+                    "tenantId": {
+                        "type": "string"
+                    },
+                    "tenantName": {
+                        "type": "string"
+                    },
+                    "tenantType": {
+                        "type": "string",
+                        "enum": [
+                            "nonPlatformTenant",
+                            "platformTenant"
+                        ]
+                    }
+                }
+            },
+            "TerminalInfo": {
+                "title": "TerminalInfo",
+                "type": "object",
+                "properties": {
+                    "acceptLanguage": {
+                        "type": "string"
+                    },
+                    "clientIp": {
+                        "type": "string"
+                    },
+                    "referer": {
+                        "type": "string"
+                    },
+                    "userAgent": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserContext": {
+                "title": "UserContext",
+                "type": "object",
+                "properties": {
+                    "proxyUser": {
+                        "$ref": "#/components/schemas/UserDto"
+                    },
+                    "terminalInfo": {
+                        "$ref": "#/components/schemas/TerminalInfo"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserDto"
+                    },
+                    "userIdentity": {
+                        "$ref": "#/components/schemas/UserIdentityDto"
+                    }
+                }
+            },
+            "UserDto": {
+                "title": "UserDto",
+                "type": "object",
+                "properties": {
+                    "company": {
+                        "$ref": "#/components/schemas/CompanyDto"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "nickName": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "realName": {
+                        "type": "string"
+                    },
+                    "token": {
+                        "type": "string"
+                    },
+                    "userId": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserIdentityDto": {
+                "title": "UserIdentityDto",
+                "type": "object",
+                "properties": {
+                    "companyCode": {
+                        "type": "string"
+                    },
+                    "companyId": {
+                        "type": "string"
+                    },
+                    "crmCode": {
+                        "type": "string"
+                    },
+                    "dacCode": {
+                        "type": "string"
+                    },
+                    "organization": {
+                        "$ref": "#/components/schemas/OrganizationDto"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RoleDto"
+                        }
+                    },
+                    "srmCode": {
+                        "type": "string"
+                    },
+                    "tenant": {
+                        "$ref": "#/components/schemas/TenantDto"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserDto"
+                    },
+                    "userIdentityId": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "extensions": {
+        "x-setting": [
+            {
+                "language": "zh-CN",
+                "enableSwaggerModels": true,
+                "swaggerModelName": "Swagger Models",
+                "enableReloadCacheParameter": false,
+                "enableAfterScript": true,
+                "enableDocumentManage": true,
+                "enableVersion": false,
+                "enableRequestCache": true,
+                "enableFilterMultipartApis": false,
+                "enableFilterMultipartApiMethodType": "POST",
+                "enableHost": false,
+                "enableHostText": "",
+                "enableDynamicParameter": false,
+                "enableDebug": true,
+                "enableFooter": true,
+                "enableFooterCustom": false,
+                "enableSearch": true,
+                "enableOpenApi": true,
+                "enableHomeCustom": true,
+                "homeCustomLocation": "## this for test\ntest\ntest\ntest\nasdfa",
+                "enableGroup": true
+            }
+        ]
+    }
+}
