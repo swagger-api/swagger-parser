@@ -65,7 +65,7 @@ public class PathsProcessor {
                 String pathRef = pathItem.get$ref().split("#")[0];
 
                 if (resolvedPath != null) {
-                    updateLocalRefs(resolvedPath, pathRef);
+                    updateRefs(resolvedPath, pathRef);
                     //we need to put the resolved path into swagger object
                     openAPI.path(pathStr, resolvedPath);
                     pathItem = resolvedPath;
@@ -124,27 +124,27 @@ public class PathsProcessor {
         }
     }
 
-    protected void updateLocalRefs(PathItem path, String pathRef) {
+    protected void updateRefs(PathItem path, String pathRef) {
         if(path.getParameters() != null) {
             List<Parameter> params = path.getParameters();
             for(Parameter param : params) {
-                updateLocalRefs(param, pathRef);
+                updateRefs(param, pathRef);
             }
         }
         List<Operation> ops = path.readOperations();
         for(Operation op : ops) {
             if(op.getParameters() != null) {
                 for (Parameter param : op.getParameters()) {
-                    updateLocalRefs(param, pathRef);
+                    updateRefs(param, pathRef);
                 }
             }
             if(op.getResponses() != null) {
                 for(ApiResponse response : op.getResponses().values()) {
-                    updateLocalRefs(response, pathRef);
+                    updateRefs(response, pathRef);
                 }
             }
             if (op.getRequestBody() != null){
-                updateLocalRefs(op.getRequestBody(),pathRef);
+                updateRefs(op.getRequestBody(),pathRef);
             }
             if (op.getCallbacks() != null){
                 Map<String,Callback> callbacks = op.getCallbacks();
@@ -153,7 +153,7 @@ public class PathsProcessor {
                     if (callback != null) {
                         for(String callbackName : callback.keySet()) {
                             PathItem pathItem = callback.get(callbackName);
-                            updateLocalRefs(pathItem,pathRef);
+                            updateRefs(pathItem,pathRef);
                         }
                     }
                 }
@@ -161,75 +161,67 @@ public class PathsProcessor {
         }
     }
 
-    protected void updateLocalRefs(ApiResponse response, String pathRef) {
+    protected void updateRefs(ApiResponse response, String pathRef) {
         if (response.get$ref() != null){
-            if(isLocalRef(response.get$ref())) {
-                response.set$ref(computeLocalRef(response.get$ref(), pathRef));
-            }
+        	response.set$ref(computeRef(response.get$ref(), pathRef));
         }
         if(response.getContent() != null) {
             Map<String, MediaType> content = response.getContent();
             for (String key: content.keySet()) {
                 MediaType mediaType = content.get(key);
                 if (mediaType.getSchema() != null) {
-                    updateLocalRefs(mediaType.getSchema(), pathRef);
+                    updateRefs(mediaType.getSchema(), pathRef);
                 }
                 Map<String, Example> examples = content.get(key).getExamples();
                 if (examples != null) {
                     for( Example example:examples.values()){
-                        updateLocalRefs(example, pathRef);
+                        updateRefs(example, pathRef);
                     }
                 }
             }
         }
     }
 
-    protected void updateLocalRefs(Example example, String pathRef) {
+    protected void updateRefs(Example example, String pathRef) {
         if(example.get$ref() != null) {
-            if(isLocalRef(example.get$ref())) {
-                example.set$ref(computeLocalRef(example.get$ref(), pathRef));
-            }
+        	example.set$ref(computeRef(example.get$ref(), pathRef));
         }
     }
 
-    protected void updateLocalRefs(Parameter param, String pathRef) {
+    protected void updateRefs(Parameter param, String pathRef) {
         if (param.get$ref() != null){
-            if(isLocalRef(param.get$ref())) {
-                param.set$ref(computeLocalRef(param.get$ref(), pathRef));
-            }
+        	param.set$ref(computeRef(param.get$ref(), pathRef));
         }
         if(param.getSchema() != null) {
-            updateLocalRefs(param.getSchema(), pathRef);
+            updateRefs(param.getSchema(), pathRef);
         }
         if(param.getContent() != null) {
             Map<String, MediaType> content = param.getContent();
             for (String key: content.keySet()) {
                 MediaType mediaType = content.get(key);
                 if (mediaType.getSchema() != null) {
-                    updateLocalRefs(mediaType.getSchema(), pathRef);
+                    updateRefs(mediaType.getSchema(), pathRef);
                 }
             }
         }
 
     }
 
-    protected void updateLocalRefs(RequestBody body, String pathRef) {
+    protected void updateRefs(RequestBody body, String pathRef) {
         if (body.get$ref() != null){
-            if(isLocalRef(body.get$ref())) {
-                body.set$ref(computeLocalRef(body.get$ref(), pathRef));
-            }
+        	body.set$ref(computeRef(body.get$ref(), pathRef));
         }
         if(body.getContent() != null) {
             Map<String, MediaType> content = body.getContent();
             for (String key: content.keySet()) {
                 MediaType mediaType = content.get(key);
                 if (mediaType.getSchema() != null) {
-                    updateLocalRefs(mediaType.getSchema(), pathRef);
+                    updateRefs(mediaType.getSchema(), pathRef);
                 }
                 Map<String, Example> examples = content.get(key).getExamples();
                 if (examples != null) {
                     for (Example example : examples.values()) {
-                        updateLocalRefs(example, pathRef);
+                        updateRefs(example, pathRef);
                     }
                 }
             }
@@ -238,11 +230,9 @@ public class PathsProcessor {
         }
     }
 
-    protected void updateLocalRefs(Schema model, String pathRef) {
+    protected void updateRefs(Schema model, String pathRef) {
         if(model.get$ref() != null) {
-            if(isLocalRef(model.get$ref())) {
-                model.set$ref(computeLocalRef(model.get$ref(), pathRef));
-            }
+        	model.set$ref(computeRef(model.get$ref(), pathRef));
         }
         else if(model.getProperties() != null) {
             // process properties
@@ -251,7 +241,7 @@ public class PathsProcessor {
                 for(String key : properties.keySet()) {
                     Schema property = properties.get(key);
                     if (property != null) {
-                        updateLocalRefs(property, pathRef);
+                        updateRefs(property, pathRef);
                     }
                 }
             }
@@ -260,22 +250,22 @@ public class PathsProcessor {
             ComposedSchema composedSchema = (ComposedSchema) model;
             if (composedSchema.getAllOf() != null) {
                 for (Schema innerModel : composedSchema.getAllOf()) {
-                    updateLocalRefs(innerModel, pathRef);
+                    updateRefs(innerModel, pathRef);
                 }
             }if (composedSchema.getAnyOf() != null) {
                 for(Schema innerModel : composedSchema.getAnyOf()) {
-                    updateLocalRefs(innerModel, pathRef);
+                    updateRefs(innerModel, pathRef);
                 }
             }if (composedSchema.getOneOf() != null) {
                 for (Schema innerModel : composedSchema.getOneOf()) {
-                    updateLocalRefs(innerModel, pathRef);
+                    updateRefs(innerModel, pathRef);
                 }
             }
         }
         else if(model instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) model;
             if(arraySchema.getItems() != null) {
-                updateLocalRefs(arraySchema.getItems(), pathRef);
+                updateRefs(arraySchema.getItems(), pathRef);
             }
         }
     }
@@ -286,6 +276,27 @@ public class PathsProcessor {
             return true;
         }
         return false;
+    }
+    
+    protected boolean isAbsoluteRef(String ref) {
+    	 if(ref.startsWith("./")) {
+             return true;
+         }
+         return false;
+    }
+    
+    protected String computeRef(String ref, String prefix) {
+    	if(isLocalRef(ref)) return computeLocalRef(ref, prefix);
+    	if(isAbsoluteRef(ref)) return ref;
+    	return computeRelativeRef(ref, prefix);
+    }
+    
+    protected String computeRelativeRef(String ref, String prefix) {
+    	int iIdxOfSlash = prefix.lastIndexOf('/');
+    	if(iIdxOfSlash != -1) {
+    		return prefix.substring(0, iIdxOfSlash+1) + ref;
+    	}
+    	return prefix + ref;
     }
 
     protected String computeLocalRef(String ref, String prefix) {
