@@ -1,0 +1,15 @@
+post:
+  tags:
+  - Security
+  description: authorize the user
+  summary: authorize the user
+  operationId: authorize.user
+  responses:
+    "200":
+      description: authorize 200 response
+      content:
+        text/plain:
+          schema:
+            type: string
+    default:
+      $ref: '../../_responses/UnexpectedError.yaml'
