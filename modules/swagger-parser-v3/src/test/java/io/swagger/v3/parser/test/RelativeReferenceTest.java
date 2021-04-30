@@ -1,8 +1,6 @@
 package io.swagger.v3.parser.test;
 
 
-
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -12,9 +10,15 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Mocked;
+
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -133,5 +137,22 @@ public class RelativeReferenceTest {
 
         OpenAPI swagger = (new OpenAPIV3Parser().readContents(yaml,null, null)).getOpenAPI();
         assertNotNull(swagger.getComponents().getSchemas().get("ID"));
+    }
+        
+    @Test
+    public void testResolveRelativePaths() {
+    	ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("/relative-references-example/openapi.yaml", null, options);
+        
+    	Assert.assertNotNull(parseResult.getOpenAPI());
+    	
+    	HashSet<String> validationMessages = new HashSet<>(null != parseResult.getMessages() ? parseResult.getMessages() : new ArrayList<>());
+    	
+    	
+    	//validationMessages.forEach(msg->System.out.println(msg));
+        //OpenAPI specification = parseResult.getOpenAPI();
+    	Assert.assertTrue(validationMessages.isEmpty(), validationMessages.toString());
+    	
     }
 }
