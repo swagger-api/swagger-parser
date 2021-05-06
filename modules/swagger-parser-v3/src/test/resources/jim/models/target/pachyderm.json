@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "paleos",
+    "strake"
+  ],
+  "properties": {
+    "paleos": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Palaeoarchaeant"
+      },
+      "description": "blah blah blah"
+    },
+    "strakes": {
+      "$ref": "#/components/schemas/Strake",
+      "description": "blah blah blah"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Strake": {
+        "$ref": "./strake.json"
+      },
+      "Palaeoarchaeant": {
+        "$ref": "./palaeoarchaeant.json"
+      }
+    }
+  }
+}

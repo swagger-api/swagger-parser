@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "enum": [
+    "RAFTER",
+    "DORMUND",
+    "HABITATTS",
+    "PEACH"
+  ],
+  "description": "blah blah blah"
+}

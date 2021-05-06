@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "clown",
+    "pie"
+  ],
+  "properties": {
+    "clown": {
+      "type": "integer",
+      "description": "blah blah blah"
+    },
+    "pie": {
+      "type": "string",
+      "enum": [
+        "LEMON"
+      ],
+      "description": "blah blah blah"
+    }
+  }
+}

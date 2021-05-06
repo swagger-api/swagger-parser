@@ -1,0 +1,9 @@
+{
+  "type": "string",
+  "enum": [
+    "ORK",
+    "MORK"
+  ],
+  "default": "MORK",
+  "description": "blah blah blah"
+}

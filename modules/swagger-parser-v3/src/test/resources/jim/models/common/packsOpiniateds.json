@@ -1,0 +1,7 @@
+{
+  "description": "blah blah blah",
+  "type": "array",
+  "items": {
+    "$ref": "./packsOpiniated.json"
+  }
+}

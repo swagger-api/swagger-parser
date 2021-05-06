@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "properties": {
+    "fump": {
+      "$ref": "#/components/schemas/Fump",
+      "description": "blah blah blah"
+    },
+    "strake": {
+      "$ref": "#/components/schemas/Strake",
+      "description": "blah blah blah"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Fump": {
+        "$ref": "./fump.json"
+      },
+      "Strake": {
+        "$ref": "./strake.json"
+      }
+    }
+  }
+}

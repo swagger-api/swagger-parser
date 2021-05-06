@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "pollys"
+  ],
+  "properties": {
+    "pollys": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Coadjuvancy"
+      },
+      "description": "blah blah blah"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Coadjuvancy": {
+        "$ref": "./coadjuvancy.json"
+      }
+    }
+  }
+}

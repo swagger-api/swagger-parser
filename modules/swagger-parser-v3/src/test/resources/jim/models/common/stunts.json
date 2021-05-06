@@ -1,0 +1,8 @@
+{
+  "type": "string",
+  "enum": [
+    "XORK",
+    "PESKIEST"
+  ],
+  "description": "blah blah blah"
+}

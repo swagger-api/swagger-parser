@@ -139,6 +139,11 @@ public class ComponentsProcessor {
             while(schemas.keySet().size() > keySet.size()) {
                 processSchemas(keySet, schemas);
             }
+            //process any schema property unresolved
+            //processSchemas(keySet, schemas);
+
+
+
         }
     }
 

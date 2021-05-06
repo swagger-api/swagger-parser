@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "classy"
+  ],
+  "properties": {
+    "classy": {
+      "type": "string",
+      "description": "blah blah blah"
+    }
+  }
+}

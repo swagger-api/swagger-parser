@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "tump"
+  ],
+  "properties": {
+    "tump": {
+      "type": "string",
+      "description": "blah blah blah"
+    }
+  }
+}

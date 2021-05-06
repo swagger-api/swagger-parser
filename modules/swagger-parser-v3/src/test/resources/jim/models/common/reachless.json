@@ -1,0 +1,16 @@
+{
+  "required": [
+    "tvop",
+    "jt"
+  ],
+  "properties": {
+    "tvop": {
+      "description": "blah blah blah",
+      "type": "string"
+    },
+    "jt": {
+      "description": "blah blah blah",
+      "type": "string"
+    }
+  }
+}

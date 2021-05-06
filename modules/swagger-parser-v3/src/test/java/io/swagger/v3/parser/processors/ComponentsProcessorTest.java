@@ -188,6 +188,8 @@ public class ComponentsProcessorTest {
 
             schemaProcessor.processSchema(refModel);
             times = 1;
+
+
         }};
 
         new ComponentsProcessor(openAPI, mockResolverCache).processComponents();

@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "lobsters",
+    "shedss",
+    "type"
+  ],
+  "properties": {
+    "lobsters": {
+      "$ref": "#/components/schemas/Lobsters",
+      "description": "blah blah blah"
+    },
+    "shedss": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Sheds"
+      },
+      "description": "blah blah blah"
+    },
+    "normal": {
+      "type": "string",
+      "description": "blah blah blah"
+    },
+    "zorg": {
+      "type": "string",
+      "description": "blah blah blah"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Lobsters": {
+        "$ref": "./lobsters.json"
+      },
+      "Sheds": {
+        "$ref": "./sheds.json"
+      }
+    }
+  }
+}

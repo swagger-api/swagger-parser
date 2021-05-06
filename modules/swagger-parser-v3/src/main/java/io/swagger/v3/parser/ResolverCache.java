@@ -107,7 +107,7 @@ public class ResolverCache {
         //we might have already resolved this ref, so check the resolutionCache
         Object previouslyResolvedEntity = resolutionCache.get(ref);
 
-        if (previouslyResolvedEntity != null) {
+       if (previouslyResolvedEntity != null) {
             if(expectedType.equals(Header.class)){
                 if (expectedType.getClass().equals(previouslyResolvedEntity.getClass())) {
                     return expectedType.cast(previouslyResolvedEntity);

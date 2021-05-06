@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "jt",
+    "tvod",
+    "fipa",
+    "fipaWestion",
+    "tashot",
+    "tashotSipe",
+    "massage",
+    "stunts"
+  ],
+  "properties": {
+    "jt": {
+      "type": "string",
+      "description": "blah blah blah",
+      "readOnly": true
+    },
+    "tvod": {
+      "type": "string",
+      "description": "blah blah blah",
+      "readOnly": true
+    },
+    "fipa": {
+      "$ref": "#/components/schemas/Reachless",
+      "description": "blah blah blah",
+      "readOnly": true
+    },
+    "fipaWestion": {
+      "$ref": "#/components/schemas/Reachless",
+      "description": "blah blah blah"
+    },
+    "tashot": {
+      "oneOf": [
+        {
+          "$ref": "#/components/schemas/Rebato"
+        },
+        {
+          "$ref": "#/components/schemas/Drabbet"
+        },
+        {
+          "$ref": "#/components/schemas/Highvelds"
+        },
+        {
+          "$ref": "#/components/schemas/Polly"
+        }
+      ],
+      "description": "blah blah blah"
+    },
+    "tashotSipe": {
+      "$ref": "../api.json#/components/schemas/TashotSipe"
+    },
+    "massage": {
+      "type": "string",
+      "description": "blah blah blah"
+    },
+    "stunts": {
+      "$ref": "../api.json#/components/schemas/Stunts"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Reachless": {
+        "$ref": "./common/reachless.json"
+      },
+      "Rebato": {
+        "$ref": "./target/rebato.json"
+      },
+      "Drabbet": {
+        "$ref": "./target/drabbet.json"
+      },
+      "Highvelds": {
+        "$ref": "./target/highvelds.json"
+      },
+      "Polly": {
+        "$ref": "./target/polly.json"
+      }
+    }
+  }
+}

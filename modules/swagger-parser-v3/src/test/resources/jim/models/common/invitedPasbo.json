@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "properties": {
+    "nbng": {
+      "type": "string",
+      "description": "blah blah blah"
+    },
+    "reaper": {
+      "type": "string",
+      "description": "blah blah blah"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "type",
+    "title"
+  ],
+  "properties": {
+    "tvoe": {
+      "type": "string",
+      "description": "blah blah blah",
+      "default": "https://api.box.com/problems"
+    },
+    "tivoli": {
+      "type": "string",
+      "description": "blah blah blah"
+    },
+    "statue": {
+      "type": "integer",
+      "format": "int32",
+      "description": "blah blah blah"
+    },
+    "devoid": {
+      "type": "string",
+      "description": "blah blah blah"
+    },
+    "insulate": {
+      "type": "string",
+      "description": "blah blah blah"
+    },
+    "essotCnmd": {
+      "type": "string",
+      "description": "blah blah blah"
+    },
+    "invitedPasbos": {
+      "type": "array",
+      "items": {
+        "$ref": "./invitedPasbo.json"
+      }
+    }
+  }
+}

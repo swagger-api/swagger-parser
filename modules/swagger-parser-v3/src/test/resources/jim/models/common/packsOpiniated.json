@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "required": [
+    "ad",
+    "pots"
+  ],
+  "properties": {
+    "ad": {
+      "type": "string",
+      "enum": [
+        "app",
+        "refave",
+        "repeler",
+        "tast",
+        "coop",
+        "marp"
+      ]
+    },
+    "four": {
+      "type": "string"
+    },
+    "pots": {
+      "type": "string"
+    },
+    "vevum": {
+      "type": "object"
+    }
+  }
+}

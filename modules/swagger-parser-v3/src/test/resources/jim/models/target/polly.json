@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "lobsters",
+    "cape"
+  ],
+  "properties": {
+    "lobsters": {
+      "$ref": "#/components/schemas/Lobsters",
+      "description": "blah blah blah"
+    },
+    "cape": {
+      "type": "string",
+      "description": "blah blah blah"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Lobsters": {
+        "$ref": "./lobsters.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "lobsters",
+    "sheds",
+    "bungle"
+  ],
+  "properties": {
+    "lobsters": {
+      "$ref": "#/components/schemas/Lobsters",
+      "description": "blah blah blah"
+    },
+    "sheds": {
+      "$ref": "#/components/schemas/Sheds",
+      "description": "blah blah blah"
+    },
+    "bungle": {
+      "type": "string",
+      "description": "blah blah blah"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Lobsters": {
+        "$ref": "./lobsters.json"
+      },
+      "Sheds": {
+        "$ref": "./sheds.json"
+      }
+    }
+  }
+}

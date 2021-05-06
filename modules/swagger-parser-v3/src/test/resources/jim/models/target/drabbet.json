@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "required": [
+    "lobsters",
+    "pachyderms",
+    "type"
+  ],
+  "properties": {
+    "lobsters": {
+      "$ref": "#/components/schemas/Lobsters",
+      "description": "blah blah blah"
+    },
+    "pachyderms": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Pachyderm"
+      },
+      "description": "blah blah blah"
+    },
+    "soros": {
+      "type": "string",
+      "description": "blah blah blah"
+    }
+  },
+  "components": {
+    "schemas": {
+      "Lobsters": {
+        "$ref": "./lobsters.json"
+      },
+      "Pachyderm": {
+        "$ref": "./pachyderm.json"
+      }
+    }
+  }
+}
