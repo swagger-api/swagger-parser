@@ -58,6 +58,8 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -2803,4 +2805,33 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(cat);
     }
 
+
+    // Relative external refs failed on windows due to \ issue
+    @Test
+    public void testRelativePathIssue1543() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/issue-1543/openapi.yaml", null, options);
+
+        if (readResult.getMessages().size() > 0) {
+        	Assert.assertFalse(readResult.getMessages().get(0).contains("end -1"));
+        }
+    }
+
+    @Test
+    public void testIssue1540() throws Exception{
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./issue-1540/a.json");
+        Assert.assertNotNull(openAPI);
+        Map<String, Object> extensions = openAPI.getExtensions();
+        Assert.assertNotNull(extensions);
+        Assert.assertTrue(!extensions.isEmpty());
+        Assert.assertNotNull(extensions.get("x-setting"));
+        Map<String, Object> testPutExtensions = openAPI.getPaths().get("/test").getPut().getExtensions();
+        Assert.assertNotNull(testPutExtensions);
+        Assert.assertTrue(!testPutExtensions.isEmpty());
+        Assert.assertNotNull(testPutExtensions.get("x-order"));
+        Assert.assertEquals((String)testPutExtensions.get("x-order"),"2147483647");
+    }
 }

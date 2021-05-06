@@ -54,7 +54,7 @@ public class RemoteUrl {
                 }};
 
                 // Install the all-trusting trust manager
-                final SSLContext sc = SSLContext.getInstance("SSL");
+                final SSLContext sc = SSLContext.getInstance("TLS");
                 sc.init(null, trustAllCerts, new java.security.SecureRandom());
                 final SSLSocketFactory sf = sc.getSocketFactory();
 
