@@ -3,8 +3,12 @@ package io.swagger.v3.parser.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,7 +57,9 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -84,6 +90,51 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testServerRelativeUrl(){
+        String url = "https://petstore3.swagger.io/api/v3/openapi.json";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url,new ArrayList<>(),options);
+        assertTrue(result.getMessages().isEmpty());
+    }
+
+    @Test
+    public void testServerRelativeUrlLocal(){
+        String url = "issue-1509/openapilocal.json";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url,new ArrayList<>(),options);
+        Yaml.prettyPrint(result.getOpenAPI());
+        assertTrue(result.getMessages().isEmpty());
+    }
+
+    @Test
+    public void testServerRelativeUrlJar(){
+        String url;
+        InputStream in;
+        URL inputURL = null;
+        String inputFile = "jar:file:/parser-cp-loader/target/parser-cp-loader-1.0-SNAPSHOT-jar-with-dependencies.jar!/openapi.json";
+        try {
+            inputURL = new URL(inputFile);
+            JarURLConnection conn = (JarURLConnection)inputURL.openConnection();
+            in = conn.getInputStream();
+            url = IOUtils.toString(in);
+        } catch (MalformedURLException e1) {
+            System.err.println("Malformed input URL: "+inputURL);
+            return;
+        } catch (IOException e1) {
+            System.err.println("IO error open connection");
+            return;
+        }
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(url,new ArrayList<>(),options);
+        Yaml.prettyPrint(result.getOpenAPI().getServers().equals("/api/v3"));
+        assertTrue(result.getMessages().isEmpty());
+    }
+  
     @Test
     public void testIssue251() throws IOException {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/domain.yaml"), "UTF-8");
