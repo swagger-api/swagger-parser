@@ -272,8 +272,8 @@ public class OpenAPIV3ParserTest {
         assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Pagelimit")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw2");
 
         //requestBodies
-        assertNotNull(openAPI.getComponents().getSchemas().get("Body"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Body")).getAllOf().get(1).get$ref(),"#/components/schemas/requestBodiesAllOf2");
+        assertNotNull(openAPI.getComponents().getSchemas().get("RequestBodiesBody"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("RequestBodiesBody")).getAllOf().get(1).get$ref(),"#/components/schemas/requestBodiesAllOf2");
         assertNotNull(openAPI.getComponents().getSchemas().get("InlineResponseItems200"));
         assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineBodyItemsApplicationxmlrequestBodies")).getAllOf().get(1).get$ref(),"#/components/schemas/ApplicationxmlAllOf2");
 
@@ -416,9 +416,9 @@ public class OpenAPIV3ParserTest {
 
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertNotNull(openAPI.getComponents().getSchemas().get("status"));
-        assertNotNull(openAPI.getComponents().getSchemas().get("body"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("testBody"));
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
-        assertNotNull(openAPI.getComponents().getSchemas().get("body_1"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("testBody_1"));
         assertNotNull(openAPI.getComponents().getSchemas().get("Test1"));
         assertNotNull(openAPI.getComponents().getSchemas().get("Test2"));
     }
