@@ -1,0 +1,26 @@
+{
+  "swagger" : "2.0",
+  "definitions" : {
+    "User" : {
+      "required" : [ "address" ],
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "address" : {
+          "type" : "object",
+          "description" : "description",
+          "properties" : {
+            "city" : {
+              "type" : "string"
+            },
+            "street" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "description" : "a common user"
+    }
+  }
+}

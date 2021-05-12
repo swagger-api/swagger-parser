@@ -1022,6 +1022,22 @@ public class SwaggerDeserializer {
 
             addProperties(location, node, result, model);
 
+            // need to set properties first
+            ArrayNode required = getArray("required", node, false, location, result);
+            if (required != null) {
+                List<String> requiredProperties = new ArrayList<String>();
+                for (JsonNode n : required) {
+                    if (n.getNodeType().equals(JsonNodeType.STRING)) {
+                        requiredProperties.add(((TextNode) n).textValue());
+                    } else {
+                        result.invalidType(location, "required", "string", n);
+                    }
+                }
+                if (requiredProperties.size() > 0) {
+                    model.setRequired(requiredProperties);
+                }
+            }
+
             return model;
         }
         return null;
@@ -1183,7 +1199,7 @@ public class SwaggerDeserializer {
                     result.invalidType(location, "$ref", "string", node);
                 }
             } else {
-                output.responseSchema(Json.mapper().convertValue(schema, Model.class));
+                output.responseSchema(definition(schema, location + ".schema", result));
             }
 
         }

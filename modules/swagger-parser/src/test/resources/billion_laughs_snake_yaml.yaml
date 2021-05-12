@@ -1,0 +1,2910 @@
+swagger: "2.0"
+info:
+  title: test BLA
+  version: 1.0.0
+basePath: /
+consumes:
+  - application/json
+produces:
+  - application/json
+definitions:
+  a1:
+    type: string
+    enum: &A1
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a2:
+    type: string
+    enum: &A2
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a3:
+    type: string
+    enum: &A3
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a4:
+    type: string
+    enum: &A4
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a5:
+    type: string
+    enum: &A5
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a6:
+    type: string
+    enum: &A6
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a7:
+    type: string
+    enum: &A7
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a8:
+    type: string
+    enum: &A8
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a9:
+    type: string
+    enum: &A9
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a10:
+    type: string
+    enum: &A10
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a11:
+    type: string
+    enum: &A11
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a12:
+    type: string
+    enum: &A12
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a13:
+    type: string
+    enum: &A13
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a14:
+    type: string
+    enum: &A14
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a15:
+    type: string
+    enum: &A15
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a16:
+    type: string
+    enum: &A16
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a17:
+    type: string
+    enum: &A17
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a18:
+    type: string
+    enum: &A18
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a19:
+    type: string
+    enum: &A19
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a20:
+    type: string
+    enum: &A20
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a21:
+    type: string
+    enum: &A21
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a22:
+    type: string
+    enum: &A22
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a23:
+    type: string
+    enum: &A23
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a24:
+    type: string
+    enum: &A24
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a25:
+    type: string
+    enum: &A25
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a26:
+    type: string
+    enum: &A26
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a27:
+    type: string
+    enum: &A27
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a28:
+    type: string
+    enum: &A28
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a29:
+    type: string
+    enum: &A29
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a30:
+    type: string
+    enum: &A30
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a31:
+    type: string
+    enum: &A31
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a32:
+    type: string
+    enum: &A32
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a33:
+    type: string
+    enum: &A33
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a34:
+    type: string
+    enum: &A34
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a35:
+    type: string
+    enum: &A35
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a36:
+    type: string
+    enum: &A36
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a37:
+    type: string
+    enum: &A37
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a38:
+    type: string
+    enum: &A38
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a39:
+    type: string
+    enum: &A39
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a40:
+    type: string
+    enum: &A40
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a41:
+    type: string
+    enum: &A41
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a42:
+    type: string
+    enum: &A42
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a43:
+    type: string
+    enum: &A43
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a44:
+    type: string
+    enum: &A44
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a45:
+    type: string
+    enum: &A45
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a46:
+    type: string
+    enum: &A46
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a47:
+    type: string
+    enum: &A47
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a48:
+    type: string
+    enum: &A48
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a49:
+    type: string
+    enum: &A49
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a50:
+    type: string
+    enum: &A50
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a51:
+    type: string
+    enum: &A51
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a52:
+    type: string
+    enum: &A52
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a53:
+    type: string
+    enum: &A53
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a54:
+    type: string
+    enum: &A54
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a55:
+    type: string
+    enum: &A55
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a56:
+    type: string
+    enum: &A56
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a57:
+    type: string
+    enum: &A57
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a58:
+    type: string
+    enum: &A58
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a59:
+    type: string
+    enum: &A59
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a60:
+    type: string
+    enum: &A60
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a61:
+    type: string
+    enum: &A61
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a62:
+    type: string
+    enum: &A62
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a63:
+    type: string
+    enum: &A63
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a64:
+    type: string
+    enum: &A64
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a65:
+    type: string
+    enum: &A65
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a66:
+    type: string
+    enum: &A66
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a67:
+    type: string
+    enum: &A67
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a68:
+    type: string
+    enum: &A68
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a69:
+    type: string
+    enum: &A69
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a70:
+    type: string
+    enum: &A70
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a71:
+    type: string
+    enum: &A71
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a72:
+    type: string
+    enum: &A72
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a73:
+    type: string
+    enum: &A73
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a74:
+    type: string
+    enum: &A74
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a75:
+    type: string
+    enum: &A75
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a76:
+    type: string
+    enum: &A76
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a77:
+    type: string
+    enum: &A77
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a78:
+    type: string
+    enum: &A78
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a79:
+    type: string
+    enum: &A79
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a80:
+    type: string
+    enum: &A80
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a81:
+    type: string
+    enum: &A81
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a82:
+    type: string
+    enum: &A82
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a83:
+    type: string
+    enum: &A83
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a84:
+    type: string
+    enum: &A84
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a85:
+    type: string
+    enum: &A85
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a86:
+    type: string
+    enum: &A86
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a87:
+    type: string
+    enum: &A87
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a88:
+    type: string
+    enum: &A88
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a89:
+    type: string
+    enum: &A89
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a90:
+    type: string
+    enum: &A90
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a91:
+    type: string
+    enum: &A91
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a92:
+    type: string
+    enum: &A92
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a93:
+    type: string
+    enum: &A93
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a94:
+    type: string
+    enum: &A94
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a95:
+    type: string
+    enum: &A95
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a96:
+    type: string
+    enum: &A96
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a97:
+    type: string
+    enum: &A97
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a98:
+    type: string
+    enum: &A98
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a99:
+    type: string
+    enum: &A99
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  a100:
+    type: string
+    enum: &A100
+      - AA1
+      - AA2
+      - AA3
+      - AA4
+      - AA5
+      - AA6
+      - AA7
+      - AA8
+      - AA9
+      - AA10
+      - AA11
+      - AA12
+      - AA13
+      - AA14
+      - AA15
+      - AA16
+      - AA17
+      - AA18
+      - AA19
+      - AA20
+  c1:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A1
+  c2:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A2
+  c3:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A3
+  c4:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A4
+  c5:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A5
+  c6:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A6
+  c7:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A7
+  c8:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A8
+  c9:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A9
+  c10:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A10
+  c11:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A11
+  c12:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A12
+  c13:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A13
+  c14:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A14
+  c15:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A15
+  c16:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A16
+  c17:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A17
+  c18:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A18
+  c19:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A19
+  c20:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A20
+  c21:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A21
+  c22:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A22
+  c23:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A23
+  c24:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A24
+  c25:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A25
+  c26:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A26
+  c27:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A27
+  c28:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A28
+  c29:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A29
+  c30:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A30
+  c31:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A31
+  c32:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A32
+  c33:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A33
+  c34:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A34
+  c35:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A35
+  c36:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A36
+  c37:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A37
+  c38:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A38
+  c39:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A39
+  c40:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A40
+  c41:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A41
+  c42:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A42
+  c43:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A43
+  c44:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A44
+  c45:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A45
+  c46:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A46
+  c47:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A47
+  c48:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A48
+  c49:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A49
+  c50:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A50
+  c51:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A51
+  c52:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A52
+  c53:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A53
+  c54:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A54
+  c55:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A55
+  c56:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A56
+  c57:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A57
+  c58:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A58
+  c59:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A59
+  c60:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A60
+  c61:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A61
+  c62:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A62
+  c63:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A63
+  c64:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A64
+  c65:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A65
+  c66:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A66
+  c67:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A67
+  c68:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A68
+  c69:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A69
+  c70:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A70
+  c71:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A71
+  c72:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A72
+  c73:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A73
+  c74:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A74
+  c75:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A75
+  c76:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A76
+  c77:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A77
+  c78:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A78
+  c79:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A79
+  c80:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A80
+  c81:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A81
+  c82:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A82
+  c83:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A83
+  c84:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A84
+  c85:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A85
+  c86:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A86
+  c87:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A87
+  c88:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A88
+  c89:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A89
+  c90:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A90
+  c91:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A91
+  c92:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A92
+  c93:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A93
+  c94:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A94
+  c95:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A95
+  c96:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A96
+  c97:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A97
+  c98:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A98
+  c99:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A99
+  c100:
+    type: object
+    properties:
+      a:
+        type: string
+        enum: *A100

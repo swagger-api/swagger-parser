@@ -8,14 +8,13 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import io.swagger.parser.util.DeserializationUtils;
+import io.swagger.parser.util.ParseOptions;
+import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
@@ -58,6 +57,16 @@ import io.swagger.util.Yaml;
 
 public class SwaggerParserTest {
 
+    @Test
+    public void testArrayRelativeRefs() {
+        String location = "arrayItemsResolving/Swagger.yaml";
+        Swagger swagger = new SwaggerParser().read(location, null, true);
+        assertNotNull(swagger);
+        assertTrue(swagger.getDefinitions().size() == 3);
+        assertNotNull(swagger.getDefinitions().get("InventoryDataItems"));
+        assertNotNull(swagger.getDefinitions().get("InventoryItem"));
+        assertNotNull(swagger.getDefinitions().get("Manufacturer"));
+    }
 
     @Test
     public void testIssueRelativeRefs3() {
@@ -1655,7 +1664,88 @@ public class SwaggerParserTest {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("src/test/resources/issue-1432.yaml", null, true);
         assertNotNull(result);
         assertEquals("attribute paths.'/tickets'(get).responses.200.title is unexpected",result.getMessages().get(0));
+    }
 
+    @Test
+    public void testIssue1541() {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/issue-1541/main.yaml");
+        assertNotNull(swagger);
 
+        Model inlineSchema = swagger.getPaths()
+                .get("/inline_response")
+                .getGet()
+                .getResponses()
+                .get("200")
+                .getResponseSchema();
+
+        assertNotNull(inlineSchema);
+        assertNotNull(inlineSchema.getProperties());
+        assertNotNull(inlineSchema.getProperties().get("a"));
+        assertEquals("number", inlineSchema.getProperties().get("a").getType());
+
+        Model responseRef = swagger.getPaths()
+                .get("/ref_response")
+                .getGet()
+                .getResponses()
+                .get("200")
+                .getResponseSchema();
+
+        assertEquals("#/definitions/ref_response_object", responseRef.getReference());
+
+        Model refSchema = swagger.getDefinitions()
+                .get("ref_response_object");
+
+        assertEquals("number", refSchema.getProperties().get("a").getType());
+    }
+
+    @Test
+    public void testRequiredItemsInComposedModel() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("src/test/resources/allOf-example/allOf.yaml", null, true);
+        assertNotNull(result);
+        final Swagger swagger = result.getSwagger();
+        final Model model = swagger.getDefinitions().get("UserRegister");
+        final ComposedModel composedModel = (ComposedModel) model;
+
+        assertNotNull(composedModel.getRequired());
+        assertFalse(composedModel.getRequired().isEmpty());
+
+        assertEquals("password", composedModel.getRequired().get(0));
+    }
+
+    @Test
+    public void testInlineModelResolver() throws IOException {
+        String inputSpec = FileUtils.readFileToString(new File("src/test/resources/flatten.json"));
+        JsonNode rootNode = DeserializationUtils.deserializeIntoTree(inputSpec, "");
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setFlatten(true);
+
+        Swagger swagger = new SwaggerParser().read(rootNode, new ArrayList<>(), parseOptions);
+
+        assertNotNull(swagger);
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("User"));
+        assertTrue(definitions.containsKey("User_address"));
+
+        Model userAddress = definitions.get("User_address");
+        assertTrue(userAddress.getProperties().containsKey("city"));
+        assertTrue(userAddress.getProperties().containsKey("street"));
+    }
+
+    @Test
+    public void testInlineModelResolverByLocation() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setFlatten(true);
+
+        Swagger swagger = new SwaggerParser().read("src/test/resources/flatten.json", new ArrayList<>(), parseOptions);
+
+        assertNotNull(swagger);
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("User"));
+        assertTrue(definitions.containsKey("User_address"));
+
+        Model userAddress = definitions.get("User_address");
+        assertTrue(userAddress.getProperties().containsKey("city"));
+        assertTrue(userAddress.getProperties().containsKey("street"));
     }
 }

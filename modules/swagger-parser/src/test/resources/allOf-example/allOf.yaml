@@ -1,0 +1,44 @@
+swagger: '2.0'
+info:
+  description: This is a simple API
+  version: 1.0.0
+  title: Simple User API
+host: localhost
+basePath: /v1
+schemes:
+  - https
+
+paths:
+  /user:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/jsonÅÅÅ
+      parameters:
+        - in: body
+          name: checkUser
+          description: Check user
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        201:
+          description: item created
+
+definitions:
+  User:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
+  UserRegister:
+    allOf:
+      - $ref: '#/definitions/User'
+    type: object
+    required:
+      - password
+    properties:
+      password:
+        type: string

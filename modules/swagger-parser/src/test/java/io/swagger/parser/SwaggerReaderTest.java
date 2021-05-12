@@ -1,6 +1,5 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.*;
 import io.swagger.models.parameters.Parameter;
@@ -266,7 +265,7 @@ public class SwaggerReaderTest {
         assertNotNull(definition);
         assertTrue(definition instanceof ModelImpl);
     }
-    
+
     @Test
     public void testIssue136() {
         String spec =
