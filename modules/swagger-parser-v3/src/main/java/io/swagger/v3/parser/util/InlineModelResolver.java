@@ -99,16 +99,17 @@ public class InlineModelResolver {
               MediaType mediaType = content.get(key);
               if (mediaType.getSchema() != null) {
                   Schema model = mediaType.getSchema();
+                  String genericName = pathBody(pathname);
                   if (model.getProperties() != null && model.getProperties().size() > 0) {
                       flattenProperties(model.getProperties(), pathname);
-                      String modelName = resolveModelName(model.getTitle(), "body");
+                      String modelName = resolveModelName(model.getTitle(), genericName);
                       mediaType.setSchema(new Schema().$ref(modelName));
                       addGenerated(modelName, model);
                       openAPI.getComponents().addSchemas(modelName, model);
                   } else if (model instanceof ComposedSchema) {
                       flattenComposedSchema(model, pathname);
                       if (model.get$ref() == null) {
-                          String modelName = resolveModelName(model.getTitle(), "body");
+                          String modelName = resolveModelName(model.getTitle(), genericName);
                           mediaType.setSchema(this.makeRefProperty(modelName, model));
                           addGenerated(modelName, model);
                           openAPI.getComponents().addSchemas(modelName, model);
@@ -119,7 +120,7 @@ public class InlineModelResolver {
                       if (isObjectSchema(inner)) {
                           if (inner.getProperties() != null && inner.getProperties().size() > 0) {
                               flattenProperties(inner.getProperties(), pathname);
-                              String modelName = resolveModelName(inner.getTitle(), "body");
+                              String modelName = resolveModelName(inner.getTitle(), genericName);
                               String existing = matchGenerated(inner);
                               if (existing != null) {
                                   am.setItems(new Schema().$ref(existing));
@@ -389,6 +390,19 @@ public class InlineModelResolver {
                 m.setExample(example.substring(1, example.length() - 1));
             }
         }
+    }
+    
+    private static String pathBody(String pathname)
+    {
+      String[] parts = pathname.split("/");
+      StringBuilder body = new StringBuilder();
+      if (parts.length > 2)
+      {
+        body.append(parts[parts.length-2]);
+      }
+      body.append(parts[parts.length-1]);
+      body.append("Body");
+      return body.toString();
     }
 
     private String resolveModelName(String title, String key) {
