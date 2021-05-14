@@ -681,6 +681,47 @@ public class InlineModelResolverTest {
 
         assertNotNull(bodySchema.getProperties().get("address"));
     }
+    
+    @Test
+    public void resolveInlineRequestBody_stripsDotsFromPath() throws Exception {
+        OpenAPI openAPI = new OpenAPI();
+
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.addProperties("street", new StringSchema());
+
+        Schema schema = new Schema();
+        schema.addProperties("address", objectSchema);
+        schema.addProperties("name", new StringSchema());
+
+        MediaType mediaType = new MediaType();
+        mediaType.setSchema(schema);
+
+        Content content = new Content();
+        content.addMediaType("*/*", mediaType );
+
+        RequestBody requestBody = new RequestBody();
+        requestBody.setContent(content);
+
+        Operation operation = new Operation();
+        operation.setRequestBody(requestBody);
+
+        PathItem pathItem = new PathItem();
+        pathItem.setGet(operation);
+        openAPI.path("/api/Cloud.Greet.Hello",pathItem);
+
+        new InlineModelResolver(true, true).flatten(openAPI);
+
+        Operation getOperation = openAPI.getPaths().get("/api/Cloud.Greet.Hello").getGet();
+        RequestBody body = getOperation.getRequestBody();
+        assertEquals("use dot as common word separator: as it occurs frequently on OData services", 
+            "#/components/schemas/ApiCloudGreetHelloBody", 
+            body.getContent().get("*/*").getSchema().get$ref());
+
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("ApiCloudGreetHelloBody");
+        assertTrue(bodySchema instanceof Schema);
+
+        assertNotNull(bodySchema.getProperties().get("address"));
+    }
 
     @Test
     public void resolveInlineParameter() throws Exception {

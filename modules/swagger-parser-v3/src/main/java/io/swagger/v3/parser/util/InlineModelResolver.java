@@ -398,14 +398,19 @@ public class InlineModelResolver {
       StringBuilder body = new StringBuilder();
       if (parts.length > 2)
       {
-        body.append(parts[parts.length-2].replace(".", "_")).append('_');
+        body.append(normalize(parts[parts.length-2])).append('_');
       }
       if (parts.length > 1)
       {
-        body.append(parts[parts.length-1].replace(".", "_")).append('_');
+        body.append(normalize(parts[parts.length-1])).append('_');
       }
       body.append("body");
       return body.toString();
+    }
+    
+    private static String normalize(String pathPart)
+    {
+      return pathPart.replace(".", "_");
     }
 
     private String resolveModelName(String title, String key) {
