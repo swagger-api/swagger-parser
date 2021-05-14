@@ -398,10 +398,13 @@ public class InlineModelResolver {
       StringBuilder body = new StringBuilder();
       if (parts.length > 2)
       {
-        body.append(parts[parts.length-2]);
+        body.append(parts[parts.length-2].replace(".", "_")).append('_');
       }
-      body.append(parts[parts.length-1]);
-      body.append("Body");
+      if (parts.length > 1)
+      {
+        body.append(parts[parts.length-1].replace(".", "_")).append('_');
+      }
+      body.append("body");
       return body.toString();
     }
 

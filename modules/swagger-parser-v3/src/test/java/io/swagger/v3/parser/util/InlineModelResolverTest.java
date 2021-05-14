@@ -637,7 +637,7 @@ public class InlineModelResolverTest {
         RequestBody body = getOperation.getRequestBody();
         assertTrue(body.getContent().get("*/*").getSchema().get$ref() != null);
 
-        Schema bodySchema = openAPI.getComponents().getSchemas().get("helloBody");
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("hello_body");
         assertTrue(bodySchema instanceof Schema);
 
         assertNotNull(bodySchema.getProperties().get("address"));
@@ -676,7 +676,7 @@ public class InlineModelResolverTest {
         RequestBody body = getOperation.getRequestBody();
         assertTrue(body.getContent().get("*/*").getSchema().get$ref() != null);
 
-        Schema bodySchema = openAPI.getComponents().getSchemas().get("greethelloBody");
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("greet_hello_body");
         assertTrue(bodySchema instanceof Schema);
 
         assertNotNull(bodySchema.getProperties().get("address"));
@@ -805,9 +805,9 @@ public class InlineModelResolverTest {
         Schema inner = am.getItems();
         assertTrue(inner.get$ref() != null);
 
-        assertEquals( "#/components/schemas/helloBody",inner.get$ref());
+        assertEquals( "#/components/schemas/hello_body",inner.get$ref());
 
-        Schema inline = openAPI.getComponents().getSchemas().get("helloBody");
+        Schema inline = openAPI.getComponents().getSchemas().get("hello_body");
         assertNotNull(inline);
         assertTrue(inline instanceof Schema);
 
@@ -1091,7 +1091,7 @@ public class InlineModelResolverTest {
         RequestBody requestBody = operation.getRequestBody();
         assertTrue(requestBody.getContent().get("*/*").getSchema().get$ref() != null);
 
-        Schema body = swagger.getComponents().getSchemas().get("helloBody");
+        Schema body = swagger.getComponents().getSchemas().get("hello_body");
         assertTrue(body instanceof Schema);
 
 
@@ -1153,9 +1153,9 @@ public class InlineModelResolverTest {
         assertTrue(inner.get$ref() != null);
 
 
-        assertEquals(inner.get$ref(), "#/components/schemas/helloBody");
+        assertEquals(inner.get$ref(), "#/components/schemas/hello_body");
 
-        Schema inline = openAPI.getComponents().getSchemas().get("helloBody");
+        Schema inline = openAPI.getComponents().getSchemas().get("hello_body");
         assertNotNull(inline);
 
         Schema p = (Schema)inline.getProperties().get("arbitrary");
