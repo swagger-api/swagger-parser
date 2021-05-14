@@ -637,7 +637,7 @@ public class InlineModelResolverTest {
         RequestBody body = getOperation.getRequestBody();
         assertTrue(body.getContent().get("*/*").getSchema().get$ref() != null);
 
-        Schema bodySchema = openAPI.getComponents().getSchemas().get("helloBody");
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("hello_body");
         assertTrue(bodySchema instanceof Schema);
 
         assertNotNull(bodySchema.getProperties().get("address"));
@@ -676,7 +676,48 @@ public class InlineModelResolverTest {
         RequestBody body = getOperation.getRequestBody();
         assertTrue(body.getContent().get("*/*").getSchema().get$ref() != null);
 
-        Schema bodySchema = openAPI.getComponents().getSchemas().get("greethelloBody");
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("greet_hello_body");
+        assertTrue(bodySchema instanceof Schema);
+
+        assertNotNull(bodySchema.getProperties().get("address"));
+    }
+    
+    @Test
+    public void resolveInlineRequestBody_stripsDotsFromPath() throws Exception {
+        OpenAPI openAPI = new OpenAPI();
+
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.addProperties("street", new StringSchema());
+
+        Schema schema = new Schema();
+        schema.addProperties("address", objectSchema);
+        schema.addProperties("name", new StringSchema());
+
+        MediaType mediaType = new MediaType();
+        mediaType.setSchema(schema);
+
+        Content content = new Content();
+        content.addMediaType("*/*", mediaType );
+
+        RequestBody requestBody = new RequestBody();
+        requestBody.setContent(content);
+
+        Operation operation = new Operation();
+        operation.setRequestBody(requestBody);
+
+        PathItem pathItem = new PathItem();
+        pathItem.setGet(operation);
+        openAPI.path("/api/Cloud.Greet.Hello",pathItem);
+
+        new InlineModelResolver(true, true).flatten(openAPI);
+
+        Operation getOperation = openAPI.getPaths().get("/api/Cloud.Greet.Hello").getGet();
+        RequestBody body = getOperation.getRequestBody();
+        assertEquals("use dot as common word separator: as it occurs frequently on OData services", 
+            "#/components/schemas/ApiCloudGreetHelloBody", 
+            body.getContent().get("*/*").getSchema().get$ref());
+
+        Schema bodySchema = openAPI.getComponents().getSchemas().get("ApiCloudGreetHelloBody");
         assertTrue(bodySchema instanceof Schema);
 
         assertNotNull(bodySchema.getProperties().get("address"));
@@ -805,9 +846,9 @@ public class InlineModelResolverTest {
         Schema inner = am.getItems();
         assertTrue(inner.get$ref() != null);
 
-        assertEquals( "#/components/schemas/helloBody",inner.get$ref());
+        assertEquals( "#/components/schemas/hello_body",inner.get$ref());
 
-        Schema inline = openAPI.getComponents().getSchemas().get("helloBody");
+        Schema inline = openAPI.getComponents().getSchemas().get("hello_body");
         assertNotNull(inline);
         assertTrue(inline instanceof Schema);
 
@@ -1091,7 +1132,7 @@ public class InlineModelResolverTest {
         RequestBody requestBody = operation.getRequestBody();
         assertTrue(requestBody.getContent().get("*/*").getSchema().get$ref() != null);
 
-        Schema body = swagger.getComponents().getSchemas().get("helloBody");
+        Schema body = swagger.getComponents().getSchemas().get("hello_body");
         assertTrue(body instanceof Schema);
 
 
@@ -1153,9 +1194,9 @@ public class InlineModelResolverTest {
         assertTrue(inner.get$ref() != null);
 
 
-        assertEquals(inner.get$ref(), "#/components/schemas/helloBody");
+        assertEquals(inner.get$ref(), "#/components/schemas/hello_body");
 
-        Schema inline = openAPI.getComponents().getSchemas().get("helloBody");
+        Schema inline = openAPI.getComponents().getSchemas().get("hello_body");
         assertNotNull(inline);
 
         Schema p = (Schema)inline.getProperties().get("arbitrary");
