@@ -1,0 +1,33 @@
+openapi: 3.0.2
+info:
+  title: Sample API
+  description: A small example to demonstrate individual problems
+  version: 0.1.9
+servers:
+  - url: /api/customer1/v1
+    description: Server
+paths:
+  /pets:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        '200':
+          description: Updated
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - pet_type
+      properties:
+        pet_type:
+          type: string
+        name:
+          type: string
+        birth_date:
+          type: string
+          format: date
