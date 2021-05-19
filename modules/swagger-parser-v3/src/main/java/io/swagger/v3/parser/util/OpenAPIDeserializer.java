@@ -145,17 +145,10 @@ public class OpenAPIDeserializer {
 
 	public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
 		SwaggerParseResult result = new SwaggerParseResult();
-		try {
-
-			ParseResult rootParse = new ParseResult();
-			OpenAPI api = parseRoot(rootNode, rootParse, path);
-			result.setOpenAPI(api);
-			result.setMessages(rootParse.getMessages());
-
-		} catch (Exception e) {
-			result.setMessages(Arrays.asList(e.getMessage()));
-
-		}
+		ParseResult rootParse = new ParseResult();
+		OpenAPI api = parseRoot(rootNode, rootParse, path);
+		result.setOpenAPI(api);
+		result.setMessages(rootParse.getMessages());
 		return result;
 	}
 
@@ -480,7 +473,7 @@ public class OpenAPIDeserializer {
 		if (StringUtils.isNotBlank(value)) {
 			if (!isValidURL(value) && path != null) {
 				try {
-					final URI absURI = new URI(path);
+					final URI absURI = new URI(path.replaceAll("\\\\", "/"));
 					if ("http".equals(absURI.getScheme()) || "https".equals(absURI.getScheme())) {
 						value = absURI.resolve(new URI(value)).toString();
 					}

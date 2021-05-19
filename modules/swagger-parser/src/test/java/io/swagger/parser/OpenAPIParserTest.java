@@ -624,5 +624,14 @@ public class OpenAPIParserTest {
         BigDecimal multipleOf = decimalValue.getMultipleOf();
         assertEquals(multipleOf, new BigDecimal("0.3", new MathContext(multipleOf.precision())));
     }
+
+    @Test
+    public void testConvertWindowsPathsToUnixWhenResolvingServerPaths() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("exampleSpecs\\specs\\issue1553.yaml", null, options);
+
+        assertEquals("/api/customer1/v1", result.getOpenAPI().getServers().get(0).getUrl());
+    }
 }
 
