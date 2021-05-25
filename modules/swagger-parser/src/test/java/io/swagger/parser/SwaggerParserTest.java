@@ -42,6 +42,7 @@ import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.ComposedProperty;
 import io.swagger.models.properties.IntegerProperty;
@@ -83,6 +84,21 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue985_971() {
+        Swagger swagger = new SwaggerParser().read("issue-985_971.yaml");
+        assertNotNull(swagger);
+        Yaml.prettyPrint(swagger);
+        //assert for 985
+        assertNotNull(((BooleanProperty)swagger.getDefinitions().get("TypeHolderEnum").getProperties().get("bool_item_1")).getEnum());
+
+        //asserts for 971
+        assertNotNull(((IntegerProperty)swagger.getDefinitions().get("TypeHolder").getProperties().get("number_item")).getDefault());
+        assertNotNull(((IntegerProperty)swagger.getDefinitions().get("TypeHolder").getProperties().get("integer_item")).getDefault());
+        //ArrayProperty and ObjectProperty does not have getDefault method
+
+    }
+
+     @Test
     public void testIssue1204() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1204.yaml", null, true);
         System.out.println(result.getMessages());
@@ -105,6 +121,7 @@ public class SwaggerParserTest {
         assertEquals("attribute paths.'user'. For path parameter 'user' the required value should be true", result.getMessages().get(0));
         assertNotNull(result.getSwagger());
     }
+
 
 
     @Test
