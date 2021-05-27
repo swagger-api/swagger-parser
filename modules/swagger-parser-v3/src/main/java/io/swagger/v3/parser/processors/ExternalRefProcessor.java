@@ -49,7 +49,7 @@ public final class ExternalRefProcessor {
         this.openAPI = openAPI;
     }
 
-    private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newScema,
+    private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newSchema,
         int iteration) {
         String tryName =
             iteration == 0 ? possiblyConflictingDefinitionName : possiblyConflictingDefinitionName + "_" + iteration;
@@ -58,9 +58,23 @@ public final class ExternalRefProcessor {
             if (existingModel.get$ref() != null) {
                 // use the new model
                 existingModel = null;
-            } else if (!newScema.equals(existingModel)) {
+            } else if (!newSchema.equals(existingModel)) {
+                if(cache.getResolutionCache().get(newSchema.get$ref())!= null){
+                    return tryName;
+                }
                 LOGGER.debug("A model for " + existingModel + " already exists");
-                return finalNameRec(schemas, possiblyConflictingDefinitionName, newScema, ++iteration);
+                return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration);
+            }
+        }else{
+            // validate the name
+            if(existingModel == null){
+                for(String name: schemas.keySet()){
+                    if(name.toLowerCase().equals(tryName.toLowerCase())){
+                        existingModel = schemas.get(name);
+                        tryName = name;
+                        break;
+                    }
+                }
             }
         }
         return tryName;
@@ -95,7 +109,7 @@ public final class ExternalRefProcessor {
         newRef = finalNameRec(schemas, possiblyConflictingDefinitionName, schema, 0);
         cache.putRenamedRef($ref, newRef);
         Schema existingModel = schemas.get(newRef);
-        if(existingModel != null && existingModel.get$ref() != null) {
+       if(existingModel != null && existingModel.get$ref() != null) {
             // use the new model
             existingModel = null;
         }
@@ -192,7 +206,6 @@ public final class ExternalRefProcessor {
                 }
             }
         }
-
         return newRef;
     }
 

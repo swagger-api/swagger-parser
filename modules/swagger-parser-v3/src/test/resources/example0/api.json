@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "v3.1.1",
+    "title": "Foo API",
+    "x-serviceName": "foo",
+    "description": "Blah blah blah",
+    "contact": {
+      "name": "Foo Team",
+      "email": "bar@foo.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/v4/foo": {
+      "get": {
+        "description": "Blah blah blah",
+        "operationId": "getFoos",
+        "tags": [
+          "Foo"
+        ],
+        "parameters": [
+          {
+            "name": "my_id",
+            "description": "Blah blah blah",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Combination"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Combination": {
+        "$ref": "./models/combination.json"
+      },
+      "Combinations": {
+        "$ref": "./models/combinations.json"
+      },
+      "Raygun": {
+        "$ref": "./models/target/raygun.json"
+      },
+      "Dingy": {
+        "$ref": "./models/target/dingy.json"
+      },
+      "Headlight": {
+        "$ref": "./models/target/headlight.json"
+      },
+      "Stamp": {
+        "$ref": "./models/target/stamp.json"
+      },
+      "Stripe": {
+        "$ref": "./models/target/stripe.json"
+      }
+    }
+  }
+}

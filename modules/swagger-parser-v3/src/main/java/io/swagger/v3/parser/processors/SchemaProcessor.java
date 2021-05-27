@@ -116,7 +116,6 @@ public class SchemaProcessor {
                  }else {
                      processSchemaType(property);
                  }
-
              }
          }
     }

@@ -1,0 +1,12 @@
+{
+  "properties": {
+    "type": {
+      "description": "Blah blah blah",
+      "type": "string"
+    },
+    "id": {
+      "description": "Blah blah blah",
+      "type": "string"
+    }
+  }
+}
