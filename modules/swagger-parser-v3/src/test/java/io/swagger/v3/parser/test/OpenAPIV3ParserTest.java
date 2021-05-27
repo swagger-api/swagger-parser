@@ -84,6 +84,30 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1518() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-1518/api.json", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("Analemmata").getProperties().get("tashotSipe")).get$ref().equals("#/components/schemas/TashotSipe"));
+        assertTrue(openAPI.getComponents().getSchemas().get("analemmata") == null);
+    }
+
+    @Test
+    public void testIssue1518StackOverFlow() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        try {
+            SwaggerParseResult result = new OpenAPIV3Parser().readLocation("example0/api.json", null, options);
+            Yaml.prettyPrint(result.getOpenAPI().getComponents().getSchemas());
+        }catch (StackOverflowError stackOverflowError){
+            assertTrue(false);
+        }
+
+
+    }
+
+    @Test
     public void testIssue251() throws IOException {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/domain.yaml"), "UTF-8");
         WireMock.stubFor(get(urlPathMatching("/domain"))

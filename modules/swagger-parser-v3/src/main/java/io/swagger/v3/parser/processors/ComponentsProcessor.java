@@ -244,5 +244,18 @@ public class ComponentsProcessor {
                 }
             }
         }
+        //process schemas again to check properties that hasn't been solved
+        for (String modelName : schemaKeys) {
+            final Schema model = schemas.get(modelName);
+            Map<String, Schema> properties = model.getProperties();
+            if (properties != null) {
+                for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
+                    Schema property = propertyEntry.getValue();
+                    if(property.get$ref() != null) {
+                        schemaProcessor.processSchema(model);
+                    }
+                }
+            }
+        }
     }
 }

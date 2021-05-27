@@ -162,7 +162,6 @@ public class ResolverCache {
         }
 
         updateLocalRefs(file, result);
-
         resolutionCache.put(ref, result);
 
         return result;

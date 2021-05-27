@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "properties": {
+    "statue": {
+      "type": "integer",
+      "format": "int32",
+      "description": "blah blah blah"
+    }
+  }
+}

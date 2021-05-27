@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "description": "blah blah blah",
+  "properties": {
+    "tashotSipe": {
+      "$ref": "../api.json#/components/schemas/TashotSipe"
+    },
+    "stunts": {
+      "$ref": "../api.json#/components/schemas/Stunts"
+    }
+  }
+}
