@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: test
+  version: 1.0.0
+paths:
+  /inventory:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+components:
+  schemas:
+    InventoryItem:
+      type: object
+      properties:
+        suppliersArray:
+          type: array
+          items:
+            $ref: '#/components/schemas/Supplier'
+      xml:
+        name: inventoryItem
+    Manufacturer:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ACME Corporation
+      xml:
+        name: manufacturer
+    Supplier:
+      allOf:
+        - $ref: '#/components/schemas/Manufacturer'
+        - type: object
+          properties:
+            supplierRef:
+              type: string
+              example: REF123
+      xml:
+        name: supplierObject
