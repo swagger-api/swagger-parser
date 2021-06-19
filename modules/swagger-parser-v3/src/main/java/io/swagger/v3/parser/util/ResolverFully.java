@@ -377,6 +377,10 @@ public class ResolverFully {
                     combinedModel.setExample(examples);
                 }
 
+                if(schema.getXml()!= null){
+                    combinedModel.setXml(schema.getXml());
+                }
+
                 result = combinedModel;
 
             } else {

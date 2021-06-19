@@ -84,6 +84,15 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testAnonymousModelAllOf() {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue203/issue203AllOf.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(openAPI.getComponents().getSchemas().get("Supplier").getXml().getName(),"supplierObject");
+    }
+
+    @Test
     public void testIssue1518() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -103,8 +112,6 @@ public class OpenAPIV3ParserTest {
         }catch (StackOverflowError stackOverflowError){
             assertTrue(false);
         }
-
-
     }
 
     @Test
