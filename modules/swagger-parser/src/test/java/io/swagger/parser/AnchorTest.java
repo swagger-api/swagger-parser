@@ -2,6 +2,7 @@ package io.swagger.parser;
 
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 public class AnchorTest {
@@ -111,4 +113,26 @@ public class AnchorTest {
         DeserializationUtils.getOptions().setMaxYamlReferences(10000000L);
 
     }
+
+    @org.testng.annotations.Test
+    public void testBillionLaughProtectionSnakeYaml() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("billion_laughs_snake_yaml.yaml", null, true);
+
+        assertNotNull(result.getSwagger().getDefinitions().get("a1"));
+        assertEquals(((ModelImpl)result.getSwagger().getDefinitions().get("a1")).getEnum().get(0), "AA1");
+        assertNotNull(result.getSwagger().getDefinitions().get("c1"));
+        assertEquals(((StringProperty)result.getSwagger().getDefinitions().get("c1").getProperties().get("a")).getEnum().get(0), "AA1");
+
+
+        DeserializationUtils.getOptions().setMaxYamlAliasesForCollections(50);
+        DeserializationUtils.getOptions().setYamlAllowRecursiveKeys(false);
+
+        result = new SwaggerParser().readWithInfo("billion_laughs_snake_yaml.yaml", null, true);
+
+        assertNull(result.getSwagger());
+        DeserializationUtils.getOptions().setMaxYamlAliasesForCollections(Integer.MAX_VALUE);
+        DeserializationUtils.getOptions().setYamlAllowRecursiveKeys(true);
+
+    }
+
 }

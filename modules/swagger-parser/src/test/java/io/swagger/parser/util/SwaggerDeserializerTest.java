@@ -225,6 +225,36 @@ public class SwaggerDeserializerTest {
     }
 
     @Test
+    public void testSecurityWithEmpty() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"security\": [\n" +
+                "    {},\n" +
+                "    {\n" +
+                "      \"petstore_auth\": [\n" +
+                "        \"write:pets\",\n" +
+                "        \"read:pets\"\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+
+        Swagger swagger = result.getSwagger();
+
+        assertNotNull(swagger.getSecurity());
+        List<SecurityRequirement> security = swagger.getSecurity();
+        Assert.assertTrue(security.size() == 2);
+        Assert.assertTrue(security.get(0).getRequirements().size() == 0);
+        Assert.assertTrue(security.get(1).getRequirements().size() == 1);
+
+        List<String> requirement = security.get(1).getRequirements().get("petstore_auth");
+        Assert.assertTrue(requirement.size() == 2);
+    }
+
+    @Test
     public void testSecurityDefinition() {
         String json = "{\n" +
                 "  \"swagger\": \"2.0\",\n" +
@@ -566,6 +596,51 @@ public class SwaggerDeserializerTest {
         assertTrue(scopes.contains("read:pets"));
         assertTrue(scopes.contains("write:pets"));
     }
+
+    @Test
+    public void testOperationSecurityWithEmpty() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/pet\": {\n" +
+                "      \"foo\": \"bar\",\n" +
+                "      \"get\": {\n" +
+                "        \"security\": [\n" +
+                "          {},\n" +
+                "          {\n" +
+                "            \"petstore_auth\": [\n" +
+                "              \"write:pets\",\n" +
+                "              \"read:pets\"\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        SwaggerParser parser = new SwaggerParser();
+
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<String>(messageList);
+        assertTrue(messages.contains("attribute paths.'/pet'.foo is unexpected"));
+        Swagger swagger = result.getSwagger();
+
+        Path path = swagger.getPath("/pet");
+        assertNotNull(path);
+        Operation operation = path.getGet();
+        assertNotNull(operation);
+        List<Map<String, List<String>>> security = operation.getSecurity();
+
+        assertTrue(security.size() == 2);
+
+        Map<String, List<String>> requirement1 = security.get(0);
+        assertTrue(requirement1.isEmpty());
+
+        Map<String, List<String>> requirement2 = security.get(1);
+        assertTrue(requirement2.containsKey("petstore_auth"));
+        assertFalse(requirement2.get("petstore_auth").isEmpty());
+    }
     
     @Test
     public void testPathsWithRefResponse() {
@@ -630,6 +705,54 @@ public class SwaggerDeserializerTest {
 
         Property response = swagger.getPath("/store/inventory").getGet().getResponsesObject().get("200").getSchema();
         assertTrue(response instanceof MapProperty);
+    }
+
+    @Test
+    public void testArrayModelWithUniqueItems() {
+        String json = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"info\": {\n" +
+                "    \"title\": \"foo\"\n" +
+                "  },\n" +
+                "  \"paths\": {\n" +
+                "    \"/test\": {\n" +
+                "      \"post\": {\n" +
+                "        \"parameters\": [\n" +
+                "          {\n" +
+                "            \"name\": \"AnyName\",\n" +
+                "            \"in\": \"body\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"array\",\n" +
+                "              \"uniqueItems\": true,\n" +
+                "              \"items\": {\n" +
+                "                \"type\": \"string\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"ok\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(json);
+        Parameter parameter = result.getSwagger().getPath("/test")
+                .getPost().getParameters().get(0);
+
+        assertTrue(parameter instanceof BodyParameter);
+        BodyParameter bodyParameter = (BodyParameter) parameter;
+
+        Model model = bodyParameter.getSchema();
+        assertTrue(model instanceof ArrayModel);
+        ArrayModel arrayModel = (ArrayModel) model;
+        assertNotNull(arrayModel.getUniqueItems());
+        assertTrue(arrayModel.getUniqueItems());
     }
 
     @Test
@@ -1624,7 +1747,7 @@ public class SwaggerDeserializerTest {
         SwaggerDeserializationResult result = parser.readWithInfo(swaggerSpec);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<String>(messageList);
-        assertEquals(0, messages.size());
+        assertEquals(1, messages.size());
 
         Swagger swagger = result.getSwagger();
         List<Parameter> parameters = swagger.getPaths().get("/test").getGet().getParameters();

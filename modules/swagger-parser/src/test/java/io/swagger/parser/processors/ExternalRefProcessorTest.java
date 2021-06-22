@@ -1,7 +1,9 @@
 package io.swagger.parser.processors;
 
+import io.swagger.models.ComposedModel;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
+import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
@@ -11,12 +13,16 @@ import io.swagger.parser.ResolverCache;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.StrictExpectations;
+
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.AssertJUnit.assertTrue;
 
 
@@ -128,5 +134,47 @@ public class ExternalRefProcessorTest {
 		assertTrue(testedSwagger.getDefinitions().get("Customer")!=null);
     	assertTrue(testedSwagger.getDefinitions().get("Contact")!=null);
     	assertTrue(testedSwagger.getDefinitions().get("Address")!=null);
+    }
+    
+    @Test
+    public void testEmptyModelWithDiscriminator(@Injectable final Model mockedModel){
+    	//Swagger test instance
+    	Swagger testedSwagger = new Swagger();
+    	
+    	final String contactURL = "#/definitions/Contact";
+    	final String emailContactURL = "#/definitions/EmailContact";
+    	
+    	//Start with EmailContact model inherited from Contact model
+    	final ComposedModel emailContactModel = new ComposedModel();
+    	RefModel contactRefModel = new RefModel(contactURL);
+    	List<Model> refs = new ArrayList<>();
+    	refs.add(contactRefModel);
+    	emailContactModel.setAllOf(refs);
+    	Property emailProp = new StringProperty();
+    	emailProp.setName("Email");
+    	emailProp.setRequired(true);
+    	Map<String, Property> emailContactProps = new HashMap<String, Property>();
+    	emailContactProps.put("Email", emailProp);
+    	emailContactModel.setProperties(emailContactProps);
+    	
+    	//create Contact, an empty model with discriminator
+    	final ModelImpl contactModel = new ModelImpl();
+    	contactModel.setDiscriminator("type");
+    	
+    	new Expectations(){{
+    		cache.loadRef(emailContactURL, RefFormat.INTERNAL, Model.class);
+    		result = emailContactModel;
+    		times = 1;
+    				
+    		cache.loadRef(contactURL, RefFormat.RELATIVE, Model.class);
+    		result = contactModel;
+    		times = 1;
+ 		}};
+    	
+    	String actualRef = new ExternalRefProcessor(cache, testedSwagger).processRefToExternalDefinition(emailContactURL, RefFormat.INTERNAL);
+    	assertEquals(actualRef, "EmailContact");
+
+		assertSame(testedSwagger.getDefinitions().get("EmailContact"), emailContactModel);
+    	assertSame(testedSwagger.getDefinitions().get("Contact"), contactModel);
     }
 }

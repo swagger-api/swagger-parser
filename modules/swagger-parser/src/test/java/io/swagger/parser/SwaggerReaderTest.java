@@ -1,6 +1,5 @@
 package io.swagger.parser;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.matchers.SerializationMatchers;
 import io.swagger.models.*;
 import io.swagger.models.parameters.Parameter;
@@ -267,7 +266,6 @@ public class SwaggerReaderTest {
         assertTrue(definition instanceof ModelImpl);
     }
 
-
     @Test
     public void testIssue136() {
         String spec =
@@ -282,7 +280,7 @@ public class SwaggerReaderTest {
             "        200:\n" +
             "          description: 'the pet'\n" +
             "          schema:\n" +
-            "            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
+            "            $ref: 'https://petstore.swagger.io/v2/swagger.json#/definitions/Pet'";
 
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
 

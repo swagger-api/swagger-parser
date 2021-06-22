@@ -4,8 +4,10 @@
 atlassian-ide-plugin.xml
 .idea/
 target/
-
+.DS_Store
 .classpath
 .project
 .settings/
-**/test-output/*
+**/test-output/
+dependency-reduced-pom.xml
+*.pyc
