@@ -62,6 +62,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ObjectWithNullExample'
+              examples:
+                foo:
+                  value: '{"foo": "bar"}'
+                bar:
+                  value: null
 
   /object-with-null-in-schema-example:
     get:
@@ -73,6 +78,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ObjectWithNullInSchemaExample'
+              examples:
+                a:
+                  value: 5
+                b:
+                  value: 'test'
+                c:
+                  value: true
+                d:
+                  value: null
+
 
   /object-with-null-property-example:
     get:
