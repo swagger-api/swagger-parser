@@ -395,8 +395,8 @@ public class SwaggerDeserializer {
         ArrayNode parameters = getArray("parameters", obj, false, location, result);
         output.setParameters(parameters(parameters, location, result));
 
-        ObjectNode responses = getObject("responses", obj, true, location, result);
-        Responses responsesObject = responses(responses, location, result);
+        ObjectNode responses = getObject("responses", obj, true, location+".responses", result);
+        Responses responsesObject = responses(responses, location+".responses", result);
         if(responsesObject != null && responsesObject.size() == 0) {
 
             result.missing(location, "responses");

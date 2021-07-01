@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
+import io.swagger.models.*;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.ParseOptions;
 import org.apache.commons.io.FileUtils;
@@ -21,15 +22,6 @@ import org.testng.reporters.Files;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.swagger.models.ArrayModel;
-import io.swagger.models.ComposedModel;
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.Response;
-import io.swagger.models.Swagger;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
@@ -91,6 +83,7 @@ public class SwaggerParserTest {
         Assert.assertNotNull(swagger.getPaths().get("/something").getGet().getResponsesObject().getVendorExtensions());
 
     }
+    @Test
     public void testIssue1204() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1204.yaml", null, true);
         System.out.println(result.getMessages());
@@ -212,7 +205,7 @@ public class SwaggerParserTest {
         Swagger swagger = new SwaggerParser().read("issue-834/index.yaml", null, true);
         assertNotNull(swagger);
 
-        Response foo200 = swagger.getPaths().get("/foo").getGet().getResponses().get("200");
+        Response foo200 = swagger.getPaths().get("/foo").getGet().getResponsesObject().get("200");
         assertNotNull(foo200);
         RefModel model200 = (RefModel) foo200.getResponseSchema();
         String foo200SchemaRef = model200.get$ref();
@@ -244,8 +237,8 @@ public class SwaggerParserTest {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/oapi-reference-test/index.yaml");
         Assert.assertNotNull(swagger);
-        assertTrue(swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema() instanceof RefModel);
-        RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema();
+        assertTrue(swagger.getPaths().get("/").getGet().getResponsesObject().get("200").getResponseSchema() instanceof RefModel);
+        RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponsesObject().get("200").getResponseSchema();
         Assert.assertEquals(model.get$ref(), "#/definitions/schema-with-reference");
 
     }
@@ -916,7 +909,7 @@ public class SwaggerParserTest {
 
         final Operation operation = path.getGet();
 
-        final Map<String, Response> responsesMap = operation.getResponses();
+        final Responses responsesMap = operation.getResponsesObject();
 
         assertResponse(swagger, responsesMap, "200", "OK", "#/definitions/User");
 
@@ -1665,7 +1658,7 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testIssuei432() {
+    public void testIssue432() {
 
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("src/test/resources/issue-1432.yaml", null, true);
         assertNotNull(result);

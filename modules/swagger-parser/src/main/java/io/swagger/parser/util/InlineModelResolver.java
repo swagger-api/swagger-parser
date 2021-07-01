@@ -90,7 +90,7 @@ public class InlineModelResolver {
                     if (responses != null) {
                         for (String key : responses.keySet()) {
                             Response response = responses.get(key);
-                            if (response.getSchema() != null) {
+                            if (response.getResponseSchema() != null) {
                                 Property property = response.getSchema();
                                 if (property instanceof ObjectProperty) {
                                     ObjectProperty op = (ObjectProperty) property;
