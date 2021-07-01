@@ -846,7 +846,7 @@ public class OpenAPIDeserializer {
 			}
 		} else if (!v.isValueNode()) {
 			result.invalidType(location, key, "string", node);
-		} else {
+		} else if (!v.isNull()) {
 			value = v.asText();
 			if (uniqueValues != null && !uniqueValues.add(value)) {
 				result.unique(location, "operationId");
