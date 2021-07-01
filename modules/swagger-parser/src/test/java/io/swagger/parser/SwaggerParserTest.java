@@ -77,19 +77,15 @@ public class SwaggerParserTest {
     @Test
     public void testIssue719() {
         final Swagger swagger = new SwaggerParser().readWithInfo("extensions-responses/extensions.yaml", null, true).getSwagger();
-
         Assert.assertNotNull(swagger);
-        //Assert.assertNotNull(swagger.getPaths().getVendorExtensions());
         Assert.assertNotNull(swagger.getPaths().get("/something").getGet().getResponsesObject().getVendorExtensions());
-
     }
+
     @Test
     public void testIssue1204() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1204.yaml", null, true);
-        System.out.println(result.getMessages());
         assertTrue(result.getMessages().size() == 0);
         assertNotNull(result.getSwagger());
-
     }
 
     @Test
@@ -205,7 +201,7 @@ public class SwaggerParserTest {
         Swagger swagger = new SwaggerParser().read("issue-834/index.yaml", null, true);
         assertNotNull(swagger);
 
-        Response foo200 = swagger.getPaths().get("/foo").getGet().getResponsesObject().get("200");
+        Response foo200 = swagger.getPaths().get("/foo").getGet().getResponses().get("200");
         assertNotNull(foo200);
         RefModel model200 = (RefModel) foo200.getResponseSchema();
         String foo200SchemaRef = model200.get$ref();
@@ -237,8 +233,8 @@ public class SwaggerParserTest {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/oapi-reference-test/index.yaml");
         Assert.assertNotNull(swagger);
-        assertTrue(swagger.getPaths().get("/").getGet().getResponsesObject().get("200").getResponseSchema() instanceof RefModel);
-        RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponsesObject().get("200").getResponseSchema();
+        assertTrue(swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema() instanceof RefModel);
+        RefModel model = (RefModel) swagger.getPaths().get("/").getGet().getResponses().get("200").getResponseSchema();
         Assert.assertEquals(model.get$ref(), "#/definitions/schema-with-reference");
 
     }
@@ -855,7 +851,7 @@ public class SwaggerParserTest {
         final BodyParameter bodyParameter = (BodyParameter) operationParams.get(2);
         assertEquals(((RefModel) bodyParameter.getSchema()).get$ref(), "#/definitions/health");
 
-        final Map<String, Response> responsesMap = operation.getResponsesObject();
+        final Map<String, Response> responsesMap = operation.getResponses();
 
         assertResponse(swagger, responsesMap, "200", "Health information from the server", "#/definitions/health");
         assertResponse(swagger, responsesMap, "400", "Your request was not valid", "#/definitions/error");
@@ -909,7 +905,7 @@ public class SwaggerParserTest {
 
         final Operation operation = path.getGet();
 
-        final Responses responsesMap = operation.getResponsesObject();
+        final Map<String, Response> responsesMap = operation.getResponses();
 
         assertResponse(swagger, responsesMap, "200", "OK", "#/definitions/User");
 
