@@ -2,6 +2,7 @@ package io.swagger.parser;
 
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Path;
+import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
@@ -218,10 +219,10 @@ public class NetworkReferenceTest {
         assertNotNull(swagger.getPath("/health"));
         Path health = swagger.getPath("/health");
         assertTrue(health.getGet().getParameters().size() == 0);
-        Object responseRef = health.getGet().getResponses().get("200").getSchema();
-        assertTrue(responseRef instanceof RefProperty);
+        Object responseRef = health.getGet().getResponsesObject().get("200").getResponseSchema();
+        assertTrue(responseRef instanceof RefModel);
 
-        RefProperty refProperty = (RefProperty) responseRef;
+        RefModel refProperty = (RefModel) responseRef;
         assertEquals(refProperty.get$ref(), "#/definitions/Success");
 
         assertNotNull(swagger.getDefinitions().get("Success"));
@@ -230,11 +231,11 @@ public class NetworkReferenceTest {
         assertEquals(param.getIn(), "query");
         assertEquals(param.getName(), "skip");
 
-        Response response = swagger.getPath("/stuff").getGet().getResponses().get("200");
+        Response response = swagger.getPath("/stuff").getGet().getResponsesObject().get("200");
         assertNotNull(response);
         assertTrue(response.getSchema() instanceof StringProperty);
 
-        Response error = swagger.getPath("/stuff").getGet().getResponses().get("400");
+        Response error = swagger.getPath("/stuff").getGet().getResponsesObject().get("400");
         assertNotNull(error);
         Property errorProp = error.getSchema();
         assertNotNull(errorProp);

@@ -135,7 +135,7 @@ public class SwaggerDeserializer {
             }
 
             obj = getObject("responses", on, false, location, result);
-            Map<String, Response> responses = responses(obj, "responses", result);
+            Responses responses = responses(obj, "responses", result);
             swagger.responses(responses);
 
             obj = getObject("securityDefinitions", on, false, location, result);
@@ -171,9 +171,10 @@ public class SwaggerDeserializer {
         return swagger;
     }
 
-    public Map<String, Path> paths(ObjectNode obj, String location, ParseResult result) {
-        Map<String, Path> output = new LinkedHashMap<>();
-        if (obj == null) {
+
+    public Map<String,Path> paths(ObjectNode obj, String location, ParseResult result) {
+        Map<String,Path> output = new LinkedHashMap<>();
+        if(obj == null) {
             return null;
         }
 
@@ -395,11 +396,12 @@ public class SwaggerDeserializer {
         output.setParameters(parameters(parameters, location, result));
 
         ObjectNode responses = getObject("responses", obj, true, location+".responses", result);
-        Map<String, Response> responsesObject = responses(responses, location+".responses", result);
-        if (responsesObject != null && responsesObject.size() == 0) {
+        Responses responsesObject = responses(responses, location+".responses", result);
+        if(responsesObject != null && responsesObject.size() == 0) {
+
             result.missing(location, "responses");
         }
-        output.setResponses(responsesObject);
+        output.setResponsesObject(responsesObject);
 
         array = getArray("schemes", obj, false, location, result);
         if (array != null) {
@@ -1148,20 +1150,23 @@ public class SwaggerDeserializer {
         return output;
     }
 
-    public Map<String, Response> responses(ObjectNode node, String location, ParseResult result) {
-        if (node == null)
+
+    public Responses responses(ObjectNode node, String location, ParseResult result) {
+        if(node == null)
             return null;
 
-        Map<String, Response> output = new TreeMap<String, Response>();
+        Responses output = new Responses();
 
         Set<String> keys = getKeys(node);
 
-        for (String key : keys) {
+        for(String key : keys) {
+            JsonNode responseValue = node.get(key);
             if (key.startsWith("x-")) {
-
-            } else {
-                ObjectNode obj = getObject(key, node, false, location, result);
-                Response response = response(obj, location + "."+key, result);
+                output.addVendorExtension(key,extension(responseValue));
+            }
+            else {
+                ObjectNode obj = getObject(key, node, false, location + ".responses", result);
+                Response response = response(obj, location + "." + key, result);
                 output.put(key, response);
             }
         }

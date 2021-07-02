@@ -70,7 +70,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -196,9 +195,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 final String fileScheme = "file:";
                 java.nio.file.Path path;
                 if (input.toLowerCase().startsWith(fileScheme)) {
-                    path = Paths.get(URI.create(input));
+                    path = java.nio.file.Paths.get(URI.create(input));
                 } else {
-                    path = Paths.get(input);
+                    path = java.nio.file.Paths.get(input);
                 }
                 String json;
                 if (Files.exists(path)) {
@@ -515,9 +514,9 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
                 final String fileScheme = "file:";
                 java.nio.file.Path path;
                 if (input.toLowerCase().startsWith(fileScheme)) {
-                    path = Paths.get(URI.create(input));
+                    path = java.nio.file.Paths.get(URI.create(input));
                 } else {
-                    path = Paths.get(input);
+                    path = java.nio.file.Paths.get(input);
                 }
                 String json;
                 if (Files.exists(path)) {
@@ -571,7 +570,6 @@ public class SwaggerCompatConverter implements SwaggerParserExtension {
             info = new Info()
                     .version(resourceListing.getApiVersion());
         }
-
         Map<String, Path> paths = new HashMap<String, Path>();
         Map<String, Model> definitions = new HashMap<String, Model>();
         String basePath = null;

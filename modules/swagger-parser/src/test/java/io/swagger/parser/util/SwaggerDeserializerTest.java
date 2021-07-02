@@ -667,9 +667,9 @@ public class SwaggerDeserializerTest {
         assertNotNull(path);
         Operation operation = path.getGet();
         assertNotNull(operation);
-        assertTrue(operation.getResponses().containsKey("200"));
-        assertEquals(RefResponse.class,operation.getResponses().get("200").getClass());
-        RefResponse refResponse = (RefResponse)operation.getResponses().get("200");
+        assertTrue(operation.getResponsesObject().containsKey("200"));
+        assertEquals(RefResponse.class,operation.getResponsesObject().get("200").getClass());
+        RefResponse refResponse = (RefResponse)operation.getResponsesObject().get("200");
         assertEquals("#/responses/OK",refResponse.get$ref());
     }
 
@@ -703,7 +703,7 @@ public class SwaggerDeserializerTest {
         Set<String> messages = new HashSet<String>(messageList);
         Swagger swagger = result.getSwagger();
 
-        Property response = swagger.getPath("/store/inventory").getGet().getResponses().get("200").getSchema();
+        Property response = swagger.getPath("/store/inventory").getGet().getResponsesObject().get("200").getSchema();
         assertTrue(response instanceof MapProperty);
     }
 
@@ -1672,7 +1672,7 @@ public class SwaggerDeserializerTest {
         Set<String> messages = new HashSet<String>(messageList);
         Swagger swagger = result.getSwagger();
 
-        Property response = swagger.getPath("/store/inventory").getGet().getResponses().get("200").getSchema();
+        Property response = swagger.getPath("/store/inventory").getGet().getResponsesObject().get("200").getSchema();
         assertTrue(response instanceof MapProperty);
         Property additionalProperties = ((MapProperty) response).getAdditionalProperties();
         assertTrue(additionalProperties instanceof UntypedProperty);
@@ -1682,7 +1682,6 @@ public class SwaggerDeserializerTest {
     @Test
     public void testIssue911() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue_911.yaml", null, true);
-        System.out.println(result.getMessages());
         assertEquals(result.getMessages().size(),1);
         assertNotNull(result.getSwagger());
     }

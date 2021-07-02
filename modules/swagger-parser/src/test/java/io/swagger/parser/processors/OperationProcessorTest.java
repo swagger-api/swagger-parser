@@ -76,7 +76,7 @@ public class OperationProcessorTest {
 
         new FullVerifications() {{}};
 
-        assertEquals(operation.getResponses().get("200"), resolvedResponse);
+        assertEquals(operation.getResponsesObject().get("200"), resolvedResponse);
         assertEquals(operation.getParameters(), outputParameterList);
     }
 }
