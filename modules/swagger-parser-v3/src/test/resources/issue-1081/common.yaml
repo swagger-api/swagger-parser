@@ -1,0 +1,13 @@
+openapi: 3.0.0
+info:
+  title: Common Data Types
+  version: "1.0"
+paths: {}
+components:
+  responses:
+    E500:
+      description: Server Error
+      content:
+        application/json:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/ProblemDetails'
