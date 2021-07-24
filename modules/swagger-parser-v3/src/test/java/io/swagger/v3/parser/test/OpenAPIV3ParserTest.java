@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -2871,5 +2872,16 @@ public class OpenAPIV3ParserTest {
         Assert.assertTrue(!testPutExtensions.isEmpty());
         Assert.assertNotNull(testPutExtensions.get("x-order"));
         Assert.assertEquals((String)testPutExtensions.get("x-order"),"2147483647");
+    }
+
+    @Test
+    public void testIssue1592() throws Exception {
+        File file = new File("src/test/resources/issue-1592.jar");
+        URL url = new URL("jar:" + file.toURI() + "!/test.yaml");
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url.toString(), null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
     }
 }
