@@ -232,6 +232,65 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testExampleFlag() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        options.setResolveFully(true);
+        options.setFlatten(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("media-type-null-example.yaml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertNull(openAPI.getPaths().get("/pets/{petId}").getGet().getResponses().get("200").getContent().get("application/json").getExample());
+        assertTrue(openAPI.getPaths().get("/pets/{petId}").getGet().getResponses().get("200").getContent().get("application/json").getExampleSetFlag());
+
+        assertNull(openAPI.getPaths().get("/pet").getPost().getResponses().get("200").getContent().get("application/json").getExample());
+        assertFalse(openAPI.getPaths().get("/pet").getPost().getResponses().get("200").getContent().get("application/json").getExampleSetFlag());
+
+        assertNotNull(openAPI.getPaths().get("/pet").getPost().getRequestBody().getContent().get("application/json").getExample());
+        assertNotNull(openAPI.getPaths().get("/pet").getPost().getRequestBody().getContent().get("application/json").getExample());
+
+        assertTrue(openAPI.getPaths().get("/pet").getPost().getRequestBody().getContent().get("application/json").getExampleSetFlag());
+
+        assertNotNull(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("foo").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("foo").getValueSetFlag());
+        assertNull(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("bar").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("bar").getValueSetFlag());
+
+        assertNotNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("a").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("a").getValueSetFlag());
+        assertNotNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("b").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("b").getValueSetFlag());
+        assertNotNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("c").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("c").getValueSetFlag());
+        assertNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("d").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("d").getValueSetFlag());
+
+
+        assertNull(openAPI.getComponents().getSchemas().get("ObjectWithNullExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("ObjectWithNullExample").getExampleSetFlag());
+
+        assertNotNull(openAPI.getComponents().getSchemas().get("ObjectWithNullInSchemaExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("ObjectWithNullInSchemaExample").getExampleSetFlag());
+
+        assertNotNull(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("a")).getExample());
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("a")).getExampleSetFlag());
+        assertNull(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("b")).getExample());
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("b")).getExampleSetFlag());
+
+        assertNull(openAPI.getComponents().getSchemas().get("StringWithNullExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("StringWithNullExample").getExampleSetFlag());
+
+        assertNull(openAPI.getComponents().getSchemas().get("ArrayWithNullArrayExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("ArrayWithNullArrayExample").getExampleSetFlag());
+
+        assertNull(((ArraySchema)openAPI.getComponents().getSchemas().get("ArrayWithNullItemExample")).getItems().getExample());
+        assertTrue(((ArraySchema)openAPI.getComponents().getSchemas().get("ArrayWithNullItemExample")).getItems().getExampleSetFlag());
+    }
+
+    @Test
     public void testIssueFlattenAdditionalPropertiesSchemaInlineModelTrue() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
