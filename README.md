@@ -655,7 +655,7 @@ components:
 ### Extensions
 This project has a core artifact--`swagger-parser`, which uses Java Service Provider Inteface (SPI) so additional extensions can be added. 
 
-To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.parser.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.parser.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
+To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.v3.parser.core.extensions.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.v3.parser.core.extensions.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
 
 ## Security contact
 
