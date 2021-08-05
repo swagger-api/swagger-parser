@@ -221,28 +221,4 @@ public class SwaggerParser {
         }
         return output;
     }
-
-    /**
-     * Transform the swagger-model version of AuthorizationValue into a parser-specific one, to avoid
-     * dependencies across extensions
-     *
-     * @param input
-     * @return
-     */
-    protected List<AuthorizationValue> transform(List<AuthorizationValue> input) {
-        if(input == null) {
-            return null;
-        }
-        List<AuthorizationValue> output = new ArrayList<>();
-        for(AuthorizationValue value : input) {
-            AuthorizationValue v = new AuthorizationValue();
-            v.setKeyName(value.getKeyName());
-            v.setValue(value.getValue());
-            v.setType(value.getType());
-            v.setUrls(value.getUrls());
-
-            output.add(v);
-        }
-        return output;
-    }
 }

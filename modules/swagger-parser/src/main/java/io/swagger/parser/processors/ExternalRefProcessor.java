@@ -11,8 +11,6 @@ import io.swagger.models.properties.StringProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
-import io.swagger.parser.util.RefUtils;
-import jdk.nashorn.internal.ir.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 

@@ -101,7 +101,7 @@ public class RemoteUrl {
                 final List<AuthorizationValue> header = new ArrayList<>();
                 if (auths != null) {
                     for (AuthorizationValue auth : auths) {
-                        if (auth.getUrls() == null || auth.getUrls().contains(inUrl)) {
+                        if (auth.getUrlMatcher() == null || auth.getUrlMatcher().test(inUrl)) {
                             if ("query".equals(auth.getType())) {
                                 appendValue(inUrl, auth, query);
                             } else if ("header".equals(auth.getType())) {
