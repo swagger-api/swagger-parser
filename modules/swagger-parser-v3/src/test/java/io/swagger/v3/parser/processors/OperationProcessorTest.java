@@ -27,6 +27,9 @@ public class OperationProcessorTest {
     @Injectable
     OpenAPI openAPI;
 
+    @Injectable
+    boolean openapi31;
+
     @Mocked
     ParameterProcessor parameterProcessor;
 
@@ -51,11 +54,11 @@ public class OperationProcessorTest {
 
 
         new Expectations() {{
-            new ParameterProcessor(cache, openAPI);
+            new ParameterProcessor(cache, openAPI, openapi31);
             times = 1;
             result = parameterProcessor;
 
-            new ResponseProcessor(cache, openAPI);
+            new ResponseProcessor(cache, openAPI, openapi31);
             times = 1;
             result = responseProcessor;
 
@@ -88,7 +91,7 @@ public class OperationProcessorTest {
 
 
 
-        new OperationProcessor(cache, openAPI).processOperation(operation);
+        new OperationProcessor(cache, openAPI, openapi31).processOperation(operation);
 
 
         new FullVerifications() {{}};

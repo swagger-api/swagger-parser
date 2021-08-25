@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml31;
+import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -131,13 +133,17 @@ public class DeserializationUtils {
         return deserializeIntoTree(contents, fileOrHost, null, new SwaggerParseResult());
     }
     public static JsonNode deserializeIntoTree(String contents, String fileOrHost, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
+        return deserializeIntoTree(contents, fileOrHost, parseOptions, deserializationUtilsResult, false);
+    }
+
+    public static JsonNode deserializeIntoTree(String contents, String fileOrHost, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult, boolean openapi31) {
         JsonNode result;
 
         try {
             if (isJson(contents)) {
-                result = ObjectMapperFactory.createJson().readTree(contents);
+                result = openapi31 ? ObjectMapperFactory.createJson31().readTree(contents) : ObjectMapperFactory.createJson().readTree(contents);
             } else {
-                result = readYamlTree(contents, parseOptions, deserializationUtilsResult);
+                result = readYamlTree(contents, parseOptions, deserializationUtilsResult, openapi31);
             }
         } catch (IOException e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into a JsonNode tree", e);
@@ -147,6 +153,10 @@ public class DeserializationUtils {
     }
 
     public static <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType) {
+        return deserialize(contents, fileOrHost, expectedType, false);
+    }
+
+    public static <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType, boolean openapi31) {
         T result;
 
         boolean isJson = false;
@@ -157,13 +167,22 @@ public class DeserializationUtils {
 
         try {
             if (contents instanceof String) {
+                ObjectMapper mapper = Json.mapper();
                 if (isJson) {
-                    result = Json.mapper().readValue((String) contents, expectedType);
+                    if (openapi31) {
+                        mapper = Json31.mapper();
+                    }
                 } else {
-                    result = Yaml.mapper().readValue((String) contents, expectedType);
+                    if (openapi31) {
+                        mapper = Yaml31.mapper();
+                    } else {
+                        mapper = Yaml.mapper();
+                    }
                 }
+                result = mapper.readValue((String) contents, expectedType);
             } else {
-                result = Json.mapper().convertValue(contents, expectedType);
+                ObjectMapper mapper = openapi31 ? Json31.mapper() : Json.mapper();
+                result = mapper.convertValue(contents, expectedType);
             }
         } catch (Exception e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into type " + expectedType, e);
@@ -177,12 +196,16 @@ public class DeserializationUtils {
     }
 
     public static JsonNode readYamlTree(String contents) {
-        return readYamlTree(contents, null, new SwaggerParseResult());
+        return readYamlTree(contents, null, new SwaggerParseResult(), false);
     }
-    public static JsonNode readYamlTree(String contents, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
+    public static JsonNode readYamlTree(String contents, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult, boolean openapi31) {
+
+        ObjectMapper jsonMapper = openapi31 ? Json31.mapper() : Json.mapper();
+        ObjectMapper yamlMapper = openapi31 ? Yaml31.mapper() : Yaml.mapper();
+
         if (parseOptions != null && parseOptions.isLegacyYamlDeserialization()) {
             org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
-            return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
+            return jsonMapper.convertValue(yaml.load(contents), JsonNode.class);
         }
         try {
             org.yaml.snakeyaml.Yaml yaml = null;
@@ -196,7 +219,7 @@ public class DeserializationUtils {
                 boolean res = exceedsLimits(o, null, new Integer(0), new IdentityHashMap<Object, Long>(), deserializationUtilsResult);
                 if (res) {
                     LOGGER.warn("Error converting snake-parsed yaml to JsonNode");
-                    return Yaml.mapper().readTree(contents);
+                    return yamlMapper.readTree(contents);
                 }
             }
             try {
@@ -205,14 +228,14 @@ public class DeserializationUtils {
             } catch (Exception e) {
                 //
             }
-            return Json.mapper().convertValue(o, JsonNode.class);
+            return jsonMapper.convertValue(o, JsonNode.class);
         } catch (Throwable e) {
             LOGGER.warn("Error snake-parsing yaml content", e);
             if (deserializationUtilsResult != null) {
                 deserializationUtilsResult.message(e.getMessage());
             }
             try {
-                return Yaml.mapper().readTree(contents);
+                return yamlMapper.readTree(contents);
             } catch (Exception ee) {
                 LOGGER.error("Error parsing content", ee);
                 throw new RuntimeException(e);
@@ -222,8 +245,12 @@ public class DeserializationUtils {
     }
 
     public static <T> T readYamlValue(String contents, Class<T> expectedType) {
+        return readYamlValue(contents, expectedType, false);
+    }
+    public static <T> T readYamlValue(String contents, Class<T> expectedType, boolean openapi31) {
         org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
-        return Json.mapper().convertValue(yaml.load(contents), expectedType);
+        ObjectMapper jsonMapper = openapi31 ? Json31.mapper() : Json.mapper();
+        return jsonMapper.convertValue(yaml.load(contents), expectedType);
     }
 
     public static org.yaml.snakeyaml.Yaml buildSnakeYaml(BaseConstructor constructor) {

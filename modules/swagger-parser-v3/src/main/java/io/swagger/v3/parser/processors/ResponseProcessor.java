@@ -26,9 +26,13 @@ public class ResponseProcessor {
     private final OpenAPI openAPI;
 
     public ResponseProcessor(ResolverCache cache, OpenAPI openAPI) {
-        schemaProcessor = new SchemaProcessor(cache,openAPI);
-        headerProcessor = new HeaderProcessor(cache,openAPI);
-        linkProcessor = new LinkProcessor(cache,openAPI);
+        this(cache, openAPI, false);
+    }
+
+    public ResponseProcessor(ResolverCache cache, OpenAPI openAPI, boolean openapi31) {
+        schemaProcessor = new SchemaProcessor(cache,openAPI, openapi31);
+        headerProcessor = new HeaderProcessor(cache,openAPI, openapi31);
+        linkProcessor = new LinkProcessor(cache,openAPI, openapi31);
         exampleProcessor = new ExampleProcessor(cache,openAPI);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
         this.cache = cache;
