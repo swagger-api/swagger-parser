@@ -8,6 +8,7 @@ import java.util.List;
 public class SwaggerParseResult {
     private List<String> messages = null;
     private OpenAPI openAPI;
+    private boolean openapi31;
 
     public SwaggerParseResult messages(List<String> messages) {
         this.messages = messages;
@@ -34,5 +35,18 @@ public class SwaggerParseResult {
         final SwaggerParseResult result = new SwaggerParseResult();
         result.setMessages(Collections.singletonList(message));
         return result;
+    }
+
+    public void setOpenapi31(boolean openapi31) {
+        this.openapi31 = openapi31;
+    }
+
+    public SwaggerParseResult openapi31(boolean openapi31) {
+        this.openapi31 = openapi31;
+        return this;
+    }
+
+    public boolean isOpenapi31() {
+        return this.openapi31;
     }
 }

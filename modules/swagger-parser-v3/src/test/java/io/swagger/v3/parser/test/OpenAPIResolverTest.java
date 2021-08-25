@@ -873,15 +873,15 @@ public class OpenAPIResolverTest {
                                     @Mocked final PathsProcessor pathsProcessor) throws Exception {
 
         new StrictExpectations() {{
-            new ResolverCache(swagger, auths, null);
+            new ResolverCache(swagger, auths, null, false);
             result = cache;
             times = 1;
 
-            new ComponentsProcessor(swagger, cache);
+            new ComponentsProcessor(swagger, cache, false);
             result = componentsProcessor;
             times = 1;
 
-            new PathsProcessor(cache, swagger, withInstanceOf(OpenAPIResolver.Settings.class));
+            new PathsProcessor(cache, swagger, withInstanceOf(OpenAPIResolver.Settings.class), false);
             result = pathsProcessor;
             times = 1;
 
@@ -893,7 +893,7 @@ public class OpenAPIResolverTest {
 
         }};
 
-        assertEquals(new OpenAPIResolver(swagger, auths, null).resolve(), swagger);
+        assertEquals(new OpenAPIResolver(swagger, auths, null, false).resolve(), swagger);
     }
 
     @Test

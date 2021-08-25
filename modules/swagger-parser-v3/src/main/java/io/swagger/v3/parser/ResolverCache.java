@@ -58,6 +58,7 @@ public class ResolverCache {
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
     private Set<String> referencedModelKeys = new HashSet<>();
+    protected boolean openapi31;
 
     /*
     a map that stores original external references, and their associated renamed references
@@ -65,6 +66,11 @@ public class ResolverCache {
     private Map<String, String> renameCache = new HashMap<>();
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation) {
+        this(openApi, auths, parentFileLocation, false);
+    }
+
+    public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, boolean openapi31) {
+        this.openapi31 = openapi31;
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
@@ -136,13 +142,13 @@ public class ResolverCache {
         }
 
         if (definitionPath == null) {
-            T result = DeserializationUtils.deserialize(contents, file, expectedType);
+            T result = DeserializationUtils.deserialize(contents, file, expectedType, openapi31);
             resolutionCache.put(ref, result);
             return result;
         }
 
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
+        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, openapi31);
 
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
@@ -156,9 +162,9 @@ public class ResolverCache {
         T result;
         if (expectedType.equals(Schema.class)) {
             OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-            result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), null);
+            result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
         } else {
-            result = DeserializationUtils.deserialize(tree, file, expectedType);
+            result = DeserializationUtils.deserialize(tree, file, expectedType, openapi31);
         }
 
         updateLocalRefs(file, result);

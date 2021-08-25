@@ -53,12 +53,12 @@ public class ResolverCacheTest {
             times = 1;
             result = contentsOfExternalFile;
 
-            DeserializationUtils.deserialize(contentsOfExternalFile, ref, Schema.class);
+            DeserializationUtils.deserialize(contentsOfExternalFile, ref, Schema.class, false);
             times = 1;
             result = expectedResult;
         }};
 
-        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json");
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", false);
 
         Schema firstActualResult = cache.loadRef(ref, RefFormat.URL, Schema.class);
 
@@ -78,12 +78,12 @@ public class ResolverCacheTest {
             times = 1;
             result = contentsOfExternalFile;
 
-            DeserializationUtils.deserialize(contentsOfExternalFile, ref, Schema.class);
+            DeserializationUtils.deserialize(contentsOfExternalFile, ref, Schema.class, false);
             times = 1;
             result = expectedResult;
         }};
 
-        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json");
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", false);
 
         Schema firstActualResult = cache.loadRef(ref, RefFormat.URL, Schema.class);
 
@@ -101,17 +101,17 @@ public class ResolverCacheTest {
     public void testLoadExternalRefWithEscapedCharacters() throws Exception {
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/main.yaml";
-        final String contentsOfExternalFile = "openAPI: \"2.0\"\n" + 
-            "\n" + 
-            "info:\n" + 
-            "  version: 1.0.0\n" + 
-            "  title: Path include test case child\n" + 
-            "\n" + 
-            "paths:\n" + 
-            "  /foo~bar~1:\n" + 
-            "    get:\n" + 
-            "      responses:\n" + 
-            "        200:\n" + 
+        final String contentsOfExternalFile = "openAPI: \"2.0\"\n" +
+            "\n" +
+            "info:\n" +
+            "  version: 1.0.0\n" +
+            "  title: Path include test case child\n" +
+            "\n" +
+            "paths:\n" +
+            "  /foo~bar~1:\n" +
+            "    get:\n" +
+            "      responses:\n" +
+            "        200:\n" +
             "          description: \"Request successful\"\n";
 
         new Expectations() {{
@@ -167,7 +167,7 @@ public class ResolverCacheTest {
         assertNull(cache.loadRef("#/components/parameters/bar", RefFormat.INTERNAL, Parameter.class));
         assertNull(cache.loadRef("#/params/foo", RefFormat.INTERNAL, Parameter.class));
     }
-    
+
     @Test
     public void testLoadInternalParameterRefWithSpaces(@Injectable Parameter mockedParameter) throws Exception {
         OpenAPI openAPI = new OpenAPI();
@@ -200,7 +200,7 @@ public class ResolverCacheTest {
         Schema actualResult = cache.loadRef("#/components/schemas/foo bar", RefFormat.INTERNAL, Schema.class);
         assertEquals(actualResult, mockedModel);
     }
-    
+
     @Test
     public void testLoadInternalDefinitionRefWithEscapedCharacters(@Injectable Schema mockedModel) throws Exception {
         OpenAPI openAPI = new OpenAPI();
@@ -210,7 +210,7 @@ public class ResolverCacheTest {
         Schema actualResult = cache.loadRef("#/components/schemas/foo~0bar~1baz~01", RefFormat.INTERNAL, Schema.class);
         assertEquals(actualResult, mockedModel);
     }
-    
+
     @Test
     public void testLoadInternalResponseRef(@Injectable ApiResponse mockedResponse) throws Exception {
         OpenAPI openAPI = new OpenAPI();

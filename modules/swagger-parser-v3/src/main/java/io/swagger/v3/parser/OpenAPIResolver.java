@@ -19,6 +19,7 @@ public class OpenAPIResolver {
     private final PathsProcessor pathProcessor;
     private final OperationProcessor operationsProcessor;
     private Settings settings = new Settings();
+    private boolean openapi31 = false;
 
     public OpenAPIResolver(OpenAPI openApi) {
         this(openApi, null, null, null);
@@ -32,13 +33,22 @@ public class OpenAPIResolver {
         this(openApi, auths, parentFileLocation, null);
     }
 
+    public OpenAPIResolver(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, boolean openapi31) {
+        this(openApi, auths, parentFileLocation, null, openapi31);
+    }
+
     public OpenAPIResolver(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Settings settings) {
+        this(openApi, auths, parentFileLocation, settings, false);
+    }
+
+    public OpenAPIResolver(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Settings settings, boolean openapi31) {
         this.openApi = openApi;
         this.settings = settings != null ? settings : new Settings();
-        this.cache = new ResolverCache(openApi, auths, parentFileLocation);
-        componentsProcessor = new ComponentsProcessor(openApi,this.cache);
-        pathProcessor = new PathsProcessor(cache, openApi,this.settings);
-        operationsProcessor = new OperationProcessor(cache, openApi);
+        this.cache = new ResolverCache(openApi, auths, parentFileLocation, openapi31);
+        this.openapi31 = openapi31;
+        componentsProcessor = new ComponentsProcessor(openApi,this.cache, openapi31);
+        pathProcessor = new PathsProcessor(cache, openApi,this.settings, openapi31);
+        operationsProcessor = new OperationProcessor(cache, openApi, openapi31);
     }
 
     public OpenAPI resolve() {

@@ -26,9 +26,12 @@ public class CallbackProcessor {
     private final ExternalRefProcessor externalRefProcessor;
 
     public CallbackProcessor(ResolverCache cache, OpenAPI openAPI) {
+        this(cache, openAPI, false);
+    }
+    public CallbackProcessor(ResolverCache cache, OpenAPI openAPI, boolean openapi31) {
         this.cache = cache;
-        this.operationProcessor = new OperationProcessor(cache, openAPI);
-        this.parameterProcessor = new ParameterProcessor(cache,openAPI);
+        this.operationProcessor = new OperationProcessor(cache, openAPI, openapi31);
+        this.parameterProcessor = new ParameterProcessor(cache,openAPI, openapi31);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
         this.openAPI = openAPI;
     }

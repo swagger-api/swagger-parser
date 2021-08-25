@@ -37,12 +37,16 @@ public class PathsProcessor {
     public PathsProcessor(ResolverCache cache, OpenAPI openAPI) {
         this(cache, openAPI, new OpenAPIResolver.Settings());
     }
+
     public PathsProcessor(ResolverCache cache, OpenAPI openAPI, OpenAPIResolver.Settings settings) {
+        this(cache, openAPI, settings, false);
+    }
+    public PathsProcessor(ResolverCache cache, OpenAPI openAPI, OpenAPIResolver.Settings settings, boolean openapi31) {
         this.openAPI = openAPI;
         this.cache = cache;
         this.settings = settings;
-        parameterProcessor = new ParameterProcessor(cache, openAPI);
-        operationProcessor = new OperationProcessor(cache, openAPI);
+        parameterProcessor = new ParameterProcessor(cache, openAPI, openapi31);
+        operationProcessor = new OperationProcessor(cache, openAPI, openapi31);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
@@ -277,20 +281,20 @@ public class PathsProcessor {
         }
         return false;
     }
-    
+
     protected boolean isAbsoluteRef(String ref) {
     	 if(ref.startsWith("./")) {
              return true;
          }
          return false;
     }
-    
+
     protected String computeRef(String ref, String prefix) {
     	if(isLocalRef(ref)) return computeLocalRef(ref, prefix);
     	if(isAbsoluteRef(ref)) return ref;
     	return computeRelativeRef(ref, prefix);
     }
-    
+
     protected String computeRelativeRef(String ref, String prefix) {
     	int iIdxOfSlash = prefix.lastIndexOf('/');
     	if(iIdxOfSlash != -1) {

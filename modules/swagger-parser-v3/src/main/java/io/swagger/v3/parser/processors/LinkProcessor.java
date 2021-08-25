@@ -22,11 +22,13 @@ public class LinkProcessor {
     private final HeaderProcessor headerProcessor;
     private final ExternalRefProcessor externalRefProcessor;
 
-
     public LinkProcessor(ResolverCache cache, OpenAPI openAPI){
+        this (cache, openAPI, false);
+    }
+    public LinkProcessor(ResolverCache cache, OpenAPI openAPI, boolean openapi31){
         this.cache = cache;
         this.openAPI = openAPI;
-        this.headerProcessor = new HeaderProcessor(cache,openAPI);
+        this.headerProcessor = new HeaderProcessor(cache,openAPI, openapi31);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
