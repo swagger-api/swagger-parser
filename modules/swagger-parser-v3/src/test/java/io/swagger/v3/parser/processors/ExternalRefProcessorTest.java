@@ -34,6 +34,9 @@ public class ExternalRefProcessorTest {
     @Injectable
 	OpenAPI openAPI;
 
+    @Injectable
+	boolean openapi31;
+
     @Test
     public void testProcessRefToExternalDefinition_NoNameConflict(
             @Injectable final Schema mockedModel) throws Exception {

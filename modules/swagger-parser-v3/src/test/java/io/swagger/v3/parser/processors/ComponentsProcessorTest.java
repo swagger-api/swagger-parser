@@ -42,6 +42,8 @@ public class ComponentsProcessorTest {
     @Mocked
     SecuritySchemeProcessor securitySchemeProcessor;
 
+    @Injectable
+    boolean openapi31;
 
     @Test
     public void testComponentsSchemasProcessor(@Injectable final Schema model1,
@@ -56,7 +58,7 @@ public class ComponentsProcessorTest {
 
         new Expectations() {{
 
-            new SchemaProcessor(cache, openAPI);
+            new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
             result = schemaProcessor;
 
@@ -65,7 +67,7 @@ public class ComponentsProcessorTest {
             times = 2;
         }};
 
-        new ComponentsProcessor(openAPI,cache).processComponents();
+        new ComponentsProcessor(openAPI,cache, openapi31).processComponents();
 
 
 
@@ -81,23 +83,23 @@ public class ComponentsProcessorTest {
 
 
         new StrictExpectations() {{
-            new SchemaProcessor(cache, openAPI);
+            new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
             result = schemaProcessor;
 
-            new ResponseProcessor(cache, openAPI);
+            new ResponseProcessor(cache, openAPI, openapi31);
             times = 1;
             result = responseProcessor;
 
-            new RequestBodyProcessor(cache, openAPI);
+            new RequestBodyProcessor(cache, openAPI, openapi31);
             times = 1;
             result = requestBodyProcessor;
 
-            new ParameterProcessor( cache, openAPI);
+            new ParameterProcessor( cache, openAPI, openapi31);
             times = 1;
             result = parameterProcessor;
 
-            new HeaderProcessor(cache, openAPI);
+            new HeaderProcessor(cache, openAPI, openapi31);
             times = 1;
             result = headerProcessor;
 
@@ -105,11 +107,11 @@ public class ComponentsProcessorTest {
             times = 1;
             result = exampleProcessor;
 
-            new LinkProcessor(cache, openAPI);
+            new LinkProcessor(cache, openAPI, openapi31);
             times = 1;
             result = linkProcessor;
 
-            new CallbackProcessor(cache, openAPI);
+            new CallbackProcessor(cache, openAPI, openapi31);
             times = 1;
             result = callbackProcessor;
 
@@ -124,7 +126,7 @@ public class ComponentsProcessorTest {
 
         }};
 
-        new ComponentsProcessor(openAPI,cache).processComponents();
+        new ComponentsProcessor(openAPI,cache, openapi31).processComponents();
 
         new FullVerifications() {{
         }};
@@ -150,23 +152,23 @@ public class ComponentsProcessorTest {
 
         new StrictExpectations() {{
 
-            new SchemaProcessor(mockResolverCache, openAPI);
+            new SchemaProcessor(mockResolverCache, openAPI, openapi31);
             times = 1;
             result = schemaProcessor;
 
-            new ResponseProcessor(mockResolverCache, openAPI);
+            new ResponseProcessor(mockResolverCache, openAPI, openapi31);
             times = 1;
             result = responseProcessor;
 
-            new RequestBodyProcessor(mockResolverCache, openAPI);
+            new RequestBodyProcessor(mockResolverCache, openAPI, openapi31);
             times = 1;
             result = requestBodyProcessor;
 
-            new ParameterProcessor( mockResolverCache, openAPI);
+            new ParameterProcessor( mockResolverCache, openAPI, openapi31);
             times = 1;
             result = parameterProcessor;
 
-            new HeaderProcessor(mockResolverCache, openAPI);
+            new HeaderProcessor(mockResolverCache, openAPI, openapi31);
             times = 1;
             result = headerProcessor;
 
@@ -174,11 +176,11 @@ public class ComponentsProcessorTest {
             times = 1;
             result = exampleProcessor;
 
-            new LinkProcessor(mockResolverCache, openAPI);
+            new LinkProcessor(mockResolverCache, openAPI, openapi31);
             times = 1;
             result = linkProcessor;
 
-            new CallbackProcessor(mockResolverCache, openAPI);
+            new CallbackProcessor(mockResolverCache, openAPI, openapi31);
             times = 1;
             result = callbackProcessor;
 
@@ -194,7 +196,7 @@ public class ComponentsProcessorTest {
 
         }};
 
-        new ComponentsProcessor(openAPI, mockResolverCache).processComponents();
+        new ComponentsProcessor(openAPI, mockResolverCache, openapi31).processComponents();
 
         new FullVerifications(){{}};
 

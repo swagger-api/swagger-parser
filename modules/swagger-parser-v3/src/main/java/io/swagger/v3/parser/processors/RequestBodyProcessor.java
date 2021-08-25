@@ -24,7 +24,11 @@ public class RequestBodyProcessor {
     private final OpenAPI openAPI;
 
     public RequestBodyProcessor(ResolverCache cache, OpenAPI openAPI) {
-        schemaProcessor = new SchemaProcessor(cache,openAPI);
+        this(cache, openAPI, false);
+    }
+
+    public RequestBodyProcessor(ResolverCache cache, OpenAPI openAPI, boolean openapi31) {
+        schemaProcessor = new SchemaProcessor(cache,openAPI, openapi31);
         exampleProcessor = new ExampleProcessor(cache,openAPI);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
         this.cache = cache;

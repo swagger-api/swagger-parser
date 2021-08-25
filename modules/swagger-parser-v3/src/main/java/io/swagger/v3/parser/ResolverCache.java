@@ -69,7 +69,7 @@ public class ResolverCache {
     private List<String> referencedModelKeys = new ArrayList<>();
     private Set<String> resolveValidationMessages;
     private final ParseOptions parseOptions;
-
+    protected boolean openapi31;
 
     /*
      * a map that stores original external references, and their associated renamed
@@ -86,6 +86,7 @@ public class ResolverCache {
     }
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Set<String> resolveValidationMessages, ParseOptions parseOptions) {
+        this.openapi31 = parseOptions.isOpenapi31();
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
@@ -158,14 +159,14 @@ public class ResolverCache {
             externalFileCache.put(file, contents);
         }
         SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
+        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult, openapi31);
 
         if (definitionPath == null) {
             T result = null;
             if (parseOptions.isValidateExternalRefs()) {
                 result = deserializeFragment(tree, expectedType, file, "/");
             } else {
-                result = DeserializationUtils.deserialize(contents, file, expectedType);
+                result = DeserializationUtils.deserialize(contents, file, expectedType, openapi31);
             }
             resolutionCache.put(ref, result);
             if (deserializationUtilResult.getMessages() != null) {
@@ -191,9 +192,9 @@ public class ResolverCache {
         } else {
             if (expectedType.equals(Schema.class)) {
                 OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), null);
+                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), null, , new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
             } else {
-                result = DeserializationUtils.deserialize(tree, file, expectedType);
+                result = DeserializationUtils.deserialize(tree, file, expectedType, openapi31);
             }
         }
         updateLocalRefs(file, result);
