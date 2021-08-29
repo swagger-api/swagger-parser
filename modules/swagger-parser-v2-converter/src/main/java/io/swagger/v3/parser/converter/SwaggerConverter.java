@@ -966,7 +966,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }else {
 
             result = Json.mapper().convertValue(schema, Schema.class);
-            result.setExample(schema.getExample());
+            if (schema.getExample() != null) {
+                result.setExample(schema.getExample());
+            }
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
                 Map<String, Schema> properties = new LinkedHashMap<>();
@@ -1182,7 +1184,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
             ComposedModel composedModel = (ComposedModel) v2Model;
             ComposedSchema composed = new ComposedSchema();
             composed.setDescription(composedModel.getDescription());
-            composed.setExample(composedModel.getExample());
+            if(composedModel.getExample()!= null) {
+                composed.setExample(composedModel.getExample());
+            }
             if (composedModel.getExternalDocs() != null) {
                 composed.setExternalDocs(convert(composedModel.getExternalDocs()));
             }
