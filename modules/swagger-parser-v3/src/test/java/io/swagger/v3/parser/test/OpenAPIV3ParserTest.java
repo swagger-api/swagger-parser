@@ -89,10 +89,8 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-1561/swagger.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
-        Yaml.prettyPrint(openAPI);
         assertTrue(openAPI.getComponents().getResponses().size() == 3);
     }
-
 
     @Test
     public void testAnonymousModelAllOf() {
