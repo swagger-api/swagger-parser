@@ -1,0 +1,67 @@
+components:
+  schemas:
+    Exception:
+      type: object
+    Rfc7807Exception:
+      description: The Rfc7807 specification for exceptions.
+      allOf:
+        - $ref: '#/components/schemas/Exception'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: A URI reference that identifies the problem type.
+          required:
+            - type
+            - title
+            - status
+            - detail
+    AbsisExceptionType:
+      type: string
+      enum: [VALIDATION, BUSINESS, RUNTIME, CHALLENGE, NOTFOUND, UNAUTHORIZED, AUTHENTICATION]
+      description: The possible types of an AbsisException.
+    AbsisFieldError:
+      type: object
+      description: The representation of a validation error.
+      properties:
+        code:
+          type: string
+          description: The error code.
+      example:
+        code: request
+        parameters:
+          - codes:
+              - aCode
+              - otherCode
+        value: NotNull
+    AbsisException:
+      description: Representation of an exception.
+      allOf:
+        - $ref: '#/components/schemas/Rfc7807Exception'
+        - type: object
+          properties:
+            _class:
+              type: string
+              description: The canonical name of the class AbsisException.
+            cause:
+              $ref: '#/components/schemas/AbsisException'
+              description: The AbsisException wrapping the exception that originated this exception.
+  responses:
+    '400':
+      description: Error when validating input parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+    '404':
+      description: The endpoint does not exists or the attempted resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+    '500':
+      description: Unexpected error occurred at one of the layers of the microservice, controller, business service, repository etc.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'

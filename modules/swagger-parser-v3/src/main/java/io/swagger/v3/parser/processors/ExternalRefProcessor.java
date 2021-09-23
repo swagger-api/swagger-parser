@@ -391,6 +391,7 @@ public final class ExternalRefProcessor {
             }
         }
         newRef = possiblyConflictingDefinitionName;
+        openAPI.getComponents().addResponses(newRef, response);
         cache.putRenamedRef($ref, newRef);
 
         if(response != null) {
@@ -407,6 +408,7 @@ public final class ExternalRefProcessor {
 
         return newRef;
     }
+
 
     public String processRefToExternalRequestBody(String $ref, RefFormat refFormat) {
         String renamedRef = cache.getRenamedRef($ref);
