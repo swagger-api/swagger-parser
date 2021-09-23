@@ -84,6 +84,15 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1561() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-1561/swagger.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertTrue(openAPI.getComponents().getResponses().size() == 3);
+    }
+
+    @Test
     public void testAnonymousModelAllOf() {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);

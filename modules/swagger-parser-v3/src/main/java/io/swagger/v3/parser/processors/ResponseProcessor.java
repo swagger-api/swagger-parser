@@ -81,7 +81,11 @@ public class ResponseProcessor {
         RefFormat refFormat = computeRefFormat(response.get$ref());
         String $ref = response.get$ref();
         if (isAnExternalRefFormat(refFormat)){
-            externalRefProcessor.processRefToExternalResponse($ref, refFormat);
+            final String newRef =  externalRefProcessor.processRefToExternalResponse($ref, refFormat);
+
+            if (newRef != null) {
+                response.set$ref(newRef);
+            }
         }
     }
 }

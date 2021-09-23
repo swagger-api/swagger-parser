@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  description: The Trazabilidad API offers the functionalities of the new trace regardless of the channel in which it is in invoked.
+  version: 1.0.2
+  title: ApiTrazabilidad
+
+tags:
+  - name: Trazabilidad
+    description: Trazabilidad API
+paths:
+  '/operationalServices/tracks/scopes/{scopeId}/processes/{processId}/petitions':
+    post:
+      tags:
+        - createPetition
+      summary: Creates a new instance in the traceability operation.
+      operationId: createPetition
+      description: Creates a new instance in the traceability operation.
+      parameters:
+        - in: path
+          name: processId
+          description: instance process ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: '#/components/requestBodies/TrazabilidadBodyRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BodyOutResponse'
+        '400':
+          $ref: >-
+            exceptions.yml#/components/responses/400
+        '404':
+          $ref: >-
+            exceptions.yml#/components/responses/404
+        '500':
+          $ref: >-
+            exceptions.yml#/components/responses/500
+
+components:
+  requestBodies:
+    TrazabilidadBodyRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrazabilidadBodyRequest'
+      description: body request
+      required: true
+  schemas:
+    BodyOutResponse:
+      type: object
+      properties:
+        petitionId:
+          type: string
+          description: The ID of the request that has been created
+          example: "971205125921"
+    TrazabilidadBodyRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          description: Action to be performed. values -- alta , mod , fin , baja
+          example: "alta"
