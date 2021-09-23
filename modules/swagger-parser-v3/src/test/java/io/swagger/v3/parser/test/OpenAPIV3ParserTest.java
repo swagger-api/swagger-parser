@@ -86,14 +86,13 @@ public class OpenAPIV3ParserTest {
     @Test
     public void testIssue1561() {
         ParseOptions options = new ParseOptions();
-        options.setResolveFully(true);
-        options.setFlatten(true);
+        options.setResolve(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-1561/swagger.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
-        assertNotNull(openAPI);
-        assertNull(openAPI.getPaths().get("/operationalServices/tracks/scopes/{scopeId}/processes/{processId}/petitions")
-                .getPost().getResponses().get("400").get$ref());
+        Yaml.prettyPrint(openAPI);
+        assertTrue(openAPI.getComponents().getResponses().size() == 3);
     }
+
 
     @Test
     public void testAnonymousModelAllOf() {
