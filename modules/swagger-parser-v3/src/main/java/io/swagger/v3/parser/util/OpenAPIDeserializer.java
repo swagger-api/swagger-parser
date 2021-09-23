@@ -1771,9 +1771,11 @@ public class OpenAPIDeserializer {
 				} else {
 					parameter.set$ref(ref.textValue());
 				}
-				String desc = getString("description", obj, false, location, result);
-				if (StringUtils.isNotBlank(desc)) {
-					parameter.setDescription(desc);
+				if (result.isOpenapi31()) {
+					String desc = getString("description", obj, false, location, result);
+					if (StringUtils.isNotBlank(desc)) {
+						parameter.setDescription(desc);
+					}
 				}
 				return parameter;
 			} else {
@@ -3568,7 +3570,6 @@ public class OpenAPIDeserializer {
 				}
 			} else {
 				result.invalidType(location, "$ref", "string", node);
-				return null;
 			}
 		}
 
