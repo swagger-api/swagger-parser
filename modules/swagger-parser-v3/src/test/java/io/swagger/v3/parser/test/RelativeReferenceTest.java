@@ -158,21 +158,15 @@ public class RelativeReferenceTest {
     }
 
     @Test
-    public void testResolveRelativePaths2() {
+    public void testResolveRelativeSiblingPaths() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        //SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("/relativeParent/root/root.yaml", null, options);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("/dati/dev/progetti/swagger/projects/swagger-parser/modules/swagger-parser-v3/src/test/resources/relativeParent/root/root.yaml", null, options);
-
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("/relativeParent/root/root.yaml", null, options);
 
         Assert.assertNotNull(parseResult.getOpenAPI());
         Yaml.prettyPrint(parseResult);
 
         HashSet<String> validationMessages = new HashSet<>(null != parseResult.getMessages() ? parseResult.getMessages() : new ArrayList<>());
-
-
-        //validationMessages.forEach(msg->System.out.println(msg));
-        //OpenAPI specification = parseResult.getOpenAPI();
         Assert.assertTrue(validationMessages.isEmpty(), validationMessages.toString());
 
     }
