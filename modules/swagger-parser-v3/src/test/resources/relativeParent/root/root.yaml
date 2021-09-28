@@ -1,6 +1,7 @@
 openapi: 3.0.0
 info:
   title: MyExampleSpec
+  version: 1.0.0
   description: >-
 paths: {}
 components:
