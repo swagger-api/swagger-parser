@@ -391,8 +391,38 @@ public final class ExternalRefProcessor {
             }
         }
         newRef = possiblyConflictingDefinitionName;
-        openAPI.getComponents().addResponses(newRef, response);
         cache.putRenamedRef($ref, newRef);
+
+        if(existingResponse == null) {
+            // don't overwrite existing model reference
+            openAPI.getComponents().addResponses(newRef, response);
+            cache.addReferencedKey(newRef);
+
+            String file = $ref.split("#/")[0];
+            if (response.get$ref() != null) {
+                RefFormat format = computeRefFormat(response.get$ref());
+                if (isAnExternalRefFormat(format)) {
+                    String fullRef = response.get$ref();
+                    if (!format.equals(RefFormat.URL)) {
+                        String parent = file.substring(0, file.lastIndexOf('/'));
+                        if (!parent.isEmpty()) {
+                            if (fullRef.contains("#/")) {
+                                String[] parts = fullRef.split("#/");
+                                String fullRefFilePart = parts[0];
+                                String fullRefInternalRefPart = parts[1];
+                                fullRef = Paths.get(parent, fullRefFilePart).normalize().toString() + "#/" + fullRefInternalRefPart;
+                            } else {
+                                fullRef = Paths.get(parent, fullRef).normalize().toString();
+                            }
+                        }
+
+                    }
+                    response.set$ref(processRefToExternalResponse(fullRef, format));
+                } else {
+                    processRefToExternalResponse(file + response.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+        }
 
         if(response != null) {
             if(response.getContent() != null){
