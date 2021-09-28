@@ -49,7 +49,7 @@ public class OpenAPIV31ParserTest {
     }
 
 
-    @Test
+    @Test(enabled = false) // TODO remove
     public void testREf() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
@@ -60,7 +60,7 @@ public class OpenAPIV31ParserTest {
 
     }
 
-    @Test
+    @Test(enabled = false) // TODO remove
     public void testREf2() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
@@ -84,10 +84,10 @@ public class OpenAPIV31ParserTest {
     }
 
     @Test
-    public void testREf407() throws Exception {
+    public void testExternalResponsesAndSchemas() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("/dati/dev/progetti/swagger/projects/swagger-parser/modules/swagger-parser-v3/src/test/resources/issue-407/petstore.yml", null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("/issue-407/petstore.yml", null, p);
 
         Yaml.prettyPrint(swaggerParseResult);
         assertNotNull(swaggerParseResult.getOpenAPI());
