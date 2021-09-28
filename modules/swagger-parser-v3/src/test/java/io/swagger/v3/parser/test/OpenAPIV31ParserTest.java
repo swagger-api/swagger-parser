@@ -3,6 +3,7 @@ package io.swagger.v3.parser.test;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -22,6 +23,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIV31ParserTest {
@@ -44,6 +46,53 @@ public class OpenAPIV31ParserTest {
     @AfterClass
     private void tearDownWireMockServer() {
         this.wireMockServer.stop();
+    }
+
+
+    @Test
+    public void testREf() throws Exception {
+        ParseOptions p = new ParseOptions();
+        p.setResolve(true);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("http://localhost:8082/root.yaml", null, p);
+        Yaml.prettyPrint(swaggerParseResult);
+        assertNotNull(swaggerParseResult.getOpenAPI());
+        assertTrue(swaggerParseResult.getMessages().isEmpty());
+
+    }
+
+    @Test
+    public void testREf2() throws Exception {
+        ParseOptions p = new ParseOptions();
+        p.setResolve(true);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("/html2/root.yaml", null, p);
+        Yaml.prettyPrint(swaggerParseResult);
+        assertNotNull(swaggerParseResult.getOpenAPI());
+        assertTrue(swaggerParseResult.getMessages().isEmpty());
+
+    }
+
+    @Test
+    public void testREf3() throws Exception {
+        ParseOptions p = new ParseOptions();
+        p.setResolve(true);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("/dati/dev/progetti/swagger/projects/swagger-parser/modules/swagger-parser-v3/src/test/resources/issue-1292/petstore.yml", null, p);
+
+        Yaml.prettyPrint(swaggerParseResult);
+        assertNotNull(swaggerParseResult.getOpenAPI());
+        assertTrue(swaggerParseResult.getMessages().isEmpty());
+
+    }
+
+    @Test
+    public void testREf407() throws Exception {
+        ParseOptions p = new ParseOptions();
+        p.setResolve(true);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("/dati/dev/progetti/swagger/projects/swagger-parser/modules/swagger-parser-v3/src/test/resources/issue-407/petstore.yml", null, p);
+
+        Yaml.prettyPrint(swaggerParseResult);
+        assertNotNull(swaggerParseResult.getOpenAPI());
+        assertTrue(swaggerParseResult.getMessages().isEmpty());
+
     }
 
 
