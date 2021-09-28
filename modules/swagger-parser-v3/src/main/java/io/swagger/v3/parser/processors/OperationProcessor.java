@@ -38,6 +38,11 @@ public class OperationProcessor {
     }
 
     public void processOperation(Operation operation) {
+        if (operation.getParameters() != null) {
+            for (Parameter parameter : operation.getParameters()) {
+                parameterProcessor.processParameter(parameter);
+            }
+        }
         final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
         if(processedOperationParameters != null) {
             operation.setParameters(processedOperationParameters);

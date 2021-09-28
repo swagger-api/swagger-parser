@@ -759,7 +759,22 @@ public final class ExternalRefProcessor {
             if (parameter.get$ref() != null) {
                 RefFormat format = computeRefFormat(parameter.get$ref());
                 if (isAnExternalRefFormat(format)) {
-                    parameter.set$ref(processRefToExternalParameter(parameter.get$ref(), format));
+                    String fullRef = parameter.get$ref();
+                    if (!format.equals(RefFormat.URL)) {
+                        String parent = file.substring(0, file.lastIndexOf('/'));
+                        if (!parent.isEmpty()) {
+                            if (fullRef.contains("#/")) {
+                                String[] parts = fullRef.split("#/");
+                                String fullRefFilePart = parts[0];
+                                String fullRefInternalRefPart = parts[1];
+                                fullRef = Paths.get(parent, fullRefFilePart).normalize().toString() + "#/" + fullRefInternalRefPart;
+                            } else {
+                                fullRef = Paths.get(parent, fullRef).normalize().toString();
+                            }
+                        }
+
+                    }
+                    parameter.set$ref(processRefToExternalParameter(fullRef, format));
                 } else {
                     processRefToExternalParameter(file + parameter.get$ref(), RefFormat.RELATIVE);
                 }
