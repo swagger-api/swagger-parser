@@ -138,7 +138,7 @@ public class OpenAPIDeserializer {
 	// TODO use a map instead for 3.0 and 3.1. Care about compatibility
 	protected static Set<String> ROOT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("openapi", "info", "servers", "paths",
 			"components", "security", "tags", "externalDocs", "webhooks"));
-	protected static Set<String> INFO_KEYS_31 = new LinkedHashSet<>(Arrays.asList("title", "description", "termsOfService"
+	protected static Set<String> INFO_KEYS_31 = new LinkedHashSet<>(Arrays.asList("title","summary", "description", "termsOfService"
 			, "contact", "license", "version"));
 	protected static Set<String> CONTACT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("name", "url", "email"));
 	protected static Set<String> LICENSE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("name", "url", "identifier"));
@@ -163,7 +163,7 @@ public class OpenAPIDeserializer {
 	protected static Set<String> SECURITY_SCHEME_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "type", "name", "in"
 			, "description", "flows", "scheme", "bearerFormat", "openIdConnectUrl"));
 	protected static Set<String> EXTERNAL_DOCS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("description", "url"));
-	protected static Set<String> COMPONENTS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("schemas", "responses",
+	protected static Set<String> COMPONENTS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("schemas", "responses", "pathItems",
 			"parameters", "examples", "requestBodies", "headers", "securitySchemes", "links", "callbacks"));
 	protected static Set<String> SCHEMA_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "title", "multipleOf",
 			"maximum", "format", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength",
@@ -453,6 +453,12 @@ public class OpenAPIDeserializer {
 		if (node != null) {
 			components.setResponses(getResponses(node, String.format("%s.%s", location, "responses"), result,
 					true));
+		}
+		if(result.isOpenapi31()){
+			node = getObject("pathItems", obj, false, location, result);
+			if (node != null) {
+				components.setPathItems(getPathItems(node, String.format("%s.%s", location, "pathItems"), result, true));
+			}
 		}
 
 		node = getObject("parameters", obj, false, location, result);
@@ -747,6 +753,29 @@ public class OpenAPIDeserializer {
 			return paths;
 		}
 		return null;
+	}
+
+		public Map<String, PathItem> getPathItems(ObjectNode node, String location, ParseResult result,
+											  boolean underComponents) {
+		if (node == null) {
+			return null;
+		}
+		Map<String, PathItem> pathItems = new LinkedHashMap<>();
+		Set<String> keys = getKeys(node);
+		for (String key : keys) {
+			if (underComponents) {
+				if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+						key)) {
+					result.warning(location, "PathItem key " + key + " doesn't adhere to regular expression " +
+							"^[a-zA-Z0-9\\.\\-_]+$");
+				}
+			}
+			PathItem pathItem = getPathItem((ObjectNode) node.get(key), location, result);
+			if (pathItem != null) {
+				pathItems.put(key, pathItem);
+			}
+		}
+		return pathItems;
 	}
 
 	//Webhooks
@@ -1090,6 +1119,13 @@ public class OpenAPIDeserializer {
 		value = getString("description", node, false, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			info.setDescription(value);
+		}
+
+		if(result.isOpenapi31()) {
+			value = getString("summary", node, false, location, result);
+			if (StringUtils.isNotBlank(value)) {
+				info.setSummary(value);
+			}
 		}
 
 		value = getString("termsOfService", node, false, location, result);
@@ -1479,6 +1515,8 @@ public class OpenAPIDeserializer {
 		return linkParameters;
 	}
 
+
+
 	public Map<String, Callback> getCallbacks(ObjectNode node, String location, ParseResult result,
 											  boolean underComponents) {
 		if (node == null) {
@@ -1501,6 +1539,7 @@ public class OpenAPIDeserializer {
 		}
 		return callbacks;
 	}
+
 
 	public Callback getCallback(ObjectNode node, String location, ParseResult result) {
 		if (node == null) {
@@ -2373,6 +2412,18 @@ public class OpenAPIDeserializer {
 				mapping.put(key, mappingNode.get(key).asText());
 			}
 			discriminator.setMapping(mapping);
+		}
+
+		if(result.isOpenapi31()) {
+			Set<String> keys = getKeys(node);
+			for (String key : keys) {
+				if (key.startsWith("x-")) {
+					Map<String, Object> extensions = getExtensions(node);
+					if (extensions != null && extensions.size() > 0) {
+						discriminator.setExtensions(extensions);
+					}
+				}
+			}
 		}
 
 		return discriminator;
