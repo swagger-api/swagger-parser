@@ -943,6 +943,17 @@ public class OpenAPIDeserializer {
 				} else {
 					pathItem.set$ref(ref.textValue());
 				}
+				if(result.isOpenapi31()){
+					String value = getString("summary", obj, false, location, result);
+					if (StringUtils.isNotBlank(value)) {
+						pathItem.setSummary(value);
+					}
+
+					value = getString("description", obj, false, location, result);
+					if (StringUtils.isNotBlank(value)) {
+						pathItem.setDescription(value);
+					}
+				}
 				return pathItem;
 			} else if (ref.getNodeType().equals(JsonNodeType.OBJECT)) {
 				ObjectNode node = (ObjectNode) ref;
