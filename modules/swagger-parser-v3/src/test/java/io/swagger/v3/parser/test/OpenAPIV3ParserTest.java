@@ -286,7 +286,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue1398() {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue1398.yaml", null, options);
-        assertEquals(result.getMessages().get(0), "attribute paths.'/pet/{petId}'(get).parameters.[petId].schemas.multipleOf value must be > 0");
+        assertEquals(result.getMessages().get(0), "paths.'/pet/{petId}'(get).parameters.[petId].schemas.multipleOf value must be > 0");
     }
 
     @Test
@@ -2834,7 +2834,7 @@ public class OpenAPIV3ParserTest {
 
         assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() > 0);
-        assertEquals(result.getMessages().get(0).contains("attribute components.schemas.Pet. writeOnly and readOnly are both present"), true);
+        assertEquals(result.getMessages().get(0).contains("components.schemas.Pet. writeOnly and readOnly are both present"), true);
 
     }
 

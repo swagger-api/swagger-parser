@@ -137,7 +137,8 @@ public class OpenAPIDeserializer {
 	// 3.1
 	// TODO use a map instead for 3.0 and 3.1. Care about compatibility
 	protected static Set<String> ROOT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("openapi", "info", "servers", "paths",
-			"components", "security", "tags", "externalDocs", "webhooks"));
+			"components", "security", "tags", "externalDocs", "webhooks", "jsonSchemaDialect"));
+	protected static Set<String> RESERVED_KEYWORDS_31 = new LinkedHashSet<>(Arrays.asList("x-oai-","x-oas-"));
 	protected static Set<String> INFO_KEYS_31 = new LinkedHashSet<>(Arrays.asList("title","summary", "description", "termsOfService"
 			, "contact", "license", "version"));
 	protected static Set<String> CONTACT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("name", "url", "email"));
@@ -245,6 +246,7 @@ public class OpenAPIDeserializer {
 		keys31.put("OAUTHFLOW_KEYS", OAUTHFLOW_KEYS_31);
 		keys31.put("OAUTHFLOWS_KEYS", OAUTHFLOWS_KEYS_31);
 		keys31.put("ENCODING_KEYS", ENCODING_KEYS_31);
+		keys31.put("RESERVED_KEYWORDS", RESERVED_KEYWORDS_31);
 		KEYS.put("openapi30", keys30);
 		KEYS.put("openapi31", keys31);
 
@@ -320,7 +322,11 @@ public class OpenAPIDeserializer {
 				this.components = components;
 			}
 
-			obj = getObject("paths", rootNode, true, location, result);
+			boolean pathsRequired = true;
+			if (result.isOpenapi31()) {
+				pathsRequired = false;
+			}
+			obj = getObject("paths", rootNode, pathsRequired, location, result);
 			if (obj != null) {
 				Paths paths = getPaths(obj, "paths", result);
 				openAPI.setPaths(paths);
@@ -372,12 +378,25 @@ public class OpenAPIDeserializer {
 				openAPI.setExtensions(extensions);
 			}
 
+			if (result.isOpenapi31()) {
+				value = getString("jsonSchemaDialect", rootNode, false, location, result);
+				if (value != null) {
+					openAPI.setJsonSchemaDialect(value);
+				}
+			}
+
+			if(result.isOpenapi31() && openAPI.getComponents() == null && openAPI.getPaths() == null && openAPI.getWebhooks() == null){
+				result.warning(location, "The OpenAPI document MUST contain at least one paths field, a components field or a webhooks field");
+			}
+
 			Set<String> keys = getKeys(rootNode);
 			Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
 			for (String key : keys) {
 				if (!specKeys.get("ROOT_KEYS").contains(key) && !key.startsWith("x-")) {
 					result.extra(location, key, node.get(key));
 				}
+				validateReservedKeywords(specKeys, key, location, result);
+
 			}
 
 		} else {
@@ -387,6 +406,15 @@ public class OpenAPIDeserializer {
 		}
 
 		return openAPI;
+	}
+
+	private void validateReservedKeywords(Map<String, Set<String>> specKeys, String key, String location, ParseResult result) {
+		if(result.isOpenapi31() && specKeys.get("RESERVED_KEYWORDS").stream()
+				.filter(rk -> key.startsWith(rk))
+				.findAny()
+				.orElse(null) != null){
+			result.reserved(location, key);
+		}
 	}
 
 	public String mungedRef(String refString) {
@@ -511,6 +539,8 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("COMPONENTS_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
+
 		}
 
 
@@ -575,6 +605,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("TAG_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return tag;
@@ -663,6 +694,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("SERVER_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 
@@ -741,6 +773,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("SERVER_VARIABLE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return serverVariable;
@@ -999,6 +1032,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("PATHITEM_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return pathItem;
@@ -1160,6 +1194,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("INFO_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return info;
@@ -1205,6 +1240,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("LICENSE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return license;
@@ -1247,6 +1283,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("CONTACT_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return contact;
@@ -1314,6 +1351,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("MEDIATYPE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, contentNode.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return mediaType;
@@ -1389,6 +1427,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("ENCODING_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return encoding;
@@ -1497,6 +1536,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("LINK_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, linkNode.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return link;
@@ -1626,6 +1666,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("XML_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 
@@ -1958,6 +1999,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("PARAMETER_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return parameter;
@@ -2178,9 +2220,9 @@ public class OpenAPIDeserializer {
 		}
 
 		boolean descriptionRequired, bearerFormatRequired, nameRequired, inRequired, schemeRequired, flowsRequired,
-				openIdConnectRequired;
+				openIdConnectRequired, mutualTLSRequired;
 		descriptionRequired = bearerFormatRequired = nameRequired = inRequired = schemeRequired = flowsRequired =
-				openIdConnectRequired = false;
+				openIdConnectRequired = mutualTLSRequired = false;
 
 		String value = getString("type", node, true, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
@@ -2196,8 +2238,11 @@ public class OpenAPIDeserializer {
 			} else if (SecurityScheme.Type.OPENIDCONNECT.toString().equals(value)) {
 				securityScheme.setType(SecurityScheme.Type.OPENIDCONNECT);
 				openIdConnectRequired = true;
+			}else if (result.isOpenapi31() && SecurityScheme.Type.MUTUALTLS.toString().equals(value)) {
+				securityScheme.setType(SecurityScheme.Type.MUTUALTLS);
+				mutualTLSRequired = true;
 			} else {
-				result.invalidType(location + ".type", "type", "http|apiKey|oauth2|openIdConnect ", node);
+				result.invalidType(location + ".type", "type", "http|apiKey|oauth2|openIdConnect|mutualTLS ", node);
 			}
 		}
 		value = getString("description", node, descriptionRequired, location, result);
@@ -2422,6 +2467,7 @@ public class OpenAPIDeserializer {
 					if (extensions != null && extensions.size() > 0) {
 						discriminator.setExtensions(extensions);
 					}
+					//validateReservedKeywords(keys,key, location, result);
 				}
 			}
 		}
@@ -2851,6 +2897,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("SCHEMA_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return schema;
@@ -3081,6 +3128,8 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("EXAMPLE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
+
 		}
 		return example;
 	}
@@ -3211,6 +3260,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("RESPONSE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 
@@ -3319,6 +3369,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("OPERATION_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 
@@ -3450,6 +3501,7 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("REQUEST_BODY_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
+			validateReservedKeywords(specKeys, key, location, result);
 		}
 
 		return body;
@@ -3956,6 +4008,7 @@ public class OpenAPIDeserializer {
 		private List<Location> unique = new ArrayList<>();
 		private List<Location> uniqueTags = new ArrayList<>();
 		private boolean allowEmptyStrings = true;
+        private List<Location> reserved = new ArrayList<>();
 
 		private boolean openapi31 = false;
 
@@ -3977,6 +4030,10 @@ public class OpenAPIDeserializer {
 
 		public void unsupported(String location, String key, JsonNode value) {
 			unsupported.put(new Location(location, key), value);
+		}
+
+		public void reserved(String location, String key) {
+			reserved.add(new Location(location, key));
 		}
 
 		public void extra(String location, String key, JsonNode value) {
@@ -4044,7 +4101,7 @@ public class OpenAPIDeserializer {
 			}
 			for (Location l : warnings) {
 				String location = l.location.equals("") ? "" : l.location + ".";
-				String message = "attribute " + location + l.key;
+				String message =  location + l.key;
 				messages.add(message);
 			}
 			for (Location l : unsupported.keySet()) {
@@ -4060,6 +4117,11 @@ public class OpenAPIDeserializer {
 			for (Location l : uniqueTags) {
 				String location = l.location.equals("") ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is repeated";
+				messages.add(message);
+			}
+			for (Location l : reserved) {
+				String location = l.location.equals("") ? "" : l.location + ".";
+				String message = "attribute " + location + l.key + " is reserved by The OpenAPI Iniciative";
 				messages.add(message);
 			}
 			return messages;
