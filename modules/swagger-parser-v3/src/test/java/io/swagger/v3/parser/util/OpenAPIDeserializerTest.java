@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -2481,10 +2482,10 @@ public class OpenAPIDeserializerTest {
         assertEqualsNoOrder
             (result.getMessages().toArray(),
              new Object[] {
-                "attribute components.parameters.withBoth.[withBoth].examples already defined -- ignoring \"example\" field",
-                "attribute components.parameters.withContentBoth.[withContentBoth].content.'application/json'.examples already defined -- ignoring \"example\" field",
-                "attribute components.requestBodies.withBodyBoth.content.'application/json'.examples already defined -- ignoring \"example\" field",
-                "attribute components.headers.withBoth.examples already defined -- ignoring \"example\" field"
+                "components.parameters.withBoth.[withBoth].examples already defined -- ignoring \"example\" field",
+                "components.parameters.withContentBoth.[withContentBoth].content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "components.requestBodies.withBodyBoth.content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "components.headers.withBoth.examples already defined -- ignoring \"example\" field"
              },
              "Expected warnings not found");
         
