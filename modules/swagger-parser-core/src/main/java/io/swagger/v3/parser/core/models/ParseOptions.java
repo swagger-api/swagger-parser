@@ -11,6 +11,7 @@ public class ParseOptions {
     private boolean allowEmptyStrings = true;
     private boolean validateExternalRefs = false;
     private boolean legacyYamlDeserialization = false;
+    private boolean oaiAuthor;
 
     public boolean isResolve() {
         return resolve;
@@ -88,5 +89,13 @@ public class ParseOptions {
 
     public void setLegacyYamlDeserialization(boolean legacyYamlDeserialization) {
         this.legacyYamlDeserialization = legacyYamlDeserialization;
+    }
+
+    public void setOaiAuthor(boolean oaiAuthor) {
+        this.oaiAuthor = oaiAuthor;
+    }
+
+    public boolean isOaiAuthor() {
+        return oaiAuthor;
     }
 }
