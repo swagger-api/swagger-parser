@@ -266,10 +266,10 @@ public class OpenAPIDeserializer {
 	private final Set<String> operationIDs = new HashSet<>();
 
 	public SwaggerParseResult deserialize(JsonNode rootNode) {
-		return deserialize(rootNode, null);
+		return deserialize(rootNode, null, false);
 	}
 
-	public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
+	public SwaggerParseResult deserialize(JsonNode rootNode, String path, boolean isOaiAuthor) {
 		basePath = path;
 		this.rootNode = rootNode;
 		rootMap = new ObjectMapper().convertValue(rootNode, Map.class);
@@ -277,6 +277,7 @@ public class OpenAPIDeserializer {
 		try {
 
 			ParseResult rootParse = new ParseResult();
+			rootParse.setOaiAuthor(isOaiAuthor);
 			OpenAPI api = parseRoot(rootNode, rootParse, path);
 			result.openapi31(rootParse.isOpenapi31());
 			result.setOpenAPI(api);
@@ -378,7 +379,11 @@ public class OpenAPIDeserializer {
 			if (result.isOpenapi31()) {
 				value = getString("jsonSchemaDialect", rootNode, false, location, result);
 				if (value != null) {
-					openAPI.setJsonSchemaDialect(value);
+					if (isValidURL(value)) {
+						openAPI.setJsonSchemaDialect(value);
+					}else{
+						result.warning(location,"jsonSchemaDialect. Invalid url: " + value);
+					}
 				}
 			}
 
@@ -401,12 +406,11 @@ public class OpenAPIDeserializer {
 			result.invalid();
 			return null;
 		}
-
 		return openAPI;
 	}
 
 	private void validateReservedKeywords(Map<String, Set<String>> specKeys, String key, String location, ParseResult result) {
-		if(result.isOpenapi31() && specKeys.get("RESERVED_KEYWORDS").stream()
+		if(!result.isOaiAuthor() && result.isOpenapi31() && specKeys.get("RESERVED_KEYWORDS").stream()
 				.filter(rk -> key.startsWith(rk))
 				.findAny()
 				.orElse(null) != null){
@@ -2206,9 +2210,9 @@ public class OpenAPIDeserializer {
 		}
 
 		boolean descriptionRequired, bearerFormatRequired, nameRequired, inRequired, schemeRequired, flowsRequired,
-				openIdConnectRequired, mutualTLSRequired;
+				openIdConnectRequired;
 		descriptionRequired = bearerFormatRequired = nameRequired = inRequired = schemeRequired = flowsRequired =
-				openIdConnectRequired = mutualTLSRequired = false;
+				openIdConnectRequired = false;
 
 		String value = getString("type", node, true, location, result);
 		if (StringUtils.isNotBlank(value)) {
@@ -2226,7 +2230,6 @@ public class OpenAPIDeserializer {
 				openIdConnectRequired = true;
 			}else if (result.isOpenapi31() && SecurityScheme.Type.MUTUALTLS.toString().equals(value)) {
 				securityScheme.setType(SecurityScheme.Type.MUTUALTLS);
-				mutualTLSRequired = true;
 			} else {
 				result.invalidType(location + ".type", "type", "http|apiKey|oauth2|openIdConnect|mutualTLS ", node);
 			}
@@ -2453,7 +2456,6 @@ public class OpenAPIDeserializer {
 					if (extensions != null && extensions.size() > 0) {
 						discriminator.setExtensions(extensions);
 					}
-					//validateReservedKeywords(keys,key, location, result);
 				}
 			}
 		}
@@ -2878,11 +2880,8 @@ public class OpenAPIDeserializer {
 			if (!specKeys.get("SCHEMA_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
 			}
-			validateReservedKeywords(specKeys, key, location, result);
 		}
-
 		return schema;
-
 	}
 
 
@@ -3985,6 +3984,7 @@ public class OpenAPIDeserializer {
 		private List<Location> reserved = new ArrayList<>();
 
 		private boolean openapi31 = false;
+		private boolean oaiAuthor = false;
 
 		public ParseResult() {
 		}
@@ -4038,9 +4038,21 @@ public class OpenAPIDeserializer {
 			this.openapi31 = openapi31;
 			return this;
 		}
-
 		public boolean isOpenapi31() {
 			return this.openapi31;
+		}
+
+		public boolean isOaiAuthor() {
+			return this.oaiAuthor;
+		}
+
+		public void setOaiAuthor(boolean oaiAuthor) {
+			this.oaiAuthor = oaiAuthor;
+		}
+
+		public ParseResult oaiAuthor(boolean oaiAuthor) {
+			this.oaiAuthor = oaiAuthor;
+			return this;
 		}
 
 		public List<String> getMessages() {
@@ -4082,7 +4094,7 @@ public class OpenAPIDeserializer {
 			}
 			for (Location l : reserved) {
 				String location = l.location.equals("") ? "" : l.location + ".";
-				String message = "attribute " + location + l.key + " is reserved by The OpenAPI Iniciative";
+				String message = "attribute " + location + l.key + " is reserved by The OpenAPI Initiative";
 				messages.add(message);
 			}
 			return messages;
