@@ -1501,7 +1501,12 @@ public class OpenAPIDeserializer {
 				} else {
 					link.set$ref(ref.textValue());
 				}
-
+				if (result.isOpenapi31()) {
+					String desc = getString("description", linkNode, false, location, result);
+					if (StringUtils.isNotBlank(desc)) {
+						link.setDescription(desc);
+					}
+				}
 				return link;
 			} else {
 				result.invalidType(location, "$ref", "string", linkNode);
@@ -2073,6 +2078,12 @@ public class OpenAPIDeserializer {
 				} else {
 					header.set$ref(ref.textValue());
 				}
+				if (result.isOpenapi31()) {
+					String desc = getString("description", headerNode, false, location, result);
+					if (StringUtils.isNotBlank(desc)) {
+						header.setDescription(desc);
+					}
+				}
 				return header;
 			} else {
 				result.invalidType(location, "$ref", "string", headerNode);
@@ -2147,6 +2158,7 @@ public class OpenAPIDeserializer {
 
 
 	public Object getAnyExample(String nodeKey, ObjectNode node, String location, ParseResult result) {
+		//TODO: Examples now allows Ref
 		JsonNode example = node.get(nodeKey);
 		if (example != null) {
 			if (example.getNodeType().equals(JsonNodeType.STRING)) {
@@ -2230,6 +2242,12 @@ public class OpenAPIDeserializer {
 					securityScheme.set$ref(mungedRef);
 				} else {
 					securityScheme.set$ref(ref.textValue());
+				}
+				if (result.isOpenapi31()) {
+					String desc = getString("description", node, false, location, result);
+					if (StringUtils.isNotBlank(desc)) {
+						securityScheme.setDescription(desc);
+					}
 				}
 				return securityScheme;
 			} else {
@@ -3100,6 +3118,18 @@ public class OpenAPIDeserializer {
 				} else {
 					example.set$ref(ref.textValue());
 				}
+				if (result.isOpenapi31()) {
+					String desc = getString("summary", node, false, location, result);
+					if (StringUtils.isNotBlank(desc)) {
+						example.setSummary(desc);
+					}
+				}
+				if (result.isOpenapi31()) {
+					String desc = getString("description", node, false, location, result);
+					if (StringUtils.isNotBlank(desc)) {
+						example.setDescription(desc);
+					}
+				}
 				return example;
 			} else {
 				result.invalidType(location, "$ref", "string", node);
@@ -3228,6 +3258,13 @@ public class OpenAPIDeserializer {
 					apiResponse.set$ref(mungedRef);
 				} else {
 					apiResponse.set$ref(ref.textValue());
+				}
+				if(result.isOpenapi31()){
+					String value = getString("summary", node, false, location, result);
+					value = getString("description", node, false, location, result);
+					if (StringUtils.isNotBlank(value)) {
+						apiResponse.setDescription(value);
+					}
 				}
 				return apiResponse;
 			} else {
@@ -3475,6 +3512,12 @@ public class OpenAPIDeserializer {
 					body.set$ref(mungedRef);
 				} else {
 					body.set$ref(ref.textValue());
+				}
+				if (result.isOpenapi31()) {
+					String desc = getString("description", node, false, location, result);
+					if (StringUtils.isNotBlank(desc)) {
+						body.setDescription(desc);
+					}
 				}
 				return body;
 			} else {
