@@ -136,7 +136,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return new OpenAPIDeserializer().deserialize(node, path,new ParseOptions());
     }
     public SwaggerParseResult parseJsonNode(String path, JsonNode node, ParseOptions options) {
-        return new OpenAPIDeserializer().deserialize(node, path, options);
+        return new OpenAPIDeserializer().deserialize(node, path, options, options.isOaiAuthor());
     }
 
     public SwaggerParseResult readContents(String yaml) {
@@ -180,6 +180,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 }
             }
             return result;
+
         } catch (JsonProcessingException e) {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getOriginalMessage(), location);
