@@ -41,9 +41,43 @@ public class OAI31DeserializationTest {
     @Test
     public void testBasic() {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/basic.yaml", null, null);
-        //Yaml31.prettyPrint(result);
         //assertEquals(result.getMessages().size(),1);
         assertNotNull(result.getOpenAPI());
+    }
+
+    @Test
+    public void testOAS31() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/oas3.1.yaml", null, null);
+        assertNotNull(result.getOpenAPI());
+    }
+
+    @Test
+    public void testJsonSchemaDialectValid() {
+        String jsonSchemaDialect = "openapi: 3.1.0\n" +
+                "jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema\n" +
+                "info:\n" +
+                "  title: Swagger Petstore\n" +
+                "  version: 1.0.0\n" +
+                "paths: {}";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( jsonSchemaDialect, null, null);
+        assertNotNull(result.getOpenAPI());
+        assertNotNull(result.getOpenAPI().getJsonSchemaDialect());
+        assertEquals(result.getOpenAPI().getJsonSchemaDialect(), "https://json-schema.org/draft/2020-12/schema");
+
+    }
+
+    @Test
+    public void testJsonSchemaDialectInvalid() {
+        String jsonSchemaDialect = "openapi: 3.1.0\n" +
+                "jsonSchemaDialect: http//\n" +
+                "info:\n" +
+                "  title: Swagger Petstore\n" +
+                "  version: 1.0.0\n" +
+                "paths: {}";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( jsonSchemaDialect, null, null);
+        assertNotNull(result.getOpenAPI());
+        assertTrue(result.getMessages().contains("jsonSchemaDialect. Invalid url: http//"));
+
     }
 
     @Test
@@ -69,7 +103,6 @@ public class OAI31DeserializationTest {
         assertNotNull(result.getOpenAPI());
         assertNotNull(result.getOpenAPI().getInfo().getSummary());
         assertFalse(result.getMessages().contains("attribute info.summary is unexpected"));
-        Yaml31.prettyPrint(result.getMessages());
     }
 
     @Test
@@ -116,20 +149,7 @@ public class OAI31DeserializationTest {
         String infoYaml = "openapi: 3.1.0\n" +
                 "info:\n" +
                 "  title: Swagger Petstore\n" +
-                "  summary: test summary in info object\n" +
-                "  description: \"This is a sample server Petstore server. You can find out more about\\\n" +
-                "    \\ Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).\\\n" +
-                "    \\ For this sample, you can use the api key `special-key` to test the authorization\\\n" +
-                "    \\ filters.\"\n" +
-                "  termsOfService: http://swagger.io/terms/\n" +
-                "  contact:\n" +
-                "    email: apiteam@swagger.io\n" +
-                "  license:\n" +
-                "    name: Apache 2.0\n" +
-                "    url: http://www.apache.org/licenses/LICENSE-2.0.html\n" +
-                "  version: 1.0.0\n" +
-                "servers:\n" +
-                "- url: /\n";
+                "  version: 1.0.0\n";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents( infoYaml, null, null);
         assertNotNull(result.getOpenAPI());
         assertFalse(result.getMessages().contains("attribute paths is missing"));
@@ -137,7 +157,7 @@ public class OAI31DeserializationTest {
 
     @Test
     public void testValidOpenAPIDocument() {
-        String infoYaml = "openapi: 3.1.0\n" +
+        String api = "openapi: 3.1.0\n" +
                 "info:\n" +
                 "  title: Swagger Petstore\n" +
                 "  summary: test summary in info object\n" +
@@ -154,17 +174,27 @@ public class OAI31DeserializationTest {
                 "  version: 1.0.0\n" +
                 "servers:\n" +
                 "- url: /\n";
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents( infoYaml, null, null);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( api, null, null);
         assertNotNull(result.getOpenAPI());
         assertFalse(result.getMessages().contains("attribute paths is missing"));
         assertTrue(result.getMessages().contains("The OpenAPI document MUST contain at least one paths field, a components field or a webhooks field"));
     }
 
     @Test
-    public void testReservedExtensions() {
+    public void testReservedExtensionsOaiAuthorFalse() {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/basic.yaml", null, null);
         assertNotNull(result.getOpenAPI());
-        assertTrue(result.getMessages().contains("attribute x-oas-internal is reserved by The OpenAPI Iniciative"));
-        assertTrue(result.getMessages().contains("attribute x-oai-extension is reserved by The OpenAPI Iniciative"));
+        assertTrue(result.getMessages().contains("attribute x-oas-internal is reserved by The OpenAPI Initiative"));
+        assertTrue(result.getMessages().contains("attribute x-oai-extension is reserved by The OpenAPI Initiative"));
+    }
+
+    @Test
+    public void testReservedExtensionsOaiAuthorTrue() {
+        ParseOptions options = new ParseOptions();
+        options.setOaiAuthor(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/basic.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        assertFalse(result.getMessages().contains("attribute x-oas-internal is reserved by The OpenAPI Initiative"));
+        assertFalse(result.getMessages().contains("attribute x-oai-extension is reserved by The OpenAPI Initiative"));
     }
 }
