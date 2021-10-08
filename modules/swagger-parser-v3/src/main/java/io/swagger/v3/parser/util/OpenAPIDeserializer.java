@@ -956,7 +956,6 @@ public class OpenAPIDeserializer {
 					if (StringUtils.isNotBlank(value)) {
 						pathItem.setSummary(value);
 					}
-
 					value = getString("description", obj, false, location, result);
 					if (StringUtils.isNotBlank(value)) {
 						pathItem.setDescription(value);
@@ -2171,9 +2170,7 @@ public class OpenAPIDeserializer {
 		return header;
 	}
 
-
 	public Object getAnyExample(String nodeKey, ObjectNode node, String location, ParseResult result) {
-		//TODO: Examples now allows Ref
 		JsonNode example = node.get(nodeKey);
 		if (example != null) {
 			if (example.getNodeType().equals(JsonNodeType.STRING)) {
@@ -2246,7 +2243,6 @@ public class OpenAPIDeserializer {
 		if (node == null) {
 			return null;
 		}
-
 		SecurityScheme securityScheme = new SecurityScheme();
 
 		JsonNode ref = node.get("$ref");
@@ -3137,18 +3133,6 @@ public class OpenAPIDeserializer {
 				} else {
 					example.set$ref(ref.textValue());
 				}
-				if (result.isOpenapi31()) {
-					String desc = getString("summary", node, false, location, result);
-					if (StringUtils.isNotBlank(desc)) {
-						example.setSummary(desc);
-					}
-				}
-				if (result.isOpenapi31()) {
-					String desc = getString("description", node, false, location, result);
-					if (StringUtils.isNotBlank(desc)) {
-						example.setDescription(desc);
-					}
-				}
 				return example;
 			} else {
 				result.invalidType(location, "$ref", "string", node);
@@ -3279,8 +3263,7 @@ public class OpenAPIDeserializer {
 					apiResponse.set$ref(ref.textValue());
 				}
 				if(result.isOpenapi31()){
-					String value = getString("summary", node, false, location, result);
-					value = getString("description", node, false, location, result);
+					String value = getString("description", node, false, location, result);
 					if (StringUtils.isNotBlank(value)) {
 						apiResponse.setDescription(value);
 					}

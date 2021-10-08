@@ -197,4 +197,42 @@ public class OAI31DeserializationTest {
         assertFalse(result.getMessages().contains("attribute x-oas-internal is reserved by The OpenAPI Initiative"));
         assertFalse(result.getMessages().contains("attribute x-oai-extension is reserved by The OpenAPI Initiative"));
     }
+
+    @Test
+    public void testSiblingsReferenceObjects() {
+        ParseOptions options = new ParseOptions();
+        options.setOaiAuthor(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/siblings31.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        //PathItems
+        assertTrue(openAPI.getPaths().get("/pets").get$ref() != null
+                && openAPI.getPaths().get("/pets").getDescription() != null
+                && openAPI.getPaths().get("/pets").getSummary() != null);
+
+        //Parameters
+        assertTrue(openAPI.getPaths().get("/pets/{petId}").getGet().getParameters().get(0).get$ref() != null
+                && openAPI.getPaths().get("/pets/{petId}").getGet().getParameters().get(0).getDescription() != null);
+
+        //Responses
+        assertTrue(openAPI.getPaths().get("/pets/{petId}").getGet().getResponses().get("200").get$ref() != null
+                && openAPI.getPaths().get("/pets/{petId}").getGet().getResponses().get("200").getDescription() != null);
+
+        //RequestBody
+        assertTrue(openAPI.getPaths().get("/pets/requestBody").getPost().getRequestBody().get$ref() != null
+                && openAPI.getPaths().get("/pets/requestBody").getPost().getRequestBody().getDescription() != null);
+
+        //Headers
+        assertTrue(openAPI.getPaths().get("/pets/requestBody").getPost().getResponses().get("200").getHeaders().get("X-Rate-Limit").get$ref() != null
+                && openAPI.getPaths().get("/pets/requestBody").getPost().getResponses().get("200").getHeaders().get("X-Rate-Limit").getDescription() != null);
+
+        //Links
+        assertTrue(openAPI.getPaths().get("/pets/requestBody").getPost().getResponses().get("200").getLinks().get("userRepository").get$ref() != null
+                && openAPI.getPaths().get("/pets/requestBody").getPost().getResponses().get("200").getLinks().get("userRepository").getDescription() != null);
+
+        //SecuritySchemes
+        assertTrue(openAPI.getComponents().getSecuritySchemes().get("api_key").get$ref() != null
+                && openAPI.getComponents().getSecuritySchemes().get("api_key").getDescription() != null);
+    }
 }
