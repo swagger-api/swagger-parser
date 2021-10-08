@@ -63,20 +63,19 @@ public class OAI31DeserializationTest {
         assertNotNull(result.getOpenAPI());
         assertNotNull(result.getOpenAPI().getJsonSchemaDialect());
         assertEquals(result.getOpenAPI().getJsonSchemaDialect(), "https://json-schema.org/draft/2020-12/schema");
-
     }
 
     @Test
     public void testJsonSchemaDialectInvalid() {
         String jsonSchemaDialect = "openapi: 3.1.0\n" +
-                "jsonSchemaDialect: http//\n" +
+                "jsonSchemaDialect: \" \"\n" +
                 "info:\n" +
                 "  title: Swagger Petstore\n" +
                 "  version: 1.0.0\n" +
                 "paths: {}";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents( jsonSchemaDialect, null, null);
         assertNotNull(result.getOpenAPI());
-        assertTrue(result.getMessages().contains("jsonSchemaDialect. Invalid url: http//"));
+        assertTrue(result.getMessages().contains("jsonSchemaDialect. Invalid url:  "));
 
     }
 

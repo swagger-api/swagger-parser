@@ -267,6 +267,10 @@ public class OpenAPIDeserializer {
 	private final Set<String> operationIDs = new HashSet<>();
 
 	public SwaggerParseResult deserialize(JsonNode rootNode) {
+		return deserialize(rootNode, null);
+	}
+
+	public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
 		return deserialize(rootNode, null, false);
 	}
 
@@ -386,7 +390,7 @@ public class OpenAPIDeserializer {
 			if (result.isOpenapi31()) {
 				value = getString("jsonSchemaDialect", rootNode, false, location, result);
 				if (value != null) {
-					if (isValidURL(value)) {
+					if (isValidURI(value)) {
 						openAPI.setJsonSchemaDialect(value);
 					}else{
 						result.warning(location,"jsonSchemaDialect. Invalid url: " + value);
@@ -414,6 +418,15 @@ public class OpenAPIDeserializer {
 			return null;
 		}
 		return openAPI;
+	}
+
+	boolean isValidURI(String uriString) {
+		try {
+			URI uri = new URI(uriString);
+			return true;
+		} catch (Exception exception) {
+			return false;
+		}
 	}
 
 	private void validateReservedKeywords(Map<String, Set<String>> specKeys, String key, String location, ParseResult result) {
