@@ -1,0 +1,46 @@
+openapi: "3.1.0"
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+paths:
+  /pets:
+      $ref: "#/components/pathItems/Pets"
+      summary: List all pets
+      description: description
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      security:
+        -  apiKey: [ ]
+      tags:
+        - pets
+      parameters:
+        - $ref: "#/components/parameters/Pets"
+          description: The id of the pet to retrieve
+      responses:
+        "200":
+          $ref: "#/components/responses/Pets"
+          description: Expected response to a valid request
+  /pets/requestBody:
+    post:
+      description: It gets pets
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              $ref: "#/components/headers/Pets"
+              description: header sibling description
+          links:
+            userRepository:
+              $ref: '#/components/links/userRepository'
+              description: link sibling description
+      requestBody:
+        $ref: "#/components/requestBodies/Pets"
+        description: request body description
+components:
+  securitySchemes:
+    api_key:
+      $ref: "#/components/securitySchemes/security"
+      description: This is another description
