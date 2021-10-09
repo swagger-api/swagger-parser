@@ -391,7 +391,7 @@ public class OpenAPIDeserializer {
 		Tag tag = new Tag();
 
 		String value = getString("name", obj, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			tag.setName(value);
 		}
 
@@ -470,7 +470,7 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("url", obj, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			if (!isValidURL(value) && path != null) {
 				try {
 					final URI absURI = new URI(path.replaceAll("\\\\", "/"));
@@ -558,7 +558,7 @@ public class OpenAPIDeserializer {
 			}
 		}
 		String value = getString("default", obj, true, String.format("%s.%s", location, "default"), result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			serverVariable.setDefault(value);
 		}
 
@@ -814,7 +814,7 @@ public class OpenAPIDeserializer {
 			}
 
 			value = getString("url", node, true, location, result);
-			if (StringUtils.isNotBlank(value)) {
+			if (value != null) {
 				externalDocs.url(value);
 			}
 
@@ -901,7 +901,7 @@ public class OpenAPIDeserializer {
 		Info info = new Info();
 
 		String value = getString("title", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			info.setTitle(value);
 		}
 
@@ -927,7 +927,7 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("version", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			info.setVersion(value);
 		}
 
@@ -953,7 +953,7 @@ public class OpenAPIDeserializer {
 		License license = new License();
 
 		String value = getString("name", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			license.setName(value);
 		}
 
@@ -1605,7 +1605,7 @@ public class OpenAPIDeserializer {
 		parameter.setIn(value);
 
 		value = getString("name", obj, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			parameter.setName(value);
 		}
 
@@ -1911,7 +1911,7 @@ public class OpenAPIDeserializer {
 				openIdConnectRequired = false;
 
 		String value = getString("type", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			if (SecurityScheme.Type.APIKEY.toString().equals(value)) {
 				securityScheme.setType(SecurityScheme.Type.APIKEY);
 				nameRequired = inRequired = true;
@@ -1929,12 +1929,12 @@ public class OpenAPIDeserializer {
 			}
 		}
 		value = getString("description", node, descriptionRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			securityScheme.setDescription(value);
 		}
 
 		value = getString("name", node, nameRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			securityScheme.setName(value);
 		}
 
@@ -1946,12 +1946,12 @@ public class OpenAPIDeserializer {
 		securityScheme.setIn(matchingIn.orElse(null));
 
 		value = getString("scheme", node, schemeRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			securityScheme.setScheme(value);
 		}
 
 		value = getString("bearerFormat", node, bearerFormatRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			securityScheme.setBearerFormat(value);
 		}
 
@@ -1961,7 +1961,7 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("openIdConnectUrl", node, openIdConnectRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			securityScheme.setOpenIdConnectUrl(value);
 		}
 
@@ -2049,17 +2049,17 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			oAuthFlow.setAuthorizationUrl(value);
 		}
 
 		value = getString("tokenUrl", node, tokenUrlRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			oAuthFlow.setTokenUrl(value);
 		}
 
 		value = getString("refreshUrl", node, refreshUrlRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			oAuthFlow.setRefreshUrl(value);
 		}
 
@@ -2125,7 +2125,7 @@ public class OpenAPIDeserializer {
 		Discriminator discriminator = new Discriminator();
 
 		String value = getString("propertyName", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			discriminator.setPropertyName(value);
 		}
 
@@ -2835,7 +2835,7 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("description", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			apiResponse.description(value);
 		}
 

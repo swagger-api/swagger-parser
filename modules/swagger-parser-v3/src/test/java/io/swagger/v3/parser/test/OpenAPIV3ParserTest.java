@@ -83,6 +83,22 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testEmptyRequiredStrings() throws Exception{
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options  );
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getInfo().getTitle());
+        assertNotNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
+        assertNotNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
+        Yaml.prettyPrint(result);
+    }
+
+
     @Test
     public void testIssue1561() {
         ParseOptions options = new ParseOptions();
