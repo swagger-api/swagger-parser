@@ -68,14 +68,15 @@ public class OAI31DeserializationTest {
     @Test
     public void testJsonSchemaDialectInvalid() {
         String jsonSchemaDialect = "openapi: 3.1.0\n" +
-                "jsonSchemaDialect: \" \"\n" +
+                "jsonSchemaDialect: bad URI\n" +
                 "info:\n" +
                 "  title: Swagger Petstore\n" +
                 "  version: 1.0.0\n" +
                 "paths: {}";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents( jsonSchemaDialect, null, null);
         assertNotNull(result.getOpenAPI());
-        assertTrue(result.getMessages().contains("jsonSchemaDialect. Invalid url:  "));
+        assertTrue(result.getMessages().contains("jsonSchemaDialect. Invalid url: bad URI"));
+
 
     }
 
