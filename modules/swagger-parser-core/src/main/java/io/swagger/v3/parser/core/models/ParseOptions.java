@@ -8,6 +8,7 @@ public class ParseOptions {
     private boolean flattenComposedSchemas;
     private boolean camelCaseFlattenNaming;
     private boolean skipMatches;
+    private boolean oaiAuthor;
 
     public boolean isResolve() {
         return resolve;
@@ -59,4 +60,13 @@ public class ParseOptions {
     public void setCamelCaseFlattenNaming(boolean camelCaseFlattenNaming) {
         this.camelCaseFlattenNaming = camelCaseFlattenNaming;
     }
+
+    public void setOaiAuthor(boolean oaiAuthor) {
+        this.oaiAuthor = oaiAuthor;
+    }
+
+    public boolean isOaiAuthor() {
+        return oaiAuthor;
+    }
+
 }

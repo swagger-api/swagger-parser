@@ -1,6 +1,7 @@
 openapi: "3.1.0"
 x-oas-internal: test reserved keyword
 x-oai-extension: test reserved keyword
+jsonSchemaDialect: 'https://json-schema.org/draft/2020-12/schema'
 info:
   version: 1.0.0
   title: Swagger Petstore
@@ -58,6 +59,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
                 description: error
+      security:
+        - mutualTLS: [ ]
     post:
       summary: Create a pet
       operationId: createPets
