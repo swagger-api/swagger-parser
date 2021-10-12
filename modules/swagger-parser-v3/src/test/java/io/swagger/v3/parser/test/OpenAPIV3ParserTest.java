@@ -85,17 +85,34 @@ public class OpenAPIV3ParserTest {
 
 
     @Test
-    public void testEmptyRequiredStrings() throws Exception{
+    public void testEmptyStrings_False() throws Exception{
         ParseOptions options = new ParseOptions();
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options  );
+        options.setAllowEmptyString(false);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNull(openAPI.getInfo().getTitle());
+        assertNull(openAPI.getInfo().getLicense().getName());
+        assertNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
+        assertNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
+    }
+
+
+    @Test
+    public void testEmptyStrings_True() throws Exception{
+        ParseOptions options = new ParseOptions();
+        options.setAllowEmptyString(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI.getInfo().getTitle());
+        assertNotNull(openAPI.getInfo().getLicense().getName());
         assertNotNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
         assertNotNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
-        Yaml.prettyPrint(result);
     }
 
 
@@ -1042,8 +1059,7 @@ public class OpenAPIV3ParserTest {
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
