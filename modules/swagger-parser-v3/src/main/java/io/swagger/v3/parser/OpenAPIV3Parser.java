@@ -131,10 +131,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     public SwaggerParseResult parseJsonNode(String path, JsonNode node) {
-        return new OpenAPIDeserializer().deserialize(node, path,true);
+        return new OpenAPIDeserializer().deserialize(node, path,new ParseOptions());
     }
     public SwaggerParseResult parseJsonNode(String path, JsonNode node, ParseOptions options) {
-        return new OpenAPIDeserializer().deserialize(node, path, options.isAllowEmptyString());
+        return new OpenAPIDeserializer().deserialize(node, path, options);
     }
 
     public SwaggerParseResult readContents(String yaml) {

@@ -94,6 +94,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         OpenAPI openAPI = result.getOpenAPI();
         assertNull(openAPI.getInfo().getTitle());
+        assertNotNull(openAPI.getInfo().getVersion());
         assertNull(openAPI.getInfo().getLicense().getName());
         assertNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
         assertNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
