@@ -2966,7 +2966,6 @@ public class OpenAPIDeserializerTest {
 
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
-        //System.out.println(openAPI);
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
@@ -2992,7 +2991,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertNotNull(petEndpoint.getPost().getTags());
         Assert.assertEquals(petEndpoint.getPost().getTags().size(), 1);
         Assert.assertEquals(petEndpoint.getPost().getSummary(), "Add a new pet to the store");
-        Assert.assertNull(petEndpoint.getPost().getDescription());
+        Assert.assertEquals(petEndpoint.getPost().getDescription(), "");
         Assert.assertEquals(petEndpoint.getPost().getOperationId(), "addPet");
         Assert.assertNotNull(petEndpoint.getServers());
         Assert.assertEquals(petEndpoint.getServers().size(), 1);
@@ -3150,7 +3149,7 @@ public class OpenAPIDeserializerTest {
 
 
         Assert.assertNotNull(stripe.getPost());
-        Assert.assertNull(stripe.getPost().getDescription());
+        Assert.assertEquals(stripe.getPost().getDescription(), "");
         Assert.assertEquals(stripe.getPost().getOperationId(), "Create3DSecure");
         Assert.assertNotNull(stripe.getPost().getParameters());
 
@@ -3169,7 +3168,7 @@ public class OpenAPIDeserializerTest {
 
 
         Assert.assertNotNull(stripeGet.getGet());
-        Assert.assertNull(stripeGet.getGet().getDescription());
+        Assert.assertEquals(stripeGet.getGet().getDescription(), "");
         Assert.assertEquals(stripeGet.getGet().getOperationId(), "AllAccountExternalAccounts");
         Assert.assertNotNull(stripeGet.getGet().getParameters());
 

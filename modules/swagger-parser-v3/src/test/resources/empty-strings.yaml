@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: ''
+  description: ''
+  version: 1.0.0
+  license:
+    name: ''
+  contact:
+    name: ''
+
+externalDocs:
+  url: https://example.com
+  description: ''
+
+servers:
+  - url: https://example.com
+    description: ''
+
+tags:
+  - name: tag1
+    description: ''
+
+paths:
+  /something:
+    summary: ''
+    description: ''
+    get:
+      summary: ''
+      description: ''
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            example: ''
+          description: ''
+          example: ''
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Foo'
+
+components:
+  schemas:
+    Foo:
+      type: object
+      description: ''
+      properties:
+        foo:
+          type: string
+          description: ''
+          example: ''
