@@ -1,0 +1,23 @@
+openapi: 3.0.1
+info:
+  title: Example OpenAPI spec
+  version: 0.0.1
+paths:
+  '/example':
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExamplePost'
+      responses:
+        204:
+          description: No content
+components:
+  schemas:
+    # Renaming this key from `Example` to `ExampleGet` stops the issue from occurring
+    # Removing this key stops the issue from occurring
+    Example:
+      $ref: example.get.yaml
+    ExamplePost:
+      $ref: example.post.yaml
