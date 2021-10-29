@@ -31,6 +31,16 @@ import static org.testng.Assert.assertTrue;
 public class OpenAPIParserTest {
 
     @Test
+    public void testIssue1608(){
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue1608.json", null, options);
+        Schema schema = swaggerParseResult.getOpenAPI().getPaths().get("/pet").getPut().getRequestBody().getContent().get("application/json").getSchema();
+        assertEquals(schema.getRequired().size(), 1);
+    }
+
+    @Test
     public void testIssue1143(){
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
