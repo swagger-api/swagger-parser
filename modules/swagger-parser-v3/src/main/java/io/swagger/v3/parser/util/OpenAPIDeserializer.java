@@ -2951,10 +2951,9 @@ public class OpenAPIDeserializer {
 		if (requestObjectNode != null) {
 			if (ignoreRequestBody) {
 				result.warning(location, " is no longer allowed to have request body because it does not have defined semantics as per RFC 7231");
-			} else {
-				operation.setRequestBody(getRequestBody(requestObjectNode, String.format("%s.%s", location,
-						"requestBody"), result));
 			}
+			operation.setRequestBody(getRequestBody(requestObjectNode, String.format("%s.%s", location,
+						"requestBody"), result));
 		}
 
 		ObjectNode responsesNode = getObject("responses", obj, true, location, result);

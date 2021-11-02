@@ -2921,5 +2921,6 @@ public class OpenAPIV3ParserTest {
         List<String> messages = result.getMessages();
         Assert.assertEquals(messages.get(0), "attribute paths.'/inventory'(get). is no longer allowed to have request body because it does not have defined semantics as per RFC 7231");
         Assert.assertEquals(messages.size(), 1);
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/inventory").getGet().getRequestBody());
     }
 }
