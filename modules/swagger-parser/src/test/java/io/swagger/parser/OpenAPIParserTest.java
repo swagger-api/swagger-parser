@@ -51,6 +51,26 @@ public class OpenAPIParserTest {
     }
 
     @Test
+    public void testIssue1621() {
+        final ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setResolveCombinators(false);
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue-1621/example.openapi.yaml", null, parseOptions);
+        assertEquals(0, swaggerParseResult.getMessages().size());
+        OpenAPI api = swaggerParseResult.getOpenAPI();
+        assertEquals("POST Example", api.getPaths()
+                .get("/example")
+                .getPost()
+                .getRequestBody()
+                .getContent()
+                .get("application/json")
+                .getSchema()
+                .getTitle());
+    }
+
+    @Test
     public void testIssue749() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
