@@ -46,7 +46,11 @@ public class RefUtils {
             plausibleName = filePathElements[filePathElements.length - 1];
 
             final String[] split = plausibleName.split("\\.");
+            // Fix for issue-1621
             plausibleName = split[0];
+            for (int i = 1; i < split.length - 1; i++) {
+                plausibleName += "." + split[i];
+            }
         }
 
         return plausibleName;
