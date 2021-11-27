@@ -279,9 +279,9 @@ public class PathsProcessor {
     }
     
     protected boolean isAbsoluteRef(String ref) {
-    	 if(ref.startsWith("./")) {
+    	if(!ref.startsWith(".")) {
              return true;
-         }
+        }
          return false;
     }
     
@@ -292,6 +292,9 @@ public class PathsProcessor {
     }
     
     protected String computeRelativeRef(String ref, String prefix) {
+         if(ref.startsWith("./")) {
+            return ref;
+        }
     	int iIdxOfSlash = prefix.lastIndexOf('/');
     	if(iIdxOfSlash != -1) {
     		return prefix.substring(0, iIdxOfSlash+1) + ref;
