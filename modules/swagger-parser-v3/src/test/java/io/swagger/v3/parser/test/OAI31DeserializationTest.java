@@ -1,7 +1,10 @@
 package io.swagger.v3.parser.test;
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.JsonSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -234,5 +237,41 @@ public class OAI31DeserializationTest {
         //SecuritySchemes
         assertTrue(openAPI.getComponents().getSecuritySchemes().get("api_key").get$ref() != null
                 && openAPI.getComponents().getSecuritySchemes().get("api_key").getDescription() != null);
+    }
+
+    @Test(description = "Test siblings with $ref for maxItems, properties, description, required")
+    public void testSiblingsReferenceJSONSchema() {
+        ParseOptions options = new ParseOptions();
+        String refSibling = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: siblings JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    profile:\n" +
+                "      description: siblings refs\n" +
+                "      required:\n" +
+                "        - login\n" +
+                "        - password\n" +
+                "      maxItems: 2\n" +
+                "      $ref: ./ex.json#user-profile\n" +
+                "      properties:\n" +
+                "        login:\n" +
+                "          type: string\n" +
+                "        password:\n" +
+                "          type: string";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        Schema profile = openAPI.getComponents().getSchemas().get("profile");
+        assertNotNull(profile.get$ref());
+        assertTrue(profile.getMaxItems()==2);
+        assertEquals(profile.getDescription(),"siblings refs");
+        assertTrue(profile.getRequired().size()==2);
+        assertTrue(profile.getProperties().containsKey("login"));
+        assertTrue(profile.getProperties().containsKey("password"));
     }
 }
