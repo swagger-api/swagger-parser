@@ -240,7 +240,7 @@ public class OAI31DeserializationTest {
     }
 
     @Test(description = "Test siblings with $ref for maxItems, properties, description, required")
-    public void testSiblingsReferenceJSONSchema() {
+    public void testSiblingsReferenceJSONSchema1() {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
                 "info:\n" +
@@ -273,5 +273,71 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getRequired().size()==2);
         assertTrue(profile.getProperties().containsKey("login"));
         assertTrue(profile.getProperties().containsKey("password"));
+    }
+
+    @Test(description = "Test siblings with $ref for patternProperties, pattern, additionalProperties")
+    public void testSiblingsReferenceJSONSchema2() {
+        ParseOptions options = new ParseOptions();
+        String refSibling = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: siblings JSONschema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    profile:\n" +
+                "      $ref: ./ex.json#user-profile\n" +
+                "      pattern: \\d\\d\\d\\d-\\d\\d-\\d\\d\n" +
+                "      patternProperties:\n" +
+                "        \"^S_\":\n" +
+                "          type: string\n" +
+                "        \"^I_\":\n" +
+                "          type: integer\n" +
+                "      additionalProperties: false";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        Schema profile = openAPI.getComponents().getSchemas().get("profile");
+        assertNotNull(profile.get$ref());
+        assertEquals(profile.getPattern(),"\\d\\d\\d\\d-\\d\\d-\\d\\d");
+        assertNotNull(profile.getAdditionalProperties());
+        assertTrue(profile.getPatternProperties().containsKey("^S_"));
+    }
+
+    @Test(description = "Test siblings with $ref for patternProperties, pattern, additionalProperties")
+    public void testSiblingsReferenceJSONSchema3() {
+        ParseOptions options = new ParseOptions();
+        String refSibling = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: siblings JSONschema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    profile:\n" +
+                "      $id: profile-id\n" +
+                "      $anchor: foo\n" +
+                "      $schema: https://json-schema.org/draft/2020-12/schema\n" +
+                "      $comment: end user should not see this comment\n" +
+                "      type:\n" +
+                "        - string\n" +
+                "        - integer\n" +
+                "      exclusiveMaximum: 12\n" +
+                "      exclusiveMinimum: 1\n" +
+                "      $ref: ./ex.json#user-profile";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        Schema profile = openAPI.getComponents().getSchemas().get("profile");
+        assertNotNull(profile.get$ref());
+        assertEquals(profile.get$anchor(),"foo");
+        assertEquals(profile.get$id(),"profile-id");
+        assertTrue(profile.getExclusiveMaximumValue().intValue()==12);
+        assertTrue(profile.getExclusiveMinimumValue().intValue()==1);
+        assertEquals(profile.get$comment(),"end user should not see this comment");
     }
 }
