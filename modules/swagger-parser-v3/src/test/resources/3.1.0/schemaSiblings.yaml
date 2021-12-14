@@ -8,14 +8,13 @@ paths: { }
 components:
   schemas:
     profile:
-      description: siblings refs
-      required:
-        - login
-        - password
-      maxItems: 2
+      $id: profile-id
+      $anchor: foo
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $comment: end user should not see this comment
+      type:
+        - string
+        - integer
+      exclusiveMaximum: 12
+      exclusiveMinimum: 1
       $ref: ./ex.json#user-profile
-      properties:
-        login:
-          type: string
-        password:
-          type: string
