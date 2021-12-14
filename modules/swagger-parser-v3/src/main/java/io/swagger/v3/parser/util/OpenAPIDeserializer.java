@@ -4053,6 +4053,26 @@ public class OpenAPIDeserializer {
 			schema.setDeprecated(bool);
 		}
 
+		value = getString("$anchor", node, false, location, result);
+		if (value != null) {
+			schema.set$anchor(value);
+		}
+
+		value = getString("$id", node, false, location, result);
+		if (value != null) {
+			schema.set$id(value);
+		}
+
+		value = getString("$schema", node, false, location, result);
+		if (value != null) {
+			schema.set$schema(value);
+		}
+
+		value = getString("$comment", node, false, location, result);
+		if (value != null) {
+			schema.set$comment(value);
+		}
+
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
 			schema.setExtensions(extensions);
