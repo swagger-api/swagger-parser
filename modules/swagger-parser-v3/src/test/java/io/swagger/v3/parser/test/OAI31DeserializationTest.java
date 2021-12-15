@@ -280,7 +280,7 @@ public class OAI31DeserializationTest {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
                 "info:\n" +
-                "  title: siblings JSONschema\n" +
+                "  title: siblings JSONSchema\n" +
                 "  version: 1.0.0\n" +
                 "servers:\n" +
                 "  - url: /\n" +
@@ -311,7 +311,7 @@ public class OAI31DeserializationTest {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
                 "info:\n" +
-                "  title: siblings JSONschema\n" +
+                "  title: siblings JSONSchema\n" +
                 "  version: 1.0.0\n" +
                 "servers:\n" +
                 "  - url: /\n" +
@@ -339,5 +339,34 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getExclusiveMaximumValue().intValue()==12);
         assertTrue(profile.getExclusiveMinimumValue().intValue()==1);
         assertEquals(profile.get$comment(),"end user should not see this comment");
+        assertTrue(profile.getTypes().contains("string"));
+        assertTrue(profile.getTypes().contains("integer"));
+    }
+
+    @Test(description = "Test siblings with $ref for const, contentEncoding, contentMediaType")
+    public void testSiblingsReferenceJSONSchema4() {
+        ParseOptions options = new ParseOptions();
+        String refSibling = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: siblings JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    profile:\n" +
+                "      const: sales\n" +
+                "      contentEncoding: base64\n" +
+                "      contentMediaType: text/html\n" +
+                "      $ref: ./ex.json#user-profile";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        Schema profile = openAPI.getComponents().getSchemas().get("profile");
+        assertNotNull(profile.get$ref());
+        assertEquals(profile.getConst(),"sales");
+        assertEquals(profile.getContentEncoding(),"base64");
+        assertEquals(profile.getContentMediaType(),"text/html");
     }
 }
