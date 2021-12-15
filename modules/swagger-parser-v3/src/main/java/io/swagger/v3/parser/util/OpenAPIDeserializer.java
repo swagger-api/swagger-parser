@@ -3943,10 +3943,20 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		//sets const value according to the schema type
-		// TODO check types
-		if (node.get("const") != null) {
-			schema.setConst(node.get("const"));
+		//const is a String
+		value = getString("const", node, false, location, result);
+		if (value != null) {
+			schema.setConst(value);
+		}
+
+		value = getString("contentEncoding", node, false, location, result);
+		if (value != null) {
+			schema.setContentEncoding(value);
+		}
+
+		value = getString("contentMediaType", node, false, location, result);
+		if (value != null) {
+			schema.setContentMediaType(value);
 		}
 
 		bool = getBoolean("readOnly", node, false, location, result);
