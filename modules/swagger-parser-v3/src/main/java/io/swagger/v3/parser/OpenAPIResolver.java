@@ -5,10 +5,13 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.processors.ComponentsProcessor;
 import io.swagger.v3.parser.processors.OperationProcessor;
 import io.swagger.v3.parser.processors.PathsProcessor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OpenAPIResolver {
@@ -19,6 +22,11 @@ public class OpenAPIResolver {
     private final PathsProcessor pathProcessor;
     private final OperationProcessor operationsProcessor;
     private Settings settings = new Settings();
+    private List<String> resolveValidationMessages = new ArrayList<>();
+
+    public ResolverCache getCache() {
+        return cache;
+    }
 
     public OpenAPIResolver(OpenAPI openApi) {
         this(openApi, null, null, null);
@@ -33,12 +41,26 @@ public class OpenAPIResolver {
     }
 
     public OpenAPIResolver(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Settings settings) {
+        this(openApi, auths, parentFileLocation, settings, new ParseOptions());
+    }
+
+    public OpenAPIResolver(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Settings settings, ParseOptions parseOptions) {
         this.openApi = openApi;
         this.settings = settings != null ? settings : new Settings();
-        this.cache = new ResolverCache(openApi, auths, parentFileLocation);
+        this.cache = new ResolverCache(openApi, auths, parentFileLocation, resolveValidationMessages, parseOptions);
         componentsProcessor = new ComponentsProcessor(openApi,this.cache);
         pathProcessor = new PathsProcessor(cache, openApi,this.settings);
         operationsProcessor = new OperationProcessor(cache, openApi);
+    }
+
+    public void resolve(SwaggerParseResult result) {
+
+        OpenAPI resolved = resolve();
+        if (resolved == null) {
+            return;
+        }
+        result.setOpenAPI(resolved);
+        result.getMessages().addAll(resolveValidationMessages);
     }
 
     public OpenAPI resolve() {
@@ -48,7 +70,6 @@ public class OpenAPIResolver {
 
         pathProcessor.processPaths();
         componentsProcessor.processComponents();
-
 
         if(openApi.getPaths() != null) {
             for(String pathname : openApi.getPaths().keySet()) {
@@ -60,7 +81,6 @@ public class OpenAPIResolver {
                 }
             }
         }
-
         return openApi;
     }
 

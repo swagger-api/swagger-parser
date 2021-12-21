@@ -3068,7 +3068,7 @@ public class OpenAPIDeserializer {
 	}
 
 
-	protected RequestBody getRequestBody(ObjectNode node, String location, ParseResult result) {
+	public RequestBody getRequestBody(ObjectNode node, String location, ParseResult result) {
 		if (node == null) {
 			return null;
 		}
@@ -3150,7 +3150,7 @@ public class OpenAPIDeserializer {
 	}
 
 
-	protected static class ParseResult {
+	public static class ParseResult {
 		private boolean valid = true;
 		private Map<Location, JsonNode> extra = new LinkedHashMap<>();
 		private Map<Location, JsonNode> unsupported = new LinkedHashMap<>();

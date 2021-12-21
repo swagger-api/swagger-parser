@@ -9,6 +9,7 @@ public class ParseOptions {
     private boolean camelCaseFlattenNaming;
     private boolean skipMatches;
     private boolean allowEmptyStrings = true;
+    private boolean validateExternalRefs = false;
 
     public boolean isResolve() {
         return resolve;
@@ -67,5 +68,13 @@ public class ParseOptions {
 
     public void setAllowEmptyString(boolean allowEmptyStrings) {
         this.allowEmptyStrings = allowEmptyStrings;
+    }
+
+    public boolean isValidateExternalRefs() {
+        return validateExternalRefs;
+    }
+
+    public void setValidateExternalRefs(boolean validateExternalRefs) {
+        this.validateExternalRefs = validateExternalRefs;
     }
 }

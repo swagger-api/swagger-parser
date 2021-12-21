@@ -869,11 +869,12 @@ public class OpenAPIResolverTest {
     public void testSwaggerResolver(@Injectable final OpenAPI swagger,
                                     @Injectable final List<AuthorizationValue> auths,
                                     @Mocked final ResolverCache cache,
+                                    @Injectable final ParseOptions parseOptions,
                                     @Mocked final ComponentsProcessor componentsProcessor,
                                     @Mocked final PathsProcessor pathsProcessor) throws Exception {
 
         new StrictExpectations() {{
-            new ResolverCache(swagger, auths, null);
+            new ResolverCache(swagger, auths, null, new ArrayList<>(), parseOptions);
             result = cache;
             times = 1;
 
@@ -893,7 +894,7 @@ public class OpenAPIResolverTest {
 
         }};
 
-        assertEquals(new OpenAPIResolver(swagger, auths, null).resolve(), swagger);
+        assertEquals(new OpenAPIResolver(swagger, auths, null, null, parseOptions).resolve(), swagger);
     }
 
     @Test

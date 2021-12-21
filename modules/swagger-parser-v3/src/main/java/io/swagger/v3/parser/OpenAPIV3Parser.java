@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -179,8 +178,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
-                    result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
-                            location).resolve());
+                    OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
+                            location, null, options);
+                    resolver.resolve(result);
                     if (options.isResolveFully()) {
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                     }
@@ -196,7 +196,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             }
         } catch (Exception e) {
             LOGGER.warn("Exception while resolving:", e);
-            result.setMessages(Collections.singletonList(e.getMessage()));
+            // TODO verify if this change makes sense (adding resolve messages instead of replacing)
+            result.getMessages().add(e.getMessage());
+            // result.setMessages(Collections.singletonList(e.getMessage()));
         }
         return result;
     }

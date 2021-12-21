@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  title: Acme Components
+  description: Common components for Acme REST APIs
+  version: '1'
+components:
+  requestBodies:
+    NewItem:
+      asdasd: asd
+      descasdasdription: A JSON object containing item data
+      required: true
+      content:
+        application/json:
+          schema:
+            type: asd
+  responses:
+    GeneralError:
+      descrsaiption: An error occurred
+      asdas: asdasd
+  schemas:
+    ErrorModel:
+      type: object
+      properties:

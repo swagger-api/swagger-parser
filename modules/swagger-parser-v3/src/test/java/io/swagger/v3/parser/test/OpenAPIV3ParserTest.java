@@ -180,7 +180,7 @@ public class OpenAPIV3ParserTest {
         assertTrue(parseResult.getOpenAPI().getComponents().getSchemas().size() == 2);
         assertTrue(parseResult.getOpenAPI().getPaths().get("/parse").getGet().getParameters().get(0).getSchema().get$ref().equals("#/components/schemas/Parse"));
     }
-    
+
     @Test
     public void testCantReadDeepProperties() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -192,7 +192,7 @@ public class OpenAPIV3ParserTest {
         Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
         assertEquals(projects.getType(), "integer");
     }
-  
+
     @Test
     public void testIssueSameRefsDifferentModel() throws IOException {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-refs-different-model-domain.yaml"), "UTF-8");
@@ -2914,4 +2914,40 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(testPutExtensions.get("x-order"));
         Assert.assertEquals((String)testPutExtensions.get("x-order"),"2147483647");
     }
+
+    // TODO implement for http locations
+/*
+    @Test
+    public void testOriginalLocation() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:1337/root.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        result.getMessages().forEach(System.out::println);
+
+
+        // TODO implement tests
+    }
+*/
+
+    @Test
+    public void testOriginalLocationLocal() {
+        ParseOptions options = new ParseOptions();
+        options.setValidateExternalRefs(true);
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        result.getMessages().forEach(System.out::println);
+        // TODO implement tests
+
+        options.setValidateExternalRefs(false);
+        result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
+        openAPI = result.getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        assertTrue(result.getMessages().isEmpty());
+
+    }
+
 }
