@@ -125,7 +125,10 @@ public final class ExternalRefProcessor {
                 if (isAnExternalRefFormat(ref)) {
                     if (!ref.equals(RefFormat.URL)) {
                         String schemaFullRef = schema.get$ref();
-                        String parent = file.substring(0, file.lastIndexOf('/'));
+                        if(file.contains("/"))
+                        {
+                            parent = file.substring(0, file.lastIndexOf('/'));
+                        }
                         if (!parent.isEmpty()) {
                             if (schemaFullRef.contains("#/")) {
                                 String[] parts = schemaFullRef.split("#/");
