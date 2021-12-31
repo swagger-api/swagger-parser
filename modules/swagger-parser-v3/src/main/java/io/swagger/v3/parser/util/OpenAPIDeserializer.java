@@ -3710,6 +3710,29 @@ public class OpenAPIDeserializer {
 			schema.setAdditionalProperties(additionalProperties);
 		}
 
+		Boolean unevaluatedPropertiesBoolean = getBoolean("unevaluatedProperties", node, false, location, result);
+
+		ObjectNode unevaluatedPropertiesObject =
+				additionalPropertiesBoolean == null
+						? getObject("unevaluatedProperties", node, false, location, result)
+						: null;
+
+		Object unevaluatedProperties =
+				unevaluatedPropertiesObject != null
+						? getSchema(unevaluatedPropertiesObject, location, result)
+						: unevaluatedPropertiesBoolean;
+
+		if (unevaluatedProperties != null) {
+			if (schema == null) {
+				schema =
+						unevaluatedProperties.equals(Boolean.FALSE)
+								? new ObjectSchema()
+								: new Schema();
+			}
+			//TODO change the unevaluatedProperties Field in core oas 3.1
+			// schema.setUnevaluatedProperties(unevaluatedProperties);
+		}
+
 		if (schema == null) {
 			schema = new Schema();
 		}
@@ -3827,6 +3850,16 @@ public class OpenAPIDeserializer {
 			schema.setMinProperties(integer);
 		}
 
+		integer = getInteger("minContains", node, false, location, result);
+		if (integer != null) {
+			schema.setMinContains(integer);
+		}
+
+		integer = getInteger("maxContains", node, false, location, result);
+		if (integer != null) {
+			schema.setMaxContains(integer);
+		}
+
 		ArrayNode required = getArray("required", node, false, location, result);
 		if (required != null) {
 			List<String> requiredList = new ArrayList<>();
@@ -3912,6 +3945,115 @@ public class OpenAPIDeserializer {
 			}
 		}
 
+		ObjectNode contentSchemaObj = getObject("contentSchema", node, false, location, result);
+		if (contentSchemaObj != null) {
+			Schema contentSchema = getJsonSchema(contentSchemaObj, location, result);
+			if (contentSchema != null) {
+				schema.setContentSchema(contentSchema);
+			}
+		}
+
+		ObjectNode propertyNamesObj = getObject("propertyNames", node, false, location, result);
+		if (propertyNamesObj != null) {
+			Schema propertyNames = getJsonSchema(propertyNamesObj, location, result);
+			if (propertyNames != null) {
+				schema.setPropertyNames(propertyNames);
+			}
+		}
+
+		ObjectNode ifObj = getObject("if", node, false, location, result);
+		if (ifObj != null) {
+			Schema _if = getJsonSchema(ifObj, location, result);
+			if (_if != null) {
+				schema.setIf(_if);
+			}
+		}
+
+		ObjectNode thenObj = getObject("then", node, false, location, result);
+		if (thenObj != null) {
+			Schema _then = getJsonSchema(thenObj, location, result);
+			if (_then != null) {
+				schema.setThen(_then);
+			}
+		}
+
+		ObjectNode elseObj = getObject("else", node, false, location, result);
+		if (elseObj != null) {
+			Schema _else = getJsonSchema(elseObj, location, result);
+			if (_else != null) {
+				schema.setElse(_else);
+			}
+		}
+
+		Map<String, Schema> dependentRequiredList = new LinkedHashMap<>();
+		ObjectNode dependentRequiredObj = getObject("dependentRequired", node, false, location, result);
+		Schema dependentRequired = null;
+
+		Set<String> dependentRequiredKeys = getKeys(dependentRequiredObj);
+		for (String name : dependentRequiredKeys) {
+			JsonNode dependentRequiredValue = dependentRequiredObj.get(name);
+			if (!dependentRequiredValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+				result.invalidType(location, "dependentRequired", "object", dependentRequiredValue);
+			} else {
+				if (dependentRequiredObj != null) {
+					dependentRequired = getJsonSchema((ObjectNode) dependentRequiredValue, location, result);
+					if (dependentRequired != null) {
+						dependentRequiredList.put(name, dependentRequired);
+					}
+				}
+			}
+		}
+		if (dependentRequiredObj != null) {
+			schema.setDependentRequired(dependentRequiredList);
+		}
+
+		Map<String, Schema> dependentSchemasList = new LinkedHashMap<>();
+		ObjectNode dependentSchemasObj = getObject("dependentSchemas", node, false, location, result);
+		Schema dependentSchemas = null;
+
+		Set<String> dependentSchemasKeys = getKeys(dependentSchemasObj);
+		for (String name : dependentSchemasKeys) {
+			JsonNode dependentSchemasValue = dependentSchemasObj.get(name);
+			if (!dependentSchemasValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+				result.invalidType(location, "dependentSchemas", "object", dependentSchemasValue);
+			} else {
+				if (dependentSchemasObj != null) {
+					dependentSchemas = getJsonSchema((ObjectNode) dependentSchemasValue, location, result);
+					if (dependentSchemas != null) {
+						dependentSchemasList.put(name, dependentSchemas);
+					}
+				}
+			}
+		}
+		if (dependentSchemasObj != null) {
+			schema.setDependentSchemas(dependentSchemasList);
+		}
+
+		//prefixItems
+		ArrayNode prefixItemsArray = getArray("prefixItems", node, false, location, result);
+
+		if(prefixItemsArray != null) {
+			Schema prefixItems = new Schema();
+
+			List<Schema> prefixItemsList = new ArrayList<>();
+			for (JsonNode n : prefixItemsArray) {
+				if (n.isObject()) {
+					prefixItems = getJsonSchema((ObjectNode) n, location, result);
+					prefixItemsList.add(prefixItems);
+				}
+			}
+			if (prefixItemsList.size() > 0) {
+				schema.setPrefixItems(prefixItemsList);
+			}
+		}
+
+		ObjectNode containsObj = getObject("contains", node, false, location, result);
+		if (containsObj != null) {
+			Schema contains = getJsonSchema(containsObj, location, result);
+			if (contains != null) {
+				schema.setContains(contains);
+			}
+		}
 
 		Map<String, Schema> properties = new LinkedHashMap<>();
 		ObjectNode propertiesObj = getObject("properties", node, false, location, result);
@@ -4051,6 +4193,12 @@ public class OpenAPIDeserializer {
 			if (docs != null) {
 				schema.setExternalDocs(docs);
 			}
+		}
+		//examples
+		ArrayNode examples = getArray("examples", node,false, location, result);
+		List<Example> exampleList = getExampleList(examples, location, result);
+		if(exampleList.size() > 0){
+			schema.setExamples(exampleList);
 		}
 
 		Object example = getAnyExample("example", node, location, result);
