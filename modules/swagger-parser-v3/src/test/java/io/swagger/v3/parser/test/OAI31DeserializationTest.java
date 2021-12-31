@@ -1,9 +1,7 @@
 package io.swagger.v3.parser.test;
 
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.JsonSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -343,7 +341,7 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getTypes().contains("integer"));
     }
 
-    @Test(description = "Test siblings with $ref for const, contentEncoding, contentMediaType")
+    @Test(description = "Test siblings with $ref for const, contentEncoding, contentMediaType, contentSchema")
     public void testSiblingsReferenceJSONSchema4() {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
@@ -359,6 +357,8 @@ public class OAI31DeserializationTest {
                 "      const: sales\n" +
                 "      contentEncoding: base64\n" +
                 "      contentMediaType: text/html\n" +
+                "      contentSchema:\n" +
+                "        type: string\n" +
                 "      $ref: ./ex.json#user-profile";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
         OpenAPI openAPI = result.getOpenAPI();
@@ -368,5 +368,196 @@ public class OAI31DeserializationTest {
         assertEquals(profile.getConst(),"sales");
         assertEquals(profile.getContentEncoding(),"base64");
         assertEquals(profile.getContentMediaType(),"text/html");
+        assertNotNull(profile.getContentSchema());
+        assertTrue(profile.getContentSchema().getTypes().contains("string"));
+    }
+
+    @Test(description = "Test siblings with $ref for contains, maxContains, minContains, prefixItems, uniqueItems, propertyNames, unevaluatedProperties")
+    public void testSiblingsReferenceJSONSchema5() {
+        ParseOptions options = new ParseOptions();
+        String refSibling = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: siblings JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    ContainsSchema:\n" +
+                "      type: array\n" +
+                "      contains:\n" +
+                "        type: integer\n" +
+                "      minContains: 2\n" +
+                "      maxContains: 4\n" +
+                "      uniqueItems: true\n" +
+                "    Profile:\n" +
+                "      propertyNames:\n" +
+                "        pattern: ^[A-Za-z_][A-Za-z0-9_]*$\n" +
+                "      $ref: ./ex.json#user-profile\n" +
+                "    Person:\n" +
+                "      type: array\n" +
+                "      prefixItems:\n" +
+                "        - type: string\n" +
+                "          description: Name\n" +
+                "        - type: integer\n" +
+                "          description: Age\n" +
+                "      minItems: 2\n" +
+                "      maxItems: 2\n" +
+                "    Patient:\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        patientId: { }\n" +
+                "      patientDetails:\n" +
+                "        type: object\n" +
+                "    PatientPerson:\n" +
+                "      allOf:\n" +
+                "        - $ref: '#/components/schemas/Person'\n" +
+                "        - $ref: '#/components/schemas/Patient'\n" +
+                "      unevaluatedProperties: false\n" +
+                "      $ref: ./ex.json#patient-person";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        Schema profile = openAPI.getComponents().getSchemas().get("Profile");
+        Schema containsSchema = openAPI.getComponents().getSchemas().get("ContainsSchema");
+        Schema personSchema = openAPI.getComponents().getSchemas().get("Person");
+        assertNotNull(profile.get$ref());
+
+        //contains
+        assertNotNull(containsSchema.getContains());
+        //maxContains, minContains
+        assertEquals(containsSchema.getMaxContains().intValue(), 4);
+        assertEquals(containsSchema.getMinContains().intValue(), 2);
+        //prefixItems
+        assertNotNull(personSchema.getPrefixItems());
+        //minItems, maxItems
+        assertEquals(personSchema.getMaxItems().intValue(), 2);
+        assertEquals(personSchema.getMinItems().intValue(), 2);
+        //uniqueItems
+        assertNotNull(containsSchema.getUniqueItems().booleanValue());
+        //propertyNames
+        assertEquals(profile.getPropertyNames().getPattern(),"^[A-Za-z_][A-Za-z0-9_]*$");
+        //unevaluatedProperties
+        //assertNotNull(profile.getUnevaluatedProperties());
+        //assertTrue(profile.getUnevaluatedProperties().getTypes().contains("object"));
+    }
+
+    @Test(description = "Test siblings with $ref for if - then - else, dependentRequired, dependentSchemas, examples / example")
+    public void testSiblingsReferenceJSONSchema6() {
+        ParseOptions options = new ParseOptions();
+        String refSibling = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: siblings JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Payment:\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        name:\n" +
+                "          type: string\n" +
+                "        credit_card:\n" +
+                "          type: number\n" +
+                "        billing_address:\n" +
+                "          type: string\n" +
+                "      required:\n" +
+                "        - name\n" +
+                "      dependentRequired:\n" +
+                "        credit_card:\n" +
+                "          - billing_address\n" +
+                "    PaymentMethod:\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        name:\n" +
+                "          type: string\n" +
+                "        credit_card:\n" +
+                "          type: number\n" +
+                "      required:\n" +
+                "        - name\n" +
+                "      dependentSchemas:\n" +
+                "        credit_card:\n" +
+                "          properties:\n" +
+                "            billing_address:\n" +
+                "              type: string\n" +
+                "          required:\n" +
+                "            - billing_address\n" +
+                "    IfTest:\n" +
+                "      title: Person\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        country:\n" +
+                "          type: string\n" +
+                "          widget: Select\n" +
+                "          enum:\n" +
+                "            - usa\n" +
+                "            - canada\n" +
+                "            - eu\n" +
+                "          default: eu\n" +
+                "      required:\n" +
+                "        - country\n" +
+                "      if:\n" +
+                "        properties:\n" +
+                "          country:\n" +
+                "            type: string\n" +
+                "            const: canada\n" +
+                "      then:\n" +
+                "        properties:\n" +
+                "          maple_trees:\n" +
+                "            type: number\n" +
+                "      else:\n" +
+                "        properties:\n" +
+                "          accept:\n" +
+                "            type: boolean\n" +
+                "            const: true\n" +
+                "        required:\n" +
+                "          - accept\n" +
+                "    Fruit:\n" +
+                "      type: string\n" +
+                "      examples:\n" +
+                "        - apple\n" +
+                "        - orange\n" +
+                "    Error:\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        code:\n" +
+                "          type: integer\n" +
+                "        message:\n" +
+                "          type: string\n" +
+                "      examples:\n" +
+                "        - code: 123\n" +
+                "          message: Oops...\n" +
+                "        - code: 456\n" +
+                "          message: Feature is not available for your plan\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        Yaml31.prettyPrint(openAPI);
+        //if - then - else
+        assertNotNull(openAPI.getComponents().getSchemas().get("IfTest"));
+        Schema itTest = openAPI.getComponents().getSchemas().get("IfTest");
+        assertNotNull(itTest.getIf());
+        assertTrue(itTest.getIf().getProperties().containsKey("country"));
+        assertNotNull(itTest.getThen());
+        assertTrue(itTest.getThen().getProperties().containsKey("maple_trees"));
+        assertNotNull(itTest.getElse());
+        assertTrue(itTest.getElse().getProperties().containsKey("accept"));
+        //dependentRequired
+        assertNotNull(openAPI.getComponents().getSchemas().get("Payment"));
+        Schema payment = openAPI.getComponents().getSchemas().get("Payment");
+        assertNotNull(payment.getDependentRequired().get("credit_card"));
+
+        //dependentSchemas
+        assertNotNull(openAPI.getComponents().getSchemas().get("PaymentMethod"));
+        Schema paymentMethod = openAPI.getComponents().getSchemas().get("PaymentMethod");
+        //examples / example
+        assertNotNull(openAPI.getComponents().getSchemas().get("Fruit"));
+        Schema fruit = openAPI.getComponents().getSchemas().get("Fruit");
+        assertNotNull(openAPI.getComponents().getSchemas().get("Error"));
+        Schema error = openAPI.getComponents().getSchemas().get("Error");
     }
 }
