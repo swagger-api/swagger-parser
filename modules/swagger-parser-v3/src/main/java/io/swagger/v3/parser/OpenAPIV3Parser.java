@@ -206,7 +206,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             return String.format("Unable to parse `%s`", location);
         }
         if (originalMessage.startsWith("Duplicate field")) {
-            return String.format(originalMessage + " in `%s`", location);
+            return String.format("%s in `%s`", originalMessage, location);
         }
         return originalMessage;
     }
