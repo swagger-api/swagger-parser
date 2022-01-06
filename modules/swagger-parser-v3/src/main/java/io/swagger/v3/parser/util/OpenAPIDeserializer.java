@@ -3096,22 +3096,6 @@ public class OpenAPIDeserializer {
 		return examples;
 	}
 
-	public List<Example> getExampleList(ArrayNode obj, String location, ParseResult result) {
-		List<Example> examples = new ArrayList<>();
-		if (obj == null) {
-			return examples;
-		}
-		for (JsonNode item : obj) {
-			if (item.getNodeType().equals(JsonNodeType.OBJECT)) {
-				Example example = getExample((ObjectNode) item, location, result);
-				if (example != null) {
-					examples.add(example);
-				}
-			}
-		}
-		return examples;
-	}
-
 	public Example getExample(ObjectNode node, String location, ParseResult result) {
 		if (node == null)
 			return null;
@@ -3327,7 +3311,6 @@ public class OpenAPIDeserializer {
 		}
 		return tags;
 	}
-
 
 	public Operation getOperation(ObjectNode obj, String location, ParseResult result) {
 		if (obj == null) {
@@ -3710,8 +3693,7 @@ public class OpenAPIDeserializer {
 								? new ObjectSchema()
 								: new Schema();
 			}
-			//TODO change the unevaluatedProperties Field in core oas 3.1
-			// schema.setUnevaluatedProperties(unevaluatedProperties);
+			schema.setUnevaluatedProperties(unevaluatedProperties);
 		}
 
 		if (schema == null) {
@@ -3966,18 +3948,22 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		Map<String, Schema> dependentRequiredList = new LinkedHashMap<>();
+		Map<String, List<String>> dependentRequiredList = new LinkedHashMap<>();
 		ObjectNode dependentRequiredObj = getObject("dependentRequired", node, false, location, result);
-		Schema dependentRequired = null;
+		List<String> dependentRequired = new ArrayList<>();
 
 		Set<String> dependentRequiredKeys = getKeys(dependentRequiredObj);
 		for (String name : dependentRequiredKeys) {
 			JsonNode dependentRequiredValue = dependentRequiredObj.get(name);
-			if (!dependentRequiredValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+			if (!dependentRequiredValue.getNodeType().equals(JsonNodeType.ARRAY)) {
 				result.invalidType(location, "dependentRequired", "object", dependentRequiredValue);
 			} else {
 				if (dependentRequiredObj != null) {
-					dependentRequired = getJsonSchema((ObjectNode) dependentRequiredValue, location, result);
+					for (JsonNode n : dependentRequiredValue){
+						if (n.getNodeType().equals(JsonNodeType.STRING)) {
+							dependentRequired.add(n.textValue());
+						}
+					}
 					if (dependentRequired != null) {
 						dependentRequiredList.put(name, dependentRequired);
 					}
@@ -4012,7 +3998,6 @@ public class OpenAPIDeserializer {
 
 		//prefixItems
 		ArrayNode prefixItemsArray = getArray("prefixItems", node, false, location, result);
-
 		if(prefixItemsArray != null) {
 			Schema prefixItems = new Schema();
 
@@ -4175,9 +4160,13 @@ public class OpenAPIDeserializer {
 				schema.setExternalDocs(docs);
 			}
 		}
-		//examples
 		ArrayNode examples = getArray("examples", node,false, location, result);
-		List<Example> exampleList = getExampleList(examples, location, result);
+		List<Object> exampleList = new ArrayList<>();
+		if (examples != null) {
+			for (JsonNode item : examples) {
+				exampleList.add(item);
+			}
+		}
 		if(exampleList.size() > 0){
 			schema.setExamples(exampleList);
 		}

@@ -9,6 +9,7 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -395,6 +396,8 @@ public class OAI31DeserializationTest {
                 "      propertyNames:\n" +
                 "        pattern: ^[A-Za-z_][A-Za-z0-9_]*$\n" +
                 "      $ref: ./ex.json#user-profile\n" +
+                "      unevaluatedProperties:\n" +
+                "         type: object\n"+
                 "    Person:\n" +
                 "      type: array\n" +
                 "      prefixItems:\n" +
@@ -422,6 +425,7 @@ public class OAI31DeserializationTest {
         Schema profile = openAPI.getComponents().getSchemas().get("Profile");
         Schema containsSchema = openAPI.getComponents().getSchemas().get("ContainsSchema");
         Schema personSchema = openAPI.getComponents().getSchemas().get("Person");
+        Schema patientPersonSchema = openAPI.getComponents().getSchemas().get("PatientPerson");
         assertNotNull(profile.get$ref());
 
         //contains
@@ -439,11 +443,15 @@ public class OAI31DeserializationTest {
         //propertyNames
         assertEquals(profile.getPropertyNames().getPattern(),"^[A-Za-z_][A-Za-z0-9_]*$");
         //unevaluatedProperties
-        //assertNotNull(profile.getUnevaluatedProperties());
-        //assertTrue(profile.getUnevaluatedProperties().getTypes().contains("object"));
+        assertNotNull(profile.getUnevaluatedProperties());
+        assertTrue(profile.getUnevaluatedProperties() instanceof Schema);
+        assertTrue(((Schema)profile.getUnevaluatedProperties()).getTypes().contains("object"));
+        assertNotNull(patientPersonSchema.getUnevaluatedProperties());
+        assertTrue(patientPersonSchema.getUnevaluatedProperties() instanceof Boolean);
+        assertFalse(((Boolean)patientPersonSchema.getUnevaluatedProperties()).booleanValue());
     }
 
-    @Test(description = "Test siblings with $ref for if - then - else, dependentRequired, dependentSchemas, examples / example")
+    @Test(description = "Test siblings with $ref for if - then - else, dependentRequired, dependentSchemas")
     public void testSiblingsReferenceJSONSchema6() {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
@@ -514,28 +522,10 @@ public class OAI31DeserializationTest {
                 "            type: boolean\n" +
                 "            const: true\n" +
                 "        required:\n" +
-                "          - accept\n" +
-                "    Fruit:\n" +
-                "      type: string\n" +
-                "      examples:\n" +
-                "        - apple\n" +
-                "        - orange\n" +
-                "    Error:\n" +
-                "      type: object\n" +
-                "      properties:\n" +
-                "        code:\n" +
-                "          type: integer\n" +
-                "        message:\n" +
-                "          type: string\n" +
-                "      examples:\n" +
-                "        - code: 123\n" +
-                "          message: Oops...\n" +
-                "        - code: 456\n" +
-                "          message: Feature is not available for your plan\n";
+                "          - accept\n";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
-
         Yaml31.prettyPrint(openAPI);
         //if - then - else
         assertNotNull(openAPI.getComponents().getSchemas().get("IfTest"));
@@ -546,6 +536,7 @@ public class OAI31DeserializationTest {
         assertTrue(itTest.getThen().getProperties().containsKey("maple_trees"));
         assertNotNull(itTest.getElse());
         assertTrue(itTest.getElse().getProperties().containsKey("accept"));
+
         //dependentRequired
         assertNotNull(openAPI.getComponents().getSchemas().get("Payment"));
         Schema payment = openAPI.getComponents().getSchemas().get("Payment");
@@ -554,10 +545,56 @@ public class OAI31DeserializationTest {
         //dependentSchemas
         assertNotNull(openAPI.getComponents().getSchemas().get("PaymentMethod"));
         Schema paymentMethod = openAPI.getComponents().getSchemas().get("PaymentMethod");
+    }
+
+    @Test(description = "Test examples in JSONSchema")
+    public void testExamplesJSONSchema() {
+        ParseOptions options = new ParseOptions();
+        String examplesSchema = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: examples JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Fruit:\n" +
+                "      type: string\n" +
+                "      example: kiwi\n" +
+                "      examples:\n" +
+                "        - apple\n" +
+                "        - orange\n" +
+                "    Error:\n" +
+                "      type: object\n" +
+                "      example: wrong\n" +
+                "      properties:\n" +
+                "        code:\n" +
+                "          type: integer\n" +
+                "        message:\n" +
+                "          type: string\n" +
+                "      examples:\n" +
+                "        - code: 123\n" +
+                "          message: Oops...\n" +
+                "        - code: 456\n" +
+                "          message: Feature is not available for your plan\n" +
+                "    ExampleSchema:\n" +
+                "      type: object\n" +
+                "      example: foo\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( examplesSchema , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
         //examples / example
         assertNotNull(openAPI.getComponents().getSchemas().get("Fruit"));
         Schema fruit = openAPI.getComponents().getSchemas().get("Fruit");
+        assertTrue(fruit.getExample().equals("kiwi"));
+        assertNotNull(fruit.getExamples());
         assertNotNull(openAPI.getComponents().getSchemas().get("Error"));
         Schema error = openAPI.getComponents().getSchemas().get("Error");
+        assertTrue(error.getExample().equals("wrong"));
+        assertTrue(error.getExamples().get(0)!= null);
+        assertNotNull(openAPI.getComponents().getSchemas().get("ExampleSchema"));
+        Schema exampleSchema = openAPI.getComponents().getSchemas().get("ExampleSchema");
+        assertTrue(exampleSchema.getExample().equals("foo"));
     }
 }
