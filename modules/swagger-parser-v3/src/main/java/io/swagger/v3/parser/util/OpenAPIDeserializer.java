@@ -737,7 +737,7 @@ public class OpenAPIDeserializer {
 
 		ObjectNode node = getObject("get", obj, false, location, result);
 		if (node != null) {
-			Operation operation = getOperation(node, location + "(get)", result);
+			Operation operation = getOperation(node, location + "(get)", result, true);
 			if (operation != null) {
 				pathItem.setGet(operation);
 			}
@@ -758,14 +758,14 @@ public class OpenAPIDeserializer {
 		}
 		node = getObject("head", obj, false, location, result);
 		if (node != null) {
-			Operation operation = getOperation(node, location + "(head)", result);
+			Operation operation = getOperation(node, location + "(head)", result, true);
 			if (operation != null) {
 				pathItem.setHead(operation);
 			}
 		}
 		node = getObject("delete", obj, false, location, result);
 		if (node != null) {
-			Operation operation = getOperation(node, location + "(delete)", result);
+			Operation operation = getOperation(node, location + "(delete)", result, true);
 			if (operation != null) {
 				pathItem.setDelete(operation);
 			}
@@ -2905,8 +2905,11 @@ public class OpenAPIDeserializer {
 		return tags;
 	}
 
-
 	public Operation getOperation(ObjectNode obj, String location, ParseResult result) {
+		return getOperation(obj, location, result, false);
+	}
+
+	public Operation getOperation(ObjectNode obj, String location, ParseResult result, boolean ignoreRequestBody) {
 		if (obj == null) {
 			return null;
 		}
@@ -2946,8 +2949,11 @@ public class OpenAPIDeserializer {
 
 		final ObjectNode requestObjectNode = getObject("requestBody", obj, false, location, result);
 		if (requestObjectNode != null) {
+			if (ignoreRequestBody) {
+				result.warning(location, " is no longer allowed to have request body because it does not have defined semantics as per RFC 7231");
+			}
 			operation.setRequestBody(getRequestBody(requestObjectNode, String.format("%s.%s", location,
-					"requestBody"), result));
+						"requestBody"), result));
 		}
 
 		ObjectNode responsesNode = getObject("responses", obj, true, location, result);

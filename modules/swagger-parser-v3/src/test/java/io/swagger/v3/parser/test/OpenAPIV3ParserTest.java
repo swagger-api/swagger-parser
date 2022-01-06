@@ -1572,7 +1572,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = parser.readLocation("src/test/resources/petstore.yaml", null, options);
 
         assertNotNull(result);
-        assertTrue(result.getMessages().size()==2);
+        assertTrue(result.getMessages().size()==3);
 
         OpenAPI openAPI = result.getOpenAPI();
         Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
@@ -2913,5 +2913,14 @@ public class OpenAPIV3ParserTest {
         Assert.assertTrue(!testPutExtensions.isEmpty());
         Assert.assertNotNull(testPutExtensions.get("x-order"));
         Assert.assertEquals((String)testPutExtensions.get("x-order"),"2147483647");
+    }
+
+    @Test
+    public void testIssue1601() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue-1601.yaml", null, null);
+        List<String> messages = result.getMessages();
+        Assert.assertEquals(messages.get(0), "attribute paths.'/inventory'(get). is no longer allowed to have request body because it does not have defined semantics as per RFC 7231");
+        Assert.assertEquals(messages.size(), 1);
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/inventory").getGet().getRequestBody());
     }
 }
