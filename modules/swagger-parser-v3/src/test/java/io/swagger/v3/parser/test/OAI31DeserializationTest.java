@@ -1,5 +1,6 @@
 package io.swagger.v3.parser.test;
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -597,4 +598,132 @@ public class OAI31DeserializationTest {
         Schema exampleSchema = openAPI.getComponents().getSchemas().get("ExampleSchema");
         assertTrue(exampleSchema.getExample().equals("foo"));
     }
+
+    @Test(description = "Test arbitraryKeywords in JSONSchema")
+    public void testArbitraryKeywordsJSONSchema() {
+        ParseOptions options = new ParseOptions();
+        String arbitraryKeyword = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: arbitrary keywords JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Fruit:\n" +
+                "      type: string\n" +
+                "      example: kiwi\n" +
+                "      examples:\n" +
+                "        - apple\n" +
+                "        - orange\n" +
+                "      arbitraryKeyword: test\n" +
+                "      x-normalExtension: extensionTest\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( arbitraryKeyword , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("Fruit").getExtensions().get("arbitraryKeyword"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Fruit").getExtensions().get("x-normalExtension"));
+    }
+
+    @Test(description = "Test for Tuple parsing")
+    public void testTuplesJSONSchema() {
+        ParseOptions options = new ParseOptions();
+        String tuple = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  title: tuple JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Tuple:\n" +
+                "      type: array\n" +
+                "      prefixItems:\n" +
+                "        - type: string\n" +
+                "          description: Name\n" +
+                "        - type: integer\n" +
+                "          description: Age\n" +
+                "      minItems: 2\n" +
+                "      maxItems: 2\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(tuple, null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertTrue(openAPI.getComponents().getSchemas().get("Tuple").getPrefixItems().get(0) instanceof Schema);
+        Schema schema = (Schema) openAPI.getComponents().getSchemas().get("Tuple").getPrefixItems().get(0);
+        assertTrue(schema.getTypes().contains("string"));
+        assertEquals(schema.getDescription(), "Name");
+    }
+
+        @Test(description = "Test for not setting the schema type as default")
+        public void testNotDefaultSchemaType() {
+            ParseOptions options = new ParseOptions();
+            String defaultSchemaType = "openapi: 3.1.0\n" +
+                    "info:\n" +
+                    "  title: ping test\n" +
+                    "  version: '1.0'\n" +
+                    "servers:\n" +
+                    "  - url: 'http://localhost:8000/'\n" +
+                    "paths:\n" +
+                    "  /ping:\n" +
+                    "    get:\n" +
+                    "      operationId: pingGet\n" +
+                    "      responses:\n" +
+                    "        '201':\n" +
+                    "          description: OK\n" +
+                    "components:\n" +
+                    "  schemas:\n" +
+                    "    AnyValue: {}\n" +
+                    "    AnyValueWithDesc:\n" +
+                    "      description: Can be any value - string, number, boolean, array or object.\n" +
+                    "    AnyValueNullable:\n" +
+                    "      nullable: true\n" +
+                    "      description: Can be any value, including `null`.\n" +
+                    "    AnyValueModel:\n" +
+                    "      description: test any value\n" +
+                    "      type: object\n" +
+                    "      properties:\n" +
+                    "        any_value:\n" +
+                    "          $ref: '#/components/schemas/AnyValue'\n" +
+                    "        any_value_with_desc:\n" +
+                    "          $ref: '#/components/schemas/AnyValueWithDesc'\n" +
+                    "        any_value_nullable:\n" +
+                    "          $ref: '#/components/schemas/AnyValueNullable'\n" +
+                    "    AnyValueModelInline:\n" +
+                    "      description: test any value inline\n" +
+                    "      type: object\n" +
+                    "      properties:\n" +
+                    "        any_value: {}\n" +
+                    "        any_value_with_desc:\n" +
+                    "          description: inline any value\n" +
+                    "        any_value_nullable:\n" +
+                    "          nullable: true\n" +
+                    "          description: inline any value nullable\n" +
+                    "        map_any_value:\n" +
+                    "          additionalProperties: {}\n" +
+                    "        map_any_value_with_desc:\n" +
+                    "          additionalProperties: \n" +
+                    "            description: inline any value\n" +
+                    "        map_any_value_nullable:\n" +
+                    "          additionalProperties:\n" +
+                    "            nullable: true\n" +
+                    "            description: inline any value nullable\n" +
+                    "        array_any_value:\n" +
+                    "          items: {}\n" +
+                    "        array_any_value_with_desc:\n" +
+                    "          items: \n" +
+                    "            description: inline any value\n" +
+                    "        array_any_value_nullable:\n" +
+                    "          items:\n" +
+                    "            nullable: true\n" +
+                    "            description: inline any value nullable";
+            SwaggerParseResult result = new OpenAPIV3Parser().readContents(defaultSchemaType, null, options);
+            OpenAPI openAPI = result.getOpenAPI();
+            assertNotNull(openAPI);
+            assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value"));
+            assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value") instanceof Schema);
+            Schema mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value");
+            assertNull(mapProperty.getType());
+        }
 }

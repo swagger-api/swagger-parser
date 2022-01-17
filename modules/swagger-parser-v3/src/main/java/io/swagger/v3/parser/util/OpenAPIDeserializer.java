@@ -173,7 +173,7 @@ public class OpenAPIDeserializer {
 			"allOf",
 			"oneOf", "anyOf", "not", "items", "properties", "additionalProperties", "patternProperties", "description",
 			"format", "default", "discriminator", "readOnly", "writeOnly", "xml", "externalDocs", "example", "deprecated",
-			"const"));
+			"const", "examples", "$id", "$comment"));
 	protected static Set<String> EXAMPLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
 			"value", "externalValue"));
 	protected static Set<String> HEADER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "name", "in", "description",
@@ -563,8 +563,6 @@ public class OpenAPIDeserializer {
 			validateReservedKeywords(specKeys, key, location, result);
 
 		}
-
-
 		return components;
 	}
 
@@ -2881,12 +2879,6 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-
-		bool = getBoolean("nullable", node, false, location, result);
-		if (bool != null) {
-			schema.setNullable(bool);
-		}
-
 		bool = getBoolean("readOnly", node, false, location, result);
 		if (bool != null) {
 			schema.setReadOnly(bool);
@@ -3401,8 +3393,6 @@ public class OpenAPIDeserializer {
 			}
 			validateReservedKeywords(specKeys, key, location, result);
 		}
-
-
 		return operation;
 	}
 
@@ -3539,7 +3529,6 @@ public class OpenAPIDeserializer {
 			}
 			validateReservedKeywords(specKeys, key, location, result);
 		}
-
 		return body;
 	}
 
@@ -3833,9 +3822,8 @@ public class OpenAPIDeserializer {
 					result.invalidType(location, "required", "string", n);
 				}
 			}
-			if (requiredList.size() > 0) {
-				schema.setRequired(requiredList);
-			}
+			schema.setRequired(requiredList);
+
 		}
 
 
@@ -3866,17 +3854,11 @@ public class OpenAPIDeserializer {
 				schema.addType(type);
 			}
 		}
-		if (schema.getTypes() != null &&
-				schema.getTypes().size() == 1 &&
-				"array".equals(schema.getTypes().toArray()[0]) && schema.getItems() == null) {
-			result.missing(location, "items");
-		}
 
 		value = getString("format", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if (value != null) {
 			schema.setFormat(value);
 		}
-
 
 		ArrayNode enumArray = getArray("enum", node, false, location, result);
 		if (enumArray != null) {
@@ -4070,48 +4052,6 @@ public class OpenAPIDeserializer {
 			schema.setDescription(value);
 		}
 
-		//sets default value according to the schema type
-		if (node.get("default") != null) {
-			if (!StringUtils.isBlank(schema.getType())) {
-				if (schema.getType().equals("array")) {
-					ArrayNode array = getArray("default", node, false, location, result);
-					if (array != null) {
-						schema.setDefault(array);
-					}
-				} else if (schema.getType().equals("string")) {
-					value = getString("default", node, false, location, result);
-					if (value != null) {
-						try {
-							schema.setDefault(getDecodedObject(schema, value));
-						} catch (ParseException e) {
-							result.invalidType(location, String.format("default=`%s`", e.getMessage()),
-									schema.getFormat(), node);
-						}
-					}
-				} else if (schema.getType().equals("boolean")) {
-					bool = getBoolean("default", node, false, location, result);
-					if (bool != null) {
-						schema.setDefault(bool);
-					}
-				} else if (schema.getType().equals("object")) {
-					Object object = getObject("default", node, false, location, result);
-					if (object != null) {
-						schema.setDefault(object);
-					}
-				} else if (schema.getType().equals("integer")) {
-					Integer number = getInteger("default", node, false, location, result);
-					if (number != null) {
-						schema.setDefault(number);
-					}
-				} else if (schema.getType().equals("number")) {
-					BigDecimal number = getBigDecimal("default", node, false, location, result);
-					if (number != null) {
-						schema.setDefault(number);
-					}
-				}
-			}
-		}
-
 		//const is a String
 		value = getString("const", node, false, location, result);
 		if (value != null) {
@@ -4209,13 +4149,13 @@ public class OpenAPIDeserializer {
 		Set<String> schemaKeys = getKeys(node);
 		Map<String, Set<String>> specKeys = KEYS.get("openapi31");
 		for (String key : schemaKeys) {
+			validateReservedKeywords(specKeys, key, location, result);
 			if (!specKeys.get("SCHEMA_KEYS").contains(key) && !key.startsWith("x-")) {
-				result.extra(location, key, node.get(key));
+				extensions.put(key, Json.mapper().convertValue(node.get(key), Object.class));
+				schema.setExtensions(extensions);
 			}
 		}
-
 		return schema;
-
 	}
 
 	public static class ParseResult {
