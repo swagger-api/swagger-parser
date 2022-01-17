@@ -135,6 +135,7 @@ components:
           const: pending
         tag:
           type: string
+      arbitraryKeyword: test
     Pets:
       type: array
       items:
