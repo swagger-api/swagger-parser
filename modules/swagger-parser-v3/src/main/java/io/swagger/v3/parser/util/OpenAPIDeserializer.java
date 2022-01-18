@@ -793,7 +793,7 @@ public class OpenAPIDeserializer {
 	//PathsObject
 	public Paths getPaths(ObjectNode obj, String location, ParseResult result) {
 		final Paths paths = new Paths();
-		if (getPathItems(obj, location, result, paths)) {
+		if (getPathItems(obj, location, result, paths, false)) {
 			return paths;
 		}
 		return null;
@@ -825,13 +825,13 @@ public class OpenAPIDeserializer {
 	//Webhooks
 	public Map<String, PathItem> getWebhooks(ObjectNode obj, String location, ParseResult result) {
 		final Map<String, PathItem> webhooks = new LinkedHashMap<>();
-		if (getPathItems(obj, location, result, webhooks)) {
+		if (getPathItems(obj, location, result, webhooks, true)) {
 			return webhooks;
 		}
 		return null;
 	}
 
-	protected boolean getPathItems(ObjectNode obj, String location, ParseResult result, Map<String, PathItem> paths) {
+	protected boolean getPathItems(ObjectNode obj, String location, ParseResult result, Map<String, PathItem> paths, boolean isWebhook) {
 		if (obj == null) {
 			return false;
 		}
@@ -847,7 +847,7 @@ public class OpenAPIDeserializer {
 				if (!pathValue.getNodeType().equals(JsonNodeType.OBJECT)) {
 					result.invalidType(location, pathName, "object", pathValue);
 				} else {
-					if (!pathName.startsWith("/")) {
+					if (!pathName.startsWith("/") && !isWebhook ) {
 						result.warning(location, " Resource " + pathName + " should start with /");
 					}
 					ObjectNode path = (ObjectNode) pathValue;
@@ -2133,7 +2133,7 @@ public class OpenAPIDeserializer {
 
 		return header;
 	}
-
+	//TODO rename method as is used by different objects not only to get examples
 	public Object getAnyExample(String nodeKey, ObjectNode node, String location, ParseResult result) {
 		JsonNode example = node.get(nodeKey);
 		if (example != null) {
@@ -3681,9 +3681,15 @@ public class OpenAPIDeserializer {
 		}
 
 
+
 		String value = getString("title", node, false, location, result);
 		if (StringUtils.isNotBlank(value)) {
 			schema.setTitle(value);
+		}
+
+		if (node.get("default") != null) {
+			//TODO rename method
+			schema.setDefault(getAnyExample("default",node,location,result));
 		}
 
 		ObjectNode discriminatorNode = getObject("discriminator", node, false, location, result);

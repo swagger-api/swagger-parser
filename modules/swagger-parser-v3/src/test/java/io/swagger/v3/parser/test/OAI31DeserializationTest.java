@@ -1,6 +1,5 @@
 package io.swagger.v3.parser.test;
 
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -10,12 +9,69 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.testng.Assert.*;
 
 public class OAI31DeserializationTest {
+
+    @Test(description = "Test basic OAS31 deserialization/validation")
+    public void testBasicOAS31() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/test/basicOAS31.yaml", null, null);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        System.out.println("Messages: "+result.getMessages());
+        Yaml31.prettyPrint(openAPI);
+        //JsonSchemaDialect
+        assertNotNull(openAPI.getJsonSchemaDialect());
+        //change to bad uri and retest to show the error message
+        assertEquals(openAPI.getJsonSchemaDialect(), "https://json-schema.org/draft/2020-12/schema");
+        //info: description and summary
+        assertNotNull(openAPI.getInfo().getSummary());
+        assertEquals(openAPI.getInfo().getSummary(), "test summary in info object");
+        assertNotNull(openAPI.getInfo().getDescription());
+        assertEquals(openAPI.getInfo().getDescription(), "description in info object");
+        //license: identifier
+        assertNotNull(openAPI.getInfo().getLicense().getIdentifier());
+        assertEquals(openAPI.getInfo().getLicense().getIdentifier(), "test identifier");
+        //pathItems under components
+        assertNotNull(openAPI.getComponents().getPathItems());
+        assertNotNull(openAPI.getComponents().getPathItems().get("pets"));
+        //Type array without items
+        assertTrue(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getTypes().contains("array"));
+        assertNull(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getItems());
+        assertFalse(result.getMessages().contains("attribute components.schemas.ArrayWithoutItems.items is missing"));
+        //Type object with items
+        assertTrue(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getTypes().contains("object"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getItems());
+        assertFalse(result.getMessages().contains("attribute components.schemas.ItemsWithoutArrayType.item1 is unexpected"));
+        //Type as array
+        assertTrue(openAPI.getComponents().getSchemas().get("Pet").getTypes().size() == 3);
+        assertTrue(openAPI.getComponents().getSchemas().get("Pet").getTypes().contains("array"));
+        assertTrue(openAPI.getComponents().getSchemas().get("Pet").getTypes().contains("string"));
+        assertTrue(openAPI.getComponents().getSchemas().get("Pet").getTypes().contains("object"));
+        //JsonSchema
+        //arbitrary keywords are now allowed
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pet").getExtensions().get("arbitraryKeyword"));
+        assertFalse(result.getMessages().contains("attribute components.schemas.Pet.arbitraryKeyword is unexpected"));
+        //const
+        assertNotNull(((Schema) openAPI.getComponents().getSchemas().get("Pet").getProperties().get("testconst")).getConst());
+        assertFalse(result.getMessages().contains("attribute components.schemas.Pet.const is unexpected"));
+        //exclusiveMaximum-exclusiveMinimum
+        assertTrue(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMaximumValue().intValue()==12);
+        assertTrue(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMinimumValue().intValue()==1);
+        //Null type
+        assertTrue(openAPI.getComponents().getSchemas().get("Pets").getTypes().contains("null"));
+        //default value independence
+        assertEquals(openAPI.getComponents().getSchemas().get("Pets").getDefault(), "I'm a string");
+        //not setting the type by default
+        assertNull(openAPI.getComponents().getSchemas().get("MapAnyValue").getTypes());
+        //$ref siblings
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pet").get$ref());
+        assertNotNull(openAPI.getComponents().getSchemas().get("Pet").getProperties());
+
+    }
+
     @Test
     public void testDeserializeSimpleDefinition() throws Exception {
         String json =
@@ -40,6 +96,7 @@ public class OAI31DeserializationTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(json, null, options);
         assertNotNull(result.getOpenAPI());
     }
+
 
     @Test
     public void testBasic() {
@@ -306,7 +363,7 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getPatternProperties().containsKey("^S_"));
     }
 
-    @Test(description = "Test siblings with $ref for patternProperties, pattern, additionalProperties")
+    @Test(description = "Test siblings with $ref for patternProperties, pattern, additionalProperties,exclusiveMaximum,exclusiveMinimum")
     public void testSiblingsReferenceJSONSchema3() {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
@@ -721,9 +778,46 @@ public class OAI31DeserializationTest {
             SwaggerParseResult result = new OpenAPIV3Parser().readContents(defaultSchemaType, null, options);
             OpenAPI openAPI = result.getOpenAPI();
             assertNotNull(openAPI);
+
+            //map_any_value as object when it should be null
             assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value"));
             assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value") instanceof Schema);
             Schema mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value");
             assertNull(mapProperty.getType());
+
+            //map_any_value_with_desc as object when it should be null
+            assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc"));
+            assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc") instanceof Schema);
+            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc");
+            assertNull(mapProperty.getType());
+
+            //map_any_value_nullable as object when it should be null
+            assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable"));
+            assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable") instanceof Schema);
+            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable");
+            assertNull(mapProperty.getType());
+
+            //array_any_value as array when it should be null
+            assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value"));
+            assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value") instanceof Schema);
+            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value");
+            assertNull(mapProperty.getType());
+
+            //array_any_value_with_desc as array when it should be null
+            assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc"));
+            assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc") instanceof Schema);
+            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc");
+            assertNull(mapProperty.getType());
+
+            //array_any_value_nullable
+            assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable"));
+            assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable") instanceof Schema);
+            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable");
+            assertNull(mapProperty.getType());
+            assertNull(mapProperty.getItems().getNullable());
+            Yaml31.prettyPrint(mapProperty);
+            assertNotNull(mapProperty.getItems().getExtensions().get("nullable"));
+            //TODO check the toString Method difference between SOUT and YAML31 prettyprint
+            System.out.println(mapProperty);
         }
 }

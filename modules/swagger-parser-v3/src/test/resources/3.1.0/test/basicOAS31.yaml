@@ -1,10 +1,13 @@
 openapi: "3.1.0"
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 info:
   version: 1.0.0
+  summary: test summary in info object
+  description: description in info object
   title: Swagger Petstore
   license:
     name: MIT
-    identifier: test
+    identifier: test identifier
 servers:
   - url: http://petstore.swagger.io/v1
 webhooks:
@@ -100,6 +103,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 components:
+  pathItems:
+    pets:
+      get:
+        description: Returns all pets from the system that the user has access to
+        responses:
+          '200':
+            description: A list of pets.
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/pet'
   parameters:
     User:
       in: query
@@ -112,6 +128,7 @@ components:
       type:
         - object
         - string
+        - array
       required:
         - id
         - name
@@ -134,10 +151,24 @@ components:
         tag:
           type: string
       arbitraryKeyword: test
+      $ref: ./ex.json#user-profile
     Pets:
-      type: array
+      type: 'null'
+      default: "I'm a string"
+      exclusiveMaximum: 12
+      exclusiveMinimum: 1
       items:
         $ref: "#/components/schemas/Pet"
+    ArrayWithoutItems:
+      type: array
+    ItemsWithoutArrayType:
+      type: object
+      items:
+        item1:
+          type: object
+        item2:
+          type: string
+        item3: what
     Error:
       required:
         - code
@@ -162,3 +193,5 @@ components:
           format: int64
         name:
           type: string
+    MapAnyValue:
+      additionalProperties: { }
