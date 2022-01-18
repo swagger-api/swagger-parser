@@ -10,6 +10,12 @@ info:
     identifier: test identifier
 servers:
   - url: http://petstore.swagger.io/v1
+  - url: http://{host}.swagger.io/v1
+    variables:
+      host:
+        default: demo
+        description: this value is assigned by the service provider
+        enum: []
 webhooks:
   # Each webhook needs a name
   newPet:
@@ -138,6 +144,8 @@ components:
           format: int64
         name:
           type: string
+          writeOnly: true
+          readOnly: true
         testenum:
           type: string
           enum:
@@ -193,5 +201,7 @@ components:
           format: int64
         name:
           type: string
+      patternProperties:
+        '[a-b].*': 1
     MapAnyValue:
       additionalProperties: { }
