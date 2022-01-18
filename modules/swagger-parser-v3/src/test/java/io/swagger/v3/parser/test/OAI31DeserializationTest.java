@@ -20,7 +20,10 @@ public class OAI31DeserializationTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/test/basicOAS31.yaml", null, null);
         assertNotNull(result.getOpenAPI());
         OpenAPI openAPI = result.getOpenAPI();
-        System.out.println("Messages: "+result.getMessages());
+        System.out.println("Messages: \n");
+        result.getMessages().forEach(System.out::println);
+
+        System.out.println("\n\nParsed: \n\n");
         Yaml31.prettyPrint(openAPI);
         //JsonSchemaDialect
         assertNotNull(openAPI.getJsonSchemaDialect());
