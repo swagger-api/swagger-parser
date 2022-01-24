@@ -83,6 +83,100 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test(description = "Test for not setting the schema type as default")
+    public void testNotDefaultSchemaType() {
+        ParseOptions options = new ParseOptions();
+        options.setDefaultSchemaTypeObject(false);
+        String defaultSchemaType = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: ping test\n" +
+                "  version: '1.0'\n" +
+                "servers:\n" +
+                "  - url: 'http://localhost:8000/'\n" +
+                "paths:\n" +
+                "  /ping:\n" +
+                "    get:\n" +
+                "      operationId: pingGet\n" +
+                "      responses:\n" +
+                "        '201':\n" +
+                "          description: OK\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    AnyValueModelInline:\n" +
+                "      description: test any value inline\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        array_any_value:\n" +
+                "          items: {}\n" +
+                "        map_any_value:\n" +
+                "         additionalProperties: {}\n" +
+                "        any_value: {}\n" +
+                "        any_value_with_desc:\n" +
+                "          description: inline any value\n" +
+                "        any_value_nullable:\n" +
+                "          nullable: true\n" +
+                "          description: inline any value nullable\n" +
+                "        map_any_value_with_desc:\n" +
+                "          additionalProperties: \n" +
+                "            description: inline any value\n" +
+                "        map_any_value_nullable:\n" +
+                "          additionalProperties:\n" +
+                "            nullable: true\n" +
+                "            description: inline any value nullable\n" +
+                "        array_any_value_with_desc:\n" +
+                "          items: \n" +
+                "            description: inline any value\n" +
+                "        array_any_value_nullable:\n" +
+                "          items:\n" +
+                "            nullable: true\n" +
+                "            description: inline any value nullable";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(defaultSchemaType, null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        //map_any_value as object when it should be null
+        assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value"));
+        assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value") instanceof Schema);
+        Schema schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value");
+        assertNull(schema.getType());
+
+        //map_any_value_with_desc as object when it should be null
+        assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc"));
+        assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc") instanceof Schema);
+        schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc");
+        assertNull(schema.getType());
+
+        //map_any_value_nullable as object when it should be null
+        assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable"));
+        assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable") instanceof Schema);
+        schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable");
+        assertNull(schema.getType());
+
+        //array_any_value as array when it should be null
+        assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value"));
+        assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value") instanceof Schema);
+        schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value");
+        //TODO assertNull(schema.getItems());
+        assertNull(schema.getType());
+
+        //array_any_value_with_desc as array when it should be null
+        assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc"));
+        assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc") instanceof Schema);
+        schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc");
+        //TODO assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc").getItems().getDescription());
+        assertNull(schema.getType());
+
+        //array_any_value_nullable
+        assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable"));
+        assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable") instanceof Schema);
+        schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable");
+        assertNull(schema.getType());
+        //TODO  The ArraySchema sets by default the type array to the schema.
+        // TODO Items are not a field of Schema Class
+        //assertNull(schema.getItems().getNullable());
+        //assertNotNull(schema.getItems().getExtensions().get("nullable"));
+        System.out.println(schema);
+    }
 
     @Test
     public void testEmptyStrings_False() throws Exception{

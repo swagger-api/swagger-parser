@@ -152,6 +152,7 @@ public class OpenAPIDeserializer {
 		SwaggerParseResult result = new SwaggerParseResult();
 		ParseResult rootParse = new ParseResult();
 		rootParse.setAllowEmptyStrings(options.isAllowEmptyString());
+		rootParse.setDefaultSchemaTypeObject(options.isDefaultSchemaTypeObject());
 		OpenAPI api = parseRoot(rootNode, rootParse, path);
 		result.setOpenAPI(api);
 		result.setMessages(rootParse.getMessages());
@@ -2204,7 +2205,7 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		if (itemsNode != null) {
+		if (itemsNode != null && result.isDefaultSchemaTypeObject()) {
 			ArraySchema items = new ArraySchema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getSchema(itemsNode, location, result));
@@ -2230,7 +2231,7 @@ public class OpenAPIDeserializer {
 						? getSchema(additionalPropertiesObject, location, result)
 						: additionalPropertiesBoolean;
 
-		if (additionalProperties != null) {
+		if (additionalProperties != null && result.isDefaultSchemaTypeObject()) {
 			if (schema == null) {
 				schema =
 						additionalProperties.equals(Boolean.FALSE)
@@ -2455,7 +2456,7 @@ public class OpenAPIDeserializer {
 		}
 
 		//sets default value according to the schema type
-		if (node.get("default") != null) {
+		if (node.get("default") != null && result.isDefaultSchemaTypeObject()) {
 			if (!StringUtils.isBlank(schema.getType())) {
 				if (schema.getType().equals("array")) {
 					ArrayNode array = getArray("default", node, false, location, result);
@@ -2494,6 +2495,8 @@ public class OpenAPIDeserializer {
 					}
 				}
 			}
+		}else{
+			schema.setDefault(null);
 		}
 
 
@@ -3160,8 +3163,22 @@ public class OpenAPIDeserializer {
 		private List<Location> unique = new ArrayList<>();
 		private List<Location> uniqueTags = new ArrayList<>();
 		private boolean allowEmptyStrings = true;
+		private boolean defaultSchemaTypeObject = true;
 
 		public ParseResult() {
+		}
+
+		public boolean isDefaultSchemaTypeObject() {
+			return defaultSchemaTypeObject;
+		}
+
+		public void setDefaultSchemaTypeObject(boolean defaultSchemaTypeObject) {
+			this.defaultSchemaTypeObject = defaultSchemaTypeObject;
+		}
+
+		public ParseResult defaultSchemaTypeObject(boolean defaultSchemaTypeObject) {
+			this.defaultSchemaTypeObject = defaultSchemaTypeObject;
+			return this;
 		}
 
 		public boolean isAllowEmptyStrings() {
@@ -3254,6 +3271,7 @@ public class OpenAPIDeserializer {
 			}
 			return messages;
 		}
+
 	}
 
 
