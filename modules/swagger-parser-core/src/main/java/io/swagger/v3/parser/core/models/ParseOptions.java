@@ -12,6 +12,7 @@ public class ParseOptions {
     private boolean validateExternalRefs = false;
     private boolean legacyYamlDeserialization = false;
     private boolean oaiAuthor;
+    private boolean defaultSchemaTypeObject = true;
 
     public boolean isResolve() {
         return resolve;
@@ -97,5 +98,13 @@ public class ParseOptions {
 
     public boolean isOaiAuthor() {
         return oaiAuthor;
+    }
+
+    public boolean isDefaultSchemaTypeObject() {
+        return defaultSchemaTypeObject;
+    }
+
+    public void setDefaultSchemaTypeObject(boolean defaultSchemaTypeObject) {
+        this.defaultSchemaTypeObject = defaultSchemaTypeObject;
     }
 }
