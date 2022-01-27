@@ -824,6 +824,18 @@ public class SwaggerDeserializer {
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
             }
 
+
+            /*JsonNode items = node.get("items");
+            if (items != null && items.getNodeType().equals(JsonNodeType.OBJECT)) {
+                impl.setItems(Json.mapper().convertValue(items, Property.class));
+            }*/
+
+            ObjectNode itemsNode = getObject("items", node, false, location, result);
+            Property items = property(itemsNode, location, result);
+            if (items != null) {
+                impl.setItems(items);
+            }
+
             value = getString("default", node, false, location, result);
             impl.setDefaultValue(value);
 
