@@ -52,6 +52,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 
@@ -270,10 +271,10 @@ public class OpenAPIDeserializer {
 	}
 
 	public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
-		return deserialize(rootNode, null, false);
+		return deserialize(rootNode, null, new ParseOptions());
 	}
 
-	public SwaggerParseResult deserialize(JsonNode rootNode, String path, boolean isOaiAuthor) {
+	public SwaggerParseResult deserialize(JsonNode rootNode, String path, ParseOptions options) {
 		basePath = path;
 		this.rootNode = rootNode;
 		rootMap = new ObjectMapper().convertValue(rootNode, Map.class);
@@ -281,7 +282,8 @@ public class OpenAPIDeserializer {
 		try {
 
 			ParseResult rootParse = new ParseResult();
-			rootParse.setOaiAuthor(isOaiAuthor);
+			rootParse.setOaiAuthor(options.isOaiAuthor());
+			rootParse.setDefaultSchemaTypeObject(options.isDefaultSchemaTypeObject());
 			OpenAPI api = parseRoot(rootNode, rootParse, path);
 			result.openapi31(rootParse.isOpenapi31());
 			result.setOpenAPI(api);
@@ -1356,7 +1358,7 @@ public class OpenAPIDeserializer {
 					, false));
 		}
 
-		Object example = getAnyExample("example", contentNode, location, result);
+		Object example = getAnyType("example", contentNode, location, result);
 		if (example != null) {
 			if (examplesObject != null) {
 				result.warning(location, "examples already defined -- ignoring \"example\" field");
@@ -1971,7 +1973,7 @@ public class OpenAPIDeserializer {
 					, false));
 		}
 
-		Object example = getAnyExample("example", obj, location, result);
+		Object example = getAnyType("example", obj, location, result);
 		if (example != null) {
 			if (examplesObject != null) {
 				result.warning(location, "examples already defined -- ignoring \"example\" field");
@@ -2104,7 +2106,7 @@ public class OpenAPIDeserializer {
 			header.setExamples(getExamples(examplesObject, location, result, false));
 		}
 
-		Object example = getAnyExample("example", headerNode, location, result);
+		Object example = getAnyType("example", headerNode, location, result);
 		if (example != null) {
 			if (examplesObject != null) {
 				result.warning(location, "examples already defined -- ignoring \"example\" field");
@@ -2133,8 +2135,8 @@ public class OpenAPIDeserializer {
 
 		return header;
 	}
-	//TODO rename method as is used by different objects not only to get examples
-	public Object getAnyExample(String nodeKey, ObjectNode node, String location, ParseResult result) {
+	
+	public Object getAnyType(String nodeKey, ObjectNode node, String location, ParseResult result) {
 		JsonNode example = node.get(nodeKey);
 		if (example != null) {
 			if (example.getNodeType().equals(JsonNodeType.STRING)) {
@@ -2550,8 +2552,20 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		if (itemsNode != null) {
+		if (itemsNode != null && result.isDefaultSchemaTypeObject()) {
 			ArraySchema items = new ArraySchema();
+			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
+				items.setItems(getSchema(itemsNode, location, result));
+			} else if (itemsNode.getNodeType().equals(JsonNodeType.ARRAY)) {
+				for (JsonNode n : itemsNode) {
+					if (n.isValueNode()) {
+						items.setItems(getSchema(itemsNode, location, result));
+					}
+				}
+			}
+			schema = items;
+		}else if (itemsNode != null){
+			Schema items = new Schema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getSchema(itemsNode, location, result));
 			} else if (itemsNode.getNodeType().equals(JsonNodeType.ARRAY)) {
@@ -2576,7 +2590,7 @@ public class OpenAPIDeserializer {
 						? getSchema(additionalPropertiesObject, location, result)
 						: additionalPropertiesBoolean;
 
-		if (additionalProperties != null) {
+		if (additionalProperties != null && result.isDefaultSchemaTypeObject()) {
 			if (schema == null) {
 				schema =
 						additionalProperties.equals(Boolean.FALSE)
@@ -2801,7 +2815,7 @@ public class OpenAPIDeserializer {
 		}
 
 		//sets default value according to the schema type
-		if (node.get("default") != null) {
+		if (node.get("default") != null && result.isDefaultSchemaTypeObject()) {
 			if (!StringUtils.isBlank(schema.getType())) {
 				if (schema.getType().equals("array")) {
 					ArrayNode array = getArray("default", node, false, location, result);
@@ -2840,6 +2854,13 @@ public class OpenAPIDeserializer {
 					}
 				}
 			}
+		}else{
+			schema.setDefault(null);
+		}
+
+		bool = getBoolean("nullable", node, false, location, result);
+		if (bool != null) {
+			schema.setNullable(bool);
 		}
 
 		bool = getBoolean("readOnly", node, false, location, result);
@@ -2875,7 +2896,7 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		Object example = getAnyExample("example", node, location, result);
+		Object example = getAnyType("example", node, location, result);
 		if (example != null) {
 			schema.setExample(example instanceof NullNode ? null : example);
 		}
@@ -3083,7 +3104,7 @@ public class OpenAPIDeserializer {
 			example.setDescription(value);
 		}
 
-		Object sample = getAnyExample("value", node, location, result);
+		Object sample = getAnyType("value", node, location, result);
 		if (sample != null) {
 			example.setValue(sample instanceof NullNode ? null : sample);
 		}
@@ -3586,8 +3607,19 @@ public class OpenAPIDeserializer {
 				schema = composedSchema;
 			}
 		}
-
-		if (itemsNode != null) {
+		if (itemsNode != null && result.isDefaultSchemaTypeObject()) {
+			ArraySchema items = new ArraySchema();
+			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
+				items.setItems(getSchema(itemsNode, location, result));
+			} else if (itemsNode.getNodeType().equals(JsonNodeType.ARRAY)) {
+				for (JsonNode n : itemsNode) {
+					if (n.isValueNode()) {
+						items.setItems(getSchema(itemsNode, location, result));
+					}
+				}
+			}
+			schema = items;
+		}else if (itemsNode != null) {
 			JsonSchema items = new JsonSchema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getJsonSchema(itemsNode, location, result));
@@ -3613,7 +3645,16 @@ public class OpenAPIDeserializer {
 						? getJsonSchema(additionalPropertiesObject, location, result)
 						: additionalPropertiesBoolean;
 
-		if (additionalProperties != null) {
+
+		if (additionalProperties != null && result.isDefaultSchemaTypeObject()) {
+			if (schema == null) {
+				schema =
+						additionalProperties.equals(Boolean.FALSE)
+								? new ObjectSchema()
+								: new MapSchema();
+			}
+			schema.setAdditionalProperties(additionalProperties);
+		}else if (additionalProperties != null) {
 			if (schema == null) {
 				schema = new JsonSchema();
 			}
@@ -3689,7 +3730,9 @@ public class OpenAPIDeserializer {
 
 		if (node.get("default") != null) {
 			//TODO rename method
-			schema.setDefault(getAnyExample("default",node,location,result));
+			if(result.isDefaultSchemaTypeObject()) {
+				schema.setDefault(getAnyType("default", node, location, result));
+			}
 		}
 
 		ObjectNode discriminatorNode = getObject("discriminator", node, false, location, result);
@@ -4074,7 +4117,7 @@ public class OpenAPIDeserializer {
 			schema.setExamples(exampleList);
 		}
 
-		Object example = getAnyExample("example", node, location, result);
+		Object example = getAnyType("example", node, location, result);
 		if (example != null) {
 			schema.setExample(example instanceof NullNode ? null : example);
 		}
@@ -4131,9 +4174,22 @@ public class OpenAPIDeserializer {
 		private List<Location> unique = new ArrayList<>();
 		private List<Location> uniqueTags = new ArrayList<>();
 		private List<Location> reserved = new ArrayList<>();
-
+		private boolean defaultSchemaTypeObject = true;
 		private boolean openapi31 = false;
 		private boolean oaiAuthor = false;
+
+		public boolean isDefaultSchemaTypeObject() {
+			return defaultSchemaTypeObject;
+		}
+
+		public void setDefaultSchemaTypeObject(boolean defaultSchemaTypeObject) {
+			this.defaultSchemaTypeObject = defaultSchemaTypeObject;
+		}
+
+		public ParseResult defaultSchemaTypeObject(boolean defaultSchemaTypeObject) {
+			this.defaultSchemaTypeObject = defaultSchemaTypeObject;
+			return this;
+		}
 
 		public ParseResult() {
 		}
