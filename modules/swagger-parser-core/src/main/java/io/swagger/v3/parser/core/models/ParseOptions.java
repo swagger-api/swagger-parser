@@ -15,6 +15,7 @@ public class ParseOptions {
     private boolean resolveRequestBody = false;
 
     private boolean oaiAuthor;
+    private boolean defaultSchemaTypeObject = true;
 
     public boolean isResolve() {
         return resolve;
@@ -121,5 +122,13 @@ public class ParseOptions {
 
     public boolean isValidateInternalRefs() {
         return validateInternalRefs;
+    }
+
+    public boolean isDefaultSchemaTypeObject() {
+        return defaultSchemaTypeObject;
+    }
+
+    public void setDefaultSchemaTypeObject(boolean defaultSchemaTypeObject) {
+        this.defaultSchemaTypeObject = defaultSchemaTypeObject;
     }
 }

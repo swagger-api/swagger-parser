@@ -719,6 +719,7 @@ public class OAI31DeserializationTest {
         @Test(description = "Test for not setting the schema type as default")
         public void testNotDefaultSchemaType() {
             ParseOptions options = new ParseOptions();
+            options.setDefaultSchemaTypeObject(false);
             String defaultSchemaType = "openapi: 3.1.0\n" +
                     "info:\n" +
                     "  title: ping test\n" +
@@ -785,42 +786,39 @@ public class OAI31DeserializationTest {
             //map_any_value as object when it should be null
             assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value"));
             assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value") instanceof Schema);
-            Schema mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value");
-            assertNull(mapProperty.getType());
+            Schema schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value");
+            assertNull(schema.getType());
 
             //map_any_value_with_desc as object when it should be null
             assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc"));
             assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc") instanceof Schema);
-            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc");
-            assertNull(mapProperty.getType());
+            schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_with_desc");
+            assertNull(schema.getType());
 
             //map_any_value_nullable as object when it should be null
             assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable"));
             assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable") instanceof Schema);
-            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable");
-            assertNull(mapProperty.getType());
+            schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("map_any_value_nullable");
+            assertNull(schema.getType());
 
             //array_any_value as array when it should be null
             assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value"));
             assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value") instanceof Schema);
-            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value");
-            assertNull(mapProperty.getType());
+            schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value");
+            assertNull(schema.getType());
 
             //array_any_value_with_desc as array when it should be null
             assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc"));
             assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc") instanceof Schema);
-            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc");
-            assertNull(mapProperty.getType());
+            schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_with_desc");
+            assertNull(schema.getType());
 
             //array_any_value_nullable
             assertNotNull(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable"));
             assertTrue(openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable") instanceof Schema);
-            mapProperty = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable");
-            assertNull(mapProperty.getType());
-            assertNull(mapProperty.getItems().getNullable());
-            Yaml31.prettyPrint(mapProperty);
-            assertNotNull(mapProperty.getItems().getExtensions().get("nullable"));
-            //TODO check the toString Method difference between SOUT and YAML31 prettyprint
-            System.out.println(mapProperty);
+            schema = (Schema)openAPI.getComponents().getSchemas().get("AnyValueModelInline").getProperties().get("array_any_value_nullable");
+            assertNull(schema.getType());
+            assertNull(schema.getItems().getNullable());
+            assertNotNull(schema.getItems().getExtensions().get("nullable"));
         }
 }
