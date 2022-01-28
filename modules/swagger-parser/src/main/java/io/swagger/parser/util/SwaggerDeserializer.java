@@ -775,13 +775,13 @@ public class SwaggerDeserializer {
         String value = null;
 
         String type = getString("type", node, false, location, result);
+        JsonNode itemsKey = node.get("items");
         Model m = new ModelImpl();
-        if ("array".equals(type)) {
+        if ("array".equals(type) || itemsKey != null) {
             ArrayModel am = new ArrayModel();
             ObjectNode propertyNode = getObject("properties", node, false, location, result);
             Map<String, Property> properties = properties(propertyNode, location, result);
             am.setProperties(properties);
-
 
             ObjectNode itemsNode = getObject("items", node, false, location, result);
             Property items = property(itemsNode, location, result);
@@ -822,18 +822,6 @@ public class SwaggerDeserializer {
             JsonNode ap = node.get("additionalProperties");
             if (ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
-            }
-
-
-            /*JsonNode items = node.get("items");
-            if (items != null && items.getNodeType().equals(JsonNodeType.OBJECT)) {
-                impl.setItems(Json.mapper().convertValue(items, Property.class));
-            }*/
-
-            ObjectNode itemsNode = getObject("items", node, false, location, result);
-            Property items = property(itemsNode, location, result);
-            if (items != null) {
-                impl.setItems(items);
             }
 
             value = getString("default", node, false, location, result);

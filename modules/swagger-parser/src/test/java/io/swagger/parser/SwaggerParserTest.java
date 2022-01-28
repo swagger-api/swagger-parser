@@ -83,8 +83,8 @@ public class SwaggerParserTest {
         assertNotNull(swagger);
         assertNotNull(swagger.getPaths().get("/test").getGet().getResponses().get("200"));
         assertNotNull(swagger.getPaths().get("/test").getGet().getResponses().get("200").getResponseSchema());
-        ModelImpl model = (ModelImpl) swagger.getPaths().get("/test").getGet().getResponses().get("200").getResponseSchema();
-        assertNotNull(model.getItems());
+        ArrayModel arrayModel = (ArrayModel) swagger.getPaths().get("/test").getGet().getResponses().get("200").getResponseSchema();
+        assertNotNull(arrayModel.getItems());
     }
 
     @Test
