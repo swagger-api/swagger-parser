@@ -3729,7 +3729,6 @@ public class OpenAPIDeserializer {
 		}
 
 		if (node.get("default") != null) {
-			//TODO rename method
 			if(result.isDefaultSchemaTypeObject()) {
 				schema.setDefault(getAnyType("default", node, location, result));
 			}
@@ -3935,6 +3934,15 @@ public class OpenAPIDeserializer {
 				schema.setElse(_else);
 			}
 		}
+
+		ObjectNode unevaluatedItems = getObject("unevaluatedItems", node, false, location, result);
+		if (unevaluatedItems != null) {
+			Schema unevaluatedItemsSchema = getJsonSchema(unevaluatedItems, location, result);
+			if (unevaluatedItemsSchema != null) {
+				schema.setUnevaluatedItems(unevaluatedItemsSchema);
+			}
+		}
+
 
 		Map<String, List<String>> dependentRequiredList = new LinkedHashMap<>();
 		ObjectNode dependentRequiredObj = getObject("dependentRequired", node, false, location, result);
