@@ -366,7 +366,7 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getPatternProperties().containsKey("^S_"));
     }
 
-    @Test(description = "Test siblings with $ref for patternProperties, pattern, additionalProperties,exclusiveMaximum,exclusiveMinimum")
+    @Test(description = "Test siblings with $ref for patternProperties, pattern, additionalProperties,exclusiveMaximum,exclusiveMinimum, $schema")
     public void testSiblingsReferenceJSONSchema3() {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
@@ -394,6 +394,7 @@ public class OAI31DeserializationTest {
         assertNotNull(openAPI);
         Schema profile = openAPI.getComponents().getSchemas().get("profile");
         assertNotNull(profile.get$ref());
+        assertEquals(profile.get$schema(), "https://json-schema.org/draft/2020-12/schema");
         assertEquals(profile.get$anchor(),"foo");
         assertEquals(profile.get$id(),"profile-id");
         assertTrue(profile.getExclusiveMaximumValue().intValue()==12);
@@ -434,7 +435,7 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getContentSchema().getTypes().contains("string"));
     }
 
-    @Test(description = "Test siblings with $ref for contains, maxContains, minContains, prefixItems, uniqueItems, propertyNames, unevaluatedProperties")
+    @Test(description = "Test siblings with $ref for contains, maxContains, minContains, prefixItems, uniqueItems, propertyNames, unevaluatedProperties, unevaluatedItems")
     public void testSiblingsReferenceJSONSchema5() {
         ParseOptions options = new ParseOptions();
         String refSibling = "openapi: 3.1.0\n" +
@@ -459,6 +460,8 @@ public class OAI31DeserializationTest {
                 "      $ref: ./ex.json#user-profile\n" +
                 "      unevaluatedProperties:\n" +
                 "         type: object\n"+
+                "      unevaluatedItems:\n" +
+                "          type: object\n" +
                 "    Person:\n" +
                 "      type: array\n" +
                 "      prefixItems:\n" +
@@ -510,6 +513,9 @@ public class OAI31DeserializationTest {
         assertNotNull(patientPersonSchema.getUnevaluatedProperties());
         assertTrue(patientPersonSchema.getUnevaluatedProperties() instanceof Boolean);
         assertFalse(((Boolean)patientPersonSchema.getUnevaluatedProperties()).booleanValue());
+
+        //unevaluatedItems
+        assertNotNull(profile.getUnevaluatedItems());
     }
 
     @Test(description = "Test siblings with $ref for if - then - else, dependentRequired, dependentSchemas")
@@ -672,6 +678,7 @@ public class OAI31DeserializationTest {
                 "components:\n" +
                 "  schemas:\n" +
                 "    Fruit:\n" +
+                "      deprecated: true\n"+
                 "      type: string\n" +
                 "      example: kiwi\n" +
                 "      examples:\n" +
@@ -684,6 +691,7 @@ public class OAI31DeserializationTest {
         assertNotNull(openAPI);
         assertNotNull(openAPI.getComponents().getSchemas().get("Fruit").getExtensions().get("arbitraryKeyword"));
         assertNotNull(openAPI.getComponents().getSchemas().get("Fruit").getExtensions().get("x-normalExtension"));
+        assertTrue(openAPI.getComponents().getSchemas().get("Fruit").getDeprecated());
     }
 
     @Test(description = "Test for Tuple parsing")
