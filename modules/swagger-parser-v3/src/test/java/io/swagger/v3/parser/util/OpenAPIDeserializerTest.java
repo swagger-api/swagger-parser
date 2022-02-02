@@ -1271,6 +1271,157 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testParamContent() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"parameters\": ["
+            + "          {"
+            + "            \"name\": \"param0\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "            }"
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param1\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              }"
+            + "            }"
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param2\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              },"
+            + "              \"application/json\": {"
+            + "                \"schema\": {"
+            + "                  \"type\": \"object\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        ],"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+
+        Parameter param0 =
+            post.getParameters().stream()
+            .filter( p -> "param0".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param0"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param0].content with no media type is unsupported"),
+             true,
+             "No media types error reported");
+        assertEquals( param0.getContent(), null, "Empty content");
+
+        Parameter param1 =
+            post.getParameters().stream()
+            .filter( p -> "param1".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param1"));
+        assertEquals( param1.getContent().size(), 1, "Valid content size");
+
+        Parameter param2 =
+            post.getParameters().stream()
+            .filter( p -> "param2".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param2"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param2].content with multiple media types is unsupported"),
+             true,
+             "Multiple media types error reported");
+        assertEquals( param2.getContent(), null, "Content with multiple media types");
+    }
+
+    @Test
+    public void testParamData() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"parameters\": ["
+            + "          {"
+            + "            \"name\": \"param0\","
+            + "            \"in\": \"query\""
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param2\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              }"
+            + "            },"
+            + "            \"schema\": {"
+            + "               \"type\": \"object\""
+            + "              }"
+            + "            }"
+            + "        ],"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+
+        Parameter param0 =
+            post.getParameters().stream()
+            .filter( p -> "param0".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param0"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param0].content is missing"),
+             true,
+             "No schema or content error reported");
+        assertEquals( param0.getContent(), null, "No schema or content");
+
+        Parameter param2 =
+            post.getParameters().stream()
+            .filter( p -> "param2".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param2"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param2].content when schema defined is unsupported"),
+             true,
+             "Both schema and content error reported");
+        assertEquals( param2.getContent(), null, "Content when schema defined");
+    }
+
+    @Test
     public void testDeserializeWithMessages() {
         String yaml = "openapi: '3.0.0'\n" +
                 "info:\n" +

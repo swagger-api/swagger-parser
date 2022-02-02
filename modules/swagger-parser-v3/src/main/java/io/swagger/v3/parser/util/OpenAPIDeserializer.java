@@ -1680,8 +1680,23 @@ public class OpenAPIDeserializer {
 
 		ObjectNode contentNode = getObject("content", obj, false, location, result);
 		if (contentNode != null) {
-			parameter.setContent(getContent(contentNode, String.format("%s.%s", location, "content"), result));
+            Content content = getContent(contentNode, String.format("%s.%s", location, "content"), result);
+            if(content.size() == 0) {
+                result.unsupported(location,"content with no media type",contentNode);
+            }
+            else if(content.size() > 1) {
+                result.unsupported(location,"content with multiple media types",contentNode);
+            }
+            else if(parameter.getSchema() != null) {
+                result.unsupported(location,"content when schema defined",contentNode);
+            }
+            else {
+                parameter.setContent(content);
+            }
 		}
+        else if(parameter.getSchema() == null) {
+            result.missing(location,"content");
+        }
 
 		Map<String, Object> extensions = getExtensions(obj);
 		if (extensions != null && extensions.size() > 0) {
