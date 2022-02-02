@@ -2753,29 +2753,32 @@ public class OpenAPIDeserializerTest {
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
 
-        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatusContent");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 3);
+
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),3);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),null);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExamples().get("list").getSummary(),"List of Names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
 
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(1).getContent());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().size(),1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getSummary());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getSummary(),"Empty list");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getValue(),"<Users/>");
 
-        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary(),"Empty list");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getValue(),"<Users/>");
-
-
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(2).getContent());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().size(),1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
 
         PathItem petEndpoint = paths.get("/pet");
         Assert.assertNotNull(petEndpoint.getPut());
@@ -2976,7 +2979,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -3000,7 +3003,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -3026,7 +3029,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByTags");
@@ -3053,7 +3056,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem producesTestEndpoint = paths.get("/producesTest");
@@ -3120,7 +3123,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
 
         PathItem petRef = paths.get("/pathItemRef");
