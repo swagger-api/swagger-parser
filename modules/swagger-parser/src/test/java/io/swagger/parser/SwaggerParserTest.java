@@ -50,6 +50,44 @@ import io.swagger.util.Yaml;
 public class SwaggerParserTest {
 
     @Test
+    public void testNonArraySchemaWithItems_1636() {
+        String spec = "swagger: '2.0'\n" +
+                "info:\n" +
+                "  description: 'This is a TEST.'\n" +
+                "  version: 1.0.0\n" +
+                "  title: Test\n" +
+                "host: www.abc.com\n" +
+                "basePath: /api\n" +
+                "schemes:\n" +
+                "  - http\n" +
+                "paths:\n" +
+                "  /test:\n" +
+                "    get:\n" +
+                "      summary: Test\n" +
+                "      description: 'test'\n" +
+                "      operationId: test\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          schema:\n" +
+                "            items:\n" +
+                "              $ref: '#/definitions/myResponse'\n" +
+                "          description: myResponse\n" +
+                "definitions:\n" +
+                "  myResponse:\n" +
+                "    type: object\n" +
+                "    properties:\n" +
+                "      id:\n" +
+                "        type: integer\n" +
+                "        format: int64";
+        Swagger swagger = new SwaggerParser().parse(spec);
+        assertNotNull(swagger);
+        assertNotNull(swagger.getPaths().get("/test").getGet().getResponses().get("200"));
+        assertNotNull(swagger.getPaths().get("/test").getGet().getResponses().get("200").getResponseSchema());
+        ArrayModel arrayModel = (ArrayModel) swagger.getPaths().get("/test").getGet().getResponses().get("200").getResponseSchema();
+        assertNotNull(arrayModel.getItems());
+    }
+
+    @Test
     public void testArrayRelativeRefs() {
         String location = "arrayItemsResolving/Swagger.yaml";
         Swagger swagger = new SwaggerParser().read(location, null, true);

@@ -775,13 +775,13 @@ public class SwaggerDeserializer {
         String value = null;
 
         String type = getString("type", node, false, location, result);
+        JsonNode itemsKey = node.get("items");
         Model m = new ModelImpl();
-        if ("array".equals(type)) {
+        if ("array".equals(type) || itemsKey != null) {
             ArrayModel am = new ArrayModel();
             ObjectNode propertyNode = getObject("properties", node, false, location, result);
             Map<String, Property> properties = properties(propertyNode, location, result);
             am.setProperties(properties);
-
 
             ObjectNode itemsNode = getObject("items", node, false, location, result);
             Property items = property(itemsNode, location, result);
