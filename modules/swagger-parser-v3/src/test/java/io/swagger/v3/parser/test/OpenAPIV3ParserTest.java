@@ -83,6 +83,58 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1644_NullValue() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1644 = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Operations\n" +
+                "  version: 0.0.0\n" +
+                "paths:\n" +
+                "  \"/operations\":\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        - name: param0\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: None\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1644, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),1);
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is missing"));
+        assertFalse(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+    }
+
+    @Test
+    public void testIssue1644_EmptyValue() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1644 = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Operations\n" +
+                "  version: 0.0.0\n" +
+                "paths:\n" +
+                "  \"/operations\":\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        - name: param0\n" +
+                "          in: ''\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: None\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1644, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),1);
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+    }
+
 
     @Test
     public void testEmptyStrings_False() throws Exception{
