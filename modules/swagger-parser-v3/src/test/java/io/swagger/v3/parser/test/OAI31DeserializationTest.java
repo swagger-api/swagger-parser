@@ -1,5 +1,6 @@
 package io.swagger.v3.parser.test;
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -20,11 +21,7 @@ public class OAI31DeserializationTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/test/basicOAS31.yaml", null, null);
         assertNotNull(result.getOpenAPI());
         OpenAPI openAPI = result.getOpenAPI();
-        System.out.println("Messages: \n");
-        result.getMessages().forEach(System.out::println);
 
-        System.out.println("\n\nParsed: \n\n");
-        Yaml31.prettyPrint(openAPI);
         //JsonSchemaDialect
         assertNotNull(openAPI.getJsonSchemaDialect());
         //change to bad uri and retest to show the error message
@@ -60,7 +57,7 @@ public class OAI31DeserializationTest {
         //const
         assertNotNull(((Schema) openAPI.getComponents().getSchemas().get("Pet").getProperties().get("testconst")).getConst());
         assertFalse(result.getMessages().contains("attribute components.schemas.Pet.const is unexpected"));
-        //exclusiveMaximum-exclusiveMinimum
+        //exclusiveMaximum-exclusiveMinimum are numeric in 3.1
         assertTrue(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMaximumValue().intValue()==12);
         assertTrue(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMinimumValue().intValue()==1);
         //Null type
@@ -73,6 +70,56 @@ public class OAI31DeserializationTest {
         assertNotNull(openAPI.getComponents().getSchemas().get("Pet").get$ref());
         assertNotNull(openAPI.getComponents().getSchemas().get("Pet").getProperties());
 
+    }
+
+    @Test(description = "Test basic OAS30 deserialization/validation if added the fields of OAS3.1")
+    public void testBasicOAS30_With31Fields() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/test/basicOAS30.yaml", null, null);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        //No JsonSchemaDialect
+        assertNull(openAPI.getJsonSchemaDialect());
+        assertTrue(result.getMessages().contains("attribute jsonSchemaDialect is unexpected"));
+        //info: only description is parsed
+        assertNotNull(openAPI.getInfo().getDescription());
+        assertEquals(openAPI.getInfo().getDescription(), "description in info object");
+        assertTrue(result.getMessages().contains("attribute info.summary is unexpected"));
+        //license: No identifier
+        assertNull(openAPI.getInfo().getLicense().getIdentifier());
+        assertTrue(result.getMessages().contains("attribute info.license.identifier is unexpected"));
+        //No pathItems under components
+        assertNull(openAPI.getComponents().getPathItems());
+        assertTrue(result.getMessages().contains("attribute components.pathItems is unexpected"));
+        //Type array without items but with error message
+        assertEquals(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getType(),"array");
+        assertNull(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getItems());
+        assertTrue(result.getMessages().contains("attribute components.schemas.ArrayWithoutItems.items is missing"));
+        //Type object with items: not allowed, it will internally create an array (New Option setDefaultSchemaTypeObject )
+        assertNotEquals(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getType(),"object");
+        assertEquals(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getType(),"array");
+        assertNotNull(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getItems());
+        assertTrue(result.getMessages().contains("attribute components.schemas.ItemsWithoutArrayType.item1 is unexpected"));
+        //Type field as array not deserialized
+        assertNull(openAPI.getComponents().getSchemas().get("Pet").getTypes());
+        //JsonSchema
+        //arbitrary keywords are not allowed
+        assertNull(openAPI.getComponents().getSchemas().get("Pet").getExtensions());
+        assertTrue(result.getMessages().contains("attribute components.schemas.Pet.arbitraryKeyword is unexpected"));
+        //const
+        assertNull(((Schema) openAPI.getComponents().getSchemas().get("Pet").getProperties().get("testconst")).getConst());
+        assertTrue(result.getMessages().contains("attribute components.schemas.Pet.const is unexpected"));
+        //exclusiveMaximum-exclusiveMinimum are boolean in 3.0
+        assertNull(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMaximum());
+        assertNull(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMinimum());
+        //Null type
+        assertNull(openAPI.getComponents().getSchemas().get("Pets").getTypes());
+        //default value independence
+        assertNull(openAPI.getComponents().getSchemas().get("Pets").getDefault());
+        //not setting the type by default
+        assertNull(openAPI.getComponents().getSchemas().get("MapAnyValue").getTypes());
+        //Not webhooks
+        assertTrue(result.getMessages().contains("attribute webhooks is unexpected"));
     }
 
     @Test
@@ -593,7 +640,6 @@ public class OAI31DeserializationTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
-        Yaml31.prettyPrint(openAPI);
         //if - then - else
         assertNotNull(openAPI.getComponents().getSchemas().get("IfTest"));
         Schema itTest = openAPI.getComponents().getSchemas().get("IfTest");
@@ -829,4 +875,40 @@ public class OAI31DeserializationTest {
             assertNull(schema.getItems().getNullable());
             assertNotNull(schema.getItems().getExtensions().get("nullable"));
         }
+
+    @Test(description = "Test how 3.0 spec deserializes with ref schema and other fields")
+    public void test30NonRefSiblingsBehavior() {
+        ParseOptions options = new ParseOptions();
+        String refSibling = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: siblings JSONSchema\n" +
+                "  version: 1.0.0\n" +
+                "servers:\n" +
+                "  - url: /\n" +
+                "paths: { }\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    profile:\n" +
+                "      description: siblings refs\n" +
+                "      required:\n" +
+                "        - login\n" +
+                "        - password\n" +
+                "      maxItems: 2\n" +
+                "      $ref: ./ex.json#user-profile\n" +
+                "      properties:\n" +
+                "        login:\n" +
+                "          type: string\n" +
+                "        password:\n" +
+                "          type: string";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        Schema profile = openAPI.getComponents().getSchemas().get("profile");
+        assertNotNull(profile.get$ref());
+        assertNull(profile.getMaxItems());
+        assertNull(profile.getDescription());
+        assertNull(profile.getRequired());
+        assertNull(profile.getProperties());
+
+    }
 }
