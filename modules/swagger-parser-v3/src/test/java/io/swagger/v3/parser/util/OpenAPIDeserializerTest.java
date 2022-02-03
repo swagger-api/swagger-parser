@@ -1353,6 +1353,8 @@ public class OpenAPIDeserializerTest {
              true,
              "Multiple media types error reported");
         assertEquals( param2.getContent(), null, "Content with multiple media types");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
     }
 
     @Test
@@ -1419,6 +1421,8 @@ public class OpenAPIDeserializerTest {
              true,
              "Both schema and content error reported");
         assertEquals( param2.getContent(), null, "Content when schema defined");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
     }
 
     @Test
