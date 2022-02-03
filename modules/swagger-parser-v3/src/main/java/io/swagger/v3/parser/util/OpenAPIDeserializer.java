@@ -1683,12 +1683,15 @@ public class OpenAPIDeserializer {
             Content content = getContent(contentNode, String.format("%s.%s", location, "content"), result);
             if(content.size() == 0) {
                 result.unsupported(location,"content with no media type",contentNode);
+                result.invalid();
             }
             else if(content.size() > 1) {
                 result.unsupported(location,"content with multiple media types",contentNode);
+                result.invalid();
             }
             else if(parameter.getSchema() != null) {
                 result.unsupported(location,"content when schema defined",contentNode);
+                result.invalid();
             }
             else {
                 parameter.setContent(content);
