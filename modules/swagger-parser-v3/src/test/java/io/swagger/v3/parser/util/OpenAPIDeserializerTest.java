@@ -1221,6 +1221,63 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testBodyContent() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"requestBody\": {"
+            + "            \"description\": \"Content empty\","
+            + "            \"content\": {"
+            + "            }"
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      },"
+            + "      \"put\": {"
+            + "        \"requestBody\": {"
+            + "            \"description\": \"Content undefined\""
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+        assertEquals( post.getRequestBody().getContent(), null, "Empty content");
+        assertEquals
+            (result.getMessages().contains("attribute paths.'/operations'(post).requestBody.content with no media type is unsupported"),
+             true,
+             "Empty content error reported");
+
+        Operation put = result.getOpenAPI().getPaths().get( "/operations").getPut();
+        assertEquals( put.getRequestBody().getContent(), null, "Empty content");
+        assertEquals
+            (result.getMessages().contains("attribute paths.'/operations'(put).requestBody.content is missing"),
+             true,
+             "Missing content error reported");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
+    }
+
+    @Test
     public void testStyleInvalid() {
         String json =
             "{"
