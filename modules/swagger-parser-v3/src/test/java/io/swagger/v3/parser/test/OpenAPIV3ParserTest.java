@@ -232,7 +232,7 @@ public class OpenAPIV3ParserTest {
         assertTrue(parseResult.getOpenAPI().getComponents().getSchemas().size() == 2);
         assertTrue(parseResult.getOpenAPI().getPaths().get("/parse").getGet().getParameters().get(0).getSchema().get$ref().equals("#/components/schemas/Parse"));
     }
-    
+
     @Test
     public void testCantReadDeepProperties() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -244,7 +244,7 @@ public class OpenAPIV3ParserTest {
         Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
         assertEquals(projects.getType(), "integer");
     }
-  
+
     @Test
     public void testIssueSameRefsDifferentModel() throws IOException {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-refs-different-model-domain.yaml"), "UTF-8");
@@ -2965,5 +2965,17 @@ public class OpenAPIV3ParserTest {
         Assert.assertTrue(!testPutExtensions.isEmpty());
         Assert.assertNotNull(testPutExtensions.get("x-order"));
         Assert.assertEquals((String)testPutExtensions.get("x-order"),"2147483647");
+    }
+
+    @Test
+    public void testNullExample() throws Exception{
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/null-full-example.yaml"), "UTF-8");
+        String yamlStringResolved = FileUtils.readFileToString(new File("src/test/resources/null-full-example-resolved.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(false);
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
     }
 }
