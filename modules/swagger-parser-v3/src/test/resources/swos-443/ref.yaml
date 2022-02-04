@@ -21,3 +21,10 @@ components:
     ErrorModel:
       type: object
       properties:
+    Examples:
+      description: The example model
+      nonExpected: arbitrary keyword
+      type: object
+      properties:
+        foo:
+

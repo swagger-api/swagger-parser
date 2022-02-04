@@ -22,6 +22,10 @@ paths:
       operationId: addPet
       responses:
         '405':
-          description: Invalid input
+          $ref: './ref.yaml#/components/responses/GeneralError'
       requestBody:
         $ref: './ref.yaml#/components/requestBodies/NewItem'
+components:
+  schemas:
+    refInDefinitions:
+      $ref: './ref.yaml#/components/schemas/Examples'

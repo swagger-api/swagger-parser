@@ -2931,23 +2931,55 @@ public class OpenAPIV3ParserTest {
     }
 */
 
-    @Test
-    public void testOriginalLocationLocal() {
+    @Test(description = "option true, adds Original Location to messages when ref is relative/local")
+    public void testValidateExternalRefsTrue() {
         ParseOptions options = new ParseOptions();
         options.setValidateExternalRefs(true);
         options.setResolve(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
-        Yaml.prettyPrint(openAPI);
-        result.getMessages().forEach(System.out::println);
-        // TODO implement tests
+        //result.getMessages().forEach(System.out::println);
+        assertNotNull(openAPI);
+        assertNotNull(result.getMessages());
+        assertTrue(result.getMessages().size() == 6);
+        assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.asdasd is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.descasdasdription is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.descrsaiption is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.asdas is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.description is missing (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.nonExpected is unexpected (./ref.yaml)"));
 
-        options.setValidateExternalRefs(false);
-        result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
-        openAPI = result.getOpenAPI();
-        Yaml.prettyPrint(openAPI);
-        assertTrue(result.getMessages().isEmpty());
+        //These messages are not caught by parser's deserializer because JsonMapper convertValue method trims the invalid content before it gets to it.
+        //line 156 in ResolverCache#LoadRef before calling the deserialize fragment, meaning we already send the trim object to the new implementation.
+        assertTrue(result.getMessages().contains("attribute components.schemas.ErrorModel.properties is not of type `object`"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object`"));
 
     }
+
+    @Test(description = "directly parsed  definition, tested in previous method as reference relative/local ")
+    public void testValidateDefinition() {
+        ParseOptions options = new ParseOptions();
+        options.setValidateExternalRefs(false);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/ref.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertNotNull(result.getMessages());
+        assertTrue(result.getMessages().contains("attribute components.schemas.ErrorModel.properties is not of type `object`"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object`"));
+        //result.getMessages().forEach(System.out::println);
+
+    }
+
+    @Test(description = "option false, does not add Original Location to messages when ref is relative/local")
+    public void testValidateExternalRefsFalse() {
+        ParseOptions options = new ParseOptions();
+        options.setValidateExternalRefs(false);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        assertTrue(result.getMessages().isEmpty());
+    }
+
+
 
 }

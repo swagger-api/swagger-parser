@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.models.RefFormat;
@@ -151,6 +152,7 @@ public class ResolverCache {
             }
             externalFileCache.put(file, contents);
         }
+        //this deserialization is done by snakeyaml not parser's deserializer and removes not valid content without any messages being sent to the end user.
         JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
 
         if (definitionPath == null) {
@@ -199,6 +201,8 @@ public class ResolverCache {
             // TODO add location to all messages, and add to result
         } else if (expectedType.equals(RequestBody.class)) {
             result = (T) deserializer.getRequestBody((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        } else if (expectedType.equals(ApiResponse.class)) {
+            result = (T) deserializer.getResponse((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
         }
         // TODO complete for all types, ensure deserializer doesn't rely on other status to correctly deserialize
         parseResult.getMessages().forEach((m) -> {
