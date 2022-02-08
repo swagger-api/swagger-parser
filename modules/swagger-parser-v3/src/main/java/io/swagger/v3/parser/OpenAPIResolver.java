@@ -12,7 +12,9 @@ import io.swagger.v3.parser.processors.OperationProcessor;
 import io.swagger.v3.parser.processors.PathsProcessor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class OpenAPIResolver {
 
@@ -22,7 +24,7 @@ public class OpenAPIResolver {
     private final PathsProcessor pathProcessor;
     private final OperationProcessor operationsProcessor;
     private Settings settings = new Settings();
-    private List<String> resolveValidationMessages = new ArrayList<>();
+    private Set<String> resolveValidationMessages = new HashSet<>();
 
     public ResolverCache getCache() {
         return cache;

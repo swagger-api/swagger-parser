@@ -1338,7 +1338,11 @@ public class OpenAPIDeserializer {
 						return null;
 					}
 				}
-				callback.addPathItem(name, getPathItem((ObjectNode) value, location, result));
+				if(value.isObject()) {
+					callback.addPathItem(name, getPathItem((ObjectNode) value, location, result));
+				}else{
+					result.invalidType(location, name, "object", value);
+				}
 
 				Map<String, Object> extensions = getExtensions(node);
 				if (extensions != null && extensions.size() > 0) {
@@ -1557,8 +1561,6 @@ public class OpenAPIDeserializer {
 		if (obj == null) {
 			return null;
 		}
-
-
 		Parameter parameter = null;
 
 		JsonNode ref = obj.get("$ref");
@@ -1605,10 +1607,9 @@ public class OpenAPIDeserializer {
 		}
 
 		if (parameter == null) {
-			result.invalidType(location, "in", "string", obj);
+			result.invalidType(location, "in", "[query|header|path|cookie]", obj);
 			return null;
 		}
-
 
 		parameter.setIn(value);
 
@@ -2738,10 +2739,13 @@ public class OpenAPIDeserializer {
 			example.setValue(sample instanceof NullNode ? null : sample);
 		}
 
-
 		value = getString("externalValue", node, false, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			example.setExternalValue(value);
+		}
+
+		if (sample != null && value != null) {
+			result.warning(location, " value and externalValue are both present");
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
@@ -2755,8 +2759,6 @@ public class OpenAPIDeserializer {
 				result.extra(location, key, node.get(key));
 			}
 		}
-
-
 		return example;
 	}
 

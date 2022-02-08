@@ -2925,8 +2925,6 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = result.getOpenAPI();
         Yaml.prettyPrint(openAPI);
         result.getMessages().forEach(System.out::println);
-
-
         // TODO implement tests
     }
 */
@@ -2938,22 +2936,32 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
-        //result.getMessages().forEach(System.out::println);
         assertNotNull(openAPI);
         assertNotNull(result.getMessages());
-        assertTrue(result.getMessages().size() == 6);
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.asdasd is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.descasdasdription is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.descrsaiption is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.asdas is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.description is missing (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.schemas.Examples.nonExpected is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.parameters.skipParam.[skip].in is not of type `[query|header|path|cookie]` (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.namex is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.name is missing (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.callbacks.webhookVerificationEvent.postx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.headers.X-Rate-Limit-Limit.descriptasdd is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.links.unsubscribe.parametersx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.examples.response-example.summaryx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.examples.response-example. value and externalValue are both present (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.callbacks.failed.wrongField is not of type `object` (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute paths.~1refPet(get).responses is missing (./ref.yaml)"));
+
+        //error message in main file
+        assertTrue(result.getMessages().contains("attribute components.schemas.InvalidSchema.invalid is unexpected"));
 
         //These messages are not caught by parser's deserializer because JsonMapper convertValue method trims the invalid content before it gets to it.
-        //line 156 in ResolverCache#LoadRef before calling the deserialize fragment, meaning we already send the trim object to the new implementation.
-        assertTrue(result.getMessages().contains("attribute components.schemas.ErrorModel.properties is not of type `object`"));
-        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object`"));
-
+        //line 156 in ResolverCache#LoadRef before calling the deserializeFragment, meaning we already send the trimmed object to the new implementation.
+        /*assertTrue(result.getMessages().contains("attribute components.schemas.ErrorModel.properties is not of type `object`"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object`"));*/
     }
 
     @Test(description = "directly parsed  definition, tested in previous method as reference relative/local ")
@@ -2966,8 +2974,6 @@ public class OpenAPIV3ParserTest {
         assertNotNull(result.getMessages());
         assertTrue(result.getMessages().contains("attribute components.schemas.ErrorModel.properties is not of type `object`"));
         assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object`"));
-        //result.getMessages().forEach(System.out::println);
-
     }
 
     @Test(description = "option false, does not add Original Location to messages when ref is relative/local")
@@ -2976,10 +2982,7 @@ public class OpenAPIV3ParserTest {
         options.setValidateExternalRefs(false);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
-        Yaml.prettyPrint(openAPI);
-        assertTrue(result.getMessages().isEmpty());
+        //keeps error messages only from original spec
+        assertTrue(result.getMessages().contains("attribute components.schemas.InvalidSchema.invalid is unexpected"));
     }
-
-
-
 }

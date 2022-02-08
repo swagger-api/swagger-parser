@@ -874,7 +874,7 @@ public class OpenAPIResolverTest {
                                     @Mocked final PathsProcessor pathsProcessor) throws Exception {
 
         new StrictExpectations() {{
-            new ResolverCache(swagger, auths, null, new ArrayList<>(), parseOptions);
+            new ResolverCache(swagger, auths, null, new HashSet<>(), parseOptions);
             result = cache;
             times = 1;
 

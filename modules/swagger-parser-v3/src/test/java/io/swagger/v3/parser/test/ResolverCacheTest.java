@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,7 +65,7 @@ public class ResolverCacheTest {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         parseOptions.setValidateExternalRefs(true);
-        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new ArrayList<>(), parseOptions);
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new HashSet<>(), parseOptions);
 
         Schema firstActualResult = cache.loadRef(ref, RefFormat.URL, Schema.class);
 
@@ -92,7 +93,7 @@ public class ResolverCacheTest {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         parseOptions.setValidateExternalRefs(true);
-        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new ArrayList<>(), parseOptions);
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new HashSet<>(), parseOptions);
 
         Schema firstActualResult = cache.loadRef(ref, RefFormat.URL, Schema.class);
 
