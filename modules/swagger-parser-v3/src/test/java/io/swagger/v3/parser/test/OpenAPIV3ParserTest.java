@@ -2915,20 +2915,6 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals((String)testPutExtensions.get("x-order"),"2147483647");
     }
 
-    // TODO implement for http locations
-/*
-    @Test
-    public void testOriginalLocation() {
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:1337/root.yaml", null, options);
-        OpenAPI openAPI = result.getOpenAPI();
-        Yaml.prettyPrint(openAPI);
-        result.getMessages().forEach(System.out::println);
-        // TODO implement tests
-    }
-*/
-
     @Test(description = "option true, adds Original Location to messages when ref is relative/local")
     public void testValidateExternalRefsTrue() {
         ParseOptions options = new ParseOptions();
@@ -2938,6 +2924,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
         assertNotNull(result.getMessages());
+        assertTrue(result.getMessages().size()==17);
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.asdasd is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.descasdasdription is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.descrsaiption is unexpected (./ref.yaml)"));
@@ -2964,6 +2951,7 @@ public class OpenAPIV3ParserTest {
         assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object`"));*/
     }
 
+
     @Test(description = "directly parsed  definition, tested in previous method as reference relative/local ")
     public void testValidateDefinition() {
         ParseOptions options = new ParseOptions();
@@ -2979,10 +2967,13 @@ public class OpenAPIV3ParserTest {
     @Test(description = "option false, does not add Original Location to messages when ref is relative/local")
     public void testValidateExternalRefsFalse() {
         ParseOptions options = new ParseOptions();
+        options.setResolve(true);
         options.setValidateExternalRefs(false);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
         //keeps error messages only from original spec
         assertTrue(result.getMessages().contains("attribute components.schemas.InvalidSchema.invalid is unexpected"));
+        assertTrue(result.getMessages().contains("An exception was thrown while trying to deserialize the contents of ./ref.yaml into type class io.swagger.v3.oas.models.callbacks.Callback"));
     }
 }

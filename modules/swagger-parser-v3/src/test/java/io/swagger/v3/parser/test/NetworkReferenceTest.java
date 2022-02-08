@@ -2,6 +2,7 @@ package io.swagger.v3.parser.test;
 
 
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
@@ -39,6 +40,7 @@ public class NetworkReferenceTest {
     private static String issue_407_json;
     private static String issue_411_server, issue_411_components;
     private static String issue_742_json;
+    private static String issue_443_yaml,issue_443_ref_yaml ;
 
     static {
         try {
@@ -66,10 +68,51 @@ public class NetworkReferenceTest {
             issue_411_components    = readFile("src/test/resources/nested-network-references/issue-411-remote2.yaml");
 
             issue_742_json          = readFile("src/test/resources/issue-742.json");
+            issue_443_yaml          = readFile("src/test/resources/swos-443/root.yaml");
+            issue_443_ref_yaml      = readFile("src/test/resources/swos-443/ref.yaml");
         }
         catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test(description = "option true, adds Original Location to messages when ref is remote")
+    public void testValidateExternalRefsTrueRemote() throws Exception{
+        new Expectations() {
+            {
+                remoteUrl.urlToString("http://localhost:8080/swos-443/root.yaml", new ArrayList<>());
+                result = issue_443_yaml;
+                remoteUrl.urlToString("http://localhost:8080/swos-443/ref.yaml", new ArrayList<>());
+                result = issue_443_ref_yaml;
+            }};
+        ParseOptions options = new ParseOptions();
+        options.setValidateExternalRefs(true);
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8080/swos-443/root.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+
+        assertNotNull(result.getMessages());
+        assertTrue(result.getMessages().size()==17);
+        assertNotNull(openAPI);
+        assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.asdasd is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.descasdasdription is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.descrsaiption is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.asdas is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.description is missing (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.nonExpected is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.parameters.skipParam.[skip].in is not of type `[query|header|path|cookie]` (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.namex is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.name is missing (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.callbacks.webhookVerificationEvent.postx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.headers.X-Rate-Limit-Limit.descriptasdd is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.links.unsubscribe.parametersx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.examples.response-example.summaryx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.examples.response-example. value and externalValue are both present (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.callbacks.failed.wrongField is not of type `object` (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute paths.~1refPet(get).responses is missing (./ref.yaml)"));
+
+        //error message in main file
+        assertTrue(result.getMessages().contains("attribute components.schemas.InvalidSchema.invalid is unexpected"));
     }
 
     @Test
