@@ -132,7 +132,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         assertEquals(result.getMessages().size(),1);
-        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `[query|header|path|cookie]`"));
     }
 
 
@@ -3027,6 +3027,7 @@ public class OpenAPIV3ParserTest {
         //keeps error messages only from original spec
         assertTrue(result.getMessages().contains("attribute components.schemas.InvalidSchema.invalid is unexpected"));
         assertTrue(result.getMessages().contains("An exception was thrown while trying to deserialize the contents of ./ref.yaml into type class io.swagger.v3.oas.models.callbacks.Callback"));
+    }
 
     @Test
     public void testNullExample() throws Exception{
