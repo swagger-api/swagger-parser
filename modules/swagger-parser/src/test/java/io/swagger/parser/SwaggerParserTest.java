@@ -50,6 +50,48 @@ import io.swagger.util.Yaml;
 public class SwaggerParserTest {
 
     @Test
+    public void testPathsVladimir() {
+        String spec = "---\n" +
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: 1.0.0\n" +
+                "  title: Swagger Petstore\n" +
+                "paths:\n" +
+                "  \"/pet/{pet_Id}\":\n" +
+                "    post:\n" +
+                "      tags:\n" +
+                "      - pet\n" +
+                "      operationId: getPetById\n" +
+                "      parameters:\n" +
+                "      - in: path\n" +
+                "        name: pet_Id\n" +
+                "        required: true\n" +
+                "        type: string\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: successful operation\n" +
+                "  \"/pet/{petId}\":\n" +
+                "    get:\n" +
+                "      tags:\n" +
+                "      - pet\n" +
+                "      operationId: getPetByAnId\n" +
+                "      parameters:\n" +
+                "      - name: petId\n" +
+                "        in: path\n" +
+                "        description: ID of pet to return\n" +
+                "        required: true\n" +
+                "        type: string\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: successful operation\n";
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(spec);
+        System.out.println(result.getMessages());
+        assertNotNull(result.getSwagger());
+        Yaml.prettyPrint(result.getSwagger());
+
+    }
+
+    @Test
     public void testNonArraySchemaWithItems_1636() {
         String spec = "swagger: '2.0'\n" +
                 "info:\n" +
