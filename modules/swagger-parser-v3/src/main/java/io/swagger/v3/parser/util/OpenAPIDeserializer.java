@@ -1558,7 +1558,6 @@ public class OpenAPIDeserializer {
 			return null;
 		}
 
-
 		Parameter parameter = null;
 
 		JsonNode ref = obj.get("$ref");
@@ -1589,10 +1588,9 @@ public class OpenAPIDeserializer {
 
 		String value = getString("in", obj, true, location, result);
 
-		if (!result.isAllowEmptyStrings() && value == null) {
+		if (!result.isAllowEmptyStrings() && StringUtils.isBlank(value) || result.isAllowEmptyStrings() && value == null) {
 			return null;
 		}
-
 
 		if (QUERY_PARAMETER.equals(value)) {
 			parameter = new QueryParameter();
@@ -1608,7 +1606,6 @@ public class OpenAPIDeserializer {
 			result.invalidType(location, "in", "string", obj);
 			return null;
 		}
-
 
 		parameter.setIn(value);
 
