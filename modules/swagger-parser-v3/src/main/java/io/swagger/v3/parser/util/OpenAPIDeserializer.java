@@ -50,6 +50,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 
@@ -144,8 +145,13 @@ public class OpenAPIDeserializer {
 	}
 
 	public SwaggerParseResult deserialize(JsonNode rootNode, String path) {
+		return deserialize(rootNode,path, new ParseOptions());
+	}
+
+	public SwaggerParseResult deserialize(JsonNode rootNode, String path, ParseOptions options) {
 		SwaggerParseResult result = new SwaggerParseResult();
 		ParseResult rootParse = new ParseResult();
+		rootParse.setAllowEmptyStrings(options.isAllowEmptyString());
 		OpenAPI api = parseRoot(rootNode, rootParse, path);
 		result.setOpenAPI(api);
 		result.setMessages(rootParse.getMessages());
@@ -391,12 +397,12 @@ public class OpenAPIDeserializer {
 		Tag tag = new Tag();
 
 		String value = getString("name", obj, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			tag.setName(value);
 		}
 
 		value = getString("description", obj, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			tag.setDescription(value);
 		}
 
@@ -470,7 +476,7 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("url", obj, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			if (!isValidURL(value) && path != null) {
 				try {
 					final URI absURI = new URI(path.replaceAll("\\\\", "/"));
@@ -490,7 +496,7 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("description", obj, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			server.setDescription(value);
 		}
 
@@ -558,12 +564,12 @@ public class OpenAPIDeserializer {
 			}
 		}
 		String value = getString("default", obj, true, String.format("%s.%s", location, "default"), result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			serverVariable.setDefault(value);
 		}
 
 		value = getString("description", obj, false, String.format("%s.%s", location, "description"), result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			serverVariable.setDescription(value);
 		}
 
@@ -710,12 +716,12 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("summary", obj, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			pathItem.setSummary(value);
 		}
 
 		value = getString("description", obj, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			pathItem.setDescription(value);
 		}
 
@@ -809,12 +815,12 @@ public class OpenAPIDeserializer {
 			externalDocs = new ExternalDocumentation();
 
 			String value = getString("description", node, false, location, result);
-			if (StringUtils.isNotBlank(value)) {
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 				externalDocs.description(value);
 			}
 
 			value = getString("url", node, true, location, result);
-			if (StringUtils.isNotBlank(value)) {
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 				externalDocs.url(value);
 			}
 
@@ -901,17 +907,17 @@ public class OpenAPIDeserializer {
 		Info info = new Info();
 
 		String value = getString("title", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			info.setTitle(value);
 		}
 
 		value = getString("description", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			info.setDescription(value);
 		}
 
 		value = getString("termsOfService", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			info.setTermsOfService(value);
 		}
 
@@ -927,7 +933,7 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("version", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			info.setVersion(value);
 		}
 
@@ -953,12 +959,12 @@ public class OpenAPIDeserializer {
 		License license = new License();
 
 		String value = getString("name", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			license.setName(value);
 		}
 
 		value = getString("url", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			try {
 				new URL(value);
 			} catch (Exception e) {
@@ -989,12 +995,12 @@ public class OpenAPIDeserializer {
 		Contact contact = new Contact();
 
 		String value = getString("name", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			contact.setName(value);
 		}
 
 		value = getString("url", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			try {
 				new URL(value);
 			} catch (Exception e) {
@@ -1004,7 +1010,7 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("email", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			contact.setEmail(value);
 		}
 
@@ -1112,7 +1118,9 @@ public class OpenAPIDeserializer {
 		Encoding encoding = new Encoding();
 
 		String value = getString("contentType", node, false, location, result);
-		encoding.setContentType(value);
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+			encoding.setContentType(value);
+		}
 
 		value = getString("style", node, false, location, result);
 
@@ -1219,12 +1227,12 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("operationRef", linkNode, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			link.setOperationRef(value);
 		}
 
 		value = getString("operationId", linkNode, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			link.setOperationId(value);
 		}
 
@@ -1234,7 +1242,7 @@ public class OpenAPIDeserializer {
 		}
 
 		String requestBody = getString("requestBody", linkNode, false, location, result);
-		if (requestBody != null) {
+		if (result.isAllowEmptyStrings() && requestBody != null) {
 			link.setRequestBody(requestBody);
 		}
 
@@ -1249,7 +1257,7 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("description", linkNode, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			link.setDescription(value);
 		}
 
@@ -1349,17 +1357,17 @@ public class OpenAPIDeserializer {
 		XML xml = new XML();
 
 		String value = getString("name", node, false, String.format("%s.%s", location, "name"), result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			xml.setName(value);
 		}
 
 		value = getString("namespace", node, false, String.format("%s.%s", location, "namespace"), result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			xml.setNamespace(value);
 		}
 
 		value = getString("prefix", node, false, String.format("%s.%s", location, "prefix"), result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			xml.setPrefix(value);
 		}
 
@@ -1550,7 +1558,6 @@ public class OpenAPIDeserializer {
 			return null;
 		}
 
-
 		Parameter parameter = null;
 
 		JsonNode ref = obj.get("$ref");
@@ -1581,10 +1588,9 @@ public class OpenAPIDeserializer {
 
 		String value = getString("in", obj, true, location, result);
 
-		if (StringUtils.isBlank(value)) {
+		if (!result.isAllowEmptyStrings() && StringUtils.isBlank(value) || result.isAllowEmptyStrings() && value == null) {
 			return null;
 		}
-
 
 		if (QUERY_PARAMETER.equals(value)) {
 			parameter = new QueryParameter();
@@ -1601,16 +1607,15 @@ public class OpenAPIDeserializer {
 			return null;
 		}
 
-
 		parameter.setIn(value);
 
 		value = getString("name", obj, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			parameter.setName(value);
 		}
 
 		value = getString("description", obj, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			parameter.setDescription(value);
 		}
 
@@ -1636,6 +1641,7 @@ public class OpenAPIDeserializer {
 
 		value = getString("style", obj, false, location, result);
 		setStyle(value, parameter, location, obj, result);
+
 
 		Boolean explode = getBoolean("explode", obj, false, location, result);
 		if (explode != null) {
@@ -1750,7 +1756,7 @@ public class OpenAPIDeserializer {
 
 
 		String value = getString("description", headerNode, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			header.setDescription(value);
 		}
 
@@ -1911,7 +1917,7 @@ public class OpenAPIDeserializer {
 				openIdConnectRequired = false;
 
 		String value = getString("type", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			if (SecurityScheme.Type.APIKEY.toString().equals(value)) {
 				securityScheme.setType(SecurityScheme.Type.APIKEY);
 				nameRequired = inRequired = true;
@@ -1929,12 +1935,12 @@ public class OpenAPIDeserializer {
 			}
 		}
 		value = getString("description", node, descriptionRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			securityScheme.setDescription(value);
 		}
 
 		value = getString("name", node, nameRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			securityScheme.setName(value);
 		}
 
@@ -1946,12 +1952,12 @@ public class OpenAPIDeserializer {
 		securityScheme.setIn(matchingIn.orElse(null));
 
 		value = getString("scheme", node, schemeRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			securityScheme.setScheme(value);
 		}
 
 		value = getString("bearerFormat", node, bearerFormatRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			securityScheme.setBearerFormat(value);
 		}
 
@@ -1961,7 +1967,7 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("openIdConnectUrl", node, openIdConnectRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			securityScheme.setOpenIdConnectUrl(value);
 		}
 
@@ -2049,17 +2055,17 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			oAuthFlow.setAuthorizationUrl(value);
 		}
 
 		value = getString("tokenUrl", node, tokenUrlRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			oAuthFlow.setTokenUrl(value);
 		}
 
 		value = getString("refreshUrl", node, refreshUrlRequired, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			oAuthFlow.setRefreshUrl(value);
 		}
 
@@ -2125,7 +2131,7 @@ public class OpenAPIDeserializer {
 		Discriminator discriminator = new Discriminator();
 
 		String value = getString("propertyName", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			discriminator.setPropertyName(value);
 		}
 
@@ -2146,6 +2152,11 @@ public class OpenAPIDeserializer {
 	public Schema getSchema(ObjectNode node, String location, ParseResult result) {
 		if (node == null) {
 			return null;
+		}
+		//Added to handle NPE from ResolverCache when Trying to dereference a schema
+		if (result == null){
+			result = new ParseResult();
+			result.setAllowEmptyStrings(true);
 		}
 
 
@@ -2268,7 +2279,7 @@ public class OpenAPIDeserializer {
 
 
 		String value = getString("title", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			schema.setTitle(value);
 		}
 
@@ -2317,7 +2328,7 @@ public class OpenAPIDeserializer {
 		}
 
 		String pattern = getString("pattern", node, false, location, result);
-		if (StringUtils.isNotBlank(pattern)) {
+		if (result.isAllowEmptyStrings() && pattern != null) {
 			schema.setPattern(pattern);
 		}
 
@@ -2384,7 +2395,7 @@ public class OpenAPIDeserializer {
 
 		value = getString("type", node, false, location, result);
 		if (StringUtils.isBlank(schema.getType())) {
-			if (StringUtils.isNotBlank(value)) {
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 				schema.setType(value);
 			} else {
 				// may have an enum where type can be inferred
@@ -2431,12 +2442,12 @@ public class OpenAPIDeserializer {
 		}
 
 		value = getString("description", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			schema.setDescription(value);
 		}
 
 		value = getString("format", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			schema.setFormat(value);
 		}
 
@@ -2450,7 +2461,7 @@ public class OpenAPIDeserializer {
 					}
 				} else if (schema.getType().equals("string")) {
 					value = getString("default", node, false, location, result);
-					if (value != null) {
+					if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 						try {
 							schema.setDefault(getDecodedObject(schema, value));
 						} catch (ParseException e) {
@@ -2710,12 +2721,12 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("summary", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			example.setSummary(value);
 		}
 
 		value = getString("description", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			example.setDescription(value);
 		}
 
@@ -2726,7 +2737,7 @@ public class OpenAPIDeserializer {
 
 
 		value = getString("externalValue", node, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			example.setExternalValue(value);
 		}
 
@@ -2835,7 +2846,7 @@ public class OpenAPIDeserializer {
 		}
 
 		String value = getString("description", node, true, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			apiResponse.description(value);
 		}
 
@@ -2904,12 +2915,12 @@ public class OpenAPIDeserializer {
 			operation.setTags(tags);
 		}
 		String value = getString("summary", obj, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			operation.setSummary(value);
 		}
 
 		value = getString("description", obj, false, location, result);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			operation.setDescription(value);
 		}
 
@@ -2920,7 +2931,7 @@ public class OpenAPIDeserializer {
 			operation.setExternalDocs(docs);
 		}
 		value = getString("operationId", obj, false, location, result, operationIDs);
-		if (StringUtils.isNotBlank(value)) {
+		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			operation.operationId(value);
 		}
 
@@ -3079,7 +3090,7 @@ public class OpenAPIDeserializer {
 
 
 		final String description = getString("description", node, false, location, result);
-		if (StringUtils.isNotBlank(description)) {
+		if (result.isAllowEmptyStrings() && description != null) {
 			body.setDescription(description);
 		}
 
@@ -3145,8 +3156,22 @@ public class OpenAPIDeserializer {
 		private List<Location> warnings = new ArrayList<>();
 		private List<Location> unique = new ArrayList<>();
 		private List<Location> uniqueTags = new ArrayList<>();
+		private boolean allowEmptyStrings = true;
 
 		public ParseResult() {
+		}
+
+		public boolean isAllowEmptyStrings() {
+			return this.allowEmptyStrings;
+		}
+
+		public void setAllowEmptyStrings(boolean allowEmptyStrings) {
+			this.allowEmptyStrings = allowEmptyStrings;
+		}
+
+		public ParseResult allowEmptyStrings(boolean allowEmptyStrings) {
+			this.allowEmptyStrings = allowEmptyStrings;
+			return this;
 		}
 
 		public void unsupported(String location, String key, JsonNode value) {
@@ -3185,6 +3210,7 @@ public class OpenAPIDeserializer {
 		public boolean isValid() {
 			return this.valid;
 		}
+
 
 		public List<String> getMessages() {
 			List<String> messages = new ArrayList<String>();

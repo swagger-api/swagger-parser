@@ -85,6 +85,92 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1644_NullValue() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1644 = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Operations\n" +
+                "  version: 0.0.0\n" +
+                "paths:\n" +
+                "  \"/operations\":\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        - name: param0\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: None\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1644, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),1);
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is missing"));
+        assertFalse(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+    }
+
+    @Test
+    public void testIssue1644_EmptyValue() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1644 = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Operations\n" +
+                "  version: 0.0.0\n" +
+                "paths:\n" +
+                "  \"/operations\":\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        - name: param0\n" +
+                "          in: ''\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: None\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1644, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),1);
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+    }
+
+
+    @Test
+    public void testEmptyStrings_False() throws Exception{
+        ParseOptions options = new ParseOptions();
+        options.setAllowEmptyString(false);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNull(openAPI.getInfo().getTitle());
+        assertNotNull(openAPI.getInfo().getVersion());
+        assertNull(openAPI.getInfo().getLicense().getName());
+        assertNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
+        assertNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
+    }
+
+
+    @Test
+    public void testEmptyStrings_True() throws Exception{
+        ParseOptions options = new ParseOptions();
+        options.setAllowEmptyString(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getInfo().getTitle());
+        assertNotNull(openAPI.getInfo().getLicense().getName());
+        assertNotNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
+        assertNotNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
+    }
+
+
+    @Test
     public void testIssue1561() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -147,7 +233,7 @@ public class OpenAPIV3ParserTest {
         assertTrue(parseResult.getOpenAPI().getComponents().getSchemas().size() == 2);
         assertTrue(parseResult.getOpenAPI().getPaths().get("/parse").getGet().getParameters().get(0).getSchema().get$ref().equals("#/components/schemas/Parse"));
     }
-    
+
     @Test
     public void testCantReadDeepProperties() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -159,7 +245,7 @@ public class OpenAPIV3ParserTest {
         Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
         assertEquals(projects.getType(), "integer");
     }
-  
+
     @Test
     public void testIssueSameRefsDifferentModel() throws IOException {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-refs-different-model-domain.yaml"), "UTF-8");
@@ -1027,8 +1113,7 @@ public class OpenAPIV3ParserTest {
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
@@ -2892,5 +2977,17 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url.toString(), null, options);
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
+    }
+  
+    @Test
+    public void testNullExample() throws Exception{
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/null-full-example.yaml"), "UTF-8");
+        String yamlStringResolved = FileUtils.readFileToString(new File("src/test/resources/null-full-example-resolved.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(false);
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
     }
 }
