@@ -50,7 +50,7 @@ import io.swagger.util.Yaml;
 public class SwaggerParserTest {
 
     @Test
-    public void testPathsVladimir() {
+    public void testAmbiguousPaths() {
         String spec = "---\n" +
                 "swagger: '2.0'\n" +
                 "info:\n" +
