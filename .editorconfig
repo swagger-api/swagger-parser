@@ -1,0 +1,20 @@
+# http://editorconfig.org
+
+# A special property that should be specified at the top of the file outside of
+# any sections. Set to true to stop .editor config file search on current file
+root = true
+
+[*]
+# Indentation style
+# Possible values - tab, space
+indent_style = space
+
+# File character encoding
+# Possible values - latin1, utf-8, utf-16be, utf-16le
+charset = utf-8
+
+[modules/swagger-parser-v3/src/test/resources/**/*.json]
+trim_trailing_whitespace = false
+
+[modules/swagger-parser-v3/src/test/resources/**/*.yaml]
+trim_trailing_whitespace = false

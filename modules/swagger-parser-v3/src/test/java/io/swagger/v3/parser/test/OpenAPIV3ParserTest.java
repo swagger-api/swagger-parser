@@ -1,10 +1,27 @@
 package io.swagger.v3.parser.test;
 
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,11 +31,20 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.hamcrest.CoreMatchers;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.testng.reporters.Files;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
@@ -52,36 +78,137 @@ import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import mockit.Injectable;
-import org.apache.commons.io.FileUtils;
-import org.hamcrest.CoreMatchers;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.testng.reporters.Files;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 
 public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
+
+    @Test
+    public void testIssue1644_NullValue() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1644 = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Operations\n" +
+                "  version: 0.0.0\n" +
+                "paths:\n" +
+                "  \"/operations\":\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        - name: param0\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: None\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1644, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),1);
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is missing"));
+        assertFalse(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+    }
+
+    @Test
+    public void testIssue1644_EmptyValue() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1644 = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Operations\n" +
+                "  version: 0.0.0\n" +
+                "paths:\n" +
+                "  \"/operations\":\n" +
+                "    post:\n" +
+                "      parameters:\n" +
+                "        - name: param0\n" +
+                "          in: ''\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: None\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1644, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),1);
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+    }
+
+
+    @Test
+    public void testEmptyStrings_False() throws Exception{
+        ParseOptions options = new ParseOptions();
+        options.setAllowEmptyString(false);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNull(openAPI.getInfo().getTitle());
+        assertNotNull(openAPI.getInfo().getVersion());
+        assertNull(openAPI.getInfo().getLicense().getName());
+        assertNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
+        assertNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
+    }
+
+
+    @Test
+    public void testEmptyStrings_True() throws Exception{
+        ParseOptions options = new ParseOptions();
+        options.setAllowEmptyString(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/empty-strings.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getInfo().getTitle());
+        assertNotNull(openAPI.getInfo().getLicense().getName());
+        assertNotNull(openAPI.getPaths().get("/something").getGet().getResponses().get("200").getDescription());
+        assertNotNull(openAPI.getPaths().get("/something").getGet().getParameters().get(0).getDescription());
+    }
+
+
+    @Test
+    public void testIssue1561() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-1561/swagger.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertTrue(openAPI.getComponents().getResponses().size() == 3);
+    }
+
+    @Test
+    public void testAnonymousModelAllOf() {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue203/issue203AllOf.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(openAPI.getComponents().getSchemas().get("Supplier").getXml().getName(),"supplierObject");
+    }
+
+    @Test
+    public void testIssue1518() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-1518/api.json", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("Analemmata").getProperties().get("tashotSipe")).get$ref().equals("#/components/schemas/TashotSipe"));
+        assertTrue(openAPI.getComponents().getSchemas().get("analemmata") == null);
+    }
+
+    @Test
+    public void testIssue1518StackOverFlow() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        try {
+            SwaggerParseResult result = new OpenAPIV3Parser().readLocation("example0/api.json", null, options);
+            Yaml.prettyPrint(result.getOpenAPI().getComponents().getSchemas());
+        }catch (StackOverflowError stackOverflowError){
+            assertTrue(false);
+        }
+    }
 
     @Test
     public void testIssue251() throws IOException {
@@ -106,7 +233,7 @@ public class OpenAPIV3ParserTest {
         assertTrue(parseResult.getOpenAPI().getComponents().getSchemas().size() == 2);
         assertTrue(parseResult.getOpenAPI().getPaths().get("/parse").getGet().getParameters().get(0).getSchema().get$ref().equals("#/components/schemas/Parse"));
     }
-    
+
     @Test
     public void testCantReadDeepProperties() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -118,7 +245,7 @@ public class OpenAPIV3ParserTest {
         Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
         assertEquals(projects.getType(), "integer");
     }
-  
+
     @Test
     public void testIssueSameRefsDifferentModel() throws IOException {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-refs-different-model-domain.yaml"), "UTF-8");
@@ -201,6 +328,65 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testExampleFlag() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveCombinators(true);
+        options.setResolveFully(true);
+        options.setFlatten(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("media-type-null-example.yaml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertNull(openAPI.getPaths().get("/pets/{petId}").getGet().getResponses().get("200").getContent().get("application/json").getExample());
+        assertTrue(openAPI.getPaths().get("/pets/{petId}").getGet().getResponses().get("200").getContent().get("application/json").getExampleSetFlag());
+
+        assertNull(openAPI.getPaths().get("/pet").getPost().getResponses().get("200").getContent().get("application/json").getExample());
+        assertFalse(openAPI.getPaths().get("/pet").getPost().getResponses().get("200").getContent().get("application/json").getExampleSetFlag());
+
+        assertNotNull(openAPI.getPaths().get("/pet").getPost().getRequestBody().getContent().get("application/json").getExample());
+        assertNotNull(openAPI.getPaths().get("/pet").getPost().getRequestBody().getContent().get("application/json").getExample());
+
+        assertTrue(openAPI.getPaths().get("/pet").getPost().getRequestBody().getContent().get("application/json").getExampleSetFlag());
+
+        assertNotNull(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("foo").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("foo").getValueSetFlag());
+        assertNull(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("bar").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("bar").getValueSetFlag());
+
+        assertNotNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("a").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("a").getValueSetFlag());
+        assertNotNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("b").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("b").getValueSetFlag());
+        assertNotNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("c").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("c").getValueSetFlag());
+        assertNull(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("d").getValue());
+        assertTrue(openAPI.getPaths().get("/object-with-null-in-schema-example").getGet().getResponses().get("200").getContent().get("application/json").getExamples().get("d").getValueSetFlag());
+
+
+        assertNull(openAPI.getComponents().getSchemas().get("ObjectWithNullExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("ObjectWithNullExample").getExampleSetFlag());
+
+        assertNotNull(openAPI.getComponents().getSchemas().get("ObjectWithNullInSchemaExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("ObjectWithNullInSchemaExample").getExampleSetFlag());
+
+        assertNotNull(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("a")).getExample());
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("a")).getExampleSetFlag());
+        assertNull(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("b")).getExample());
+        assertTrue(((Schema)openAPI.getComponents().getSchemas().get("ObjectWithNullPropertyExample").getProperties().get("b")).getExampleSetFlag());
+
+        assertNull(openAPI.getComponents().getSchemas().get("StringWithNullExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("StringWithNullExample").getExampleSetFlag());
+
+        assertNull(openAPI.getComponents().getSchemas().get("ArrayWithNullArrayExample").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("ArrayWithNullArrayExample").getExampleSetFlag());
+
+        assertNull(((ArraySchema)openAPI.getComponents().getSchemas().get("ArrayWithNullItemExample")).getItems().getExample());
+        assertTrue(((ArraySchema)openAPI.getComponents().getSchemas().get("ArrayWithNullItemExample")).getItems().getExampleSetFlag());
+    }
+
+    @Test
     public void testIssueFlattenAdditionalPropertiesSchemaInlineModelTrue() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -271,8 +457,8 @@ public class OpenAPIV3ParserTest {
         assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Pagelimit")).getOneOf().get(0).get$ref(),"#/components/schemas/Macaw2");
 
         //requestBodies
-        assertNotNull(openAPI.getComponents().getSchemas().get("Body"));
-        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Body")).getAllOf().get(1).get$ref(),"#/components/schemas/requestBodiesAllOf2");
+        assertNotNull(openAPI.getComponents().getSchemas().get("RequestBodiesBody"));
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("RequestBodiesBody")).getAllOf().get(1).get$ref(),"#/components/schemas/requestBodiesAllOf2");
         assertNotNull(openAPI.getComponents().getSchemas().get("InlineResponseItems200"));
         assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("InlineBodyItemsApplicationxmlrequestBodies")).getAllOf().get(1).get$ref(),"#/components/schemas/ApplicationxmlAllOf2");
 
@@ -415,9 +601,9 @@ public class OpenAPIV3ParserTest {
 
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertNotNull(openAPI.getComponents().getSchemas().get("status"));
-        assertNotNull(openAPI.getComponents().getSchemas().get("body"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("test_body"));
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
-        assertNotNull(openAPI.getComponents().getSchemas().get("body_1"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("test_body_1"));
         assertNotNull(openAPI.getComponents().getSchemas().get("Test1"));
         assertNotNull(openAPI.getComponents().getSchemas().get("Test2"));
     }
@@ -927,8 +1113,7 @@ public class OpenAPIV3ParserTest {
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options  );
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(pathFile, auths, options);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
@@ -2753,4 +2938,56 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(cat);
     }
 
+
+    // Relative external refs failed on windows due to \ issue
+    @Test
+    public void testRelativePathIssue1543() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolve(true);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/issue-1543/openapi.yaml", null, options);
+
+        if (readResult.getMessages().size() > 0) {
+        	Assert.assertFalse(readResult.getMessages().get(0).contains("end -1"));
+        }
+    }
+
+    @Test
+    public void testIssue1540() throws Exception{
+        OpenAPI openAPI = new OpenAPIV3Parser().read("./issue-1540/a.json");
+        Assert.assertNotNull(openAPI);
+        Map<String, Object> extensions = openAPI.getExtensions();
+        Assert.assertNotNull(extensions);
+        Assert.assertTrue(!extensions.isEmpty());
+        Assert.assertNotNull(extensions.get("x-setting"));
+        Map<String, Object> testPutExtensions = openAPI.getPaths().get("/test").getPut().getExtensions();
+        Assert.assertNotNull(testPutExtensions);
+        Assert.assertTrue(!testPutExtensions.isEmpty());
+        Assert.assertNotNull(testPutExtensions.get("x-order"));
+        Assert.assertEquals((String)testPutExtensions.get("x-order"),"2147483647");
+    }
+
+    @Test
+    public void testIssue1592() throws Exception {
+        File file = new File("src/test/resources/issue-1592.jar");
+        URL url = new URL("jar:" + file.toURI() + "!/test.yaml");
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url.toString(), null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+    }
+  
+    @Test
+    public void testNullExample() throws Exception{
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/null-full-example.yaml"), "UTF-8");
+        String yamlStringResolved = FileUtils.readFileToString(new File("src/test/resources/null-full-example-resolved.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(false);
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
+    }
 }

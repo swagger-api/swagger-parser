@@ -1,0 +1,24 @@
+post:
+  tags:
+  - Security
+  description: login
+  summary: login
+  operationId: login
+  parameters: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../_schemas/usernamepasswordcredentials.yaml'
+      application/x-www-form-urlencoded:
+        schema:
+          $ref: '../_schemas/usernamepasswordcredentials.yaml'
+    required: true
+  responses:
+    "200":
+      description: login 200 response
+      content:
+        application/json:
+          schema:
+            type: object
+  security: []

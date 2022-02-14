@@ -51,6 +51,7 @@ public class OperationProcessor {
             for (String responseCode : responses.keySet()) {
                 ApiResponse response = responses.get(responseCode);
                 if(response != null) {
+                    //This part allows parser to put response schema inline without the resolveFully option set to true
                     if (response.get$ref() != null) {
 
                         responseProcessor.processResponse(response);
@@ -63,9 +64,7 @@ public class OperationProcessor {
                             responses.put(responseCode, resolvedResponse);
                         }
                     }
-
                     responseProcessor.processResponse(response);
-
                 }
             }
         }

@@ -59,6 +59,7 @@ import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.util.ResolverFully;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -108,19 +109,25 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
     private SwaggerParseResult readResult(SwaggerDeserializationResult result, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult out = convert(result);
-        if (out != null && options != null && options.isFlatten()) {
-            try {
-                SwaggerParseResult resultV3 = new OpenAPIV3Parser().readContents(Yaml.pretty(out.getOpenAPI()), auth, options);
-                out.setOpenAPI(resultV3.getOpenAPI());
-                if (out.getMessages() != null) {
-                    out.getMessages().addAll(resultV3.getMessages());
-                    out.messages(out.getMessages().stream()
-                            .distinct()
-                            .collect(Collectors.toList()));
-                } else {
-                    out.messages(resultV3.getMessages());
+        if (out != null && options != null) {
+            if (options.isResolveFully()) {
+                new ResolverFully(options.isResolveCombinators()).resolveFully(out.getOpenAPI());
+            }
+            if (options.isFlatten()) {
+                try {
+                    SwaggerParseResult resultV3 = new OpenAPIV3Parser().readContents(Yaml.pretty(out.getOpenAPI()), auth, options);
+                    out.setOpenAPI(resultV3.getOpenAPI());
+                    if (out.getMessages() != null) {
+                        out.getMessages().addAll(resultV3.getMessages());
+                        out.messages(out.getMessages().stream()
+                                .distinct()
+                                .collect(Collectors.toList()));
+                    } else {
+                        out.messages(resultV3.getMessages());
+                    }
+                } catch (Exception ignore) {
                 }
-            } catch (Exception ignore) {}
+            }
         }
         return out;
     }
@@ -966,7 +973,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }else {
 
             result = Json.mapper().convertValue(schema, Schema.class);
-            result.setExample(schema.getExample());
+            if (schema.getExample() != null) {
+                result.setExample(schema.getExample());
+            }
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
                 Map<String, Schema> properties = new LinkedHashMap<>();
@@ -1182,7 +1191,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
             ComposedModel composedModel = (ComposedModel) v2Model;
             ComposedSchema composed = new ComposedSchema();
             composed.setDescription(composedModel.getDescription());
-            composed.setExample(composedModel.getExample());
+            if(composedModel.getExample()!= null) {
+                composed.setExample(composedModel.getExample());
+            }
             if (composedModel.getExternalDocs() != null) {
                 composed.setExternalDocs(convert(composedModel.getExternalDocs()));
             }

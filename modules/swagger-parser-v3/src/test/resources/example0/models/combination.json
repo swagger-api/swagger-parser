@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "description": "Blah blah blah",
+  "properties": {
+    "file": {
+      "$ref": "#/components/schemas/Link",
+      "description": "Blah blah blah",
+      "readOnly": true
+    },
+    "fileVersion": {
+      "$ref": "#/components/schemas/Link",
+      "description": "Blah blah blah"
+    },
+    "target": {
+      "oneOf": [
+        {
+          "$ref": "#/components/schemas/Raygun"
+        },
+        {
+          "$ref": "#/components/schemas/Dingy"
+        },
+        {
+          "$ref": "#/components/schemas/Headlight"
+        }
+      ],
+      "description": "Blah blah blah"
+    },
+    "createdBy": {
+      "$ref": "#/components/schemas/Link",
+      "description": "Blah blah blah",
+      "readOnly": true
+    }
+  },
+  "components": {
+    "schemas": {
+      "Link": {
+        "$ref": "./common/link.json"
+      },
+      "Raygun": {
+        "$ref": "./target/raygun.json"
+      },
+      "Dingy": {
+        "$ref": "./target/dingy.json"
+      },
+      "Headlight": {
+        "$ref": "./target/headlight.json"
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ public class ParseOptions {
     private boolean flattenComposedSchemas;
     private boolean camelCaseFlattenNaming;
     private boolean skipMatches;
+    private boolean allowEmptyStrings = true;
 
     public boolean isResolve() {
         return resolve;
@@ -58,5 +59,13 @@ public class ParseOptions {
 
     public void setCamelCaseFlattenNaming(boolean camelCaseFlattenNaming) {
         this.camelCaseFlattenNaming = camelCaseFlattenNaming;
+    }
+
+    public boolean isAllowEmptyString() {
+        return allowEmptyStrings;
+    }
+
+    public void setAllowEmptyString(boolean allowEmptyStrings) {
+        this.allowEmptyStrings = allowEmptyStrings;
     }
 }

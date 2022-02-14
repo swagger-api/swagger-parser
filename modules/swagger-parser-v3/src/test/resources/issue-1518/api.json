@@ -1,0 +1,373 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "v3.1.1",
+    "title": "Foo/Foo1 API",
+    "x-serviceName": "duplicates",
+    "description": "blah blah blah",
+    "contact": {
+      "name": "Foo/Foo1 Team",
+      "email": "foo@foo1.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/v7/duplicates": {
+      "get": {
+        "description": "blah blah blah",
+        "operationId": "getAnalemmatas",
+        "tags": [
+          "Analemmatas"
+        ],
+        "parameters": [
+          {
+            "name": "dup_id",
+            "description": "blah blah blah",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnacreonticPacedCoalheaver"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "blah blah blah",
+        "operationId": "createAnalemmata",
+        "tags": [
+          "Analemmata"
+        ],
+        "requestBody": {
+          "description": "blah blah blah",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Analemmata"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analemmata"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v7/duplicates/{id}": {
+      "get": {
+        "description": "blah blah blah",
+        "operationId": "getAnalemmataById",
+        "tags": [
+          "Analemmata"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "blah blah blah",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analemmata"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "blah blah blah",
+        "operationId": "packsAnalemmataById",
+        "tags": [
+          "Analemmata"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "blah blah blah",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PacksOpiniateds"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analemmata"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "blah blah blah",
+        "operationId": "deleteAnalemmataById",
+        "tags": [
+          "Analemmata"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "blah blah blah",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "blah blah blah"
+          },
+          "400": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "blah blah blah",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "blah blah blah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Essot"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Analemmata": {
+        "$ref": "./models/analemmata.json"
+      },
+      "TashotSipe": {
+        "$ref": "./models/common/tashotSipe.json"
+      },
+      "Stunts": {
+        "$ref": "./models/common/stunts.json"
+      },
+      "Essot": {
+        "$ref": "./models/common/essot.json"
+      }
+    }
+  }
+}

@@ -70,7 +70,7 @@ public class ResolverCache {
         this.rootPath = parentFileLocation;
 
         if(parentFileLocation != null) {
-            if(parentFileLocation.startsWith("http")) {
+            if(parentFileLocation.startsWith("http") || parentFileLocation.startsWith("jar")) {
                 parentDirectory = null;
             } else {
                 parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
@@ -162,7 +162,6 @@ public class ResolverCache {
         }
 
         updateLocalRefs(file, result);
-
         resolutionCache.put(ref, result);
 
         return result;

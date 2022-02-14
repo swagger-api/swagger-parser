@@ -55,7 +55,8 @@ public class ResolverFully {
     private Map<String, Header> headers;
     private Map<String, Link> links;
     private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
-
+    private Map<String, Callback> callbacks;
+    
     public void resolveFully(OpenAPI openAPI) {
         Components components = openAPI.getComponents();
         if (components != null && components.getRequestBodies() != null) {
@@ -98,6 +99,12 @@ public class ResolverFully {
                 links = new HashMap<>();
             }
         }
+        if (components != null && components.getCallbacks() != null) {
+            callbacks = components.getCallbacks();
+            if (callbacks == null) {
+            	callbacks = new HashMap<>();
+            }
+        }
         Paths paths = openAPI.getPaths();
         if(paths != null) {
             for (String pathname : paths.keySet()) {
@@ -136,7 +143,8 @@ public class ResolverFully {
             if (op.getCallbacks() != null){
                 Map<String,Callback> callbacks = op.getCallbacks();
                 for (String name : callbacks.keySet()) {
-                    Callback callback = callbacks.get(name);
+                	Callback callback = callbacks.get(name);
+                	callback = callback.get$ref() != null ? resolveCallback(callback) : callback;
                     if (callback != null) {
                         for(String callbackName : callback.keySet()) {
                             PathItem path = callback.get(callbackName);
@@ -146,6 +154,7 @@ public class ResolverFully {
 
                         }
                     }
+                    op.getCallbacks().put(name, callback);
                 }
             }
 
@@ -263,6 +272,18 @@ public class ResolverFully {
         }
         return requestBody;
     }
+    
+    public Callback resolveCallback(Callback callback){
+        RefFormat refFormat = computeRefFormat(callback.get$ref());
+        String $ref = callback.get$ref();
+        if (!isAnExternalRefFormat(refFormat)){
+            if (callbacks != null && !callbacks.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return callbacks.getOrDefault(referenceKey, callback);
+            }
+        }
+        return callback;
+    }
 
     public Parameter resolveParameter(Parameter parameter){
         String $ref = parameter.get$ref();
@@ -375,6 +396,10 @@ public class ResolverFully {
                     combinedModel.setExample(schema.getExample());
                 } else if (!examples.isEmpty()) {
                     combinedModel.setExample(examples);
+                }
+
+                if(schema.getXml()!= null){
+                    combinedModel.setXml(schema.getXml());
                 }
 
                 result = combinedModel;

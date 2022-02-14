@@ -15,6 +15,7 @@ import io.swagger.v3.parser.util.InlineModelResolver;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RemoteUrl;
 import io.swagger.v3.parser.util.ResolverFully;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +29,7 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import javax.net.ssl.SSLHandshakeException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +133,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     public SwaggerParseResult parseJsonNode(String path, JsonNode node) {
-        return new OpenAPIDeserializer().deserialize(node, path);
+        return new OpenAPIDeserializer().deserialize(node, path,new ParseOptions());
+    }
+    public SwaggerParseResult parseJsonNode(String path, JsonNode node, ParseOptions options) {
+        return new OpenAPIDeserializer().deserialize(node, path, options);
     }
 
     public SwaggerParseResult readContents(String yaml) {
@@ -149,7 +154,12 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             final ObjectMapper mapper = getRightMapper(swaggerAsString);
             final JsonNode rootNode = mapper.readTree(swaggerAsString);
-            final SwaggerParseResult result = parseJsonNode(location, rootNode);
+            final SwaggerParseResult result;
+            if (options != null) {
+                result = parseJsonNode(location, rootNode, options);
+            }else {
+                result = parseJsonNode(location, rootNode);
+            }
             if (result.getOpenAPI() != null) {
                 return resolve(result, auth, options, location);
             }
@@ -198,7 +208,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             return String.format("Unable to parse `%s`", location);
         }
         if (originalMessage.startsWith("Duplicate field")) {
-            return String.format(originalMessage + " in `%s`", location);
+            return String.format("%s in `%s`", originalMessage, location);
         }
         return originalMessage;
     }
@@ -219,6 +229,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             if (adjustedLocation.toLowerCase().startsWith("http")) {
                 return RemoteUrl.urlToString(adjustedLocation, auth);
+            } else if (adjustedLocation.toLowerCase().startsWith("jar:")) {
+                final InputStream in = new URI(adjustedLocation).toURL().openStream();
+                return IOUtils.toString(in, encoding);
             } else {
                 final String fileScheme = "file:";
                 final Path path = adjustedLocation.toLowerCase().startsWith(fileScheme) ?

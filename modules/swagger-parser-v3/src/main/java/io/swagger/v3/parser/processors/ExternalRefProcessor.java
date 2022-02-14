@@ -49,7 +49,7 @@ public final class ExternalRefProcessor {
         this.openAPI = openAPI;
     }
 
-    private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newScema,
+    private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newSchema,
         int iteration) {
         String tryName =
             iteration == 0 ? possiblyConflictingDefinitionName : possiblyConflictingDefinitionName + "_" + iteration;
@@ -58,9 +58,23 @@ public final class ExternalRefProcessor {
             if (existingModel.get$ref() != null) {
                 // use the new model
                 existingModel = null;
-            } else if (!newScema.equals(existingModel)) {
+            } else if (!newSchema.equals(existingModel)) {
+                if(cache.getResolutionCache().get(newSchema.get$ref())!= null){
+                    return tryName;
+                }
                 LOGGER.debug("A model for " + existingModel + " already exists");
-                return finalNameRec(schemas, possiblyConflictingDefinitionName, newScema, ++iteration);
+                return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration);
+            }
+        }else{
+            // validate the name
+            if(existingModel == null){
+                for(String name: schemas.keySet()){
+                    if(name.toLowerCase().equals(tryName.toLowerCase())){
+                        existingModel = schemas.get(name);
+                        tryName = name;
+                        break;
+                    }
+                }
             }
         }
         return tryName;
@@ -95,7 +109,7 @@ public final class ExternalRefProcessor {
         newRef = finalNameRec(schemas, possiblyConflictingDefinitionName, schema, 0);
         cache.putRenamedRef($ref, newRef);
         Schema existingModel = schemas.get(newRef);
-        if(existingModel != null && existingModel.get$ref() != null) {
+       if(existingModel != null && existingModel.get$ref() != null) {
             // use the new model
             existingModel = null;
         }
@@ -111,9 +125,16 @@ public final class ExternalRefProcessor {
                 if (isAnExternalRefFormat(ref)) {
                     if (!ref.equals(RefFormat.URL)) {
                         String schemaFullRef = schema.get$ref();
-                        String parent = file.substring(0, file.lastIndexOf(File.separatorChar));
+                        String parent = file.substring(0, file.lastIndexOf('/'));
                         if (!parent.isEmpty()) {
-                            schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
+                            if (schemaFullRef.contains("#/")) {
+                                String[] parts = schemaFullRef.split("#/");
+                                String schemaFullRefFilePart = parts[0];
+                                String schemaFullRefInternalRefPart = parts[1];
+                                schemaFullRef = Paths.get(parent, schemaFullRefFilePart).normalize().toString() + "#/" + schemaFullRefInternalRefPart;
+                            } else {
+                                schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
+                            }
                         }
                         schema.set$ref(processRefToExternalSchema(schemaFullRef, ref));
                     }
@@ -192,7 +213,6 @@ public final class ExternalRefProcessor {
                 }
             }
         }
-
         return newRef;
     }
 
@@ -371,6 +391,7 @@ public final class ExternalRefProcessor {
             }
         }
         newRef = possiblyConflictingDefinitionName;
+        openAPI.getComponents().addResponses(newRef, response);
         cache.putRenamedRef($ref, newRef);
 
         if(response != null) {
@@ -387,6 +408,7 @@ public final class ExternalRefProcessor {
 
         return newRef;
     }
+
 
     public String processRefToExternalRequestBody(String $ref, RefFormat refFormat) {
         String renamedRef = cache.getRenamedRef($ref);
@@ -866,7 +888,7 @@ public final class ExternalRefProcessor {
         if (schema.get$ref() != null) {
             RefFormat ref = computeRefFormat(schema.get$ref());
             if (isAnExternalRefFormat(ref)) {
-                processRefSchema(schema, $ref);
+                processRefSchema(schema, file);
             } else {
                 processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
             }

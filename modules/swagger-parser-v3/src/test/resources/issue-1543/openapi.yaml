@@ -1,0 +1,29 @@
+openapi: 3.0.1
+info:
+  title: Innotech API backend
+  description: >
+    API for the Innotech backend
+  version: 1.0.0
+
+paths:
+
+  ## Miscellaneous ###################################################################
+  "/misc/ping":
+    get:
+      tags:
+        - Ping
+      operationId: getPing
+      parameters:
+        - in: query
+          name: param
+          schema:
+            type: string
+            maxLength: 255
+          required: true
+      responses:
+        "200":
+          description: Ping response
+          content:
+            application/json:
+              schema:
+                $ref: "schemas/_index.yaml#/pingResponse"

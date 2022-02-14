@@ -1,0 +1,16 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: x
+  description: desc
+  license:
+    name: public domain
+  contact:
+    name: API Support
+    url: http://www.example.com/support
+    email: support@example.com
+paths:
+  /authorize:
+    $ref: 'security/_resources/authorize.yaml'
+  /login:
+    $ref: 'security/_resources/login.yaml'

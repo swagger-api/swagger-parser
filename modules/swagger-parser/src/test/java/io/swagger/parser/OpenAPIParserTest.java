@@ -31,6 +31,16 @@ import static org.testng.Assert.assertTrue;
 public class OpenAPIParserTest {
 
     @Test
+    public void testIssue1608(){
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue1608.json", null, options);
+        Schema schema = swaggerParseResult.getOpenAPI().getPaths().get("/pet").getPut().getRequestBody().getContent().get("application/json").getSchema();
+        assertEquals(schema.getRequired().size(), 1);
+    }
+
+    @Test
     public void testIssue1143(){
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -38,6 +48,26 @@ public class OpenAPIParserTest {
         assertNotNull(result.getOpenAPI());
         assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("RedisResource"));
         assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("identificacion_usuario_aplicacion"));
+    }
+
+    @Test
+    public void testIssue1621() {
+        final ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setResolveCombinators(false);
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue-1621/example.openapi.yaml", null, parseOptions);
+        assertEquals(0, swaggerParseResult.getMessages().size());
+        OpenAPI api = swaggerParseResult.getOpenAPI();
+        assertEquals("POST Example", api.getPaths()
+                .get("/example")
+                .getPost()
+                .getRequestBody()
+                .getContent()
+                .get("application/json")
+                .getSchema()
+                .getTitle());
     }
 
     @Test
@@ -623,6 +653,15 @@ public class OpenAPIParserTest {
         Schema decimalValue = schema.getProperties().get("decimal_value");
         BigDecimal multipleOf = decimalValue.getMultipleOf();
         assertEquals(multipleOf, new BigDecimal("0.3", new MathContext(multipleOf.precision())));
+    }
+
+    @Test
+    public void testConvertWindowsPathsToUnixWhenResolvingServerPaths() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation("exampleSpecs\\specs\\issue1553.yaml", null, options);
+
+        assertEquals("/api/customer1/v1", result.getOpenAPI().getServers().get(0).getUrl());
     }
 }
 

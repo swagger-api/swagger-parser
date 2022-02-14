@@ -1,0 +1,7 @@
+{
+  "type": "string",
+  "enum": [
+    "RAFTER"
+  ],
+  "description": "blah blah blah"
+}
