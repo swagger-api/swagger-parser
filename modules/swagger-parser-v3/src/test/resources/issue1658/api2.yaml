@@ -1,0 +1,7 @@
+components:
+  schemas:
+    ref2:
+      type: object
+      properties:
+        status:
+          type: string

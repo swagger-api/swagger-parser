@@ -1,0 +1,20 @@
+paths:
+  healthCheck:
+    get:
+      summary: Gets service health status
+      responses:
+        '200':
+          description: Success status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseBase'
+
+
+components:
+  schemas:
+    responseBase:
+      $ref: '#/components/schemas/ref1'
+
+    ref1:
+      $ref: './api2.yaml#/components/schemas/ref2'
