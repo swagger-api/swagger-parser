@@ -12,3 +12,4 @@ modules/swagger-parser/src/test/resources/relative-file-references/yaml
 **/test-output/*
 dependency-reduced-pom.xml
 *.pyc
+modules/swagger-parser/target/dependency-check-report.html
