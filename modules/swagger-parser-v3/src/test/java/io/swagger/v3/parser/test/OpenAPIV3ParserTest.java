@@ -133,7 +133,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         assertEquals(result.getMessages().size(),1);
-        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `string`"));
+        assertTrue(result.getMessages().contains("attribute paths.'/operations'(post).parameters.[param0].in is not of type `[query|header|path|cookie]`"));
     }
 
 
@@ -2847,7 +2847,6 @@ public class OpenAPIV3ParserTest {
 
         final OpenAPIV3Parser parser = new OpenAPIV3Parser();
         final SwaggerParseResult result = parser.readLocation(location, null, options);
-        assertNull(result.getOpenAPI());
         List<String> messages = result.getMessages();
         assertEquals(1, messages.size());
         assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.json`");
@@ -2863,10 +2862,9 @@ public class OpenAPIV3ParserTest {
 
         final OpenAPIV3Parser parser = new OpenAPIV3Parser();
         final SwaggerParseResult result = parser.readLocation(location, null, options);
-        assertNull(result.getOpenAPI());
         List<String> messages = result.getMessages();
         assertEquals(1, messages.size());
-        assertEquals(messages.get(0), "Duplicate field '200' in `src/test/resources/duplicateHttpStatusCodes.yaml`");
+        assertEquals(messages.get(0), "Duplicate field 200 in `src/test/resources/duplicateHttpStatusCodes.yaml`");
 
     }
 
@@ -2978,7 +2976,67 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
     }
-  
+
+    @Test(description = "option true, adds Original Location to messages when ref is relative/local")
+    public void testValidateExternalRefsTrue() {
+        ParseOptions options = new ParseOptions();
+        options.setValidateExternalRefs(true);
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertNotNull(result.getMessages());
+        assertEquals(result.getMessages().size(), 19);
+        assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.asdasd is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.descasdasdription is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.descrsaiption is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.asdas is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.description is missing (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.nonExpected is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.parameters.skipParam.[skip].in is not of type `[query|header|path|cookie]` (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.namex is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.name is missing (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.callbacks.webhookVerificationEvent.postx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.headers.X-Rate-Limit-Limit.descriptasdd is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.links.unsubscribe.parametersx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.examples.response-example.summaryx is unexpected (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.examples.response-example. value and externalValue are both present (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.callbacks.failed.wrongField is not of type `object` (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute paths.~1refPet(get).responses is missing (./ref.yaml)"));
+
+        //error message in main file
+        assertTrue(result.getMessages().contains("attribute components.schemas.InvalidSchema.invalid is unexpected"));
+
+        assertTrue(result.getMessages().contains("attribute components.schemas.ErrorModel.properties is not of type `object` (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object` (./ref.yaml)"));
+
+    }
+
+    @Test(description = "directly parsed  definition, tested in previous method as reference relative/local ")
+    public void testValidateDefinition() {
+        ParseOptions options = new ParseOptions();
+        options.setValidateExternalRefs(false);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/ref.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertNotNull(result.getMessages());
+        assertTrue(result.getMessages().contains("attribute components.schemas.ErrorModel.properties is not of type `object`"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Examples.properties is not of type `object`"));
+    }
+
+    @Test(description = "option false, does not add Original Location to messages when ref is relative/local")
+    public void testValidateExternalRefsFalse() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setValidateExternalRefs(false);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        //keeps error messages only from original spec
+        assertTrue(result.getMessages().contains("attribute components.schemas.InvalidSchema.invalid is unexpected"));
+        assertTrue(result.getMessages().contains("An exception was thrown while trying to deserialize the contents of ./ref.yaml into type class io.swagger.v3.oas.models.callbacks.Callback"));
+    }
+
     @Test
     public void testNullExample() throws Exception{
         String yamlString = FileUtils.readFileToString(new File("src/test/resources/null-full-example.yaml"), "UTF-8");

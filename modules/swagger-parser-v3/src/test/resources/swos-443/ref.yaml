@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Acme Components
+  description: Common components for Acme REST APIs
+  version: '1'
+paths:
+  /refPet:
+    get:
+      tags:
+        - pet
+      summary: Add a new pet to the store
+      operationId: addPet
+components:
+  links:
+    unsubscribe:
+      operationId: cancelHookCallback
+      parametersx:
+        id: $response.body#/hookId
+  headers:
+    X-Rate-Limit-Limit:
+      descriptasdd: The number of allowed requests in the current period
+      schema:
+        type: integer
+      example: "This is a header example"
+  securitySchemes:
+    api_key:
+      type: apiKey
+      namex: api_key
+      in: not
+  examples:
+    response-example:
+      summaryx: This is a text example
+      value:
+        id: 3
+        name: Tricia McMillan
+      externalValue: 'http://foo.bar/examples/address-example.txt'
+  requestBodies:
+    NewItem:
+      asdasd: asd
+      descasdasdription: A JSON object containing item data
+      required: true
+      content:
+        application/json:
+          schema:
+            type: asd
+  responses:
+    GeneralError:
+      descrsaiption: An error occurred
+      asdas: asdasd
+  schemas:
+    ErrorModel:
+      type: object
+      properties:
+    Examples:
+      description: The example model
+      nonExpected: arbitrary keyword
+      type: object
+      properties:
+        foo:
+  parameters:
+    skipParam:
+      name: skip
+      in: wrong
+      descriptionx: number of items to skip
+  callbacks:
+    failed:
+      wrongField: badCallback
+    webhookVerificationEvent:
+      'https://yourdomain.com/css/yourCallbackEndpoint':
+        postx:
+          parameters:
+            - $ref: '#/components/parameters/x-api-key'
+          requestBody:
+            required: true
+            description: description
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/WebhookVerification'
+          responses:
+            '202':
+              description: Your server returns this code if it accepts the message it was sent
+
+
