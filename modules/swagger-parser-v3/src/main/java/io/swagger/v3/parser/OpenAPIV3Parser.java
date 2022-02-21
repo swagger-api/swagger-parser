@@ -11,10 +11,12 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.exception.EncodingNotSupportedException;
 import io.swagger.v3.parser.exception.ReadContentException;
 import io.swagger.v3.parser.util.ClasspathHelper;
+import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.InlineModelResolver;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RemoteUrl;
 import io.swagger.v3.parser.util.ResolverFully;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -22,12 +24,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import javax.net.ssl.SSLHandshakeException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,20 +153,40 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
 
         try {
             final ObjectMapper mapper = getRightMapper(swaggerAsString);
-            final JsonNode rootNode = mapper.readTree(swaggerAsString);
-            final SwaggerParseResult result;
+            JsonNode rootNode;
+            final SwaggerParseResult deserializationUtilsResult = new SwaggerParseResult();
+            if (options != null && options.isLegacyYamlDeserialization()) {
+                rootNode = mapper.readTree(swaggerAsString);
+            } else {
+                try {
+                    rootNode = DeserializationUtils.deserializeIntoTree(swaggerAsString, location, options, deserializationUtilsResult);
+                } catch (Exception e) {
+                    rootNode = mapper.readTree(swaggerAsString);
+                }
+            }
+
+            SwaggerParseResult result;
             if (options != null) {
                 result = parseJsonNode(location, rootNode, options);
             }else {
                 result = parseJsonNode(location, rootNode);
             }
             if (result.getOpenAPI() != null) {
-                return resolve(result, auth, options, location);
+                result = resolve(result, auth, options, location);
+            }
+            if (deserializationUtilsResult.getMessages() != null) {
+                for (String s: deserializationUtilsResult.getMessages()) {
+                    result.message(getParseErrorMessage(s, location));
+                }
             }
             return result;
         } catch (JsonProcessingException e) {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getOriginalMessage(), location);
+            return SwaggerParseResult.ofError(message);
+        } catch (Exception e) {
+            LOGGER.warn("Exception while parsing:", e);
+            final String message = getParseErrorMessage(e.getMessage(), location);
             return SwaggerParseResult.ofError(message);
         }
     }
@@ -179,8 +201,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
-                    result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
-                            location).resolve());
+                    OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
+                            location, null, options);
+                    resolver.resolve(result);
                     if (options.isResolveFully()) {
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                     }
@@ -196,7 +219,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             }
         } catch (Exception e) {
             LOGGER.warn("Exception while resolving:", e);
-            result.setMessages(Collections.singletonList(e.getMessage()));
+            // TODO verify if this change makes sense (adding resolve messages instead of replacing)
+            result.getMessages().add(e.getMessage());
+            // result.setMessages(Collections.singletonList(e.getMessage()));
         }
         return result;
     }
@@ -227,6 +252,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             if (adjustedLocation.toLowerCase().startsWith("http")) {
                 return RemoteUrl.urlToString(adjustedLocation, auth);
+            } else if (adjustedLocation.toLowerCase().startsWith("jar:")) {
+                final InputStream in = new URI(adjustedLocation).toURL().openStream();
+                return IOUtils.toString(in, encoding);
             } else {
                 final String fileScheme = "file:";
                 final Path path = adjustedLocation.toLowerCase().startsWith(fileScheme) ?

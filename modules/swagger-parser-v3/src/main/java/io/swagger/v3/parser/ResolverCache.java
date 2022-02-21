@@ -3,11 +3,19 @@ package io.swagger.v3.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.callbacks.Callback;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
 import io.swagger.v3.parser.util.DeserializationUtils;
@@ -20,6 +28,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +66,11 @@ public class ResolverCache {
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
-    private Set<String> referencedModelKeys = new HashSet<>();
+    private List<String> referencedModelKeys = new ArrayList<>();
+    private Set<String> resolveValidationMessages;
+
+    private final ParseOptions parseOptions;
+
 
     /*
     a map that stores original external references, and their associated renamed references
@@ -65,12 +78,22 @@ public class ResolverCache {
     private Map<String, String> renameCache = new HashMap<>();
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation) {
+        this(openApi, auths, parentFileLocation, new HashSet<>());
+    }
+
+    public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Set<String> resolveValidationMessages) {
+        this(openApi, auths, parentFileLocation, resolveValidationMessages, new ParseOptions());
+    }
+
+    public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Set<String> resolveValidationMessages, ParseOptions parseOptions) {
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
+        this.resolveValidationMessages = resolveValidationMessages;
+        this.parseOptions = parseOptions;
 
         if(parentFileLocation != null) {
-            if(parentFileLocation.startsWith("http")) {
+            if(parentFileLocation.startsWith("http") || parentFileLocation.startsWith("jar")) {
                 parentDirectory = null;
             } else {
                 parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
@@ -134,16 +157,26 @@ public class ResolverCache {
             }
             externalFileCache.put(file, contents);
         }
+        SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
+        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
 
         if (definitionPath == null) {
-            T result = DeserializationUtils.deserialize(contents, file, expectedType);
+            T result = null;
+            if (parseOptions.isValidateExternalRefs()) {
+                result = deserializeFragment(tree, expectedType, file, "/");
+            } else {
+                result = DeserializationUtils.deserialize(contents, file, expectedType);
+            }
             resolutionCache.put(ref, result);
+            if (deserializationUtilResult.getMessages() != null) {
+                if (this.resolveValidationMessages != null) {
+                    this.resolveValidationMessages.addAll(deserializationUtilResult.getMessages());
+                }
+            }
             return result;
         }
 
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file);
-
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
             tree = tree.get(unescapePointer(jsonPathElement));
@@ -152,19 +185,60 @@ public class ResolverCache {
                 throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
             }
         }
-
-        T result;
-        if (expectedType.equals(Schema.class)) {
-            OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-            result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), null);
+        T result = null;
+        if (parseOptions.isValidateExternalRefs()) {
+            result = deserializeFragment(tree, expectedType, file, definitionPath);
         } else {
-            result = DeserializationUtils.deserialize(tree, file, expectedType);
+            if (expectedType.equals(Schema.class)) {
+                OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), null);
+            } else {
+                result = DeserializationUtils.deserialize(tree, file, expectedType);
+            }
         }
-
         updateLocalRefs(file, result);
         resolutionCache.put(ref, result);
-
+        if (deserializationUtilResult.getMessages() != null) {
+            if (this.resolveValidationMessages != null) {
+                this.resolveValidationMessages.addAll(deserializationUtilResult.getMessages());
+            }
+        }
         return result;
+    }
+
+    private <T> T deserializeFragment(JsonNode node, Class<T> expectedType, String file, String definitionPath) {
+        OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+        OpenAPIDeserializer.ParseResult parseResult = new OpenAPIDeserializer.ParseResult();
+        T result = null;
+        if (expectedType.equals(Schema.class)) {
+            result = (T) deserializer.getSchema((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        } else if (expectedType.equals(RequestBody.class)) {
+            result = (T) deserializer.getRequestBody((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        } else if (expectedType.equals(ApiResponse.class)) {
+            result = (T) deserializer.getResponse((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }else if (expectedType.equals(Callback.class)) {
+            result = (T) deserializer.getCallback((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }else if (expectedType.equals(Example.class)) {
+            result = (T) deserializer.getExample((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }else if (expectedType.equals(Header.class)) {
+            result = (T) deserializer.getHeader((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }else if (expectedType.equals(Link.class)) {
+            result = (T) deserializer.getLink((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }else if (expectedType.equals(Parameter.class)) {
+            result = (T) deserializer.getParameter((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }else if (expectedType.equals(SecurityScheme.class)) {
+            result = (T) deserializer.getSecurityScheme((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }else if (expectedType.equals(PathItem.class)) {
+            result = (T) deserializer.getPathItem((ObjectNode) node, definitionPath.replace("/", "."), parseResult);
+        }
+        parseResult.getMessages().forEach((m) -> {
+            resolveValidationMessages.add(m + " (" + file + ")");
+        });
+        if (result != null) {
+            return result;
+        }
+        // TODO ensure core deserialization exceptions get added to result messages resolveValidationMessages
+        return DeserializationUtils.deserialize(node, file, expectedType);
     }
 
     protected <T> void updateLocalRefs(String file, T result) {
