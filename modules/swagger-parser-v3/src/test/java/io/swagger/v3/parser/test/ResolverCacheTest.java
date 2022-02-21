@@ -4,9 +4,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import java.util.HashSet;
 import java.util.List;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -15,6 +16,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.RefUtils;
@@ -43,57 +46,66 @@ public class ResolverCacheTest {
     List<AuthorizationValue> auths;
 
     @Test
-    public void testMock(@Injectable final Schema expectedResult) throws Exception {
+    public void testMock() throws Exception {
+
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/file.json";
         final String contentsOfExternalFile = "really good json";
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setValidateExternalRefs(true);
 
         new Expectations(DeserializationUtils.class) {{
             RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
             times = 1;
             result = contentsOfExternalFile;
 
-            DeserializationUtils.deserialize(contentsOfExternalFile, ref, Schema.class);
+            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, ref, parseOptions, (SwaggerParseResult) any);
             times = 1;
-            result = expectedResult;
-        }};
+            result = new ObjectMapper().readTree("{\"type\":  \"string\"}");
 
-        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json");
+        }};
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new HashSet<>(), parseOptions);
 
         Schema firstActualResult = cache.loadRef(ref, RefFormat.URL, Schema.class);
 
 
-        assertEquals(firstActualResult, expectedResult);
+        assertEquals(firstActualResult.getType(), "string");
     }
 
     @Test
-    public void testLoadExternalRef_NoDefinitionPath(@Injectable final Schema expectedResult) throws Exception {
+    public void testLoadExternalRef_NoDefinitionPath() throws Exception {
 
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/file.json";
         final String contentsOfExternalFile = "really good json";
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setValidateExternalRefs(true);
 
         new Expectations(DeserializationUtils.class) {{
             RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
             times = 1;
             result = contentsOfExternalFile;
 
-            DeserializationUtils.deserialize(contentsOfExternalFile, ref, Schema.class);
+            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, ref, parseOptions, (SwaggerParseResult) any);
             times = 1;
-            result = expectedResult;
+            result = new ObjectMapper().readTree("{\"type\":  \"string\"}");
         }};
 
-        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json");
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new HashSet<>(), parseOptions);
 
         Schema firstActualResult = cache.loadRef(ref, RefFormat.URL, Schema.class);
 
         assertEquals(contentsOfExternalFile, cache.getExternalFileCache().get(ref));
-        assertEquals(expectedResult, cache.getResolutionCache().get(ref));
-        assertEquals(expectedResult, firstActualResult);
+        assertEquals(((Schema)cache.getResolutionCache().get(ref)).getType(), "string");
+        assertEquals(firstActualResult.getType(), "string");
 
         //requesting the same ref a second time should not result in reading the external file again
         Schema secondActualResult = cache.loadRef(ref, format, Schema.class);
-        assertEquals(expectedResult, secondActualResult);
+        assertEquals(secondActualResult.getType(), "string");
 
     }
 
@@ -101,17 +113,17 @@ public class ResolverCacheTest {
     public void testLoadExternalRefWithEscapedCharacters() throws Exception {
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/main.yaml";
-        final String contentsOfExternalFile = "openAPI: \"2.0\"\n" + 
-            "\n" + 
-            "info:\n" + 
-            "  version: 1.0.0\n" + 
-            "  title: Path include test case child\n" + 
-            "\n" + 
-            "paths:\n" + 
-            "  /foo~bar~1:\n" + 
-            "    get:\n" + 
-            "      responses:\n" + 
-            "        200:\n" + 
+        final String contentsOfExternalFile = "openAPI: \"2.0\"\n" +
+            "\n" +
+            "info:\n" +
+            "  version: 1.0.0\n" +
+            "  title: Path include test case child\n" +
+            "\n" +
+            "paths:\n" +
+            "  /foo~bar~1:\n" +
+            "    get:\n" +
+            "      responses:\n" +
+            "        200:\n" +
             "          description: \"Request successful\"\n";
 
         new Expectations() {{
@@ -167,7 +179,7 @@ public class ResolverCacheTest {
         assertNull(cache.loadRef("#/components/parameters/bar", RefFormat.INTERNAL, Parameter.class));
         assertNull(cache.loadRef("#/params/foo", RefFormat.INTERNAL, Parameter.class));
     }
-    
+
     @Test
     public void testLoadInternalParameterRefWithSpaces(@Injectable Parameter mockedParameter) throws Exception {
         OpenAPI openAPI = new OpenAPI();
@@ -200,7 +212,7 @@ public class ResolverCacheTest {
         Schema actualResult = cache.loadRef("#/components/schemas/foo bar", RefFormat.INTERNAL, Schema.class);
         assertEquals(actualResult, mockedModel);
     }
-    
+
     @Test
     public void testLoadInternalDefinitionRefWithEscapedCharacters(@Injectable Schema mockedModel) throws Exception {
         OpenAPI openAPI = new OpenAPI();
@@ -210,7 +222,7 @@ public class ResolverCacheTest {
         Schema actualResult = cache.loadRef("#/components/schemas/foo~0bar~1baz~01", RefFormat.INTERNAL, Schema.class);
         assertEquals(actualResult, mockedModel);
     }
-    
+
     @Test
     public void testLoadInternalResponseRef(@Injectable ApiResponse mockedResponse) throws Exception {
         OpenAPI openAPI = new OpenAPI();
