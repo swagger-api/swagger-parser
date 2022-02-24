@@ -1,0 +1,9 @@
+openapi: 3.0.0
+info:
+  title: Demo
+  description: Demo to crash parser
+  version: 1.0.0
+
+paths:
+  /internal/v1/hc:
+    $ref: './apis.yaml#/paths/healthCheck' 
