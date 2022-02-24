@@ -3123,9 +3123,14 @@ public class OpenAPIDeserializer {
 		}
 
 		final ObjectNode contentNode = getObject("content", node, true, location, result);
-		if (contentNode != null) {
-			body.setContent(getContent(contentNode, location + ".content", result));
-		}
+        Content content = getContent(contentNode, location + ".content", result);
+		if(content != null && content.isEmpty()) {
+            result.unsupported(location,"content with no media type",contentNode);
+            result.invalid();
+        }
+        else {
+            body.setContent(content);
+        }
 
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
