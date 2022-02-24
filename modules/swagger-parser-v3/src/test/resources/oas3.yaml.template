@@ -243,6 +243,90 @@ paths:
             - pending
             - sold
             default: available
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Pet"
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Pet"
+        '400':
+          description: Invalid status value
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+      requestBody:
+        description: pet store to add to the system
+        required: true
+        content:
+          multipart/mixed:
+            schema:
+              type: object
+              properties:
+                id:
+                  # default is text/plain
+                  type: string
+                  format: uuid
+                  "$ref": "#/components/schemas/Pet"
+                address:
+                  # default is application/json
+                  type: object
+                  properties: {}
+                historyMetadata:
+                  # need to declare XML format!
+                  description: metadata in XML format
+                  type: object
+                  properties: {}
+                profileImage:
+                  # default is application/octet-stream, need to declare an image type only!
+                  type: string
+                  format: binary
+            encoding:
+              historyMetadata:
+                # require XML Content-Type in utf-8 encoding
+                contentType: application/xml; charset=utf-8
+              profileImage:
+                # only accept png/jpeg
+                contentType: image/png, image/jpeg
+                headers:
+                  X-Rate-Limit:
+                    description: calls per hour allowed by the user
+                    schema:
+                      type: integer
+                      format: int32
+                  X-Expires-After:
+                    description: date in UTC when token expires
+                    schema:
+                      type: string
+                      format: date-time
+      callbacks:
+        mainHook:
+          '$request.body#/url':
+            post:
+              responses:
+                '200':
+                  description: webhook successfully processed operation
+  "/pet/findByStatusContent":
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatusContent
+      parameters:
+      - name: status
+        in: query
+        description: Status values that need to be considered for filter
+        required: true
+        example: "example"
         content:
           'application/json':
             schema:
@@ -274,6 +358,12 @@ paths:
                     schema:
                       type: integer
                       format: int32
+      - name: statusXml
+        in: query
+        description: Status values that need to be considered for filter
+        required: true
+        example: "example"
+        content:
           'application/xml':
             examples:
               list:
@@ -282,6 +372,12 @@ paths:
               empty:
                 summary: Empty list
                 value: "<Users/>"
+      - name: statusText
+        in: query
+        description: Status values that need to be considered for filter
+        required: true
+        example: "example"
+        content:
           'text/plain':
             examples:
               list:

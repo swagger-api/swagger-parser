@@ -1271,6 +1271,161 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testParamContent() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"parameters\": ["
+            + "          {"
+            + "            \"name\": \"param0\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "            }"
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param1\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              }"
+            + "            }"
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param2\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              },"
+            + "              \"application/json\": {"
+            + "                \"schema\": {"
+            + "                  \"type\": \"object\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        ],"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+
+        Parameter param0 =
+            post.getParameters().stream()
+            .filter( p -> "param0".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param0"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param0].content with no media type is unsupported"),
+             true,
+             "No media types error reported");
+        assertEquals( param0.getContent(), null, "Empty content");
+
+        Parameter param1 =
+            post.getParameters().stream()
+            .filter( p -> "param1".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param1"));
+        assertEquals( param1.getContent().size(), 1, "Valid content size");
+
+        Parameter param2 =
+            post.getParameters().stream()
+            .filter( p -> "param2".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param2"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param2].content with multiple media types is unsupported"),
+             true,
+             "Multiple media types error reported");
+        assertEquals( param2.getContent(), null, "Content with multiple media types");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
+    }
+
+    @Test
+    public void testParamData() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"parameters\": ["
+            + "          {"
+            + "            \"name\": \"param0\","
+            + "            \"in\": \"query\""
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param2\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              }"
+            + "            },"
+            + "            \"schema\": {"
+            + "               \"type\": \"object\""
+            + "              }"
+            + "            }"
+            + "        ],"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+
+        Parameter param0 =
+            post.getParameters().stream()
+            .filter( p -> "param0".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param0"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param0].content is missing"),
+             true,
+             "No schema or content error reported");
+        assertEquals( param0.getContent(), null, "No schema or content");
+
+        Parameter param2 =
+            post.getParameters().stream()
+            .filter( p -> "param2".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param2"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param2].content when schema defined is unsupported"),
+             true,
+             "Both schema and content error reported");
+        assertEquals( param2.getContent(), null, "Content when schema defined");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
+    }
+
+    @Test
     public void testDeserializeWithMessages() {
         String yaml = "openapi: '3.0.0'\n" +
                 "info:\n" +
@@ -2602,29 +2757,32 @@ public class OpenAPIDeserializerTest {
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
 
-        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatusContent");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 3);
+
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),3);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),null);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExamples().get("list").getSummary(),"List of Names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
 
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(1).getContent());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().size(),1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getSummary());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getSummary(),"Empty list");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getValue(),"<Users/>");
 
-        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary(),"Empty list");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getValue(),"<Users/>");
-
-
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(2).getContent());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().size(),1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
 
         PathItem petEndpoint = paths.get("/pet");
         Assert.assertNotNull(petEndpoint.getPut());
@@ -2825,7 +2983,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -2849,7 +3007,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -2875,7 +3033,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByTags");
@@ -2902,7 +3060,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem producesTestEndpoint = paths.get("/producesTest");
@@ -2969,7 +3127,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
 
         PathItem petRef = paths.get("/pathItemRef");
