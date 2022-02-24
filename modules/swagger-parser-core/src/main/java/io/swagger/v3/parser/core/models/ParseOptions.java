@@ -9,6 +9,8 @@ public class ParseOptions {
     private boolean camelCaseFlattenNaming;
     private boolean skipMatches;
     private boolean allowEmptyStrings = true;
+    private boolean validateExternalRefs = false;
+    private boolean legacyYamlDeserialization = false;
 
     public boolean isResolve() {
         return resolve;
@@ -67,5 +69,24 @@ public class ParseOptions {
 
     public void setAllowEmptyString(boolean allowEmptyStrings) {
         this.allowEmptyStrings = allowEmptyStrings;
+    }
+
+    public boolean isValidateExternalRefs() {
+        return validateExternalRefs;
+    }
+
+    public void setValidateExternalRefs(boolean validateExternalRefs) {
+        this.validateExternalRefs = validateExternalRefs;
+    }
+
+    /**
+     * if set to true, triggers YAML deserialization as done up to 2.0.30, not supporting YAML Anchors safe resolution.
+     */
+    public boolean isLegacyYamlDeserialization() {
+        return legacyYamlDeserialization;
+    }
+
+    public void setLegacyYamlDeserialization(boolean legacyYamlDeserialization) {
+        this.legacyYamlDeserialization = legacyYamlDeserialization;
     }
 }

@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  description: |
+    This is a sample Petstore server.  You can find
+    out more about Swagger at
+    [http://swagger.io](http://swagger.io) or on
+    [irc.freenode.net, #swagger](http://swagger.io/irc/).
+  version: "1.0.0"
+  title: Swagger Petstore
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  "/pathItemRef2":
+    "$ref": './ref.yaml#/paths/~1refPet'
+  /pet:
+    post:
+      tags:
+        - pet
+      summary: Add a new pet to the store
+      operationId: addPet
+      parameters:
+        - "$ref": "./ref.yaml#/components/parameters/skipParam"
+      responses:
+        '405':
+          $ref: './ref.yaml#/components/responses/GeneralError'
+        '401':
+          description: header and link test
+          headers:
+            X-Ref-Limit-Limit:
+              "$ref": "./ref.yaml#/components/headers/X-Rate-Limit-Limit"
+          links:
+            address:
+              "$ref": "./ref.yaml#/components/links/unsubscribe"
+      requestBody:
+        $ref: './ref.yaml#/components/requestBodies/NewItem'
+      callbacks:
+        failed:
+          '$ref': './ref.yaml#/components/callbacks/failed'
+        mainHook:
+          '$ref': './ref.yaml#/components/callbacks/webhookVerificationEvent'
+components:
+  schemas:
+    refInDefinitions:
+      $ref: './ref.yaml#/components/schemas/Examples'
+    InvalidSchema:
+      invalid: error
+    refErrorModelInDefinitions:
+      $ref: './ref.yaml#/components/schemas/ErrorModel'
+  securitySchemes:
+    reference:
+      "$ref": "./ref.yaml#/components/securitySchemes/api_key"
+  examples:
+    response-example:
+      $ref: './ref.yaml#/components/examples/response-example'
