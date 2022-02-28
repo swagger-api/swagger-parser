@@ -85,6 +85,22 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testExampleFormatByte() throws Exception{
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1630.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        Schema model = (Schema) openAPI.getComponents().getSchemas().get("Response").getProperties().get("content");
+        assertTrue(model instanceof ByteArraySchema);
+        ByteArraySchema byteArraySchema = (ByteArraySchema) model;
+        assertEquals(new String( byteArraySchema.getExample()), "VGhpc1Nob3VsZFBhc3MK");
+
+    }
+
+    @Test
     public void testIssue1644_NullValue() throws Exception{
         ParseOptions options = new ParseOptions();
         String issue1644 = "openapi: 3.0.0\n" +
