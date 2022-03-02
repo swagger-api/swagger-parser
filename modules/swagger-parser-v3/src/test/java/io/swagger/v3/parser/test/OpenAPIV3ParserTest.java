@@ -3263,7 +3263,7 @@ public class OpenAPIV3ParserTest {
         assertTrue(result.getMessages().contains("attribute components.headers.X-Rate-Limit-Limit.descriptasdd is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.links.unsubscribe.parametersx is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.examples.response-example.summaryx is unexpected (./ref.yaml)"));
-        assertTrue(result.getMessages().contains("attribute components.examples.response-example. value and externalValue are both present (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("components.examples.response-example. value and externalValue are both present (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.callbacks.failed.wrongField is not of type `object` (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute paths.~1refPet(get).responses is missing (./ref.yaml)"));
 

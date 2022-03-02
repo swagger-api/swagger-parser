@@ -132,18 +132,15 @@ public class DeserializationUtils {
     public static JsonNode deserializeIntoTree(String contents, String fileOrHost) {
         return deserializeIntoTree(contents, fileOrHost, null, new SwaggerParseResult());
     }
-    public static JsonNode deserializeIntoTree(String contents, String fileOrHost, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
-        return deserializeIntoTree(contents, fileOrHost, parseOptions, deserializationUtilsResult, false);
-    }
 
-    public static JsonNode deserializeIntoTree(String contents, String fileOrHost, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult, boolean openapi31) {
+    public static JsonNode deserializeIntoTree(String contents, String fileOrHost, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
         JsonNode result;
 
         try {
             if (isJson(contents)) {
-                result = openapi31 ? ObjectMapperFactory.createJson31().readTree(contents) : ObjectMapperFactory.createJson().readTree(contents);
+                result = ObjectMapperFactory.createJson().readTree(contents);
             } else {
-                result = readYamlTree(contents, parseOptions, deserializationUtilsResult, openapi31);
+                result = readYamlTree(contents, parseOptions, deserializationUtilsResult);
             }
         } catch (IOException e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into a JsonNode tree", e);
@@ -161,7 +158,7 @@ public class DeserializationUtils {
 
         boolean isJson = false;
 
-        if(contents instanceof String && isJson((String)contents)) {
+        if (contents instanceof String && isJson((String)contents)) {
             isJson = true;
         }
 
@@ -196,16 +193,13 @@ public class DeserializationUtils {
     }
 
     public static JsonNode readYamlTree(String contents) {
-        return readYamlTree(contents, null, new SwaggerParseResult(), false);
+        return readYamlTree(contents, null, new SwaggerParseResult());
     }
-    public static JsonNode readYamlTree(String contents, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult, boolean openapi31) {
-
-        ObjectMapper jsonMapper = openapi31 ? Json31.mapper() : Json.mapper();
-        ObjectMapper yamlMapper = openapi31 ? Yaml31.mapper() : Yaml.mapper();
+    public static JsonNode readYamlTree(String contents, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
 
         if (parseOptions != null && parseOptions.isLegacyYamlDeserialization()) {
             org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
-            return jsonMapper.convertValue(yaml.load(contents), JsonNode.class);
+            return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
         }
         try {
             org.yaml.snakeyaml.Yaml yaml = null;
@@ -219,7 +213,7 @@ public class DeserializationUtils {
                 boolean res = exceedsLimits(o, null, new Integer(0), new IdentityHashMap<Object, Long>(), deserializationUtilsResult);
                 if (res) {
                     LOGGER.warn("Error converting snake-parsed yaml to JsonNode");
-                    return yamlMapper.readTree(contents);
+                    return Yaml.mapper().readTree(contents);
                 }
             }
             try {
@@ -228,14 +222,14 @@ public class DeserializationUtils {
             } catch (Exception e) {
                 //
             }
-            return jsonMapper.convertValue(o, JsonNode.class);
+            return Json.mapper().convertValue(o, JsonNode.class);
         } catch (Throwable e) {
             LOGGER.warn("Error snake-parsing yaml content", e);
             if (deserializationUtilsResult != null) {
                 deserializationUtilsResult.message(e.getMessage());
             }
             try {
-                return yamlMapper.readTree(contents);
+                return Yaml.mapper().readTree(contents);
             } catch (Exception ee) {
                 LOGGER.error("Error parsing content", ee);
                 throw new RuntimeException(e);

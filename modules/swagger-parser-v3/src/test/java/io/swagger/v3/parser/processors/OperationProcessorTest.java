@@ -13,7 +13,6 @@ import mockit.Expectations;
 import mockit.FullVerifications;
 import mockit.Injectable;
 import mockit.Mocked;
-import org.junit.Ignore;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -39,7 +38,7 @@ public class OperationProcessorTest {
     ResponseProcessor responseProcessor;
 
     @Test (enabled = false)
-    // TODO reenable failing on operation.getParameters()
+    // TODO OAS3.1 - reenable failing on operation.getParameters()
     public void testProcessOperation(@Injectable final List<Parameter> inputParameterList,
                                      @Injectable final List<Parameter> outputParameterList,
                                      @Injectable final Parameter inputParameter,

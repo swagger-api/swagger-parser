@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.test;
 
 
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -15,8 +14,6 @@ import mockit.Mocked;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -164,7 +161,6 @@ public class RelativeReferenceTest {
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("/relativeParent/root/root.yaml", null, options);
 
         Assert.assertNotNull(parseResult.getOpenAPI());
-        Yaml.prettyPrint(parseResult);
 
         HashSet<String> validationMessages = new HashSet<>(null != parseResult.getMessages() ? parseResult.getMessages() : new ArrayList<>());
         Assert.assertTrue(validationMessages.isEmpty(), validationMessages.toString());
