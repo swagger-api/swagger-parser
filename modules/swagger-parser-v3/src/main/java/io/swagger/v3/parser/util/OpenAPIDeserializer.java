@@ -136,6 +136,7 @@ public class OpenAPIDeserializer {
 
 	// 3.1
 	// TODO use a map instead for 3.0 and 3.1. Care about compatibility
+    // TODO OAS3.1 - ensure all OAS 3.1 new keywords are added to the various sets
 	protected static Set<String> ROOT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("openapi", "info", "servers", "paths",
 			"components", "security", "tags", "externalDocs", "webhooks", "jsonSchemaDialect"));
 	protected static Set<String> RESERVED_KEYWORDS_31 = new LinkedHashSet<>(Arrays.asList("x-oai-","x-oas-"));
@@ -166,6 +167,7 @@ public class OpenAPIDeserializer {
 	protected static Set<String> EXTERNAL_DOCS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("description", "url"));
 	protected static Set<String> COMPONENTS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("schemas", "responses", "pathItems",
 			"parameters", "examples", "requestBodies", "headers", "securitySchemes", "links", "callbacks"));
+    // TODO OAS3.1 - ensure all schema 2020/12 + OAS 3.1 vocabulary keys are added
 	protected static Set<String> SCHEMA_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "title", "multipleOf",
 			"maximum", "format", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength",
 			"pattern",
@@ -173,7 +175,7 @@ public class OpenAPIDeserializer {
 			"allOf",
 			"oneOf", "anyOf", "not", "items", "properties", "additionalProperties", "patternProperties", "description",
 			"format", "default", "discriminator", "readOnly", "writeOnly", "xml", "externalDocs", "example", "deprecated",
-			"const", "examples", "$id", "$comment"));
+			"const", "examples", "$id", "$comment", "if", "then", "else", "unevaluatedProperties", "prefixItems"));
 	protected static Set<String> EXAMPLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
 			"value", "externalValue"));
 	protected static Set<String> HEADER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "name", "in", "description",
@@ -1855,10 +1857,10 @@ public class OpenAPIDeserializer {
 			if (!filter.add(param.getName() + "#" + param.getIn())) {
 				if (ref != null) {
 					if (ref.startsWith(REFERENCE_SEPARATOR)) {// validate if it's inline param also
-						result.warning(location, "There are duplicate parameter values");
+						result.warning(location, " There are duplicate parameter values");
 					}
 				} else {
-					result.warning(location, "There are duplicate parameter values");
+					result.warning(location, " There are duplicate parameter values");
 				}
 			}
 		});
@@ -4360,7 +4362,7 @@ public class OpenAPIDeserializer {
 			}
 			for (Location l : warnings) {
 				String location = l.location.equals("") ? "" : l.location + ".";
-				String message =  location + l.key;
+				String message = location + l.key;
 				messages.add(message);
 			}
 			for (Location l : unsupported.keySet()) {

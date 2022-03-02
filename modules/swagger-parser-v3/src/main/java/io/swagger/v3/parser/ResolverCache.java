@@ -86,7 +86,7 @@ public class ResolverCache {
     }
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Set<String> resolveValidationMessages, ParseOptions parseOptions) {
-        this.openapi31 = parseOptions.isOpenapi31();
+        this.openapi31 = openApi != null && openApi.getOpenapi() != null && openApi.getOpenapi().startsWith("3.1");
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
@@ -159,7 +159,7 @@ public class ResolverCache {
             externalFileCache.put(file, contents);
         }
         SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult, openapi31);
+        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
 
         if (definitionPath == null) {
             T result = null;
@@ -192,7 +192,7 @@ public class ResolverCache {
         } else {
             if (expectedType.equals(Schema.class)) {
                 OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), null, , new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
+                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
             } else {
                 result = DeserializationUtils.deserialize(tree, file, expectedType, openapi31);
             }
