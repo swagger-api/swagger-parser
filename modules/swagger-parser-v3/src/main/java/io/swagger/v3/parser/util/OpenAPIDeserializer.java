@@ -1684,8 +1684,26 @@ public class OpenAPIDeserializer {
 
 		ObjectNode contentNode = getObject("content", obj, false, location, result);
 		if (contentNode != null) {
-			parameter.setContent(getContent(contentNode, String.format("%s.%s", location, "content"), result));
+            Content content = getContent(contentNode, String.format("%s.%s", location, "content"), result);
+            if(content.size() == 0) {
+                result.unsupported(location,"content with no media type",contentNode);
+                result.invalid();
+            }
+            else if(content.size() > 1) {
+                result.unsupported(location,"content with multiple media types",contentNode);
+                result.invalid();
+            }
+            else if(parameter.getSchema() != null) {
+                result.unsupported(location,"content when schema defined",contentNode);
+                result.invalid();
+            }
+            else {
+                parameter.setContent(content);
+            }
 		}
+        else if(parameter.getSchema() == null) {
+            result.missing(location,"content");
+        }
 
 		Map<String, Object> extensions = getExtensions(obj);
 		if (extensions != null && extensions.size() > 0) {
@@ -3105,9 +3123,14 @@ public class OpenAPIDeserializer {
 		}
 
 		final ObjectNode contentNode = getObject("content", node, true, location, result);
-		if (contentNode != null) {
-			body.setContent(getContent(contentNode, location + ".content", result));
-		}
+        Content content = getContent(contentNode, location + ".content", result);
+		if(content != null && content.isEmpty()) {
+            result.unsupported(location,"content with no media type",contentNode);
+            result.invalid();
+        }
+        else {
+            body.setContent(content);
+        }
 
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
