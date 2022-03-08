@@ -178,6 +178,23 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue1658() throws Exception{
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue-1658/issue1658.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertTrue(result.getMessages().size() == 0);
+        assertFalse(result.getMessages().contains("String index out of range: -1"));
+        assertEquals(openAPI.getComponents().getSchemas().get("ref1").get$ref(), "#/components/schemas/ref2");
+        assertTrue(openAPI.getComponents().getSchemas().get("ref2") != null);
+        assertTrue(openAPI.getComponents().getSchemas().get("ref2").get$ref() == null);
+
+    }
+
+    @Test
     public void testIssue1644_NullValue() throws Exception{
         ParseOptions options = new ParseOptions();
         String issue1644 = "openapi: 3.0.0\n" +
