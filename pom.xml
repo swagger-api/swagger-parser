@@ -405,7 +405,7 @@
         <wiremock-version>2.15.0</wiremock-version>
         <surefire-version>2.22.2</surefire-version>
         <commons-lang-version>3.2.1</commons-lang-version>
-        <jackson-version>2.12.1</jackson-version>
+        <jackson-version>2.12.6</jackson-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
