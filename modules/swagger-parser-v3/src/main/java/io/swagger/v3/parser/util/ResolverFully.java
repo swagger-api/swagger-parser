@@ -38,7 +38,6 @@ public class ResolverFully {
     private boolean aggregateCombinators;
 
 
-
     public ResolverFully() {
         this(true);
     }

@@ -1280,8 +1280,9 @@ public class OpenAPIResolverTest {
         OpenAPI openAPI = new OpenAPIV3Parser().read("issue-984-simple.yaml", null, parseOptions);
         if (openAPI == null) fail("failed parsing issue-984");
         try {
-            Json.pretty(openAPI);
-            //System.out.println(Json.pretty(openAPI));
+            Json.mapper().writeValueAsString(openAPI);
+            // Json.pretty(openAPI);
+            // System.out.println(Json.pretty(openAPI));
         }
         catch (Exception e) {
             e.printStackTrace();
