@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -96,6 +97,7 @@ public class V2ConverterTest {
     private static final String ISSUE_1113_YAML = "issue-1113.yaml";
     private static final String ISSUE_1164_YAML = "issue-1164.yaml";
     private static final String ISSUE_1261_YAML = "issue-1261.yaml";
+    private static final String ISSUE_1378_YAML = "issue-1378.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -850,6 +852,20 @@ public class V2ConverterTest {
         ComposedSchema schema = (ComposedSchema) oas.getComponents().getSchemas().get("Bar").getProperties().get("bar2");
         assertEquals(schema.getAllOf().get(0).get$ref(),"#/components/schemas/Foo");
 
+    }
+
+    @Test(description = "OpenAPI v2 converter - Schema without the 'type' keyword")
+    public void testissue1378() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1378_YAML);
+        assertNotNull(oas);
+        Schema schema = (Schema) oas.getComponents().getSchemas().get("Foo");
+        assertNotNull(schema);
+        assertNotNull(schema.getProperties());
+        assertNotNull(schema.getProperties().get("p1"));
+        assertNotNull(schema.getProperties().get("p2"));
+        assertTrue(schema.getProperties().get("p1") instanceof ObjectSchema);
+        assertTrue(schema.getProperties().get("p2").getClass().equals(Schema.class));
+        assertNull(((Schema)schema.getProperties().get("p2")).getType());
     }
 
     @Test()
