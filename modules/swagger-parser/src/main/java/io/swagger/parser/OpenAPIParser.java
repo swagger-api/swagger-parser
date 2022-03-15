@@ -7,6 +7,7 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 
 import java.util.List;
+import java.util.Map;
 
 public class OpenAPIParser {
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
@@ -27,6 +28,19 @@ public class OpenAPIParser {
 
         for(SwaggerParserExtension extension : OpenAPIV3Parser.getExtensions()) {
             output = extension.readContents(swaggerAsString, auth, options);
+            if(output != null && output.getOpenAPI() != null) {
+                return output;
+            }
+        }
+
+        return output;
+    }
+
+    public SwaggerParseResult readContents(String swaggerAsString, Map<String,String> referencesMap, List<AuthorizationValue> auth, ParseOptions options) {
+        SwaggerParseResult output = null;
+
+        for(SwaggerParserExtension extension : OpenAPIV3Parser.getExtensions()) {
+            output = extension.readContents(swaggerAsString, referencesMap, auth, options);
             if(output != null && output.getOpenAPI() != null) {
                 return output;
             }

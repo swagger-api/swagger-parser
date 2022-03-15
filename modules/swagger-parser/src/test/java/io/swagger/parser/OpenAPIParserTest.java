@@ -19,6 +19,7 @@ import java.math.MathContext;
 import org.junit.Test;
 import org.testng.Assert;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import java.util.List;
@@ -29,6 +30,40 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIParserTest {
+
+    @Test
+    public void testIssue248(){
+        LinkedHashMap<String,String> referencesMap = new LinkedHashMap<>();
+        referencesMap.put("paths.yml", "schema:\n" +
+                                       "  type: \"string\"");
+        String swaggerAsString = "openapi: '3.0.0'\n" +
+                "info:\n" +
+                "  version: 1.0.0\n" +
+                "  title: Title\n" +
+                "  description: desc\n" +
+                "paths:\n" +
+                "  /pets:\n" +
+                "    post:\n" +
+                "      summary: Add a new pet\n" +
+                "      requestBody:\n" +
+                "        description: Opt desc\n" +
+                "        required: true\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              $ref: 'paths.yml'\n" +
+                "          text/plain:\n" +
+                "            schema:\n" +
+                "              type: string\n" +
+                "      responses:\n" +
+                "        '201':\n" +
+                "          description: Created\n";
+        ParseOptions options = new ParseOptions();
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        openAPIParser.readContents( swaggerAsString, referencesMap, null,  options);
+
+    }
+
 
     @Test
     public void testIssue1608(){
