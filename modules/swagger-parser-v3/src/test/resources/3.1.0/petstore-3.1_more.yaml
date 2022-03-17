@@ -119,6 +119,78 @@ components:
         $ref: "#/components/schemas/Pet"
         description: desc
         format: int32
+    Schema2020_12:
+      type: object
+      title: schema 2020-12
+      required:
+        - country
+      properties:
+        country:
+          enum:
+            - usa
+            - canada
+            - eu
+          default: eu
+          type: string
+          widget: Select
+      if:
+        properties:
+          country:
+            const: canada
+            type: string
+      then:
+        properties:
+          maple_trees:
+            type: number
+      else:
+        required:
+          - accept
+        properties:
+          accept:
+            const: "true"
+            type: boolean
+      const: const text
+      examples:
+        - sample1 
+        - sample2
+      $id: schemaId
+      $comment: comment for testing
+      propertyNames:
+        pattern: "^[A-Za-z_][A-Za-z0-9_]*$"
+      unevaluatedProperties:
+        type: object
+      unevaluatedItems:
+        type: object
+      prefixItems:
+        - description: Name
+          type: string
+        - description: Age
+          type: integer
+      contains:
+        type: integer
+      maxContains: 4
+      minContains: 2
+      $anchor: anchor text
+      $schema: https://json-schema.org/draft/2020-12/schema
+      contentSchema:
+        type: string
+      dependentSchemas:
+        credit_card:
+          required:
+            - billing_address
+          properties:
+            billing_address:
+              type: string
+      dependentRequired:
+        credit_card:
+          - billing_address
+      patternProperties:
+        ^S_:
+          type: string
+        ^I_:
+          type: integer
+      contentEncoding: base64
+      contentMediaType: text/html
     Error:
       required:
         - code
