@@ -133,7 +133,6 @@ public class OpenAPIDeserializer {
 			"explode", "allowReserved"));
 
 	// 3.1
-	// TODO use a map instead for 3.0 and 3.1. Care about compatibility
 	protected static Set<String> ROOT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("openapi", "info", "servers", "paths",
 			"components", "security", "tags", "externalDocs", "webhooks", "jsonSchemaDialect"));
 	protected static Set<String> RESERVED_KEYWORDS_31 = new LinkedHashSet<>(Arrays.asList("x-oai-","x-oas-")); 
@@ -170,7 +169,7 @@ public class OpenAPIDeserializer {
 			"pattern", "maxItems", "minItems", "uniqueItems", "maxProperties", "minProperties", "required", "enum", "type",
 			"allOf", "oneOf", "anyOf", "not", "items", "properties", "additionalProperties", "description",
             "default", "discriminator", "readOnly", "writeOnly", "xml", "externalDocs", "example", "deprecated",
-			"const", "examples", "$id", "$comment", "if", "then", "else", "unevaluatedProperties", "prefixItems",
+			"const", "examples", "$id", "$comment", "if", "then", "else", "unevaluatedProperties","unevaluatedItems", "prefixItems",
             "contains","contentEncoding","contentMediaType","$anchor","$schema","contentSchema","propertyNames",
             "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties"));
 	protected static Set<String> EXAMPLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
