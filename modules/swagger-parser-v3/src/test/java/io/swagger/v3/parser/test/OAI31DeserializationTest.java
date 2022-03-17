@@ -1,5 +1,7 @@
 package io.swagger.v3.parser.test;
 
+import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -13,6 +15,46 @@ import java.util.List;
 import static org.testng.Assert.*;
 
 public class OAI31DeserializationTest {
+
+    @Test(description = "Test OAS31 new Schema keys deserialization")
+    public void testSchemaKeysOAS31() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/petstore-3.1_more.yaml", null, null);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        assertTrue(result.getMessages().size() == 0);
+        Schema schema2020_12 = openAPI.getComponents().getSchemas().get("Schema2020_12");
+        assertEquals(schema2020_12.getConst(), "const text");
+        assertEquals(schema2020_12.get$id(), "schemaId");
+        assertEquals(schema2020_12.get$comment(), "comment for testing");
+        assertNotNull(schema2020_12.getIf().getProperties().get("country"));
+        assertNotNull(schema2020_12.getThen().getProperties().get("maple_trees"));
+        assertNotNull(schema2020_12.getElse().getProperties().get("accept"));
+        assertTrue(schema2020_12.getUnevaluatedProperties() instanceof Schema);
+        Schema unevaluatedProperty = (Schema)schema2020_12.getUnevaluatedProperties();
+        assertTrue(unevaluatedProperty.getTypes().contains("object"));
+        assertEquals(schema2020_12.getContentMediaType(), "text/html");
+        assertEquals(schema2020_12.get$anchor(), "anchor text");
+        assertEquals(schema2020_12.get$schema(), "https://json-schema.org/draft/2020-12/schema");
+        assertNotNull(schema2020_12.getExamples().get(0));
+        assertEquals(schema2020_12.getContentEncoding(), "base64");
+        assertEquals(schema2020_12.getMinContains(), Integer.valueOf(2));
+        assertEquals(schema2020_12.getMaxContains(), Integer.valueOf(4));
+        assertTrue(schema2020_12.getPrefixItems().get(0) instanceof Schema);
+        Schema prefixItems = (Schema)schema2020_12.getPrefixItems().get(0);
+        assertEquals(prefixItems.getDescription(), "Name");
+        assertTrue(schema2020_12.getContains().getTypes().contains("integer"));
+        assertTrue(schema2020_12.getContentSchema().getTypes().contains("string"));
+        assertEquals(schema2020_12.getPropertyNames().getPattern(), "^[A-Za-z_][A-Za-z0-9_]*$");
+        assertTrue(schema2020_12.getDependentSchemas().get("credit_card") instanceof Schema);
+        Schema dependantSchema = (Schema)schema2020_12.getDependentSchemas().get("credit_card");
+        assertEquals(dependantSchema.getRequired().get(0), "billing_address");
+        assertTrue(schema2020_12.getDependentRequired().containsKey("credit_card"));
+        assertTrue(schema2020_12.getPatternProperties().get("^S_") instanceof Schema);
+        Schema patternProperties = (Schema)schema2020_12.getPatternProperties().get("^S_");
+        assertTrue(schema2020_12.getUnevaluatedItems().getTypes().contains("object"));
+        assertTrue(patternProperties.getTypes().contains("string"));
+    }
 
     @Test(description = "Test basic OAS31 deserialization/validation")
     public void testBasicOAS31() {
@@ -67,7 +109,6 @@ public class OAI31DeserializationTest {
         //$ref siblings
         assertNotNull(openAPI.getComponents().getSchemas().get("Pet").get$ref());
         assertNotNull(openAPI.getComponents().getSchemas().get("Pet").getProperties());
-
     }
 
     @Test(description = "Test basic OAS30 deserialization/validation if added the fields of OAS3.1")
@@ -558,9 +599,9 @@ public class OAI31DeserializationTest {
         assertNotNull(patientPersonSchema.getUnevaluatedProperties());
         assertTrue(patientPersonSchema.getUnevaluatedProperties() instanceof Boolean);
         assertFalse(((Boolean)patientPersonSchema.getUnevaluatedProperties()).booleanValue());
-
         //unevaluatedItems
         assertNotNull(profile.getUnevaluatedItems());
+
     }
 
     @Test(description = "Test siblings with $ref for if - then - else, dependentRequired, dependentSchemas")
@@ -656,6 +697,7 @@ public class OAI31DeserializationTest {
         //dependentSchemas
         assertNotNull(openAPI.getComponents().getSchemas().get("PaymentMethod"));
         Schema paymentMethod = openAPI.getComponents().getSchemas().get("PaymentMethod");
+
     }
 
     @Test(description = "Test examples in JSONSchema")
