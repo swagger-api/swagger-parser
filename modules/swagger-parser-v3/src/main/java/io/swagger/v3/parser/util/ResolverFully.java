@@ -496,10 +496,10 @@ public class ResolverFully {
             if (resolved.getExample() != null) {
                 examples.add(resolved.getExample());
             }
-            if (sourceSchema.getExtensions() != null) {
-                Map<String, Object> extensions = sourceSchema.getExtensions();
+            if (resolved.getExtensions() != null) {
+                Map<String, Object> extensions = resolved.getExtensions();
                 for (String key : extensions.keySet()) {
-                    targetSchema.addExtension(key, sourceSchema.getExtensions().get(key));
+                    targetSchema.addExtension(key, extensions.get(key));
                 }
             }
         }

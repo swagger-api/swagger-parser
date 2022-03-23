@@ -2994,6 +2994,18 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI);
     }
 
+    @Test
+    public void testIssue1266() throws Exception{
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/issue-1266/issue-1266.yaml"), "UTF-8");
+        String yamlStringResolved = FileUtils.readFileToString(new File("src/test/resources/issue-1266/issue-1266-resolved.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
+    }
+
     @Test(description = "option true, adds Original Location to messages when ref is relative/local")
     public void testValidateExternalRefsTrue() {
         ParseOptions options = new ParseOptions();
