@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
@@ -83,6 +84,32 @@ import mockit.Injectable;
 public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
+
+    @Test
+    public void testExampleFormatByte() throws Exception{
+
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1630.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        Schema model = (Schema) openAPI.getComponents().getSchemas().get("Response").getProperties().get("content");
+        assertTrue(model instanceof ByteArraySchema);
+        ByteArraySchema byteArraySchema = (ByteArraySchema) model;
+        assertEquals(new String((byte[])byteArraySchema.getExample()), "VGhpc1Nob3VsZFBhc3MK");
+        System.setProperty(SchemaTypeUtil.BINARY_AS_STRING, "true");
+        result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1630.yaml", null, options);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        openAPI = result.getOpenAPI();
+        model = (Schema) openAPI.getComponents().getSchemas().get("Response").getProperties().get("content");
+        assertTrue(model instanceof StringSchema);
+        StringSchema stringSchema = (StringSchema) model;
+        assertEquals(stringSchema.getExample(), "VGhpc1Nob3VsZFBhc3MK");
+        System.clearProperty(SchemaTypeUtil.BINARY_AS_STRING);
+
+    }
 
     @Test
     public void testIssue1658() throws Exception{
