@@ -40,6 +40,8 @@ public class SchemaTypeUtil {
     public static final String EMAIL_FORMAT = "email";
     public static final String UUID_FORMAT = "uuid";
 
+    public static final String BINARY_AS_STRING = "swaggerParserBinaryAsString";
+
     public static Schema createSchemaByType(ObjectNode node){
         if(node == null) {
             return new Schema();
@@ -78,9 +80,15 @@ public class SchemaTypeUtil {
         }
         else if(STRING_TYPE.equals(type)) {
             if(BYTE_FORMAT.equals(format)) {
+                if (System.getProperty(BINARY_AS_STRING) != null || System.getenv(BINARY_AS_STRING) != null) {
+                    return new StringSchema().format("byte");
+                }
                 return new ByteArraySchema();
             }
             else if(BINARY_FORMAT.equals(format)) {
+                if (System.getProperty(BINARY_AS_STRING) != null || System.getenv(BINARY_AS_STRING) != null) {
+                    return new StringSchema().format("binary");
+                }
                 return new BinarySchema();
             }
             else if(DATE_FORMAT.equals(format)) {
