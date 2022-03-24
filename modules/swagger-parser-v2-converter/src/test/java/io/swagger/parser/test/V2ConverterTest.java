@@ -96,6 +96,7 @@ public class V2ConverterTest {
     private static final String ISSUE_1113_YAML = "issue-1113.yaml";
     private static final String ISSUE_1164_YAML = "issue-1164.yaml";
     private static final String ISSUE_1261_YAML = "issue-1261.yaml";
+    private static final String ISSUE_1369_YAML = "issue-1369.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -850,6 +851,29 @@ public class V2ConverterTest {
         ComposedSchema schema = (ComposedSchema) oas.getComponents().getSchemas().get("Bar").getProperties().get("bar2");
         assertEquals(schema.getAllOf().get(0).get$ref(),"#/components/schemas/Foo");
 
+    }
+
+    @Test(description = "OpenAPI v2 converter - verifies the additionalProperties")
+    public void testissue1369() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1369_YAML);
+        assertNotNull(oas);
+        Schema schema = (Schema) oas.getComponents().getSchemas().get("Foo1");
+        assertNotNull(schema);
+        assertNull(schema.getAdditionalProperties());
+
+        schema = (Schema) oas.getComponents().getSchemas().get("Foo2");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertEquals(schema.getAdditionalProperties(), Boolean.TRUE);
+
+        schema = (Schema) oas.getComponents().getSchemas().get("Foo3");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertEquals(schema.getAdditionalProperties(), Boolean.FALSE);
+
+        schema = (Schema) oas.getComponents().getSchemas().get("Foo4");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
     }
 
     @Test()
