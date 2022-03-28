@@ -3675,7 +3675,7 @@ public class OpenAPIDeserializer {
 			}
 			schema = items;
 		}else if (itemsNode != null) {
-			ArraySchema items = new ArraySchema();
+			JsonSchema items = new JsonSchema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getJsonSchema(itemsNode, location, result));
 			} else if (itemsNode.getNodeType().equals(JsonNodeType.ARRAY)) {
