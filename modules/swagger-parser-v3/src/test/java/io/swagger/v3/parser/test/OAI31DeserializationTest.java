@@ -1,7 +1,5 @@
 package io.swagger.v3.parser.test;
 
-import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -54,7 +52,6 @@ public class OAI31DeserializationTest {
         Schema patternProperties = (Schema)schema2020_12.getPatternProperties().get("^S_");
         assertTrue(schema2020_12.getUnevaluatedItems().getTypes().contains("object"));
         assertTrue(patternProperties.getTypes().contains("string"));
-        System.out.println(schema2020_12);
     }
 
     @Test(description = "Test basic OAS31 deserialization/validation")
