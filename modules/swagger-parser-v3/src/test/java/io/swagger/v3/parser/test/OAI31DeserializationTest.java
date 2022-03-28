@@ -54,6 +54,7 @@ public class OAI31DeserializationTest {
         Schema patternProperties = (Schema)schema2020_12.getPatternProperties().get("^S_");
         assertTrue(schema2020_12.getUnevaluatedItems().getTypes().contains("object"));
         assertTrue(patternProperties.getTypes().contains("string"));
+        System.out.println(schema2020_12);
     }
 
     @Test(description = "Test basic OAS31 deserialization/validation")
