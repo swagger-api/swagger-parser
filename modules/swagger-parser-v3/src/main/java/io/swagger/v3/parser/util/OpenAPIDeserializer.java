@@ -3610,7 +3610,7 @@ public class OpenAPIDeserializer {
 		ObjectNode itemsNode = getObject("items", node, false, location, result);
 
 		if ((allOfArray != null) || (anyOfArray != null) || (oneOfArray != null)) {
-			Schema composedSchema = new Schema();
+            JsonSchema composedSchema = new JsonSchema();
 
 			if (allOfArray != null) {
 
@@ -3644,7 +3644,7 @@ public class OpenAPIDeserializer {
 			}
 		}
 		if (itemsNode != null && result.isDefaultSchemaTypeObject()) {
-			ArraySchema items = new ArraySchema();
+            ArraySchema items = new ArraySchema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getSchema(itemsNode, location, result));
 			} else if (itemsNode.getNodeType().equals(JsonNodeType.ARRAY)) {
@@ -3656,7 +3656,7 @@ public class OpenAPIDeserializer {
 			}
 			schema = items;
 		}else if (itemsNode != null) {
-			JsonSchema items = new JsonSchema();
+			ArraySchema items = new ArraySchema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getJsonSchema(itemsNode, location, result));
 			} else if (itemsNode.getNodeType().equals(JsonNodeType.ARRAY)) {
@@ -3714,13 +3714,13 @@ public class OpenAPIDeserializer {
 				schema =
 						unevaluatedProperties.equals(Boolean.FALSE)
 								? new ObjectSchema()
-								: new Schema();
+								: new JsonSchema();
 			}
 			schema.setUnevaluatedProperties(unevaluatedProperties);
 		}
 
 		if (schema == null) {
-			schema = new Schema();
+			schema = new JsonSchema();
 		}
 
 		JsonNode ref = node.get("$ref");
