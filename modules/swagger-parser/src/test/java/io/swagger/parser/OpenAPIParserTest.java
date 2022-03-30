@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -27,8 +28,18 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNull;
 
 public class OpenAPIParserTest {
+
+    @Test
+    public void testNPE_1685() {
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue1685.json", null, options);
+        assertNull(swaggerParseResult.getOpenAPI());
+    }
 
     @Test
     public void testIssue1608(){
