@@ -39,6 +39,10 @@ public class OpenAPIParserTest {
         options.setResolveFully(true);
         SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue1685.json", null, options);
         assertNull(swaggerParseResult.getOpenAPI());
+        assertNotNull(swaggerParseResult.getMessages());
+        assertTrue(swaggerParseResult.getMessages().size() == 2);
+        assertEquals(swaggerParseResult.getMessages().get(0), "attribute notswagger is unexpected");
+        assertEquals(swaggerParseResult.getMessages().get(1), "attribute swagger is missing");
     }
 
     @Test
