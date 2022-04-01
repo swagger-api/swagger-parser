@@ -26,6 +26,7 @@ public class SwaggerParser {
         location = location.replaceAll("\\\\", "/");
         List<SwaggerParserExtension> parserExtensions = getExtensions();
         SwaggerDeserializationResult output = new SwaggerDeserializationResult();
+        List<SwaggerDeserializationResult> results = new ArrayList<>();
         try {
             if (auths == null) {
                 auths = new ArrayList<AuthorizationValue>();
@@ -45,6 +46,7 @@ public class SwaggerParser {
                 if (output != null && output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
                     return output;
                 }
+                results.add(output);
             }
             if (output == null) {
                 output = new SwaggerDeserializationResult()
@@ -53,6 +55,13 @@ public class SwaggerParser {
         }catch (Exception e) {
                 output.message(e.getMessage());
             }
+        if (output.getMessages() == null && output.getSwagger() == null){
+            for(int i = 0; i<results.size();i++){
+                if (results.get(i).getMessages()!= null && results.get(i).getSwagger()!= null){
+                    output.setMessages(results.get(i).getMessages());
+                }
+            }
+        }
         return output;
     }
 
