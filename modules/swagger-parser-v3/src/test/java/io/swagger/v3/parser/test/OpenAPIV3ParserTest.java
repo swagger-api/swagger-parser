@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
@@ -175,6 +176,32 @@ public class OpenAPIV3ParserTest {
         assertNotNull(schema.getItems());
         assertNotNull(schema.getItems().getDescription());
         assertTrue(schema.getItems().getNullable());
+    }
+
+    @Test
+    public void testExampleFormatByte() throws Exception{
+
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1630.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        Schema model = (Schema) openAPI.getComponents().getSchemas().get("Response").getProperties().get("content");
+        assertTrue(model instanceof ByteArraySchema);
+        ByteArraySchema byteArraySchema = (ByteArraySchema) model;
+        assertEquals(new String((byte[])byteArraySchema.getExample()), "VGhpc1Nob3VsZFBhc3MK");
+        System.setProperty(SchemaTypeUtil.BINARY_AS_STRING, "true");
+        result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1630.yaml", null, options);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        openAPI = result.getOpenAPI();
+        model = (Schema) openAPI.getComponents().getSchemas().get("Response").getProperties().get("content");
+        assertTrue(model instanceof StringSchema);
+        StringSchema stringSchema = (StringSchema) model;
+        assertEquals(stringSchema.getExample(), "VGhpc1Nob3VsZFBhc3MK");
+        System.clearProperty(SchemaTypeUtil.BINARY_AS_STRING);
+
     }
 
     @Test
@@ -3085,6 +3112,18 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation(url.toString(), null, options);
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
+    }
+
+    @Test
+    public void testIssue1266() throws Exception{
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/issue-1266/issue-1266.yaml"), "UTF-8");
+        String yamlStringResolved = FileUtils.readFileToString(new File("src/test/resources/issue-1266/issue-1266-resolved.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
     }
 
     @Test(description = "option true, adds Original Location to messages when ref is relative/local")

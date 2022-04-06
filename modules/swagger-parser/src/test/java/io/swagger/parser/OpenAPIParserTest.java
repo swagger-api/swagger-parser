@@ -27,8 +27,22 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNull;
 
 public class OpenAPIParserTest {
+
+    @Test
+    public void testNPE_1685() {
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue1685.json", null, options);
+        assertNull(swaggerParseResult.getOpenAPI());
+        assertNotNull(swaggerParseResult.getMessages());
+        assertTrue(swaggerParseResult.getMessages().size() == 2);
+        assertEquals(swaggerParseResult.getMessages().get(0), "attribute notswagger is unexpected");
+        assertEquals(swaggerParseResult.getMessages().get(1), "attribute swagger is missing");
+    }
 
     @Test
     public void testIssue1608(){
