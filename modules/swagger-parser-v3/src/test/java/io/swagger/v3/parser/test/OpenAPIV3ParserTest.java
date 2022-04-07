@@ -86,6 +86,49 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1643() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1643 = "openapi: \"3.0.0\"\n" +
+                "info:\n" +
+                "  version: 1.0.0\n" +
+                "  title: People\n" +
+                "paths:\n" +
+                "  /person:\n" +
+                "    get:\n" +
+                "      operationId: getPerson\n" +
+                "      parameters:\n" +
+                "        - name: name\n" +
+                "          in: query\n" +
+                "          required: true\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: The person with the given name.          \n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema:\n" +
+                "                $ref: '#/components/schemas/Person'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Person:\n" +
+                "      required:\n" +
+                "      - name\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        name:\n" +
+                "          type: string\n" +
+                "        employee:\n" +
+                "          $ref: '#/components/schemas/Employee'";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1643, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),1);
+        assertTrue(result.getMessages().contains("attribute components.schemas.Employee is missing"));
+    }
+
+    @Test
     public void testExampleFormatByte() throws Exception{
 
         ParseOptions options = new ParseOptions();
