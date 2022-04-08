@@ -139,7 +139,7 @@ public class OpenAPIDeserializer {
 	private static final String REFERENCE_SEPARATOR = "#/";
 	private Components components;
 	private final Set<String> operationIDs = new HashSet<>();
-    private List<String> internalProperties = new ArrayList();
+    private Map<String,String> localSchemaRefs = new HashMap<>();
 
     public SwaggerParseResult deserialize(JsonNode rootNode) {
 		return deserialize(rootNode, null);
@@ -185,9 +185,9 @@ public class OpenAPIDeserializer {
 				Components components = getComponents(obj, "components", result);
 				openAPI.setComponents(components);
 				this.components = components;
-                for (String schema : internalProperties){
+                for (String schema : localSchemaRefs.keySet()){
                     if(components.getSchemas().get(schema) == null){
-                        result.missing("components.schemas",schema);
+                        result.invalidType(localSchemaRefs.get(schema), schema, "schema", rootNode);
                     }
                 }
 			}
@@ -2300,7 +2300,7 @@ public class OpenAPIDeserializer {
 				}
                 if(schema.get$ref().startsWith("#/components/schemas")){// it's internal
                     String refName  = schema.get$ref().substring(schema.get$ref().lastIndexOf("/")+1);
-                    internalProperties.add(refName);
+                    localSchemaRefs.put(refName,location);
                 }
 				return schema;
 			} else {

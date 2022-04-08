@@ -125,7 +125,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         assertEquals(result.getMessages().size(),1);
-        assertTrue(result.getMessages().contains("attribute components.schemas.Employee is missing"));
+        assertTrue(result.getMessages().contains("attribute components.schemas.Person.Employee is not of type `schema`"));
     }
 
     @Test
@@ -328,7 +328,7 @@ public class OpenAPIV3ParserTest {
         options.setResolveFully(true);
 
         final SwaggerParseResult parseResult = parser.readLocation("src/test/resources/cant-read-deep-properties.yaml", null, options);
-        assertEquals(parseResult.getMessages().size(), 0);
+        assertEquals(parseResult.getMessages().size(), 1);
         Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
         assertEquals(projects.getType(), "integer");
     }
@@ -2511,7 +2511,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("Issue_931.json", null, options);
         assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() > 0);
-        assertEquals(result.getMessages().get(0).contains("doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$"), true);
+        assertEquals(result.getMessages().get(1).contains("doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$"), true);
 
     }
 
