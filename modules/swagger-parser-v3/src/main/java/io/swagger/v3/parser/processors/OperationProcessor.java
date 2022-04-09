@@ -42,6 +42,17 @@ public class OperationProcessor {
         }
         final RequestBody requestBody = operation.getRequestBody();
         if(requestBody != null) {
+        	//This part allows paser to put requestBody schema inline without the resolveFully option set to true
+        	if (requestBody.get$ref() != null) {
+        		requestBodyProcessor.processRequestBody(requestBody);
+        		RefFormat refFormat = computeRefFormat(requestBody.get$ref());
+        		RequestBody resolvedRequestBody = cache.loadRef(requestBody.get$ref(), refFormat, RequestBody.class);
+
+                if (resolvedRequestBody != null) {
+                	requestBody = resolvedRequestBody;
+                	operation.setRequestBody(resolvedRequestBody);
+                }
+        	}
             requestBodyProcessor.processRequestBody(requestBody);
         }
 
