@@ -261,7 +261,7 @@ components:
       example: Example value
 ```
 
-#### 3. flatten : 
+#### 3. flatten: 
 
 ```java
 ParseOptions parseOptions = new ParseOptions();
