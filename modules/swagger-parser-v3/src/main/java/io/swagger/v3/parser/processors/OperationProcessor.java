@@ -40,7 +40,7 @@ public class OperationProcessor {
         if(processedOperationParameters != null) {
             operation.setParameters(processedOperationParameters);
         }
-        final RequestBody requestBody = operation.getRequestBody();
+        RequestBody requestBody = operation.getRequestBody();
         if(requestBody != null) {
         	//This part allows paser to put requestBody schema inline without the resolveFully option set to true
         	if (requestBody.get$ref() != null) {
