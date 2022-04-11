@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -235,9 +236,9 @@ public class FileReferenceTest {
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getPost().getParameters());
         assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getParameters().size() == 1);
         assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody() != null);
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref() != null);
-        assertEquals(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody");
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref().equals("#/components/requestBodies/requestBody"));
+        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().getContent() != null);
+        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().getContent().get("application/x-www-form-urlencoded") != null);
+        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().getContent().get("application/x-www-form-urlencoded").getSchema() instanceof ObjectSchema);
 
         assertNotNull(swagger.getPaths().get("/store/order"));
         assertNotNull(swagger.getPaths().get("/store/order").getPost());
