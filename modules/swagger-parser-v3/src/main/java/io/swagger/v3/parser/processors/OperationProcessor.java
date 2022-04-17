@@ -31,7 +31,6 @@ public class OperationProcessor {
         this.responseProcessor = new ResponseProcessor(cache,openAPI);
         this.requestBodyProcessor = new RequestBodyProcessor(cache,openAPI);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
-
         this.cache = cache;
     }
 
@@ -42,8 +41,8 @@ public class OperationProcessor {
         }
         RequestBody requestBody = operation.getRequestBody();
         if(requestBody != null) {
-        	//This part allows paser to put requestBody schema inline without the resolveFully option set to true
-        	if (requestBody.get$ref() != null) {
+        	//This part allows paser to put requestBody inline without the resolveFully option set to true
+        	if (requestBody.get$ref() != null && cache != null && cache.getParseOptions() != null && cache.getParseOptions().isResolveRequestBody()) {
         		requestBodyProcessor.processRequestBody(requestBody);
         		RefFormat refFormat = computeRefFormat(requestBody.get$ref());
         		RequestBody resolvedRequestBody = cache.loadRef(requestBody.get$ref(), refFormat, RequestBody.class);
@@ -62,8 +61,8 @@ public class OperationProcessor {
             for (String responseCode : responses.keySet()) {
                 ApiResponse response = responses.get(responseCode);
                 if(response != null) {
-                    //This part allows parser to put response schema inline without the resolveFully option set to true
-                    if (response.get$ref() != null) {
+                    //This part allows parser to put response inline without the resolveFully option set to true
+                    if (response.get$ref() != null && cache != null && cache.getParseOptions() != null && cache.getParseOptions().isResolveResponses()) {
 
                         responseProcessor.processResponse(response);
 
