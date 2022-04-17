@@ -346,9 +346,7 @@ public class OpenAPIResolverTest {
         // internal callback reference
         assertEquals(callbacks.get("referenced").get$ref(),"#/components/callbacks/failed");
         //callback pathItem -> operation ->requestBody
-        assertTrue(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().getContent() != null);
-        assertTrue(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ArraySchema);
-        assertEquals(((ArraySchema) callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().getContent().get("application/json").getSchema()).getItems().get$ref(),"#/components/schemas/User");
+        assertEquals(callbacks.get("heartbeat").get("$request.query.heartbeat-url").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody3");
         //remote callback ref
         assertEquals(callbacks.get("remoteCallback").get$ref(),"#/components/callbacks/callback");
 
