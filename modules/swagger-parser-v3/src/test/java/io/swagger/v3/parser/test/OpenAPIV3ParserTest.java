@@ -86,8 +86,9 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
-    public void testIssue1643() throws Exception{
+    public void testIssue1643_True() throws Exception{
         ParseOptions options = new ParseOptions();
+        options.setValidateInternalRefs(true);
         String issue1643 = "openapi: \"3.0.0\"\n" +
                 "info:\n" +
                 "  version: 1.0.0\n" +
@@ -126,6 +127,49 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         assertEquals(result.getMessages().size(),1);
         assertTrue(result.getMessages().contains("attribute components.schemas.Person.Employee is not of type `schema`"));
+    }
+
+    @Test
+    public void testIssue1643_False() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1643 = "openapi: \"3.0.0\"\n" +
+                "info:\n" +
+                "  version: 1.0.0\n" +
+                "  title: People\n" +
+                "paths:\n" +
+                "  /person:\n" +
+                "    get:\n" +
+                "      operationId: getPerson\n" +
+                "      parameters:\n" +
+                "        - name: name\n" +
+                "          in: query\n" +
+                "          required: true\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: The person with the given name.          \n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema:\n" +
+                "                $ref: '#/components/schemas/Person'\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Person:\n" +
+                "      required:\n" +
+                "      - name\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        name:\n" +
+                "          type: string\n" +
+                "        employee:\n" +
+                "          $ref: '#/components/schemas/Employee'";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1643, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),0);
+        assertFalse(result.getMessages().contains("attribute components.schemas.Person.Employee is not of type `schema`"));
     }
 
     @Test
@@ -328,7 +372,7 @@ public class OpenAPIV3ParserTest {
         options.setResolveFully(true);
 
         final SwaggerParseResult parseResult = parser.readLocation("src/test/resources/cant-read-deep-properties.yaml", null, options);
-        assertEquals(parseResult.getMessages().size(), 1);
+        assertEquals(parseResult.getMessages().size(), 0);
         Schema projects = (Schema) parseResult.getOpenAPI().getComponents().getSchemas().get("Project").getProperties().get("project_type");
         assertEquals(projects.getType(), "integer");
     }
@@ -2511,7 +2555,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("Issue_931.json", null, options);
         assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() > 0);
-        assertEquals(result.getMessages().get(1).contains("doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$"), true);
+        assertEquals(result.getMessages().get(0).contains("doesn't adhere to regular expression ^[a-zA-Z0-9\\.\\-_]+$"), true);
 
     }
 

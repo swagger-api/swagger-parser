@@ -153,6 +153,7 @@ public class OpenAPIDeserializer {
 		SwaggerParseResult result = new SwaggerParseResult();
 		ParseResult rootParse = new ParseResult();
 		rootParse.setAllowEmptyStrings(options.isAllowEmptyString());
+        rootParse.setValidateInternalRefs(options.isValidateInternalRefs());
 		OpenAPI api = parseRoot(rootNode, rootParse, path);
 		result.setOpenAPI(api);
 		result.setMessages(rootParse.getMessages());
@@ -185,9 +186,11 @@ public class OpenAPIDeserializer {
 				Components components = getComponents(obj, "components", result);
 				openAPI.setComponents(components);
 				this.components = components;
-                for (String schema : localSchemaRefs.keySet()){
-                    if(components.getSchemas().get(schema) == null){
-                        result.invalidType(localSchemaRefs.get(schema), schema, "schema", rootNode);
+                if(result.validateInternalRefs) {
+                    for (String schema : localSchemaRefs.keySet()) {
+                        if (components.getSchemas().get(schema) == null) {
+                            result.invalidType(localSchemaRefs.get(schema), schema, "schema", rootNode);
+                        }
                     }
                 }
 			}
@@ -3195,6 +3198,7 @@ public class OpenAPIDeserializer {
 		private List<Location> unique = new ArrayList<>();
 		private List<Location> uniqueTags = new ArrayList<>();
 		private boolean allowEmptyStrings = true;
+        private boolean validateInternalRefs;
 
 		public ParseResult() {
 		}
@@ -3289,7 +3293,15 @@ public class OpenAPIDeserializer {
 			}
 			return messages;
 		}
-	}
+
+        public void setValidateInternalRefs(boolean validateInternalRefs) {
+            this.validateInternalRefs = validateInternalRefs;
+        }
+
+        public boolean isValidateInternalRefs() {
+            return validateInternalRefs;
+        }
+    }
 
 
 	protected static class Location {
