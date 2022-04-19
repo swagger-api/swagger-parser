@@ -10,6 +10,7 @@ public class ParseOptions {
     private boolean skipMatches;
     private boolean allowEmptyStrings = true;
     private boolean validateExternalRefs = false;
+    private boolean validateInternalRefs = false;
     private boolean legacyYamlDeserialization = false;
     private boolean resolveRequestBody = false;
     
@@ -101,5 +102,13 @@ public class ParseOptions {
 
     public void setLegacyYamlDeserialization(boolean legacyYamlDeserialization) {
         this.legacyYamlDeserialization = legacyYamlDeserialization;
+    }
+
+    public void setValidateInternalRefs(boolean validateInternalRefs) {
+        this.validateInternalRefs = validateInternalRefs;
+    }
+
+    public boolean isValidateInternalRefs() {
+        return validateInternalRefs;
     }
 }
