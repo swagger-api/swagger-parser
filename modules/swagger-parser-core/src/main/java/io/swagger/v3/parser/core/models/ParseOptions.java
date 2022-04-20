@@ -10,7 +10,7 @@ public class ParseOptions {
     private boolean skipMatches;
     private boolean allowEmptyStrings = true;
     private boolean validateExternalRefs = false;
-    private boolean validateInternalRefs = false;
+    private boolean validateInternalRefs = true;
     private boolean legacyYamlDeserialization = false;
     private boolean resolveRequestBody = false;
     
