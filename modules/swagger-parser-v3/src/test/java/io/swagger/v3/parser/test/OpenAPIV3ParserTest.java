@@ -88,7 +88,6 @@ public class OpenAPIV3ParserTest {
     @Test
     public void testIssue1643_True() throws Exception{
         ParseOptions options = new ParseOptions();
-        options.setValidateInternalRefs(true);
         String issue1643 = "openapi: \"3.0.0\"\n" +
                 "info:\n" +
                 "  version: 1.0.0\n" +
@@ -132,6 +131,7 @@ public class OpenAPIV3ParserTest {
     @Test
     public void testIssue1643_False() throws Exception{
         ParseOptions options = new ParseOptions();
+        options.setValidateInternalRefs(false);
         String issue1643 = "openapi: \"3.0.0\"\n" +
                 "info:\n" +
                 "  version: 1.0.0\n" +
@@ -370,6 +370,7 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
+        options.setValidateInternalRefs(false);
 
         final SwaggerParseResult parseResult = parser.readLocation("src/test/resources/cant-read-deep-properties.yaml", null, options);
         assertEquals(parseResult.getMessages().size(), 0);
@@ -2552,6 +2553,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue931() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setValidateInternalRefs(false);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("Issue_931.json", null, options);
         assertNotNull(result.getOpenAPI());
         assertTrue(result.getMessages().size() > 0);
