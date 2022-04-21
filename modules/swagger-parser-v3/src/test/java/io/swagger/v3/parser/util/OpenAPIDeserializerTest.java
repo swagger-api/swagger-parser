@@ -1278,6 +1278,66 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testEncodingNotApplicable() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Encodings\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/resource\": {"
+            + "      \"post\": {"
+            + "        \"requestBody\": {"
+            + "          \"content\": {"
+            + "            \"multipart/form-data\": {"
+            + "              \"schema\": {"
+            + "                \"type\": \"object\","
+            + "                \"properties\": {"
+            + "                  \"X\": {"
+            + "                    \"type\": \"integer\""
+            + "                  },"
+            + "                  \"Y\": {"
+            + "                    \"type\": \"integer\""
+            + "                  }"
+            + "                }"
+            + "              },"
+            + "              \"encoding\": {"
+            + "                \"A\": {"
+            + "                  \"contentType\": \"application/json\""
+            + "                },"
+            + "                \"Z\": {"
+            + "                  \"contentType\": \"text/plain\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+
+        assertEquals
+            ( result.getMessages(),
+
+              Arrays.asList
+              ( "attribute paths.'/resource'(post).requestBody.content.'multipart/form-data'.encoding.A is unexpected",
+                "attribute paths.'/resource'(post).requestBody.content.'multipart/form-data'.encoding.Z is unexpected"),
+
+              "Error messages");
+    }
+
+    @Test
     public void testStyleInvalid() {
         String json =
             "{"
