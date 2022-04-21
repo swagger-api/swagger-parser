@@ -1,0 +1,81 @@
+{
+  "basePath": "/external-api/v3",
+  "consumes": [
+    "application/json"
+  ],
+
+  "host": "host.systems",
+  "info": {
+    "description": "test form data",
+    "title": "test form data",
+    "version": "v0"
+  },
+  "paths": {
+    "/companies/": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Create company.",
+        "operationId": "companies_create",
+        "parameters": [
+          {
+            "description": "Accessible extensions are: `.jpg`, `.png`, maximum size is: `5.0` Mb",
+            "in": "formData",
+            "name": "profile_image",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "format": "date",
+            "in": "formData",
+            "name": "expiry",
+            "required": false,
+            "type": "string",
+            "x-nullable": true
+          },
+          {
+            "in": "formData",
+            "maxLength": 250,
+            "minLength": 1,
+            "name": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Accessible extensions are: `.svg`, `.png`, maximum size is: `5.0` Mb",
+            "in": "formData",
+            "name": "logo",
+            "required": false,
+            "type": "file",
+            "x-nullable": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status" : {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create company.",
+        "tags": [
+          "companies"
+        ]
+      }
+    }
+  },
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "swagger": "2.0"
+}

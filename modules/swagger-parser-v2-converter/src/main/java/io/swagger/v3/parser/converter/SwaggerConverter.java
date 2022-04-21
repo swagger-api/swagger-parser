@@ -37,13 +37,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.Discriminator;
-import io.swagger.v3.oas.models.media.FileSchema;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -66,7 +60,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -679,7 +672,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
     private RequestBody convertFormDataToRequestBody(List<io.swagger.models.parameters.Parameter> formParams, List<String> consumes) {
         RequestBody body = new RequestBody();
 
-        Schema formSchema = new Schema();
+        Schema<Object> formSchema = new ObjectSchema();
 
         for (io.swagger.models.parameters.Parameter param : formParams) {
             SerializableParameter sp;
@@ -702,7 +695,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 formSchema.addRequiredItem(sp.getName());
             }
 
-            formSchema.addProperties(name, schema);
+            formSchema.addProperty(name, schema);
         }
 
         List<String> mediaTypes = new ArrayList<>(globalConsumes);
