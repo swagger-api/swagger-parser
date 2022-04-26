@@ -1,0 +1,24 @@
+swagger: '2.0'
+info:
+  title: Test for Issue 1715
+  version: 1.0.0
+paths:
+  /foo:
+    post:
+      operationId: doFoo
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/SomeObj'
+          required: true
+          x-foo: bar
+      responses:
+        '200':
+          description: OK
+definitions:
+  SomeObj:
+    type: string
+    minLength: 1
+    maxLength: 3
+    pattern: ^[0-9]+$
