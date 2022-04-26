@@ -39,22 +39,23 @@ public class OperationProcessor {
         if(processedOperationParameters != null) {
             operation.setParameters(processedOperationParameters);
         }
+
         RequestBody requestBody = operation.getRequestBody();
-        if(requestBody != null) {
-        	//This part allows paser to put requestBody inline without the resolveFully option set to true
-        	if (requestBody.get$ref() != null && cache != null && cache.getParseOptions() != null && cache.getParseOptions().isResolveRequestBody()) {
-        		requestBodyProcessor.processRequestBody(requestBody);
-        		RefFormat refFormat = computeRefFormat(requestBody.get$ref());
-        		RequestBody resolvedRequestBody = cache.loadRef(requestBody.get$ref(), refFormat, RequestBody.class);
+        if (requestBody != null) {
+            // This part allows paser to put requestBody inline without the resolveFully
+            // option set to true
+            if (requestBody.get$ref() != null && cache != null && cache.getParseOptions() != null && cache.getParseOptions().isResolveRequestBody()) {
+                requestBodyProcessor.processRequestBody(requestBody);
+                RefFormat refFormat = computeRefFormat(requestBody.get$ref());
+                RequestBody resolvedRequestBody = cache.loadRef(requestBody.get$ref(), refFormat, RequestBody.class);
 
                 if (resolvedRequestBody != null) {
-                	requestBody = resolvedRequestBody;
-                	operation.setRequestBody(resolvedRequestBody);
+                    requestBody = resolvedRequestBody;
+                    operation.setRequestBody(resolvedRequestBody);
                 }
-        	}
+            }
             requestBodyProcessor.processRequestBody(requestBody);
         }
-
 
         final Map<String, ApiResponse> responses = operation.getResponses();
         if (responses != null) {

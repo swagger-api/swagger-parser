@@ -39,16 +39,17 @@ public class ParseOptions {
     }
     
     public boolean isResolveRequestBody() {
-		return resolveRequestBody;
-	}
-    
+        return resolveRequestBody;
+    }
+
     /**
-     * If set to true, will help resolving the requestBody as inline, provided resolve is also set to true.
-     * Default is false because of the existing behaviour.
+     * If set to true, will help resolving the requestBody as inline, provided
+     * resolve is also set to true. Default is false because of the existing
+     * behaviour.
      */
-	public void setResolveRequestBody(boolean resolveRequestBody) {
-		this.resolveRequestBody = resolveRequestBody;
-	}
+    public void setResolveRequestBody(boolean resolveRequestBody) {
+        this.resolveRequestBody = resolveRequestBody;
+    }
 
     public boolean isFlatten() { return flatten; }
 
