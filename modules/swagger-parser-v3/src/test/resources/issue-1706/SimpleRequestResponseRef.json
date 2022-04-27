@@ -1,89 +1,89 @@
 {
-	"openapi": "3.0.0",
-	"info": {
-		"version": "1.0",
-		"title": "Resource service",
-		"description": "Resource service"
-	},
-	"servers": [
-		{
-			"url": "http://localhost:8088/"
-		}
-	],
-	"paths": {
-		"/resource": {
-			"post": {
-				"summary": "postResource",
-				"description": "postResource",
-				"operationId": "post-resource",
-				"parameters": [],
-				"requestBody": {
-					"$ref": "#/components/requestBodies/ResourceBodyPost"
-				},
-				"responses": {
-					"200": {
-						"$ref": "#/components/responses/ResourceSuccessResponse"
-					}
-				}
-			}
-		}
-	},
-	"components": {
-		"requestBodies": {
-			"ResourceBodyPost": {
-				"content": {
-					"application/json": {
-						"schema": {
-							"type": "object",
-							"required": [
-								"rqname"
-							],
-							"properties": {
-								"rqname": {
-									"type": "string"
-								},
-								"rqnumber": {
-									"type": "integer",
-									"format": "int32"
-								},
-								"rqflag": {
-									"type": "boolean"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"responses": {
-			"ResourceSuccessResponse": {
-				"description": "a Element to be returned",
-				"content": {
-					"application/json": {
-						"schema": {
-							"type": "object",
-							"required": [
-								"rname"
-							],
-							"properties": {
-								"rname": {
-									"type": "string"
-								},
-								"rnumber": {
-									"type": "integer",
-									"format": "int32"
-								},
-								"rflag": {
-									"type": "boolean"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"schemas": {
-			
-		}
-	}
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0",
+        "title": "Resource service",
+        "description": "Resource service"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8088/"
+        }
+    ],
+    "paths": {
+        "/resource": {
+            "post": {
+                "summary": "postResource",
+                "description": "postResource",
+                "operationId": "post-resource",
+                "parameters": [],
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/ResourceBodyPost"
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ResourceSuccessResponse"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "requestBodies": {
+            "ResourceBodyPost": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "rqname"
+                            ],
+                            "properties": {
+                                "rqname": {
+                                    "type": "string"
+                                },
+                                "rqnumber": {
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "rqflag": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "responses": {
+            "ResourceSuccessResponse": {
+                "description": "a Element to be returned",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "rname"
+                            ],
+                            "properties": {
+                                "rname": {
+                                    "type": "string"
+                                },
+                                "rnumber": {
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "rflag": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            
+        }
+    }
 }
