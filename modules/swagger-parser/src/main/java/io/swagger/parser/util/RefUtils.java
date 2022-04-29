@@ -2,6 +2,7 @@ package io.swagger.parser.util;
 
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.refs.RefFormat;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -138,7 +139,7 @@ public class RefUtils {
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
 
                 if(Files.exists(pathToUse)) {
-                    result = IOUtils.toString(new FileInputStream(pathToUse.toFile()), "UTF-8");
+                    result = FileUtils.readFileToString((pathToUse.toFile()), "UTF-8");
                 } else {
                     String url = file;
                     if(url.contains("..")) {
@@ -149,7 +150,7 @@ public class RefUtils {
                     final Path pathToUse2 = parentDirectory.resolve(url).normalize();
 
                     if(Files.exists(pathToUse2)) {
-                        result = IOUtils.toString(new FileInputStream(pathToUse2.toFile()), "UTF-8");
+                        result = FileUtils.readFileToString((pathToUse2.toFile()), "UTF-8");
                     }
                 }
                 if (result == null){
