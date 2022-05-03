@@ -1,0 +1,32 @@
+swagger: '2.0'
+paths:
+  '/path_{p0}/{p1}{p2}/another-{p3}':
+    put:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: p0
+          in: path
+          required: true
+          type: string
+        - name: p1
+          in: path
+          required: true
+          type: string
+        - name: p2
+          in: path
+          required: true
+          type: string
+        - name: p3
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: sample desc
+info:
+  version: 1.0.0
+  title: Sample title
+  
