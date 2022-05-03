@@ -810,7 +810,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue1169noSplit() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue1169.yaml", null, options);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue1169-noSplit.yaml", null, options);
         assertTrue(parseResult.getMessages().size() == 0);
         OpenAPI apispec = parseResult.getOpenAPI();
         assertNotNull(apispec);
