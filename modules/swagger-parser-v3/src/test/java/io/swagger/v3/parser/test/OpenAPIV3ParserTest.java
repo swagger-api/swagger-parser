@@ -807,6 +807,18 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue1169noSplit() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue1169.yaml", null, options);
+        assertTrue(parseResult.getMessages().size() == 0);
+        OpenAPI apispec = parseResult.getOpenAPI();
+        assertNotNull(apispec);
+    }
+
+
+
+    @Test
     public void testIssue339() throws Exception {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         OpenAPI api = openAPIV3Parser.read("issue-339.yaml");

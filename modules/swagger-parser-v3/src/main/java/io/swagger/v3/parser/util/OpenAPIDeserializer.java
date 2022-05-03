@@ -621,9 +621,12 @@ public class OpenAPIDeserializer {
 					}
 					ObjectNode path = (ObjectNode) pathValue;
 					PathItem pathObj = getPathItem(path, String.format("%s.'%s'", location, pathName), result);
-					String[] eachPart = pathName.split("[-/.]+");
-					Arrays.stream(eachPart)
-							.filter(part -> part.startsWith("{") && part.endsWith("}") && part.length() > 2)
+                    List<String> eachPart = new ArrayList<>();
+                    Matcher m = Pattern.compile("\\{(.+?)\\}").matcher(pathName);
+                    while (m.find()) {
+                        eachPart.add(m.group());
+                    }
+					eachPart.stream()
 							.forEach(part -> {
 								String pathParam = part.substring(1, part.length() - 1);
 								boolean definedInPathLevel = isPathParamDefined(pathParam,
