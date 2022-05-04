@@ -134,6 +134,13 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue1169noSplit() {
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue1169-noSplit.yaml", null, true);
+        assertTrue(result.getMessages().size() == 0);
+        assertNotNull(result.getSwagger());
+    }
+
+    @Test
     public void testIssue1249() {
         SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("issue-1249.json", null, true);
         Assert.assertEquals(result.getMessages().size(), 1);
@@ -161,6 +168,8 @@ public class SwaggerParserTest {
         assertTrue(result.getMessages().get(0).equals("attribute definitions.Filter.items is missing"));
         assertNotNull(result.getSwagger());
     }
+
+
 
     @Test
     public void testIssue1146() {
