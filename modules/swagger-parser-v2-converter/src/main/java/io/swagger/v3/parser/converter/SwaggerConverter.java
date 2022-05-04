@@ -831,6 +831,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
         convertExamples(((BodyParameter) param).getExamples(), content);
+        body.setExtensions(convert(param.getVendorExtensions()));
         body.content(content);
         return body;
     }

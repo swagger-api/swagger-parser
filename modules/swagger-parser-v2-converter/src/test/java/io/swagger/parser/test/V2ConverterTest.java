@@ -97,6 +97,8 @@ public class V2ConverterTest {
     private static final String ISSUE_1164_YAML = "issue-1164.yaml";
     private static final String ISSUE_1261_YAML = "issue-1261.yaml";
 
+    private static final String ISSUE_1715_YAML = "issue-1715.yaml";
+
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
     private static final String PET_FIND_BY_STATUS_PATH = "/pet/findByStatus";
@@ -850,6 +852,16 @@ public class V2ConverterTest {
         ComposedSchema schema = (ComposedSchema) oas.getComponents().getSchemas().get("Bar").getProperties().get("bar2");
         assertEquals(schema.getAllOf().get(0).get$ref(),"#/components/schemas/Foo");
 
+    }
+
+    @Test(description = "OpenAPI v2 converter - vendor extensions on body parameters copied to output RequestBody")
+    public void testissue1715() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1715_YAML);
+        assertNotNull(oas);
+        RequestBody requestBody = oas.getPaths().get("/foo").getPost().getRequestBody();
+        assertNotNull(requestBody.getExtensions());
+        assertEquals(1, requestBody.getExtensions().size());
+        assertEquals("bar", requestBody.getExtensions().get("x-foo"));
     }
 
     @Test()
