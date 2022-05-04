@@ -12,7 +12,8 @@ public class ParseOptions {
     private boolean validateExternalRefs = false;
     private boolean validateInternalRefs = true;
     private boolean legacyYamlDeserialization = false;
-
+    private boolean resolveRequestBody = false;
+    
     public boolean isResolve() {
         return resolve;
     }
@@ -35,6 +36,19 @@ public class ParseOptions {
 
     public void setResolveFully(boolean resolveFully) {
         this.resolveFully = resolveFully;
+    }
+    
+    public boolean isResolveRequestBody() {
+        return resolveRequestBody;
+    }
+
+    /**
+     * If set to true, will help resolving the requestBody as inline, provided
+     * resolve is also set to true. Default is false because of the existing
+     * behaviour.
+     */
+    public void setResolveRequestBody(boolean resolveRequestBody) {
+        this.resolveRequestBody = resolveRequestBody;
     }
 
     public boolean isFlatten() { return flatten; }

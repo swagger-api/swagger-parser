@@ -68,12 +68,12 @@ public class ResolverCache {
     private Map<String, String> externalFileCache = new HashMap<>();
     private List<String> referencedModelKeys = new ArrayList<>();
     private Set<String> resolveValidationMessages;
-
     private final ParseOptions parseOptions;
 
 
     /*
-    a map that stores original external references, and their associated renamed references
+     * a map that stores original external references, and their associated renamed
+     * references
      */
     private Map<String, String> renameCache = new HashMap<>();
 
@@ -393,5 +393,9 @@ public class ResolverCache {
 
     public Map<String, String> getRenameCache() {
         return Collections.unmodifiableMap(renameCache);
+    }
+
+    public ParseOptions getParseOptions() {
+        return parseOptions;
     }
 }
