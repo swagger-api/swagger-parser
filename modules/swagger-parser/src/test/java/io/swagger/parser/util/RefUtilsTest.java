@@ -160,6 +160,9 @@ public class RefUtilsTest {
             IOUtils.toString(fileInputStream, "UTF-8");
             times = 1;
             result = expectedResult;
+            fileInputStream.close();
+            times = 1;
+
         }};
 
         String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
