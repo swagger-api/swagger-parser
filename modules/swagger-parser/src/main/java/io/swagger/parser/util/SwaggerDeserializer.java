@@ -12,6 +12,8 @@ import io.swagger.util.Json;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
 
@@ -189,7 +191,11 @@ public class SwaggerDeserializer {
                 } else {
                     ObjectNode path = (ObjectNode) pathValue;
                     Path pathObj = path(path, location + ".'" + pathName + "'", result);
-                    String[] eachPart = pathName.split("[-/.]+");
+                    List<String> eachPart = new ArrayList<>();
+                    Matcher m = Pattern.compile("\\{(.+?)\\}").matcher(pathName);
+                    while (m.find()) {
+                        eachPart.add(m.group());
+                    }
                     List<Operation> operationsInAPath = getAllOperationsInAPath(pathObj);
                     for (Operation operation : operationsInAPath) {
                         for (Parameter parameter : operation.getParameters()) {
@@ -199,17 +205,15 @@ public class SwaggerDeserializer {
                         }
                     }
                     for (String part : eachPart) {
-                        if (part.startsWith("{") && part.endsWith("}") && part.length() > 2) {
-                            String pathParam = part.substring(1, part.length() - 1);
-                            boolean definedInPathLevel = isPathParamDefined(pathParam, pathObj.getParameters());
-                            if (definedInPathLevel) {
-                                continue;
-                            }
-                            for (Operation operation : operationsInAPath) {
-                                if (!isPathParamDefined(pathParam, operation.getParameters())) {
-                                    result.warning(location + ".'" + pathName + "'", " Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
-                                    break;
-                                }
+                        String pathParam = part.substring(1, part.length() - 1);
+                        boolean definedInPathLevel = isPathParamDefined(pathParam, pathObj.getParameters());
+                        if (definedInPathLevel) {
+                            continue;
+                        }
+                        for (Operation operation : operationsInAPath) {
+                            if (!isPathParamDefined(pathParam, operation.getParameters())) {
+                                result.warning(location + ".'" + pathName + "'", " Declared path parameter " + pathParam + " needs to be defined as a path parameter in path or operation level");
+                                break;
                             }
                         }
                     }
