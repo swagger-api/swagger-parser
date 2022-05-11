@@ -92,7 +92,10 @@ public class OpenAPIV3ParserTest {
     public void testIssue1637_StyleAndContent() throws IOException {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1637.yaml", null, options);
-        Yaml.prettyPrint(result.getOpenAPI());
+       
+        Assert.assertNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getStyle());
+        Assert.assertNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getExplode());
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getContent());
     }
 
     @Test
