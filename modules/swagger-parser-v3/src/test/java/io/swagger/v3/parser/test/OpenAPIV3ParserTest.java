@@ -89,6 +89,28 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testEnumValuesAreNotConvertedToBooleansOAS3_Utils() throws IOException {
+
+        String yaml = new String(java.nio.file.Files.readAllBytes(new File("src/test/resources/EnumYesNoOnOffOAS3.yaml").toPath()), StandardCharsets.UTF_8);
+        JsonNode jsonNode = DeserializationUtils.readYamlTree(yaml);
+        Yaml.prettyPrint(jsonNode);
+
+        jsonNode.findPath("EnumWithQuotes").get("enum").elements()
+                .forEachRemaining(element -> {
+                    AssertJUnit.assertFalse(element.isBoolean());
+                    assertNotSame(element.textValue(), "true");
+                    assertNotSame(element.textValue(), "false");
+                });
+        jsonNode.findPath("EnumNoQuotes").get("enum").elements()
+                .forEachRemaining(element -> {
+                    AssertJUnit.assertFalse(element.isBoolean());
+                    assertNotSame(element.textValue(), "true");
+                    assertNotSame(element.textValue(), "false");
+                });
+    }
+
+
+    @Test
     public void testIssue1637_StyleAndContent() throws IOException {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1637.yaml", null, options);
