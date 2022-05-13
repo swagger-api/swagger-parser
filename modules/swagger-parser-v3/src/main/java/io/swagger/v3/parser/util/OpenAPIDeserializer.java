@@ -621,9 +621,12 @@ public class OpenAPIDeserializer {
 					}
 					ObjectNode path = (ObjectNode) pathValue;
 					PathItem pathObj = getPathItem(path, String.format("%s.'%s'", location, pathName), result);
-					String[] eachPart = pathName.split("[-/.]+");
-					Arrays.stream(eachPart)
-							.filter(part -> part.startsWith("{") && part.endsWith("}") && part.length() > 2)
+                    List<String> eachPart = new ArrayList<>();
+                    Matcher m = Pattern.compile("\\{(.+?)\\}").matcher(pathName);
+                    while (m.find()) {
+                        eachPart.add(m.group());
+                    }
+					eachPart.stream()
 							.forEach(part -> {
 								String pathParam = part.substring(1, part.length() - 1);
 								boolean definedInPathLevel = isPathParamDefined(pathParam,
@@ -1652,18 +1655,7 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		value = getString("style", obj, false, location, result);
-		setStyle(value, parameter, location, obj, result);
 
-
-		Boolean explode = getBoolean("explode", obj, false, location, result);
-		if (explode != null) {
-			parameter.setExplode(explode);
-		} else if (StyleEnum.FORM.equals(parameter.getStyle())) {
-			parameter.setExplode(Boolean.TRUE);
-		} else {
-			parameter.setExplode(Boolean.FALSE);
-		}
 
 
 		ObjectNode parameterObject = getObject("schema", obj, false, location, result);
@@ -1712,6 +1704,20 @@ public class OpenAPIDeserializer {
 		}
         else if(parameter.getSchema() == null) {
             result.missing(location,"content");
+        }
+
+        value = getString("style", obj, false, location, result);
+        if (parameter.getContent() == null) {
+            setStyle(value, parameter, location, obj, result);
+
+            Boolean explode = getBoolean("explode", obj, false, location, result);
+            if (explode != null) {
+                parameter.setExplode(explode);
+            } else if (StyleEnum.FORM.equals(parameter.getStyle())) {
+                parameter.setExplode(Boolean.TRUE);
+            } else {
+                parameter.setExplode(Boolean.FALSE);
+            }
         }
 
 		Map<String, Object> extensions = getExtensions(obj);
