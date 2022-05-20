@@ -1,0 +1,21 @@
+[
+    {
+        "openapi": "3.1.0",
+        "components": {
+            "schemas": {
+                "User": {
+                    "type": "object",
+                    "properties": {
+                        "profile": {
+                            "$ref": "#user-profile"
+                        }
+                    }
+                },
+                "UserProfile": {
+                    "$anchor": "user-profile",
+                    "type": "string"
+                }
+            }
+        }
+    }
+]

@@ -1,0 +1,99 @@
+        if (source.getReadOnly() != null){
+    target.setReadOnly(source.getReadOnly());
+}
+        if (source.getWriteOnly() != null){
+    target.setWriteOnly(source.getWriteOnly());
+}
+        if (source.getMaxLength() != null){
+    target.setMaxLength(source.getMaxLength());
+}
+        if (source.get$anchor() != null){
+    target.set$anchor(source.get$anchor());
+}
+        if (source.get$comment() != null){
+    target.set$comment(source.get$comment());
+}
+        if (source.get$id() != null){
+    target.set$id(source.get$id());
+}
+        if (source.get$schema() != null){
+    target.set$schema(source.get$schema());
+}
+        if (source.getContentEncoding() != null){
+    target.setContentEncoding(source.getContentEncoding());
+}
+        if (source.getContentMediaType() != null){
+    target.setContentMediaType(source.getContentMediaType());
+}
+        if (source.getDefault() != null){
+    target.setDefault(source.getDefault());
+}
+        if (source.getDependentRequired() != null){
+    target.setDependentRequired(source.getDependentRequired());
+}
+        if (source.getDeprecated() != null){
+    target.setDeprecated(source.getDeprecated());
+}
+        if (source.getDiscriminator() != null){
+    target.setDiscriminator(source.getDiscriminator());
+}
+        if (source.getExample() != null){
+    target.setExample(source.getExample());
+}
+        if (source.getExamples() != null){
+    target.setExamples(source.getExamples());
+}
+        if (source.getExclusiveMaximum() != null){
+    target.setExclusiveMaximum(source.getExclusiveMaximum());
+}
+        if (source.getExclusiveMaximumValue() != null){
+    target.setExclusiveMaximumValue(source.getExclusiveMaximumValue());
+}
+        if (source.getExclusiveMinimum() != null){
+    target.setExclusiveMinimum(source.getExclusiveMinimum());
+}
+        if (source.getExclusiveMinimumValue() != null){
+    target.setExclusiveMinimumValue(source.getExclusiveMinimumValue());
+}
+        if (source.getExtensions() != null){
+    target.setExtensions(source.getExtensions());
+}
+        if (source.getExternalDocs() != null){
+    target.setExternalDocs(source.getExternalDocs());
+}
+        if (source.getMaxContains() != null){
+    target.setMaxContains(source.getMaxContains());
+}
+        if (source.getMaximum() != null){
+    target.setMaximum(source.getMaximum());
+}
+        if (source.getMaxItems() != null){
+    target.setMaxItems(source.getMaxItems());
+}
+        if (source.getMaxProperties() != null){
+    target.setMaxProperties(source.getMaxProperties());
+}
+        if (source.getMinContains() != null){
+    target.setMinContains(source.getMinContains());
+}
+        if (source.getMinItems() != null){
+    target.setMinItems(source.getMinItems());
+}
+        if (source.getMinProperties() != null){
+    target.setMinProperties(source.getMinProperties());
+}
+        if (source.getMultipleOf() != null){
+    target.setMultipleOf(source.getMultipleOf());
+}
+        if (source.getNullable() != null){
+    target.setNullable(source.getNullable());
+}
+        if (source.getPropertyNames() != null){
+    target.setPropertyNames(source.getPropertyNames());
+}
+        if (source.getTitle() != null){
+    target.setTitle(source.getTitle());
+}
+        if (source.getUniqueItems() != null){
+    target.setUniqueItems(source.getUniqueItems());
+}

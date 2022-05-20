@@ -494,18 +494,6 @@ public class OpenAPIParserTest {
     }
 
     @Test
-
-    public void testIssue844() {
-        OpenAPIParser openApiParser = new OpenAPIParser();
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-
-        OpenAPI openAPI = openApiParser.readLocation("reusableParametersWithExternalRef.json", null, options).getOpenAPI();
-        assertNotNull(openAPI);
-        assertEquals(openAPI.getPaths().get("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
-    }
-
-    @Test
     public void testIssue258() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);

@@ -135,34 +135,34 @@ public class OpenAPIDeserializer {
 	// 3.1
 	protected static Set<String> ROOT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("openapi", "info", "servers", "paths",
 			"components", "security", "tags", "externalDocs", "webhooks", "jsonSchemaDialect"));
-	protected static Set<String> RESERVED_KEYWORDS_31 = new LinkedHashSet<>(Arrays.asList("x-oai-","x-oas-")); 
+	protected static Set<String> RESERVED_KEYWORDS_31 = new LinkedHashSet<>(Arrays.asList("x-oai-","x-oas-"));
 	protected static Set<String> INFO_KEYS_31 = new LinkedHashSet<>(Arrays.asList("title","summary", "description", "termsOfService"
 			, "contact", "license", "version"));
 	protected static Set<String> CONTACT_KEYS_31 = new LinkedHashSet<>(Arrays.asList("name", "url", "email"));
 	protected static Set<String> LICENSE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("name", "url", "identifier"));
-	protected static Set<String> TAG_KEYS_31 = new LinkedHashSet<>(Arrays.asList("description", "name", "externalDocs")); 
+	protected static Set<String> TAG_KEYS_31 = new LinkedHashSet<>(Arrays.asList("description", "name", "externalDocs"));
 	protected static Set<String> RESPONSE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "description", "headers",
-			"content", "links")); 
+			"content", "links"));
 	protected static Set<String> SERVER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("url", "description", "variables"));
 	protected static Set<String> SERVER_VARIABLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("enum", "default",
-			"description")); 
+			"description"));
 	protected static Set<String> PATHITEM_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
-			"get", "put", "post", "delete", "head", "patch", "options", "trace", "servers", "parameters")); 
+			"get", "put", "post", "delete", "head", "patch", "options", "trace", "servers", "parameters"));
 	protected static Set<String> OPERATION_KEYS_31 = new LinkedHashSet<>(Arrays.asList("tags", "summary", "description",
 			"externalDocs", "operationId", "parameters", "requestBody", "responses", "callbacks", "deprecated",
 			"security",
-			"servers")); 
+			"servers"));
 	protected static Set<String> PARAMETER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "name", "in", "description"
 			, "required", "deprecated", "allowEmptyValue", "style", "explode", "allowReserved", "schema", "example",
 			"examples"
-			, "content")); 
+			, "content"));
 	protected static Set<String> REQUEST_BODY_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "description", "content"
-			, "required")); 
+			, "required"));
 	protected static Set<String> SECURITY_SCHEME_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "type", "name", "in"
-			, "description", "flows", "scheme", "bearerFormat", "openIdConnectUrl")); 
-	protected static Set<String> EXTERNAL_DOCS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("description", "url")); 
+			, "description", "flows", "scheme", "bearerFormat", "openIdConnectUrl"));
+	protected static Set<String> EXTERNAL_DOCS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("description", "url"));
 	protected static Set<String> COMPONENTS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("schemas", "responses", "pathItems",
-			"parameters", "examples", "requestBodies", "headers", "securitySchemes", "links", "callbacks")); 
+			"parameters", "examples", "requestBodies", "headers", "securitySchemes", "links", "callbacks"));
 
 	protected static Set<String> SCHEMA_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "title", "multipleOf",
 			"maximum", "format", "exclusiveMaximum", "minimum", "exclusiveMinimum", "maxLength", "minLength",
@@ -173,23 +173,23 @@ public class OpenAPIDeserializer {
             "contains","contentEncoding","contentMediaType","$anchor","$schema","contentSchema","propertyNames",
             "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties"));
 	protected static Set<String> EXAMPLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
-			"value", "externalValue")); 
+			"value", "externalValue"));
 	protected static Set<String> HEADER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "name", "in", "description",
 			"required", "deprecated", "allowEmptyValue", "style", "explode", "allowReserved", "schema", "example",
 			"examples",
 			"content"));
 	protected static Set<String> LINK_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "operationRef", "operationId",
-			"parameters", "requestBody", "description", "server")); 
+			"parameters", "requestBody", "description", "server"));
 	protected static Set<String> MEDIATYPE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("schema", "example", "examples",
-			"encoding")); 
+			"encoding"));
 	protected static Set<String> XML_KEYS_31 = new LinkedHashSet<>(Arrays.asList("name", "namespace", "prefix",
-			"attribute", "wrapped")); 
+			"attribute", "wrapped"));
 	protected static Set<String> OAUTHFLOW_KEYS_31 = new LinkedHashSet<>(Arrays.asList("authorizationUrl", "tokenUrl",
-			"refreshUrl", "scopes")); 
+			"refreshUrl", "scopes"));
 	protected static Set<String> OAUTHFLOWS_KEYS_31 = new LinkedHashSet<>(Arrays.asList("implicit", "password",
-			"clientCredentials", "authorizationCode")); 
+			"clientCredentials", "authorizationCode"));
 	protected static Set<String> ENCODING_KEYS_31 = new LinkedHashSet<>(Arrays.asList("contentType", "headers", "style",
-			"explode", "allowReserved")); 
+			"explode", "allowReserved"));
 
 	protected static Map<String, Map<String, Set<String>>> KEYS = new LinkedHashMap<>();
 
@@ -2932,7 +2932,7 @@ public class OpenAPIDeserializer {
         if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
             schema.setFormat(value);
         }
-        
+
         bool = getBoolean("readOnly", node, false, location, result);
         if (bool != null) {
             schema.setReadOnly(bool);
@@ -3144,6 +3144,16 @@ public class OpenAPIDeserializer {
 				} else {
 					example.set$ref(ref.textValue());
 				}
+                if(result.isOpenapi31()){
+                    String value = getString("summary", node, false, location, result);
+                    if (StringUtils.isNotBlank(value)) {
+                        example.setSummary(value);
+                    }
+                    value = getString("description", node, false, location, result);
+                    if (StringUtils.isNotBlank(value)) {
+                        example.setDescription(value);
+                    }
+                }
 				return example;
 			} else {
 				result.invalidType(location, "$ref", "string", node);
