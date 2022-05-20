@@ -1,0 +1,98 @@
+openapi: 3.1.0
+servers:
+- url: /
+paths:
+  /path1:
+    summary: path item summary
+    description: /path3 ex2
+    get: {}
+  /externalref:
+    get:
+      description: ExternalRef domain
+      operationId: ExternalRef PathItem
+      responses:
+        "200":
+          description: OK
+  /relativeref:
+    get:
+      description: RelativeRef domain
+      operationId: RelativeRef PathItem
+      responses:
+        "200":
+          description: OK
+  /internalref:
+    $ref: '#/components/pathItems/InternalRef'
+  /internalreftoexternal:
+    $ref: '#/components/pathItems/InternalRefToExternal'
+  /internal:
+    get:
+      description: Internal PathItem
+      operationId: Internal PathItem
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Indirection:
+      type: object
+      description: VALUE ex3schema
+      properties:
+        prop1:
+          type: string
+    IndirectionSiblings:
+      type: object
+      description: IndirectionSiblings root
+      properties:
+        prop1:
+          type: string
+  parameters:
+    userId:
+      description: userId root
+      $ref: '#/components/parameters/indirection1'
+    indirection1:
+      $ref: '#/components/parameters/userIdRef'
+    indirection2:
+      description: indirection2 root
+      $ref: '#/components/parameters/userIdRef'
+    userIdRef:
+      name: userId
+      in: query
+      description: userIdRef root
+      required: true
+      style: form
+      explode: true
+    externalRef:
+      name: externalParameter
+      in: query
+      description: externalRef root
+      required: true
+      style: form
+      explode: true
+    externalRefIndirectPointer:
+      description: externalRefIndirectPointer root
+      $ref: '#/components/parameters/externalRefIndirect3'
+    externalRefIndirect3:
+      name: externalParameter3
+      in: query
+      description: externalRefIndirect3 root
+      required: true
+      style: form
+      explode: true
+  links:
+    link1:
+      operationRef: ./ex.json#/operation
+  pathItems:
+    InternalRefToExternal:
+      get:
+        description: DomainInternalRefToExternal domain
+        operationId: DomainInternalRefToExternal PathItem
+        responses:
+          "200":
+            description: OK
+    InternalRef:
+      get:
+        description: InternalRef root
+        operationId: InternalRef PathItem
+        responses:
+          "200":
+            description: OK

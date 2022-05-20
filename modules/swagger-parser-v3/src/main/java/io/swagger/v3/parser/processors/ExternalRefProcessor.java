@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.processors;
 
 
-import java.io.File;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Collection;

@@ -1,0 +1,19 @@
+{
+    "openapi": "3.1.0",
+    "components": {
+        "parameters": {
+            "externalRef": {
+                "$ref": "./ex.json#/externalParameter",
+                "description": "externalRef root"
+            },
+            "externalRefIndirectPointer": {
+                "$ref": "#/components/parameters/externalRefIndirect3",
+                "description": "externalRefIndirectPointer root"
+            },
+            "externalRefIndirect3": {
+                "$ref": "./ex1a.json#/indirection3",
+                "description": "externalRefIndirect3 root"
+            }
+        }
+    }
+}

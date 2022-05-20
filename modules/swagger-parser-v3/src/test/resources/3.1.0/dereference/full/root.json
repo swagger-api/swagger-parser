@@ -1,0 +1,106 @@
+{
+    "openapi": "3.1.0",
+    "paths": {
+        "/path1": {
+            "$ref": "./ex1.json"
+        },
+        "/externalref": {
+            "$ref": "http://localhost:${dynamicPort}/full/nested/domain.yaml#/components/pathItems/ExternalRef"
+        },
+        "/relativeref": {
+            "$ref": "./nested/domain.yaml#/components/pathItems/RelativeRef"
+        },
+        "/internalref": {
+            "$ref": "#/components/pathItems/InternalRef"
+        },
+        "/internalreftoexternal": {
+            "$ref": "#/components/pathItems/InternalRefToExternal"
+        },
+        "/internal": {
+            "get": {
+                "description": "Internal PathItem",
+                "operationId": "Internal PathItem",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "userId": {
+                "$ref": "#/components/parameters/indirection1",
+                "description": "userId root",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "indirection1": {
+                "$ref": "#/components/parameters/userIdRef",
+                "summary": "indirect summary 1",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "indirection2": {
+                "$ref": "#/components/parameters/userIdRef",
+                "description": "indirection2 root",
+                "summary": "indirect summary 2",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "userIdRef": {
+                "name": "userId",
+                "in": "query",
+                "description": "userIdRef root",
+                "required": true
+            },
+            "externalRef": {
+                "$ref": "./ex.json#/externalParameter",
+                "description": "externalRef root",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "externalRefIndirectPointer": {
+                "$ref": "#/components/parameters/externalRefIndirect3",
+                "description": "externalRefIndirectPointer root",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "externalRefIndirect3": {
+                "$ref": "./ex1a.json#/indirection3",
+                "description": "externalRefIndirect3 root"
+            }
+        },
+        "pathItems": {
+            "InternalRefToExternal": {
+                "$ref": "./nested/domain.yaml#/components/pathItems/DomainInternalRefToExternal"
+            },
+            "InternalRef": {
+                "get": {
+                    "description": "InternalRef root",
+                    "operationId": "InternalRef PathItem",
+                    "responses": {
+                        "200": {
+                            "description": "OK"
+                        }
+                    }
+                }
+            }
+        },
+        "links": {
+            "link1": {
+                "operationRef": "./ex.json#/operation"
+            }
+        },
+        "schemas": {
+            "Indirection": {
+                "$ref": "./ex1schema.json#/$defs/Indirection"
+            },
+            "IndirectionSiblings": {
+                "$ref": "./ex1schema.json#/$defs/IndirectionSiblings",
+                "description": "IndirectionSiblings root"
+            }
+        }
+    }
+}

@@ -133,7 +133,7 @@ public class DeserializationUtils {
         return deserializeIntoTree(contents, fileOrHost, null, new SwaggerParseResult());
     }
 
-    public static JsonNode deserializeIntoTree(String contents, String fileOrHost, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
+    public static JsonNode deserializeIntoTree(String contents, String uri, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
         JsonNode result;
 
         try {
@@ -143,7 +143,7 @@ public class DeserializationUtils {
                 result = readYamlTree(contents, parseOptions, deserializationUtilsResult);
             }
         } catch (IOException e) {
-            throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + fileOrHost + " into a JsonNode tree", e);
+            throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + uri + " into a JsonNode tree", e);
         }
 
         return result;
@@ -188,7 +188,7 @@ public class DeserializationUtils {
         return result;
     }
 
-    private static boolean isJson(String contents) {
+    public static boolean isJson(String contents) {
         return contents.toString().trim().startsWith("{");
     }
 

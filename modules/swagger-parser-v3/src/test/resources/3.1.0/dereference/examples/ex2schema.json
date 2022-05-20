@@ -1,0 +1,11 @@
+{
+  "$defs": {
+    "Indirection": {
+      "$ref": "./ex3schema.json"
+    },
+      "IndirectionSiblings": {
+          "$ref": "./ex3schema.json",
+          "description": "overwritten desc IndirectionSiblings ex2schema"
+      }
+  }
+}

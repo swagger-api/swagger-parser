@@ -1,0 +1,97 @@
+{
+    "openapi": "3.1.0",
+    "paths": {
+        "/internal": {
+            "get": {
+                "description": "Internal PathItem",
+                "operationId": "Internal PathItem",
+                "parameters" : [
+                    {
+                        "in": "query",
+                        "examples": {
+                            "bar": {
+                                "summary": "overwritten summary",
+                                "description": "root item bar",
+                                "$ref": "#/components/examples/userId"
+                            },
+                            "foo": {
+                                "summary": "foo summary",
+                                "description": "root item foo",
+                                "value": {
+                                    "test": "aaa"
+                                }
+                            },
+                            "ext": {
+                                "summary": "ext overwritten summary",
+                                "description": "root item ext",
+                                "$ref": "./example.json#/externalDirectExample"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/externalRef"
+                    },
+                    {
+                        "$ref": "./param.json#/externalDirectParameter"
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "examples": {
+            "userId": {
+                "description": "root userId",
+                "summary": "summary  components userId",
+                "value": {
+                    "test": "aaa"
+                }
+            },
+            "indirect": {
+                "description": "root indirect",
+                "summary": "summary  components indirect",
+                "$ref": "./exampleindirect.json#/externalIndirectExample"
+            }
+        },
+        "parameters": {
+            "indirection1": {
+                "$ref": "#/components/parameters/indirection2",
+                "summary": "indirect summary 1",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "indirection2": {
+                "$ref": "#/components/parameters/userIdRef",
+                "description": "indirect description 2",
+                "summary": "indirect summary 2",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "userIdRef": {
+                "name": "userId",
+                "in": "query",
+                "description": "ID of the user",
+                "required": true
+            },
+            "externalRef": {
+                "$ref": "./ex.json#/externalParameter",
+                "description": "pulled from external source",
+                "prop1": "value1",
+                "prop2": "value2"
+            },
+            "externalRefIndirect3": {
+                "$ref": "./ex1a.json#/indirection3",
+                "description": "external ref 3 overwritten"
+            },
+            "externalRefIndirect32": {
+                "$ref": "./ex1a.json#/indirection3",
+                "description": "external ref 32 overwritten"
+            },
+            "externalRefIndirect33": {
+                "$ref": "#/components/parameters/externalRefIndirect32",
+                "description": "external ref 33 overwritten"
+                
+            }
+        }
+    }
+}

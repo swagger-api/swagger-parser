@@ -1,0 +1,34 @@
+openapi: 3.1.0
+servers:
+- url: /
+components:
+  parameters:
+    userId:
+      description: userId description
+      $ref: '#/components/parameters/indirection1'
+    indirection1:
+      description: indirection1 description
+      $ref: '#/components/parameters/indirection2'
+    indirection2:
+      description: indirection2 description
+      $ref: '#/components/parameters/userIdRef'
+    userIdRef:
+      name: userId
+      in: query
+      description: ID of the user
+      required: true
+      style: form
+      explode: true
+    userIdExt:
+      description: userId description
+      $ref: '#/components/parameters/indirection1Ext'
+    indirection1Ext:
+      description: indirection1 description
+      $ref: '#/components/parameters/indirection2Ext'
+    indirection2Ext:
+      name: externalParameter
+      in: query
+      description: indirection2 description
+      required: true
+      style: form
+      explode: true

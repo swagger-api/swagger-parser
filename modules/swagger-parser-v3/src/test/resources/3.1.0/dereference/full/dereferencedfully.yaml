@@ -1,0 +1,125 @@
+openapi: 3.1.0
+servers:
+- url: /
+paths:
+  /path1:
+    summary: path item summary
+    description: /path3 ex2
+    get: {}
+  /externalref:
+    get:
+      description: ExternalRef domain
+      operationId: ExternalRef PathItem
+      responses:
+        "200":
+          description: OK
+  /relativeref:
+    get:
+      description: RelativeRef domain
+      operationId: RelativeRef PathItem
+      responses:
+        "200":
+          description: OK
+  /internalref:
+    get:
+      description: InternalRef root
+      operationId: InternalRef PathItem
+      responses:
+        "200":
+          description: OK
+  /internalreftoexternal:
+    get:
+      description: DomainInternalRefToExternal domain
+      operationId: DomainInternalRefToExternal PathItem
+      responses:
+        "200":
+          description: OK
+  /internal:
+    get:
+      description: Internal PathItem
+      operationId: Internal PathItem
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Indirection:
+      type: object
+      description: VALUE ex3schema
+      properties:
+        prop1:
+          type: string
+    IndirectionSiblings:
+      type: object
+      description: IndirectionSiblings root
+      properties:
+        prop1:
+          type: string
+  parameters:
+    userId:
+      name: userId
+      in: query
+      description: userId root
+      required: true
+      style: form
+      explode: true
+    indirection1:
+      name: userId
+      in: query
+      description: userIdRef root
+      required: true
+      style: form
+      explode: true
+    indirection2:
+      name: userId
+      in: query
+      description: indirection2 root
+      required: true
+      style: form
+      explode: true
+    userIdRef:
+      name: userId
+      in: query
+      description: userIdRef root
+      required: true
+      style: form
+      explode: true
+    externalRef:
+      name: externalParameter
+      in: query
+      description: externalRef root
+      required: true
+      style: form
+      explode: true
+    externalRefIndirectPointer:
+      name: externalParameter3
+      in: query
+      description: externalRefIndirectPointer root
+      required: true
+      style: form
+      explode: true
+    externalRefIndirect3:
+      name: externalParameter3
+      in: query
+      description: externalRefIndirect3 root
+      required: true
+      style: form
+      explode: true
+  links:
+    link1:
+      operationRef: ./ex.json#/operation
+  pathItems:
+    InternalRefToExternal:
+      get:
+        description: DomainInternalRefToExternal domain
+        operationId: DomainInternalRefToExternal PathItem
+        responses:
+          "200":
+            description: OK
+    InternalRef:
+      get:
+        description: InternalRef root
+        operationId: InternalRef PathItem
+        responses:
+          "200":
+            description: OK
