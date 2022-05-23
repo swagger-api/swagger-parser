@@ -1,7 +1,10 @@
 package io.swagger.v3.parser.reference;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,12 +45,27 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
             return;
         }
 
-        // Set<Object> visitedSet = new HashSet<>();
+        LinkedHashMap<String, Reference> refSet = new LinkedHashMap<>();
+        LinkedHashSet<String> msgs = new LinkedHashSet<>();
+        if (StringUtils.isBlank(context.getRootUri())) {
+            context.rootUri("local");
+            context.currentUri("local");
+        }
+        if (context.getRootUri().equals("local")) {
+            Reference localReference = new Reference()
+                    .referenceSet(refSet)
+                    .uri(context.getCurrentUri())
+                    .messages(msgs)
+                    .jsonNode(Json31.mapper().convertValue(openAPI, JsonNode.class))
+                    .auths(context.getAuths());
+
+            refSet.put("local", localReference);
+        }
+
         Reference reference = new Reference()
-                .referenceSet(new LinkedHashMap<>())
+                .referenceSet(refSet)
                 .uri(context.getCurrentUri())
-                .messages(new LinkedHashSet<>())
-                // .visitedSet(visitedSet)
+                .messages(msgs)
                 .auths(context.getAuths());
 
         Traverser traverser = buildTraverser(context);
