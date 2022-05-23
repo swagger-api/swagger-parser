@@ -14,7 +14,7 @@ public class DereferencerContext {
     protected final OpenAPI openApi;
 
     protected final List<AuthorizationValue> auths;
-    protected final String rootUri;
+    protected String rootUri;
     protected final ParseOptions parseOptions;
     protected String providedBaseUri;
     protected SwaggerParseResult swaggerParseResult;
@@ -112,6 +112,11 @@ public class DereferencerContext {
 
     public DereferencerContext referenceSet(Map<String, Reference> referenceSet) {
         this.referenceSet = referenceSet;
+        return this;
+    }
+
+    public DereferencerContext rootUri(String rootUri) {
+        this.rootUri = rootUri;
         return this;
     }
 }

@@ -214,6 +214,17 @@ public class OpenAPIV31ParserPathItemResolveFullyTest {
                         .withHeader("Content-type", "application/yaml")
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/3.1.0/dereference/pathItem/internal-indirections/root.json"));
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        WireMock.stubFor(get(urlPathMatching("/internal-indirections/root.json"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/json")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
     }
 
     @AfterClass
@@ -446,6 +457,49 @@ public class OpenAPIV31ParserPathItemResolveFullyTest {
                 "    description: path item description\n" +
                 "    get: {}\n" +
                 "  /path4:\n" +
+                "    summary: path item summary\n" +
+                "    description: path item description\n" +
+                "    get: {}\n");
+    }
+
+    @Test
+    public void testPathItemInternalNoLocation() throws Exception {
+        ParseOptions p = new ParseOptions();
+        p.setResolve(true);
+        p.setResolveFully(true);
+
+        String con = "{\n" +
+                "  \"openapi\": \"3.1.0\",\n" +
+                "  \"paths\": {\n" +
+                "    \"/path1\": {\n" +
+                "      \"$ref\": \"#/paths/~1path2\"\n" +
+                "    },\n" +
+                "    \"/path2\": {\n" +
+                "      \"$ref\": \"#/paths/~1path3\"\n" +
+                "    },\n" +
+                "    \"/path3\": {\n" +
+                "      \"summary\": \"path item summary\",\n" +
+                "      \"description\": \"path item description\",\n" +
+                "      \"get\": {}\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(con, null, p);
+        assertNotNull(swaggerParseResult.getOpenAPI());
+        assertFalse(swaggerParseResult.getMessages().isEmpty());
+        assertEquals(Yaml31.pretty(swaggerParseResult.getOpenAPI()), "openapi: 3.1.0\n" +
+                "servers:\n" +
+                "- url: /\n" +
+                "paths:\n" +
+                "  /path1:\n" +
+                "    summary: path item summary\n" +
+                "    description: path item description\n" +
+                "    get: {}\n" +
+                "  /path2:\n" +
+                "    summary: path item summary\n" +
+                "    description: path item description\n" +
+                "    get: {}\n" +
+                "  /path3:\n" +
                 "    summary: path item summary\n" +
                 "    description: path item description\n" +
                 "    get: {}\n");
