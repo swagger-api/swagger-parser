@@ -111,10 +111,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(openAPI)) {
             return openAPI;
         }
-        visiting.add(openAPI);
         if (visitedMap.containsKey(openAPI)) {
             return (OpenAPI)visitedMap.get(openAPI);
         }
+        visiting.add(openAPI);
+
         OpenAPI resolved = visitor.visitOpenApi(openAPI);
 
         if (resolved == null) {
@@ -150,11 +151,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(components)) {
             return components;
         }
-        visiting.add(components);
+
         if (visitedMap.containsKey(components)) {
             return (Components)visitedMap.get(components);
         }
-
+        visiting.add(components);
         Components resolved = visitor.visitComponents(components);
         if (resolved == null) {
             resolved = components;
@@ -183,11 +184,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(paths)) {
             return paths;
         }
-        visiting.add(paths);
+
         if (visitedMap.containsKey(paths)) {
             return (Paths)visitedMap.get(paths);
         }
-
+        visiting.add(paths);
         Paths resolved = visitor.visitPaths(paths);
         if (resolved == null) {
             resolved = paths;
@@ -206,11 +207,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(operation)) {
             return operation;
         }
-        visiting.add(operation);
+
         if (visitedMap.containsKey(operation)) {
             return (Operation)visitedMap.get(operation);
         }
-
+        visiting.add(operation);
         Operation resolved = visitor.visitOperation(operation);
         if (resolved == null) {
             resolved = operation;
@@ -257,10 +258,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(responses)) {
             return responses;
         }
-        visiting.add(responses);
+
         if (visitedMap.containsKey(responses)) {
             return (ApiResponses)visitedMap.get(responses);
         }
+        visiting.add(responses);
         ApiResponses resolved = visitor.visitResponses(responses);
         if (resolved == null) {
             resolved = responses;
@@ -279,10 +281,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(response)) {
             return response;
         }
-        visiting.add(response);
+
         if (visitedMap.containsKey(response)) {
             return (ApiResponse)visitedMap.get(response);
         }
+        visiting.add(response);
         ApiResponse resolved = visitor.visitResponse(response);
 
         boolean resolvedNotNull = false;
@@ -326,10 +329,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(requestBody)) {
             return requestBody;
         }
-        visiting.add(requestBody);
+
         if (visitedMap.containsKey(requestBody)) {
             return (RequestBody)visitedMap.get(requestBody);
         }
+        visiting.add(requestBody);
         RequestBody resolved = visitor.visitRequestBody(requestBody);
         boolean resolvedNotNull = false;
 
@@ -371,11 +375,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(pathItem)) {
             return pathItem;
         }
-        visiting.add(pathItem);
+
         if (visitedMap.containsKey(pathItem)) {
             return (PathItem) visitedMap.get(pathItem);
         }
-
+        visiting.add(pathItem);
         PathItem resolved = visitor.visitPathItem(pathItem);
 
         boolean resolvedNotNull = false;
@@ -472,10 +476,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(parameter)) {
             return parameter;
         }
-        visiting.add(parameter);
+
         if (visitedMap.containsKey(parameter)) {
             return (Parameter)visitedMap.get(parameter);
         }
+        visiting.add(parameter);
         Parameter resolved = visitor.visitParameter(parameter);
 
         boolean resolvedNotNull = false;
@@ -521,10 +526,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(example)) {
             return example;
         }
-        visiting.add(example);
+
         if (visitedMap.containsKey(example)) {
             return (Example)visitedMap.get(example);
         }
+        visiting.add(example);
         Example resolved = visitor.visitExample(example);
 
         boolean resolvedNotNull = false;
@@ -564,10 +570,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(callback)) {
             return callback;
         }
-        visiting.add(callback);
+
         if (visitedMap.containsKey(callback)) {
             return (Callback)visitedMap.get(callback);
         }
+        visiting.add(callback);
         traverseMap(callback, visitor, this::traversePathItem);
         visitedMap.put(callback, callback);
         visiting.remove(callback);
@@ -581,11 +588,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(mediaType)) {
             return mediaType;
         }
-        visiting.add(mediaType);
+
         if (visitedMap.containsKey(mediaType)) {
             return (MediaType)visitedMap.get(mediaType);
         }
-
+        visiting.add(mediaType);
         MediaType resolved = visitor.visitMediaType(mediaType);
 
         if (resolved == null) {
@@ -612,10 +619,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(encoding)) {
             return encoding;
         }
-        visiting.add(encoding);
+
         if (visitedMap.containsKey(encoding)) {
             return (Encoding)visitedMap.get(encoding);
         }
+        visiting.add(encoding);
         Encoding resolved = visitor.visitEncoding(encoding);
 
         if (resolved == null) {
@@ -635,10 +643,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(header)) {
             return header;
         }
-        visiting.add(header);
+
         if (visitedMap.containsKey(header)) {
             return (Header)visitedMap.get(header);
         }
+        visiting.add(header);
         Header resolved = visitor.visitHeader(header);
 
         boolean resolvedNotNull = false;
@@ -684,10 +693,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(securityScheme)) {
             return securityScheme;
         }
-        visiting.add(securityScheme);
+
         if (visitedMap.containsKey(securityScheme)) {
             return (SecurityScheme)visitedMap.get(securityScheme);
         }
+        visiting.add(securityScheme);
         SecurityScheme resolved = visitor.visitSecurityScheme(securityScheme);
         boolean resolvedNotNull = false;
 
@@ -725,10 +735,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(link)) {
             return link;
         }
-        visiting.add(link);
+
         if (visitedMap.containsKey(link)) {
             return (Link)visitedMap.get(link);
         }
+        visiting.add(link);
         Link resolved = visitor.visitLink(link);
 
         boolean resolvedNotNull = false;
@@ -768,10 +779,11 @@ public class OpenAPI31Traverser implements Traverser {
         if (visiting.contains(schema)) {
             return schema;
         }
-        visiting.add(schema);
         if (visitedMap.containsKey(schema)) {
             return (Schema)visitedMap.get(schema);
         }
+        visiting.add(schema);
+
         if (StringUtils.isNotBlank(schema.get$id())) {
             inheritedIds.add(schema.get$id());
         }
