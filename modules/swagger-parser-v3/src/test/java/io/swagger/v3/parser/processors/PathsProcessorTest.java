@@ -16,28 +16,28 @@ public class PathsProcessorTest {
 
     @Test
     public void testProcessPaths_parameters_internalTopLevelDefinition() {
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-XYZ/api.yaml");
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-1733/api.yaml");
 
         assertOperationsHasParameters(openAPI, "/internal/test/{id}/toplevelparam");
     }
 
     @Test
     public void testProcessPaths_parameters_internalOperationLevelDefinition() {
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-XYZ/api.yaml");
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-1733/api.yaml");
 
         assertOperationsHasParameters(openAPI, "/internal/test/{id}/operationlevelparam");
     }
 
     @Test
     public void testProcessPaths_parameters_refTopLevelDefinition() {
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-XYZ/api.yaml");
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-1733/api.yaml");
 
         assertOperationsHasParameters(openAPI, "/ref/test/{id}/toplevelparam");
     }
 
     @Test
     public void testProcessPaths_parameters_refOperationLevelDefinition() {
-        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-XYZ/api.yaml");
+        OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue-1733/api.yaml");
 
         assertOperationsHasParameters(openAPI, "/ref/test/{id}/operationlevelparam");
     }
