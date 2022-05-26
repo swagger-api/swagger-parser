@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.core.util.Yaml;
 import org.testng.annotations.Test;
 
 import io.swagger.v3.oas.models.Components;
@@ -834,7 +835,7 @@ public class InlineModelResolverTest {
                         .requestBody(new RequestBody()
                                 .content(new Content().addMediaType("*/*",new MediaType()
                                 .schema(arraySchema))))));
-
+        
         new InlineModelResolver().flatten(openAPI);
 
         RequestBody body = openAPI.getPaths().get("/hello").getGet().getRequestBody();
