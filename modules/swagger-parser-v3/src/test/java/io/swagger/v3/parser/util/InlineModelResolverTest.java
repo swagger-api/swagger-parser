@@ -835,7 +835,6 @@ public class InlineModelResolverTest {
                         .requestBody(new RequestBody()
                                 .content(new Content().addMediaType("*/*",new MediaType()
                                 .schema(arraySchema))))));
-        
         new InlineModelResolver().flatten(openAPI);
 
         RequestBody body = openAPI.getPaths().get("/hello").getGet().getRequestBody();
