@@ -198,6 +198,7 @@ public class ReferenceVisitor extends AbstractVisitor {
             baseURI = ReferenceUtils.resolve(ref, baseURI);
             baseURI = ReferenceUtils.toBaseURI(baseURI);
             Reference reference = null;
+            boolean isAnchor = false;
             if (this.reference.getReferenceSet().containsKey(baseURI)) {
                 reference = this.reference.getReferenceSet().get(baseURI);
             }
@@ -222,9 +223,12 @@ public class ReferenceVisitor extends AbstractVisitor {
                 if (evaluatedNode == null) {
                     throw new RuntimeException("Could not find " + fragment + " in contents of " + ref);
                 }
+                isAnchor = true;
             }
             Schema resolved = openAPITraverser.deserializeFragment(evaluatedNode, Schema.class, ref, fragment, reference.getMessages());
-
+            if (isAnchor) {
+                resolved.$anchor(null);
+            }
             ReferenceVisitor visitor = new ReferenceVisitor(reference, openAPITraverser, this.visited, this.visitedMap);
             return openAPITraverser.traverseSchema(resolved, visitor, inheritedIds);
         } catch (Exception e) {

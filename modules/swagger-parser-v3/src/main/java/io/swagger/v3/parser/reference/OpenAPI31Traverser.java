@@ -1056,6 +1056,9 @@ public class OpenAPI31Traverser implements Traverser {
         if (source.getMaxLength() != null){
             target.setMaxLength(source.getMaxLength());
         }
+        if (source.get$anchor() != null){
+            target.set$anchor(source.get$anchor());
+        }
         if (source.get$comment() != null){
             target.set$comment(source.get$comment());
         }
