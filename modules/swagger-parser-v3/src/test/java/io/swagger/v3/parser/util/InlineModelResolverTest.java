@@ -2,11 +2,6 @@ package io.swagger.v3.parser.util;
 
 
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertNull;
-import static org.testng.AssertJUnit.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,10 +30,26 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 
+import static org.testng.AssertJUnit.*;
+
 @SuppressWarnings({"static-method", "rawtypes"})
 public class InlineModelResolverTest {
 
     @Test
+    public void testIssueUnexpectedNullValues() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("unexpectedNullValues.yaml", null, options);
+        assertNotNull(openAPI);
+        assertNull(openAPI.getComponents().getSchemas().get("DatasetDetail_schema").getExample());
+        assertFalse(openAPI.getComponents().getSchemas().get("DatasetDetail_schema").getExampleSetFlag());
+        //example set to null explicitly in the definition
+        assertNull(openAPI.getComponents().getSchemas().get("verify_datasets").getExample());
+        assertTrue(openAPI.getComponents().getSchemas().get("verify_datasets").getExampleSetFlag());
+    }
+
+        @Test
     public void testIssue1018() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);

@@ -401,7 +401,9 @@ public class InlineModelResolver {
             String example = m.getExample().toString();
             if (example.substring(0, 1).equals("\"") &&
                     example.substring(example.length() - 1).equals("\"")) {
-                m.setExample(example.substring(1, example.length() - 1));
+                if(example != null || (example == null && m.getExampleSetFlag())) {
+                    m.setExample(example.substring(1, example.length() - 1));
+                }
             }
         }
     }
@@ -629,7 +631,9 @@ public class InlineModelResolver {
         if (inner instanceof ObjectSchema) {
             ArraySchema model = new ArraySchema();
             model.setDescription(description);
-            model.setExample(example);
+            if(example != null || (example == null && object.getExampleSetFlag())) {
+                model.setExample(example);
+            }
             model.setItems(object.getItems());
             return model;
         }
@@ -656,7 +660,9 @@ public class InlineModelResolver {
             ComposedSchema composedModel = (ComposedSchema) schema;
 
             composedModel.setDescription(description);
-            composedModel.setExample(example);
+            if(example != null || (example == null && schema.getExampleSetFlag())) {
+                composedModel.setExample(example);
+            }
             composedModel.setName(name);
             composedModel.setXml(xml);
             composedModel.setType(schema.getType());
@@ -672,7 +678,9 @@ public class InlineModelResolver {
             model.setDeprecated(schema.getDeprecated());
             model.setDiscriminator(schema.getDiscriminator());
             model.setEnum(schema.getEnum());
-            model.setExample(example);
+            if(example != null || (example == null && schema.getExampleSetFlag())) {
+                model.setExample(example);
+            }
             model.setExclusiveMaximum(schema.getExclusiveMaximum());
             model.setExclusiveMinimum(schema.getExclusiveMinimum());
             model.setFormat(schema.getFormat());
@@ -718,7 +726,9 @@ public class InlineModelResolver {
         }
         ArraySchema model = new ArraySchema();
         model.setDescription(description);
-        model.setExample(example);
+        if(example != null || (example == null && object.getExampleSetFlag())) {
+            model.setExample(example);
+        }
         if (object.getAdditionalProperties() != null && !(object.getAdditionalProperties() instanceof Boolean)) {
             model.setItems((Schema)  object.getAdditionalProperties());
         }
