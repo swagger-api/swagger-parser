@@ -14,6 +14,7 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -112,7 +113,21 @@ public class DeserializationUtils {
     public static Options getOptions() {
         return options;
     }
+    public static class CustomResolver extends Resolver {
 
+        /*
+         * do not resolve timestamp
+         */
+        protected void addImplicitResolvers() {
+            addImplicitResolver(Tag.BOOL, BOOL, "yYnNtTfFoO");
+            addImplicitResolver(Tag.INT, INT, "-+0123456789");
+            addImplicitResolver(Tag.FLOAT, FLOAT, "-+0123456789.");
+            addImplicitResolver(Tag.MERGE, MERGE, "<");
+            addImplicitResolver(Tag.NULL, NULL, "~nN\0");
+            addImplicitResolver(Tag.NULL, EMPTY, null);
+            // addImplicitResolver(Tag.TIMESTAMP, TIMESTAMP, "0123456789");
+        }
+    }
     public static JsonNode deserializeIntoTree(String contents, String fileOrHost) {
         return deserializeIntoTree(contents, fileOrHost, null);
     }
@@ -179,7 +194,7 @@ public class DeserializationUtils {
             method.invoke(loaderOptions, options.getMaxYamlAliasesForCollections());
             method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
             method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
-            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions);
+            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions, new CustomResolver());
             return yaml;
         } catch (ReflectiveOperationException e) {
             //
