@@ -11,7 +11,6 @@
             "type" : "string"
           },
           "profile" : {
-            "$anchor" : "user-profile",
             "properties" : {
               "firstName" : {
                 "type" : "string"
