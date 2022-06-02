@@ -25,16 +25,24 @@ public class OperationProcessor {
     private final ExternalRefProcessor externalRefProcessor;
     private final ResolverCache cache;
 
-
     public OperationProcessor(ResolverCache cache, OpenAPI openAPI) {
-        this.parameterProcessor = new ParameterProcessor(cache, openAPI);
-        this.responseProcessor = new ResponseProcessor(cache,openAPI);
-        this.requestBodyProcessor = new RequestBodyProcessor(cache,openAPI);
+        this(cache, openAPI, false);
+    }
+
+    public OperationProcessor(ResolverCache cache, OpenAPI openAPI, boolean openapi31) {
+        this.parameterProcessor = new ParameterProcessor(cache, openAPI, openapi31);
+        this.responseProcessor = new ResponseProcessor(cache,openAPI, openapi31);
+        this.requestBodyProcessor = new RequestBodyProcessor(cache,openAPI, openapi31);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
         this.cache = cache;
     }
 
     public void processOperation(Operation operation) {
+        if (operation.getParameters() != null) {
+            for (Parameter parameter : operation.getParameters()) {
+                parameterProcessor.processParameter(parameter);
+            }
+        }
         final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
         if(processedOperationParameters != null) {
             operation.setParameters(processedOperationParameters);

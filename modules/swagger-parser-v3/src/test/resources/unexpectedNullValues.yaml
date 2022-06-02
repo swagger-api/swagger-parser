@@ -1,0 +1,176 @@
+openapi: 3.0.3
+
+info:
+  title: Unexpected null value at schema
+  version: 0.0.16
+  description: |
+    - Unexpected null value at schema when the flatten option is set and an inline object property is flatten.
+
+servers:
+  - url: https://api.abc.com/v1
+    description: null values
+
+paths:
+  /dataset:
+    get:
+      summary: |
+        sample for exposing issue
+      tags:
+        - dataset
+      responses:
+        200:
+          description: OK - Returns metadata information for the specified dataset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetDetail'
+              examples:
+                123:
+                  value:
+                    id: 123
+                    version: 1
+                    country: CHN
+                    provider: DataZoo
+                    description: DataZoo China National ID
+        
+        default:
+          description: Returns an array of errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+  /verify:
+    post:
+      summary: |
+        Performs a verification. Depending on the success or failure of the datasets you will receive an HTTP response indicating if all succeeded (200), if some had problems (200) or all had problems
+      tags:
+        - verify
+      requestBody:
+        description: The verification details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                datasets:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        description: The dataset id
+                        type: integer
+                        format: int32
+                        example: 123
+                      version:
+                        description: The dataset version number
+                        type: integer
+                        format: int32
+                        example: 1
+                    required:
+                      - id
+                      - version
+                    example: null
+                  minItems: 1
+              required:
+                - datasets
+                - subject
+            examples:
+              123:
+                value:
+                  datasets:
+                    - id: 123
+                      version: 1
+                      credentials:
+                        userName: username
+                        password: password
+                  subject:
+                    person:
+                      firstName: Joe
+                      lastNames:
+                        - Bloggs2
+                    identity:
+                      documents:
+                        - documentType: countryId
+                          documentNumber: '37020319611025031X'
+      responses:
+        200:
+          description: OK - Returns metadata information for the specified dataset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetDetail'
+              examples:
+                123:
+                  value:
+                    id: 123
+                    version: 1
+                    country: CHN
+                    provider: DataZoo
+                    description: DataZoo China National ID
+        
+        default:
+          description: Returns an array of errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+
+components:
+  schemas:
+    Dataset:
+      description: The high level details of a Dataset that is available within a country
+      type: object
+      properties:
+        id:
+          description: The dataset id
+          type: integer
+          format: int32
+          example: 123
+        version:
+          description: The dataset version number
+          type: integer
+          format: int32
+          example: 1
+        country:
+          description: The 3 digit ISO country code
+          type: string
+          maxLength: 3
+          example: CHN
+        provider:
+          description: The dataset provider name
+          type: string
+          maxLength: 999
+          example: DataZoo
+        description:
+          description: The dataset description
+          type: string
+          maxLength: 999
+          example: DataZoo China National ID
+      required:
+        - id
+        - version
+    
+    Errors:
+      description: An array of errors
+      type: object
+      required:
+        - errors
+
+    DatasetDetail:
+      description: The high level details of a Dataset that is available within a country
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Dataset'
+      properties:
+        schema:
+          type: object
+          properties:
+            request:
+              type: string
+          required:
+            - request
+      required:
+        - schema

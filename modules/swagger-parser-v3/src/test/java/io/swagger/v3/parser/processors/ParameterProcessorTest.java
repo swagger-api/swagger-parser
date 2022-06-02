@@ -35,6 +35,9 @@ public class ParameterProcessorTest {
     @Mocked
     SchemaProcessor modelProcessor;
 
+    @Injectable
+    boolean openapi31;
+
     @Test
     public void testProcessParameters_TypesThatAreNotRefOrBody(@Injectable final HeaderParameter headerParameter,
                                                                @Injectable final QueryParameter queryParameter,
@@ -42,7 +45,7 @@ public class ParameterProcessorTest {
                                                                @Injectable final PathParameter pathParameter) throws Exception {
         expectedModelProcessorCreation();
         new Expectations() {
-            {       
+            {
                 headerParameter.getSchema();
                 result = null;
                 headerParameter.getContent();
@@ -61,7 +64,7 @@ public class ParameterProcessorTest {
                 result = null;
             }
         };
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
+        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31)
                 .processParameters(Arrays.asList(headerParameter,
                         queryParameter,
                         cookieParameter,
@@ -102,7 +105,7 @@ public class ParameterProcessorTest {
             }
         };
 
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI).processParameters(Arrays.asList(refParameter));
+        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31).processParameters(Arrays.asList(refParameter));
 
         new FullVerifications(){{}};
 
@@ -137,7 +140,7 @@ public class ParameterProcessorTest {
 
         expectModelProcessorInvoked(bodyParamSchema);
 
-        new RequestBodyProcessor(cache, openAPI).processRequestBody(bodyParameter);
+        new RequestBodyProcessor(cache, openAPI, openapi31).processRequestBody(bodyParameter);
 
         new FullVerifications(){{}};
     }
@@ -151,7 +154,7 @@ public class ParameterProcessorTest {
 
     private void expectedModelProcessorCreation() {
         new StrictExpectations() {{
-            new SchemaProcessor(cache, openAPI);
+            new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
             result = modelProcessor;
         }};

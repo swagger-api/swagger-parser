@@ -35,20 +35,23 @@ public class ResponseProcessorTest {
     @Mocked
     LinkProcessor linkProcessor;
 
+    @Injectable
+    boolean openapi31;
+
     @Test
     public void testProcessResponse(@Injectable final Schema responseSchema,
                                     @Injectable final Header responseHeader) throws Exception {
 
         new StrictExpectations(){{
-            new SchemaProcessor(cache, swagger);
+            new SchemaProcessor(cache, swagger, openapi31);
             times=1;
             result = propertyProcessor;
 
-            new HeaderProcessor(cache,swagger);
+            new HeaderProcessor(cache,swagger, openapi31);
             times = 1;
             result = headerProcessor;
 
-            new LinkProcessor(cache,swagger);
+            new LinkProcessor(cache,swagger, openapi31);
             times = 1;
             result = linkProcessor;
 
@@ -66,7 +69,7 @@ public class ResponseProcessorTest {
         response.content(new Content().addMediaType("*/*", new MediaType().schema(responseSchema)));
         response.addHeaderObject("foo", responseHeader);
 
-        new ResponseProcessor(cache, swagger).processResponse(response);
+        new ResponseProcessor(cache, swagger, openapi31).processResponse(response);
 
 
         new FullVerifications(){{}};

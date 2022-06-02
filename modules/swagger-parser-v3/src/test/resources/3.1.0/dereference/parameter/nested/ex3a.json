@@ -1,0 +1,8 @@
+{
+  "externalParameter3": {
+    "name": "externalParameter3",
+    "in": "query",
+    "description": "this is parameter stored in external file 3",
+    "required": true
+  }
+}

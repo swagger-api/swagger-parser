@@ -1,0 +1,86 @@
+openapi: 3.1.0
+info:
+  title: siblings JSONSchema
+  version: 1.0.0
+servers:
+  - url: /
+paths: { }
+components:
+  schemas:
+    Payment:
+      type: object
+      properties:
+        name:
+          type: string
+        credit_card:
+          type: number
+        billing_address:
+          type: string
+      required:
+        - name
+      dependentRequired:
+        credit_card:
+          - billing_address
+    PaymentMethod:
+      type: object
+      properties:
+        name:
+          type: string
+        credit_card:
+          type: number
+      required:
+        - name
+      dependentSchemas:
+        credit_card:
+          properties:
+            billing_address:
+              type: string
+          required:
+            - billing_address
+    IfTest:
+      title: Person
+      type: object
+      properties:
+        country:
+          type: string
+          widget: Select
+          enum:
+            - usa
+            - canada
+            - eu
+          default: eu
+      required:
+        - country
+      if:
+        properties:
+          country:
+            type: string
+            const: canada
+      then:
+        properties:
+          maple_trees:
+            type: number
+      else:
+        properties:
+          accept:
+            type: boolean
+            const: true
+        required:
+          - accept
+    Fruit:
+      type: string
+      examples:
+        - apple
+        - orange
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      examples:
+        - code: 123
+          message: Oops...
+        - code: 456
+          message: Feature is not available for your plan

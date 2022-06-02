@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: Parser Test
+  version: '1.0'
+components:
+  schemas:
+    Parse:
+      $ref: '#/components/schemas/ParseEnum'
+      description: Overwritten description
+    ParseEnum:
+      title: Parse It
+      description: Can it parse it?
+      type:
+      - string
+      - object
+      enum:
+        - Yes
+        - No
+    NestedRef:
+      $ref: './domainref.yaml#/components/schemas/Parse'

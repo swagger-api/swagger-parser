@@ -1,0 +1,14 @@
+{
+    "openapi": "3.1.0",
+    "components": {
+        "schemas": {
+            "Indirection": {
+                "$ref": "./ex3schema.json"
+            },
+            "IndirectionSiblings": {
+                "$ref": "./ex3schema.json",
+                "description": "overwritten desc IndirectionSiblings root"
+            }
+        }
+    }
+}
