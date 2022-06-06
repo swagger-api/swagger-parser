@@ -68,12 +68,12 @@ public class ResolverCache {
     private Map<String, String> externalFileCache = new HashMap<>();
     private List<String> referencedModelKeys = new ArrayList<>();
     private Set<String> resolveValidationMessages;
-
     private final ParseOptions parseOptions;
-
+    protected boolean openapi31;
 
     /*
-    a map that stores original external references, and their associated renamed references
+     * a map that stores original external references, and their associated renamed
+     * references
      */
     private Map<String, String> renameCache = new HashMap<>();
 
@@ -86,6 +86,7 @@ public class ResolverCache {
     }
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Set<String> resolveValidationMessages, ParseOptions parseOptions) {
+        this.openapi31 = openApi != null && openApi.getOpenapi() != null && openApi.getOpenapi().startsWith("3.1");
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
@@ -165,7 +166,7 @@ public class ResolverCache {
             if (parseOptions.isValidateExternalRefs()) {
                 result = deserializeFragment(tree, expectedType, file, "/");
             } else {
-                result = DeserializationUtils.deserialize(contents, file, expectedType);
+                result = DeserializationUtils.deserialize(contents, file, expectedType, openapi31);
             }
             resolutionCache.put(ref, result);
             if (deserializationUtilResult.getMessages() != null) {
@@ -191,9 +192,9 @@ public class ResolverCache {
         } else {
             if (expectedType.equals(Schema.class)) {
                 OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), null);
+                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
             } else {
-                result = DeserializationUtils.deserialize(tree, file, expectedType);
+                result = DeserializationUtils.deserialize(tree, file, expectedType, openapi31);
             }
         }
         updateLocalRefs(file, result);
@@ -393,5 +394,9 @@ public class ResolverCache {
 
     public Map<String, String> getRenameCache() {
         return Collections.unmodifiableMap(renameCache);
+    }
+
+    public ParseOptions getParseOptions() {
+        return parseOptions;
     }
 }

@@ -595,6 +595,30 @@ public class OpenAPIResolverTest {
         assertTrue(colouringPropertySchema == colouringsSchema);
 
     }
+    
+    @Test
+    public void testIssue1706() {
+        String path = "/issue-1706/SimpleRequestResponseRef.json";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        // Added this parseOption to make requestBody inline in the operation resolve processing flow.
+        options.setResolveRequestBody(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, null, options).getOpenAPI();
+        
+        // RequestBody should be inline
+        assertTrue(openAPI.getPaths().get("/resource").getPost().getRequestBody().get$ref() == null);
+        assertTrue(openAPI.getPaths().get("/resource").getPost().getRequestBody().getContent() != null);
+        assertTrue(openAPI.getPaths().get("/resource").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ObjectSchema);
+        
+        // Responses are already by default made inline in case referenced.
+        assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").get$ref() == null);
+        assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").getContent() != null);
+        assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ObjectSchema);        
+    }
+    
+    
 
     @Test
     public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {

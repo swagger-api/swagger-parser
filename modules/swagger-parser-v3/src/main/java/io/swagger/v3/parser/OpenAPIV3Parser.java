@@ -10,6 +10,9 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.exception.EncodingNotSupportedException;
 import io.swagger.v3.parser.exception.ReadContentException;
+import io.swagger.v3.parser.reference.DereferencerContext;
+import io.swagger.v3.parser.reference.DereferencersFactory;
+import io.swagger.v3.parser.reference.OpenAPIDereferencer;
 import io.swagger.v3.parser.util.ClasspathHelper;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.InlineModelResolver;
@@ -136,7 +139,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return new OpenAPIDeserializer().deserialize(node, path,new ParseOptions());
     }
     public SwaggerParseResult parseJsonNode(String path, JsonNode node, ParseOptions options) {
-        return new OpenAPIDeserializer().deserialize(node, path, options);
+        return new OpenAPIDeserializer().deserialize(node, path, options, options.isOaiAuthor());
     }
 
     public SwaggerParseResult readContents(String yaml) {
@@ -145,7 +148,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return readContents(yaml, null, options);
     }
 
-    private SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options,
+    public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options,
                                             String location) {
         if (swaggerAsString == null || swaggerAsString.trim().isEmpty()) {
             return SwaggerParseResult.ofError("Null or empty definition");
@@ -180,6 +183,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 }
             }
             return result;
+
         } catch (JsonProcessingException e) {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getOriginalMessage(), location);
@@ -201,9 +205,26 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
-                    OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
-                            location, null, options);
-                    resolver.resolve(result);
+                    if (result.getOpenAPI().getOpenapi() != null && result.getOpenAPI().getOpenapi().startsWith("3.1")) {
+                        DereferencerContext dereferencerContext = new DereferencerContext(
+                                result,
+                                auth,
+                                location,
+                                options,
+                                null,
+                                null,
+                                true
+                        );
+                        List<OpenAPIDereferencer> dereferencers = DereferencersFactory.getInstance().getDereferencers();
+                        if (dereferencers.iterator().hasNext()) {
+                            OpenAPIDereferencer dereferencer = dereferencers.iterator().next();
+                            dereferencer.dereference(dereferencerContext, dereferencers.iterator());
+                        }
+                    } else {
+                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
+                                location, null, options);
+                        resolver.resolve(result);
+                    }
                     if (options.isResolveFully()) {
                         new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
                     }

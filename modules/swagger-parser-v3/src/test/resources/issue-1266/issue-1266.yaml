@@ -1,0 +1,31 @@
+openapi: "3.0.2"
+info:
+  version: "1"
+  title: "Extension not inherited"
+
+components:
+  schemas:
+    ResponseModel:
+      x-extension-ref: 1
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: "string"
+
+paths:
+  /test/extensions/not/inherited:
+    get:
+      responses:
+        200:
+          description: "A test failing on the merge of extensions in a allOf"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResponseModel"
+                  - type: "object"
+                    properties:
+                      data2:
+                        type: "string"

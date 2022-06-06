@@ -109,7 +109,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
     private SwaggerParseResult readResult(SwaggerDeserializationResult result, List<AuthorizationValue> auth, ParseOptions options) {
         SwaggerParseResult out = convert(result);
-        if (out != null && options != null) {
+        if (out != null && out.getOpenAPI() != null && options != null) {
             if (options.isResolveFully()) {
                 new ResolverFully(options.isResolveCombinators()).resolveFully(out.getOpenAPI());
             }
@@ -831,6 +831,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
         convertExamples(((BodyParameter) param).getExamples(), content);
+        body.setExtensions(convert(param.getVendorExtensions()));
         body.content(content);
         return body;
     }

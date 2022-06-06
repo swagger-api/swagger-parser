@@ -1,0 +1,18 @@
+openapi: 3.1.0
+info:
+  title: Parser Test
+  version: '1.0'
+components:
+  schemas:
+    NestedParse:
+      $ref: '#/components/schemas/NestedParseEnum'
+      description: Overwritten description
+    NestedParseEnum:
+      title: Parse It
+      description: Can it parse it?
+      type:
+      - string
+      - object
+      enum:
+        - Yes
+        - No

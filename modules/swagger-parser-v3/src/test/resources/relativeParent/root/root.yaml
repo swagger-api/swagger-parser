@@ -1,0 +1,17 @@
+openapi: 3.0.0
+info:
+  title: MyExampleSpec
+  version: 1.0.0
+  description: >-
+paths: {}
+components:
+  schemas:
+    MyExampleSchema:
+      description: >-
+      properties:
+        id:
+          description: The id of MyExampleSchema.
+          type: string
+        message:
+          description: The message of MyExampleSchema.
+          $ref: ../specs/specs.yaml#/components/schemas/Message

@@ -1,0 +1,31 @@
+{
+  "components" : {
+    "schemas" : {
+      "User" : {
+        "type" : "object",
+        "properties" : {
+          "login" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          },
+          "profile" : {
+            "properties" : {
+              "firstName" : {
+                "type" : "string"
+              },
+              "lastName" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "openapi" : "3.1.0",
+  "servers" : [ {
+    "url" : "/"
+  } ]
+}

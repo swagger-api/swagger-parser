@@ -1,0 +1,35 @@
+openapi: 3.0.1
+info:
+  title: Sample title
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /path_{p0}/{p1}{p2}/another-{p3}:
+    put:
+      parameters:
+        - name: p0
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: p1
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: sample desc
+          content: {}
+components: {}

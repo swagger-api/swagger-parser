@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: example
+  version: 1.0.0
+paths:
+  "/examples":
+    get:
+      responses:
+        default:
+          description: None
+components:
+  schemas:
+    Response:
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          format: byte
+          example: "VGhpc1Nob3VsZFBhc3MK"
