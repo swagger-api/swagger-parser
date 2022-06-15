@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  version: "1.0.0"
+  title: parse-api
+  description: Test swagger-parser
+paths:
+  /parse:
+    get:
+      description: Parser test
+      operationId: getParse
+      parameters:
+        - in: query
+          name: parse
+          required: true
+          schema:
+            $ref: 'http://localhost:${dynamicPort}/domain#/components/schemas/Parse'
+        - in: query
+          name: relativeParse
+          required: true
+          schema:
+            $ref: './domain.yaml#/components/schemas/Parse'
+      responses:
+        '200':
+          description: OK
+          content:
+            "application/json":
+               schema:
+                 $ref: './nested/domain.yaml#/components/schemas/NestedRef'

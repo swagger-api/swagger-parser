@@ -1,0 +1,17 @@
+openapi: 3.1.0
+servers:
+- url: /
+components:
+  schemas:
+    Indirection:
+      type: object
+      description: desc ex3schema
+      properties:
+        prop1:
+          type: string
+    IndirectionSiblings:
+      type: object
+      description: overwritten desc IndirectionSiblings root
+      properties:
+        prop1:
+          type: string

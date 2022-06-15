@@ -137,8 +137,8 @@ public class OpenAPIParserTest {
         SwaggerParseResult result = new OpenAPIParser().readLocation("issue895.yaml", null, null);
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getMessages().get(0),"attribute info.contact.test");
-        assertEquals(result.getMessages().get(1),"attribute info.license.test1");
+        assertEquals(result.getMessages().get(0),"info.contact.test");
+        assertEquals(result.getMessages().get(1),"info.license.test1");
 
     }
 
@@ -494,18 +494,6 @@ public class OpenAPIParserTest {
     }
 
     @Test
-
-    public void testIssue844() {
-        OpenAPIParser openApiParser = new OpenAPIParser();
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-
-        OpenAPI openAPI = openApiParser.readLocation("reusableParametersWithExternalRef.json", null, options).getOpenAPI();
-        assertNotNull(openAPI);
-        assertEquals(openAPI.getPaths().get("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
-    }
-
-    @Test
     public void testIssue258() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -574,10 +562,10 @@ public class OpenAPIParserTest {
     public void testIssue959() {
         OpenAPIParser openAPIParser = new OpenAPIParser();
         SwaggerParseResult result =  openAPIParser.readLocation("issue959.json",null,null);
-        assertEquals(result.getMessages().get(0),"attribute paths.'/pets/{petId}'(get).parameters.There are duplicate parameter values");
+        assertEquals(result.getMessages().get(0),"paths.'/pets/{petId}'(get).parameters. There are duplicate parameter values");
 
         result =  openAPIParser.readLocation("issue959PathLevelDuplication.json",null,null);
-        assertEquals(result.getMessages().get(0),"attribute paths.'/pets'.There are duplicate parameter values");
+        assertEquals(result.getMessages().get(0),"paths.'/pets'. There are duplicate parameter values");
 
     }
 
@@ -605,7 +593,7 @@ public class OpenAPIParserTest {
         assertTrue(required.contains("Amount"));
         assertTrue(required.contains("Currency"));
     }
-  
+
     public void testIssue1086() {
         OpenAPIParser openApiParser = new OpenAPIParser();
         ParseOptions options = new ParseOptions();

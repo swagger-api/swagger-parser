@@ -1,0 +1,5 @@
+{
+  "indirection3": {
+    "$ref": "./nested/ex2a.json#/indirection3"
+  }
+}

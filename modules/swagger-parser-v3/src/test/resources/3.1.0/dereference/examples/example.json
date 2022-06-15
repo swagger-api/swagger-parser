@@ -1,0 +1,9 @@
+{
+    "externalDirectExample": {
+        "summary": "externalDirectExample",
+        "description": "example.json",
+        "value": {
+            "foo": "bar"
+        }
+    }
+}

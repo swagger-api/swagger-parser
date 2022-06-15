@@ -710,7 +710,7 @@ public class OpenAPIDeserializerTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
         assertEquals(result.getMessages(), emptyList());
-        
+
         OpenAPI openAPI = result.getOpenAPI();
 
         Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
@@ -795,7 +795,7 @@ public class OpenAPIDeserializerTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
         assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.'application/json'.schema.items is missing"));
-        
+
         OpenAPI openAPI = result.getOpenAPI();
 
         Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
@@ -929,11 +929,11 @@ public class OpenAPIDeserializerTest {
                 "    ObjectEnum:\n" +
                 "      type: object\n" +
                 "      enum:\n" +
-                "        - make: Toyota\n" + 
+                "        - make: Toyota\n" +
                 "          model: Prius\n" +
-                "        - make: Honda\n" + 
+                "        - make: Honda\n" +
                 "          model: Pilot\n" +
-                "        - make: Nissan\n" + 
+                "        - make: Nissan\n" +
                 "          model: Leaf\n" +
                 "        - null\n";
 
@@ -970,14 +970,14 @@ public class OpenAPIDeserializerTest {
         assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
         assertEquals(new BigDecimal("3.14"), numberValues.get(3));
         assertEquals(numberImpl.getDefault(), new BigDecimal("3.14"));
-        
+
         Schema booleanModel = resolved.getComponents().getSchemas().get("BooleanEnum");
         assertEquals("boolean", booleanModel.getType());
         List<Object> booleanValues = booleanModel.getEnum();
         assertEquals(2, booleanValues.size());
         assertEquals(Boolean.TRUE, booleanValues.get(0));
         assertEquals(Boolean.FALSE, booleanValues.get(1));
-        
+
         Schema arrayModel = resolved.getComponents().getSchemas().get("ArrayEnum");
         assertEquals("array", arrayModel.getType());
         List<Object> arrayValues = arrayModel.getEnum();
@@ -986,7 +986,7 @@ public class OpenAPIDeserializerTest {
         assertEquals(arrayValues.get(1), null);
         assertEquals(arrayValues.get(2), JsonNodeFactory.instance.arrayNode().add( "Pilot").add( "Passport"));
         assertEquals(arrayValues.get(3), JsonNodeFactory.instance.arrayNode().add( "Rogue").add( "Leaf"));
-        
+
         Schema objectModel = resolved.getComponents().getSchemas().get("ObjectEnum");
         assertEquals("object", objectModel.getType());
         List<Object> objectValues = objectModel.getEnum();
@@ -2111,38 +2111,38 @@ public class OpenAPIDeserializerTest {
             "        properties:\n" +
             "          name:\n" +
             "            type: string\n";
-  
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-  
+
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-  
+
         SwaggerParseResult result = parser.readContents(yaml,auths,options);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<>(messageList);
-  
+
         Schema catSchema = result.getOpenAPI().getComponents().getSchemas().get("Cat");
         assertTrue(catSchema != null);
         assertTrue(catSchema instanceof ComposedSchema);
-        
+
         ComposedSchema catCompSchema = (ComposedSchema) catSchema;
         List<Schema> allOfSchemas = catCompSchema.getAllOf();
         assertTrue(allOfSchemas != null);
         assertEquals(allOfSchemas.size(), 2);
-        
+
         Schema refPetSchema = allOfSchemas.get(0);
         assertTrue(refPetSchema != null);
         assertEquals(refPetSchema.get$ref(), "#/components/schemas/Pet");
-  
+
         Schema otherSchema = allOfSchemas.get(1);
         assertTrue(otherSchema != null);
         assertTrue(otherSchema.getProperties() != null);
         Schema nameProp = (Schema) otherSchema.getProperties().get("name");
         assertTrue(nameProp != null);
         assertEquals(nameProp.getType(), "string");
-        
-    }  
-  
+
+    }
+
     @Test
     public void testOneOfSchema(@Injectable List<AuthorizationValue> auths){
         String yaml = "openapi: '3.0'\n" +
@@ -2162,47 +2162,47 @@ public class OpenAPIDeserializerTest {
             "          type: string\n" +
             "    Pet:\n" +
             "      oneOf: \n" +
-            "       - $ref: '#/components/schemas/Cat'\n" +      
+            "       - $ref: '#/components/schemas/Cat'\n" +
             "       - $ref: '#/components/schemas/Dog'\n" +
             "       - type: object\n" +
             "         # neither a `Cat` nor a `Dog`\n" +
             "         properties:\n" +
             "           name:\n" +
             "             type: string\n" ;
-  
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-  
+
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-  
+
         SwaggerParseResult result = parser.readContents(yaml,auths,options);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<>(messageList);
-  
+
         Schema petSchema = result.getOpenAPI().getComponents().getSchemas().get("Pet");
         assertTrue(petSchema != null);
         assertTrue(petSchema instanceof ComposedSchema);
-        
+
         ComposedSchema petCompSchema = (ComposedSchema) petSchema;
         List<Schema> oneOfSchemas = petCompSchema.getOneOf();
         assertTrue(oneOfSchemas != null);
         assertEquals(oneOfSchemas.size(), 3);
-        
+
         Schema refCatSchema = oneOfSchemas.get(0);
         assertTrue(refCatSchema != null);
         assertEquals(refCatSchema.get$ref(), "#/components/schemas/Cat");
-  
+
         Schema refDogSchema = oneOfSchemas.get(1);
         assertTrue(refDogSchema != null);
         assertEquals(refDogSchema.get$ref(), "#/components/schemas/Dog");
-        
+
         Schema otherSchema = oneOfSchemas.get(2);
         assertTrue(otherSchema != null);
         Schema nameProp = (Schema) otherSchema.getProperties().get("name");
         assertTrue(nameProp != null);
         assertEquals(nameProp.getType(), "string");
-        
-    }  
+
+    }
 
     @Test
     public void testAnyOfSchema(@Injectable List<AuthorizationValue> auths){
@@ -2211,37 +2211,37 @@ public class OpenAPIDeserializerTest {
             "  schemas:\n" +
             "    id:\n" +
             "      anyOf: \n" +
-            "       - type: string\n" +      
+            "       - type: string\n" +
             "       - type: number\n" ;
-  
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-  
+
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-  
+
         SwaggerParseResult result = parser.readContents(yaml,auths,options);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<>(messageList);
-  
+
         Schema idSchema = result.getOpenAPI().getComponents().getSchemas().get("id");
         assertTrue(idSchema != null);
         assertTrue(idSchema instanceof ComposedSchema);
-        
+
         ComposedSchema idCompSchema = (ComposedSchema) idSchema;
         List<Schema> anyOfSchemas = idCompSchema.getAnyOf();
         assertTrue(anyOfSchemas != null);
         assertEquals(anyOfSchemas.size(), 2);
-        
+
         Schema stringSchema = anyOfSchemas.get(0);
         assertTrue(stringSchema != null);
         assertEquals(stringSchema.getType(), "string");
-  
+
         Schema numberSchema = anyOfSchemas.get(1);
         assertTrue(numberSchema != null);
         assertEquals(numberSchema.getType(), "number");
-        
-    }  
-    
+
+    }
+
     @Test
     public void propertyTest(@Injectable List<AuthorizationValue> auths){
         String yaml = "openapi: 3.0.1\n"+
@@ -2460,7 +2460,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(stateSchemaProperty.getExample(),"CA" );
     }
 
-    @Test   
+    @Test
     public void testExampleVsExamples(){
         String json =
             "{" +
@@ -2541,24 +2541,24 @@ public class OpenAPIDeserializerTest {
         assertEqualsNoOrder
             (result.getMessages().toArray(),
              new Object[] {
-                "attribute components.parameters.withBoth.[withBoth].examples already defined -- ignoring \"example\" field",
-                "attribute components.parameters.withContentBoth.[withContentBoth].content.'application/json'.examples already defined -- ignoring \"example\" field",
-                "attribute components.requestBodies.withBodyBoth.content.'application/json'.examples already defined -- ignoring \"example\" field",
-                "attribute components.headers.withBoth.examples already defined -- ignoring \"example\" field"
+                "components.parameters.withBoth.[withBoth].examples already defined -- ignoring \"example\" field",
+                "components.parameters.withContentBoth.[withContentBoth].content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "components.requestBodies.withBodyBoth.content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "components.headers.withBoth.examples already defined -- ignoring \"example\" field"
              },
              "Expected warnings not found");
-        
+
         OpenAPI openAPI = result.getOpenAPI();
 
         Parameter param;
         param = openAPI.getComponents().getParameters().get("withExample");
         assertNull( param.getExamples(), "Examples,");
         assertNotNull( param.getExample(), "Example,");
-        
+
         param = openAPI.getComponents().getParameters().get("withExamples");
         assertNotNull( param.getExamples(), "Examples,");
         assertNull( param.getExample(), "Example,");
-        
+
         param = openAPI.getComponents().getParameters().get("withBoth");
         assertNotNull( param.getExamples(), "Examples,");
         assertNull( param.getExample(), "Example,");
@@ -2567,24 +2567,24 @@ public class OpenAPIDeserializerTest {
         header = openAPI.getComponents().getHeaders().get("withExample");
         assertNull( header.getExamples(), "Examples,");
         assertNotNull( header.getExample(), "Example,");
-        
+
         header = openAPI.getComponents().getHeaders().get("withExamples");
         assertNotNull( header.getExamples(), "Examples,");
         assertNull( header.getExample(), "Example,");
-        
+
         header = openAPI.getComponents().getHeaders().get("withBoth");
         assertNotNull( header.getExamples(), "Examples,");
         assertNull( header.getExample(), "Example,");
-        
+
         MediaType mediaType;
         mediaType = openAPI.getComponents().getParameters().get("withContentExample").getContent().get( "application/json");
         assertNull( mediaType.getExamples(), "Examples,");
         assertNotNull( mediaType.getExample(), "Example,");
-        
+
         mediaType = openAPI.getComponents().getParameters().get("withContentExamples").getContent().get( "application/json");
         assertNotNull( mediaType.getExamples(), "Examples,");
         assertNull( mediaType.getExample(), "Example,");
-        
+
         mediaType = openAPI.getComponents().getParameters().get("withContentBoth").getContent().get( "application/json");
         assertNotNull( mediaType.getExamples(), "Examples,");
         assertNull( mediaType.getExample(), "Example,");
@@ -2592,7 +2592,7 @@ public class OpenAPIDeserializerTest {
         mediaType = openAPI.getComponents().getRequestBodies().get("withBodyExample").getContent().get( "application/json");
         assertNull( mediaType.getExamples(), "Examples,");
         assertNotNull( mediaType.getExample(), "Example,");
-        
+
         mediaType = openAPI.getComponents().getRequestBodies().get("withBodyExamples").getContent().get( "application/json");
         assertNotNull( mediaType.getExamples(), "Examples,");
         assertNull( mediaType.getExample(), "Example,");
@@ -2970,27 +2970,27 @@ public class OpenAPIDeserializerTest {
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.in is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.scheme is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.openIdConnectUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.tokenUrl is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth_password'.authorizationUrl is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth_clientCredentials'.authorizationUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.scheme is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.flows is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.openIdConnectUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.name is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.in is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.flows is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.openIdConnectUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.name is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.in is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.scheme is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.flows is missing"));
-        
-        
-        
+
+
+
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
 
@@ -3003,19 +3003,19 @@ public class OpenAPIDeserializerTest {
 
         securityScheme = securitySchemes.get("remote_reference");
         assertTrue(securityScheme.get$ref().equals("http://localhost:${dynamicPort}/remote/security#/petstore_remote"));
-        
+
         securityScheme = securitySchemes.get("petstore_auth");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("petstore_auth_password");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("petstore_auth_clientCredentials");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("petstore_auth_authorizationCode");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("api_key");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
         assertTrue(securityScheme.getIn()== SecurityScheme.In.HEADER);
@@ -3030,7 +3030,7 @@ public class OpenAPIDeserializerTest {
         securityScheme = securitySchemes.get("openID");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OPENIDCONNECT);
     }
-    
+
     @Test(dataProvider = "data")
     public void readExtensions(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
@@ -3164,7 +3164,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getExplode(), Boolean.TRUE);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getStyle(), StyleEnum.FORM);
     }
-    
+
     @Test(dataProvider = "data")
     public void readProducesTestEndpoint(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
@@ -3466,7 +3466,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(items.getItems().get$ref(),"#/components/schemas/bank_account");
 
     }
-    
+
     @DataProvider(name="data")
     private Object[][] getRootNode() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());

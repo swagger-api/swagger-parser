@@ -12,6 +12,10 @@ public class ParseOptions {
     private boolean validateExternalRefs = false;
     private boolean validateInternalRefs = true;
     private boolean legacyYamlDeserialization = false;
+    private boolean resolveRequestBody = false;
+
+    private boolean oaiAuthor;
+    private boolean defaultSchemaTypeObject = true;
 
     public boolean isResolve() {
         return resolve;
@@ -35,6 +39,19 @@ public class ParseOptions {
 
     public void setResolveFully(boolean resolveFully) {
         this.resolveFully = resolveFully;
+    }
+
+    public boolean isResolveRequestBody() {
+        return resolveRequestBody;
+    }
+
+    /**
+     * If set to true, will help resolving the requestBody as inline, provided
+     * resolve is also set to true. Default is false because of the existing
+     * behaviour.
+     */
+    public void setResolveRequestBody(boolean resolveRequestBody) {
+        this.resolveRequestBody = resolveRequestBody;
     }
 
     public boolean isFlatten() { return flatten; }
@@ -91,11 +108,27 @@ public class ParseOptions {
         this.legacyYamlDeserialization = legacyYamlDeserialization;
     }
 
+    public void setOaiAuthor(boolean oaiAuthor) {
+        this.oaiAuthor = oaiAuthor;
+    }
+
+    public boolean isOaiAuthor() {
+        return oaiAuthor;
+    }
+
     public void setValidateInternalRefs(boolean validateInternalRefs) {
         this.validateInternalRefs = validateInternalRefs;
     }
 
     public boolean isValidateInternalRefs() {
         return validateInternalRefs;
+    }
+
+    public boolean isDefaultSchemaTypeObject() {
+        return defaultSchemaTypeObject;
+    }
+
+    public void setDefaultSchemaTypeObject(boolean defaultSchemaTypeObject) {
+        this.defaultSchemaTypeObject = defaultSchemaTypeObject;
     }
 }
