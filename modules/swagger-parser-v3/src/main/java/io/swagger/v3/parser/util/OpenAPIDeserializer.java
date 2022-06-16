@@ -72,6 +72,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import static java.util.Collections.emptySet;
 
 
 public class OpenAPIDeserializer {
@@ -1354,15 +1355,27 @@ public class OpenAPIDeserializer {
 			mediaType.setSchema(getSchema(schemaObject, String.format("%s.%s", location, "schema"), result));
 		}
 
-
 		ObjectNode encodingObject = getObject("encoding", contentNode, false, location, result);
 		if (encodingObject != null) {
             String encodingLocation = String.format("%s.%s", location, "encoding");
 			mediaType.setEncoding(getEncodingMap(encodingObject, encodingLocation, result));
 
-            mediaType.getEncoding().keySet().stream()
-                .filter( ep -> Optional.ofNullable( mediaType.getSchema().getProperties()).map( p -> !p.containsKey( ep)).orElse( true))
-                .forEach( ep -> result.extra( encodingLocation, ep, encodingObject));
+            // Given all properties defined for this media type object...
+            Set<String> mediaTypeProperties =
+                mediaType.getSchema() == null?
+                emptySet() :
+
+                mediaType.getSchema().get$ref() == null?
+                Optional.ofNullable( mediaType.getSchema().getProperties()).map( Map::keySet).orElse( emptySet()) :
+
+                null;
+
+            if( mediaTypeProperties != null) {
+                // ... report an error if an encoding is specified for an undefined property
+                mediaType.getEncoding().keySet().stream()
+                    .filter( ep -> !mediaTypeProperties.contains( ep))
+                    .forEach( ep -> result.extra( encodingLocation, ep, encodingObject));
+            }
 		}
 		Map<String, Object> extensions = getExtensions(contentNode);
 		if (extensions != null && extensions.size() > 0) {
