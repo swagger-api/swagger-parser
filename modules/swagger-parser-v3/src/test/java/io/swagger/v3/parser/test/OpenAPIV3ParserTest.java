@@ -88,6 +88,42 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1758() throws Exception{
+        ParseOptions options = new ParseOptions();
+        String issue1643 = "openapi: 3.0.3\n" +
+                "\n" +
+                "info: \n" +
+                "  title: Missing validation rule for schemas in Headers.\n" +
+                "  version: 1.0.0\n" +
+                "  \n" +
+                "paths: \n" +
+                "  /foo:\n" +
+                "    get:\n" +
+                "      description: ok\n" +
+                "      parameters:         \n" +
+                "      - $ref: '#/components/schemas/xFoo'\n" +
+                "      responses:\n" +
+                "        default:\n" +
+                "          description: ok\n" +
+                "          headers:\n" +
+                "            three:\n" +
+                "              $ref: '#/components/schemas/xFoo'\n" +
+                "           \n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    xFoo:\n" +
+                "      type: string\n" +
+                "      description: This isn't validated correctly";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1643, null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),2);
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).parameters.$ref is not pointing to #/components/parameters"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.default.three.$ref is not pointing to #/components/headers"));
+    }
+
     @Test(description = "Test for not setting the schema type as default")
     public void testNotDefaultSchemaType() {
         ParseOptions options = new ParseOptions();
@@ -516,7 +552,6 @@ public class OpenAPIV3ParserTest {
         options.setResolveFully(true);
 
         final SwaggerParseResult openAPI = parser.readLocation("src/test/resources/same-refs-different-model-valid.yaml", null, options);
-        Yaml.prettyPrint(openAPI);
         assertEquals(openAPI.getMessages().size(), 0);
     }
 

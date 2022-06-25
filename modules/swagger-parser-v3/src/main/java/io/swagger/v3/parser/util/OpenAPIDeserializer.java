@@ -1905,10 +1905,13 @@ public class OpenAPIDeserializer {
 				parameter = new Parameter();
 				String mungedRef = mungedRef(ref.textValue());
 				if (mungedRef != null) {
-					parameter.set$ref(mungedRef);
-				} else {
-					parameter.set$ref(ref.textValue());
-				}
+                    parameter.set$ref(mungedRef);
+                }else {
+                    parameter.set$ref(ref.textValue());
+                }
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters")||ref.textValue().startsWith("#/components/headers"))) {
+                    result.warning(location, "$ref is not pointing to #/components/parameters");
+                }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", obj, false, location, result);
 					if (StringUtils.isNotBlank(desc)) {
@@ -2115,6 +2118,10 @@ public class OpenAPIDeserializer {
 				} else {
 					header.set$ref(ref.textValue());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters")||ref.textValue().startsWith("#/components/headers"))) {
+                    result.warning(location, "$ref is not pointing to #/components/headers");
+                }
+
 				if (result.isOpenapi31()) {
 					String desc = getString("description", headerNode, false, location, result);
 					if (StringUtils.isNotBlank(desc)) {
