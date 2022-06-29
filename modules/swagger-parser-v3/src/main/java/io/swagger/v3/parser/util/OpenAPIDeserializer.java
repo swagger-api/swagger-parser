@@ -958,6 +958,9 @@ public class OpenAPIDeserializer {
 				} else {
 					pathItem.set$ref(ref.textValue());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/pathItems"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                }
 				if(result.isOpenapi31()){
 					String value = getString("summary", obj, false, location, result);
 					if (StringUtils.isNotBlank(value)) {
@@ -1535,6 +1538,9 @@ public class OpenAPIDeserializer {
 				} else {
 					link.set$ref(ref.textValue());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/links"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", linkNode, false, location, result);
 					if (StringUtils.isNotBlank(desc)) {
@@ -1659,6 +1665,9 @@ public class OpenAPIDeserializer {
 						} else {
 							callback.set$ref(ref.textValue());
 						}
+                        if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/callbacks"))) {
+                            result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                        }
 						return callback;
 					} else {
 						result.invalidType(location, "$ref", "string", node);
@@ -1910,7 +1919,7 @@ public class OpenAPIDeserializer {
                     parameter.set$ref(ref.textValue());
                 }
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters")||ref.textValue().startsWith("#/components/headers"))) {
-                    result.warning(location, "$ref is not pointing to #/components/parameters");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", obj, false, location, result);
@@ -2119,7 +2128,7 @@ public class OpenAPIDeserializer {
 					header.set$ref(ref.textValue());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters")||ref.textValue().startsWith("#/components/headers"))) {
-                    result.warning(location, "$ref is not pointing to #/components/headers");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
                 }
 
 				if (result.isOpenapi31()) {
@@ -2284,6 +2293,9 @@ public class OpenAPIDeserializer {
 				} else {
 					securityScheme.set$ref(ref.textValue());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/securitySchemes"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", node, false, location, result);
 					if (StringUtils.isNotBlank(desc)) {
@@ -2705,6 +2717,9 @@ public class OpenAPIDeserializer {
                 if(schema.get$ref().startsWith("#/components/schemas")){// it's internal
                     String refName  = schema.get$ref().substring(schema.get$ref().lastIndexOf("/")+1);
                     localSchemaRefs.put(refName,location);
+                }
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
                 }
 				return schema;
 			} else {
@@ -3168,6 +3183,9 @@ public class OpenAPIDeserializer {
 				} else {
 					example.set$ref(ref.textValue());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/examples"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                }
                 if(result.isOpenapi31()){
                     String value = getString("summary", node, false, location, result);
                     if (StringUtils.isNotBlank(value)) {
@@ -3307,6 +3325,9 @@ public class OpenAPIDeserializer {
 				} else {
 					apiResponse.set$ref(ref.textValue());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/responses"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                }
 				if(result.isOpenapi31()){
 					String value = getString("description", node, false, location, result);
 					if (StringUtils.isNotBlank(value)) {
@@ -3557,6 +3578,9 @@ public class OpenAPIDeserializer {
 				} else {
 					body.set$ref(ref.textValue());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/requestBodies"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", node, false, location, result);
 					if (StringUtils.isNotBlank(desc)) {
@@ -3813,6 +3837,9 @@ public class OpenAPIDeserializer {
 				} else {
 					schema.set$ref(ref.asText());
 				}
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                }
 			} else {
 				result.invalidType(location, "$ref", "string", node);
 			}

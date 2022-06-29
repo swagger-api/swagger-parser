@@ -91,37 +91,20 @@ public class OpenAPIV3ParserTest {
     @Test
     public void testIssue1758() throws Exception{
         ParseOptions options = new ParseOptions();
-        String issue1643 = "openapi: 3.0.3\n" +
-                "\n" +
-                "info: \n" +
-                "  title: Missing validation rule for schemas in Headers.\n" +
-                "  version: 1.0.0\n" +
-                "  \n" +
-                "paths: \n" +
-                "  /foo:\n" +
-                "    get:\n" +
-                "      description: ok\n" +
-                "      parameters:         \n" +
-                "      - $ref: '#/components/schemas/xFoo'\n" +
-                "      responses:\n" +
-                "        default:\n" +
-                "          description: ok\n" +
-                "          headers:\n" +
-                "            three:\n" +
-                "              $ref: '#/components/schemas/xFoo'\n" +
-                "           \n" +
-                "components:\n" +
-                "  schemas:\n" +
-                "    xFoo:\n" +
-                "      type: string\n" +
-                "      description: This isn't validated correctly";
-        SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1643, null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1758.yaml", null, options);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        assertEquals(result.getMessages().size(),2);
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).parameters.$ref is not pointing to #/components/parameters"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.default.three.$ref is not pointing to #/components/headers"));
+        assertEquals(result.getMessages().size(),8);
+        assertTrue(result.getMessages().contains("paths.'/path1'.$ref target #/components/schemas/xFoo is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).parameters.$ref target #/components/schemas/xFoo is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.default.three.$ref target #/components/schemas/xFoo is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).requestBody.$ref target #/components/schemas/xFoo is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.user.$ref target #/components/schemas/xFoo is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.schema.$ref target #/components/parameters/pet is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.400.$ref target #/components/schemas/xFoo is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).callbacks.$ref target #/components/schemas/xFoo is not of expected type"));
+
     }
 
     @Test(description = "Test for not setting the schema type as default")

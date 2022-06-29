@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: Missing validation rule for schemas in Headers.
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /path1:
+    $ref: '#/components/schemas/xFoo'
+  /foo:
+    get:
+      description: ok
+      parameters:
+      - $ref: '#/components/schemas/xFoo'
+      requestBody:
+        $ref: '#/components/schemas/xFoo'
+      responses:
+        default:
+          description: ok
+          headers:
+            three:
+              $ref: '#/components/schemas/xFoo'
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/parameters/pet'
+          links:
+            user:
+              $ref: '#/components/schemas/xFoo'       
+        '400':
+          $ref: '#/components/schemas/xFoo'
+      callbacks:
+        mainHook:
+          $ref: "#/components/schemas/xFoo"
+components:
+  schemas:
+    xFoo:
+      type: string
+      description: This isn't validated correctly
+  parameters:
+    pet:
+      name: X-pet
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+      
