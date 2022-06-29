@@ -28,6 +28,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/parameters/pet'
+              examples:
+                one:
+                  $ref: '#/components/schemas/xFoo'
           links:
             user:
               $ref: '#/components/schemas/xFoo'       
