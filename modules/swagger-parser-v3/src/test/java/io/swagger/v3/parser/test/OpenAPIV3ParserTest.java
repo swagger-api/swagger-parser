@@ -32,12 +32,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
-import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -91,7 +89,7 @@ public class OpenAPIV3ParserTest {
     @Test(description = "Test for not setting the schema type as default")
     public void testNotDefaultSchemaType() {
         ParseOptions options = new ParseOptions();
-        options.setDefaultSchemaTypeObject(false);
+        options.setInferSchemaType(false);
         String defaultSchemaType = "openapi: 3.0.0\n" +
                 "info:\n" +
                 "  title: ping test\n" +
@@ -185,7 +183,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue1637_StyleAndContent() throws IOException {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1637.yaml", null, options);
-       
+
         Assert.assertNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getStyle());
         Assert.assertNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getExplode());
         Assert.assertNotNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getContent());
