@@ -17,6 +17,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.converter.SwaggerConverter;
@@ -98,6 +99,8 @@ public class V2ConverterTest {
     private static final String ISSUE_1261_YAML = "issue-1261.yaml";
 
     private static final String ISSUE_1715_YAML = "issue-1715.yaml";
+
+    private static final String ISSUE_1767_YAML = "issue-1767.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -862,6 +865,21 @@ public class V2ConverterTest {
         assertNotNull(requestBody.getExtensions());
         assertEquals(1, requestBody.getExtensions().size());
         assertEquals("bar", requestBody.getExtensions().get("x-foo"));
+    }
+
+    @Test(description = "OpenAPI v2 converter - security of operation should be set to empty list if that's the case")
+    public void testIssue1767() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1767_YAML);
+        assertNotNull(oas);
+
+        List<SecurityRequirement> firstOperationSecurityRequirements =
+                oas.getPaths().get("/api/not-secured").getGet().getSecurity();
+        assertNotNull(firstOperationSecurityRequirements);
+        assertEquals(firstOperationSecurityRequirements.size(), 0);
+
+        List<SecurityRequirement> secondOperationSecurityRequirements =
+                oas.getPaths().get("/api/secured/").getGet().getSecurity();
+        assertNull(secondOperationSecurityRequirements);
     }
 
     @Test()
