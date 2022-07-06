@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -3567,5 +3568,227 @@ public class OpenAPIDeserializerTest {
         return new Object[][]{new Object[]{rootNode}};
     }
 
+    @Test
+    public void testIssue1761() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setInferSchemaType(false);
+        SwaggerParseResult result = parser.readLocation("./src/test/resources/issue-1761.yaml", null, options);
+
+        assertEquals(Yaml.pretty(result.getOpenAPI()), "openapi: 3.0.3\n" +
+                "info:\n" +
+                "  title: openapi 3.0.3 sample spec\n" +
+                "  description: \"sample spec for testing openapi functionality, built from json schema\\\n" +
+                "    \\ tests for draft6\"\n" +
+                "  version: 0.0.1\n" +
+                "servers:\n" +
+                "- url: /\n" +
+                "paths: {}\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    SimpleEnumValidation:\n" +
+                "      enum:\n" +
+                "      - 1\n" +
+                "      - 2\n" +
+                "      - 3\n" +
+                "    HeterogeneousEnumValidation:\n" +
+                "      enum:\n" +
+                "      - 6\n" +
+                "      - foo\n" +
+                "      - []\n" +
+                "      - true\n" +
+                "      - foo: 12\n" +
+                "    HeterogeneousEnumWithNullValidation:\n" +
+                "      enum:\n" +
+                "      - 6\n" +
+                "      - null\n" +
+                "    EnumsInProperties:\n" +
+                "      required:\n" +
+                "      - bar\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        foo:\n" +
+                "          enum:\n" +
+                "          - foo\n" +
+                "        bar:\n" +
+                "          enum:\n" +
+                "          - bar\n" +
+                "    EnumWithEscapedCharacters:\n" +
+                "      enum:\n" +
+                "      - |-\n" +
+                "        foo\n" +
+                "        bar\n" +
+                "      - \"foo\\rbar\"\n" +
+                "    EnumWithFalseDoesNotMatch0:\n" +
+                "      enum:\n" +
+                "      - false\n" +
+                "    EnumWithTrueDoesNotMatch1:\n" +
+                "      enum:\n" +
+                "      - true\n" +
+                "    EnumWith0DoesNotMatchFalse:\n" +
+                "      enum:\n" +
+                "      - 0\n" +
+                "    EnumWith1DoesNotMatchTrue:\n" +
+                "      enum:\n" +
+                "      - 1\n" +
+                "    NulCharactersInStrings:\n" +
+                "      enum:\n" +
+                "      - \"hello\\0there\"\n" +
+                "  x-schema-test-examples:\n" +
+                "    SimpleEnumValidation:\n" +
+                "      OneOfTheEnumIsValid:\n" +
+                "        description: one of the enum is valid\n" +
+                "        data: 1\n" +
+                "        valid: true\n" +
+                "      SomethingElseIsInvalid:\n" +
+                "        description: something else is invalid\n" +
+                "        data: 4\n" +
+                "        valid: false\n" +
+                "    HeterogeneousEnumValidation:\n" +
+                "      OneOfTheEnumIsValid:\n" +
+                "        description: one of the enum is valid\n" +
+                "        data: []\n" +
+                "        valid: true\n" +
+                "      SomethingElseIsInvalid:\n" +
+                "        description: something else is invalid\n" +
+                "        valid: false\n" +
+                "      ObjectsAreDeepCompared:\n" +
+                "        description: objects are deep compared\n" +
+                "        data:\n" +
+                "          foo: false\n" +
+                "        valid: false\n" +
+                "      ValidObjectMatches:\n" +
+                "        description: valid object matches\n" +
+                "        data:\n" +
+                "          foo: 12\n" +
+                "        valid: true\n" +
+                "      ExtraPropertiesInObjectIsInvalid:\n" +
+                "        description: extra properties in object is invalid\n" +
+                "        data:\n" +
+                "          foo: 12\n" +
+                "          boo: 42\n" +
+                "        valid: false\n" +
+                "    HeterogeneousEnumWithNullValidation:\n" +
+                "      NullIsValid:\n" +
+                "        description: null is valid\n" +
+                "        valid: true\n" +
+                "      NumberIsValid:\n" +
+                "        description: number is valid\n" +
+                "        data: 6\n" +
+                "        valid: true\n" +
+                "      SomethingElseIsInvalid:\n" +
+                "        description: something else is invalid\n" +
+                "        data: test\n" +
+                "        valid: false\n" +
+                "    EnumsInProperties:\n" +
+                "      BothPropertiesAreValid:\n" +
+                "        description: both properties are valid\n" +
+                "        data:\n" +
+                "          foo: foo\n" +
+                "          bar: bar\n" +
+                "        valid: true\n" +
+                "      WrongFooValue:\n" +
+                "        description: wrong foo value\n" +
+                "        data:\n" +
+                "          foo: foot\n" +
+                "          bar: bar\n" +
+                "        valid: false\n" +
+                "      WrongBarValue:\n" +
+                "        description: wrong bar value\n" +
+                "        data:\n" +
+                "          foo: foo\n" +
+                "          bar: bart\n" +
+                "        valid: false\n" +
+                "      MissingOptionalPropertyIsValid:\n" +
+                "        description: missing optional property is valid\n" +
+                "        data:\n" +
+                "          bar: bar\n" +
+                "        valid: true\n" +
+                "      MissingRequiredPropertyIsInvalid:\n" +
+                "        description: missing required property is invalid\n" +
+                "        data:\n" +
+                "          foo: foo\n" +
+                "        valid: false\n" +
+                "      MissingAllPropertiesIsInvalid:\n" +
+                "        description: missing all properties is invalid\n" +
+                "        data: {}\n" +
+                "        valid: false\n" +
+                "    EnumWithEscapedCharacters:\n" +
+                "      Member1IsValid:\n" +
+                "        description: member 1 is valid\n" +
+                "        data: |-\n" +
+                "          foo\n" +
+                "          bar\n" +
+                "        valid: true\n" +
+                "      Member2IsValid:\n" +
+                "        description: member 2 is valid\n" +
+                "        data: \"foo\\rbar\"\n" +
+                "        valid: true\n" +
+                "      AnotherStringIsInvalid:\n" +
+                "        description: another string is invalid\n" +
+                "        data: abc\n" +
+                "        valid: false\n" +
+                "    EnumWithFalseDoesNotMatch0:\n" +
+                "      FalseIsValid:\n" +
+                "        description: false is valid\n" +
+                "        data: false\n" +
+                "        valid: true\n" +
+                "      IntegerZeroIsInvalid:\n" +
+                "        description: integer zero is invalid\n" +
+                "        data: 0\n" +
+                "        valid: false\n" +
+                "      FloatZeroIsInvalid:\n" +
+                "        description: float zero is invalid\n" +
+                "        data: 0.0\n" +
+                "        valid: false\n" +
+                "    EnumWithTrueDoesNotMatch1:\n" +
+                "      TrueIsValid:\n" +
+                "        description: true is valid\n" +
+                "        data: true\n" +
+                "        valid: true\n" +
+                "      IntegerOneIsInvalid:\n" +
+                "        description: integer one is invalid\n" +
+                "        data: 1\n" +
+                "        valid: false\n" +
+                "      FloatOneIsInvalid:\n" +
+                "        description: float one is invalid\n" +
+                "        data: 1.0\n" +
+                "        valid: false\n" +
+                "    EnumWith0DoesNotMatchFalse:\n" +
+                "      FalseIsInvalid:\n" +
+                "        description: false is invalid\n" +
+                "        data: false\n" +
+                "        valid: false\n" +
+                "      IntegerZeroIsValid:\n" +
+                "        description: integer zero is valid\n" +
+                "        data: 0\n" +
+                "        valid: true\n" +
+                "      FloatZeroIsValid:\n" +
+                "        description: float zero is valid\n" +
+                "        data: 0.0\n" +
+                "        valid: true\n" +
+                "    EnumWith1DoesNotMatchTrue:\n" +
+                "      TrueIsInvalid:\n" +
+                "        description: true is invalid\n" +
+                "        data: true\n" +
+                "        valid: false\n" +
+                "      IntegerOneIsValid:\n" +
+                "        description: integer one is valid\n" +
+                "        data: 1\n" +
+                "        valid: true\n" +
+                "      FloatOneIsValid:\n" +
+                "        description: float one is valid\n" +
+                "        data: 1.0\n" +
+                "        valid: true\n" +
+                "    NulCharactersInStrings:\n" +
+                "      MatchStringWithNul:\n" +
+                "        description: match string with nul\n" +
+                "        data: \"hello\\0there\"\n" +
+                "        valid: true\n" +
+                "      DoNotMatchStringLackingNul:\n" +
+                "        description: do not match string lacking nul\n" +
+                "        data: hellothere\n" +
+                "        valid: false\n");
+    }
 
 }
