@@ -959,7 +959,7 @@ public class OpenAPIDeserializer {
 					pathItem.set$ref(ref.textValue());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/pathItems"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type PathItem");
                 }
 				if(result.isOpenapi31()){
 					String value = getString("summary", obj, false, location, result);
@@ -1539,7 +1539,7 @@ public class OpenAPIDeserializer {
 					link.set$ref(ref.textValue());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/links"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Link");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", linkNode, false, location, result);
@@ -1666,7 +1666,7 @@ public class OpenAPIDeserializer {
 							callback.set$ref(ref.textValue());
 						}
                         if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/callbacks"))) {
-                            result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                            result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Callback");
                         }
 						return callback;
 					} else {
@@ -1918,8 +1918,8 @@ public class OpenAPIDeserializer {
                 }else {
                     parameter.set$ref(ref.textValue());
                 }
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters")||ref.textValue().startsWith("#/components/headers"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Parameter/Header");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", obj, false, location, result);
@@ -2127,8 +2127,8 @@ public class OpenAPIDeserializer {
 				} else {
 					header.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters")||ref.textValue().startsWith("#/components/headers"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Header/Parameter");
                 }
 
 				if (result.isOpenapi31()) {
@@ -2294,7 +2294,7 @@ public class OpenAPIDeserializer {
 					securityScheme.set$ref(ref.textValue());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/securitySchemes"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type securitySchemes");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", node, false, location, result);
@@ -2719,7 +2719,7 @@ public class OpenAPIDeserializer {
                     localSchemaRefs.put(refName,location);
                 }
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Schema");
                 }
 				return schema;
 			} else {
@@ -3184,7 +3184,7 @@ public class OpenAPIDeserializer {
 					example.set$ref(ref.textValue());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/examples"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Examples");
                 }
                 if(result.isOpenapi31()){
                     String value = getString("summary", node, false, location, result);
@@ -3326,7 +3326,7 @@ public class OpenAPIDeserializer {
 					apiResponse.set$ref(ref.textValue());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/responses"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Response");
                 }
 				if(result.isOpenapi31()){
 					String value = getString("description", node, false, location, result);
@@ -3349,7 +3349,7 @@ public class OpenAPIDeserializer {
 
 		ObjectNode headerObject = getObject("headers", node, false, location, result);
 		if (headerObject != null) {
-			Map<String, Header> headers = getHeaders(headerObject, location, result, false);
+			Map<String, Header> headers = getHeaders(headerObject, String.format("%s.%s", location, "headers"), result, false);
 			if (headers != null && headers.size() > 0) {
 				apiResponse.setHeaders(headers);
 			}
@@ -3357,7 +3357,7 @@ public class OpenAPIDeserializer {
 
 		ObjectNode linksObj = getObject("links", node, false, location, result);
 		if (linksObj != null) {
-			Map<String, Link> links = getLinks(linksObj, location, result, false);
+			Map<String, Link> links = getLinks(linksObj, String.format("%s.%s", location, "links"), result, false);
 			if (links != null && links.size() > 0) {
 				apiResponse.setLinks(links);
 			}
@@ -3579,7 +3579,7 @@ public class OpenAPIDeserializer {
 					body.set$ref(ref.textValue());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/requestBodies"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type RequestBody");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", node, false, location, result);
@@ -3838,7 +3838,7 @@ public class OpenAPIDeserializer {
 					schema.set$ref(ref.asText());
 				}
                 if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type");
+                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Schema");
                 }
 			} else {
 				result.invalidType(location, "$ref", "string", node);

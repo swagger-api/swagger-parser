@@ -96,15 +96,15 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         assertEquals(result.getMessages().size(),9);
-        assertTrue(result.getMessages().contains("paths.'/path1'.$ref target #/components/schemas/xFoo is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).parameters.$ref target #/components/schemas/xFoo is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.default.three.$ref target #/components/schemas/xFoo is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).requestBody.$ref target #/components/schemas/xFoo is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.user.$ref target #/components/schemas/xFoo is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.schema.$ref target #/components/parameters/pet is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.examples.one.$ref target #/components/schemas/xFoo is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.400.$ref target #/components/schemas/xFoo is not of expected type"));
-        assertTrue(result.getMessages().contains("paths.'/foo'(get).callbacks.$ref target #/components/schemas/xFoo is not of expected type"));
+        assertTrue(result.getMessages().contains("paths.'/path1'.$ref target #/components/schemas/xFoo is not of expected type PathItem"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).parameters.$ref target #/components/schemas/xFoo is not of expected type Parameter/Header"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.default.headers.three.$ref target #/components/schemas/xFoo is not of expected type Header/Parameter"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).requestBody.$ref target #/components/schemas/xFoo is not of expected type RequestBody"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.links.user.$ref target #/components/schemas/xFoo is not of expected type Link"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.schema.$ref target #/components/parameters/pet is not of expected type Schema"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.examples.one.$ref target #/components/schemas/xFoo is not of expected type Examples"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.400.$ref target #/components/schemas/xFoo is not of expected type Response"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).callbacks.$ref target #/components/schemas/xFoo is not of expected type Callback"));
 
     }
 
