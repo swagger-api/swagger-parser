@@ -86,6 +86,26 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+    @Test
+    public void testIssue1758() throws Exception{
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1758.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),9);
+        assertTrue(result.getMessages().contains("paths.'/path1'.$ref target #/components/schemas/xFoo is not of expected type PathItem"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).parameters.$ref target #/components/schemas/xFoo is not of expected type Parameter/Header"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.default.headers.three.$ref target #/components/schemas/xFoo is not of expected type Header/Parameter"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).requestBody.$ref target #/components/schemas/xFoo is not of expected type RequestBody"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.links.user.$ref target #/components/schemas/xFoo is not of expected type Link"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.schema.$ref target #/components/parameters/pet is not of expected type Schema"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.examples.one.$ref target #/components/schemas/xFoo is not of expected type Examples"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.400.$ref target #/components/schemas/xFoo is not of expected type Response"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).callbacks.$ref target #/components/schemas/xFoo is not of expected type Callback"));
+
+    }
+
     @Test(description = "Test for not setting the schema type as default")
     public void testNotDefaultSchemaType() {
         ParseOptions options = new ParseOptions();
@@ -514,7 +534,6 @@ public class OpenAPIV3ParserTest {
         options.setResolveFully(true);
 
         final SwaggerParseResult openAPI = parser.readLocation("src/test/resources/same-refs-different-model-valid.yaml", null, options);
-        Yaml.prettyPrint(openAPI);
         assertEquals(openAPI.getMessages().size(), 0);
     }
 
