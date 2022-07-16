@@ -7,12 +7,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.BooleanSchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.StringSchema;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -898,6 +893,24 @@ public class V2ConverterTest {
 
         Schema petCategoryInline = oas.getComponents().getSchemas().get("Pet_categoryInline");
         assertNotNull(petCategoryInline);
+
+    }
+
+    @Test()
+    public void testConvertFormDataAsObjectSchema() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile("issue-1529.json");
+        assertNotNull(oas);
+
+        Schema companiesSchema = oas.getPaths()
+                                    .get("/companies/")
+                                    .getPost()
+                                    .getRequestBody()
+                                    .getContent()
+                                    .get("multipart/form-data")
+                                    .getSchema();
+
+        assertEquals(companiesSchema.getType(), "object");
+        assertEquals(companiesSchema.getClass(), ObjectSchema.class);
 
     }
 }
