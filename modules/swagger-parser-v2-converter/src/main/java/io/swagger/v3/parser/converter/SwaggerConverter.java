@@ -646,7 +646,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             operation.setExternalDocs(convert(v2Operation.getExternalDocs()));
         }
 
-        if (v2Operation.getSecurity() != null && v2Operation.getSecurity().size() > 0) {
+        if (v2Operation.getSecurity() != null) {
             operation.setSecurity(convertSecurityRequirementsMap(v2Operation.getSecurity()));
         }
 

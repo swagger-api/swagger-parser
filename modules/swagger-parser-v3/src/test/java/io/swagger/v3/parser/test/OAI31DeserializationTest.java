@@ -132,7 +132,7 @@ public class OAI31DeserializationTest {
         assertEquals(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getType(),"array");
         assertNull(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getItems());
         assertTrue(result.getMessages().contains("attribute components.schemas.ArrayWithoutItems.items is missing"));
-        //Type object with items: not allowed, it will internally create an array (New Option setDefaultSchemaTypeObject )
+        //Type object with items: not allowed, it will internally create an array (New Option setInferSchemaType )
         assertNotEquals(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getType(),"object");
         assertEquals(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getType(),"array");
         assertNotNull(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getItems());
@@ -149,12 +149,10 @@ public class OAI31DeserializationTest {
         //exclusiveMaximum-exclusiveMinimum are boolean in 3.0
         assertNull(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMaximum());
         assertNull(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMinimum());
-        //Null type
-        assertNull(openAPI.getComponents().getSchemas().get("Pets").getTypes());
+        assertEquals(openAPI.getComponents().getSchemas().get("Pets").getTypes().iterator().next(), "array");
         //default value independence
         assertNull(openAPI.getComponents().getSchemas().get("Pets").getDefault());
-        //not setting the type by default
-        assertNull(openAPI.getComponents().getSchemas().get("MapAnyValue").getTypes());
+        assertEquals(openAPI.getComponents().getSchemas().get("MapAnyValue").getTypes().iterator().next(), "object");
         //Not webhooks
         assertTrue(result.getMessages().contains("attribute webhooks is unexpected"));
     }
@@ -595,8 +593,8 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getUnevaluatedProperties() instanceof Schema);
         assertTrue(((Schema)profile.getUnevaluatedProperties()).getTypes().contains("object"));
         assertNotNull(patientPersonSchema.getUnevaluatedProperties());
-        assertTrue(patientPersonSchema.getUnevaluatedProperties() instanceof Boolean);
-        assertFalse(((Boolean)patientPersonSchema.getUnevaluatedProperties()).booleanValue());
+        assertTrue(patientPersonSchema.getUnevaluatedProperties() instanceof Schema);
+        assertFalse(patientPersonSchema.getUnevaluatedProperties().getBooleanSchemaValue());
         //unevaluatedItems
         assertNotNull(profile.getUnevaluatedItems());
 
@@ -811,7 +809,7 @@ public class OAI31DeserializationTest {
         @Test(description = "Test for not setting the schema type as default")
         public void testNotDefaultSchemaType() {
             ParseOptions options = new ParseOptions();
-            options.setDefaultSchemaTypeObject(false);
+            options.setInferSchemaType(false);
             String defaultSchemaType = "openapi: 3.1.0\n" +
                     "info:\n" +
                     "  title: ping test\n" +
