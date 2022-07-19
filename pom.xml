@@ -377,6 +377,7 @@
         <module>modules/swagger-parser-v3</module>
         <module>modules/swagger-parser-v2-converter</module>
         <module>modules/swagger-parser</module>
+        <module>modules/swagger-parser-cli</module>
     </modules>
     <repositories>
         <repository>
