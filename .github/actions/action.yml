@@ -1,0 +1,29 @@
+name: 'Swagger Parser CLI'
+description: 'Uses swagger parser CLI to allow validation of a definition'
+inputs:
+  spec-file:
+    description: 'file of the openapi definition'
+    required: true
+    default: 'modules/swagger-parser-cli/target/test-classes/fileWithNoErrorMessages.yaml'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '11'
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Build with Maven
+      run: |
+        mvn --no-transfer-progress -B install --file pom.xml
+      shell: bash
+    - name: Execute Jar
+      run: java -jar modules/swagger-parser-cli/target/swagger-parser-cli.jar ${{ inputs.inputSpec }}
+      shell: bash
