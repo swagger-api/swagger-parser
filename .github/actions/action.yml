@@ -14,10 +14,7 @@ runs:
         distribution: 'zulu'
         java-version: '11'
     - name: Download JAR
-      run: curl 'https://oss.sonatype.org/service/local/repositories/snapshots/content/io/swagger/parser/v3/swagger-parser-cli/2.1.2-SNAPSHOT/swagger-parser-cli-2.1.2-20220719.144003-1.jar' -o swagger-parser-cli.jar
-      shell: bash
-    - name: Location
-      run: pwd
+      run: curl 'https://oss.sonatype.org/service/local/repositories/snapshots/content/io/swagger/parser/v3/swagger-parser-cli/2.1.2-SNAPSHOT/swagger-parser-cli-2.1.2-20220812.023913-3.jar' -o swagger-parser-cli.jar
       shell: bash
     - name: Execute Jar
       run: java -jar ./swagger-parser-cli.jar ${{ inputs.inputSpec }}

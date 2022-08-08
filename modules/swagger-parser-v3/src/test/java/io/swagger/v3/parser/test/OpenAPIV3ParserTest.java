@@ -87,6 +87,28 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1780() {
+        ParseOptions options = new ParseOptions();
+        options.setInferSchemaType(false);
+        String defaultSchemaType = "---\n" +
+                "openapi: '3.0'\n" +
+                "info:\n" +
+                "  description: This is a credit card account service tier 3 microservice\n" +
+                "  title: SC-CCS-CCSRV_AC Credit Card Account Service\n" +
+                "  version: 1.0.0\n" +
+                "tags:\n" +
+                "- name: creditCardAccount\n" +
+                "  description: Credit Card Accounts\n" +
+                "paths: {}\n" +
+                "x-ibm-configuration: {}";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(defaultSchemaType, null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertTrue(result.getMessages().contains("The provided definition does not specify a valid version field"));
+
+    }
+
+    @Test
     public void testIssue1758() throws Exception{
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1758.yaml", null, options);
