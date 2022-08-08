@@ -314,7 +314,11 @@ public class OpenAPIDeserializer {
 			} else if (value.startsWith("3.1")) {
 				result.openapi31(true);
 			}
-			openAPI.setOpenapi(value);
+            if (!value.startsWith("3.0.") && !value.startsWith("3.1.")){
+                result.warning(location, "The provided definition does not specify a valid version field");
+            }
+            openAPI.setOpenapi(value);
+
 
 			ObjectNode obj = getObject("info", rootNode, true, location, result);
 			if (obj != null) {
