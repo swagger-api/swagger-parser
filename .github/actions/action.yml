@@ -13,17 +13,12 @@ runs:
       with:
         distribution: 'zulu'
         java-version: '11'
-    - name: Cache local Maven repository
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Build with Maven
-      run: |
-        mvn --no-transfer-progress -B install --file pom.xml
+    - name: Download JAR
+      run: curl 'https://oss.sonatype.org/service/local/repositories/snapshots/content/io/swagger/parser/v3/swagger-parser-cli/2.1.2-SNAPSHOT/swagger-parser-cli-2.1.2-20220719.144003-1.jar' -o swagger-parser-cli.jar
+      shell: bash
+    - name: Location
+      run: pwd
       shell: bash
     - name: Execute Jar
-      run: java -jar modules/swagger-parser-cli/target/swagger-parser-cli.jar ${{ inputs.inputSpec }}
+      run: java -jar ./swagger-parser-cli.jar ${{ inputs.inputSpec }}
       shell: bash
