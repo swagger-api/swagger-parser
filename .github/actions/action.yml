@@ -1,7 +1,7 @@
 name: 'Swagger Parser CLI'
 description: 'Uses swagger parser CLI to allow validation of a definition'
 inputs:
-  spec-file:
+  inputSpec:
     description: 'file of the openapi definition'
     required: true
     default: 'modules/swagger-parser-cli/target/test-classes/fileWithNoErrorMessages.yaml'
