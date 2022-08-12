@@ -12,4 +12,4 @@ jobs:
           ref: action
       - uses: ./.github/actions/
         with:
-          inputSpec: 'modules/swagger-parser-cli/target/test-classes/fileWithValidationErrorMessages.yaml'
+          inputSpec: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/src/test/resources/fileWithValidationErrorMessages.yaml'

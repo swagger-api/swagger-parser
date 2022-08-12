@@ -4,7 +4,7 @@ inputs:
   inputSpec:
     description: 'file of the openapi definition'
     required: true
-    default: 'modules/swagger-parser-cli/target/test-classes/fileWithNoErrorMessages.yaml'
+    default: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/src/test/resources/fileWithNoErrorMessages.yaml'
 
 runs:
   using: "composite"
