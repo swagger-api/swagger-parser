@@ -4,17 +4,21 @@ inputs:
   inputSpec:
     description: 'file of the openapi definition'
     required: true
-    default: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/src/test/resources/fileWithNoErrorMessages.yaml'
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-java@v3
+    - id: java-version
+      run: java -version
+      shell: bash
+    - name: Build Java
+      if: steps.java-version == null
+      uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: '11'
     - name: Download JAR
-      run: curl 'https://oss.sonatype.org/service/local/repositories/snapshots/content/io/swagger/parser/v3/swagger-parser-cli/2.1.2-SNAPSHOT/swagger-parser-cli-2.1.2-20220812.023913-3.jar' -o swagger-parser-cli.jar
+      run: curl -L "https://repository.sonatype.org/service/local/artifact/maven/content?r=central-proxy&g=io.swagger.parser.v3&a=swagger-parser-cli&e=jar&v=LATEST" -o swagger-parser-cli.jar
       shell: bash
     - name: Execute Jar
       run: java -jar ./swagger-parser-cli.jar ${{ inputs.inputSpec }}
