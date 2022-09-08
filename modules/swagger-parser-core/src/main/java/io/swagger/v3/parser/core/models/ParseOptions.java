@@ -68,4 +68,14 @@ public class ParseOptions {
     public void setAllowEmptyString(boolean allowEmptyStrings) {
         this.allowEmptyStrings = allowEmptyStrings;
     }
+
+    private boolean nameInlineResponsesBasedOnEndpoint;
+
+    public boolean isNameInlineResponsesBasedOnEndpoint() {
+        return nameInlineResponsesBasedOnEndpoint;
+    }
+
+    public void setNameInlineResponsesBasedOnEndpoint(boolean isNameInlineResponsesBasedOnEndpoint) {
+        this.nameInlineResponsesBasedOnEndpoint = isNameInlineResponsesBasedOnEndpoint;
+    }
 }

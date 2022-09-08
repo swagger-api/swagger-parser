@@ -486,7 +486,7 @@ public class InlineModelResolverTest {
     public void testSkipInlineMatchesTrue() {
         final OpenAPI openAPI = new OpenAPI();
 
-        final InlineModelResolver inlineModelResolver = new InlineModelResolver(false, false, true);
+        final InlineModelResolver inlineModelResolver = new InlineModelResolver(false, false, true, false);
 
         final Schema operationAlphaInAsset = new ObjectSchema();
         operationAlphaInAsset.setTitle("operationAlphaInAsset");

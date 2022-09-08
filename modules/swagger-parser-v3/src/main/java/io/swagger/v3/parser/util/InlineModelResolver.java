@@ -34,17 +34,19 @@ public class InlineModelResolver {
 
     private final boolean flattenComposedSchemas;
     private final boolean camelCaseFlattenNaming;
+    private final boolean nameInlineModelBasedOnEndpointPath;
     private boolean skipMatches;
 
-    public InlineModelResolver(){this(false, false, false);}
+    public InlineModelResolver(){this(false, false, false, false);}
 
     public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming) {
-        this(flattenComposedSchemas, camelCaseFlattenNaming, false);
+        this(flattenComposedSchemas, camelCaseFlattenNaming, false, false);
     }
 
-    public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming, boolean skipMatches) {
+    public InlineModelResolver(boolean flattenComposedSchemas, boolean camelCaseFlattenNaming, boolean skipMatches, boolean nameInlineModelBasedOnEndpointPath) {
         this.flattenComposedSchemas = flattenComposedSchemas;
         this.camelCaseFlattenNaming = camelCaseFlattenNaming;
+        this.nameInlineModelBasedOnEndpointPath = nameInlineModelBasedOnEndpointPath;
         this.skipMatches = skipMatches;
     }
 
@@ -79,7 +81,7 @@ public class InlineModelResolver {
           for (Operation operation : path.readOperations()) {
               flattenBody(pathname, operation.getRequestBody());
               flattenParams(pathname, operation.getParameters());
-              flattenResponses(pathname, operation.getResponses());
+              flattenResponses(pathname, operation.getResponses(), operation.getOperationId());
           }
       }
     }
@@ -198,7 +200,7 @@ public class InlineModelResolver {
       }
     }
 
-    private void flattenResponses(String pathname, Map<String, ApiResponse> responses)
+    private void flattenResponses(String pathname, Map<String, ApiResponse> responses, String operationId)
     {
       if (responses == null) {
         return;
@@ -214,7 +216,11 @@ public class InlineModelResolver {
                           Schema mediaSchema = media.getSchema();
                           if (isObjectSchema(mediaSchema)) {
                               if (mediaSchema.getProperties() != null && mediaSchema.getProperties().size() > 0 || mediaSchema instanceof ComposedSchema) {
-                                  String modelName = resolveModelName(mediaSchema.getTitle(), "inline_response_" + key);
+                                  String title = mediaSchema.getTitle();
+                                  if (title == null && this.nameInlineModelBasedOnEndpointPath == true ) {
+                                    title = operationId.replaceAll("--", "-") + "ResponseBodyInline";
+                                  }
+                                  String modelName = resolveModelName(title, "inline_response_" + key);
                                   String existing = matchGenerated(mediaSchema);
                                   if (existing != null) {
                                       media.setSchema(this.makeRefProperty(existing, mediaSchema));

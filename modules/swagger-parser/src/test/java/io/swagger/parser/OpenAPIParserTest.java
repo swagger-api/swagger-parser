@@ -663,5 +663,29 @@ public class OpenAPIParserTest {
 
         assertEquals("/api/customer1/v1", result.getOpenAPI().getServers().get(0).getUrl());
     }
+
+    @Test
+    public void testInlineResponseName() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        SwaggerParseResult result = openApiParser.readLocation("inlineResponsesTest3.json",null, options);
+
+        assertNotNull(result.getOpenAPI());
+        assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("inline_response_200").getType());
+    }
+    
+    @Test
+    public void testInlineResponseNameBasedOnEndpointName() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        options.setNameInlineResponsesBasedOnEndpoint(true);
+        options.setCamelCaseFlattenNaming(true);
+        OpenAPIParser openApiParser = new OpenAPIParser();
+        SwaggerParseResult result = openApiParser.readLocation("inlineResponsesTest3.json",null, options);
+
+        assertNotNull(result.getOpenAPI());
+        assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("PostDisconnectResponseBodyInline").getType());
+    }
 }
 

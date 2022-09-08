@@ -188,7 +188,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 if (options.isFlatten()) {
                     final InlineModelResolver inlineModelResolver =
                             new InlineModelResolver(options.isFlattenComposedSchemas(),
-                                    options.isCamelCaseFlattenNaming(), options.isSkipMatches());
+                                    options.isCamelCaseFlattenNaming(), options.isSkipMatches(), options.isNameInlineResponsesBasedOnEndpoint());
                     if (result.getOpenAPI()!= null) {
                         inlineModelResolver.flatten(result.getOpenAPI());
                     }

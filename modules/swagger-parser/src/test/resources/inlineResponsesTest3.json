@@ -1,0 +1,47 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Osome API",
+    "version": "2.1886.0"
+  },
+  "host": "{{host}}",
+  "basePath": "/api/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/disconnect": {
+      "post": {
+        "summary": "POST /disconnect",
+        "description": "POST /disconnect",
+        "operationId": "post--disconnect",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "success"
+              ]
+            }
+          }
+        },
+        "tags": [],
+        "parameters": []
+      }
+    }
+  },
+  "tags": [],
+  "definitions": {}
+}
