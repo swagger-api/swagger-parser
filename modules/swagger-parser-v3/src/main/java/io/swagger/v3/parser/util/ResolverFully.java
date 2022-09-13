@@ -380,6 +380,7 @@ public class ResolverFully {
 
             if (aggregateCombinators && (hasAllOf || adjacent)) {
                 Schema combinedModel = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
+                combinedModel.setDefault(composedSchema.getDefault());
                 Set<Object> examples = new HashSet<>();
 
                 if (hasAllOf) {
