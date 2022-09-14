@@ -96,6 +96,7 @@ public class V2ConverterTest {
     private static final String ISSUE_1715_YAML = "issue-1715.yaml";
 
     private static final String ISSUE_1767_YAML = "issue-1767.yaml";
+    private static final String ISSUE_1796_YAML = "issue-1796.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -875,6 +876,16 @@ public class V2ConverterTest {
         List<SecurityRequirement> secondOperationSecurityRequirements =
                 oas.getPaths().get("/api/secured/").getGet().getSecurity();
         assertNull(secondOperationSecurityRequirements);
+    }
+
+    @Test(description = "OpenAPI v2 converter - composed model should keep required properties")
+    public void testissue1796() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1796_YAML);
+        assertNotNull(oas);
+        ComposedSchema schema = (ComposedSchema) oas.getComponents().getSchemas().get("ComposedModel");
+        assertNotNull(schema.getRequired());
+        assertEquals(schema.getRequired().size(), 1);
+        assertEquals(schema.getRequired().get(0), "name");
     }
 
     @Test()

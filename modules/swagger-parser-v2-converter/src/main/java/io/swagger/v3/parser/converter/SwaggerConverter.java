@@ -1194,6 +1194,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             composed.setTitle(composedModel.getTitle());
             composed.setExtensions(convert(composedModel.getVendorExtensions()));
             composed.setAllOf(composedModel.getAllOf().stream().map(this::convert).collect(Collectors.toList()));
+            composed.setRequired(composedModel.getRequired());
 
             addProperties(v2Model, composed);
 
