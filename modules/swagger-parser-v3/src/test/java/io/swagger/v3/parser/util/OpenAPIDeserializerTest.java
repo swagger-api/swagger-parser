@@ -2765,13 +2765,14 @@ public class OpenAPIDeserializerTest {
                 .get("enumProperty")
                 .getDefault(), "SCHEMA_DEFAULT");
 
+        OpenAPIV3Parser parser2 = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
         options.setResolveCombinators(true);
-        result = parser.readContents(json, null, options);
-        openAPI = result.getOpenAPI();
-        assertEquals(((Map<String, Schema>)openAPI.getComponents()
+        SwaggerParseResult result2 = parser2.readContents(json, null, options);
+        OpenAPI openAPI2 = result2.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI2.getComponents()
                 .getSchemas()
                 .get("SchemaWithDefaultAndEnum")
                 .getProperties())
