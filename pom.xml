@@ -402,7 +402,7 @@
         </repository>
     </repositories>
     <properties>
-        <snakeyaml-version>1.30</snakeyaml-version>
+        <snakeyaml-version>1.32</snakeyaml-version>
         <swagger-parser-v2-version>1.0.61</swagger-parser-v2-version>
         <commons-io-version>2.11.0</commons-io-version>
         <slf4j-version>1.7.30</slf4j-version>
