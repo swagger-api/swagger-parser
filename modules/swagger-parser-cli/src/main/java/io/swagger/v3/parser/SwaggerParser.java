@@ -1,6 +1,8 @@
 package io.swagger.v3.parser;
 
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
+
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -9,15 +11,19 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import java.io.FileOutputStream;
+
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+
 
 public class SwaggerParser {
+
+    public static final String RESOLVE = "resolve";
+    public static final String RESOLVEFULLY = "resolvefully";
+    public static final String FLATTEN = "flatten";
 
     public static void main(String[] args) {
         if (args.length > 0){
@@ -29,19 +35,19 @@ public class SwaggerParser {
                     .type(String.class)
                     .help("input file to be parsed");
             parser.addArgument("-resolve")
-                    .dest("resolve")
+                    .dest(RESOLVE)
                     .type(Boolean.class)
                     .action(Arguments.storeTrue())
                     .setDefault(false)
                     .help("resolve remote or local references");
             parser.addArgument("-resolveFully")
-                    .dest("resolvefully")
+                    .dest(RESOLVEFULLY)
                     .type(Boolean.class)
                     .action(Arguments.storeTrue())
                     .setDefault(false)
                     .help("");
             parser.addArgument("-flatten")
-                    .dest("flatten")
+                    .dest(FLATTEN)
                     .type(Boolean.class)
                     .action(Arguments.storeTrue())
                     .setDefault(false)
@@ -54,6 +60,14 @@ public class SwaggerParser {
                     .dest("l")
                     .type(String.class)
                     .help("output error logs");
+            parser.addArgument("-json")
+                    .dest("json")
+                    .type(String.class)
+                    .help("generate file as JSON");
+            parser.addArgument("-yaml")
+                    .dest("yaml")
+                    .type(String.class)
+                    .help("generate file as YAML");
             try{
                 readFromLocation(parser.parseArgs(args));
             }catch (ArgumentParserException e) {
@@ -73,13 +87,21 @@ public class SwaggerParser {
 
     public static List<String> readFromLocation(Namespace args) {
         List<String> messages = new ArrayList<>();
-        ParseOptions options = null;
+        ParseOptions options;
         try {
             options = setOptions(args);
             final SwaggerParseResult result = new OpenAPIV3Parser().readLocation(args.get("i"), null, options);
             if(args.getString("o") != null) {
                 if (result.getOpenAPI() != null){
-                    generateParsedFile(args, "o", Yaml.pretty(result.getOpenAPI()));
+                    String output;
+                    if(args.getString("json") != null){
+                        output = Json.pretty(result.getOpenAPI());
+                    }else if(args.getString("yaml") != null){
+                        output = Yaml.pretty(result.getOpenAPI());
+                    }else{
+                        output= Yaml.pretty(result.getOpenAPI());
+                    }
+                    generateParsedFile(args, "o", output );
                 }
             }
             if(result.getOpenAPI() == null || !result.getMessages().isEmpty()){
@@ -100,7 +122,6 @@ public class SwaggerParser {
                 out.write(specBytes);
                 out.close();
             }
-
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -109,13 +130,13 @@ public class SwaggerParser {
     private static ParseOptions setOptions(Namespace parseOptions) {
         ParseOptions options  = new ParseOptions();
 
-        if (parseOptions.getString("resolve") !=null && parseOptions.getString("resolve").equals("true")) {
+        if (parseOptions.getString(RESOLVE) !=null && parseOptions.getString(RESOLVE).equals("true")) {
             options.setResolve(true);
         }
-        if (parseOptions.getString("resolvefully") != null && parseOptions.getString("resolvefully").equals("true")) {
+        if (parseOptions.getString(RESOLVEFULLY) != null && parseOptions.getString(RESOLVEFULLY).equals("true")) {
             options.setResolveFully(true);
         }
-        if (parseOptions.getString("flatten") != null && parseOptions.getString("flatten").equals("true")) {
+        if (parseOptions.getString(FLATTEN) != null && parseOptions.getString(FLATTEN).equals("true")) {
             options.setFlatten(true);
         }
         return options;

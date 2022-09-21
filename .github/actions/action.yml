@@ -32,7 +32,3 @@ runs:
       name: Execute Jar
       run: java -jar swagger-parser-cli.jar -i ${{ inputs.inputSpec }} ${{ inputs.options }} -o ${{ inputs.parserSpecPath }} -l ${{ inputs.logsPath }}
       shell: bash
-    - id: test
-      name: test file
-      run: cat ${{ inputs.parserSpecPath }}
-      shell: bash

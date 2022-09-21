@@ -4,6 +4,9 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,15 +67,33 @@ public class SwaggerParserCLITest {
     }
 
     @Test
-    public void validateOKFromLocationWithResolveFullyOptionTest(){
+    public void validateOKFromLocationWithResolveFullyOptionTestYaml(){
         Map<String,Object> args = new HashMap();
         args.put("i","src/test/resources/internal-references-in-external-files/main.yaml");
         args.put("resolve", "true");
         args.put("resolvefully", "true");
+        args.put("yaml", "true");
         args.put("o", "target/test-classes/parsedSpec.yaml");
         Namespace namespace = new Namespace(args);
+        Path path = Paths.get("target/test-classes/parsedSpec.yaml");
 
         Assert.assertTrue(SwaggerParser.readFromLocation(namespace).size() == 0);
+        Assert.assertTrue(Files.exists(path));
+    }
+
+    @Test
+    public void validateOKFromLocationWithResolveFullyOptionTestJson(){
+        Map<String,Object> args = new HashMap();
+        args.put("i","src/test/resources/internal-references-in-external-files/main.yaml");
+        args.put("resolve", "true");
+        args.put("resolvefully", "true");
+        args.put("json", "true");
+        args.put("o", "target/test-classes/parsedSpec.json");
+        Namespace namespace = new Namespace(args);
+        Path path = Paths.get("target/test-classes/parsedSpec.json");
+
+        Assert.assertTrue(SwaggerParser.readFromLocation(namespace).size() == 0);
+        Assert.assertTrue(Files.exists(path));
     }
 
     @Test
