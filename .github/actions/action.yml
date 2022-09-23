@@ -1,17 +1,20 @@
-name: 'Swagger Parser CLI'
-description: 'Uses swagger parser CLI to allow validation of a definition'
+name: 'Swagger Parser'
+description: 'Parses, validates, dereferences an OpenAPI definition'
 inputs:
   inputSpec:
-    description: 'file of the openapi definition'
+    description: 'path to OpenAPI definition file'
     required: true
   options:
     description: 'parser options'
     required: false
+  serializationType:
+    description: 'result file serialization type'
+    required: false
   logsPath:
-    description: 'file of the logs messages or errors'
-    required: true
+    description: 'path to validation result file'
+    required: false
   parserSpecPath:
-    description: 'path where a file can be found with parsed definition'
+    description: 'output path of the serialized parsed definition'
     required: false
 runs:
   using: "composite"
@@ -26,9 +29,9 @@ runs:
         distribution: 'zulu'
         java-version: '11'
     - name: Download JAR
-      run: curl -L "https://repository.sonatype.org/service/local/artifact/maven/content?r=central-proxy&g=io.swagger.parser.v3&a=swagger-parser-cli&e=jar&v=LATEST" -o swagger-parser-cli.jar
+      run: curl -L "https://oss.sonatype.org/service/local/repositories/snapshots/content/io/swagger/parser/v3/swagger-parser-cli/2.1.3-SNAPSHOT/swagger-parser-cli-2.1.3-20220917.171959-2.jar" -o swagger-parser-cli.jar
       shell: bash
     - id: execute
       name: Execute Jar
-      run: java -jar swagger-parser-cli.jar -i ${{ inputs.inputSpec }} ${{ inputs.options }} -o ${{ inputs.parserSpecPath }} -l ${{ inputs.logsPath }}
+      run: java -jar swagger-parser-cli.jar ${{ inputs.inputSpec }} ${{ inputs.options }} ${{ inputs.serializationType }} -o ${{ inputs.parserSpecPath }} -l ${{ inputs.logsPath }}
       shell: bash
