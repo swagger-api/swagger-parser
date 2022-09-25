@@ -70,11 +70,13 @@ public class SwaggerParser {
                     .dest(JSON)
                     .type(Boolean.class)
                     .action(Arguments.storeTrue())
+                    .setDefault(false)
                     .help("generate file as JSON");
             parser.addArgument("-yaml")
                     .dest(YAML)
                     .type(Boolean.class)
                     .action(Arguments.storeTrue())
+                    .setDefault(false)
                     .help("generate file as YAML");
             try{
                 readFromLocation(parser.parseArgs(args));
