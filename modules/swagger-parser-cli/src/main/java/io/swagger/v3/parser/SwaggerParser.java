@@ -94,7 +94,6 @@ public class SwaggerParser {
             if(args.getString("o") != null) {
                 if (result.getOpenAPI() != null){
                     String output;
-                    Yaml.prettyPrint(result.getOpenAPI());
                     if(args.getString("json") != null){
                         output = Json.pretty(result.getOpenAPI());
                     }else if(args.getString("yaml") != null){

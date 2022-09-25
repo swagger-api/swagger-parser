@@ -16,6 +16,9 @@ inputs:
   parserSpecPath:
     description: 'output path of the serialized parsed definition'
     required: false
+  parserVersion:
+    description: 'parser version'
+    required: false
 runs:
   using: "composite"
   steps:
@@ -29,9 +32,9 @@ runs:
         distribution: 'zulu'
         java-version: '11'
     - name: Download JAR
-      run: curl -L "https://oss.sonatype.org/service/local/repositories/snapshots/content/io/swagger/parser/v3/swagger-parser-cli/2.1.3-SNAPSHOT/swagger-parser-cli-2.1.3-20220917.171959-2.jar" -o swagger-parser-cli.jar
+      run: curl -L 'https://repository.sonatype.org/service/local/artifact/maven/content?r=central-proxy&g=io.swagger.parser.v3&a=swagger-parser-cli&e=jar&v=${{ inputs.parserVersion }}' -o swagger-parser-cli.jar
       shell: bash
     - id: execute
       name: Execute Jar
-      run: java -jar swagger-parser-cli.jar ${{ inputs.inputSpec }} ${{ inputs.options }} ${{ inputs.serializationType }} -o ${{ inputs.parserSpecPath }} -l ${{ inputs.logsPath }}
+      run: java -jar swagger-parser-cli.jar -i ${{ inputs.inputSpec }} ${{ inputs.options }} ${{ inputs.serializationType }} -o ${{ inputs.parserSpecPath }} -l ${{ inputs.logsPath }}
       shell: bash
