@@ -1,0 +1,25 @@
+name: SwaggerParserCLI Test
+
+on: [push]
+
+jobs:
+  validate_job:
+    runs-on: ubuntu-latest
+    name: A job to validate a definition
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: action
+      - uses: ./.github/actions/
+        with:
+          inputSpec: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/src/test/resources/fileWithNoErrorMessages.yaml'
+          options: '-resolve -resolveFully'
+          parserVersion: '2.1.2'
+          serializationType: '-json'
+          logsPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/parserLogs.yaml'
+          parserSpecPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/specParsed.json'
+      - run: cat /home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/specParsed.json
+        shell: bash
+
+
+
