@@ -18,6 +18,8 @@ jobs:
           serializationType: '-json'
           logsPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/parserLogs.yaml'
           parserSpecPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/specParsed.json'
+      - run: pwd
+        shell: bash
       - run: cat /home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/specParsed.json
         shell: bash
 
