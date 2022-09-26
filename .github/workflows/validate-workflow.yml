@@ -16,11 +16,9 @@ jobs:
           options: '-resolve'
           parserVersion: '2.1.3-SNAPSHOT'
           serializationType: '-json'
-          logsPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/parserLogs.yaml'
-          parserSpecPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/specParsed.json'
-      - run: pwd
-        shell: bash
-      - run: cat /home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/target/test-classes/specParsed.json
+          logsPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/src/test/resources/parserLogs.yaml'
+          parserSpecPath: '/home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/src/test/resources/specParsed.json'
+      - run: cat /home/runner/work/swagger-parser/swagger-parser/modules/swagger-parser-cli/src/test/resources/specParsed.json
         shell: bash
 
 
