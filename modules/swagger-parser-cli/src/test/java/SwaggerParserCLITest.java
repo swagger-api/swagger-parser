@@ -117,4 +117,32 @@ public class SwaggerParserCLITest {
         Namespace namespace = new Namespace(args);
         Assert.assertTrue(SwaggerParser.readFromLocation(namespace).size() == 0);
     }
+
+    @Test
+    public void validateOKFromLocationWithResolveFullyOptionTestYamlMain(){
+        String[] args = new String[5];
+        args[0]="-i=src/test/resources/internal-references-in-external-files/main.yaml";
+        args[1]="-resolve";
+        args[2]="-resolveFully";
+        args[3]="-yaml";
+        args[4]="-o=target/test-classes/parsedSpec.yaml";
+
+        Path path = Paths.get("target/test-classes/parsedSpec.yaml");
+        SwaggerParser.main(args);
+        Assert.assertTrue(Files.exists(path));
+    }
+
+    @Test
+    public void validateOKFromLocationWithResolveFullyOptionTestJSONMain(){
+        String[] args = new String[5];
+        args[0]="-i=src/test/resources/internal-references-in-external-files/main.yaml";
+        args[1]="-resolve";
+        args[2]="-resolveFully";
+        args[3]="-json";
+        args[4]="-o=target/test-classes/parsedSpec.json";
+
+        Path path = Paths.get("target/test-classes/parsedSpec.json");
+        SwaggerParser.main(args);
+        Assert.assertTrue(Files.exists(path));
+    }
 }
