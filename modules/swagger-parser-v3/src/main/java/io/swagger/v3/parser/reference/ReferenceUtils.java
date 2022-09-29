@@ -70,7 +70,13 @@ public class ReferenceUtils {
 
     public static String readURI(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
         URI resolved = new URI(absoluteUri);
-        if (StringUtils.isBlank(resolved.getScheme())) {
+        if (resolved.getScheme().startsWith("http")) {
+            return readHttp(absoluteUri, auths);
+        } else if (resolved.getScheme().startsWith("file")) {
+            return readFile(absoluteUri);
+        } else if (resolved.getScheme().startsWith("classpath")) {
+            return readClasspath(absoluteUri);
+        } else {
             // try file
             String content = null;
             try {
@@ -82,14 +88,7 @@ public class ReferenceUtils {
                 content = readClasspath(absoluteUri);
             }
             return content;
-        }  else if (resolved.getScheme().startsWith("http")) {
-            return readHttp(absoluteUri, auths);
-        } else if (resolved.getScheme().startsWith("file")) {
-            return readFile(absoluteUri);
-        } else if (resolved.getScheme().startsWith("classpath")) {
-            return readClasspath(absoluteUri);
         }
-        throw new RuntimeException("scheme not supported for uri: " + absoluteUri);
     }
 
     public static JsonNode deserializeIntoTree(String content) throws Exception {
