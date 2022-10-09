@@ -180,7 +180,16 @@ public class ResolverCache {
         //a definition path is defined, meaning we need to "dig down" through the JSON tree and get the desired entity
         String[] jsonPathElements = definitionPath.split("/");
         for (String jsonPathElement : jsonPathElements) {
-            tree = tree.get(unescapePointer(jsonPathElement));
+            if (tree.isArray()) {
+                try {
+                    tree = tree.get(Integer.valueOf(jsonPathElement));
+                } catch (NumberFormatException numberFormatException) {
+                    //
+                }
+            } else {
+                tree = tree.get(unescapePointer(jsonPathElement));
+            }
+
             //if at any point we do find an element we expect, print and error and abort
             if (tree == null) {
                 throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
