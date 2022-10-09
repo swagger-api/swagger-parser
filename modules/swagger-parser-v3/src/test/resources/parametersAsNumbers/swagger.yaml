@@ -1,0 +1,53 @@
+openapi: 3.0.1
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://demo.com
+info:
+  description: api
+  version: v1
+  title: API
+  contact:
+    name: John Doe
+    email: John.Doe@mail.com
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+tags:
+  - name: Payments
+    description: Request payments
+  - name: Incentives
+    description: Retrieve incentives
+  - name: Deals
+    description: Save, update and search deals
+paths:
+  /api/deal/{dealId}:
+    get:
+      tags:
+        - Deals
+      summary: Gets the latest version of a deal (based on TimeStamp) or the specified version or the transactional deal by state
+      description: "Versions of a deal are ordered by the TimeStamp, if the TimeStamp is not set, the Timestamp is\r\nset to the creation time."
+      operationId: DealGetVersionOne
+      parameters:
+        - $ref: 'domain.yaml#/components/pathitems/GetDeal/get/parameters/0' #access by position
+      responses:
+        '200':
+          $ref: 'domain.yaml#/components/pathitems/GetDeal/get/responses/200' #access by name
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '503':
+          description: Server Error
+components:
+  schemas:
+    FuelType:
+      type: string
+      description: "Describe the fuel type for the vehicle"
+      enum:
+        - gas
+        - unleaded
+        - flexible
+        - other
+        - diesel
+      example: gas

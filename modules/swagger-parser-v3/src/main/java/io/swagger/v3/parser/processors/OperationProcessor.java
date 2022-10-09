@@ -50,7 +50,7 @@ public class OperationProcessor {
 
         RequestBody requestBody = operation.getRequestBody();
         if (requestBody != null) {
-            // This part allows paser to put requestBody inline without the resolveFully
+            // This part allows parser to put requestBody inline without the resolveFully
             // option set to true
             if (requestBody.get$ref() != null && cache != null && cache.getParseOptions() != null && cache.getParseOptions().isResolveRequestBody()) {
                 requestBodyProcessor.processRequestBody(requestBody);
