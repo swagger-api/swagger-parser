@@ -402,12 +402,12 @@
         </repository>
     </repositories>
     <properties>
-        <snakeyaml-version>1.32</snakeyaml-version>
-        <swagger-parser-v2-version>1.0.62</swagger-parser-v2-version>
+        <snakeyaml-version>1.33</snakeyaml-version>
+        <swagger-parser-v2-version>1.0.63-SNAPSHOT</swagger-parser-v2-version>
         <commons-io-version>2.11.0</commons-io-version>
         <slf4j-version>1.7.30</slf4j-version>
-        <swagger-core-version>2.2.3</swagger-core-version>
-        <swagger-core-v2-version>1.6.7</swagger-core-v2-version>
+        <swagger-core-version>2.2.4-SNAPSHOT</swagger-core-version>
+        <swagger-core-v2-version>1.6.8-SNAPSHOT</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>6.14.2</testng-version>
         <jmockit-version>1.35</jmockit-version>
