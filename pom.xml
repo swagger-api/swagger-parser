@@ -414,12 +414,8 @@
         <wiremock-version>2.15.0</wiremock-version>
         <surefire-version>2.22.2</surefire-version>
         <commons-lang-version>3.2.1</commons-lang-version>
-        <jackson-version>2.13.2</jackson-version>
-        <!--
-          2.13.2 is still affected by CVE-2020-36518.
-          This version pin for jackson-databind can be removed when bumping jackson to 2.14
-          -->
-        <jackson-databind-version>2.13.2.2</jackson-databind-version>
+        <jackson-version>2.13.4</jackson-version>
+        <jackson-databind-version>2.13.4</jackson-databind-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
