@@ -70,26 +70,26 @@ public class ReferenceUtils {
 
     public static String readURI(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
         URI resolved = new URI(absoluteUri);
-        if (StringUtils.isBlank(resolved.getScheme())) {
-            // try file
-            String content = null;
-            try {
-                content = readFile(absoluteUri);
-            } catch (Exception e) {
-                //
+        if (StringUtils.isNotBlank(resolved.getScheme())) {
+            if (resolved.getScheme().startsWith("http")) {
+                return readHttp(absoluteUri, auths);
+            } else if (resolved.getScheme().startsWith("file")) {
+                return readFile(absoluteUri);
+            } else if (resolved.getScheme().startsWith("classpath")) {
+                return readClasspath(absoluteUri);
             }
-            if (StringUtils.isBlank(content)) {
-                content = readClasspath(absoluteUri);
-            }
-            return content;
-        }  else if (resolved.getScheme().startsWith("http")) {
-            return readHttp(absoluteUri, auths);
-        } else if (resolved.getScheme().startsWith("file")) {
-            return readFile(absoluteUri);
-        } else if (resolved.getScheme().startsWith("classpath")) {
-            return readClasspath(absoluteUri);
         }
-        throw new RuntimeException("scheme not supported for uri: " + absoluteUri);
+        // If no matches exists, try file
+        String content = null;
+        try {
+            content = readFile(absoluteUri);
+        } catch (Exception e) {
+            //
+        }
+        if (StringUtils.isBlank(content)) {
+            content = readClasspath(absoluteUri);
+        }
+        return content;
     }
 
     public static JsonNode deserializeIntoTree(String content) throws Exception {
