@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.swagger.parser.v3</groupId>
         <artifactId>swagger-parser-project</artifactId>
-        <version>2.1.2-SNAPSHOT</version>
+        <version>2.1.5-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -21,6 +21,10 @@
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-v3</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>

@@ -7,16 +7,12 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.BooleanSchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.StringSchema;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.converter.SwaggerConverter;
@@ -98,6 +94,9 @@ public class V2ConverterTest {
     private static final String ISSUE_1261_YAML = "issue-1261.yaml";
 
     private static final String ISSUE_1715_YAML = "issue-1715.yaml";
+
+    private static final String ISSUE_1767_YAML = "issue-1767.yaml";
+    private static final String ISSUE_1796_YAML = "issue-1796.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -864,6 +863,31 @@ public class V2ConverterTest {
         assertEquals("bar", requestBody.getExtensions().get("x-foo"));
     }
 
+    @Test(description = "OpenAPI v2 converter - security of operation should be set to empty list if that's the case")
+    public void testIssue1767() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1767_YAML);
+        assertNotNull(oas);
+
+        List<SecurityRequirement> firstOperationSecurityRequirements =
+                oas.getPaths().get("/api/not-secured").getGet().getSecurity();
+        assertNotNull(firstOperationSecurityRequirements);
+        assertEquals(firstOperationSecurityRequirements.size(), 0);
+
+        List<SecurityRequirement> secondOperationSecurityRequirements =
+                oas.getPaths().get("/api/secured/").getGet().getSecurity();
+        assertNull(secondOperationSecurityRequirements);
+    }
+
+    @Test(description = "OpenAPI v2 converter - composed model should keep required properties")
+    public void testissue1796() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile(ISSUE_1796_YAML);
+        assertNotNull(oas);
+        ComposedSchema schema = (ComposedSchema) oas.getComponents().getSchemas().get("ComposedModel");
+        assertNotNull(schema.getRequired());
+        assertEquals(schema.getRequired().size(), 1);
+        assertEquals(schema.getRequired().get(0), "name");
+    }
+
     @Test()
     public void testInlineDefinitionProperty() throws Exception {
         SwaggerConverter converter = new SwaggerConverter();
@@ -880,6 +904,24 @@ public class V2ConverterTest {
 
         Schema petCategoryInline = oas.getComponents().getSchemas().get("Pet_categoryInline");
         assertNotNull(petCategoryInline);
+
+    }
+
+    @Test()
+    public void testConvertFormDataAsObjectSchema() throws Exception {
+        OpenAPI oas = getConvertedOpenAPIFromJsonFile("issue-1529.json");
+        assertNotNull(oas);
+
+        Schema companiesSchema = oas.getPaths()
+                                    .get("/companies/")
+                                    .getPost()
+                                    .getRequestBody()
+                                    .getContent()
+                                    .get("multipart/form-data")
+                                    .getSchema();
+
+        assertEquals(companiesSchema.getType(), "object");
+        assertEquals(companiesSchema.getClass(), ObjectSchema.class);
 
     }
 }
