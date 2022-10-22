@@ -380,16 +380,21 @@ public class ResolverFully {
 
             if (aggregateCombinators && (hasAllOf || adjacent)) {
                 Schema combinedModel = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
+//                combinedModel.setDefault(composedSchema.getDefault());
                 Set<Object> examples = new HashSet<>();
+                Set<Object> defaultValues = new HashSet<>();
 
                 if (hasAllOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAllOf(), examples);
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAllOf(), examples, defaultValues);
                 }
                 if (hasOneOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getOneOf(), examples);
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getOneOf(), examples, defaultValues);
                 }
                 if (hasAnyOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples);
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples, defaultValues);
+                }
+                if (defaultValues.size() == 1) {
+                    combinedModel.setDefault(defaultValues.iterator().next());
                 }
 
                 if (schema.getExample() != null) {
@@ -469,10 +474,9 @@ public class ResolverFully {
     }
 
     private void aggregateSchemaCombinators(ComposedSchema sourceSchema, Schema targetSchema,
-                                            List<Schema> schemasToAggregate, Set<Object> examples) {
+                                            List<Schema> schemasToAggregate, Set<Object> examples, Set<Object> defaultValues) {
 
         Set<String> requiredProperties = new HashSet<>();
-
         for (Schema innerModel : schemasToAggregate) {
             Schema resolved = resolveSchema(innerModel);
             Map<String, Schema> properties = resolved.getProperties();
@@ -496,6 +500,11 @@ public class ResolverFully {
             if (resolved.getExample() != null) {
                 examples.add(resolved.getExample());
             }
+            if (sourceSchema.getDefault() != null && resolved.getDefault() == null)
+                defaultValues.add(sourceSchema.getDefault());
+            else
+                defaultValues.add(resolved.getDefault());
+
             if (resolved.getExtensions() != null) {
                 Map<String, Object> extensions = resolved.getExtensions();
                 for (String key : extensions.keySet()) {
