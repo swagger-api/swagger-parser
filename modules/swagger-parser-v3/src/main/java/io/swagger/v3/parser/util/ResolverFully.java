@@ -56,7 +56,7 @@ public class ResolverFully {
     private Map<String, Link> links;
     private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
     private Map<String, Callback> callbacks;
-    
+
     public void resolveFully(OpenAPI openAPI) {
         Components components = openAPI.getComponents();
         if (components != null && components.getRequestBodies() != null) {
@@ -85,7 +85,7 @@ public class ResolverFully {
             if (headers == null) {
                 headers = new HashMap<>();
             }
-        }  
+        }
 
         if (components != null && components.getParameters() != null) {
             parameters = components.getParameters();
@@ -243,7 +243,7 @@ public class ResolverFully {
         }
         return header;
     }
-  
+
     public Link resolveLink(Link link){
         RefFormat refFormat = computeRefFormat(link.get$ref());
         String $ref = link.get$ref();
@@ -272,7 +272,7 @@ public class ResolverFully {
         }
         return requestBody;
     }
-    
+
     public Callback resolveCallback(Callback callback){
         RefFormat refFormat = computeRefFormat(callback.get$ref());
         String $ref = callback.get$ref();
@@ -509,6 +509,12 @@ public class ResolverFully {
                 Map<String, Object> extensions = resolved.getExtensions();
                 for (String key : extensions.keySet()) {
                     targetSchema.addExtension(key, extensions.get(key));
+                }
+            }
+            if (sourceSchema.getExtensions() != null) {
+                Map<String, Object> extensions = sourceSchema.getExtensions();
+                for (String key : extensions.keySet()) {
+                    targetSchema.addExtension(key, sourceSchema.getExtensions().get(key));
                 }
             }
         }
