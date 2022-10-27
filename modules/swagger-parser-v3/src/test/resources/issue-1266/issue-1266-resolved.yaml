@@ -38,6 +38,7 @@ paths:
                     type: string
                   data2:
                     type: string
+                type: object
                 x-extension-ref: 3
   /test/extensions/not/inherited/both:
     get:
