@@ -332,6 +332,10 @@ public class OpenAPIDeserializer {
 				openAPI.setComponents(components);
 				this.components = components;
                 if(result.validateInternalRefs) {
+                    /* TODO currently only capable of validating if ref is to root schema withing #/components/schemas
+                     * need to evaluate json pointer instead to also allow validation of nested schemas
+                     * e.g. #/components/schemas/foo/properties/bar
+                     */
                     for (String schema : localSchemaRefs.keySet()) {
                         if (components.getSchemas().get(schema) == null) {
                             result.invalidType(localSchemaRefs.get(schema), schema, "schema", rootNode);
@@ -2763,7 +2767,11 @@ public class OpenAPIDeserializer {
 				} else {
 					schema.set$ref(ref.asText());
 				}
-                if(schema.get$ref().startsWith("#/components/schemas")){// it's internal
+                /* TODO currently only capable of validating if ref is to root schema withing #/components/schemas
+                 * need to evaluate json pointer instead to also allow validation of nested schemas
+                 * e.g. #/components/schemas/foo/properties/bar
+                 */
+                if(schema.get$ref().startsWith("#/components/schemas") && StringUtils.countMatches(schema.get$ref(), "/") == 3){
                     String refName  = schema.get$ref().substring(schema.get$ref().lastIndexOf("/")+1);
                     localSchemaRefs.put(refName,location);
                 }
