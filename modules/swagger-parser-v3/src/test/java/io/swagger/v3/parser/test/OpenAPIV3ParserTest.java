@@ -3362,4 +3362,12 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(openAPI);
         assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
     }
+
+    @Test
+    public void testInternalRefsValidation() throws Exception {
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/internal-refs.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yamlString, null, options);
+        assertEquals(parseResult.getMessages().size(), 1);
+    }
 }
