@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -379,7 +380,15 @@ public class ResolverFully {
             boolean adjacent = (hasAllOf && hasAnyOf) || (hasAllOf && hasOneOf) || (hasAnyOf && hasOneOf);
 
             if (aggregateCombinators && (hasAllOf || adjacent)) {
-                Schema combinedModel = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
+                Schema combinedModel = null;
+                if (SpecVersion.V30.equals(composedSchema.getSpecVersion())) {
+                    combinedModel = SchemaTypeUtil.createSchema(getSchemaType(composedSchema), composedSchema.getFormat());
+                } else {
+                    combinedModel = new JsonSchema();
+                    combinedModel.setFormat(composedSchema.getFormat());
+                    combinedModel.setTypes(composedSchema.getTypes());
+                }
+
 //                combinedModel.setDefault(composedSchema.getDefault());
                 Set<Object> examples = new HashSet<>();
                 Set<Object> defaultValues = new HashSet<>();
@@ -436,8 +445,12 @@ public class ResolverFully {
                 Schema property = updated.get(key);
 
                 if (property.getProperties() != model.getProperties()) {
-                    if (property.getType() == null) {
-                        property.setType("object");
+                    if (!hasSchemaType(property)) {
+                        if (SpecVersion.V30.equals(property.getSpecVersion())) {
+                            property.setType("object");
+                        } else {
+                            property.addType("object");
+                        }
                     }
                     model.addProperties(key, property);
                 } else {
@@ -453,6 +466,22 @@ public class ResolverFully {
         return result;
     }
 
+    protected String getSchemaType(Schema schema) {
+        if (SpecVersion.V30.equals(schema.getSpecVersion())) {
+            return schema.getType();
+        }
+        if (schema.getTypes() != null && schema.getTypes().size() == 1) {
+            return (String)schema.getTypes().iterator().next();
+        }
+        return null;
+    }
+
+    protected boolean hasSchemaType(Schema schema) {
+        if (SpecVersion.V30.equals(schema.getSpecVersion())) {
+            return schema.getType() != null;
+        }
+        return schema.getTypes() != null && schema.getTypes().size() > 0;
+    }
     public Map<String,Example> resolveExample(Map<String,Example> examples){
 
         Map<String,Example> resolveExamples = examples;

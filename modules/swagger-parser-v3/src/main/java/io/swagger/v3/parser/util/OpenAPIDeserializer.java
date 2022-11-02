@@ -13,6 +13,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.links.Link;
@@ -313,6 +314,7 @@ public class OpenAPIDeserializer {
 				return null;
 			} else if (value.startsWith("3.1")) {
 				result.openapi31(true);
+                openAPI.setSpecVersion(SpecVersion.V31);
 			}
             if (!value.startsWith("3.0.") && !value.startsWith("3.1.")){
                 result.warning(location, "The provided definition does not specify a valid version field");
