@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: test
+paths: {}
+components: 
+  schemas:    
+    MemberRef:
+      description: Provides basic ID info about a member with an href to the full object
+      type: object
+      properties:
+        uuid:
+          description: "Uniquely identifies a member across the entire platform"
+          type: string
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          example: "26a0bac8-5c37-4c54-b3b1-1ad4551db061"
+        alt_id:
+          description: "An ID defined for a member, typically provided by a customer during integration, which will be unique within a given group."
+          type: string
+          minLength: 1
+          maxLength: 36
+          example: "ABC-123"
+        group:
+          $ref: "#/components/schemas/MemberGroup"
+        href:
+          type: string
+          format: uri
+          readOnly: true
+      anyOf:
+      - required: ["uuid"]
+        properties:
+          uuid:
+            $ref: "#/components/schemas/MemberRef/properties/uuid"
+          alt_id:
+            $ref: "#/components/schemas/MemberRef/properties/alt_id"
+          group:
+            $ref: "#/components/schemas/MemberRef/properties/group"
+          href:
+            $ref: "#/components/schemas/MemberRef/properties/href"
+      - required: ["alt_id", "group"]
+        properties:
+          uuid:
+            $ref: "#/components/schemas/MemberRef/properties/uuid"
+          alt_id:
+            $ref: "#/components/schemas/MemberRef/properties/alt_id"
+          group:
+            $ref: "#/components/schemas/MemberRef/properties/group"
+          href:
+            $ref: "#/components/schemas/MemberRef/properties/href"
+    MemberSmall:
+      description: >-
+        Provides abbreviated information about a member and is used when returning an array of members
+      readOnly: true
+      properties:
+        uuid:
+          $ref: "#/components/schemas/MemberRef/properties/uuid"
+        alt_id:
+          $ref: "#/components/schemas/MemberRef/properties/alt_id"
+        group:
+          $ref: "#/components/schemas/MemberRef/properties/group"
+        href:
+          $ref: "#/components/schemas/MemberRef/properties/href"
+        activated:
+          description: >-
+            Indicates that the member has logged into their account
+          type: boolean
+          example: true
+        disabled:
+          description: >-
+            Indicates that the member's account is disabled and they will no longer be able to login
+          type: boolean
+          example: false
+      
+       

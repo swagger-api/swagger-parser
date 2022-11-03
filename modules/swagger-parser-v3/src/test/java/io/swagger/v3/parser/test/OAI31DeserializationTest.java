@@ -947,4 +947,44 @@ public class OAI31DeserializationTest {
         assertNull(profile.getProperties());
 
     }
+
+    @Test(description = "Test Issue 1801")
+    public void test31Issue1801() {
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/issue-1801.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        Schema firstAllOf = (Schema)openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(0);
+        assertEquals(firstAllOf.getTypes().iterator().next(), "number");
+        assertEquals(firstAllOf.getType(), null);
+        Schema secondAllOf = (Schema)openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(1);
+        assertEquals(secondAllOf.getTypes(), null);
+        assertEquals(firstAllOf.getType(), null);
+
+        try {
+            System.setProperty("bind-type", "true");
+            result = new OpenAPIV3Parser().readLocation("3.1.0/issue-1801.yaml", null, options);
+            assertNotNull(result.getOpenAPI());
+            openAPI = result.getOpenAPI();
+            firstAllOf = (Schema) openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(0);
+            assertEquals(firstAllOf.getTypes().iterator().next(), "number");
+            assertEquals(firstAllOf.getType(), "number");
+            secondAllOf = (Schema) openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(1);
+            assertEquals(secondAllOf.getTypes(), null);
+            assertEquals(secondAllOf.getType(), null);
+        } finally {
+            System.setProperty("bind-type", "false");
+        }
+    }
+
+    @Test(description = "Test Issue 1821")
+    public void test31Issue1821() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/issue-1821.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        Schema id = (Schema)result.getOpenAPI().getComponents().getSchemas().get("Rule").getProperties().get("id");
+        assertEquals(id.getTypes().iterator().next(), "string");
+    }
 }

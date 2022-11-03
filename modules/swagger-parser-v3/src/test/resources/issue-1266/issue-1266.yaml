@@ -13,6 +13,17 @@ components:
       properties:
         data:
           type: "string"
+    ExtendedResponseModel:
+      type: object
+      x-extension-ref: 2
+      allOf:
+        - $ref: '#/components/schemas/ResponseModel'
+        - type: object
+          required:
+            - gps
+          properties:
+            gps:
+              type: string          
 
 paths:
   /test/extensions/not/inherited:
@@ -29,3 +40,27 @@ paths:
                     properties:
                       data2:
                         type: "string"
+  /test/extensions/not/inherited/bothinline:
+    get:
+      responses:
+        200:
+          description: "A test failing on the merge of extensions in a allOf, with same extension defined in referencing and referenced"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResponseModel"
+                  - type: "object"
+                    x-extension-ref: 3
+                    properties:
+                      data2:
+                        type: "string"                       
+  /test/extensions/not/inherited/both:
+    get:
+      responses:
+        200:
+          description: "A test failing on the merge of extensions in a allOf, with same extension defined in referencing and referenced"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtendedResponseModel"

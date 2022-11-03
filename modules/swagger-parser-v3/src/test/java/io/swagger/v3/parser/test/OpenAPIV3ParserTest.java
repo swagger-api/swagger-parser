@@ -109,6 +109,18 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testParametersAndResponsesAsNumbers() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/parametersAsNumbers/swagger.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getParameters().get(0).getName(), "dealId");
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getResponses().get("200").getDescription(), "Success");
+    }
+
+    @Test
     public void testIssue1758() throws Exception{
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1758.yaml", null, options);
@@ -3349,5 +3361,13 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
         Assert.assertNotNull(openAPI);
         assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
+    }
+
+    @Test
+    public void testInternalRefsValidation() throws Exception {
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/internal-refs.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yamlString, null, options);
+        assertEquals(parseResult.getMessages().size(), 1);
     }
 }
