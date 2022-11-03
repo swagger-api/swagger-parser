@@ -2697,6 +2697,261 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testIssue1454AllOfDefaultValue(){
+        String json =
+                "{" +
+                "  \"openapi\": \"3.0.1\"," +
+                "  \"info\": {" +
+                "    \"title\": \"Here be enum bugs\"," +
+                "    \"description\": \"OpenAPI spec to test the enum parsing bugs.\"," +
+                "    \"version\": \"1.0.0\"" +
+                "  }," +
+                "  \"paths\": {" +
+                "    \"/enum/parse/bug\": {" +
+                "      \"post\": {" +
+                "        \"summary\": \"Test enum parse bug\"," +
+                "        \"requestBody\": {" +
+                "          \"content\": {" +
+                "            \"application/json\": {" +
+                "              \"schema\": {" +
+                "                \"$ref\": \"#/components/schemas/SchemaWithDefaultAndEnum\"" +
+                "              }" +
+                "            }" +
+                "          }" +
+                "        }," +
+                "        \"responses\": {" +
+                "          \"default\": {" +
+                "            \"description\": \"Successful response\"" +
+                "          }" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }," +
+                "  \"components\": {" +
+                "    \"schemas\": {" +
+                "      \"SchemaWithDefaultAndEnum\": {" +
+                "        \"type\": \"object\"," +
+                "        \"properties\": {" +
+                "          \"enumProperty\": {" +
+                "            \"description\": \"This schema with set default enum value and enum ref shows default SCHEMA_DEFAULT value in Swagger Editor, but is null when parsed with OpenAPIV3Parser.\"," +
+                "            \"allOf\": [" +
+                "              {" +
+                "                \"$ref\": \"#/components/schemas/Enum\"" +
+                "              }" +
+                "            ]," +
+                "            \"default\": \"SCHEMA_DEFAULT\"" +
+                "          }" +
+                "        }" +
+                "      }," +
+                "      \"Enum\": {" +
+                "        \"type\": \"string\"," +
+                "        \"enum\": [" +
+                "          \"SCHEMA_DEFAULT\"," +
+                "          \"NOT_DEFAULT\"" +
+                "        ]" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
+
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnum")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+        OpenAPIV3Parser parser2 = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult result2 = parser2.readContents(json, null, options);
+        OpenAPI openAPI2 = result2.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI2.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnum")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+    }
+
+    @Test
+    public void testIssue1454AllOfEnumWithDefaultValue(){
+        String json =
+                "{" +
+                "  \"openapi\": \"3.0.1\"," +
+                "  \"info\": {" +
+                "    \"title\": \"Here be enum bugs\"," +
+                "    \"description\": \"OpenAPI spec to test the enum parsing bugs.\"," +
+                "    \"version\": \"1.0.0\"" +
+                "  }," +
+                "  \"paths\": {" +
+                "    \"/enum/parse/bug\": {" +
+                "      \"post\": {" +
+                "        \"summary\": \"Test enum parse bug\"," +
+                "        \"requestBody\": {" +
+                "          \"content\": {" +
+                "            \"application/json\": {" +
+                "              \"schema\": {" +
+                "                \"$ref\": \"#/components/schemas/SchemaWithEnumWithDefault\"" +
+                "              }" +
+                "            }" +
+                "          }" +
+                "        }," +
+                "        \"responses\": {" +
+                "          \"default\": {" +
+                "            \"description\": \"Successful response\"" +
+                "          }" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }," +
+                "  \"components\": {" +
+                "    \"schemas\": {" +
+                "      \"SchemaWithEnumWithDefault\": {" +
+                "        \"type\": \"object\"," +
+                "        \"properties\": {" +
+                "          \"enumProperty\": {" +
+                "            \"description\": \"This schema with set default enum value and enum ref shows default SCHEMA_DEFAULT value in Swagger Editor, but is null when parsed with OpenAPIV3Parser.\"," +
+                "            \"allOf\": [" +
+                "              {" +
+                "                \"$ref\": \"#/components/schemas/EnumWithDefault\"" +
+                "              }" +
+                "            ]" +
+                "          }" +
+                "        }" +
+                "      }," +
+                "      \"EnumWithDefault\": {" +
+                "        \"type\": \"string\"," +
+                "        \"enum\": [" +
+                "          \"SCHEMA_DEFAULT\"," +
+                "          \"NOT_DEFAULT\"" +
+                "        ]," +
+                "        \"default\": \"SCHEMA_DEFAULT\"" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
+
+        // it is really expected to be working in resolve=false mode?
+//        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+//        SwaggerParseResult result = parser.readContents(json, null, new ParseOptions());
+//        OpenAPI openAPI = result.getOpenAPI();
+//        assertEquals(((Map<String, Schema>)openAPI.getComponents()
+//                .getSchemas()
+//                .get("SchemaWithEnumWithDefault")
+//                .getProperties())
+//                .get("enumProperty")
+//                .getDefault(), "SCHEMA_DEFAULT");
+
+        OpenAPIV3Parser parser2 = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult result2 = parser2.readContents(json, null, options);
+        OpenAPI openAPI2 = result2.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI2.getComponents()
+                .getSchemas()
+                .get("SchemaWithEnumWithDefault")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+    }
+
+    @Test
+    public void testIssue1454WithDefaultAllOfEnumWithDefaultValue(){
+        String json =
+                "{" +
+                "  \"openapi\": \"3.0.1\"," +
+                "  \"info\": {" +
+                "    \"title\": \"Here be enum bugs\"," +
+                "    \"description\": \"OpenAPI spec to test the enum parsing bugs.\"," +
+                "    \"version\": \"1.0.0\"" +
+                "  }," +
+                "  \"paths\": {" +
+                "    \"/enum/parse/bug\": {" +
+                "      \"post\": {" +
+                "        \"summary\": \"Test enum parse bug\"," +
+                "        \"requestBody\": {" +
+                "          \"content\": {" +
+                "            \"application/json\": {" +
+                "              \"schema\": {" +
+                "                \"$ref\": \"#/components/schemas/SchemaWithDefaultAndEnumWithDefault\"" +
+                "              }" +
+                "            }" +
+                "          }" +
+                "        }," +
+                "        \"responses\": {" +
+                "          \"default\": {" +
+                "            \"description\": \"Successful response\"" +
+                "          }" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }," +
+                "  \"components\": {" +
+                "    \"schemas\": {" +
+                "      \"SchemaWithDefaultAndEnumWithDefault\": {" +
+                "        \"type\": \"object\"," +
+                "        \"properties\": {" +
+                "          \"enumProperty\": {" +
+                "            \"description\": \"This schema with set default enum value and enum ref shows default SCHEMA_DEFAULT value in Swagger Editor, but is null when parsed with OpenAPIV3Parser.\"," +
+                "            \"allOf\": [" +
+                "              {" +
+                "                \"$ref\": \"#/components/schemas/EnumWithDefault\"" +
+                "              }" +
+                "            ]," +
+                "            \"default\": \"SCHEMA_DEFAULT\"" +
+                "          }" +
+                "        }" +
+                "      }," +
+                "      \"EnumWithDefault\": {" +
+                "        \"type\": \"string\"," +
+                "        \"enum\": [" +
+                "          \"SCHEMA_DEFAULT\"," +
+                "          \"NOT_DEFAULT\"" +
+                "        ]," +
+                "        \"default\": \"SCHEMA_DEFAULT\"" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
+
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, new ParseOptions());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnumWithDefault")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+        OpenAPIV3Parser parser2 = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult result2 = parser2.readContents(json, null, options);
+        OpenAPI openAPI2 = result2.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI2.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnumWithDefault")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+    }
+
+    @Test
     public void testOptionalParameter(@Injectable List<AuthorizationValue> auths) {
         String yaml = "openapi: 3.0.1\n" +
                 "paths:\n" +

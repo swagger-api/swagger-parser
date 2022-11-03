@@ -136,12 +136,17 @@ public class ReferenceUtils {
         String[] tokens = fragment.split("/");
         JsonNode node = tree;
         for (String token : tokens) {
-            if (StringUtils.isNotBlank(token)) {
+            if (StringUtils.isBlank(token)) {
+                continue;
+            }
+            if (node.isArray()) {
+                node = node.get(Integer.valueOf(token));
+            } else {
                 node = node.get(ReferenceUtils.unescapePointer(token));
-                //if at any point we do find an element we expect, print and error and abort
-                if (node == null) {
-                    throw new RuntimeException("Could not find " + fragment + " in contents of " + uri);
-                }
+            }
+            //if at any point we do find an element we expect, print and error and abort
+            if (node == null) {
+                throw new RuntimeException("Could not find " + fragment + " in contents of " + uri);
             }
         }
         return node;

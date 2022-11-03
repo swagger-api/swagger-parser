@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: common
+  description: Common components for REST APIs
+  version: v1-test
+
+components:
+  pathitems:
+    GetDeal:
+      get:
+        tags:
+          - Deal
+        summary: Gets the latest version of a deal (based on TimeStamp) or the specified version or the transactional deal by state
+        description: "Versions of a deal are ordered by the TimeStamp, if the TimeStamp is not set, the Timestamp is\r\nset to the creation time."
+        operationId: DealGetVersionOne
+        parameters:
+          - name: dealId
+            in: path
+            description: The deal identifier.
+            required: true
+            style: simple
+            explode: false
+            schema:
+              maxLength: 250
+              type: string
+              description: The deal identifier.
+          - name: version
+            in: query
+            description: The version of the deal
+            required: false
+            style: form
+            explode: true
+            schema:
+              type: string
+              description: The version of the deal
+              nullable: true
+          - name: transform
+            in: query
+            description: 'The transform''s name used to format the output data. <p>Example: vinCRM</p>'
+            required: false
+            style: form
+            explode: true
+            schema:
+              type: string
+              description: The transform's name used to format the output data
+              nullable: true
+        responses:
+          '200':
+            description: Success
+            content:
+              application/vnd.common.v3+json:
+                schema:
+                  $ref: '#/components/schemas/GetDealResponse'
+          '401':
+            description: Unauthorized
+          '403':
+            description: Forbidden
+          '404':
+            description: Not Found
+            content:
+              application/vnd.common.v3+json:
+                schema:
+                  $ref: '#/components/schemas/inlineResponse4041'
+          '503':
+            description: Server Error
+  schemas:
+    ReferenceKeyModel:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        createdByClientId:
+          type: string
+          nullable: true
+        value:
+          type: string
+          nullable: true
+        createdByDateTime:
+          type: string
+          format: date-time
+      additionalProperties: false
+    GetDealResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Deal API specified unique identifier
+          nullable: true
+        version:
+          type: string
+          description: The current version of the deal represented as a hash of the contract
+          nullable: true
+        href:
+          type: string
+          description: The href/url for the deal as it was created
+          nullable: true
+        references:
+          type: object
+          additionalProperties:
+            uniqueItems: true
+            type: array
+            items:
+              $ref: '#/components/schemas/ReferenceKeyModel'
+          description: Gets or sets the reference keys.
+          nullable: true
+        createdDate:
+          type: string
+          description: Gets the creation date and time of the deal version
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: Full deal model
+    

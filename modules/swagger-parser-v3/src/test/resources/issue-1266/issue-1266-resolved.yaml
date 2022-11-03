@@ -21,6 +21,42 @@ paths:
                   data2:
                     type: string
                 x-extension-ref: 1
+  /test/extensions/not/inherited/bothinline:
+    get:
+      responses:
+        "200":
+          description: "A test failing on the merge of extensions in a allOf, with\
+            \ same extension defined in referencing and referenced"
+          content:
+            application/json:
+              schema:
+                required:
+                - data
+                properties:
+                  data:
+                    type: string
+                  data2:
+                    type: string
+                x-extension-ref: 3
+  /test/extensions/not/inherited/both:
+    get:
+      responses:
+        "200":
+          description: "A test failing on the merge of extensions in a allOf, with\
+            \ same extension defined in referencing and referenced"
+          content:
+            application/json:
+              schema:
+                required:
+                - data
+                - gps
+                type: object
+                properties:
+                  data:
+                    type: string
+                  gps:
+                    type: string
+                x-extension-ref: 2
 components:
   schemas:
     ResponseModel:
@@ -31,3 +67,14 @@ components:
         data:
           type: string
       x-extension-ref: 1
+    ExtendedResponseModel:
+      required:
+      - data
+      - gps
+      type: object
+      properties:
+        data:
+          type: string
+        gps:
+          type: string
+      x-extension-ref: 2
