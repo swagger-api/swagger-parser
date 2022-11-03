@@ -1,0 +1,42 @@
+openapi: 3.0.0
+
+info:
+  title: Sample API
+  version: 1.0.2
+
+paths:
+  /ref/test/{id}/toplevelparam:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          enum:
+            - one
+            - two
+    get:
+      summary: Test of path params defined on top level
+      responses:
+        200:
+          description: OK
+      tags:
+        - Tests
+
+  /ref/test/{id}/operationlevelparam:
+    get:
+      summary: Test of path params defined on top level
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            enum:
+              - one
+              - two
+      responses:
+        200:
+          description: OK
+      tags:
+        - Tests
