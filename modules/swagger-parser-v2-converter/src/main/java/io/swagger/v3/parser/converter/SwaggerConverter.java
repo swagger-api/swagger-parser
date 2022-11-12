@@ -861,8 +861,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             response.setDescription(v2Response.getDescription());
 
-            if (v2Response.getSchema() != null) {
-                Schema schema = convertFileSchema(convert(v2Response.getSchema()));
+            if (v2Response.getResponseSchema() != null) {
+                Schema schema = convertFileSchema(convert(v2Response.getResponseSchema()));
                 for (String type : mediaTypes) {
                     // TODO: examples
                     MediaType mediaType = new MediaType();
@@ -930,6 +930,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (schema == null) {
             return null;
         }
+        if (schema.getBooleanValue() != null) {
+            return new Schema().booleanSchemaValue(schema.getBooleanValue());
+        }
         Schema result;
 
         if (schema instanceof RefProperty) {
@@ -961,8 +964,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             result = arraySchema;
 
         } else if (schema instanceof FileProperty) {
-            FileSchema fileSchema = Json.mapper().convertValue(schema, FileSchema.class);
-            result = fileSchema;
+            result = Json.mapper().convertValue(schema, FileSchema.class);
 
         }else {
 
@@ -982,7 +984,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
             if (schema instanceof MapProperty) {
                 MapProperty map = (MapProperty) schema;
 
-                result.setAdditionalProperties(convert(map.getAdditionalProperties()));
+                if (map.getAdditionalProperties().getBooleanValue() != null) {
+                    result.setAdditionalProperties(map.getAdditionalProperties().getBooleanValue());
+                } else {
+                    result.setAdditionalProperties(convert(map.getAdditionalProperties()));
+                }
                 result.setMinProperties(map.getMinProperties());
                 result.setMaxProperties(map.getMaxProperties());
             }
@@ -1173,6 +1179,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (v2Model == null) {
             return null;
         }
+        if (v2Model.getBooleanValue() != null) {
+            return new Schema().booleanSchemaValue(v2Model.getBooleanValue());
+        }
         Schema result;
 
         if (v2Model instanceof ArrayModel) {
@@ -1208,16 +1217,22 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 v2discriminator = model.getDiscriminator();
                 model.setDiscriminator(null);
             }
-
-            result = Json.mapper().convertValue(v2Model, Schema.class);
-
+            if (v2Model instanceof ModelImpl && ("file".equals(((ModelImpl)v2Model).getType()))) {
+                result = Json.mapper().convertValue(v2Model, FileSchema.class);
+            } else {
+                result = Json.mapper().convertValue(v2Model, Schema.class);
+            }
             addProperties(v2Model, result);
 
             if (v2Model instanceof ModelImpl) {
                 ModelImpl model = (ModelImpl) v2Model;
 
                 if (model.getAdditionalProperties() != null) {
-                    result.setAdditionalProperties(convert(model.getAdditionalProperties()));
+                    if (model.getAdditionalProperties().getBooleanValue() != null) {
+                        result.setAdditionalProperties(model.getAdditionalProperties().getBooleanValue());
+                    } else {
+                        result.setAdditionalProperties(convert(model.getAdditionalProperties()));
+                    }
                 }
             } else if(v2Model instanceof RefModel) {
                 RefModel ref = (RefModel) v2Model;
