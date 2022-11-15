@@ -6,6 +6,7 @@ import io.swagger.models.*;
 import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.BooleanValueProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.util.Json;
@@ -769,6 +770,9 @@ public class SwaggerDeserializer {
             result.missing(location, "empty schema");
             return null;
         }
+        if (node.isBoolean()) {
+            return new BooleanValueModel(node.asBoolean());
+        }
         if (node.get("$ref") != null) {
             return refModel(node, location, result);
         }
@@ -804,7 +808,7 @@ public class SwaggerDeserializer {
                 am.setUniqueItems(uniqueItems);
             }
 
-            // add xml specific information if available 
+            // add xml specific information if available
             JsonNode xml = node.get("xml");
             if (xml != null) {
                 am.setXml(Json.mapper().convertValue(xml, Xml.class));
@@ -826,6 +830,8 @@ public class SwaggerDeserializer {
             JsonNode ap = node.get("additionalProperties");
             if (ap != null && ap.getNodeType().equals(JsonNodeType.OBJECT)) {
                 impl.setAdditionalProperties(Json.mapper().convertValue(ap, Property.class));
+            } else if (ap != null && ap.isBoolean()) {
+                impl.setAdditionalProperties(new BooleanValueProperty(ap.asBoolean()));
             }
 
             value = getString("default", node, false, location, result);
@@ -1092,6 +1098,9 @@ public class SwaggerDeserializer {
 
     public Property property(ObjectNode node, String location, ParseResult result) {
         if (node != null) {
+            if (node.isBoolean()) {
+                return new BooleanValueProperty(node.asBoolean());
+            }
             if (node.get("type") == null) {
                 // may have an enum where type can be inferred
                 JsonNode enumNode = node.get("enum");
