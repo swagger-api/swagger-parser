@@ -13,6 +13,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.links.Link;
@@ -313,6 +314,7 @@ public class OpenAPIDeserializer {
 				return null;
 			} else if (value.startsWith("3.1")) {
 				result.openapi31(true);
+                openAPI.setSpecVersion(SpecVersion.V31);
 			}
             if (!value.startsWith("3.0.") && !value.startsWith("3.1.")){
                 result.warning(location, "The provided definition does not specify a valid version field");
@@ -332,6 +334,10 @@ public class OpenAPIDeserializer {
 				openAPI.setComponents(components);
 				this.components = components;
                 if(result.validateInternalRefs) {
+                    /* TODO currently only capable of validating if ref is to root schema withing #/components/schemas
+                     * need to evaluate json pointer instead to also allow validation of nested schemas
+                     * e.g. #/components/schemas/foo/properties/bar
+                     */
                     for (String schema : localSchemaRefs.keySet()) {
                         if (components.getSchemas().get(schema) == null) {
                             result.invalidType(localSchemaRefs.get(schema), schema, "schema", rootNode);
@@ -2763,7 +2769,11 @@ public class OpenAPIDeserializer {
 				} else {
 					schema.set$ref(ref.asText());
 				}
-                if(schema.get$ref().startsWith("#/components/schemas")){// it's internal
+                /* TODO currently only capable of validating if ref is to root schema withing #/components/schemas
+                 * need to evaluate json pointer instead to also allow validation of nested schemas
+                 * e.g. #/components/schemas/foo/properties/bar
+                 */
+                if(schema.get$ref().startsWith("#/components/schemas") && StringUtils.countMatches(schema.get$ref(), "/") == 3){
                     String refName  = schema.get$ref().substring(schema.get$ref().lastIndexOf("/")+1);
                     localSchemaRefs.put(refName,location);
                 }

@@ -60,8 +60,6 @@ public class PathsProcessor {
         for (String pathStr : pathMap.keySet()) {
             PathItem pathItem = pathMap.get(pathStr);
 
-            addParametersToEachOperation(pathItem);
-
             if (pathItem.get$ref() != null) {
 
                 PathItem resolvedPath = processReferencePath(pathItem);
@@ -75,6 +73,8 @@ public class PathsProcessor {
                     pathItem = resolvedPath;
                 }
             }
+
+            addParametersToEachOperation(pathItem);
 
             //at this point we can process this path
             final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
