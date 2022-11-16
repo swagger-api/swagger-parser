@@ -1,0 +1,22 @@
+openapi: 3.1.0
+paths: {}
+components:
+  schemas:
+    Rule:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        condition:
+          type: string
+        order:
+          type: integer
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          description: Version counter
+    

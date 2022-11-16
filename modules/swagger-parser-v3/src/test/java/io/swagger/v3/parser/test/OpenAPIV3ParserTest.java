@@ -2234,13 +2234,14 @@ public class OpenAPIV3ParserTest {
         assertEquals(path.getClass(), PathItem.class); //we successfully converted the RefPath to a Path
 
         final List<Parameter> parameters = path.getParameters();
-        assertParamDetails(parameters, 0, QueryParameter.class, "param1", "query");
-        assertParamDetails(parameters, 1, HeaderParameter.class, "param2", "header");
+        assertNull(parameters);
 
         final Operation operation = path.getGet();
         final List<Parameter> operationParams = operation.getParameters();
-        assertParamDetails(operationParams, 0, PathParameter.class, "param3", "path");
-        assertParamDetails(operationParams, 1, HeaderParameter.class, "param4", "header");
+        assertParamDetails(operationParams, 0, QueryParameter.class, "param1", "query");
+        assertParamDetails(operationParams, 1, HeaderParameter.class, "param2", "header");
+        assertParamDetails(operationParams, 2, PathParameter.class, "param3", "path");
+        assertParamDetails(operationParams, 3, HeaderParameter.class, "param4", "header");
 
         final Map<String, ApiResponse> responsesMap = operation.getResponses();
 
@@ -3390,5 +3391,13 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
         Assert.assertNotNull(openAPI);
         assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
+    }
+
+    @Test
+    public void testInternalRefsValidation() throws Exception {
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/internal-refs.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yamlString, null, options);
+        assertEquals(parseResult.getMessages().size(), 1);
     }
 }
