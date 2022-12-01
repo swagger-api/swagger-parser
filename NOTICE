@@ -2,3 +2,14 @@ Swagger Parser - ${pom.name}
 Copyright (c) 2015. SmartBear Software Inc.
 Swagger Parser - ${pom.name}   is licensed under Apache 2.0 license.
 Copy of the Apache 2.0 license can be found in `LICENSE` file.
+
+ApiDOM
+Copyright 2020 SmartBear Software Inc.
+ApiDOM is licensed under Apache 2.0 license.
+Directory modules/swagger-parser-v3/src/test/resources/3.1.0/dereference/fixtures was originally created under Apache 2.0 license in https://github.com/swagger-api/apidom repository.
+Directory modules/swagger-parser-v3/src/test/resources/3.1.0/resolve/fixtures was originally created under Apache 2.0 license in https://github.com/swagger-api/apidom repository.
+These directories have been copied into this project and modified. All modifications are licensed under Apache 2.0 License.
+Copy of the Apache 2.0 license can be found in `LICENSES/Apache-2.0.txt` file.
+
+
+
