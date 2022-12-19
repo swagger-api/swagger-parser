@@ -416,6 +416,24 @@ public class ResolverFully {
                     combinedModel.setXml(schema.getXml());
                 }
 
+                if (schema.getDescription() != null) {
+                    combinedModel.setDescription(schema.getDescription());
+                }
+
+                if (schema.getExtensions() != null) {
+                    Map<String, Object> extensions = schema.getExtensions();
+                    for (String key : extensions.keySet()) {
+                        combinedModel.addExtension(key, extensions.get(key));
+                    }
+                }
+
+                if (schema.getProperties() != null) {
+                    if (combinedModel.getProperties() == null) {
+                        combinedModel.setProperties(new HashMap<>());
+                    }
+                    combinedModel.getProperties().putAll(schema.getProperties());
+                }
+
                 result = combinedModel;
 
             } else {
@@ -545,6 +563,72 @@ public class ResolverFully {
                 for (String key : extensions.keySet()) {
                     targetSchema.addExtension(key, sourceSchema.getExtensions().get(key));
                 }
+            }
+            if (resolved.getMaximum() != null) {
+                targetSchema.setMaximum(resolved.getMaximum());
+            }
+            if (resolved.getExclusiveMaximum() != null) {
+                targetSchema.setExclusiveMaximum(resolved.getExclusiveMaximum());
+            }
+            if (resolved.getMinimum() != null) {
+                targetSchema.setMinimum(resolved.getMinimum());
+            }
+            if (resolved.getExclusiveMinimum() != null) {
+                targetSchema.setExclusiveMinimum(resolved.getExclusiveMinimum());
+            }
+            if (resolved.getMaxLength() != null) {
+                targetSchema.setMaxLength(resolved.getMaxLength());
+            }
+            if (resolved.getMinLength() != null) {
+                targetSchema.setMinLength(resolved.getMinLength());
+            }
+            if (resolved.getPattern() != null) {
+                targetSchema.setPattern(resolved.getPattern());
+            }
+            if (resolved.getMaxItems() != null) {
+                targetSchema.setMaxItems(resolved.getMaxItems());
+            }
+            if (resolved.getMinItems() != null) {
+                targetSchema.setMinItems(resolved.getMinItems());
+            }
+            if (resolved.getUniqueItems() != null) {
+                targetSchema.setUniqueItems(resolved.getUniqueItems());
+            }
+            if (resolved.getMaxProperties() != null) {
+                targetSchema.setMaxProperties(resolved.getMaxProperties());
+            }
+            if (resolved.getMinProperties() != null) {
+                targetSchema.setMinProperties(resolved.getMinProperties());
+            }
+            if (resolved.getType() != null) {
+                targetSchema.setType(resolved.getType());
+            }
+            if (resolved.getDescription() != null) {
+                targetSchema.setDescription(resolved.getDescription());
+            }
+            if (resolved.getFormat() != null) {
+                targetSchema.setFormat(resolved.getFormat());
+            }
+            if (resolved.getNullable() != null) {
+                targetSchema.setNullable(resolved.getNullable());
+            }
+            if (resolved.getReadOnly() != null) {
+                targetSchema.setReadOnly(resolved.getReadOnly());
+            }
+            if (resolved.getWriteOnly() != null) {
+                targetSchema.setWriteOnly(resolved.getWriteOnly());
+            }
+            if (resolved.getExclusiveMaximumValue() != null) {
+                targetSchema.setExclusiveMaximumValue(resolved.getExclusiveMaximumValue());
+            }
+            if (resolved.getExclusiveMinimumValue() != null) {
+                targetSchema.setExclusiveMinimumValue(resolved.getExclusiveMinimumValue());
+            }
+            if (resolved.getMaxContains() != null) {
+                targetSchema.setMaxContains(resolved.getMaxContains());
+            }
+            if (resolved.getMinContains() != null) {
+                targetSchema.setMinContains(resolved.getMinContains());
             }
         }
 

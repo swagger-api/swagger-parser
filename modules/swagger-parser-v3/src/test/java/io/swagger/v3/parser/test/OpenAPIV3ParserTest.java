@@ -87,6 +87,35 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1777() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1777/issue1777.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        Schema id = ((Schema)openAPI.getComponents().getSchemas().get("customer").getProperties().get("id"));
+        assertEquals(id.getType(), "string");
+        assertEquals(id.getFormat(), "uuid");
+        assertEquals(id.getDescription(), "The id of the customer");
+        assertNotNull(id.getExtensions().get("x-apigen-mapping"));
+        assertEquals(id.getMinLength(), (Integer) 36);
+        assertEquals(id.getMaxLength(), (Integer) 36);
+        assertNotNull(id.getPattern());
+    }
+
+    @Test
+    public void testIssue1802() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1802/issue1802.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        Map<String, Schema> props = openAPI.getComponents().getSchemas().get("standard_response_res_one").getProperties();
+        assertNotNull(props.get("data"));
+        assertNotNull(props.get("result"));
+    }
+
+    @Test
     public void testIssue1780() {
         ParseOptions options = new ParseOptions();
         options.setInferSchemaType(false);
