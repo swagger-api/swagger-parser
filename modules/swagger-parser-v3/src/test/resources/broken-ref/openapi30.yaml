@@ -1,0 +1,8 @@
+openapi: 3.0.3
+info:
+  title: ref chain
+  version: '1'
+
+paths:
+  /foo:
+    $ref: ./apis/foo.yaml#/paths/~1foo

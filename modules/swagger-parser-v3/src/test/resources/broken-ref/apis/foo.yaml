@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: swagger parser bug, worked until 2.0.28 but not since 2.0.29
+  version: '1.0'
+
+paths:
+
+  '/foo':
+    post:
+      summary: create foo
+      description: Create a new foo.
+      responses:
+        '200':
+          description: a Foo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Foo'
+              examples:
+                Foo Bar:
+                  $ref: '#/components/examples/FooExample'
+      requestBody:
+        description: foo data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Foo'
+            examples:
+              Foo Bar:
+                $ref: '#/components/examples/FooExample'
+
+components:
+  schemas:
+    Foo:
+      $ref: ../models/foo.model.yaml
+  examples:
+    FooExample:
+      $ref: ../examples/foo.example.yaml
