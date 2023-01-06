@@ -33,10 +33,13 @@ import java.util.ServiceLoader;
 import javax.net.ssl.SSLHandshakeException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenAPIV3Parser implements SwaggerParserExtension {
+
+    public static final String DISABLE_OAS31_RESOLVE = "disableOas31Resolve";
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
     private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
     /**
@@ -206,28 +209,38 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
                     if (result.getOpenAPI().getOpenapi() != null && result.getOpenAPI().getOpenapi().startsWith("3.1")) {
-                        DereferencerContext dereferencerContext = new DereferencerContext(
-                                result,
-                                auth,
-                                location,
-                                options,
-                                null,
-                                null,
-                                true
-                        );
-                        List<OpenAPIDereferencer> dereferencers = DereferencersFactory.getInstance().getDereferencers();
-                        if (dereferencers.iterator().hasNext()) {
-                            OpenAPIDereferencer dereferencer = dereferencers.iterator().next();
-                            dereferencer.dereference(dereferencerContext, dereferencers.iterator());
+                        if (StringUtils.isBlank(System.getenv(DISABLE_OAS31_RESOLVE))) {
+                            DereferencerContext dereferencerContext = new DereferencerContext(
+                                    result,
+                                    auth,
+                                    location,
+                                    options,
+                                    null,
+                                    null,
+                                    true
+                            );
+                            List<OpenAPIDereferencer> dereferencers = DereferencersFactory.getInstance().getDereferencers();
+                            if (dereferencers.iterator().hasNext()) {
+                                OpenAPIDereferencer dereferencer = dereferencers.iterator().next();
+                                dereferencer.dereference(dereferencerContext, dereferencers.iterator());
+                            }
+                            if (options.isResolveFully()) {
+                                new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                            }
+                        } else {
+                            String msg = "Resolution of OAS 3.1 spec disabled by 'disableOas31Resolve' env variable";
+                            LOGGER.warn(msg);
+                            result.getMessages().add(msg);
                         }
                     } else {
                         OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
                                 location, null, options);
                         resolver.resolve(result);
+                        if (options.isResolveFully()) {
+                            new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                        }
                     }
-                    if (options.isResolveFully()) {
-                        new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
-                    }
+
                 }
                 if (options.isFlatten()) {
                     final InlineModelResolver inlineModelResolver =
