@@ -406,7 +406,7 @@
         <swagger-parser-v2-version>1.0.64</swagger-parser-v2-version>
         <commons-io-version>2.11.0</commons-io-version>
         <slf4j-version>1.7.30</slf4j-version>
-        <swagger-core-version>2.2.8-SNAPSHOT</swagger-core-version>
+        <swagger-core-version>2.2.8</swagger-core-version>
         <swagger-core-v2-version>1.6.9</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>6.14.2</testng-version>
