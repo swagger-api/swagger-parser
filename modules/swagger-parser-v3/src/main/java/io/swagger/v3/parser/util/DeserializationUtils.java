@@ -40,7 +40,7 @@ public class DeserializationUtils {
         private Long maxYamlReferences = System.getProperty("maxYamlReferences") == null ? 10000000L : Long.valueOf(System.getProperty("maxYamlReferences"));
         private boolean validateYamlInput = System.getProperty("validateYamlInput") == null ? true : Boolean.valueOf(System.getProperty("validateYamlInput"));
         private boolean yamlCycleCheck = System.getProperty("yamlCycleCheck") == null ? true : Boolean.valueOf(System.getProperty("yamlCycleCheck"));
-
+        private Integer maxYamlCodePoints = System.getProperty("maxYamlCodePoints") == null ? 3 * 1024 * 1024 : Integer.valueOf(System.getProperty("maxYamlCodePoints"));
 
         private Integer maxYamlAliasesForCollections = System.getProperty("maxYamlAliasesForCollections") == null ? Integer.MAX_VALUE : Integer.valueOf(System.getProperty("maxYamlAliasesForCollections"));
         private boolean yamlAllowRecursiveKeys = System.getProperty("yamlAllowRecursiveKeys") == null ? true : Boolean.valueOf(System.getProperty("yamlAllowRecursiveKeys"));
@@ -73,6 +73,8 @@ public class DeserializationUtils {
         public boolean isYamlCycleCheck() {
             return yamlCycleCheck;
         }
+
+        public Integer getMaxYamlCodePoints() { return maxYamlCodePoints; }
 
         public void setYamlCycleCheck(boolean yamlCycleCheck) {
             this.yamlCycleCheck = yamlCycleCheck;
@@ -261,6 +263,8 @@ public class DeserializationUtils {
             method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
             method = LoaderOptions.class.getMethod("setAllowDuplicateKeys", boolean.class);
             method.invoke(loaderOptions, false);
+            method = LoaderOptions.class.getMethod("setCodePointLimit", int.class);
+            method.invoke(loaderOptions, options.getMaxYamlCodePoints());
             org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions, new CustomResolver());
             return yaml;
         } catch (ReflectiveOperationException e) {
