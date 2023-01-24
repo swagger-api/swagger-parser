@@ -87,6 +87,36 @@ public class OpenAPIV3ParserTest {
     protected WireMockServer wireMockServer;
 
     @Test
+    public void testIssue1621() {
+        final ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setResolveCombinators(false);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1621/example.openapi.yaml", null, parseOptions);
+        assertEquals(0, parseResult.getMessages().size());
+        OpenAPI api = parseResult.getOpenAPI();
+        assertEquals( api.getPaths()
+                .get("/example")
+                .getPost()
+                .getRequestBody()
+                .getContent()
+                .get("application/json")
+                .getSchema()
+                .getTitle(),"POST Example");
+    }
+
+    @Test
+    public void testIssue1865() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue-1865/openapi30.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Foo").get$ref(), "#/components/schemas/foomodel");
+    }
+
+    @Test
     public void testIssue1777() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();

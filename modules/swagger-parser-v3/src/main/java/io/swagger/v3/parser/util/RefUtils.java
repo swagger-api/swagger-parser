@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,10 +48,13 @@ public class RefUtils {
             plausibleName = filePathElements[filePathElements.length - 1];
 
             final String[] split = plausibleName.split("\\.");
-            // Fix for issue-1621
-            plausibleName = split[0];
-            for (int i = 1; i < split.length - 1; i++) {
-                plausibleName += "." + split[i];
+            // Fix for issue-1621 and issue-1865
+            //validate number of dots
+            if(split.length > 2) {
+                //Remove dot so ref can be interpreted as internal and relative in Swagger-Core schema class 'set$ref'
+                plausibleName = String.join("", Arrays.copyOf(split, split.length - 1));
+            }else{
+                plausibleName = split[0];
             }
         }
 
