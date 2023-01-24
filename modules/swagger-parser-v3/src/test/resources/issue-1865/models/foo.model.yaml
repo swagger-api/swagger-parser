@@ -1,0 +1,6 @@
+#broken-ref/models/foo.model.yaml
+title: Foo
+type: object
+properties:
+  foo:
+    type: string
