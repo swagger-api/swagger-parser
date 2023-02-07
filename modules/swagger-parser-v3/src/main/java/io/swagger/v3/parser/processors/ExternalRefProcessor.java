@@ -149,8 +149,8 @@ public final class ExternalRefProcessor {
                     for(Schema item : composedSchema.getAllOf()){
                         if (item.get$ref() != null){
                             processRefSchema(item,file);
-                        } else if (item.getProperties() != null) {
-                            processProperties(item.getProperties(), file);
+                        } else{
+                            processSchema(item, file);
                         }
                     }
 
@@ -159,6 +159,8 @@ public final class ExternalRefProcessor {
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
                                 processRefSchema(item,file);
+                            }else{
+                                processSchema(item, file);
                             }
                         }
                     }
@@ -167,10 +169,11 @@ public final class ExternalRefProcessor {
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
                                 processRefSchema(item,file);
+                            }else{
+                                processSchema(item, file);
                             }
                         }
                     }
-
                 }
             }
             //Loop the properties and recursively call this method;

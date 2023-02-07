@@ -86,6 +86,18 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testIssueDereferencingComposedSchemaOneOf() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolverIssue/Beta-1-swagger.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSchemas().get("naNumber"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("unNumber"));
+    }
+
     @Test
     public void testIssue1621() {
         final ParseOptions parseOptions = new ParseOptions();
