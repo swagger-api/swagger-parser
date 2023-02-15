@@ -2,6 +2,8 @@ package io.swagger.v3.parser.reference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +53,7 @@ public class ReferenceVisitor extends AbstractVisitor {
         if (referenceSet.containsKey(baseUri)) {
             return referenceSet.get(baseUri);
         }
-        JsonNode node = ReferenceUtils.parse(baseUri, this.reference.getAuths());
+        JsonNode node = parse(baseUri, this.reference.getAuths());
 
         Reference ref = new Reference()
                 .auths(this.reference.getAuths())
@@ -205,11 +208,11 @@ public class ReferenceVisitor extends AbstractVisitor {
             else {
                 JsonNode node = null;
                 try {
-                    node = ReferenceUtils.parse(baseURI, this.reference.getAuths());
+                    node = parse(baseURI, this.reference.getAuths());
                 } catch (Exception e) {
                     // we can not parse, try ref
                     baseURI = toBaseURI(ref);
-                    node = ReferenceUtils.parse(baseURI, this.reference.getAuths());
+                    node = parse(baseURI, this.reference.getAuths());
                 }
                 reference = toSchemaReference(baseURI, node);
             }
@@ -265,5 +268,14 @@ public class ReferenceVisitor extends AbstractVisitor {
         }
 
         return null;
+    }
+
+    public JsonNode deserializeIntoTree(String content) throws Exception {
+        boolean isJson = content.trim().startsWith("{");
+        return isJson ? Json31.mapper().readTree(content) : Yaml31.mapper().readTree(content);
+    }
+
+    public JsonNode parse(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
+        return deserializeIntoTree(readURI(absoluteUri, auths));
     }
 }

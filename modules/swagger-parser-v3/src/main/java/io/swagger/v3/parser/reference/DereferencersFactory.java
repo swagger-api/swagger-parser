@@ -47,7 +47,7 @@ public class DereferencersFactory {
             if (ext == null) {
                 LOGGER.error("failed to load extension {}", ext);
             } else {
-                instance.addDereferencer(ext);
+                getInstance().addDereferencer(ext);
                 LOGGER.debug("adding OpenAPIDereferencer: {}", ext);
             }
         }

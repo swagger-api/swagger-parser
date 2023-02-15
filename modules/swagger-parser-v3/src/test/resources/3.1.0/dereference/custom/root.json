@@ -1,0 +1,8 @@
+{
+    "openapi": "3.1.0",
+    "paths": {
+        "/externalref": {
+            "$ref": "http://example.com/custom/nested/domain.yaml#/components/pathItems/ExternalRef"
+        }
+    }
+}
