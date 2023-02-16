@@ -1,7 +1,9 @@
 package io.swagger.v3.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
@@ -109,7 +111,7 @@ public class ResolverCache {
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
         if (refFormat == RefFormat.INTERNAL) {
             //we don't need to go get anything for internal refs
-            Object loadedRef = loadInternalRef(ref);
+            Object loadedRef = loadInternalRef(ref, expectedType);
 
             try{
                 return expectedType.cast(loadedRef);
@@ -304,8 +306,56 @@ public class ResolverCache {
         }
         return host + ref;
     }
+    private <T> T  loadInternalRef(String ref, Class<T> expectedType) {
+
+        final String[] refParts = ref.split("#/");
+
+        if (refParts.length > 2) {
+            throw new RuntimeException("Invalid ref format: " + ref);
+        }
+
+        final String file = refParts[0];
+        final String definitionPath = refParts.length == 2 ? refParts[1] : null;
+
+        SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
+        String contents = Yaml.pretty(openApi);
+        //JsonNode tree = ObjectMapper.convertValue(openApi,JsonNode.class);
+
+        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
 
 
+        String[] jsonPathElements = definitionPath.split("/");
+        for (String jsonPathElement : jsonPathElements) {
+            if (tree.isArray()) {
+                try {
+                    tree = tree.get(Integer.valueOf(jsonPathElement));
+                } catch (NumberFormatException numberFormatException) {
+                    //
+                }
+            } else {
+                tree = tree.get(unescapePointer(jsonPathElement));
+            }
+
+            //if at any point we do find an element we expect, print and error and abort
+            if (tree == null) {
+                throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
+            }
+        }
+
+        T result = null;
+        if (parseOptions.isValidateExternalRefs()) {
+            result = deserializeFragment(tree, expectedType, file, definitionPath);
+        } else {
+            if (expectedType.equals(Schema.class)) {
+                OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
+            } else {
+                result = DeserializationUtils.deserialize(tree, file, expectedType, openapi31);
+            }
+        }
+
+        return result;
+    }
 
     private Object loadInternalRef(String ref) {
         Object result = null;
