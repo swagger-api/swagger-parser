@@ -1,0 +1,11 @@
+openapi: 3.1.0
+servers:
+- url: /
+paths:
+  /externalref:
+    get:
+      description: ExternalRef domain
+      operationId: ExternalRef PathItem
+      responses:
+        "200":
+          description: OK
