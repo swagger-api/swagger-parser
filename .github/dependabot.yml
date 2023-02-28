@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    target-branch: "master"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    allow: 
+      - dependency-name: "io.swagger.core.v3:*"
+      - dependency-name: "io.swagger:*"
+  - package-ecosystem: "maven"
+    target-branch: "v1"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    allow: 
+      - dependency-name: "io.swagger.core.v3:*"
+      - dependency-name: "io.swagger:*"      
