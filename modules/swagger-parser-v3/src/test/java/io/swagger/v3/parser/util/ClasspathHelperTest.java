@@ -15,6 +15,11 @@ public class ClasspathHelperTest {
     @Test(expectedExceptions = {RuntimeException.class})
     public void testLoadFileFromClasspath_DoesntExist() throws Exception {
         ClasspathHelper.loadFileFromClasspath("nothing.txt");
+    }
 
+    @Test
+    public void testLoadFileFromClasspath_HandlesWindowsPathsOk() {
+       final String contents = ClasspathHelper.loadFileFromClasspath("\\issue-1878\\test.txt");
+       assertEquals(contents, "Test content");
     }
 }
