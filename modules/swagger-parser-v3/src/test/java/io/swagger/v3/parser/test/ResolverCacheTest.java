@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -181,7 +182,8 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalParameterRefWithSpaces(@Injectable Parameter mockedParameter) throws Exception {
+    public void testLoadInternalParameterRefWithSpaces() throws Exception {
+        Parameter mockedParameter = new Parameter();
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addParameters("foo bar", mockedParameter));
 
@@ -191,8 +193,9 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalDefinitionRef(@Injectable Schema mockedModel) throws Exception {
+    public void testLoadInternalDefinitionRef() throws Exception {
         OpenAPI openAPI = new OpenAPI();
+        Schema mockedModel = new Schema();
         openAPI.components(new Components().addSchemas("foo", mockedModel));
 
         ResolverCache cache = new ResolverCache(openAPI, auths, null);
@@ -204,8 +207,9 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalDefinitionRefWithSpaces(@Injectable Schema mockedModel) throws Exception {
+    public void testLoadInternalDefinitionRefWithSpaces() throws Exception {
         OpenAPI openAPI = new OpenAPI();
+        Schema mockedModel = new Schema();
         openAPI.components(new Components().addSchemas("foo bar", mockedModel));
 
         ResolverCache cache = new ResolverCache(openAPI, auths, null);
@@ -214,13 +218,17 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalDefinitionRefWithEscapedCharacters(@Injectable Schema mockedModel) throws Exception {
+    public void testLoadInternalDefinitionRefWithEscapedCharacters(@Injectable PathItem mockedPath) throws Exception {
         OpenAPI openAPI = new OpenAPI();
+
+        Schema mockedModel = new Schema();
+        openAPI.path("/test", mockedPath);
         openAPI.components(new Components().addSchemas("foo~bar/baz~1", mockedModel));
 
         ResolverCache cache = new ResolverCache(openAPI, auths, null);
         Schema actualResult = cache.loadRef("#/components/schemas/foo~0bar~1baz~01", RefFormat.INTERNAL, Schema.class);
-        assertEquals(actualResult, mockedModel);
+        assertEquals( actualResult, mockedModel);
+        Yaml.pretty(mockedModel);
     }
 
     @Test

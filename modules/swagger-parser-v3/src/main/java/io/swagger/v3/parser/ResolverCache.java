@@ -114,7 +114,10 @@ public class ResolverCache {
             Object loadedRef = loadInternalRef(ref, expectedType);
 
             try{
-                return expectedType.cast(loadedRef);
+                if (loadedRef != null){
+                    return expectedType.cast(loadedRef);
+                }
+                return null;
             }
             catch (Exception e) {
                 return null;
@@ -307,7 +310,7 @@ public class ResolverCache {
         return host + ref;
     }
     private <T> T  loadInternalRef(String ref, Class<T> expectedType) {
-
+        T result = null;
         final String[] refParts = ref.split("#/");
 
         if (refParts.length > 2) {
@@ -319,41 +322,37 @@ public class ResolverCache {
 
         SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
         String contents = Yaml.pretty(openApi);
-        //JsonNode tree = ObjectMapper.convertValue(openApi,JsonNode.class);
 
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
-
-
-        String[] jsonPathElements = definitionPath.split("/");
-        for (String jsonPathElement : jsonPathElements) {
-            if (tree.isArray()) {
-                try {
-                    tree = tree.get(Integer.valueOf(jsonPathElement));
-                } catch (NumberFormatException numberFormatException) {
-                    //
+        if (contents != null) {
+            JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
+            String[] jsonPathElements = definitionPath.split("/");
+            for (String jsonPathElement : jsonPathElements) {
+                if (tree.isArray()) {
+                    try {
+                        tree = tree.get(Integer.valueOf(jsonPathElement));
+                    } catch (NumberFormatException numberFormatException) {
+                        //
+                    }
+                } else {
+                    tree = tree.get(unescapePointer(jsonPathElement));
                 }
-            } else {
-                tree = tree.get(unescapePointer(jsonPathElement));
-            }
 
-            //if at any point we do find an element we expect, print and error and abort
-            if (tree == null) {
-                throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
+                //if at any point we do find an element we expect, print and error and abort
+                if (tree == null) {
+                    throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
+                }
+            }
+            if (parseOptions.isValidateExternalRefs()) {
+                result = deserializeFragment(tree, expectedType, file, definitionPath);
+            } else {
+                if (expectedType.equals(Schema.class)) {
+                    OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
+                    result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
+                } else {
+                    result = DeserializationUtils.deserialize(tree, file, expectedType, openapi31);
+                }
             }
         }
-
-        T result = null;
-        if (parseOptions.isValidateExternalRefs()) {
-            result = deserializeFragment(tree, expectedType, file, definitionPath);
-        } else {
-            if (expectedType.equals(Schema.class)) {
-                OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
-                result = (T) deserializer.getSchema((ObjectNode) tree, definitionPath.replace("/", "."), new OpenAPIDeserializer.ParseResult().openapi31(openapi31));
-            } else {
-                result = DeserializationUtils.deserialize(tree, file, expectedType, openapi31);
-            }
-        }
-
         return result;
     }
 
