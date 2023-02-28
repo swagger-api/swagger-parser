@@ -1,0 +1,18 @@
+openapi: 3.0.3
+paths:
+  /v2/bookings:
+    post:
+      tags:
+       - Booking Request
+      summary: Post a booking request
+      description: |
+        Creates a new booking request
+      requestBody:
+        description: Parameters used to create a booking request
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: 'DOCUMENTATION_DOMAIN-3.0.0-domain.yaml#/components/schemas/dangerousGood'
+components:
