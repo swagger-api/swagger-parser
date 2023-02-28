@@ -49,7 +49,9 @@ public class InlineModelResolverTest {
         assertTrue(openAPI.getComponents().getSchemas().get("verify_datasets").getExampleSetFlag());
     }
 
-        @Test
+
+
+    @Test
     public void testIssue1018() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);

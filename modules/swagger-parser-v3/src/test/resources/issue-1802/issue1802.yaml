@@ -1,0 +1,67 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: 0001_allOffProps
+
+paths:
+  /sample_resource:
+    post:
+      operationId: createResOne
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/create_res_one"
+      responses:
+        '201':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/standard_response_res_one"
+components:
+  schemas:
+    standard_response_result:
+      properties:
+        result:
+          type: object
+          properties:
+            status:
+              type: boolean
+            http_code:
+              type: integer
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/standard_error'
+            info:
+              type: string
+            trace_id:
+              type: string
+            num_elements:
+              type: integer
+          required:
+            - status
+            - http_code
+            - trace_id
+    standard_error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    standard_response_res_one:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/standard_response_result'
+      properties:
+        data:
+          properties:
+            name:
+              type: string
+    create_res_one:
+      type: object
+      properties:
+        name:
+          type: string

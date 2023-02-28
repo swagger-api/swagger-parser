@@ -1,0 +1,8 @@
+{
+  "externalParameter3": {
+    "name": "externalParameter3",
+    "in": "query",
+    "description": "externalParameter3 nested/ex3a",
+    "required": true
+  }
+}

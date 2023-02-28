@@ -312,6 +312,13 @@ public class RefUtilsTest {
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/my/newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
     }
 
+    @Test
+    public void testPathJoinIssue1745() {
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "./second/../newFile.yaml"), "http://foo.bar.com/my/dir/newFile.yaml");
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/", "./second/../newFile.yaml"), "http://foo.bar.com/my/dir/newFile.yaml");
+        // This is a little strange in the output (beacuse it has not completely eliminated the ..) but is still correct - paste a similar url into a browser and it resolves it correctly.
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/second/../newFile.yaml"), "http://foo.bar.com/second/../newFile.yaml");
+    }
 
     @Test
     public void shouldReturnEmptyExternalPathForInternalReference() {

@@ -2,6 +2,8 @@
 
 **NOTE:** If you're looking for `swagger-parser` 1.X and OpenAPI 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-parser/tree/v1)
 
+**NOTE:** Since version 2.1.0 Swagger Parser supports OpenAPI 3.1; see [this page](https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---OpenAPI-3.1) for details
+
 ![Build Master - Java 8, 11, and 14](https://github.com/swagger-api/swagger-parser/workflows/Build%20Test%20Deploy%20master/badge.svg?branch=master)
 
 # Table of contents
@@ -18,6 +20,7 @@
     - [Flatten](#3-flatten)
     - [ResolveCombinators](#4-resolvecombinators)
   - [Extensions](#extensions)
+  - [OpenAPI 3.1 Support](#openapi-31-support)
   - [License](#license)
    
 ## Overview 
@@ -111,7 +114,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.0.33</version>
+  <version>2.1.12</version>
 </dependency>
 ```
 
@@ -656,6 +659,10 @@ components:
 This project has a core artifact--`swagger-parser`, which uses Java Service Provider Interface (SPI) so additional extensions can be added. 
 
 To build your own extension, you simply need to create a `src/main/resources/META-INF/services/io.swagger.v3.parser.core.extensions.SwaggerParserExtension` file with the full classname of your implementation.  Your class must also implement the `io.swagger.v3.parser.core.extensions.SwaggerParserExtension` interface.  Then, including your library with the `swagger-parser` module will cause it to be triggered automatically.
+
+### OpenAPI 3.1 support
+
+Since version 2.1.0 Swagger Parser supports OpenAPI 3.1; see [this page](https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---OpenAPI-3.1) for details
 
 ## Security contact
 

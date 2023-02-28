@@ -132,7 +132,7 @@ public class OAI31DeserializationTest {
         assertEquals(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getType(),"array");
         assertNull(openAPI.getComponents().getSchemas().get("ArrayWithoutItems").getItems());
         assertTrue(result.getMessages().contains("attribute components.schemas.ArrayWithoutItems.items is missing"));
-        //Type object with items: not allowed, it will internally create an array (New Option setDefaultSchemaTypeObject )
+        //Type object with items: not allowed, it will internally create an array (New Option setInferSchemaType )
         assertNotEquals(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getType(),"object");
         assertEquals(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getType(),"array");
         assertNotNull(openAPI.getComponents().getSchemas().get("ItemsWithoutArrayType").getItems());
@@ -149,12 +149,10 @@ public class OAI31DeserializationTest {
         //exclusiveMaximum-exclusiveMinimum are boolean in 3.0
         assertNull(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMaximum());
         assertNull(openAPI.getComponents().getSchemas().get("Pets").getExclusiveMinimum());
-        //Null type
-        assertNull(openAPI.getComponents().getSchemas().get("Pets").getTypes());
+        assertEquals(openAPI.getComponents().getSchemas().get("Pets").getTypes().iterator().next(), "array");
         //default value independence
         assertNull(openAPI.getComponents().getSchemas().get("Pets").getDefault());
-        //not setting the type by default
-        assertNull(openAPI.getComponents().getSchemas().get("MapAnyValue").getTypes());
+        assertEquals(openAPI.getComponents().getSchemas().get("MapAnyValue").getTypes().iterator().next(), "object");
         //Not webhooks
         assertTrue(result.getMessages().contains("attribute webhooks is unexpected"));
     }
@@ -595,8 +593,8 @@ public class OAI31DeserializationTest {
         assertTrue(profile.getUnevaluatedProperties() instanceof Schema);
         assertTrue(((Schema)profile.getUnevaluatedProperties()).getTypes().contains("object"));
         assertNotNull(patientPersonSchema.getUnevaluatedProperties());
-        assertTrue(patientPersonSchema.getUnevaluatedProperties() instanceof Boolean);
-        assertFalse(((Boolean)patientPersonSchema.getUnevaluatedProperties()).booleanValue());
+        assertTrue(patientPersonSchema.getUnevaluatedProperties() instanceof Schema);
+        assertFalse(patientPersonSchema.getUnevaluatedProperties().getBooleanSchemaValue());
         //unevaluatedItems
         assertNotNull(profile.getUnevaluatedItems());
 
@@ -811,7 +809,7 @@ public class OAI31DeserializationTest {
         @Test(description = "Test for not setting the schema type as default")
         public void testNotDefaultSchemaType() {
             ParseOptions options = new ParseOptions();
-            options.setDefaultSchemaTypeObject(false);
+            options.setInferSchemaType(false);
             String defaultSchemaType = "openapi: 3.1.0\n" +
                     "info:\n" +
                     "  title: ping test\n" +
@@ -948,5 +946,45 @@ public class OAI31DeserializationTest {
         assertNull(profile.getRequired());
         assertNull(profile.getProperties());
 
+    }
+
+    @Test(description = "Test Issue 1801")
+    public void test31Issue1801() {
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/issue-1801.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        Schema firstAllOf = (Schema)openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(0);
+        assertEquals(firstAllOf.getTypes().iterator().next(), "number");
+        assertEquals(firstAllOf.getType(), null);
+        Schema secondAllOf = (Schema)openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(1);
+        assertEquals(secondAllOf.getTypes(), null);
+        assertEquals(firstAllOf.getType(), null);
+
+        try {
+            System.setProperty("bind-type", "true");
+            result = new OpenAPIV3Parser().readLocation("3.1.0/issue-1801.yaml", null, options);
+            assertNotNull(result.getOpenAPI());
+            openAPI = result.getOpenAPI();
+            firstAllOf = (Schema) openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(0);
+            assertEquals(firstAllOf.getTypes().iterator().next(), "number");
+            assertEquals(firstAllOf.getType(), "number");
+            secondAllOf = (Schema) openAPI.getComponents().getSchemas().get("AllofWithTheLastEmptySchema").getAllOf().get(1);
+            assertEquals(secondAllOf.getTypes(), null);
+            assertEquals(secondAllOf.getType(), null);
+        } finally {
+            System.setProperty("bind-type", "false");
+        }
+    }
+
+    @Test(description = "Test Issue 1821")
+    public void test31Issue1821() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/issue-1821.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        Schema id = (Schema)result.getOpenAPI().getComponents().getSchemas().get("Rule").getProperties().get("id");
+        assertEquals(id.getTypes().iterator().next(), "string");
     }
 }

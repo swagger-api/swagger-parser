@@ -1,0 +1,41 @@
+swagger: '2.0'
+basePath: /
+paths:
+  /api/not-secured:
+    get:
+      responses:
+        '200':
+          description: Success
+      summary: Not secured API
+      operationId: not_secured_api
+      security: []
+      tags:
+        - not-secured
+  /api/secured/:
+    get:
+      responses:
+        '200':
+          description: Success
+      summary: Secured API
+      operationId: secured_api
+      tags:
+        - secured
+info:
+  title: Sample spec
+  version: 0.1.0
+produces:
+  - application/json
+consumes:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: Authorization
+security:
+  - api_key: []
+tags:
+  - name: not-secured
+    description: API not secured
+  - name: secured
+    description: API secured

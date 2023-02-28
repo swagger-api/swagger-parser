@@ -32,12 +32,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.testng.Assert;
-import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -88,10 +86,135 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testIssueDereferencingComposedSchemaOneOf() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolverIssue/Beta-1-swagger.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSchemas().get("naNumber"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("unNumber"));
+    }
+
+    @Test
+    public void testIssue1621() {
+        final ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setResolveCombinators(false);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("issue-1621/example.openapi.yaml", null, parseOptions);
+        assertEquals(0, parseResult.getMessages().size());
+        OpenAPI api = parseResult.getOpenAPI();
+        assertEquals( api.getPaths()
+                .get("/example")
+                .getPost()
+                .getRequestBody()
+                .getContent()
+                .get("application/json")
+                .getSchema()
+                .getTitle(),"POST Example");
+    }
+
+    @Test
+    public void testIssue1865() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue-1865/openapi30.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Foo").get$ref(), "#/components/schemas/foomodel");
+    }
+
+    @Test
+    public void testIssue1777() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1777/issue1777.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        Schema id = ((Schema)openAPI.getComponents().getSchemas().get("customer").getProperties().get("id"));
+        assertEquals(id.getType(), "string");
+        assertEquals(id.getFormat(), "uuid");
+        assertEquals(id.getDescription(), "The id of the customer");
+        assertNotNull(id.getExtensions().get("x-apigen-mapping"));
+        assertEquals(id.getMinLength(), (Integer) 36);
+        assertEquals(id.getMaxLength(), (Integer) 36);
+        assertNotNull(id.getPattern());
+    }
+
+    @Test
+    public void testIssue1802() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1802/issue1802.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        Map<String, Schema> props = openAPI.getComponents().getSchemas().get("standard_response_res_one").getProperties();
+        assertNotNull(props.get("data"));
+        assertNotNull(props.get("result"));
+    }
+
+    @Test
+    public void testIssue1780() {
+        ParseOptions options = new ParseOptions();
+        options.setInferSchemaType(false);
+        String defaultSchemaType = "---\n" +
+                "openapi: '3.0'\n" +
+                "info:\n" +
+                "  description: This is a credit card account service tier 3 microservice\n" +
+                "  title: SC-CCS-CCSRV_AC Credit Card Account Service\n" +
+                "  version: 1.0.0\n" +
+                "tags:\n" +
+                "- name: creditCardAccount\n" +
+                "  description: Credit Card Accounts\n" +
+                "paths: {}\n" +
+                "x-ibm-configuration: {}";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(defaultSchemaType, null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertTrue(result.getMessages().contains("The provided definition does not specify a valid version field"));
+
+    }
+
+    @Test
+    public void testParametersAndResponsesAsNumbers() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/parametersAsNumbers/swagger.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getParameters().get(0).getName(), "dealId");
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getResponses().get("200").getDescription(), "Success");
+    }
+
+    @Test
+    public void testIssue1758() throws Exception{
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1758.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        assertEquals(result.getMessages().size(),9);
+        assertTrue(result.getMessages().contains("paths.'/path1'.$ref target #/components/schemas/xFoo is not of expected type PathItem"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).parameters.$ref target #/components/schemas/xFoo is not of expected type Parameter/Header"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.default.headers.three.$ref target #/components/schemas/xFoo is not of expected type Header/Parameter"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).requestBody.$ref target #/components/schemas/xFoo is not of expected type RequestBody"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.links.user.$ref target #/components/schemas/xFoo is not of expected type Link"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.schema.$ref target #/components/parameters/pet is not of expected type Schema"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.200.content.'application/json'.examples.one.$ref target #/components/schemas/xFoo is not of expected type Examples"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).responses.400.$ref target #/components/schemas/xFoo is not of expected type Response"));
+        assertTrue(result.getMessages().contains("paths.'/foo'(get).callbacks.$ref target #/components/schemas/xFoo is not of expected type Callback"));
+
+    }
+
     @Test(description = "Test for not setting the schema type as default")
     public void testNotDefaultSchemaType() {
         ParseOptions options = new ParseOptions();
-        options.setDefaultSchemaTypeObject(false);
+        options.setInferSchemaType(false);
         String defaultSchemaType = "openapi: 3.0.0\n" +
                 "info:\n" +
                 "  title: ping test\n" +
@@ -185,7 +308,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue1637_StyleAndContent() throws IOException {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/issue1637.yaml", null, options);
-       
+
         Assert.assertNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getStyle());
         Assert.assertNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getExplode());
         Assert.assertNotNull(result.getOpenAPI().getPaths().get("/test").getGet().getParameters().get(0).getContent());
@@ -516,7 +639,6 @@ public class OpenAPIV3ParserTest {
         options.setResolveFully(true);
 
         final SwaggerParseResult openAPI = parser.readLocation("src/test/resources/same-refs-different-model-valid.yaml", null, options);
-        Yaml.prettyPrint(openAPI);
         assertEquals(openAPI.getMessages().size(), 0);
     }
 
@@ -2154,13 +2276,14 @@ public class OpenAPIV3ParserTest {
         assertEquals(path.getClass(), PathItem.class); //we successfully converted the RefPath to a Path
 
         final List<Parameter> parameters = path.getParameters();
-        assertParamDetails(parameters, 0, QueryParameter.class, "param1", "query");
-        assertParamDetails(parameters, 1, HeaderParameter.class, "param2", "header");
+        assertNull(parameters);
 
         final Operation operation = path.getGet();
         final List<Parameter> operationParams = operation.getParameters();
-        assertParamDetails(operationParams, 0, PathParameter.class, "param3", "path");
-        assertParamDetails(operationParams, 1, HeaderParameter.class, "param4", "header");
+        assertParamDetails(operationParams, 0, QueryParameter.class, "param1", "query");
+        assertParamDetails(operationParams, 1, HeaderParameter.class, "param2", "header");
+        assertParamDetails(operationParams, 2, PathParameter.class, "param3", "path");
+        assertParamDetails(operationParams, 3, HeaderParameter.class, "param4", "header");
 
         final Map<String, ApiResponse> responsesMap = operation.getResponses();
 
@@ -3310,5 +3433,13 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yamlString, null, options).getOpenAPI();
         Assert.assertNotNull(openAPI);
         assertEquals(Yaml.pretty(openAPI), yamlStringResolved);
+    }
+
+    @Test
+    public void testInternalRefsValidation() throws Exception {
+        String yamlString = FileUtils.readFileToString(new File("src/test/resources/internal-refs.yaml"), "UTF-8");
+        ParseOptions options = new ParseOptions();
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yamlString, null, options);
+        assertEquals(parseResult.getMessages().size(), 1);
     }
 }

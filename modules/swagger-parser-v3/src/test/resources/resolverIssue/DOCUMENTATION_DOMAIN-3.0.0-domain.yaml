@@ -1,0 +1,29 @@
+openapi: 3.0.3
+paths:
+components:
+  schemas:
+    dangerousGood:
+      type: object
+      description: 'Specification for Dangerous Goods'
+      allOf:
+        - type: object
+          oneOf:
+            - type: object
+              properties:
+                unNumber:
+                  "$ref": "#/components/schemas/unNumber"
+            - type: object
+              properties:
+                naNumber:
+                  "$ref": "#/components/schemas/naNumber"
+    naNumber:
+      type: string
+      pattern: "\\d{4}"
+      description: 'Four-digit number that is assigned to dangerous, hazardous, and
+          harmful substances. Used for `US`/ `CFR` regularted shipments this is used
+          instead of `unNumber`'
+    unNumber:
+      type: string
+      pattern: "\\d{4}"
+      description: 'Four-digit number that is assigned to dangerous, hazardous, and
+                         harmful substances by United Nations'

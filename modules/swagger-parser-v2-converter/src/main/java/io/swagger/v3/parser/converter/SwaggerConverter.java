@@ -37,13 +37,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.Discriminator;
-import io.swagger.v3.oas.models.media.FileSchema;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -66,7 +60,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -653,7 +646,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             operation.setExternalDocs(convert(v2Operation.getExternalDocs()));
         }
 
-        if (v2Operation.getSecurity() != null && v2Operation.getSecurity().size() > 0) {
+        if (v2Operation.getSecurity() != null) {
             operation.setSecurity(convertSecurityRequirementsMap(v2Operation.getSecurity()));
         }
 
@@ -679,7 +672,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
     private RequestBody convertFormDataToRequestBody(List<io.swagger.models.parameters.Parameter> formParams, List<String> consumes) {
         RequestBody body = new RequestBody();
 
-        Schema formSchema = new Schema();
+        Schema<Object> formSchema = new ObjectSchema();
 
         for (io.swagger.models.parameters.Parameter param : formParams) {
             SerializableParameter sp;
@@ -702,7 +695,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 formSchema.addRequiredItem(sp.getName());
             }
 
-            formSchema.addProperties(name, schema);
+            formSchema.addProperty(name, schema);
         }
 
         List<String> mediaTypes = new ArrayList<>(globalConsumes);
@@ -868,8 +861,8 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             response.setDescription(v2Response.getDescription());
 
-            if (v2Response.getSchema() != null) {
-                Schema schema = convertFileSchema(convert(v2Response.getSchema()));
+            if (v2Response.getResponseSchema() != null) {
+                Schema schema = convertFileSchema(convert(v2Response.getResponseSchema()));
                 for (String type : mediaTypes) {
                     // TODO: examples
                     MediaType mediaType = new MediaType();
@@ -937,6 +930,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (schema == null) {
             return null;
         }
+        if (schema.getBooleanValue() != null) {
+            return new Schema().booleanSchemaValue(schema.getBooleanValue());
+        }
         Schema result;
 
         if (schema instanceof RefProperty) {
@@ -968,8 +964,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             result = arraySchema;
 
         } else if (schema instanceof FileProperty) {
-            FileSchema fileSchema = Json.mapper().convertValue(schema, FileSchema.class);
-            result = fileSchema;
+            result = Json.mapper().convertValue(schema, FileSchema.class);
 
         }else {
 
@@ -989,7 +984,11 @@ public class SwaggerConverter implements SwaggerParserExtension {
             if (schema instanceof MapProperty) {
                 MapProperty map = (MapProperty) schema;
 
-                result.setAdditionalProperties(convert(map.getAdditionalProperties()));
+                if (map.getAdditionalProperties().getBooleanValue() != null) {
+                    result.setAdditionalProperties(map.getAdditionalProperties().getBooleanValue());
+                } else {
+                    result.setAdditionalProperties(convert(map.getAdditionalProperties()));
+                }
                 result.setMinProperties(map.getMinProperties());
                 result.setMaxProperties(map.getMaxProperties());
             }
@@ -1180,6 +1179,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
         if (v2Model == null) {
             return null;
         }
+        if (v2Model.getBooleanValue() != null) {
+            return new Schema().booleanSchemaValue(v2Model.getBooleanValue());
+        }
         Schema result;
 
         if (v2Model instanceof ArrayModel) {
@@ -1201,6 +1203,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             composed.setTitle(composedModel.getTitle());
             composed.setExtensions(convert(composedModel.getVendorExtensions()));
             composed.setAllOf(composedModel.getAllOf().stream().map(this::convert).collect(Collectors.toList()));
+            composed.setRequired(composedModel.getRequired());
 
             addProperties(v2Model, composed);
 
@@ -1214,16 +1217,22 @@ public class SwaggerConverter implements SwaggerParserExtension {
                 v2discriminator = model.getDiscriminator();
                 model.setDiscriminator(null);
             }
-
-            result = Json.mapper().convertValue(v2Model, Schema.class);
-
+            if (v2Model instanceof ModelImpl && ("file".equals(((ModelImpl)v2Model).getType()))) {
+                result = Json.mapper().convertValue(v2Model, FileSchema.class);
+            } else {
+                result = Json.mapper().convertValue(v2Model, Schema.class);
+            }
             addProperties(v2Model, result);
 
             if (v2Model instanceof ModelImpl) {
                 ModelImpl model = (ModelImpl) v2Model;
 
                 if (model.getAdditionalProperties() != null) {
-                    result.setAdditionalProperties(convert(model.getAdditionalProperties()));
+                    if (model.getAdditionalProperties().getBooleanValue() != null) {
+                        result.setAdditionalProperties(model.getAdditionalProperties().getBooleanValue());
+                    } else {
+                        result.setAdditionalProperties(convert(model.getAdditionalProperties()));
+                    }
                 }
             } else if(v2Model instanceof RefModel) {
                 RefModel ref = (RefModel) v2Model;
