@@ -1305,9 +1305,17 @@ public class OpenAPIDeserializer {
 		}
 
 		if (result.isOpenapi31()) {
-			value = getString("identifier", node, true, location, result);
+            // either the url must be set or the identifier but not both
+            boolean needsIdentifier = license.getUrl() == null;
+			value = getString("identifier", node, needsIdentifier, location, result);
+
 			if (StringUtils.isNotBlank(value)) {
-				license.setIdentifier(value);
+                if (!needsIdentifier) {
+                    result.extra(location, "identifier", node);
+                    result.invalid();
+                } else {
+                    license.setIdentifier(value);
+                }
 			}
 		}
 
