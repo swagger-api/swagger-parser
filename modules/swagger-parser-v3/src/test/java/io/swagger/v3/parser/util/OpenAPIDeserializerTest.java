@@ -162,6 +162,127 @@ public class OpenAPIDeserializerTest {
 
     }
 
+    @Test
+    public void testIdentifierAndUrlInvalid() throws Exception {
+        String yaml = "openapi: 3.1.0\n" +
+                      "servers:\n" +
+                      "  - url: 'http://abc:5555/mypath'\n" +
+                      "info:\n" +
+                      "  version: '1.0'\n" +
+                      "  title: dd\n" +
+                      "  license:\n" +
+                      "    name: test\n" +
+                      "    url: http://example.com\n" +
+                      "    identifier: test\n" +
+                      "paths:\n" +
+                      "  /resource1/Id:\n" +
+                      "    post:\n" +
+                      "      description: ''\n" +
+                      "      operationId: postOp\n" +
+                      "      responses:\n" +
+                      "        '200':\n" +
+                      "          description: Successful\n" +
+                      "        '401':\n" +
+                      "          description: Access Denied\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          application/json:\n" +
+                      "            schema:\n" +
+                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "        required: true\n" +
+                      "components:\n" +
+                      "  schemas:\n" +
+                      "    mydefinition: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        assertEquals(result.getMessages().size(), 1);
+        assertTrue(result.getMessages().get(0).contains("identifier"));
+    }
+
+    @Test
+    public void testUrlValid() {
+        String yaml = "openapi: 3.1.0\n" +
+                      "servers:\n" +
+                      "  - url: 'http://abc:5555/mypath'\n" +
+                      "info:\n" +
+                      "  version: '1.0'\n" +
+                      "  title: dd\n" +
+                      "  license:\n" +
+                      "    name: test\n" +
+                      "    url: http://example.com\n" +
+                      "paths:\n" +
+                      "  /resource1/Id:\n" +
+                      "    post:\n" +
+                      "      description: ''\n" +
+                      "      operationId: postOp\n" +
+                      "      responses:\n" +
+                      "        '200':\n" +
+                      "          description: Successful\n" +
+                      "        '401':\n" +
+                      "          description: Access Denied\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          application/json:\n" +
+                      "            schema:\n" +
+                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "        required: true\n" +
+                      "components:\n" +
+                      "  schemas:\n" +
+                      "    mydefinition: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        assertEquals(result.getMessages().size(), 0);
+    }
+
+    @Test
+    public void testIdentifierValid() {
+        String yaml = "openapi: 3.1.0\n" +
+                      "servers:\n" +
+                      "  - url: 'http://abc:5555/mypath'\n" +
+                      "info:\n" +
+                      "  version: '1.0'\n" +
+                      "  title: dd\n" +
+                      "  license:\n" +
+                      "    name: test\n" +
+                      "    identifier: abc\n" +
+                      "paths:\n" +
+                      "  /resource1/Id:\n" +
+                      "    post:\n" +
+                      "      description: ''\n" +
+                      "      operationId: postOp\n" +
+                      "      responses:\n" +
+                      "        '200':\n" +
+                      "          description: Successful\n" +
+                      "        '401':\n" +
+                      "          description: Access Denied\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          application/json:\n" +
+                      "            schema:\n" +
+                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "        required: true\n" +
+                      "components:\n" +
+                      "  schemas:\n" +
+                      "    mydefinition: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        assertEquals(result.getMessages().size(), 0);
+    }
 
     @Test
     public void testSecurityDeserialization() throws Exception {
