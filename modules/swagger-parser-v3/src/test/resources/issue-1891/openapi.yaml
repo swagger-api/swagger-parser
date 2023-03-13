@@ -1,0 +1,22 @@
+---
+openapi: 3.0.0
+
+info:
+  description: Models that would published in a jar and then read from the classpath.
+  version: 1.0.0
+  title: shared-models
+
+paths:
+  /empty:
+    description: >
+      Empty API so that we can load this file in Swagger Editor for validation and
+      not get flagged for a contract without a paths element.
+
+components:
+  schemas:
+    LocalModel:
+      type: object
+      properties:
+        sharedModelField:
+          # This is resolved via the file system, but looking in the folder 'types'
+          $ref: 'types/local-types.yaml#/components/schemas/TypesModel'
