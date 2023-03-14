@@ -4167,4 +4167,14 @@ public class OpenAPIDeserializerTest {
                 "        valid: false\n");
     }
 
+    @Test
+    public void testIssue1572() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setInferSchemaType(false);
+        SwaggerParseResult result = parser.readLocation("./src/test/resources/space in name/issue-1572.yaml", null, options);
+
+        assertNotNull(result.getOpenAPI());
+    }
+
 }
