@@ -1,0 +1,22 @@
+---
+openapi: 3.0.0
+
+info:
+  description: Models that would published in a jar and then read from the classpath.
+  version: 1.0.0
+  title: shared-models
+
+paths:
+  /empty:
+    description: >
+      Empty API so that we can load this file in Swagger Editor for validation and
+      not get flagged for a contract without a paths element.
+
+components:
+  schemas:
+    TypesModel:
+      # The file 'issue-1891-shared-types.yaml' is located outside this directory and resolved
+      # via an absolute path reference (starts with a /). Typically, this resource would be
+      # found in a jar file on the classpath, but for the purposes of this test, it is
+      # found at the root of the file system, which will be loaded via the classpath helper.
+      $ref: '/issue-1891-shared-types.yaml#/components/schemas/SharedModel'
