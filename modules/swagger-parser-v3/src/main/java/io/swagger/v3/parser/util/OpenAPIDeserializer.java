@@ -2746,7 +2746,9 @@ public class OpenAPIDeserializer {
 
 		if (schema == null) {
 			schema = SchemaTypeUtil.createSchemaByType(node);
-		}
+		} else if (itemsNode != null && itemsNode.has("$ref" )) {
+             SchemaTypeUtil.updateReferenceForParentNode(schema, itemsNode.get("$ref").textValue());
+        }
 
 		JsonNode ref = node.get("$ref");
 		if (ref != null) {
