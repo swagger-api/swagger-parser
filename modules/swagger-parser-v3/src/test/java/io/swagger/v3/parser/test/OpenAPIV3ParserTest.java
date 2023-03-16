@@ -3386,26 +3386,25 @@ public class OpenAPIV3ParserTest {
 
     }
 
-    @Ignore
-    @Test(description = "test that a model in a folder that has a ref to a model in the classpath is properly resolved.")
-    public void testIssue1891() {
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        options.setFlatten(true);
-
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./issue-1891/openapi.yaml", null, options);
-        assertTrue(result.getMessages().isEmpty());
-
-        // Expect all references to be properly resolved to local references.
-        OpenAPI openAPI = result.getOpenAPI();
-        Schema<?> localModel = openAPI.getComponents().getSchemas().get("LocalModel");
-        Schema<?> typesModel = openAPI.getComponents().getSchemas().get("TypesModel");
-        Schema<?> sharedModel = openAPI.getComponents().getSchemas().get("SharedModel");
-
-        assertEquals("#/components/schemas/TypesModel", localModel.getProperties().get("sharedModelField").get$ref());
-        assertEquals("#/components/schemas/SharedModel", typesModel.get$ref());
-        assertNotNull(sharedModel);
-    }
+//    @Test(description = "test that a model in a folder that has a ref to a model in the classpath is properly resolved.")
+//    public void testIssue1891() {
+//        ParseOptions options = new ParseOptions();
+//        options.setResolve(true);
+//        options.setFlatten(true);
+//
+//        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./issue-1891/openapi.yaml", null, options);
+//        assertTrue(result.getMessages().isEmpty());
+//
+//        // Expect all references to be properly resolved to local references.
+//        OpenAPI openAPI = result.getOpenAPI();
+//        Schema<?> localModel = openAPI.getComponents().getSchemas().get("LocalModel");
+//        Schema<?> typesModel = openAPI.getComponents().getSchemas().get("TypesModel");
+//        Schema<?> sharedModel = openAPI.getComponents().getSchemas().get("SharedModel");
+//
+//        assertEquals("#/components/schemas/TypesModel", localModel.getProperties().get("sharedModelField").get$ref());
+//        assertEquals("#/components/schemas/SharedModel", typesModel.get$ref());
+//        assertNotNull(sharedModel);
+//    }
 
     @Test(description = "directly parsed  definition, tested in previous method as reference relative/local ")
     public void testValidateDefinition() {

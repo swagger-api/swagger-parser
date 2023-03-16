@@ -258,11 +258,11 @@ public class SchemaProcessor {
         String $ref = schema.get$ref();
 
         final String newRef = externalRefProcessor.processRefToExternalSchema($ref, refFormat);
-        if (newRef != null && !newRef.startsWith("#/components") && refFormat.equals(RefFormat.RELATIVE)) {
+        if (newRef != null && !newRef.startsWith("#/components")) {
             schema.set$ref(RefType.SCHEMAS.getInternalPrefix() + newRef);
         }
         Schema internalSchema = schema.getItems();
-        if (internalSchema != null && internalSchema.get$ref().startsWith("..")) {
+        if (internalSchema != null && !internalSchema.get$ref().startsWith("#/components")) {
             processReferenceSchemaForProperty(schema.getItems());
         }
     }
