@@ -208,7 +208,7 @@ public class DeserializationUtils {
             if (options.isValidateYamlInput()) {
                 yaml = buildSnakeYaml(new CustomSnakeYamlConstructor());
             } else {
-                yaml = buildSnakeYaml(new LoaderOptions());
+                yaml = buildSnakeYaml(new SafeConstructor(new LoaderOptions()));
             }
             Object o = yaml.load(contents);
             if (options.isValidateYamlInput()) {
