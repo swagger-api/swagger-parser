@@ -200,7 +200,7 @@ public class DeserializationUtils {
     public static JsonNode readYamlTree(String contents, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
 
         if (parseOptions != null && parseOptions.isLegacyYamlDeserialization()) {
-            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
+            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
             return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
         }
         try {
@@ -208,7 +208,7 @@ public class DeserializationUtils {
             if (options.isValidateYamlInput()) {
                 yaml = buildSnakeYaml(new CustomSnakeYamlConstructor());
             } else {
-                yaml = buildSnakeYaml(new SafeConstructor());
+                yaml = buildSnakeYaml(new LoaderOptions());
             }
             Object o = yaml.load(contents);
             if (options.isValidateYamlInput()) {
@@ -244,7 +244,7 @@ public class DeserializationUtils {
         return readYamlValue(contents, expectedType, false);
     }
     public static <T> T readYamlValue(String contents, Class<T> expectedType, boolean openapi31) {
-        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
         ObjectMapper jsonMapper = openapi31 ? Json31.mapper() : Json.mapper();
         return jsonMapper.convertValue(yaml.load(contents), expectedType);
     }
@@ -265,7 +265,7 @@ public class DeserializationUtils {
             method.invoke(loaderOptions, false);
             method = LoaderOptions.class.getMethod("setCodePointLimit", int.class);
             method.invoke(loaderOptions, options.getMaxYamlCodePoints());
-            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions, new CustomResolver());
+            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new CustomResolver());
             return yaml;
         } catch (ReflectiveOperationException e) {
             //
@@ -395,6 +395,10 @@ public class DeserializationUtils {
     }
 
     static class CustomSnakeYamlConstructor extends SafeConstructor {
+       
+        public CustomSnakeYamlConstructor() {
+        super(new LoaderOptions());
+      }
 
         private boolean checkNode(MappingNode node, Integer depth) {
             if (node.getValue() == null) return true;
