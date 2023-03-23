@@ -110,7 +110,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.3.0</version>
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>
@@ -127,7 +127,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5</version>
+                <version>3.10.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -136,7 +136,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.7</version>
+                <version>3.5.0</version>
                 <configuration>
                     <aggregate>true</aggregate>
                     <source>1.7</source>
@@ -159,7 +159,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -173,7 +173,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
+                <version>0.8.8</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -206,7 +206,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M2</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>enforce-no-snapshots</id>
@@ -228,7 +228,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -258,7 +258,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0-M2</version>
+                    <version>3.2.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -391,15 +391,16 @@
         </repository>
     </repositories>
     <properties>
+        <!--<maven.compiler.release>8</maven.compiler.release>-->
         <commons-io-version>2.11.0</commons-io-version>
-        <snakeyaml-version>1.33</snakeyaml-version>
-        <slf4j-version>1.7.28</slf4j-version>
-        <swagger-core-version>1.6.9</swagger-core-version>
-        <junit-version>4.13.1</junit-version>
+        <snakeyaml-version>2.0</snakeyaml-version>
+        <slf4j-version>1.7.36</slf4j-version>
+        <swagger-core-version>1.6.10</swagger-core-version>
+        <junit-version>4.13.2</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>
-        <wiremock-version>2.25.0</wiremock-version>
-        <surefire-version>2.18.1</surefire-version>
+        <wiremock-version>2.27.2</wiremock-version>
+        <surefire-version>2.22.2</surefire-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
