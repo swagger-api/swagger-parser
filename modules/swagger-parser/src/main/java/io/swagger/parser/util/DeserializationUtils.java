@@ -189,20 +189,28 @@ public class DeserializationUtils {
             return new org.yaml.snakeyaml.Yaml(constructor);
         }
         try {
-            LoaderOptions loaderOptions = new LoaderOptions();
-            Method method = LoaderOptions.class.getMethod("setMaxAliasesForCollections", int.class);
-            method.invoke(loaderOptions, options.getMaxYamlAliasesForCollections());
-            method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
-            method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
-            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions, new CustomResolver());
+            LoaderOptions loaderOptions = buildLoaderOptions();
+            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new CustomResolver());
             return yaml;
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
             //
-            LOGGER.debug("using snakeyaml < 1.25, not setting YAML Billion Laughs Attack snakeyaml level protection");
+            LOGGER.error("error building snakeYaml", e);
         }
         return new org.yaml.snakeyaml.Yaml(constructor);
     }
 
+    public static LoaderOptions buildLoaderOptions() {
+        LoaderOptions loaderOptions = new LoaderOptions();
+        try {
+            Method method = LoaderOptions.class.getMethod("setMaxAliasesForCollections", int.class);
+            method.invoke(loaderOptions, options.getMaxYamlAliasesForCollections());
+            method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
+            method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
+        } catch (ReflectiveOperationException e) {
+            LOGGER.debug("using snakeyaml < 1.25, not setting YAML Billion Laughs Attack snakeyaml level protection");
+        }
+        return loaderOptions;
+    }
 
     public static JsonNode readYamlTree(String contents, SwaggerDeserializationResult errorOutput) throws IOException {
 
@@ -214,7 +222,7 @@ public class DeserializationUtils {
             if (options.isValidateYamlInput()) {
                 yaml = buildSnakeYaml(new CustomSnakeYamlConstructor());
             } else {
-                yaml = buildSnakeYaml(new SafeConstructor());
+                yaml = buildSnakeYaml(new SafeConstructor(buildLoaderOptions()));
             }
 
             Object o = yaml.load(contents);
@@ -358,6 +366,9 @@ public class DeserializationUtils {
 
     static class CustomSnakeYamlConstructor extends SafeConstructor {
 
+        public CustomSnakeYamlConstructor() {
+            super(buildLoaderOptions());
+        }
         private boolean checkNode(MappingNode node, Integer depth) {
             if (node.getValue() == null) return true;
             if (depth > options.getMaxYamlDepth()) return false;

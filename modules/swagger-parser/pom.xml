@@ -18,6 +18,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${surefire-version}</version>
                         <configuration>
                             <groups>single</groups>
                             <workingDirectory>.</workingDirectory>
