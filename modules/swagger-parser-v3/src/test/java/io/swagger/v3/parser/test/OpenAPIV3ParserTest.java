@@ -3464,15 +3464,16 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testRefParseProblem() {
+    public void testIssue1902_component_example_not_parse_ordinal_json() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/ref-problem/ref-problem.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue1902/1902-string-example-in-component.yaml",
+                        null, options);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         OpenAPI openAPI = result.getOpenAPI();
-        String expectedReference = openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getContent()
-                .get("application/json").getSchema().get$ref();
-        assertEquals(expectedReference, "#/components/schemas/Pet");
+        Example expectedExample = openAPI.getComponents().getExamples().get("Things");
+        assertNotNull(expectedExample);
     }
 }
