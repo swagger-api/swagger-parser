@@ -1,0 +1,34 @@
+openapi: "3.0.0"
+
+info:
+  title: Test API spec
+  version: '1.0'
+
+servers:
+  - url: http://example.mocklab.io
+paths:
+  /things:
+    get:
+      description: Simple GET with no parameters
+
+      responses:
+        '200':
+          description: things response
+          content:
+            application/json:
+              example:
+                $ref: '#/components/examples/Things'
+
+components:
+  examples:
+    Things: |
+      {
+        "things": [
+          {
+            id: 1
+          },
+          {
+            id: 2
+          }
+        ]
+      }
