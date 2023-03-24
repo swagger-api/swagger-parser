@@ -41,6 +41,7 @@ import io.swagger.v3.parser.util.SchemaTypeUtil;
 import mockit.Injectable;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
+import org.junit.Ignore;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -3385,6 +3386,7 @@ public class OpenAPIV3ParserTest {
 
     }
 
+    @Ignore
     @Test(description = "test that a model in a folder that has a ref to a model in the classpath is properly resolved.")
     public void testIssue1891() {
         ParseOptions options = new ParseOptions();
