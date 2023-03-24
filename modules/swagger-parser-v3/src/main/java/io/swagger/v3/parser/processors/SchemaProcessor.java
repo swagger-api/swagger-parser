@@ -261,6 +261,7 @@ public class SchemaProcessor {
         if (newRef != null && !newRef.startsWith("#/components")) {
             schema.set$ref(RefType.SCHEMAS.getInternalPrefix() + newRef);
         }
+
         if (schema.getItems() != null && !schema.getItems().get$ref().startsWith("#/components/")) {
             processReferenceSchemaForProperty(schema.getItems());
         }
