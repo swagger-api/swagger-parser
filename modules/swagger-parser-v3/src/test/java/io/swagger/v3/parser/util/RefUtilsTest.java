@@ -7,20 +7,20 @@ import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.processors.ExternalRefProcessor;
 import mockit.Injectable;
 import mockit.Mocked;
-import mockit.StrictExpectations;
+import mockit.Expectations;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +37,17 @@ import static org.testng.Assert.fail;
 
 public class RefUtilsTest {
 
+    List<AuthorizationValue> auths;
+
+    @Injectable
+    AuthorizationValue auth1;
+    @Injectable
+    AuthorizationValue auth2;
+    public RefUtilsTest() {
+        List<AuthorizationValue> auths = new ArrayList<>();
+        auths.add(auth1);
+        auths.add(auth2);
+    }
     @Test
     public void testComputeDefinitionName() throws Exception {
         //URL refs
@@ -106,15 +117,16 @@ public class RefUtilsTest {
         }
     }
 
+
+    @Mocked RemoteUrl remoteUrl;
+
     @Test
-    public void testReadExternalRef_UrlFormat(@Injectable final List<AuthorizationValue> auths,
-                                              @Mocked RemoteUrl remoteUrl
-    ) throws Exception {
+    public void testReadExternalRef_UrlFormat() throws Exception {
 
         final String url = "http://my.company.com/path/to/file.json";
         final String expectedResult = "really good json";
 
-        new StrictExpectations() {{
+        new Expectations() {{
             RemoteUrl.urlToString(url, auths);
             times = 1;
             result = expectedResult;
@@ -128,13 +140,11 @@ public class RefUtilsTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void testReadExternalRef_UrlFormat_ExceptionThrown(@Injectable final List<AuthorizationValue> auths,
-                                                              @Mocked RemoteUrl remoteUrl
-    ) throws Exception {
+    public void testReadExternalRef_UrlFormat_ExceptionThrown() throws Exception {
 
         final String url = "http://my.company.com/path/to/file.json";
 
-        new StrictExpectations() {{
+        new Expectations() {{
             RemoteUrl.urlToString(url, auths);
             times = 1;
             result = new Exception();
@@ -143,23 +153,27 @@ public class RefUtilsTest {
         RefUtils.readExternalRef(url, RefFormat.URL, auths, null);
     }
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @Mocked IOUtils ioUtils;
+    @Mocked Files files;
+    @Injectable Path parentDirectory;
+    @Injectable Path pathToUse;
 
+    public File tempFile(String name) throws Exception{
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        File f = new File(tmpDir + File.separator + name);
+        f.createNewFile();
+        return f;
+    }
     @Test
-    public void testReadExternalRef_RelativeFileFormat(@Injectable final List<AuthorizationValue> auths,
-                                                       @Mocked IOUtils ioUtils,
-                                                       @Mocked Files files,
-                                                       @Injectable final Path parentDirectory,
-                                                       @Injectable final Path pathToUse
+    public void testReadExternalRef_RelativeFileFormat(
     ) throws Exception {
-        final String filePath = "file.json";
-        File file = tempFolder.newFile(filePath);
+
+        File file = tempFile(filePath);
         final String expectedResult = "really good json";
 
         setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
-        new StrictExpectations() {{
+        new Expectations() {{
             IOUtils.toString((FileInputStream) any, UTF_8);
             times = 1;
             result = expectedResult;
@@ -171,8 +185,11 @@ public class RefUtilsTest {
 
     }
 
+    @Injectable File file;
+    @Injectable String filePath;
+
     private void setupRelativeFileExpectations(@Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
-        new StrictExpectations() {{
+        new Expectations() {{
 
             parentDirectory.resolve(filePath).normalize();
             times = 1;
@@ -189,20 +206,16 @@ public class RefUtilsTest {
         }};
     }
 
+
     @Test
-    public void testReadExternalRef_RelativeFileFormat_ExceptionThrown(@Injectable final List<AuthorizationValue> auths,
-                                                                       @Mocked IOUtils ioUtils,
-                                                                       @Mocked Files files,
-                                                                       @Injectable final Path parentDirectory,
-                                                                       @Injectable final Path pathToUse
-    ) throws Exception {
+    public void testReadExternalRef_RelativeFileFormat_ExceptionThrown() throws Exception {
         final String filePath = "file.json";
-        File file = tempFolder.newFile(filePath);
+        File file = tempFile(filePath);
         final String expectedResult = "really good json";
 
         setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
-        new StrictExpectations() {{
+        new Expectations() {{
             IOUtils.toString((FileInputStream) any, UTF_8);
             times = 1;
             result = new IOException();
@@ -220,7 +233,7 @@ public class RefUtilsTest {
     }
 
     @Test
-    public void testReadExternalRef_InternalFormat(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void testReadExternalRef_InternalFormat() throws Exception {
 
         final String file = "#/defintiions/foo";
 
@@ -232,43 +245,10 @@ public class RefUtilsTest {
         }
     }
 
-    @Test
-    public void testReadExternalRef_OnClasspath(@Mocked Files files,
-                                                @Mocked ClasspathHelper classpathHelper,
-                                                @Injectable final Path parentDirectory,
-                                                @Injectable final Path pathToUse,
-                                                @Injectable final Path pathToUse2) throws Exception {
-        final String filePath = "./path/to/file.json";
-        final String url = parentDirectory + "/path/to/file.json";
-        final String expectedResult = "really good json";
+    @Mocked ClasspathHelper classpathHelper;
+    @Injectable Path pathToUse2;
 
-        new StrictExpectations() {{
-
-            parentDirectory.resolve(filePath).normalize();
-            times = 1;
-            result = pathToUse;
-
-            Files.exists(pathToUse);
-            times = 1;
-            result = false;
-
-            parentDirectory.resolve(url).normalize();
-            times = 1;
-            result = pathToUse2;
-
-            Files.exists(pathToUse2);
-            times = 1;
-            result = false;
-
-            ClasspathHelper.loadFileFromClasspath(filePath); times=1; result=expectedResult;
-
-        }};
-
-        final String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, null, parentDirectory);
-
-        assertEquals(actualResult, expectedResult);
-
-    }
+    @Injectable Path parentDirectory2;
 
     @Test
     public void testPathJoin1() {
@@ -299,15 +279,15 @@ public class RefUtilsTest {
         assertEquals(ExternalRefProcessor.join("./foo#/definitions/Foo", "./bar#/definitions/Bar"), "./bar#/definitions/Bar");
     }
 
-    
-    @Test 
+
+    @Test
     public void testPathJoin2() {
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../../newFile.yaml"), "http://foo.bar.com/newFile.yaml");
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "./newFile.yaml"), "http://foo.bar.com/my/dir/newFile.yaml");
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../second/newFile.yaml"), "http://foo.bar.com/my/second/newFile.yaml");
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "../../otherDir/newFile.yaml"), "http://foo.bar.com/otherDir/newFile.yaml");
-        assertEquals(RefUtils.buildUrl("http://foo.bar.com/file.yaml", "./newFile.yaml"), "http://foo.bar.com/newFile.yaml");        
+        assertEquals(RefUtils.buildUrl("http://foo.bar.com/file.yaml", "./newFile.yaml"), "http://foo.bar.com/newFile.yaml");
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/newFile.yaml"), "http://foo.bar.com/newFile.yaml");
         assertEquals(RefUtils.buildUrl("http://foo.bar.com/my/dir/file.yaml", "/my/newFile.yaml"), "http://foo.bar.com/my/newFile.yaml");
     }

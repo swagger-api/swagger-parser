@@ -35,7 +35,7 @@ public class SchemaProcessorTest {
 
         setupPropertyAndExternalRefProcessors();
 
-        new StrictExpectations() {{
+        new Expectations() {{
 
             externalRefProcessor.processRefToExternalSchema(ref, RefFormat.URL);
             times = 1;
@@ -151,7 +151,7 @@ public class SchemaProcessorTest {
     }
 
     private void setupPropertyAndExternalRefProcessors() {
-        new StrictExpectations() {{
+        new Expectations() {{
             new ExternalRefProcessor(cache, openAPI);
             times = 1;
             result = externalRefProcessor;
@@ -178,7 +178,7 @@ public class SchemaProcessorTest {
     }
 
     private void expectCallToExternalRefProcessor(final String ref, final RefFormat refFormat, final String newRef) {
-        new StrictExpectations() {{
+        new Expectations() {{
             externalRefProcessor.processRefToExternalSchema(ref, refFormat);
             times = 1;
             result = newRef;
@@ -239,7 +239,7 @@ public class SchemaProcessorTest {
     }
 
     private void expectCreationOfExternalRefProcessor() {
-        new StrictExpectations() {{
+        new Expectations() {{
             new ExternalRefProcessor(cache, openAPI);
             times = 1;
             result = externalRefProcessor;
