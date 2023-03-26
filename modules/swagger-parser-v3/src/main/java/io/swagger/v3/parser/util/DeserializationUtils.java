@@ -194,13 +194,26 @@ public class DeserializationUtils {
         return contents.toString().trim().startsWith("{");
     }
 
+    public static LoaderOptions buildLoaderOptions() {
+        LoaderOptions loaderOptions = new LoaderOptions();
+        try {
+            Method method = LoaderOptions.class.getMethod("setMaxAliasesForCollections", int.class);
+            method.invoke(loaderOptions, options.getMaxYamlAliasesForCollections());
+            method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
+            method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
+        } catch (ReflectiveOperationException e) {
+            LOGGER.debug("using snakeyaml < 1.25, not setting YAML Billion Laughs Attack snakeyaml level protection");
+        }
+        return loaderOptions;
+    }
+
     public static JsonNode readYamlTree(String contents) {
         return readYamlTree(contents, null, new SwaggerParseResult());
     }
     public static JsonNode readYamlTree(String contents, ParseOptions parseOptions, SwaggerParseResult deserializationUtilsResult) {
 
         if (parseOptions != null && parseOptions.isLegacyYamlDeserialization()) {
-            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
+            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor(buildLoaderOptions()));
             return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
         }
         try {
@@ -208,7 +221,7 @@ public class DeserializationUtils {
             if (options.isValidateYamlInput()) {
                 yaml = buildSnakeYaml(new CustomSnakeYamlConstructor());
             } else {
-                yaml = buildSnakeYaml(new SafeConstructor());
+                yaml = buildSnakeYaml(new SafeConstructor(buildLoaderOptions()));
             }
             Object o = yaml.load(contents);
             if (options.isValidateYamlInput()) {
@@ -244,7 +257,7 @@ public class DeserializationUtils {
         return readYamlValue(contents, expectedType, false);
     }
     public static <T> T readYamlValue(String contents, Class<T> expectedType, boolean openapi31) {
-        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor());
+        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(new SafeConstructor(buildLoaderOptions()));
         ObjectMapper jsonMapper = openapi31 ? Json31.mapper() : Json.mapper();
         return jsonMapper.convertValue(yaml.load(contents), expectedType);
     }
@@ -256,20 +269,12 @@ public class DeserializationUtils {
             return new org.yaml.snakeyaml.Yaml(constructor);
         }
         try {
-            LoaderOptions loaderOptions = new LoaderOptions();
-            Method method = LoaderOptions.class.getMethod("setMaxAliasesForCollections", int.class);
-            method.invoke(loaderOptions, options.getMaxYamlAliasesForCollections());
-            method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
-            method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
-            method = LoaderOptions.class.getMethod("setAllowDuplicateKeys", boolean.class);
-            method.invoke(loaderOptions, false);
-            method = LoaderOptions.class.getMethod("setCodePointLimit", int.class);
-            method.invoke(loaderOptions, options.getMaxYamlCodePoints());
-            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions, new CustomResolver());
+            LoaderOptions loaderOptions = buildLoaderOptions();
+            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new CustomResolver());
             return yaml;
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
             //
-            LOGGER.debug("using snakeyaml < 1.25, not setting YAML Billion Laughs Attack snakeyaml level protection");
+            LOGGER.error("error building snakeYaml", e);
         }
         return new org.yaml.snakeyaml.Yaml(constructor);
     }
@@ -395,6 +400,10 @@ public class DeserializationUtils {
     }
 
     static class CustomSnakeYamlConstructor extends SafeConstructor {
+
+        public CustomSnakeYamlConstructor() {
+            super(buildLoaderOptions());
+        }
 
         private boolean checkNode(MappingNode node, Integer depth) {
             if (node.getValue() == null) return true;

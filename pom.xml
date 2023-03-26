@@ -73,9 +73,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit4</artifactId>
+                        <version>3.0.0</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
                     <testNGArtifactName>none:none</testNGArtifactName>
-                    <argLine>-Djdk.attach.allowAttachSelf</argLine>
+                    <argLine>-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar --add-opens java.base/java.lang=ALL-UNNAMED -Djdk.attach.allowAttachSelf</argLine>
                 </configuration>
                 <executions>
                     <execution>
@@ -108,7 +115,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.3.0</version>
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>
@@ -125,16 +132,12 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
+                <version>3.10.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.5.0</version>
                 <configuration>
                     <aggregate>true</aggregate>
                     <source>1.8</source>
@@ -157,7 +160,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -171,7 +174,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.1</version>
+                <version>0.8.8</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -204,7 +207,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M2</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>enforce-no-snapshots</id>
@@ -226,7 +229,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -256,7 +259,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0-M2</version>
+                    <version>3.2.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -269,7 +272,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>6.5.3</version>
+                        <version>8.1.2</version>
                         <configuration>
                             <skipSystemScope>true</skipSystemScope>
                         </configuration>
@@ -402,20 +405,21 @@
         </repository>
     </repositories>
     <properties>
-        <snakeyaml-version>1.33</snakeyaml-version>
-        <swagger-parser-v2-version>1.0.64</swagger-parser-v2-version>
+        <maven.compiler.release>8</maven.compiler.release>
+        <snakeyaml-version>2.0</snakeyaml-version>
+        <swagger-parser-v2-version>1.0.65</swagger-parser-v2-version>
         <commons-io-version>2.11.0</commons-io-version>
-        <slf4j-version>1.7.30</slf4j-version>
-        <swagger-core-version>2.2.8</swagger-core-version>
-        <swagger-core-v2-version>1.6.9</swagger-core-v2-version>
+        <slf4j-version>1.7.36</slf4j-version>
+        <swagger-core-version>2.2.9</swagger-core-version>
+        <swagger-core-v2-version>1.6.10</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
-        <testng-version>6.14.2</testng-version>
-        <jmockit-version>1.35</jmockit-version>
-        <wiremock-version>2.15.0</wiremock-version>
-        <surefire-version>2.22.2</surefire-version>
-        <commons-lang-version>3.2.1</commons-lang-version>
-        <jackson-version>2.14.0</jackson-version>
-        <jackson-databind-version>2.14.0</jackson-databind-version>
+        <testng-version>7.7.1</testng-version>
+        <jmockit-version>1.49</jmockit-version>
+        <wiremock-version>2.27.2</wiremock-version>
+        <surefire-version>3.0.0</surefire-version>
+        <commons-lang-version>3.12.0</commons-lang-version>
+        <jackson-version>2.14.2</jackson-version>
+        <jackson-databind-version>2.14.2</jackson-databind-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>

@@ -47,7 +47,7 @@ import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.ResolverFully;
 import mockit.Injectable;
 import mockit.Mocked;
-import mockit.StrictExpectations;
+import mockit.Expectations;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -1066,7 +1066,7 @@ public class OpenAPIResolverTest {
                                     @Mocked final ComponentsProcessor componentsProcessor,
                                     @Mocked final PathsProcessor pathsProcessor) throws Exception {
 
-        new StrictExpectations() {{
+        new Expectations() {{
             new ResolverCache(swagger, auths, null, new HashSet<>(), parseOptions);
             result = cache;
             times = 1;
