@@ -144,7 +144,11 @@ public class SchemaProcessor {
              for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
                  Schema property = propertyEntry.getValue();
                  if(property.get$ref() != null) {
-                     processReferenceSchemaForProperty(property);
+                     if (property instanceof ArraySchema) {
+                         processReferenceSchemaForProperty(property);
+                     } else {
+                         processReferenceSchema(property);
+                     }
                  }else {
                      processSchemaType(property);
                  }
