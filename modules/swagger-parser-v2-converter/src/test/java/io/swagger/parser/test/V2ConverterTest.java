@@ -1,6 +1,5 @@
 package io.swagger.parser.test;
 
-import io.swagger.util.Yaml;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
