@@ -4,7 +4,7 @@
 
 **NOTE:** Since version 2.1.0 Swagger Parser supports OpenAPI 3.1; see [this page](https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---OpenAPI-3.1) for details
 
-![Build Master - Java 8, 11, and 14](https://github.com/swagger-api/swagger-parser/workflows/Build%20Test%20Deploy%20master/badge.svg?branch=master)
+![Build Master - Java 11, 14 and 17](https://github.com/swagger-api/swagger-parser/workflows/Build%20Test%20Deploy%20master/badge.svg?branch=master)
 
 # Table of contents
 
@@ -114,14 +114,14 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.1.12</version>
+  <version>2.1.13</version>
 </dependency>
 ```
 
 #### Prerequisites
 You need the following installed and available in your $PATH:
 
-* [Java 1.8](http://java.oracle.com)
+* Java 11
 * [Apache maven 3.x](http://maven.apache.org/)
 
 After cloning the project, you can build it from source with this command:
