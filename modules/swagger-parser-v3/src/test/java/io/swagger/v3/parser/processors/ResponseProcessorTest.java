@@ -12,7 +12,7 @@ import io.swagger.v3.parser.ResolverCache;
 import mockit.FullVerifications;
 import mockit.Injectable;
 import mockit.Mocked;
-import mockit.StrictExpectations;
+import mockit.Expectations;
 import org.testng.annotations.Test;
 
 
@@ -42,7 +42,7 @@ public class ResponseProcessorTest {
     public void testProcessResponse(@Injectable final Schema responseSchema,
                                     @Injectable final Header responseHeader) throws Exception {
 
-        new StrictExpectations(){{
+        new Expectations(){{
             new SchemaProcessor(cache, swagger, openapi31);
             times=1;
             result = propertyProcessor;

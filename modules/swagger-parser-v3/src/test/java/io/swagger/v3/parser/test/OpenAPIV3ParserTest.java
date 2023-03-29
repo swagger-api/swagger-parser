@@ -16,9 +16,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
-import static org.testng.AssertJUnit.assertNotSame;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
@@ -2770,7 +2770,7 @@ public class OpenAPIV3ParserTest {
 
     @Test(description = "A string example should not be over quoted when parsing a yaml node")
     public void readingSpecNodeShouldNotOverQuotingStringExample() throws Exception {
-        String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
+        String yaml = Files.readFile(new FileInputStream("src/test/resources/over-quoted-example.yaml"));
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         OpenAPI openAPI = (parser.parseJsonNode(null, rootNode)).getOpenAPI();

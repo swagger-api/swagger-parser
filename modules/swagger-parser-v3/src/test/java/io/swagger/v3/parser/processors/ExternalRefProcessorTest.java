@@ -12,7 +12,7 @@ import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
-import mockit.StrictExpectations;
+import mockit.Expectations;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class ExternalRefProcessorTest {
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final RefFormat refFormat = RefFormat.URL;
 
-        new StrictExpectations() {{
+        new Expectations() {{
 			cache.getRenamedRef(ref);
 			times = 1;
 			result = null;

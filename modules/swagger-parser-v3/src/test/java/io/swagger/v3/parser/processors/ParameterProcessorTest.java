@@ -115,7 +115,7 @@ public class ParameterProcessorTest {
 
     private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
                                            final Parameter resolvedParam) {
-        new StrictExpectations() {{
+        new Expectations() {{
             cache.loadRef(ref, refFormat, Parameter.class);
             times = 1;
             result = resolvedParam;
@@ -124,7 +124,7 @@ public class ParameterProcessorTest {
 
     private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
                                            final RequestBody resolvedParam) {
-        new StrictExpectations() {{
+        new Expectations() {{
             /*cache.loadRef(ref, refFormat, RequestBody.class);
             times = 1;
             result = resolvedParam;*/
@@ -146,14 +146,14 @@ public class ParameterProcessorTest {
     }
 
     private void expectModelProcessorInvoked(@Injectable final Schema bodyParamSchema) {
-        new StrictExpectations(){{
+        new Expectations(){{
             modelProcessor.processSchema(bodyParamSchema); times=1;
         }};
     }
 
 
     private void expectedModelProcessorCreation() {
-        new StrictExpectations() {{
+        new Expectations() {{
             new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
             result = modelProcessor;
