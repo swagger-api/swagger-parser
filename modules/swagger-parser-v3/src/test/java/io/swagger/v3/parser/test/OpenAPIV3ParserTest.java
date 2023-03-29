@@ -427,10 +427,11 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testRefParseProblem() {
+    public void testIssue1889_ArrayReferenceNull() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/ref-problem/ref-problem.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue-1889/issue1889.yaml", null, options);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
         OpenAPI openAPI = result.getOpenAPI();
@@ -2291,6 +2292,10 @@ public class OpenAPIV3ParserTest {
         assertEquals(refInDefinitions.getDescription(), "The example model");
         expectedPropertiesInModel(refInDefinitions, "foo", "bar");
 
+        final ObjectSchema referencedObjectModel = (ObjectSchema) definitions.get("arrayModel");
+        final Map<String, Schema> referencedObjectProperties = referencedObjectModel.getProperties();
+        assertTrue(referencedObjectProperties.containsKey("hello"));
+
         final Schema fooModel = definitions.get("foo");
         assertEquals(fooModel.getDescription(), "Just another model");
         expectedPropertiesInModel(fooModel, "hello", "world");
@@ -2299,6 +2304,9 @@ public class OpenAPIV3ParserTest {
         final Schema child =  composedCat.getAllOf().get(2);
         expectedPropertiesInModel(child, "huntingSkill", "prop2", "reflexes", "reflexMap");
         final ArraySchema reflexes = (ArraySchema) child.getProperties().get("reflexes");
+        final Schema reflexItems = reflexes.getItems();
+        assertEquals(reflexItems.get$ref(), "#/components/schemas/reflex");
+        assertTrue(definitions.containsKey(reflexItems.get$ref().substring(reflexItems.get$ref().lastIndexOf("/")+1)));
 
         final Schema reflexMap = (Schema) child.getProperties().get("reflexMap");
         final Schema reflexMapAdditionalProperties = (Schema) reflexMap.getAdditionalProperties();
