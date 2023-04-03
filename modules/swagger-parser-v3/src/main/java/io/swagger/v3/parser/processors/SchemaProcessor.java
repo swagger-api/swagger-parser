@@ -130,17 +130,17 @@ public class SchemaProcessor {
             processReferenceSchema(schema);
         }
 
-         Map<String, Schema> properties = schema.getProperties();
-         if (properties != null) {
-             for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
-                 Schema property = propertyEntry.getValue();
-                 if(property.get$ref() != null) {
-                     processReferenceSchema(property);
-                 }else {
-                     processSchemaType(property);
-                 }
-             }
-         }
+        Map<String, Schema> properties = schema.getProperties();
+        if (properties != null) {
+            for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
+                Schema property = propertyEntry.getValue();
+                if(property.get$ref() != null) {
+                    processReferenceSchema(property);
+                }else {
+                    processSchemaType(property);
+                }
+            }
+        }
     }
 
     public void processComposedSchema(ComposedSchema composedSchema) {
