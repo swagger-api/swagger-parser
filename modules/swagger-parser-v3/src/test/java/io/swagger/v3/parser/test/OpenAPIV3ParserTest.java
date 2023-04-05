@@ -1517,7 +1517,7 @@ public class OpenAPIV3ParserTest {
     @Test
     public void test30(@Injectable final List<AuthorizationValue> auths) throws Exception{
 
-       String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/oas3.yaml.template"));
         pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -2994,7 +2994,7 @@ public class OpenAPIV3ParserTest {
         try {
             // Temporarily switch tccl to an unproductive cl
             final ClassLoader tcclTemp = new java.net.URLClassLoader(new java.net.URL[] {},
-                ClassLoader.getSystemClassLoader());
+                    ClassLoader.getSystemClassLoader());
             Thread.currentThread().setContextClassLoader(tcclTemp);
             api = new OpenAPIV3Parser().read("src/test/resources/test.yaml");
         } finally {
@@ -3357,7 +3357,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult readResult = parser.readLocation("src/test/resources/issue-1543/openapi.yaml", null, options);
 
         if (readResult.getMessages().size() > 0) {
-        	Assert.assertFalse(readResult.getMessages().get(0).contains("end -1"));
+            Assert.assertFalse(readResult.getMessages().get(0).contains("end -1"));
         }
     }
 
@@ -3497,5 +3497,19 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yamlString, null, options);
         assertEquals(parseResult.getMessages().size(), 1);
+    }
+
+    @Test
+    public void testIssue1902_component_example_not_parse_ordinal_json() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue1902/1902-string-example-in-component.yaml",
+                        null, options);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+        Example expectedExample = openAPI.getComponents().getExamples().get("Things");
+        assertNotNull(expectedExample);
     }
 }
