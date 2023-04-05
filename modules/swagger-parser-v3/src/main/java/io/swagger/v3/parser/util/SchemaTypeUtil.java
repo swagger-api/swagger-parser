@@ -43,7 +43,7 @@ public class SchemaTypeUtil {
     public static final String BINARY_AS_STRING = "swaggerParserBinaryAsString";
 
     public static Schema createSchemaByType(ObjectNode node){
-        if(node == null) {
+        if (node == null) {
             return new Schema();
         }
         final String type = getNodeValue(node, TYPE);
@@ -53,6 +53,10 @@ public class SchemaTypeUtil {
         final String format = getNodeValue(node, FORMAT);
 
         return createSchema(type, format);
+    }
+
+    public static void updateReferenceForParentNode(Schema schema, String ref) {
+        schema.set$ref(ref);
     }
 
     public static Schema createSchema(String type, String format) {
