@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class SwaggerParseResult {
     private List<String> messages = null;
@@ -65,5 +66,18 @@ public class SwaggerParseResult {
 
     public boolean isOpenapi31() {
         return this.openapi31;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SwaggerParseResult result = (SwaggerParseResult) o;
+        return openapi31 == result.openapi31 && Objects.equals(messages, result.messages) && Objects.equals(openAPI, result.openAPI);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(messages, openAPI, openapi31);
     }
 }

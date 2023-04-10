@@ -195,6 +195,10 @@ public class OpenAPIDeserializer {
 
 	protected static Map<String, Map<String, Set<String>>> KEYS = new LinkedHashMap<>();
 
+    protected static Set<JsonNodeType> validNodeTypes =  new LinkedHashSet<>(
+            Arrays.asList(JsonNodeType.OBJECT, JsonNodeType.STRING));
+
+
 	static {
 		Map<String, Set<String>> keys30 = new LinkedHashMap<>();
 		Map<String, Set<String>> keys31 = new LinkedHashMap<>();
@@ -2750,7 +2754,9 @@ public class OpenAPIDeserializer {
 
 		if (schema == null) {
 			schema = SchemaTypeUtil.createSchemaByType(node);
-		}
+		} else if (itemsNode != null && itemsNode.has("$ref" )) {
+             SchemaTypeUtil.updateReferenceForParentNode(schema, itemsNode.get("$ref").textValue());
+        }
 
 		JsonNode ref = node.get("$ref");
 		if (ref != null) {
@@ -3233,9 +3239,17 @@ public class OpenAPIDeserializer {
 			}
 
 			JsonNode exampleValue = obj.get(exampleName);
-			if (!exampleValue.getNodeType().equals(JsonNodeType.OBJECT)) {
+			if (!validNodeTypes.contains(exampleValue.getNodeType())) {
 				result.invalidType(location, exampleName, "object", exampleValue);
-			} else {
+			} else if (exampleValue.getNodeType().equals(JsonNodeType.STRING)) {
+                TextNode stringExample = (TextNode) exampleValue;
+                if (stringExample != null) {
+                    Example exampleObj = getTextExample(stringExample);
+                    if (exampleObj != null) {
+                        examples.put(exampleName, exampleObj);
+                    }
+                }
+            } else {
 				ObjectNode example = (ObjectNode) exampleValue;
 				if (example != null) {
 					Example exampleObj = getExample(example, String.format("%s.%s", location, exampleName),
@@ -3248,6 +3262,13 @@ public class OpenAPIDeserializer {
 		}
 		return examples;
 	}
+
+    private Example getTextExample(TextNode textNode) {
+        if (textNode == null) return null;
+        Example example = new Example();
+        example.setValue(textNode.textValue());
+        return example;
+    }
 
 	public Example getExample(ObjectNode node, String location, ParseResult result) {
 		if (node == null)
