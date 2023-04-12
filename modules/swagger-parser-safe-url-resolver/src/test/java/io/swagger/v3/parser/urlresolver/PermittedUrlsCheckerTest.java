@@ -1,8 +1,8 @@
-package io.swagger.parser.v3.urlresolver;
+package io.swagger.v3.parser.urlresolver;
 
-import io.swagger.parser.v3.urlresolver.exceptions.HostDeniedException;
-import io.swagger.parser.v3.urlresolver.models.ResolvedUrl;
-import io.swagger.parser.v3.urlresolver.utils.NetUtils;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
+import io.swagger.v3.parser.urlresolver.models.ResolvedUrl;
+import io.swagger.v3.parser.urlresolver.utils.NetUtils;
 import mockit.*;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;

@@ -1,9 +1,8 @@
-package io.swagger.parser.v3.urlresolver.matchers;
+package io.swagger.v3.parser.urlresolver.matchers;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.List;
 

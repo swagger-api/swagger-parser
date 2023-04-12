@@ -1,4 +1,4 @@
-package io.swagger.parser.v3.urlresolver.utils;
+package io.swagger.v3.parser.urlresolver.utils;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;

@@ -1,4 +1,4 @@
-package io.swagger.parser.v3.urlresolver.exceptions;
+package io.swagger.v3.parser.urlresolver.exceptions;
 
 public class HostDeniedException extends Exception {
     public HostDeniedException(String message) {
