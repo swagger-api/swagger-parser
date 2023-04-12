@@ -14,8 +14,8 @@ import java.util.List;
 
 public class PermittedUrlsChecker {
 
-    private final UrlPatternMatcher allowlistMatcher;
-    private final UrlPatternMatcher denylistMatcher;
+    protected final UrlPatternMatcher allowlistMatcher;
+    protected final UrlPatternMatcher denylistMatcher;
 
     public PermittedUrlsChecker() {
         this.allowlistMatcher = new UrlPatternMatcher(Collections.emptyList());
@@ -86,7 +86,7 @@ public class PermittedUrlsChecker {
         return new ResolvedUrl(urlWithIp, hostname);
     }
 
-    private boolean isRestrictedIpRange(InetAddress ip) {
+    protected boolean isRestrictedIpRange(InetAddress ip) {
         return ip.isLinkLocalAddress()
                 || ip.isSiteLocalAddress()
                 || ip.isLoopbackAddress()
