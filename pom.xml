@@ -381,6 +381,7 @@
         <module>modules/swagger-parser-v2-converter</module>
         <module>modules/swagger-parser</module>
         <module>modules/swagger-parser-cli</module>
+        <module>modules/swagger-parser-safe-url-resolver</module>
     </modules>
     <repositories>
         <repository>
