@@ -23,8 +23,17 @@ public class PermittedUrlsChecker {
     }
 
     public PermittedUrlsChecker(List<String> allowlist, List<String> denylist) {
-        this.allowlistMatcher = new UrlPatternMatcher(allowlist);
-        this.denylistMatcher = new UrlPatternMatcher(denylist);
+        if(allowlist != null) {
+            this.allowlistMatcher = new UrlPatternMatcher(allowlist);
+        } else {
+            this.allowlistMatcher = new UrlPatternMatcher(Collections.emptyList());
+        }
+
+        if(denylist != null) {
+            this.denylistMatcher = new UrlPatternMatcher(denylist);
+        } else {
+            this.denylistMatcher = new UrlPatternMatcher(Collections.emptyList());
+        }
     }
 
     public ResolvedUrl verify(String url) throws HostDeniedException {
