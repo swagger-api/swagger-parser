@@ -8,6 +8,8 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -986,5 +988,36 @@ public class OAI31DeserializationTest {
         assertNotNull(result.getOpenAPI());
         Schema id = (Schema)result.getOpenAPI().getComponents().getSchemas().get("Rule").getProperties().get("id");
         assertEquals(id.getTypes().iterator().next(), "string");
+    }
+
+    @Test(description = "Test safe resolving with blocked URL")
+    public void test31SafeURLResolvingWithBlockedURL() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Arrays.asList("petstore3.swagger.io");
+        parseOptions.setAllowList(allowList);
+        parseOptions.setBlockList(blockList);
+
+        List<String> errorList = Arrays.asList("URL is part of the explicit denylist. URL [https://petstore3.swagger.io/api/v3/openapi.json]");
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/test/safeUrlResolvingExample.yaml", null, parseOptions);
+
+        assertEquals(result.getMessages(), errorList);
+    }
+
+    @Test(description = "Test safe resolving")
+    public void test31SafeURLResolving() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Collections.emptyList();
+        parseOptions.setAllowList(allowList);
+        parseOptions.setBlockList(blockList);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/test/safeUrlResolvingExample.yaml", null, parseOptions);
+
+        assertTrue(result.getMessages().isEmpty());
     }
 }

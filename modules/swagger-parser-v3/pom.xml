@@ -6,6 +6,18 @@
         <version>2.1.14-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>9</source>
+                    <target>9</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>swagger-parser-v3</artifactId>
     <packaging>jar</packaging>
@@ -25,6 +37,11 @@
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-core</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser-safe-url-resolver</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -86,6 +103,12 @@
             <artifactId>junit</artifactId>
             <version>${junit-version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser-safe-url-resolver</artifactId>
+            <version>2.1.14-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

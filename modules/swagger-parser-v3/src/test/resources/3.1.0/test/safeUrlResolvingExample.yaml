@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info:
+  version: "1.0.0"
+  title: ssrf-test
+paths:
+  /devices:
+    get:
+      operationId: getDevices
+      responses:
+        '200':
+          description: All the devices
+          content:
+            application/json:
+              schema:
+                $ref: 'https://petstore3.swagger.io/api/v3/openapi.json'

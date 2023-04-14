@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -27,7 +29,7 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
         return false;
     }
 
-    public void dereference(DereferencerContext context, Iterator<OpenAPIDereferencer> chain) {
+    public void dereference(DereferencerContext context, Iterator<OpenAPIDereferencer> chain) throws HostDeniedException {
 
         // context.referenceCache = new ReferenceCache(context);
 
@@ -80,6 +82,11 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
         if (openAPI == null) {
             return;
         }
+
+        if (context.getParseOptions().isSafelyResolveURL()) {
+            checkRefSafety(context, refSet);
+        }
+
         result.setOpenAPI(openAPI);
         result.getMessages().addAll(reference.getMessages());
     }
@@ -90,5 +97,17 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
 
     public Visitor buildReferenceVisitor(DereferencerContext context, Reference reference, Traverser traverser) {
         return new ReferenceVisitor(reference, (OpenAPI31Traverser)traverser, new HashSet<>(), new HashMap<>());
+    }
+
+    private void checkRefSafety(DereferencerContext context, LinkedHashMap<String, Reference> refSet) throws HostDeniedException {
+        Set<String> references = refSet.keySet();
+        references.remove("local");
+
+        PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getAllowList(),
+                context.getParseOptions().getBlockList());
+
+        for (String key : references) {
+            permittedUrlsChecker.verify(refSet.get(key).getUri());
+        }
     }
 }
