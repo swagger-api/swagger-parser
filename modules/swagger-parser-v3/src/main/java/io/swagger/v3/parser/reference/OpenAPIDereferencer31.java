@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -71,7 +70,7 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
                 .auths(context.getAuths());
 
         Traverser traverser = buildTraverser(context);
-        Visitor referenceVisitor = buildReferenceVisitor(context, reference, traverser);
+        ReferenceVisitor referenceVisitor = buildReferenceVisitorWithContext(context, reference, traverser);
         try {
             openAPI = traverser.traverse(context.getOpenApi(), referenceVisitor);
         } catch (Exception e){
@@ -81,10 +80,6 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
 
         if (openAPI == null) {
             return;
-        }
-
-        if (context.getParseOptions().isSafelyResolveURL()) {
-            checkRefSafety(context, refSet);
         }
 
         result.setOpenAPI(openAPI);
@@ -99,15 +94,8 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
         return new ReferenceVisitor(reference, (OpenAPI31Traverser)traverser, new HashSet<>(), new HashMap<>());
     }
 
-    private void checkRefSafety(DereferencerContext context, LinkedHashMap<String, Reference> refSet) throws HostDeniedException {
-        Set<String> references = refSet.keySet();
-        references.remove("local");
-
-        PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getAllowList(),
-                context.getParseOptions().getBlockList());
-
-        for (String key : references) {
-            permittedUrlsChecker.verify(refSet.get(key).getUri());
-        }
+    public ReferenceVisitor buildReferenceVisitorWithContext(DereferencerContext context, Reference reference, Traverser traverser) {
+        return new ReferenceVisitor(reference, (OpenAPI31Traverser)traverser, new HashSet<>(), new HashMap<>(), context);
     }
+
 }

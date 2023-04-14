@@ -997,8 +997,8 @@ public class OAI31DeserializationTest {
         parseOptions.setSafelyResolveURL(true);
         List<String> allowList = Collections.emptyList();
         List<String> blockList = Arrays.asList("petstore3.swagger.io");
-        parseOptions.setAllowList(allowList);
-        parseOptions.setBlockList(blockList);
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
 
         List<String> errorList = Arrays.asList("URL is part of the explicit denylist. URL [https://petstore3.swagger.io/api/v3/openapi.json]");
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/test/safeUrlResolvingExample.yaml", null, parseOptions);
@@ -1013,8 +1013,8 @@ public class OAI31DeserializationTest {
         parseOptions.setSafelyResolveURL(true);
         List<String> allowList = Collections.emptyList();
         List<String> blockList = Collections.emptyList();
-        parseOptions.setAllowList(allowList);
-        parseOptions.setBlockList(blockList);
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
 
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/test/safeUrlResolvingExample.yaml", null, parseOptions);
 

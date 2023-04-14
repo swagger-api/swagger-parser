@@ -14,6 +14,9 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
+import io.swagger.v3.parser.util.RemoteUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +34,7 @@ public class ReferenceVisitor extends AbstractVisitor {
     protected HashMap<Object, Object> visitedMap;
     protected OpenAPI31Traverser openAPITraverser;
     protected Reference reference;
+    protected DereferencerContext context;
 
     public ReferenceVisitor(
             Reference reference,
@@ -41,6 +45,20 @@ public class ReferenceVisitor extends AbstractVisitor {
         this.openAPITraverser = openAPITraverser;
         this.visited = visited;
         this.visitedMap = visitedMap;
+        this.context = null;
+    }
+
+    public ReferenceVisitor(
+            Reference reference,
+            OpenAPI31Traverser openAPITraverser,
+            HashSet<Object> visited,
+            HashMap<Object, Object> visitedMap,
+            DereferencerContext context) {
+        this.reference = reference;
+        this.openAPITraverser = openAPITraverser;
+        this.visited = visited;
+        this.visitedMap = visitedMap;
+        this.context = context;
     }
 
     public String toBaseURI(String uri) throws Exception{
@@ -174,13 +192,21 @@ public class ReferenceVisitor extends AbstractVisitor {
         return resolveRef(header, header.get$ref(), Header.class, openAPITraverser::traverseHeader);
     }
 
+    @Override
+    public String readHttp(String uri, List<AuthorizationValue> auths) throws Exception {
+        if(context.getParseOptions().isSafelyResolveURL()){
+            checkUrlIsPermitted(uri);
+        }
+        return RemoteUrl.urlToString(uri, auths);
+    }
+
     public<T> T resolveRef(T visiting, String ref, Class<T> clazz, BiFunction<T, ReferenceVisitor, T> traverseFunction){
         try {
             Reference reference = toReference(ref);
             String fragment = ReferenceUtils.getFragment(ref);
             JsonNode node = ReferenceUtils.jsonPointerEvaluate(fragment, reference.getJsonNode(), ref);
             T resolved = openAPITraverser.deserializeFragment(node, clazz, ref, fragment, reference.getMessages());
-            ReferenceVisitor visitor = new ReferenceVisitor(reference, openAPITraverser, this.visited, this.visitedMap);
+            ReferenceVisitor visitor = new ReferenceVisitor(reference, openAPITraverser, this.visited, this.visitedMap, context);
             return traverseFunction.apply(resolved, visitor);
 
         } catch (Exception e) {
@@ -232,7 +258,7 @@ public class ReferenceVisitor extends AbstractVisitor {
             if (isAnchor) {
                 resolved.$anchor(null);
             }
-            ReferenceVisitor visitor = new ReferenceVisitor(reference, openAPITraverser, this.visited, this.visitedMap);
+            ReferenceVisitor visitor = new ReferenceVisitor(reference, openAPITraverser, this.visited, this.visitedMap, context);
             return openAPITraverser.traverseSchema(resolved, visitor, inheritedIds);
         } catch (Exception e) {
             LOGGER.error("Error resolving schema " + ref, e);
@@ -277,5 +303,12 @@ public class ReferenceVisitor extends AbstractVisitor {
 
     public JsonNode parse(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
         return deserializeIntoTree(readURI(absoluteUri, auths));
+    }
+
+    protected void checkUrlIsPermitted(String refSet) throws HostDeniedException {
+        PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getRemoteRefAllowList(),
+                context.getParseOptions().getRemoteRefBlockList());
+
+        permittedUrlsChecker.verify(refSet);
     }
 }

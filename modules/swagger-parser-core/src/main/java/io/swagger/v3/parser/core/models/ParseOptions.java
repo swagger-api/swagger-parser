@@ -19,8 +19,8 @@ public class ParseOptions {
     private boolean oaiAuthor;
     private boolean inferSchemaType = true;
     private boolean safelyResolveURL;
-    private List<String> allowList;
-    private List<String> blockList;
+    private List<String> remoteRefAllowList;
+    private List<String> remoteRefBlockList;
 
 
     public boolean isResolve() {
@@ -146,19 +146,19 @@ public class ParseOptions {
         this.safelyResolveURL = safelyResolveURL;
     }
 
-    public List<String> getAllowList() {
-        return allowList;
+    public List<String> getRemoteRefAllowList() {
+        return remoteRefAllowList;
     }
 
-    public void setAllowList(List<String> allowList) {
-        this.allowList = allowList;
+    public void setRemoteRefAllowList(List<String> remoteRefAllowList) {
+        this.remoteRefAllowList = remoteRefAllowList;
     }
 
-    public List<String> getBlockList() {
-        return blockList;
+    public List<String> getRemoteRefBlockList() {
+        return remoteRefBlockList;
     }
 
-    public void setBlockList(List<String> blockList) {
-        this.blockList = blockList;
+    public void setRemoteRefBlockList(List<String> remoteRefBlockList) {
+        this.remoteRefBlockList = remoteRefBlockList;
     }
 }
