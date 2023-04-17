@@ -990,6 +990,21 @@ public class OAI31DeserializationTest {
         assertEquals(id.getTypes().iterator().next(), "string");
     }
 
+    @Test(description = "Test safe resolving")
+    public void test31SafeURLResolving() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Collections.emptyList();
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithPetstore.yaml", null, parseOptions);
+
+        assertTrue(result.getMessages().isEmpty());
+    }
+
     @Test(description = "Test safe resolving with blocked URL")
     public void test31SafeURLResolvingWithBlockedURL() {
         ParseOptions parseOptions = new ParseOptions();
@@ -1001,23 +1016,52 @@ public class OAI31DeserializationTest {
         parseOptions.setRemoteRefBlockList(blockList);
 
         List<String> errorList = Arrays.asList("URL is part of the explicit denylist. URL [https://petstore3.swagger.io/api/v3/openapi.json]");
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/test/safeUrlResolvingExample.yaml", null, parseOptions);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithPetstore.yaml", null, parseOptions);
 
         assertEquals(result.getMessages(), errorList);
+        assertEquals(result.getMessages().size(), 1);
     }
 
-    @Test(description = "Test safe resolving")
-    public void test31SafeURLResolving() {
+    @Test(description = "Test safe resolving with turned off safelyResolveURL option")
+    public void test31SafeURLResolvingWithTurnedOffSafeResolving() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolveFully(true);
-        parseOptions.setSafelyResolveURL(true);
+        parseOptions.setSafelyResolveURL(false);
         List<String> allowList = Collections.emptyList();
-        List<String> blockList = Collections.emptyList();
+        List<String> blockList = Arrays.asList("petstore3.swagger.io");
         parseOptions.setRemoteRefAllowList(allowList);
         parseOptions.setRemoteRefBlockList(blockList);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/test/safeUrlResolvingExample.yaml", null, parseOptions);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithPetstore.yaml", null, parseOptions);
 
         assertTrue(result.getMessages().isEmpty());
+    }
+
+    @Test(description = "Test safe resolving with localhost and blocked url")
+    public void test31SafeURLResolvingWithLocalhostAndBlockedURL() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithLocalhost.yaml", null, parseOptions);
+
+        assertTrue(result.getMessages().get(0).contains("IP is restricted"));
+        assertEquals(result.getMessages().size(), 1);
+    }
+
+    @Test(description = "Test safe resolving with localhost url")
+    public void test31SafeURLResolvingWithLocalhost() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> blockList = Arrays.asList("petstore.swagger.io");
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        String error = "URL is part of the explicit denylist. URL [https://petstore.swagger.io/v2/swagger.json]";
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithLocalhost.yaml", null, parseOptions);
+
+        assertTrue(result.getMessages().get(0).contains("IP is restricted"));
+        assertEquals(result.getMessages().get(1), error);
+        assertEquals(result.getMessages().size(), 2);
     }
 }
