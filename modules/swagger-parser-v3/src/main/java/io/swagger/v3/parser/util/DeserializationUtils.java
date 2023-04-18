@@ -201,6 +201,11 @@ public class DeserializationUtils {
             method.invoke(loaderOptions, options.getMaxYamlAliasesForCollections());
             method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
             method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
+            method = LoaderOptions.class.getMethod("setAllowDuplicateKeys", boolean.class);
+            method.invoke(loaderOptions, false);
+            method = LoaderOptions.class.getMethod("setCodePointLimit", int.class);
+            method.invoke(loaderOptions, options.getMaxYamlCodePoints());
+
         } catch (ReflectiveOperationException e) {
             LOGGER.debug("using snakeyaml < 1.25, not setting YAML Billion Laughs Attack snakeyaml level protection");
         }
