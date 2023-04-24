@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -28,7 +27,7 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
         return false;
     }
 
-    public void dereference(DereferencerContext context, Iterator<OpenAPIDereferencer> chain) throws HostDeniedException {
+    public void dereference(DereferencerContext context, Iterator<OpenAPIDereferencer> chain) {
 
         // context.referenceCache = new ReferenceCache(context);
 

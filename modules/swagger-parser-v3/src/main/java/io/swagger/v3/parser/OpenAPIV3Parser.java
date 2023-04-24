@@ -13,7 +13,6 @@ import io.swagger.v3.parser.exception.ReadContentException;
 import io.swagger.v3.parser.reference.DereferencerContext;
 import io.swagger.v3.parser.reference.DereferencersFactory;
 import io.swagger.v3.parser.reference.OpenAPIDereferencer;
-import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import io.swagger.v3.parser.util.ClasspathHelper;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.InlineModelResolver;
@@ -192,10 +191,6 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getOriginalMessage(), location);
             return SwaggerParseResult.ofError(message);
-        } catch (HostDeniedException e) {
-            LOGGER.warn("Exception while resolving:", e);
-            final String message = getParseErrorMessage(e.getMessage(), location);
-            return SwaggerParseResult.ofError(message);
         } catch (Exception e) {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getMessage(), location);
@@ -209,7 +204,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     private SwaggerParseResult resolve(SwaggerParseResult result, List<AuthorizationValue> auth, ParseOptions options,
-            String location) throws HostDeniedException {
+            String location) {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
@@ -256,8 +251,6 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     }
                 }
             }
-        }  catch (HostDeniedException error) {
-            throw error;
         } catch (Exception e) {
             LOGGER.warn("Exception while resolving:", e);
             // TODO verify if this change makes sense (adding resolve messages instead of replacing)
