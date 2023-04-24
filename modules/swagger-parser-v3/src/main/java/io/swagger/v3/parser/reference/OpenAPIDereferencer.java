@@ -1,5 +1,4 @@
 package io.swagger.v3.parser.reference;
-
 import java.util.Iterator;
 
 public interface OpenAPIDereferencer {

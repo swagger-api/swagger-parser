@@ -69,7 +69,7 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
                 .auths(context.getAuths());
 
         Traverser traverser = buildTraverser(context);
-        Visitor referenceVisitor = buildReferenceVisitor(context, reference, traverser);
+        ReferenceVisitor referenceVisitor = buildReferenceVisitorWithContext(context, reference, traverser);
         try {
             openAPI = traverser.traverse(context.getOpenApi(), referenceVisitor);
         } catch (Exception e){
@@ -80,6 +80,7 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
         if (openAPI == null) {
             return;
         }
+
         result.setOpenAPI(openAPI);
         result.getMessages().addAll(reference.getMessages());
     }
@@ -91,4 +92,9 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
     public Visitor buildReferenceVisitor(DereferencerContext context, Reference reference, Traverser traverser) {
         return new ReferenceVisitor(reference, (OpenAPI31Traverser)traverser, new HashSet<>(), new HashMap<>());
     }
+
+    public ReferenceVisitor buildReferenceVisitorWithContext(DereferencerContext context, Reference reference, Traverser traverser) {
+        return new ReferenceVisitor(reference, (OpenAPI31Traverser)traverser, new HashSet<>(), new HashMap<>(), context);
+    }
+
 }

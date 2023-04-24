@@ -1,5 +1,7 @@
 package io.swagger.v3.parser.core.models;
 
+import java.util.List;
+
 public class ParseOptions {
     private boolean resolve;
     private boolean resolveCombinators = true;
@@ -16,6 +18,10 @@ public class ParseOptions {
 
     private boolean oaiAuthor;
     private boolean inferSchemaType = true;
+    private boolean safelyResolveURL;
+    private List<String> remoteRefAllowList;
+    private List<String> remoteRefBlockList;
+
 
     public boolean isResolve() {
         return resolve;
@@ -130,5 +136,29 @@ public class ParseOptions {
 
     public void setInferSchemaType(boolean inferSchemaType) {
         this.inferSchemaType = inferSchemaType;
+    }
+
+    public boolean isSafelyResolveURL() {
+        return safelyResolveURL;
+    }
+
+    public void setSafelyResolveURL(boolean safelyResolveURL) {
+        this.safelyResolveURL = safelyResolveURL;
+    }
+
+    public List<String> getRemoteRefAllowList() {
+        return remoteRefAllowList;
+    }
+
+    public void setRemoteRefAllowList(List<String> remoteRefAllowList) {
+        this.remoteRefAllowList = remoteRefAllowList;
+    }
+
+    public List<String> getRemoteRefBlockList() {
+        return remoteRefBlockList;
+    }
+
+    public void setRemoteRefBlockList(List<String> remoteRefBlockList) {
+        this.remoteRefBlockList = remoteRefBlockList;
     }
 }
