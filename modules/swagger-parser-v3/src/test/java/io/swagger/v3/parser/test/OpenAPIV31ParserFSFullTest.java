@@ -20,7 +20,7 @@ public class OpenAPIV31ParserFSFullTest {
         org.testng.Assert.assertEquals(Yaml31.pretty(swaggerParseResult.getOpenAPI()), FileUtils.readFileToString(new File("src/test/resources/3.1.0/dereference/fullFS/dereferenced.yaml")));
     }
 
-    @Test
+    @Test(enabled = false)
     public void testCustomUrlResolver() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);

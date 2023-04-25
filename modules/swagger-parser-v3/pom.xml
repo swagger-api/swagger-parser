@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>${testng-version}</version>
+            <version>6.9.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -76,9 +76,10 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
-            <version>${wiremock-version}</version>
+            <version>1.57</version>
             <scope>test</scope>
 
+            <classifier>standalone</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -89,8 +90,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit-version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
