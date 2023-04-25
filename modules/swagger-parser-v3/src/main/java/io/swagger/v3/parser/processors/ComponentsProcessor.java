@@ -239,11 +239,6 @@ public class ComponentsProcessor {
                     // because the referenced model may be in the components map, we need to remove old instances
                     final Schema resolvedModel = schemas.get(renamedRef);
 
-                    // ensure the reference isn't still in use
-                    if(!cache.hasReferencedKey(renamedRef)) {
-                        schemas.remove(renamedRef);
-                    }
-
                     // add the new key
                     schemas.put(modelName, resolvedModel);
                 }

@@ -3512,4 +3512,17 @@ public class OpenAPIV3ParserTest {
         Example expectedExample = openAPI.getComponents().getExamples().get("Things");
         assertNotNull(expectedExample);
     }
+
+    @Test
+    public void regressionTestFailingParse() {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("amazonaws.com-amplify.json", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        assertEquals(schemas.keySet(), new HashSet<String>() {{
+            add("CustomRules");
+            add("CustomRule");
+        }});
+    }
 }
