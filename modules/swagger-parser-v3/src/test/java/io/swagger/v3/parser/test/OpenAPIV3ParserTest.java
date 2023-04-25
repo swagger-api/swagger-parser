@@ -476,7 +476,7 @@ public class OpenAPIV3ParserTest {
         Assert.assertNotNull(result.getOpenAPI());
         OpenAPI openAPI = result.getOpenAPI();
         String expectedReference = openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getContent()
-                .get("application/json").getSchema().get$ref();
+                .get("application/json").getSchema().getItems().get$ref();
         assertEquals(expectedReference, "#/components/schemas/Pet");
     }
 
@@ -2332,9 +2332,8 @@ public class OpenAPIV3ParserTest {
         assertEquals(refInDefinitions.getDescription(), "The example model");
         expectedPropertiesInModel(refInDefinitions, "foo", "bar");
 
-        final ObjectSchema referencedObjectModel = (ObjectSchema) definitions.get("arrayModel");
-        final Map<String, Schema> referencedObjectProperties = referencedObjectModel.getProperties();
-        assertTrue(referencedObjectProperties.containsKey("hello"));
+        final ArraySchema referencedObjectModel = (ArraySchema) definitions.get("arrayModel");
+        assertEquals(referencedObjectModel.getItems().get$ref(), "#/components/schemas/foo");
 
         final Schema fooModel = definitions.get("foo");
         assertEquals(fooModel.getDescription(), "Just another model");
@@ -3524,5 +3523,18 @@ public class OpenAPIV3ParserTest {
             add("CustomRules");
             add("CustomRule");
         }});
+
+        ObjectSchema customRule = (ObjectSchema) schemas.get("CustomRule");
+        assertEquals(customRule.getType(), "object");
+
+        StringSchema source = (StringSchema) customRule.getProperties().get("source");
+        assertEquals(source.getType(), "string");
+
+        ArraySchema customRules = (ArraySchema) schemas.get("CustomRules");
+        assertEquals(customRules.getType(), "array");
+
+        ObjectSchema customRulesItem = (ObjectSchema) customRules.getItems();
+
+        assertEquals(customRulesItem, customRule);
     }
 }
