@@ -74,12 +74,18 @@ public class DeserializationUtils {
             return yamlCycleCheck;
         }
 
-        public Integer getMaxYamlCodePoints() { return maxYamlCodePoints; }
-
         public void setYamlCycleCheck(boolean yamlCycleCheck) {
             this.yamlCycleCheck = yamlCycleCheck;
         }
 
+        public Integer getMaxYamlCodePoints() {
+          return maxYamlCodePoints;
+        }
+
+        public void setMaxYamlCodePoints(Integer maxYamlCodePoints) {
+          this.maxYamlCodePoints = maxYamlCodePoints;
+        }
+        
         public Integer getMaxYamlAliasesForCollections() {
             return maxYamlAliasesForCollections;
         }
