@@ -1,0 +1,69 @@
+get:
+  summary: List all pets
+  operationId: listPets
+  tags:
+    - pets
+  parameters:
+    - name: myParam
+      in: query
+      description: Param
+      required: true
+      schema:
+        $ref: 'def.yml#/components/schemas/Pet'
+    - name: myParam2
+      in: query
+      description: Param2
+      required: true
+      schema:
+        $ref: './def.yml#/components/schemas/Pet'
+    - name: myParam3
+      in: query
+      description: Param3
+      required: true
+      schema:
+        $ref: '../pets/def.yml#/components/schemas/Pet'
+  responses:
+    "200":
+      description: A paged array of pets
+      headers:
+        x-next:
+          $ref: "./def.yml#/components/headers/LocationInHeaders"
+      content:
+        application/json:
+          schema:
+            $ref: "./def.yml#/components/schemas/Pets"
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "./def.yml#/components/schemas/Error"
+post:
+  summary: Create a pet
+  operationId: createPets
+  tags:
+    - pets
+  responses:
+    '201':
+      description: New guest added to event list
+      content:
+        application/json:
+          schema:
+            properties:
+              test:
+                type: string
+          examples:
+            testExamples:
+              $ref: "../petstore.yml#/components/schemas/DateWithExample"
+      links:
+        userRepository:
+          $ref: 'def.yml#/components/links/userRepository'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "./def.yml#/components/schemas/Error"
+          example:
+            $ref: "../petstore.yml#/components/schemas/DateWithExample"
+
