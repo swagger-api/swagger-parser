@@ -313,6 +313,9 @@ public final class ExternalRefProcessor {
                                     if (response.getLinks() != null) {
                                         processRefLinks(response.getLinks(), $ref);
                                     }
+                                    if (response.getHeaders() != null) {
+                                        processRefHeaders(response.getHeaders(), $ref);
+                                    }
                                 }
                             }
                         }

@@ -3476,4 +3476,16 @@ public class OpenAPIV3ParserTest {
         Example expectedExample = openAPI.getComponents().getExamples().get("Things");
         assertNotNull(expectedExample);
     }
+
+    @Test
+    public void testIssue_1746_headers_relative_paths() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1746/petstore.yml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+
+        assertEquals(openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getHeaders().get("x-next").get$ref(), "#/components/headers/LocationInHeaders");
+    }
 }
