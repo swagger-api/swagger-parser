@@ -119,7 +119,7 @@ public final class ExternalRefProcessor {
             cache.addReferencedKey(newRef);
 
             String file = $ref.split("#/")[0];
-            if (schema.get$ref() != null && !Objects.equals(schema.getType(), "array")) {
+            if (schema.get$ref() != null) {
                 RefFormat ref = computeRefFormat(schema.get$ref());
                 if (isAnExternalRefFormat(ref)) {
                     if (!ref.equals(RefFormat.URL)) {

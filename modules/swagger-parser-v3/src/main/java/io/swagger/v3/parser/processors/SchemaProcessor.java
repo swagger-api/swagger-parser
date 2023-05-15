@@ -2,6 +2,7 @@ package io.swagger.v3.parser.processors;
 
 
 import io.swagger.v3.oas.models.OpenAPI;
+
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Discriminator;
@@ -87,16 +88,6 @@ public class SchemaProcessor {
             processDiscriminatorSchema(schema);
         }
 
-        if (doesInternalSchemaContains(schema)) {
-            processInternalPropertyReferences(schema.getItems().getItems());
-        }
-    }
-
-    private boolean doesInternalSchemaContains(Schema schema) {
-        return schema.getItems() != null
-                && schema.getItems().getItems() != null
-                && schema.getItems().getItems().get$ref() != null
-                && schema.getItems().getItems().get$ref().startsWith("..");
     }
 
     private void processDiscriminatorSchema(Schema schema) {
@@ -115,7 +106,7 @@ public class SchemaProcessor {
             if (schema.getAdditionalProperties() != null && schema.getAdditionalProperties() instanceof Schema) {
                 Schema additionalPropertiesSchema = (Schema) schema.getAdditionalProperties();
                 if (additionalPropertiesSchema.get$ref() != null) {
-                    processReferenceSchemaForProperty(additionalPropertiesSchema);
+                    processReferenceSchema(additionalPropertiesSchema);
                 } else {
                     processSchemaType(additionalPropertiesSchema);
                 }
@@ -139,25 +130,17 @@ public class SchemaProcessor {
             processReferenceSchema(schema);
         }
 
-         Map<String, Schema> properties = schema.getProperties();
-         if (properties != null) {
-             for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
-                 Schema property = propertyEntry.getValue();
-                 if(property.get$ref() != null) {
-                     if (property instanceof ArraySchema) {
-                         processReferenceSchemaForProperty(property);
-                     } else {
-                         processReferenceSchema(property);
-                     }
-                 }else {
-                     processSchemaType(property);
-                 }
-             }
-         }
-    }
-
-    private void processInternalPropertyReferences(Schema schema) {
-        processReferenceSchemaForProperty(schema);
+        Map<String, Schema> properties = schema.getProperties();
+        if (properties != null) {
+            for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
+                Schema property = propertyEntry.getValue();
+                if(property.get$ref() != null) {
+                    processReferenceSchema(property);
+                }else {
+                    processSchemaType(property);
+                }
+            }
+        }
     }
 
     public void processComposedSchema(ComposedSchema composedSchema) {
@@ -251,23 +234,11 @@ public class SchemaProcessor {
 
         if (isAnExternalRefFormat(refFormat)){
             final String newRef = externalRefProcessor.processRefToExternalSchema($ref, refFormat);
+
             if (newRef != null) {
                 schema.set$ref(RefType.SCHEMAS.getInternalPrefix() + newRef);
             }
         }
     }
 
-    private void processReferenceSchemaForProperty(Schema schema) {
-        RefFormat refFormat = computeRefFormat(schema.get$ref());
-        String $ref = schema.get$ref();
-
-        final String newRef = externalRefProcessor.processRefToExternalSchema($ref, refFormat);
-        if (newRef != null && !newRef.startsWith("#/components")) {
-            schema.set$ref(RefType.SCHEMAS.getInternalPrefix() + newRef);
-        }
-        Schema internalSchema = schema.getItems();
-        if (internalSchema != null && !internalSchema.get$ref().startsWith("#/components")) {
-            processReferenceSchemaForProperty(schema.getItems());
-        }
-    }
 }
