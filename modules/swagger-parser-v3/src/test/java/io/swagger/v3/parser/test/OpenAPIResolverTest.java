@@ -737,6 +737,15 @@ public class OpenAPIResolverTest {
         assertNotNull(breedsListSchema);
         assertNotNull(breedSchema);
 
+        assertTrue(breedsListSchema instanceof ArraySchema);
+        Schema breedPropertySchema = ((ArraySchema) breedsListSchema).getItems().getProperties().get("breed");
+        assertNotNull(breedPropertySchema);
+
+        // Verify items resolved fully
+        assertTrue(breedPropertySchema.get$ref() == null);
+        assertTrue(breedPropertySchema == breedSchema);
+
+
         // Array schema with inline items object with $ref properties
         Schema petsListSchema = openAPI.getComponents().getSchemas().get("PetsList");
         Schema colouringsSchema = openAPI.getComponents().getSchemas().get("Colouring");
