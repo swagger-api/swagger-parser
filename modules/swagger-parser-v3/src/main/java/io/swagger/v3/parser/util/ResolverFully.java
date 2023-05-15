@@ -303,7 +303,7 @@ public class ResolverFully {
             return null;
         }
 
-        if(schema.get$ref() != null && schema.getItems() == null) {
+        if(schema.get$ref() != null) {
             String ref= schema.get$ref();
             Schema resolved;
             //This validation is done to solve deep properties eg. '#/components/schemas/TypeProject/properties/id'
@@ -312,8 +312,8 @@ public class ResolverFully {
                 String refSchema = split[3];
                 Schema parentSchema = schemas.get(refSchema);
                 ref = ref.substring(ref.lastIndexOf("/") + 1);
-                resolved = parentSchema != null ? (Schema) parentSchema.getProperties().get(ref) : null;
-            } else {
+                resolved = (Schema)parentSchema.getProperties().get(ref);
+            }else {
                 ref = ref.substring(ref.lastIndexOf("/") + 1);
                 resolved = schemas != null ? schemas.get(ref) : null;
             }
