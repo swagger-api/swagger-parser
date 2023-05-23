@@ -5,7 +5,7 @@
     <parent>
         <artifactId>swagger-parser-project</artifactId>
         <groupId>io.swagger.parser.v3</groupId>
-        <version>2.1.14-SNAPSHOT</version>
+        <version>2.1.15-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-v3</artifactId>
-            <version>2.1.14-SNAPSHOT</version>
+            <version>2.1.15-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
