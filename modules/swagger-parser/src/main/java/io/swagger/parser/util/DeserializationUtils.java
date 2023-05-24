@@ -34,7 +34,7 @@ public class DeserializationUtils {
         private boolean yamlCycleCheck = System.getProperty("yamlCycleCheck") == null || Boolean.parseBoolean(System.getProperty("yamlCycleCheck"));
         private Integer maxYamlAliasesForCollections = System.getProperty("maxYamlAliasesForCollections") == null ? Integer.MAX_VALUE : Integer.parseInt(System.getProperty("maxYamlAliasesForCollections"));
         private boolean yamlAllowRecursiveKeys = System.getProperty("yamlAllowRecursiveKeys") == null || Boolean.parseBoolean(System.getProperty("yamlAllowRecursiveKeys"));
-
+        private Integer maxYamlCodePoints = System.getProperty("maxYamlCodePoints") == null ? 3 * 1024 * 1024 : Integer.parseInt(System.getProperty("maxYamlCodePoints"));
 
         public Integer getMaxYamlDepth() {
             return maxYamlDepth;
@@ -102,6 +102,14 @@ public class DeserializationUtils {
          */
         public void setYamlAllowRecursiveKeys(boolean yamlAllowRecursiveKeys) {
             this.yamlAllowRecursiveKeys = yamlAllowRecursiveKeys;
+        }
+
+        public Integer getMaxYamlCodePoints() {
+            return maxYamlCodePoints;
+        }
+
+        public void setMaxYamlCodePoints(Integer maxYamlCodePointsInBytes) {
+            this.maxYamlCodePoints = maxYamlCodePointsInBytes;
         }
     }
 
@@ -215,7 +223,7 @@ public class DeserializationUtils {
             method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
             method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
             method = LoaderOptions.class.getMethod("setCodePointLimit", int.class);
-            method.invoke(loaderOptions, options.getMaxYamlDepth());
+            method.invoke(loaderOptions, options.getMaxYamlCodePoints());
         } catch (ReflectiveOperationException e) {
             LOGGER.debug("using snakeyaml < 1.25, not setting YAML Billion Laughs Attack snakeyaml level protection");
         }
