@@ -1,7 +1,11 @@
 package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.swagger.util.Json;
+import io.swagger.util.ObjectMapperFactory;
 import io.swagger.util.Yaml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,15 +30,13 @@ import java.util.Map;
 public class DeserializationUtils {
 
     public static class Options {
-        private Integer maxYamlDepth = System.getProperty("maxYamlDepth") == null ? 2000 : Integer.valueOf(System.getProperty("maxYamlDepth"));
-        private Long maxYamlReferences = System.getProperty("maxYamlReferences") == null ? 10000000L : Long.valueOf(System.getProperty("maxYamlReferences"));
-        private boolean validateYamlInput = System.getProperty("validateYamlInput") == null ? true : Boolean.valueOf(System.getProperty("validateYamlInput"));
-        private boolean supportYamlAnchors = System.getProperty("supportYamlAnchors") == null ? true : Boolean.valueOf(System.getProperty("supportYamlAnchors"));
-        private boolean yamlCycleCheck = System.getProperty("yamlCycleCheck") == null ? true : Boolean.valueOf(System.getProperty("yamlCycleCheck"));
-
-
-        private Integer maxYamlAliasesForCollections = System.getProperty("maxYamlAliasesForCollections") == null ? Integer.MAX_VALUE : Integer.valueOf(System.getProperty("maxYamlAliasesForCollections"));
-        private boolean yamlAllowRecursiveKeys = System.getProperty("yamlAllowRecursiveKeys") == null ? true : Boolean.valueOf(System.getProperty("yamlAllowRecursiveKeys"));
+        private Integer maxYamlDepth = System.getProperty("maxYamlDepth") == null ? 2000 : Integer.parseInt(System.getProperty("maxYamlDepth"));
+        private Long maxYamlReferences = System.getProperty("maxYamlReferences") == null ? 10000000L : Long.parseLong(System.getProperty("maxYamlReferences"));
+        private boolean validateYamlInput = System.getProperty("validateYamlInput") == null || Boolean.parseBoolean(System.getProperty("validateYamlInput"));
+        private boolean supportYamlAnchors = System.getProperty("supportYamlAnchors") == null || Boolean.parseBoolean(System.getProperty("supportYamlAnchors"));
+        private boolean yamlCycleCheck = System.getProperty("yamlCycleCheck") == null || Boolean.parseBoolean(System.getProperty("yamlCycleCheck"));
+        private Integer maxYamlAliasesForCollections = System.getProperty("maxYamlAliasesForCollections") == null ? Integer.MAX_VALUE : Integer.parseInt(System.getProperty("maxYamlAliasesForCollections"));
+        private boolean yamlAllowRecursiveKeys = System.getProperty("yamlAllowRecursiveKeys") == null || Boolean.parseBoolean(System.getProperty("yamlAllowRecursiveKeys"));
 
 
         public Integer getMaxYamlDepth() {
@@ -110,6 +112,16 @@ public class DeserializationUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeserializationUtils.class);
 
+    private static ObjectMapper YAML_MAPPER = Yaml.mapper();
+
+    public static void setYamlMapper(YAMLMapper yamlMapper) {
+        YAML_MAPPER = yamlMapper;
+    }
+
+    public static ObjectMapper getYamlMapper() {
+        return YAML_MAPPER;
+    }
+
     public static Options getOptions() {
         return options;
     }
@@ -118,6 +130,7 @@ public class DeserializationUtils {
         /*
          * do not resolve timestamp
          */
+        @Override
         protected void addImplicitResolvers() {
             addImplicitResolver(Tag.BOOL, BOOL, "yYnNtTfFoO");
             addImplicitResolver(Tag.INT, INT, "-+0123456789");
@@ -128,6 +141,7 @@ public class DeserializationUtils {
             // addImplicitResolver(Tag.TIMESTAMP, TIMESTAMP, "0123456789");
         }
     }
+
     public static JsonNode deserializeIntoTree(String contents, String fileOrHost) {
         return deserializeIntoTree(contents, fileOrHost, null);
     }
@@ -151,21 +165,18 @@ public class DeserializationUtils {
     public static <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType) {
         return deserialize(contents, fileOrHost, expectedType, null);
     }
+
     public static <T> T deserialize(Object contents, String fileOrHost, Class<T> expectedType, SwaggerDeserializationResult errorOutput) {
         T result;
 
-        boolean isJson = false;
-
-        if(contents instanceof String && isJson((String)contents)) {
-            isJson = true;
-        }
+        boolean isJson = contents instanceof String && isJson((String) contents);
 
         try {
             if (contents instanceof String) {
                 if (isJson) {
                     result = Json.mapper().readValue((String) contents, expectedType);
                 } else {
-                    result = Yaml.mapper().convertValue(readYamlTree((String) contents, errorOutput), expectedType);
+                    result = getYamlMapper().convertValue(readYamlTree((String) contents, errorOutput), expectedType);
                 }
             } else {
                 result = Json.mapper().convertValue(contents, expectedType);
@@ -178,7 +189,7 @@ public class DeserializationUtils {
     }
 
     private static boolean isJson(String contents) {
-        return contents.toString().trim().startsWith("{");
+        return contents.trim().startsWith("{");
     }
 
 
@@ -206,6 +217,8 @@ public class DeserializationUtils {
             method.invoke(loaderOptions, options.getMaxYamlAliasesForCollections());
             method = LoaderOptions.class.getMethod("setAllowRecursiveKeys", boolean.class);
             method.invoke(loaderOptions, options.isYamlAllowRecursiveKeys());
+            method = LoaderOptions.class.getMethod("setCodePointLimit", int.class);
+            method.invoke(loaderOptions, options.getMaxYamlDepth());
         } catch (ReflectiveOperationException e) {
             LOGGER.debug("using snakeyaml < 1.25, not setting YAML Billion Laughs Attack snakeyaml level protection");
         }
@@ -215,7 +228,7 @@ public class DeserializationUtils {
     public static JsonNode readYamlTree(String contents, SwaggerDeserializationResult errorOutput) throws IOException {
 
         if (!options.isSupportYamlAnchors()) {
-            return Yaml.mapper().readTree(contents);
+            return getYamlMapper().readTree(contents);
         }
         try {
             org.yaml.snakeyaml.Yaml yaml = null;
@@ -230,17 +243,19 @@ public class DeserializationUtils {
                 boolean res = exceedsLimits(o, null, new Integer(0), new IdentityHashMap<Object, Long>(), errorOutput);
                 if (res) {
                     LOGGER.warn("Error converting snake-parsed yaml to JsonNode");
-                    return Yaml.mapper().readTree(contents);
+                    return getYamlMapper().readTree(contents);
                 }
             }
             JsonNode n =  Json.mapper().convertValue(o, JsonNode.class);
             return n;
+
+
         } catch (Throwable e) {
             LOGGER.warn("Error snake-parsing yaml content", e);
             if (errorOutput != null) {
                 errorOutput.message(e.getMessage());
             }
-            return Yaml.mapper().readTree(contents);
+            return getYamlMapper().readTree(contents);
         }
     }
 
