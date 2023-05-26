@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Json;
@@ -114,8 +115,8 @@ public class DeserializationUtils {
 
     private static ObjectMapper yaml30Mapper = Yaml.mapper();
 
-    public static void setYaml30Mapper(ObjectMapper yaml30Mapper) {
-        DeserializationUtils.yaml30Mapper = yaml30Mapper;
+    public static void setYaml30Mapper(YAMLFactory yamlFactory) {
+        DeserializationUtils.yaml30Mapper = io.swagger.v3.core.util.ObjectMapperFactory.createYaml(yamlFactory);
     }
 
     public static ObjectMapper getYaml30Mapper() {
@@ -124,8 +125,8 @@ public class DeserializationUtils {
 
     private static ObjectMapper yaml31Mapper = Yaml31.mapper();
 
-    public static void setYaml31Mapper(ObjectMapper yaml31Mapper) {
-        DeserializationUtils.yaml31Mapper = yaml31Mapper;
+    public static void setYaml31Mapper(YAMLFactory yamlFactory) {
+        DeserializationUtils.yaml31Mapper = io.swagger.v3.core.util.ObjectMapperFactory.createYaml31(yamlFactory);
     }
 
     public static ObjectMapper getYaml31Mapper() {
