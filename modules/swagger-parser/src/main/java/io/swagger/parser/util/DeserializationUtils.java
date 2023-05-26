@@ -2,7 +2,9 @@ package io.swagger.parser.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.util.Json;
+import io.swagger.util.ObjectMapperFactory;
 import io.swagger.util.Yaml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,14 +119,14 @@ public class DeserializationUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeserializationUtils.class);
 
-    private static ObjectMapper YAML_MAPPER = Yaml.mapper();
+    private static ObjectMapper yamlMapper = Yaml.mapper();
 
-    public static void setYamlMapper(ObjectMapper yamlMapper) {
-        YAML_MAPPER = yamlMapper;
+    public static void setYamlMapper(YAMLFactory yamlFactory) {
+        yamlMapper = ObjectMapperFactory.createYaml(yamlFactory);
     }
 
     public static ObjectMapper getYamlMapper() {
-        return YAML_MAPPER;
+        return yamlMapper;
     }
 
     public static Options getOptions() {
