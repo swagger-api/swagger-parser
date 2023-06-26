@@ -173,7 +173,7 @@ public class OpenAPIDeserializer {
             "default", "discriminator", "readOnly", "writeOnly", "xml", "externalDocs", "example", "deprecated",
 			"const", "examples", "$id", "$comment", "if", "then", "else", "unevaluatedProperties","unevaluatedItems", "prefixItems",
             "contains","contentEncoding","contentMediaType","$anchor","$schema","contentSchema","propertyNames",
-            "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties"));
+            "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties", "$vocabulary", "$dynamicAnchor"));
 	protected static Set<String> EXAMPLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
 			"value", "externalValue"));
 	protected static Set<String> HEADER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "name", "in", "description",
@@ -4179,6 +4179,16 @@ public class OpenAPIDeserializer {
 		if (value != null) {
 			schema.set$anchor(value);
 		}
+
+        value = getString("$vocabulary", node, false, location, result);
+        if (value != null) {
+            schema.set$vocabulary(value);
+        }
+
+        value = getString("$dynamicAnchor", node, false, location, result);
+        if (value != null) {
+            schema.set$dynamicAnchor(value);
+        }
 
 		value = getString("$id", node, false, location, result);
 		if (value != null) {
