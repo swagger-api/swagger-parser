@@ -38,23 +38,23 @@ public class ResponseProcessorTest {
     @Injectable
     boolean openapi31;
 
+    @Injectable
+    Schema responseSchema;
+    @Injectable
+    Header responseHeader;
+
     @Test
-    public void testProcessResponse(@Injectable final Schema responseSchema,
-                                    @Injectable final Header responseHeader) throws Exception {
+    public void testProcessResponse() throws Exception {
 
         new Expectations(){{
             new SchemaProcessor(cache, swagger, openapi31);
             times=1;
-            result = propertyProcessor;
 
             new HeaderProcessor(cache,swagger, openapi31);
             times = 1;
-            result = headerProcessor;
 
             new LinkProcessor(cache,swagger, openapi31);
             times = 1;
-            result = linkProcessor;
-
 
             propertyProcessor.processSchema(responseSchema);
             times=1;
@@ -72,6 +72,7 @@ public class ResponseProcessorTest {
         new ResponseProcessor(cache, swagger, openapi31).processResponse(response);
 
 
-        new FullVerifications(){{}};
+        new FullVerifications(){{
+        }};
     }
 }

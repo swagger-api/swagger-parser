@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -39,11 +40,19 @@ public class ResolverCacheTest {
     @Mocked
     RefUtils refUtils;
 
-
     @Injectable
     OpenAPI openAPI;
+
+    List<AuthorizationValue> auths = new ArrayList<>();
+
     @Injectable
-    List<AuthorizationValue> auths;
+    Parameter mockedParameter;
+
+    @Injectable
+    Schema mockedModel;
+
+    @Injectable
+    ApiResponse mockedResponse;
 
     @Test
     public void testMock() throws Exception {
@@ -168,7 +177,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalParameterRef(@Injectable Parameter mockedParameter) throws Exception {
+    public void testLoadInternalParameterRef() throws Exception {
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addParameters("foo", mockedParameter));
 
@@ -181,7 +190,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalParameterRefWithSpaces(@Injectable Parameter mockedParameter) throws Exception {
+    public void testLoadInternalParameterRefWithSpaces() throws Exception {
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addParameters("foo bar", mockedParameter));
 
@@ -191,7 +200,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalDefinitionRef(@Injectable Schema mockedModel) throws Exception {
+    public void testLoadInternalDefinitionRef() throws Exception {
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addSchemas("foo", mockedModel));
 
@@ -204,7 +213,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalDefinitionRefWithSpaces(@Injectable Schema mockedModel) throws Exception {
+    public void testLoadInternalDefinitionRefWithSpaces() throws Exception {
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addSchemas("foo bar", mockedModel));
 
@@ -214,7 +223,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalDefinitionRefWithEscapedCharacters(@Injectable Schema mockedModel) throws Exception {
+    public void testLoadInternalDefinitionRefWithEscapedCharacters() throws Exception {
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addSchemas("foo~bar/baz~1", mockedModel));
 
@@ -224,7 +233,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalResponseRef(@Injectable ApiResponse mockedResponse) throws Exception {
+    public void testLoadInternalResponseRef() throws Exception {
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addResponses("foo", mockedResponse));
 
@@ -236,7 +245,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadInternalResponseRefWithSpaces(@Injectable ApiResponse mockedResponse) throws Exception {
+    public void testLoadInternalResponseRefWithSpaces() throws Exception {
         OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addResponses("foo bar", mockedResponse));
 

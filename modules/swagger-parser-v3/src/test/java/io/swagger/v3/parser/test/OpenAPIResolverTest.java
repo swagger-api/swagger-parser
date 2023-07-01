@@ -79,6 +79,13 @@ import static org.testng.FileAssert.fail;
 
 public class OpenAPIResolverTest {
 
+    @Injectable  OpenAPI swagger;
+    List<AuthorizationValue> auths = new ArrayList<>();
+    @Mocked  ResolverCache cache;
+    @Injectable  ParseOptions parseOptions;
+    @Mocked  ComponentsProcessor componentsProcessor;
+    @Mocked  PathsProcessor pathsProcessor;
+
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
     private static final String REMOTE_REF_JSON = "http://localhost:${dynamicPort}/remote_ref_json#/components/schemas/Tag";
@@ -571,7 +578,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testSelfReferenceResolution(@Injectable final List<AuthorizationValue> auths)throws Exception {
+    public void testSelfReferenceResolution()throws Exception {
 
         String yaml = "" +
                 "openapi: 3.0.1\n" +
@@ -613,7 +620,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue85(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue85() {
         String yaml =
                 "openapi: '3.0.1'\n" +
                         "paths: \n" +
@@ -662,7 +669,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1352(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1352() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -673,7 +680,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1157(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1157() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -696,7 +703,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1161(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1161() {
         String path = "/issue-1161/swagger.yaml";
 
         ParseOptions options = new ParseOptions();
@@ -721,7 +728,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1170(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1170() {
         String path = "/issue-1170/swagger.yaml";
 
         ParseOptions options = new ParseOptions();
@@ -790,7 +797,7 @@ public class OpenAPIResolverTest {
 
 
     @Test
-    public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
+    public void selfReferenceTest() {
         String yaml = "" +
                 "openapi: 3.0.1\n" +
                 "paths:\n" +
@@ -881,7 +888,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void resolveAllOfWithoutAggregatingParameters(@Injectable final List<AuthorizationValue> auths) {
+    public void resolveAllOfWithoutAggregatingParameters() {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         options.setResolveCombinators(false);
@@ -910,7 +917,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void resolveComposedReferenceAllOfSchema(@Injectable final List<AuthorizationValue> auths){
+    public void resolveComposedReferenceAllOfSchema(){
 
 
 
@@ -929,7 +936,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void resolveComposedSchema(@Injectable final List<AuthorizationValue> auths){
+    public void resolveComposedSchema(){
 
         ParseOptions options = new ParseOptions();
         options.setResolveCombinators(false);
@@ -1004,7 +1011,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testComposedSchemaAdjacent(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void testComposedSchemaAdjacent() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -1025,7 +1032,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testComposedSchemaAdjacentWithExamples(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void testComposedSchemaAdjacentWithExamples() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -1044,7 +1051,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void allOfExampleGeneration(@Injectable final List<AuthorizationValue> auths) throws JsonProcessingException {
+    public void allOfExampleGeneration() throws JsonProcessingException {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -1059,12 +1066,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testSwaggerResolver(@Injectable final OpenAPI swagger,
-                                    @Injectable final List<AuthorizationValue> auths,
-                                    @Mocked final ResolverCache cache,
-                                    @Injectable final ParseOptions parseOptions,
-                                    @Mocked final ComponentsProcessor componentsProcessor,
-                                    @Mocked final PathsProcessor pathsProcessor) throws Exception {
+    public void testSwaggerResolver() throws Exception {
 
         new Expectations() {{
             new ResolverCache(swagger, auths, null, new HashSet<>(), parseOptions);
