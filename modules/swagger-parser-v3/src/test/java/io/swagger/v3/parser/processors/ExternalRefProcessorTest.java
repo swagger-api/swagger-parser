@@ -34,9 +34,10 @@ public class ExternalRefProcessorTest {
     @Injectable
 	OpenAPI openAPI;
 
+    @Injectable Schema mockedModel;
+
     @Test
-    public void testProcessRefToExternalDefinition_NoNameConflict(
-            @Injectable final Schema mockedModel) throws Exception {
+    public void testProcessRefToExternalDefinition_NoNameConflict() throws Exception {
 
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final RefFormat refFormat = RefFormat.URL;
@@ -73,7 +74,7 @@ public class ExternalRefProcessorTest {
 
 
     @Test
-    public void testNestedExternalRefs(@Injectable final Schema mockedModel){
+    public void testNestedExternalRefs(){
     	final RefFormat refFormat = RefFormat.URL;
 
     	//Swagger test instance
@@ -150,7 +151,7 @@ public class ExternalRefProcessorTest {
 
 
 	@Test
-	public void testRelativeRefIncludingUrlRef(@Injectable final Schema mockedModel)
+	public void testRelativeRefIncludingUrlRef()
 			throws Exception {
 		final RefFormat refFormat = RefFormat.RELATIVE;
 

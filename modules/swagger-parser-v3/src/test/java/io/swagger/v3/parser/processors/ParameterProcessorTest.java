@@ -38,11 +38,26 @@ public class ParameterProcessorTest {
     @Injectable
     boolean openapi31;
 
+    @Injectable
+    HeaderParameter headerParameter;
+
+    @Injectable
+    QueryParameter queryParameter;
+
+    @Injectable
+    CookieParameter cookieParameter;
+
+    @Injectable
+    PathParameter pathParameter;
+
+    @Injectable
+    HeaderParameter resolvedHeaderParam;
+
+    @Injectable
+    Schema bodyParamSchema;
+
     @Test
-    public void testProcessParameters_TypesThatAreNotRefOrBody(@Injectable final HeaderParameter headerParameter,
-                                                               @Injectable final QueryParameter queryParameter,
-                                                               @Injectable final CookieParameter cookieParameter,
-                                                               @Injectable final PathParameter pathParameter) throws Exception {
+    public void testProcessParameters_TypesThatAreNotRefOrBody() throws Exception {
         expectedModelProcessorCreation();
         new Expectations() {
             {
@@ -89,7 +104,7 @@ public class ParameterProcessorTest {
     }
 
     @Test
-    public void testProcessParameters_RefToHeader(@Injectable final HeaderParameter resolvedHeaderParam) throws Exception {
+    public void testProcessParameters_RefToHeader() throws Exception {
         expectedModelProcessorCreation();
 
         final String ref = "#/components/parameters/foo";
@@ -122,30 +137,21 @@ public class ParameterProcessorTest {
         }};
     }
 
-    private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
-                                           final RequestBody resolvedParam) {
-        new Expectations() {{
-            /*cache.loadRef(ref, refFormat, RequestBody.class);
-            times = 1;
-            result = resolvedParam;*/
-        }};
-    }
-
     @Test
-    public void testProcessParameters_BodyParameter(@Injectable final Schema bodyParamSchema) throws Exception {
+    public void testProcessParameters_BodyParameter() throws Exception {
 
         expectedModelProcessorCreation();
 
         RequestBody bodyParameter = new RequestBody().content(new Content().addMediaType("*/*",new MediaType().schema(bodyParamSchema)));
 
-        expectModelProcessorInvoked(bodyParamSchema);
+       expectModelProcessorInvoked(bodyParamSchema);
 
         new RequestBodyProcessor(cache, openAPI, openapi31).processRequestBody(bodyParameter);
 
         new FullVerifications(){{}};
     }
 
-    private void expectModelProcessorInvoked(@Injectable final Schema bodyParamSchema) {
+    private void expectModelProcessorInvoked(Schema bodyParamSchema) {
         new Expectations(){{
             modelProcessor.processSchema(bodyParamSchema); times=1;
         }};
@@ -156,7 +162,6 @@ public class ParameterProcessorTest {
         new Expectations() {{
             new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = modelProcessor;
         }};
     }
 }
