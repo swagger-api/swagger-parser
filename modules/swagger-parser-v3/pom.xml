@@ -79,12 +79,12 @@
             <version>${wiremock-version}</version>
             <scope>test</scope>
 
-            <!--exclusions>
+            <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
-            </exclusions-->
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
