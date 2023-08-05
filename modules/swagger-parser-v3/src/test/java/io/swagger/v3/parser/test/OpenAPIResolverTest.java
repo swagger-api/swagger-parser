@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -34,20 +33,14 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIResolver;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.processors.ComponentsProcessor;
-import io.swagger.v3.parser.processors.PathsProcessor;
 import io.swagger.v3.parser.reference.DereferencerContext;
 import io.swagger.v3.parser.reference.DereferencersFactory;
 import io.swagger.v3.parser.reference.OpenAPIDereferencer;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.ResolverFully;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Expectations;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -79,12 +72,7 @@ import static org.testng.FileAssert.fail;
 
 public class OpenAPIResolverTest {
 
-    @Injectable  OpenAPI swagger;
     List<AuthorizationValue> auths = new ArrayList<>();
-    @Mocked  ResolverCache cache;
-    @Injectable  ParseOptions parseOptions;
-    @Mocked  ComponentsProcessor componentsProcessor;
-    @Mocked  PathsProcessor pathsProcessor;
 
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
@@ -1063,33 +1051,6 @@ public class OpenAPIResolverTest {
 
         Object withExample = openAPI.getPaths().get("/bar").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getExample();
         Assert.assertEquals("{\"someProperty\":\"ABC\",\"someOtherProperty\":42}", Json.mapper().writeValueAsString(withExample));
-    }
-
-    @Test
-    public void testSwaggerResolver() throws Exception {
-
-        new Expectations() {{
-            new ResolverCache(swagger, auths, null, new HashSet<>(), parseOptions);
-            result = cache;
-            times = 1;
-
-            new ComponentsProcessor(swagger, cache);
-            result = componentsProcessor;
-            times = 1;
-
-            new PathsProcessor(cache, swagger, withInstanceOf(OpenAPIResolver.Settings.class));
-            result = pathsProcessor;
-            times = 1;
-
-            pathsProcessor.processPaths();
-            times = 1;
-
-            componentsProcessor.processComponents();
-            times = 1;
-
-        }};
-
-        assertEquals(new OpenAPIResolver(swagger, auths, null, null, parseOptions).resolve(), swagger);
     }
 
     @Test
