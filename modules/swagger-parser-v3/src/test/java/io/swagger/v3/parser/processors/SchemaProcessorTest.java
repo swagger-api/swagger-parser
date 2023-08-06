@@ -33,7 +33,7 @@ public class SchemaProcessorTest {
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final String newRef = "bar";
 
-        setupPropertyAndExternalRefProcessors();
+        expectCreationOfExternalRefProcessor();
 
         new Expectations() {{
 
@@ -54,7 +54,7 @@ public class SchemaProcessorTest {
     public void testProcessRefSchema_InternalRef() throws Exception {
         final String ref = "#/components/schemas/bar";
 
-        setupPropertyAndExternalRefProcessors();
+        expectCreationOfExternalRefProcessor();
 
         Schema refModel = new Schema().$ref(ref);
 
@@ -85,7 +85,7 @@ public class SchemaProcessorTest {
 
     @Test
     public void testProcessComposedSchema() throws Exception {
-        setupPropertyAndExternalRefProcessors();
+        expectCreationOfExternalRefProcessor();
 
         final String ref1 = "http://my.company.com/path/to/file.json#/foo/bar";
         final String ref2 = "http://my.company.com/path/to/file.json#/this/that";
@@ -149,16 +149,6 @@ public class SchemaProcessorTest {
         assertEquals(model.getProperties().get("foo"), property1);
         assertEquals(model.getProperties().get("bar"), property2);
     }
-
-    private void setupPropertyAndExternalRefProcessors() {
-        new Expectations() {{
-            new ExternalRefProcessor(cache, openAPI);
-            times = 1;
-            result = externalRefProcessor;
-        }};
-    }
-
-
 
     @Test
     public void testProcessRefProperty_ExternalRef() throws Exception {
