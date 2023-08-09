@@ -3072,6 +3072,17 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testIssue1081() {
+        String location = "src/test/resources/issue-1081/openapi.yaml";
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        Components components = parser.read(location).getComponents();
+
+        assertEquals(components.getSchemas().size(), 2);
+        assertNotNull(components.getSchemas().get("ProblemDetails"));
+        assertNotNull(components.getSchemas().get("Subscription"));
+    }
+  
+    @Test
     public void testIssue1177(@Injectable final List<AuthorizationValue> auths) {
         String path = "/issue-1177/swagger.yaml";
 
@@ -3151,6 +3162,7 @@ public class OpenAPIV3ParserTest {
         assertNotNull(openAPI.getComponents());
         assertNotNull(openAPI.getComponents().getSchemas());
         assertEquals(6, openAPI.getComponents().getSchemas().size());
+
     }
 
     @Test
