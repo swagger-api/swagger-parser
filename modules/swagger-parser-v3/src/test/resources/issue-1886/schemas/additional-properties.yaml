@@ -1,0 +1,12 @@
+title: AdditionalProperties
+type: object
+x-abstract: true
+properties:
+  additions:
+    x-extra-annotation: '@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY)'
+    type: object
+    additionalProperties:
+      type: string
+required:
+- additions
+description: Additional Properties

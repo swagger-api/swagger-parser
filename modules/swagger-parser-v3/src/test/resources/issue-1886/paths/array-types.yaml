@@ -1,0 +1,134 @@
+get:
+  tags:
+    - array-types
+  x-content-language: application/json
+  parameters:
+    - name: h-param
+      in: header
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 36
+        pattern: '^[A-Z]+$'
+    - name: h-params
+      in: header
+      schema:
+        type: array
+        items:
+          type: string
+          minLength: 1
+          maxLength: 36
+          pattern: '^[A-Z]+$'
+    - name: c-param
+      in: cookie
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 36
+        pattern: '^[A-Z]+$'
+    - name: c-params
+      in: cookie
+      schema:
+        type: array
+        items:
+          type: string
+          minLength: 1
+          maxLength: 36
+          pattern: '^[A-Z]+$'
+    - name: q-param
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 36
+        pattern: '^[A-Z]+$'
+    - name: q-param-enum
+      in: query
+      required: false
+      schema:
+        $ref: '../components.yaml#/Enum1'
+    - name: q-param-req
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 36
+        pattern: '^[A-Z]+$'
+    - name: q-param-enum-req
+      in: query
+      required: true
+      schema:
+        $ref: '../components.yaml#/Enum2'
+    - name: q-params
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+          minLength: 1
+          maxLength: 36
+          pattern: '^[A-Z]+$'
+    - name: q-params-enum
+      in: query
+      schema:
+        type: array
+        items:
+          $ref: '../components.yaml#/Enum3'
+    - name: q-params-req
+      in: query
+      required: true
+      schema:
+        type: array
+        items:
+          type: string
+          minLength: 1
+          maxLength: 36
+          pattern: '^[A-Z]+$'
+    - name: q-params-set
+      in: query
+      required: false
+      schema:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+          maxLength: 36
+          pattern: '^[A-Z]+$'
+    - name: q-params-set-req
+      in: query
+      required: true
+      schema:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+          maxLength: 36
+          pattern: '^[A-Z]+$'
+  responses:
+    200:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../components.yaml#/ArrayPojo'
+post:
+  tags:
+    - array-types
+  x-content-language: application/json
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components.yaml#/ArrayPojo'
+  responses:
+    200:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../components.yaml#/ArrayPojo'

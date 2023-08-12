@@ -1,0 +1,57 @@
+title: SimplePojo
+allOf:
+  - $ref: additional-properties.yaml
+x-implements:
+  - Cloneable
+properties:
+  pEnum1:
+    $ref: '../components.yaml#/Enum1'
+  pEnum2:
+    $ref: '../components.yaml#/Enum2'
+  pEnum3:
+    $ref: '../components.yaml#/Enum3'
+  pInteger:
+    type: integer
+    minimum: 0
+  pNumber:
+    type: number
+    format: double
+    minimum: 0
+    maximum: 10
+    exclusiveMaximum: true
+  pDate:
+    type: string
+    format: date
+  pDateTime:
+    type: string
+    format: date-time
+  pString:
+    type: string
+    minLength: 1
+    maxLength: 36
+    pattern: '^[A-Z]+$'
+  pStringRequired:
+    type: string
+    minLength: 1
+    maxLength: 36
+    pattern: '^[A-Z]+$'
+  pStringNullable:
+    type: string
+    nullable: true
+    minLength: 1
+    maxLength: 36
+    pattern: '^[A-Z]+$'
+  pStringNullableRequired:
+    type: string
+    nullable: true
+    minLength: 1
+    maxLength: 36
+    pattern: '^[A-Z]+$'
+  translations:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: translation-item.yaml
+required:
+  - pStringRequired
+  - pStringNullableRequired
