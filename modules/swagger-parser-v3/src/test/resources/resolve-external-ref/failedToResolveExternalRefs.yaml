@@ -4,18 +4,17 @@ info:
   title: Novo to Back Office (Financials)
   description: This API contains Novo to Back Office Integrations (Financials)
 servers:
-  # Added by API Auto Mocking Plugin
   - description: PeopleSoft Financials
-    url: https://apexfndevintegrations.apexsystems.com/PSIGW/RESTListeningConnector/PSFT_EP
+    url: www
 
 security:
   - basicAuth: []
 
 paths:
   /permAssignments:
-    $ref: 'https://api.swaggerhub.com/domains/APEX_SYSTEMS/commonPathItems/1.0.0#/components/pathitems/permAssignments'
+    $ref: 'resolve-external-ref/pathItems.yaml#/components/pathitems/permAssignments'
   /permAssignmentChangeRequests:
-    $ref: 'https://api.swaggerhub.com/domains/APEX_SYSTEMS/commonPathItems/1.0.0#/components/pathitems/permAssignments'
+    $ref: 'resolve-external-ref/pathItems.yaml#/components/pathitems/permAssignments'
 
 components:
   securitySchemes:

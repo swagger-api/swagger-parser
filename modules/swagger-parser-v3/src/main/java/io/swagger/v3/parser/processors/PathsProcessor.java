@@ -314,11 +314,10 @@ public class PathsProcessor {
         RefFormat refFormat = computeRefFormat(pathItem.get$ref());
         String $ref = pathItem.get$ref();
         if (isAnExternalRefFormat(refFormat)){
-              pathItem = externalRefProcessor.processRefToExternalPathItem($ref, refFormat);
+            pathItem = externalRefProcessor.processRefToExternalPathItem($ref, refFormat);
         }else{
              pathItem = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
         }
-
         return pathItem;
     }
 }

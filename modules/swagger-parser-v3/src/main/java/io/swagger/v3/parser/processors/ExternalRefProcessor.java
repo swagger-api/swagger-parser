@@ -271,7 +271,7 @@ public final class ExternalRefProcessor {
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
         PathItem existingPathItem = paths.get(possiblyConflictingDefinitionName);
-
+        //existingPathItems is resolved?
         if (existingPathItem != null) {
             LOGGER.debug("A model for " + existingPathItem + " already exists");
             if(existingPathItem.get$ref() != null) {

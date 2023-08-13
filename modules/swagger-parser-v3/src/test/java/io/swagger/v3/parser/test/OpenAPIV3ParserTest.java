@@ -49,10 +49,14 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult parseResult = openApiParser.readLocation("failedToResolveExternalRefs.yaml", null, options);
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolve-external-ref/failedToResolveExternalRefs.yaml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
         Yaml.prettyPrint(openAPI);
+        Assert.assertTrue(openAPI.getPaths().get("/permAssignments").get$ref() == null);
+        Assert.assertEquals(openAPI.getPaths().get("/permAssignments").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
         Assert.assertTrue(openAPI.getPaths().get("/permAssignmentChangeRequests").get$ref() == null);
+        Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChangeRequests").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
+
     }
 
     @Test

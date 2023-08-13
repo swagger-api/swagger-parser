@@ -27,7 +27,7 @@ paths:
               local:
                 $ref: '#/components/examples/LocalRef'
               external:
-                $ref: './issue-837-853-1131/components.yaml#/components/examples/ExternalRef'
+                $ref: './issue-837-853-1131/pathItems.yaml#/components/examples/ExternalRef'
       responses:
         '200':
           description: OK
@@ -48,7 +48,7 @@ paths:
                 local:
                   $ref: '#/components/examples/LocalRef'
                 external:
-                  $ref: './issue-837-853-1131/components.yaml#/components/examples/ExternalRef'
+                  $ref: './issue-837-853-1131/pathItems.yaml#/components/examples/ExternalRef'
   /guests:
     $ref: './issue-837-853-1131/external-operation.yaml'
 

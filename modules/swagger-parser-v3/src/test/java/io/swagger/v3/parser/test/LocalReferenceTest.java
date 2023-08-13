@@ -30,7 +30,7 @@ public class LocalReferenceTest {
     static {
         try {
             issue_454_yaml = readFile("src/test/resources/nested-network-references/issue-454.yaml");
-            issue_454_components_yaml = readFile("src/test/resources/nested-network-references/issue-454-components.yaml");
+            issue_454_components_yaml = readFile("src/test/resources/nested-network-references/issue-454-pathItems.yaml");
         }
         catch (Exception e) {
             e.printStackTrace();
