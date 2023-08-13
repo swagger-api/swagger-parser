@@ -67,7 +67,7 @@ public class PathsProcessor {
                 String pathRef = pathItem.get$ref().split("#")[0];
 
                 if (resolvedPath != null) {
-                    updateRefs(resolvedPath, pathRef);
+                    //updateRefs(resolvedPath, pathRef);
                     //we need to put the resolved path into swagger object
                     openAPI.path(pathStr, resolvedPath);
                     pathItem = resolvedPath;
@@ -167,7 +167,7 @@ public class PathsProcessor {
 
     protected void updateRefs(ApiResponse response, String pathRef) {
         if (response.get$ref() != null){
-        	response.set$ref(computeRef(response.get$ref(), pathRef));
+            response.set$ref(computeRef(response.get$ref(), pathRef));
         }
         if(response.getContent() != null) {
             Map<String, MediaType> content = response.getContent();
