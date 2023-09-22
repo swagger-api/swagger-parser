@@ -1,0 +1,32 @@
+openapi: 3.0.1
+info:
+  title: spec 1
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+
+paths:
+
+  /getEmptyOne:
+    get:
+      operationId: getEmptyOne
+      parameters:
+        - name: element
+          in: query
+          schema:
+            $ref: '#/components/schemas/myType'
+        - name: elements
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/myType'
+      responses:
+        "204":
+          description: empty
+
+components:
+  schemas:
+
+    myType:
+      type: string
