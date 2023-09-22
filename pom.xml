@@ -79,6 +79,11 @@
                         <artifactId>surefire-junit4</artifactId>
                         <version>3.0.0</version>
                     </dependency>
+                    <dependency>
+                        <groupId>org.testng</groupId>
+                        <artifactId>testng</artifactId>
+                        <version>${testng-version}</version>
+                    </dependency>
                 </dependencies>
                 <configuration>
                     <testNGArtifactName>none:none</testNGArtifactName>

@@ -1,0 +1,14 @@
+openapi: 3.0.1
+info:
+  title: merged spec
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+
+paths:
+
+  /getEmptyOne:
+    $ref: "./spec1.yaml#/paths/~1getEmptyOne"
+
+  /getEmptyTwo:
+    $ref: "./spec2.yaml#/paths/~1getEmptyTwo"
