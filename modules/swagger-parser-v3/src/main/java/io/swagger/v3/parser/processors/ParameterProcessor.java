@@ -87,11 +87,6 @@ public class ParameterProcessor {
             if (parameter.get$ref() != null) {
                 RefFormat refFormat = computeRefFormat(parameter.get$ref());
                 final Parameter resolvedParameter = cache.loadRef(parameter.get$ref(), refFormat, Parameter.class);
-                if (parameter.get$ref().startsWith("#") && parameter.get$ref().indexOf("#/components/parameters") <= -1) {
-                    //TODO: Not possible to add warning during resolve doesn't accept result as an input. Hence commented below line.
-                    //result.warning(location, "The parameter should use Reference Object to link to parameters that are defined at the OpenAPI Object's components/parameters.");
-                    continue;
-                }
 
                 if(resolvedParameter == null) {
                     // can't resolve it!

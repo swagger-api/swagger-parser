@@ -180,6 +180,19 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testInternalParametersAndResponsesAsNumbers() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/internalParametersAsNumbers/swagger.yaml", null, options);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getOpenAPI());
+        Yaml.prettyPrint(result.getOpenAPI());
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getParameters().get(0).getName(), "dealId");
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getResponses().get("200").getDescription(), "Success");
+    }
+
+    @Test
     public void testParametersAndResponsesAsNumbers() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -3372,7 +3385,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
         assertNotNull(result.getMessages());
-        assertEquals(result.getMessages().size(), 19);
+        assertEquals(result.getMessages().size(), 20);
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.asdasd is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.descasdasdription is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.responses.GeneralError.descrsaiption is unexpected (./ref.yaml)"));
