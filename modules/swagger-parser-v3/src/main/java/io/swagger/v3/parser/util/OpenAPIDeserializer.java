@@ -299,7 +299,11 @@ public class OpenAPIDeserializer {
             result.setOpenAPI(api);
             result.setMessages(rootParse.getMessages());
         } catch (Exception e) {
-            result.setMessages(Arrays.asList(e.getMessage()));
+            if (StringUtils.isNotBlank(e.getMessage())) {
+                result.setMessages(Arrays.asList(e.getMessage()));
+            } else {
+                result.setMessages(Arrays.asList("Unexpected error deserialising spec"));
+            }
         }
 		return result;
 	}
@@ -343,10 +347,13 @@ public class OpenAPIDeserializer {
                      * e.g. #/components/schemas/foo/properties/bar
                      */
                     for (String schema : localSchemaRefs.keySet()) {
-                        if (components.getSchemas().get(schema) == null) {
+                        if (components.getSchemas() == null){
+                            result.missing(localSchemaRefs.get(schema), schema);
+                        } else if (components.getSchemas().get(schema) == null) {
                             result.invalidType(localSchemaRefs.get(schema), schema, "schema", rootNode);
                         }
                     }
+
                 }
 			}
 
