@@ -13,17 +13,13 @@ public class ClasspathHelper {
         String file = FilenameUtils.separatorsToUnix(location);
 
         InputStream inputStream = ClasspathHelper.class.getResourceAsStream(file);
-        
+
         if(inputStream == null) {
             inputStream = ClasspathHelper.class.getClassLoader().getResourceAsStream(file);
         }
 
         if(inputStream == null) {
             inputStream = ClassLoader.getSystemResourceAsStream(file);
-        }
-
-        if(inputStream == null) {
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
         }
 
         if(inputStream != null) {
