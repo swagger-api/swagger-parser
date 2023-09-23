@@ -53,13 +53,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
@@ -70,6 +64,8 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIDeserializerTest {
+
+    List<AuthorizationValue> auths = new ArrayList<>();
 
     @Test
     public void testIssue1072() throws Exception {
@@ -2307,7 +2303,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testAllOfSchema(@Injectable List<AuthorizationValue> auths){
+    public void testAllOfSchema(){
         String yaml = "openapi: '3.0'\n" +
             "components:\n" +
             "  schemas:\n" +
@@ -2359,7 +2355,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testOneOfSchema(@Injectable List<AuthorizationValue> auths){
+    public void testOneOfSchema(){
         String yaml = "openapi: '3.0'\n" +
             "components:\n" +
             "  schemas:\n" +
@@ -2420,7 +2416,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testAnyOfSchema(@Injectable List<AuthorizationValue> auths){
+    public void testAnyOfSchema(){
         String yaml = "openapi: '3.0'\n" +
             "components:\n" +
             "  schemas:\n" +
@@ -2458,7 +2454,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void propertyTest(@Injectable List<AuthorizationValue> auths){
+    public void propertyTest(){
         String yaml = "openapi: 3.0.1\n"+
                         "paths:\n"+
                         "  /primitiveBody/inline:\n" +
@@ -2497,7 +2493,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testExamples(@Injectable List<AuthorizationValue> auths){
+    public void testExamples(){
         String yaml = "openapi: 3.0.1\n"+
                         "info:\n"+
                         "  title: httpbin\n"+
@@ -2639,7 +2635,7 @@ public class OpenAPIDeserializerTest {
 
 
     @Test
-    public void testSchemaExample(@Injectable List<AuthorizationValue> auths){
+    public void testSchemaExample(){
         String yaml = "openapi: '3.0.1'\n" +
                 "components:\n" +
                 "  schemas:\n"+
@@ -3073,7 +3069,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testOptionalParameter(@Injectable List<AuthorizationValue> auths) {
+    public void testOptionalParameter() {
         String yaml = "openapi: 3.0.1\n" +
                 "paths:\n" +
                 "  \"/pet\":\n" +
@@ -3108,7 +3104,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertFalse(parameter.getRequired());
     }
 
-    @Test void testDiscriminatorObject(@Injectable List<AuthorizationValue> auths){
+    @Test void testDiscriminatorObject(){
         String yaml = "openapi: '3.0.1'\n" +
                 "components:\n" +
                 "  schemas:\n" +
@@ -3165,7 +3161,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testEmpty(@Injectable List<AuthorizationValue> auths) {
+    public void testShouldReturnEmpty() {
         String json = "{}";
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -3181,7 +3177,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testAlmostEmpty(@Injectable List<AuthorizationValue> auths) {
+    public void testAlmostEmpty() {
         String yaml = "openapi: '3.0.1'\n" +
                       "new: extra";
 

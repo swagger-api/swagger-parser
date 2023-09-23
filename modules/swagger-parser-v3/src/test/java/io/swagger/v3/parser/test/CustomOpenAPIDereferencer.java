@@ -19,11 +19,24 @@ public class CustomOpenAPIDereferencer extends OpenAPIDereferencer31 {
         return new CustomVisitor(reference, (OpenAPI31Traverser)traverser, new HashSet<>(), new HashMap<>());
     }
 
+    @Override
+    public ReferenceVisitor buildReferenceVisitorWithContext(DereferencerContext context, Reference reference, Traverser traverser) {
+        return new CustomVisitor(reference, (OpenAPI31Traverser)traverser, new HashSet<>(), new HashMap<>(), context);
+    }
+
     static public class CustomVisitor extends ReferenceVisitor {
 
         public CustomVisitor(Reference reference, OpenAPI31Traverser openAPITraverser, HashSet<Object> visited,
                              HashMap<Object, Object> visitedMap) {
             super(reference, openAPITraverser, visited, visitedMap);
+        }
+        public CustomVisitor(
+                Reference reference,
+                OpenAPI31Traverser openAPITraverser,
+                HashSet<Object> visited,
+                HashMap<Object, Object> visitedMap,
+                DereferencerContext context) {
+            super(reference, openAPITraverser, visited, visitedMap, context);
         }
 
         @Override

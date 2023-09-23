@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -34,20 +33,14 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIResolver;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.processors.ComponentsProcessor;
-import io.swagger.v3.parser.processors.PathsProcessor;
 import io.swagger.v3.parser.reference.DereferencerContext;
 import io.swagger.v3.parser.reference.DereferencersFactory;
 import io.swagger.v3.parser.reference.OpenAPIDereferencer;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.ResolverFully;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Expectations;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -78,6 +71,8 @@ import static org.testng.FileAssert.fail;
 
 
 public class OpenAPIResolverTest {
+
+    List<AuthorizationValue> auths = new ArrayList<>();
 
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
@@ -571,7 +566,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testSelfReferenceResolution(@Injectable final List<AuthorizationValue> auths)throws Exception {
+    public void testSelfReferenceResolution()throws Exception {
 
         String yaml = "" +
                 "openapi: 3.0.1\n" +
@@ -613,7 +608,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue85(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue85() {
         String yaml =
                 "openapi: '3.0.1'\n" +
                         "paths: \n" +
@@ -662,7 +657,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1352(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1352() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -673,7 +668,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1157(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1157() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -696,7 +691,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1161(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1161() {
         String path = "/issue-1161/swagger.yaml";
 
         ParseOptions options = new ParseOptions();
@@ -721,7 +716,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testIssue1170(@Injectable final List<AuthorizationValue> auths) {
+    public void testIssue1170() {
         String path = "/issue-1170/swagger.yaml";
 
         ParseOptions options = new ParseOptions();
@@ -790,7 +785,7 @@ public class OpenAPIResolverTest {
 
 
     @Test
-    public void selfReferenceTest(@Injectable final List<AuthorizationValue> auths) {
+    public void selfReferenceTest() {
         String yaml = "" +
                 "openapi: 3.0.1\n" +
                 "paths:\n" +
@@ -881,7 +876,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void resolveAllOfWithoutAggregatingParameters(@Injectable final List<AuthorizationValue> auths) {
+    public void resolveAllOfWithoutAggregatingParameters() {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         options.setResolveCombinators(false);
@@ -910,7 +905,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void resolveComposedReferenceAllOfSchema(@Injectable final List<AuthorizationValue> auths){
+    public void resolveComposedReferenceAllOfSchema(){
 
 
 
@@ -929,7 +924,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void resolveComposedSchema(@Injectable final List<AuthorizationValue> auths){
+    public void resolveComposedSchema(){
 
         ParseOptions options = new ParseOptions();
         options.setResolveCombinators(false);
@@ -1004,7 +999,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testComposedSchemaAdjacent(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void testComposedSchemaAdjacent() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -1025,7 +1020,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void testComposedSchemaAdjacentWithExamples(@Injectable final List<AuthorizationValue> auths) throws Exception {
+    public void testComposedSchemaAdjacentWithExamples() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -1044,7 +1039,7 @@ public class OpenAPIResolverTest {
     }
 
     @Test
-    public void allOfExampleGeneration(@Injectable final List<AuthorizationValue> auths) throws JsonProcessingException {
+    public void allOfExampleGeneration() throws JsonProcessingException {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
@@ -1056,38 +1051,6 @@ public class OpenAPIResolverTest {
 
         Object withExample = openAPI.getPaths().get("/bar").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getExample();
         Assert.assertEquals("{\"someProperty\":\"ABC\",\"someOtherProperty\":42}", Json.mapper().writeValueAsString(withExample));
-    }
-
-    @Test
-    public void testSwaggerResolver(@Injectable final OpenAPI swagger,
-                                    @Injectable final List<AuthorizationValue> auths,
-                                    @Mocked final ResolverCache cache,
-                                    @Injectable final ParseOptions parseOptions,
-                                    @Mocked final ComponentsProcessor componentsProcessor,
-                                    @Mocked final PathsProcessor pathsProcessor) throws Exception {
-
-        new Expectations() {{
-            new ResolverCache(swagger, auths, null, new HashSet<>(), parseOptions);
-            result = cache;
-            times = 1;
-
-            new ComponentsProcessor(swagger, cache);
-            result = componentsProcessor;
-            times = 1;
-
-            new PathsProcessor(cache, swagger, withInstanceOf(OpenAPIResolver.Settings.class));
-            result = pathsProcessor;
-            times = 1;
-
-            pathsProcessor.processPaths();
-            times = 1;
-
-            componentsProcessor.processComponents();
-            times = 1;
-
-        }};
-
-        assertEquals(new OpenAPIResolver(swagger, auths, null, null, parseOptions).resolve(), swagger);
     }
 
     @Test

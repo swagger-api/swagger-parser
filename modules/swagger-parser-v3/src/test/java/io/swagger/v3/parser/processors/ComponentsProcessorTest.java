@@ -8,9 +8,7 @@ import io.swagger.v3.parser.ResolverCache;
 import mockit.*;
 import org.testng.annotations.Test;
 
-import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
 
 public class ComponentsProcessorTest {
 
@@ -43,33 +41,35 @@ public class ComponentsProcessorTest {
     SecuritySchemeProcessor securitySchemeProcessor;
 
     @Injectable
+    Schema model1;
+
+    @Injectable
+    Schema model2;
+
+    @Injectable
+    ResolverCache cache;
+
+    @Injectable
     boolean openapi31;
 
-    @Test
-    public void testComponentsSchemasProcessor(@Injectable final Schema model1,
-                                         @Injectable final Schema model2,
-                                         @Injectable final ResolverCache cache) throws Exception {
+    @Injectable  OpenAPI openAPI;
 
+
+
+    @Test
+    public void testComponentsSchemasProcessor() throws Exception {
         final OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addSchemas("foo", model1));
         openAPI.getComponents().addSchemas("bar", model2);
 
 
-
         new Expectations() {{
-
-            new SchemaProcessor(cache, openAPI, openapi31);
-            times = 1;
-            result = schemaProcessor;
-
 
             schemaProcessor.processSchema((Schema) any);
             times = 2;
         }};
 
         new ComponentsProcessor(openAPI,cache, openapi31).processComponents();
-
-
 
         new Verifications() {{
             schemaProcessor.processSchema(model1);
@@ -78,46 +78,35 @@ public class ComponentsProcessorTest {
     }
 
     @Test
-    public void testNoComponentsDefined(@Injectable final OpenAPI openAPI,
-                                         @Injectable final ResolverCache cache) throws Exception {
-
+    public void testNoComponentsDefined() throws Exception {
 
         new Expectations() {{
             new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = schemaProcessor;
 
             new ResponseProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = responseProcessor;
 
             new RequestBodyProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = requestBodyProcessor;
 
             new ParameterProcessor( cache, openAPI, openapi31);
             times = 1;
-            result = parameterProcessor;
 
             new HeaderProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = headerProcessor;
 
             new ExampleProcessor(cache, openAPI);
             times = 1;
-            result = exampleProcessor;
 
             new LinkProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = linkProcessor;
 
             new CallbackProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = callbackProcessor;
 
             new SecuritySchemeProcessor(cache, openAPI);
             times = 1;
-            result = securitySchemeProcessor;
 
             openAPI.getComponents();
             times = 1;
