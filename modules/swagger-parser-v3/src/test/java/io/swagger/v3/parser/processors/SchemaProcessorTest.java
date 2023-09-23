@@ -147,9 +147,9 @@ public class SchemaProcessorTest {
     @Test
     public void testProcessRefProperty_ExternalRef() throws Exception {
 
-        final ExternalRefProcessor[] erp = {new ExternalRefProcessor(cache, openAPI)};
+        final ExternalRefProcessor[] externalRefProcessor1 = {new ExternalRefProcessor(cache, openAPI)};
         new Expectations() {{
-            erp[0] = new ExternalRefProcessor(cache, openAPI);
+            externalRefProcessor1[0] = new ExternalRefProcessor(cache, openAPI);
             times = 1;
         }};
 
@@ -157,7 +157,7 @@ public class SchemaProcessorTest {
         final Schema refProperty = new Schema().$ref(ref);
 
         new Expectations() {{
-            erp[0].processRefToExternalSchema(ref, RefFormat.URL );
+            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL );
             times = 1;
             result = "bar";
         }};
@@ -165,7 +165,7 @@ public class SchemaProcessorTest {
         new SchemaProcessor(cache, openAPI).processSchema(refProperty);
 
         new FullVerifications() {{
-            erp[0].processRefToExternalSchema(ref, RefFormat.URL);
+            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL);
             times = 1;
         }};
 
@@ -191,9 +191,9 @@ public class SchemaProcessorTest {
 
     @Test
     public void testProcessArrayProperty_ItemsIsRefProperty() throws Exception {
-        final ExternalRefProcessor[] erp = {new ExternalRefProcessor(cache, openAPI)};
+        final ExternalRefProcessor[] externalRefProcessor1 = {new ExternalRefProcessor(cache, openAPI)};
         new Expectations() {{
-            erp[0] = new ExternalRefProcessor(cache, openAPI);
+            externalRefProcessor1[0] = new ExternalRefProcessor(cache, openAPI);
             times = 1;
         }};
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
@@ -202,7 +202,7 @@ public class SchemaProcessorTest {
         ArraySchema arrayProperty = new ArraySchema();
         arrayProperty.setItems(refProperty);
         new Expectations() {{
-            erp[0].processRefToExternalSchema(ref, RefFormat.URL );
+            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL );
             times = 1;
             result = "bar";
         }};
@@ -210,7 +210,7 @@ public class SchemaProcessorTest {
         new SchemaProcessor(cache, openAPI).processSchema(arrayProperty);
 
         new FullVerifications() {{
-            erp[0].processRefToExternalSchema(ref, RefFormat.URL);
+            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL);
             times = 1;
         }};
 
@@ -220,9 +220,9 @@ public class SchemaProcessorTest {
 
     @Test
     public void testProcessMapProperty_AdditionalPropertiesIsRefProperty() throws Exception {
-        final ExternalRefProcessor[] erp = {new ExternalRefProcessor(cache, openAPI)};
+        final ExternalRefProcessor[] externalRefProcessor1 = {new ExternalRefProcessor(cache, openAPI)};
         new Expectations() {{
-            erp[0] = new ExternalRefProcessor(cache, openAPI);
+            externalRefProcessor1[0] = new ExternalRefProcessor(cache, openAPI);
             times = 1;
         }};
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
@@ -231,7 +231,7 @@ public class SchemaProcessorTest {
         refProperty.setAdditionalProperties(refProperty);
 
         new Expectations() {{
-            erp[0].processRefToExternalSchema(ref, RefFormat.URL );
+            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL );
             times = 1;
             result = "bar";
         }};
@@ -239,7 +239,7 @@ public class SchemaProcessorTest {
         new SchemaProcessor(cache, openAPI).processSchema(refProperty);
 
         new FullVerifications() {{
-            erp[0].processRefToExternalSchema(ref, RefFormat.URL);
+            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL);
             times = 1;
         }};
 

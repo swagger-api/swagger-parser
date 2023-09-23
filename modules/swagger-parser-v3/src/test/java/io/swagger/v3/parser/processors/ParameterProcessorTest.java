@@ -139,24 +139,23 @@ public class ParameterProcessorTest {
 
     @Test
     public void testProcessParameters_BodyParameter() throws Exception {
+        final SchemaProcessor[] schemaProcessor1 = {new SchemaProcessor(cache, openAPI, openapi31)};
+        new Expectations() {{
+            schemaProcessor1[0] = new SchemaProcessor(cache, openAPI, openapi31);
+            times = 1;
 
-        expectedModelProcessorCreation();
+        }};
 
         RequestBody bodyParameter = new RequestBody().content(new Content().addMediaType("*/*",new MediaType().schema(bodyParamSchema)));
 
-       expectModelProcessorInvoked(bodyParamSchema);
+        new Expectations(){{
+            schemaProcessor1[0].processSchema(bodyParamSchema); times=1;
+        }};
 
         new RequestBodyProcessor(cache, openAPI, openapi31).processRequestBody(bodyParameter);
 
         new FullVerifications(){{}};
     }
-
-    private void expectModelProcessorInvoked(Schema bodyParamSchema) {
-        new Expectations(){{
-            modelProcessor.processSchema(bodyParamSchema); times=1;
-        }};
-    }
-
 
     private void expectedModelProcessorCreation() {
         new Expectations() {{
