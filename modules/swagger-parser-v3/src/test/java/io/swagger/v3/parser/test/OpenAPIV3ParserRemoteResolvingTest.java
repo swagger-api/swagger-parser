@@ -302,7 +302,7 @@ public class OpenAPIV3ParserRemoteResolvingTest {
     @Test
     public void testIssueSameRefsDifferentModel() throws IOException {
         String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-refs-different-model-domain.yaml"), "UTF-8");
-        WireMock.stubFor(get(urlPathMatching("/issue-domain"))
+        WireMock.stubFor(get(urlPathMatching("/issue-domain/"))
                 .willReturn(aResponse()
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withHeader("Content-type", "application/json")

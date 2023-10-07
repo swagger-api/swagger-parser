@@ -54,6 +54,9 @@ public class ResolverCacheTest {
     @Injectable
     ApiResponse mockedResponse;
 
+    @Injectable
+    DeserializationUtils deserializationUtils;
+
     @Test
     public void testMock() throws Exception {
 
@@ -65,7 +68,7 @@ public class ResolverCacheTest {
         parseOptions.setResolve(true);
         parseOptions.setValidateExternalRefs(true);
 
-        new Expectations(DeserializationUtils.class) {{
+        new Expectations(deserializationUtils) {{
             RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
             times = 1;
             result = contentsOfExternalFile;
@@ -94,7 +97,7 @@ public class ResolverCacheTest {
         parseOptions.setResolve(true);
         parseOptions.setValidateExternalRefs(true);
 
-        new Expectations(DeserializationUtils.class) {{
+        new Expectations(deserializationUtils) {{
             RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json");
             times = 1;
             result = contentsOfExternalFile;
