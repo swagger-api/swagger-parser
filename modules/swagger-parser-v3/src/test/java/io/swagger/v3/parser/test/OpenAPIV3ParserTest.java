@@ -43,6 +43,22 @@ import static org.testng.Assert.*;
 public class OpenAPIV3ParserTest {
     List<AuthorizationValue> auths = new ArrayList<>();
 
+
+    @Test
+    public void testFailedToResolveExternalReferences() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolve-external-ref/failedToResolveExternalRefs.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        Assert.assertTrue(openAPI.getPaths().get("/permAssignments").get$ref() == null);
+        Assert.assertEquals(openAPI.getPaths().get("/permAssignments").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
+        Assert.assertTrue(openAPI.getPaths().get("/permAssignmentChangeRequests").get$ref() == null);
+        Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChangeRequests").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
+
+    }
+
     @Test
     public void testIssueDereferencingComposedSchemaOneOf() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
@@ -3141,8 +3157,6 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         SwaggerParseResult parseResult = openApiParser.readLocation("issue-1746/petstore.yml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
-
-
         assertEquals(openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getHeaders().get("x-next").get$ref(), "#/components/headers/LocationInHeaders");
     }
 }

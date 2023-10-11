@@ -174,7 +174,7 @@ public class PathsProcessor {
             for (String key: content.keySet()) {
                 MediaType mediaType = content.get(key);
                 if (mediaType.getSchema() != null) {
-                    updateRefs(mediaType.getSchema(), pathRef);
+                    //updateRefs(mediaType.getSchema(), pathRef);
                 }
                 Map<String, Example> examples = content.get(key).getExamples();
                 if (examples != null) {

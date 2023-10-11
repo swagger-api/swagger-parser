@@ -1,0 +1,24 @@
+---
+openapi: 3.0.3
+info:
+  title: Common Path Items Domain
+  description: Common Path Items for Back Office REST APIs
+  version: 1.0.0
+components:
+  pathitems:
+    permAssignments:
+      get:
+        summary: Permanent Assignment Data Creation
+        responses:
+          '202':
+            description: Accepted
+            content:
+              application/vnd.api+json:
+                schema:
+                  "$ref": schemas.yaml#/components/schemas/schemaResponseSuccess
+          '400':
+            description: Bad Request
+            content:
+              application/vnd.api+json:
+                schema:
+                  "$ref": schemas.yaml#/components/schemas/schemaResponseError
