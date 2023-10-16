@@ -412,20 +412,20 @@
     </repositories>
     <properties>
         <maven.compiler.release>11</maven.compiler.release>
-        <snakeyaml-version>2.0</snakeyaml-version>
-        <swagger-parser-v2-version>1.0.67</swagger-parser-v2-version>
-        <commons-io-version>2.11.0</commons-io-version>
-        <slf4j-version>1.7.36</slf4j-version>
-        <swagger-core-version>2.2.14</swagger-core-version>
-        <swagger-core-v2-version>1.6.11</swagger-core-v2-version>
+        <snakeyaml-version>2.2</snakeyaml-version>
+        <swagger-parser-v2-version>1.0.68</swagger-parser-v2-version>
+        <commons-io-version>2.14.0</commons-io-version>
+        <slf4j-version>2.0.9</slf4j-version>
+        <swagger-core-version>2.2.17</swagger-core-version>
+        <swagger-core-v2-version>1.6.12</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>7.8.0</testng-version>
         <jmockit-version>1.49</jmockit-version>
         <wiremock-version>2.35.0</wiremock-version>
         <surefire-version>3.0.0</surefire-version>
-        <commons-lang-version>3.12.0</commons-lang-version>
-        <jackson-version>2.15.1</jackson-version>
-        <jackson-databind-version>2.15.1</jackson-databind-version>
+        <commons-lang-version>3.13.0</commons-lang-version>
+        <jackson-version>2.15.3</jackson-version>
+        <jackson-databind-version>2.15.3</jackson-databind-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
