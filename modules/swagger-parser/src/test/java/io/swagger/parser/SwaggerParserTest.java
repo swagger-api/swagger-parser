@@ -10,6 +10,7 @@ import static org.testng.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.util.*;
 
 import io.swagger.models.*;
@@ -18,7 +19,6 @@ import io.swagger.parser.util.ParseOptions;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.testng.reporters.Files;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -1586,7 +1586,7 @@ public class SwaggerParserTest {
 
     @Test(description = "A string example should not be over quoted when parsing a yaml node")
     public void readingSpecNodeShouldNotOverQuotingStringExample() throws Exception {
-        String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
+        String yaml = new String(Files.readAllBytes(new File("src/test/resources/over-quoted-example.yaml").toPath()), "UTF-8");
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         SwaggerParser parser = new SwaggerParser();
         Swagger swagger = parser.read(rootNode, true);
