@@ -411,7 +411,7 @@
         </repository>
     </repositories>
     <properties>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>8</maven.compiler.release>
         <snakeyaml-version>2.2</snakeyaml-version>
         <swagger-parser-v2-version>1.0.68</swagger-parser-v2-version>
         <commons-io-version>2.14.0</commons-io-version>
