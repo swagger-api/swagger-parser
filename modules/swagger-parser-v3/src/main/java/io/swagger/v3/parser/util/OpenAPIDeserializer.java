@@ -4155,7 +4155,7 @@ public class OpenAPIDeserializer {
 			schema.setPatternProperties(patternProperties);
 		}
 
-		Object constValue = getObject("const", node, false, location, result);
+		Object constValue = getAnyType("const", node, location, result);
 		if (constValue != null) {
 			schema.setConst(constValue);
 		}
