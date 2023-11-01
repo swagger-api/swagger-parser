@@ -1,5 +1,9 @@
 package io.swagger.v3.parser.test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -8,6 +12,7 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +59,46 @@ public class OAI31DeserializationTest {
         Schema patternProperties = (Schema)schema2020_12.getPatternProperties().get("^S_");
         assertTrue(schema2020_12.getUnevaluatedItems().getTypes().contains("object"));
         assertTrue(patternProperties.getTypes().contains("string"));
+    }
+
+    @Test(description = "Test OAS31 Schema const deserialization")
+    public void testSchemaConstOAS31() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/issue-1975.yaml", null, null);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        assertTrue(result.getMessages().size() == 0);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstValidation").getConst(), 2);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objNode = mapper.createObjectNode();
+        objNode.put("foo", "bar");
+        objNode.put("baz", "bax");
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithObject").getConst(), objNode);
+        ArrayNode arrayNode = mapper.createArrayNode();
+        ObjectNode arrayItem = mapper.createObjectNode();
+        arrayItem.put("foo", "bar");
+        arrayNode.add(arrayItem);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithArray").getConst(), arrayNode);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithNull").getConst(), NullNode.getInstance());
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithFalseDoesNotMatch0").getConst(), false);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithTrueDoesNotMatch1").getConst(), true);
+        arrayNode = mapper.createArrayNode();
+        arrayNode.add(false);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithArrayFalseDoesNotMatch0").getConst(), arrayNode);
+        arrayNode = mapper.createArrayNode();
+        arrayNode.add(true);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithArrayTrueDoesNotMatch1").getConst(), arrayNode);
+        objNode = mapper.createObjectNode();
+        objNode.put("a", false);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithAFalseDoesNotMatchA0").getConst(), objNode);
+        objNode = mapper.createObjectNode();
+        objNode.put("a", true);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWithATrueDoesNotMatchA1").getConst(), objNode);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWith0DoesNotMatchOtherZeroLikeTypes").getConst(), 0);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWith1DoesNotMatchTrue").getConst(), 1);
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstWith20MatchesIntegerAndFloatTypes").getConst(), new BigDecimal("-2.0"));
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstFloatAndIntegersAreEqualUpTo64BitRepresentationLimits").getConst(), new BigDecimal(9007199254740992L));
+        assertEquals(openAPI.getComponents().getSchemas().get("ConstNulCharactersInStrings").getConst(), "hello\0there");
     }
 
     @Test(description = "Test basic OAS31 deserialization/validation")
