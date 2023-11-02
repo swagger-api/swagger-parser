@@ -264,6 +264,17 @@ public class OpenAPIDeserializer {
 			"(\\d{2}):(\\d{2})(\\.\\d+)?((Z)|([+-]\\d{2}:\\d{2}))$");
 	private static final Pattern RFC3339_DATE_PATTERN = Pattern.compile("^(\\d{4})-(\\d{2})-(\\d{2})$");
 	private static final String REFERENCE_SEPARATOR = "#/";
+
+    private static final int MAX_EXTENSION_ENTRIES = 20;
+
+    // Holds extensions to a given classloader. Implemented as a least-recently used cache
+    private static final Map<ClassLoader, List<JsonSchemaParserExtension>> jsonSchemaParserExtensionMap = new LinkedHashMap<ClassLoader, List<JsonSchemaParserExtension>>() {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<ClassLoader, List<JsonSchemaParserExtension>> eldest) {
+            return size() > MAX_EXTENSION_ENTRIES;
+        }
+    };
+
 	private Components components;
 	private JsonNode rootNode;
 	private Map<String, Object> rootMap;
@@ -3780,15 +3791,30 @@ public class OpenAPIDeserializer {
 		return extensions;
 	}
 
-	protected static List<JsonSchemaParserExtension> getJsonSchemaParserExtensions(ClassLoader cl) {
-		final List<JsonSchemaParserExtension> extensions = new ArrayList<>();
+    /**
+     * Locates the extensions for given {@link ClassLoader} and stores them for performance reason in an in-memory
+     * (LRU) cache.
+     *
+     * @param cl the {@link ClassLoader} for which the extensions are located
+     * @return
+     */
+    protected static List<JsonSchemaParserExtension> getJsonSchemaParserExtensions(ClassLoader cl) {
+        if (jsonSchemaParserExtensionMap.containsKey(cl)) {
+            return jsonSchemaParserExtensionMap.get(cl);
+        }
 
-		final ServiceLoader<JsonSchemaParserExtension> loader = ServiceLoader.load(JsonSchemaParserExtension.class, cl);
-		for (JsonSchemaParserExtension extension : loader) {
-			extensions.add(extension);
-		}
-		return extensions;
-	}
+        final List<JsonSchemaParserExtension> extensions = new ArrayList<>();
+        final ServiceLoader<JsonSchemaParserExtension> loader = ServiceLoader.load(JsonSchemaParserExtension.class, cl);
+        for (JsonSchemaParserExtension extension : loader) {
+            extensions.add(extension);
+        }
+
+        // don't cache null-Value classLoader (e.g. Bootstrap Classloader)
+        if (cl != null) {
+            jsonSchemaParserExtensionMap.put(cl, extensions);
+        }
+        return extensions;
+    }
 
 	public Schema getJsonSchema(JsonNode jsonNode, String location, ParseResult result) {
 		if (jsonNode == null) {
