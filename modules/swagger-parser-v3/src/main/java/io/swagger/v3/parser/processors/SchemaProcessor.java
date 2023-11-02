@@ -47,7 +47,6 @@ public class SchemaProcessor {
             return;
         }
         if (openapi31) {
-            // TODO use as singleton somewhere loaded as static used by both here and deserializer
             List<JsonSchemaParserExtension> jsonschemaExtensions = OpenAPIDeserializer.getJsonSchemaParserExtensions();
             for (JsonSchemaParserExtension jsonschemaExtension: jsonschemaExtensions) {
                 if (jsonschemaExtension.resolveSchema(schema, cache, openAPI, openapi31)) {
