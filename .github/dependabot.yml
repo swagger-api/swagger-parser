@@ -5,14 +5,14 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    allow: 
-      - dependency-name: "io.swagger.core.v3:*"
-      - dependency-name: "io.swagger:*"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "maven"
     target-branch: "v1"
     directory: "/"
     schedule:
       interval: "daily"
-    allow: 
-      - dependency-name: "io.swagger.core.v3:*"
-      - dependency-name: "io.swagger:*"      
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
