@@ -4155,10 +4155,9 @@ public class OpenAPIDeserializer {
 			schema.setPatternProperties(patternProperties);
 		}
 
-		//const is a String
-		value = getString("const", node, false, location, result);
-		if (value != null) {
-			schema.setConst(value);
+		Object constValue = getAnyType("const", node, location, result);
+		if (constValue != null) {
+			schema.setConst(constValue);
 		}
 
 		value = getString("contentEncoding", node, false, location, result);

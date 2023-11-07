@@ -137,12 +137,12 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.11.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.2</version>
                 <configuration>
                     <aggregate>true</aggregate>
                     <source>1.8</source>
@@ -165,7 +165,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -421,8 +421,8 @@
         <junit-version>4.13.2</junit-version>
         <testng-version>7.8.0</testng-version>
         <jmockit-version>1.49</jmockit-version>
-        <wiremock-version>2.35.0</wiremock-version>
-        <surefire-version>3.0.0</surefire-version>
+        <wiremock-version>2.35.1</wiremock-version>
+        <surefire-version>3.2.2</surefire-version>
         <commons-lang-version>3.13.0</commons-lang-version>
         <jackson-version>2.15.3</jackson-version>
         <jackson-databind-version>2.15.3</jackson-databind-version>
