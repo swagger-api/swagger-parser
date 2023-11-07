@@ -398,7 +398,7 @@
         <swagger-core-version>1.6.12</swagger-core-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>6.9.6</testng-version>
-        <jmockit-version>1.19</jmockit-version>
+        <jmockit-version>1.49</jmockit-version>
         <wiremock-version>2.27.2</wiremock-version>
         <surefire-version>2.22.2</surefire-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

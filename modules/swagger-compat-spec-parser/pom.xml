@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
-            <version>1.19</version>
+            <version>1.49</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
