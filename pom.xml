@@ -422,7 +422,7 @@
         <testng-version>7.8.0</testng-version>
         <jmockit-version>1.49</jmockit-version>
         <wiremock-version>2.35.1</wiremock-version>
-        <surefire-version>3.0.0</surefire-version>
+        <surefire-version>3.2.2</surefire-version>
         <commons-lang-version>3.13.0</commons-lang-version>
         <jackson-version>2.15.3</jackson-version>
         <jackson-databind-version>2.15.3</jackson-databind-version>
