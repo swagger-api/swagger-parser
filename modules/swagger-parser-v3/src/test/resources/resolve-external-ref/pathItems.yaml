@@ -22,3 +22,32 @@ components:
               application/vnd.api+json:
                 schema:
                   "$ref": schemas.yaml#/components/schemas/schemaResponseError
+    permAssignmentChange:
+      get:
+        summary: Permanent Assignment Data Creation
+        responses:
+          '201':
+            description: Accepted
+            content:
+              application/vnd.api+json:
+                schema:
+                  "$ref": "#/components/schemas/Error"
+          '404':
+            description: Accepted
+            content:
+              application/vnd.api+json:
+                schema:
+                  "$ref": "#/components/schemas/RemoteError"
+  schemas:
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    RemoteError:
+      "$ref": schemas.yaml#/components/schemas/schemaResponseError

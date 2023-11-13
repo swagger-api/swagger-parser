@@ -56,6 +56,9 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(openAPI.getPaths().get("/permAssignments").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
         Assert.assertTrue(openAPI.getPaths().get("/permAssignmentChangeRequests").get$ref() == null);
         Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChangeRequests").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
+        Assert.assertTrue(openAPI.getPaths().get("/permAssignmentChange").get$ref() == null);
+        Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChange").getGet().getResponses().get("201").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/Error");
+        Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChange").getGet().getResponses().get("404").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/RemoteError");
 
     }
 
