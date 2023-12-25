@@ -425,7 +425,7 @@
         <surefire-version>3.2.2</surefire-version>
         <commons-lang-version>3.13.0</commons-lang-version>
         <jackson-version>2.15.3</jackson-version>
-        <jackson-databind-version>2.15.3</jackson-databind-version>
+        <jackson-databind-version>2.16.1</jackson-databind-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
