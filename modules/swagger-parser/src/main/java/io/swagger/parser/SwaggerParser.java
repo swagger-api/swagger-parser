@@ -194,7 +194,7 @@ public class SwaggerParser {
             if (output != null) {
                 if (options != null) {
                     if (options.isResolve()) {
-                        output = new SwaggerResolver(output, authorizationValues).resolve();
+                        output = new SwaggerResolver(output, authorizationValues, null, null, options).resolve();
                     }
                     if (options.isFlatten()) {
                         InlineModelResolver inlineModelResolver = new InlineModelResolver();

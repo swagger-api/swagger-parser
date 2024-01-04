@@ -13,10 +13,9 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
-import io.swagger.parser.util.DeserializationUtils;
-import io.swagger.parser.util.PathUtils;
-import io.swagger.parser.util.RefUtils;
-import io.swagger.parser.util.SwaggerDeserializer;
+import io.swagger.parser.util.*;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -53,6 +52,7 @@ public class ResolverCache {
     private final Path parentDirectory;
     private final String parentUrl;
     private final String rootPath;
+    private final ParseOptions parseOptions;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
     private Set<String> referencedModelKeys = new HashSet<>();
@@ -66,6 +66,27 @@ public class ResolverCache {
         this.swagger = swagger;
         this.auths = auths;
         this.rootPath = parentFileLocation;
+        this.parseOptions = new ParseOptions();
+
+        if(parentFileLocation != null) {
+            if(parentFileLocation.startsWith("http")) {
+                parentDirectory = null;
+            } else {
+                parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
+            }
+        } else {
+            File file = new File(".");
+            parentDirectory = file.toPath();
+        }
+        parentUrl = parentFileLocation;
+
+    }
+
+    public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation, ParseOptions parseOptions) {
+        this.swagger = swagger;
+        this.auths = auths;
+        this.rootPath = parentFileLocation;
+        this.parseOptions = parseOptions;
 
         if(parentFileLocation != null) {
             if(parentFileLocation.startsWith("http")) {
@@ -115,6 +136,10 @@ public class ResolverCache {
         String contents = externalFileCache.get(file);
 
         if (contents == null) {
+            if(parseOptions.isSafelyResolveURL()){
+                checkUrlIsPermitted(file);
+            }
+
             if(parentDirectory != null) {
                 contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
             }
@@ -289,6 +314,17 @@ public class ResolverCache {
             }
         }
         return null;
+    }
+
+    protected void checkUrlIsPermitted(String refSet) {
+        try {
+            PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(),
+                    parseOptions.getRemoteRefBlockList());
+
+            permittedUrlsChecker.verify(refSet);
+        } catch (HostDeniedException exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
     }
 
     public boolean hasReferencedKey(String modelKey) {

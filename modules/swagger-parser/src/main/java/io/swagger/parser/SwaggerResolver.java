@@ -11,6 +11,7 @@ import io.swagger.parser.processors.DefinitionsProcessor;
 import io.swagger.parser.processors.OperationProcessor;
 import io.swagger.parser.processors.ParameterProcessor;
 import io.swagger.parser.processors.PathsProcessor;
+import io.swagger.parser.util.ParseOptions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +44,16 @@ public class SwaggerResolver {
         this.swagger = swagger;
         this.settings = settings != null ? settings : new Settings();
         this.cache = new ResolverCache(swagger, auths, parentFileLocation);
+        definitionsProcessor = new DefinitionsProcessor(cache, swagger);
+        pathProcessor = new PathsProcessor(cache, swagger, this.settings);
+        operationsProcessor = new OperationProcessor(cache, swagger);
+        parametersProcessor = new ParameterProcessor(cache, swagger);
+    }
+
+    public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation, Settings settings, ParseOptions parseOptions) {
+        this.swagger = swagger;
+        this.settings = settings != null ? settings : new Settings();
+        this.cache = new ResolverCache(swagger, auths, parentFileLocation, parseOptions);
         definitionsProcessor = new DefinitionsProcessor(cache, swagger);
         pathProcessor = new PathsProcessor(cache, swagger, this.settings);
         operationsProcessor = new OperationProcessor(cache, swagger);
