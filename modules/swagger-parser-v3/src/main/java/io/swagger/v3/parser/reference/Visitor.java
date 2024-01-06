@@ -62,14 +62,14 @@ public interface Visitor {
 
     Example visitExample(Example example);
 
-    default String readFile(String uri) throws Exception {
-        try (InputStream inputStream = new FileInputStream(uri)) {
+    default String readFile(String path) throws Exception {
+        try (InputStream inputStream = new FileInputStream(path)) {
             return IOUtils.toString(inputStream, UTF_8);
         }
     }
 
-    default String readClasspath(String uri) throws Exception {
-        return ClasspathHelper.loadFileFromClasspath(uri);
+    default String readClasspath(String classPath) throws Exception {
+        return ClasspathHelper.loadFileFromClasspath(classPath);
     }
     default String readHttp(String uri, List<AuthorizationValue> auths) throws Exception {
         return RemoteUrl.urlToString(uri, auths);
@@ -81,9 +81,9 @@ public interface Visitor {
             if (resolved.getScheme().startsWith("http")) {
                 return readHttp(absoluteUri, auths);
             } else if (resolved.getScheme().startsWith("file")) {
-                return readFile(absoluteUri);
+                return readFile(resolved.getPath());
             } else if (resolved.getScheme().startsWith("classpath")) {
-                return readClasspath(absoluteUri);
+                return readClasspath(resolved.getPath());
             }
         }
         // If no matches exists, try file
