@@ -63,23 +63,7 @@ public class ResolverCache {
     private Map<String, String> renameCache = new ConcurrentHashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
-        this.swagger = swagger;
-        this.auths = auths;
-        this.rootPath = parentFileLocation;
-        this.parseOptions = new ParseOptions();
-
-        if(parentFileLocation != null) {
-            if(parentFileLocation.startsWith("http")) {
-                parentDirectory = null;
-            } else {
-                parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
-            }
-        } else {
-            File file = new File(".");
-            parentDirectory = file.toPath();
-        }
-        parentUrl = parentFileLocation;
-
+        this(swagger, auths, parentFileLocation, new ParseOptions());
     }
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation, ParseOptions parseOptions) {

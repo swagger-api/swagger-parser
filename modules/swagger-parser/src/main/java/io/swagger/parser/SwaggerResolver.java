@@ -41,13 +41,7 @@ public class SwaggerResolver {
     }
 
     public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation, Settings settings) {
-        this.swagger = swagger;
-        this.settings = settings != null ? settings : new Settings();
-        this.cache = new ResolverCache(swagger, auths, parentFileLocation);
-        definitionsProcessor = new DefinitionsProcessor(cache, swagger);
-        pathProcessor = new PathsProcessor(cache, swagger, this.settings);
-        operationsProcessor = new OperationProcessor(cache, swagger);
-        parametersProcessor = new ParameterProcessor(cache, swagger);
+        this(swagger, auths, parentFileLocation, settings, new ParseOptions());
     }
 
     public SwaggerResolver(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation, Settings settings, ParseOptions parseOptions) {
