@@ -1,0 +1,17 @@
+openapi: 3.1.0
+servers:
+  - url: https://someserver.com/v1
+info:
+  title: openapi 3.1.0 sample spec
+  version: 0.0.1
+  description: sample spec for testing openapi functionality, built from json schema
+    tests for draft2020-12
+tags: []
+paths: {}
+components:
+  schemas:
+    AllofWithTheLastEmptySchema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      allOf:
+        - type: number
+        - {}

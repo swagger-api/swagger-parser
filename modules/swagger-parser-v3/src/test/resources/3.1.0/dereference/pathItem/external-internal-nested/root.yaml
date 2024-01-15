@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  version: "1.0.0"
+  title: parse-api
+  description: Test swagger-parser
+paths:
+  /externalref:
+    $ref: 'http://localhost:${dynamicPort}/external-internal-nested/nested/domain.yaml#/components/pathItems/ExternalRef'
+  /relativeref:
+    $ref: './nested/domain.yaml#/components/pathItems/RelativeRef'
+  /internalref:
+    $ref: '#/components/pathItems/InternalRef'
+  /internal:
+    get:
+      description: Internal PathItem
+      operationId: Internal PathItem
+      responses:
+        '200':
+          description: OK
+components:
+  pathItems:
+    InternalRef:
+      get:
+        description: InternalRef PathItem
+        operationId: InternalRef PathItem
+        responses:
+          '200':
+            description: OK      

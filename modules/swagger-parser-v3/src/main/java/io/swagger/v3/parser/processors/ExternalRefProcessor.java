@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.processors;
 
 
-import java.io.File;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -125,8 +124,8 @@ public final class ExternalRefProcessor {
                 if (isAnExternalRefFormat(ref)) {
                     if (!ref.equals(RefFormat.URL)) {
                         String schemaFullRef = schema.get$ref();
-                        String parent = file.substring(0, file.lastIndexOf('/'));
-                        if (!parent.isEmpty()) {
+                        String parent = (file.contains("/")) ? file.substring(0, file.lastIndexOf('/')) : "";
+                        if (!parent.isEmpty() && !schemaFullRef.startsWith("/")) {
                             if (schemaFullRef.contains("#/")) {
                                 String[] parts = schemaFullRef.split("#/");
                                 String schemaFullRefFilePart = parts[0];
@@ -150,8 +149,8 @@ public final class ExternalRefProcessor {
                     for(Schema item : composedSchema.getAllOf()){
                         if (item.get$ref() != null){
                             processRefSchema(item,file);
-                        } else if (item.getProperties() != null) {
-                            processProperties(item.getProperties(), file);
+                        } else{
+                            processSchema(item, file);
                         }
                     }
 
@@ -160,6 +159,8 @@ public final class ExternalRefProcessor {
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
                                 processRefSchema(item,file);
+                            }else{
+                                processSchema(item, file);
                             }
                         }
                     }
@@ -168,10 +169,11 @@ public final class ExternalRefProcessor {
                         if (item.get$ref() != null){
                             if (item.get$ref() != null){
                                 processRefSchema(item,file);
+                            }else{
+                                processSchema(item, file);
                             }
                         }
                     }
-
                 }
             }
             //Loop the properties and recursively call this method;
@@ -268,15 +270,18 @@ public final class ExternalRefProcessor {
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
-        PathItem existingPathItem = paths.get(possiblyConflictingDefinitionName);
+        PathItem existingPathItem = paths.get("/"+possiblyConflictingDefinitionName);
 
         if (existingPathItem != null) {
             LOGGER.debug("A model for " + existingPathItem + " already exists");
             if(existingPathItem.get$ref() != null) {
                 // use the new model
                 existingPathItem = null;
+            }else {
+                return pathItem;
             }
         }
+
         newRef = possiblyConflictingDefinitionName;
         cache.putRenamedRef($ref, newRef);
 
@@ -310,6 +315,9 @@ public final class ExternalRefProcessor {
                                     }
                                     if (response.getLinks() != null) {
                                         processRefLinks(response.getLinks(), $ref);
+                                    }
+                                    if (response.getHeaders() != null) {
+                                        processRefHeaders(response.getHeaders(), $ref);
                                     }
                                 }
                             }
@@ -391,8 +399,38 @@ public final class ExternalRefProcessor {
             }
         }
         newRef = possiblyConflictingDefinitionName;
-        openAPI.getComponents().addResponses(newRef, response);
         cache.putRenamedRef($ref, newRef);
+
+        if(existingResponse == null) {
+            // don't overwrite existing model reference
+            openAPI.getComponents().addResponses(newRef, response);
+            cache.addReferencedKey(newRef);
+
+            String file = $ref.split("#/")[0];
+            if (response.get$ref() != null) {
+                RefFormat format = computeRefFormat(response.get$ref());
+                if (isAnExternalRefFormat(format)) {
+                    String fullRef = response.get$ref();
+                    if (!format.equals(RefFormat.URL)) {
+                        String parent = file.substring(0, file.lastIndexOf('/'));
+                        if (!parent.isEmpty()) {
+                            if (fullRef.contains("#/")) {
+                                String[] parts = fullRef.split("#/");
+                                String fullRefFilePart = parts[0];
+                                String fullRefInternalRefPart = parts[1];
+                                fullRef = Paths.get(parent, fullRefFilePart).normalize().toString() + "#/" + fullRefInternalRefPart;
+                            } else {
+                                fullRef = Paths.get(parent, fullRef).normalize().toString();
+                            }
+                        }
+
+                    }
+                    response.set$ref(processRefToExternalResponse(fullRef, format));
+                } else {
+                    processRefToExternalResponse(file + response.get$ref(), RefFormat.RELATIVE);
+                }
+            }
+        }
 
         if(response != null) {
             if(response.getContent() != null){
@@ -759,7 +797,22 @@ public final class ExternalRefProcessor {
             if (parameter.get$ref() != null) {
                 RefFormat format = computeRefFormat(parameter.get$ref());
                 if (isAnExternalRefFormat(format)) {
-                    parameter.set$ref(processRefToExternalParameter(parameter.get$ref(), format));
+                    String fullRef = parameter.get$ref();
+                    if (!format.equals(RefFormat.URL)) {
+                        String parent = file.substring(0, file.lastIndexOf('/'));
+                        if (!parent.isEmpty()) {
+                            if (fullRef.contains("#/")) {
+                                String[] parts = fullRef.split("#/");
+                                String fullRefFilePart = parts[0];
+                                String fullRefInternalRefPart = parts[1];
+                                fullRef = Paths.get(parent, fullRefFilePart).normalize().toString() + "#/" + fullRefInternalRefPart;
+                            } else {
+                                fullRef = Paths.get(parent, fullRef).normalize().toString();
+                            }
+                        }
+
+                    }
+                    parameter.set$ref(processRefToExternalParameter(fullRef, format));
                 } else {
                     processRefToExternalParameter(file + parameter.get$ref(), RefFormat.RELATIVE);
                 }

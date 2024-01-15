@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  title: Domain
+  version: '1.0'
+components:
+  pathItems:
+    ExternalRef:
+      get:
+        description: ExternalRef domain
+        operationId: ExternalRef PathItem
+        responses:
+          '200':
+            description: OK      
+    RelativeRef:
+      get:
+        description: RelativeRef domain
+        operationId: RelativeRef PathItem
+        responses:
+          '200':
+            description: OK             
+    DomainInternalRefToExternal:
+      get:
+        description: DomainInternalRefToExternal domain
+        operationId: DomainInternalRefToExternal PathItem
+        responses:
+          '200':
+            description: OK            
+            

@@ -10,7 +10,11 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.exception.EncodingNotSupportedException;
 import io.swagger.v3.parser.exception.ReadContentException;
+import io.swagger.v3.parser.reference.DereferencerContext;
+import io.swagger.v3.parser.reference.DereferencersFactory;
+import io.swagger.v3.parser.reference.OpenAPIDereferencer;
 import io.swagger.v3.parser.util.ClasspathHelper;
+import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.InlineModelResolver;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RemoteUrl;
@@ -23,17 +27,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import javax.net.ssl.SSLHandshakeException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenAPIV3Parser implements SwaggerParserExtension {
+
+    public static final String DISABLE_OAS31_RESOLVE = "disableOas31Resolve";
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
     private static ObjectMapper JSON_MAPPER, YAML_MAPPER;
     /**
@@ -136,7 +142,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return new OpenAPIDeserializer().deserialize(node, path,new ParseOptions());
     }
     public SwaggerParseResult parseJsonNode(String path, JsonNode node, ParseOptions options) {
-        return new OpenAPIDeserializer().deserialize(node, path, options);
+        return new OpenAPIDeserializer().deserialize(node, path, options, options.isOaiAuthor());
     }
 
     public SwaggerParseResult readContents(String yaml) {
@@ -145,7 +151,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return readContents(yaml, null, options);
     }
 
-    private SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options,
+    public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options,
                                             String location) {
         if (swaggerAsString == null || swaggerAsString.trim().isEmpty()) {
             return SwaggerParseResult.ofError("Null or empty definition");
@@ -153,20 +159,41 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
 
         try {
             final ObjectMapper mapper = getRightMapper(swaggerAsString);
-            final JsonNode rootNode = mapper.readTree(swaggerAsString);
-            final SwaggerParseResult result;
+            JsonNode rootNode;
+            final SwaggerParseResult deserializationUtilsResult = new SwaggerParseResult();
+            if (options != null && options.isLegacyYamlDeserialization()) {
+                rootNode = mapper.readTree(swaggerAsString);
+            } else {
+                try {
+                    rootNode = DeserializationUtils.deserializeIntoTree(swaggerAsString, location, options, deserializationUtilsResult);
+                } catch (Exception e) {
+                    rootNode = mapper.readTree(swaggerAsString);
+                }
+            }
+
+            SwaggerParseResult result;
             if (options != null) {
                 result = parseJsonNode(location, rootNode, options);
             }else {
                 result = parseJsonNode(location, rootNode);
             }
             if (result.getOpenAPI() != null) {
-                return resolve(result, auth, options, location);
+                result = resolve(result, auth, options, location);
+            }
+            if (deserializationUtilsResult.getMessages() != null) {
+                for (String s: deserializationUtilsResult.getMessages()) {
+                    result.message(getParseErrorMessage(s, location));
+                }
             }
             return result;
+
         } catch (JsonProcessingException e) {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getOriginalMessage(), location);
+            return SwaggerParseResult.ofError(message);
+        } catch (Exception e) {
+            LOGGER.warn("Exception while parsing:", e);
+            final String message = getParseErrorMessage(e.getMessage(), location);
             return SwaggerParseResult.ofError(message);
         }
     }
@@ -181,11 +208,39 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
-                    result.setOpenAPI(new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
-                            location).resolve());
-                    if (options.isResolveFully()) {
-                        new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                    if (result.getOpenAPI().getOpenapi() != null && result.getOpenAPI().getOpenapi().startsWith("3.1")) {
+                        if (StringUtils.isBlank(System.getenv(DISABLE_OAS31_RESOLVE))) {
+                            DereferencerContext dereferencerContext = new DereferencerContext(
+                                    result,
+                                    auth,
+                                    location,
+                                    options,
+                                    null,
+                                    null,
+                                    true
+                            );
+                            List<OpenAPIDereferencer> dereferencers = DereferencersFactory.getInstance().getDereferencers();
+                            if (dereferencers.iterator().hasNext()) {
+                                OpenAPIDereferencer dereferencer = dereferencers.iterator().next();
+                                dereferencer.dereference(dereferencerContext, dereferencers.iterator());
+                            }
+                            if (options.isResolveFully()) {
+                                new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                            }
+                        } else {
+                            String msg = "Resolution of OAS 3.1 spec disabled by 'disableOas31Resolve' env variable";
+                            LOGGER.warn(msg);
+                            result.getMessages().add(msg);
+                        }
+                    } else {
+                        OpenAPIResolver resolver = new OpenAPIResolver(result.getOpenAPI(), emptyListIfNull(auth),
+                                location, null, options);
+                        resolver.resolve(result);
+                        if (options.isResolveFully()) {
+                            new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                        }
                     }
+
                 }
                 if (options.isFlatten()) {
                     final InlineModelResolver inlineModelResolver =
@@ -198,7 +253,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             }
         } catch (Exception e) {
             LOGGER.warn("Exception while resolving:", e);
-            result.setMessages(Collections.singletonList(e.getMessage()));
+            // TODO verify if this change makes sense (adding resolve messages instead of replacing)
+            result.getMessages().add(e.getMessage());
+            // result.setMessages(Collections.singletonList(e.getMessage()));
         }
         return result;
     }

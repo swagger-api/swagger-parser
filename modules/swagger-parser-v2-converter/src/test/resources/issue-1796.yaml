@@ -1,0 +1,30 @@
+swagger: "2.0"
+info:
+  title: composed model conversion test
+  version: 1.0.0
+paths:
+  /composed:
+    get:
+      operationId: composed
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/ComposedModel"
+definitions:
+  BaseModel:
+    type: object
+    required:
+      - uuid
+    properties:
+      uuid:
+        type: string
+  ComposedModel:
+    type: object
+    required:
+      - name
+    allOf:
+      - $ref: "#/definitions/BaseModel"
+    properties:
+      name:
+        type: string

@@ -35,14 +35,32 @@ public class ParameterProcessorTest {
     @Mocked
     SchemaProcessor modelProcessor;
 
+    @Injectable
+    boolean openapi31;
+
+    @Injectable
+    HeaderParameter headerParameter;
+
+    @Injectable
+    QueryParameter queryParameter;
+
+    @Injectable
+    CookieParameter cookieParameter;
+
+    @Injectable
+    PathParameter pathParameter;
+
+    @Injectable
+    HeaderParameter resolvedHeaderParam;
+
+    @Injectable
+    Schema bodyParamSchema;
+
     @Test
-    public void testProcessParameters_TypesThatAreNotRefOrBody(@Injectable final HeaderParameter headerParameter,
-                                                               @Injectable final QueryParameter queryParameter,
-                                                               @Injectable final CookieParameter cookieParameter,
-                                                               @Injectable final PathParameter pathParameter) throws Exception {
+    public void testProcessParameters_TypesThatAreNotRefOrBody() throws Exception {
         expectedModelProcessorCreation();
         new Expectations() {
-            {       
+            {
                 headerParameter.getSchema();
                 result = null;
                 headerParameter.getContent();
@@ -61,7 +79,7 @@ public class ParameterProcessorTest {
                 result = null;
             }
         };
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI)
+        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31)
                 .processParameters(Arrays.asList(headerParameter,
                         queryParameter,
                         cookieParameter,
@@ -86,7 +104,7 @@ public class ParameterProcessorTest {
     }
 
     @Test
-    public void testProcessParameters_RefToHeader(@Injectable final HeaderParameter resolvedHeaderParam) throws Exception {
+    public void testProcessParameters_RefToHeader() throws Exception {
         expectedModelProcessorCreation();
 
         final String ref = "#/components/parameters/foo";
@@ -102,7 +120,7 @@ public class ParameterProcessorTest {
             }
         };
 
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI).processParameters(Arrays.asList(refParameter));
+        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31).processParameters(Arrays.asList(refParameter));
 
         new FullVerifications(){{}};
 
@@ -112,48 +130,37 @@ public class ParameterProcessorTest {
 
     private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
                                            final Parameter resolvedParam) {
-        new StrictExpectations() {{
+        new Expectations() {{
             cache.loadRef(ref, refFormat, Parameter.class);
             times = 1;
             result = resolvedParam;
         }};
     }
 
-    private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
-                                           final RequestBody resolvedParam) {
-        new StrictExpectations() {{
-            /*cache.loadRef(ref, refFormat, RequestBody.class);
-            times = 1;
-            result = resolvedParam;*/
-        }};
-    }
-
     @Test
-    public void testProcessParameters_BodyParameter(@Injectable final Schema bodyParamSchema) throws Exception {
+    public void testProcessParameters_BodyParameter() throws Exception {
+        final SchemaProcessor[] schemaProcessor1 = {new SchemaProcessor(cache, openAPI, openapi31)};
+        new Expectations() {{
+            schemaProcessor1[0] = new SchemaProcessor(cache, openAPI, openapi31);
+            times = 1;
 
-        expectedModelProcessorCreation();
+        }};
 
         RequestBody bodyParameter = new RequestBody().content(new Content().addMediaType("*/*",new MediaType().schema(bodyParamSchema)));
 
-        expectModelProcessorInvoked(bodyParamSchema);
+        new Expectations(){{
+            schemaProcessor1[0].processSchema(bodyParamSchema); times=1;
+        }};
 
-        new RequestBodyProcessor(cache, openAPI).processRequestBody(bodyParameter);
+        new RequestBodyProcessor(cache, openAPI, openapi31).processRequestBody(bodyParameter);
 
         new FullVerifications(){{}};
     }
 
-    private void expectModelProcessorInvoked(@Injectable final Schema bodyParamSchema) {
-        new StrictExpectations(){{
-            modelProcessor.processSchema(bodyParamSchema); times=1;
-        }};
-    }
-
-
     private void expectedModelProcessorCreation() {
-        new StrictExpectations() {{
-            new SchemaProcessor(cache, openAPI);
+        new Expectations() {{
+            new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = modelProcessor;
         }};
     }
 }

@@ -1,0 +1,23 @@
+openapi: 3.0.1
+info:
+  title: sample
+  version: "1.0"
+servers:
+  - url: www.abc.com
+paths:
+  /test:
+    get:
+      operationId: test
+      parameters:
+        - name: id
+          in: query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  a:
+                    type: string
+      responses:
+        200:
+          description: Ok

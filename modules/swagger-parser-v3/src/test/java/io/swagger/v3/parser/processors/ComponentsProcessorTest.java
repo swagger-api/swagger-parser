@@ -8,9 +8,7 @@ import io.swagger.v3.parser.ResolverCache;
 import mockit.*;
 import org.testng.annotations.Test;
 
-import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
 
 public class ComponentsProcessorTest {
 
@@ -42,32 +40,36 @@ public class ComponentsProcessorTest {
     @Mocked
     SecuritySchemeProcessor securitySchemeProcessor;
 
+    @Injectable
+    Schema model1;
+
+    @Injectable
+    Schema model2;
+
+    @Injectable
+    ResolverCache cache;
+
+    @Injectable
+    boolean openapi31;
+
+    @Injectable  OpenAPI openAPI;
+
+
 
     @Test
-    public void testComponentsSchemasProcessor(@Injectable final Schema model1,
-                                         @Injectable final Schema model2,
-                                         @Injectable final ResolverCache cache) throws Exception {
-
+    public void testComponentsSchemasProcessor() throws Exception {
         final OpenAPI openAPI = new OpenAPI();
         openAPI.components(new Components().addSchemas("foo", model1));
         openAPI.getComponents().addSchemas("bar", model2);
 
 
-
         new Expectations() {{
-
-            new SchemaProcessor(cache, openAPI);
-            times = 1;
-            result = schemaProcessor;
-
 
             schemaProcessor.processSchema((Schema) any);
             times = 2;
         }};
 
-        new ComponentsProcessor(openAPI,cache).processComponents();
-
-
+        new ComponentsProcessor(openAPI,cache, openapi31).processComponents();
 
         new Verifications() {{
             schemaProcessor.processSchema(model1);
@@ -76,46 +78,35 @@ public class ComponentsProcessorTest {
     }
 
     @Test
-    public void testNoComponentsDefined(@Injectable final OpenAPI openAPI,
-                                         @Injectable final ResolverCache cache) throws Exception {
+    public void testNoComponentsDefined() throws Exception {
 
-
-        new StrictExpectations() {{
-            new SchemaProcessor(cache, openAPI);
+        new Expectations() {{
+            new SchemaProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = schemaProcessor;
 
-            new ResponseProcessor(cache, openAPI);
+            new ResponseProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = responseProcessor;
 
-            new RequestBodyProcessor(cache, openAPI);
+            new RequestBodyProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = requestBodyProcessor;
 
-            new ParameterProcessor( cache, openAPI);
+            new ParameterProcessor( cache, openAPI, openapi31);
             times = 1;
-            result = parameterProcessor;
 
-            new HeaderProcessor(cache, openAPI);
+            new HeaderProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = headerProcessor;
 
             new ExampleProcessor(cache, openAPI);
             times = 1;
-            result = exampleProcessor;
 
-            new LinkProcessor(cache, openAPI);
+            new LinkProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = linkProcessor;
 
-            new CallbackProcessor(cache, openAPI);
+            new CallbackProcessor(cache, openAPI, openapi31);
             times = 1;
-            result = callbackProcessor;
 
             new SecuritySchemeProcessor(cache, openAPI);
             times = 1;
-            result = securitySchemeProcessor;
 
             openAPI.getComponents();
             times = 1;
@@ -124,84 +115,9 @@ public class ComponentsProcessorTest {
 
         }};
 
-        new ComponentsProcessor(openAPI,cache).processComponents();
+        new ComponentsProcessor(openAPI,cache, openapi31).processComponents();
 
         new FullVerifications() {{
         }};
-    }
-
-    @Test
-    public void testDefinitionsProcessor_RefModelInDefinitionsMap(@Injectable final Schema resolvedModel) throws Exception {
-        final OpenAPI openAPI = new OpenAPI();
-        final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
-        final Schema refModel = new Schema().$ref(ref);
-        openAPI.components(new Components().addSchemas("foo", refModel));
-
-        final MockUp<ResolverCache> mockup = new MockUp<ResolverCache>() {
-            @Mock
-            String getRenamedRef(String ref) {
-                openAPI.getComponents().getSchemas().put("bar", resolvedModel);
-                return "bar";
-            }
-        };
-
-        final ResolverCache mockResolverCache = mockup.getMockInstance();
-
-
-        new StrictExpectations() {{
-
-            new SchemaProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = schemaProcessor;
-
-            new ResponseProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = responseProcessor;
-
-            new RequestBodyProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = requestBodyProcessor;
-
-            new ParameterProcessor( mockResolverCache, openAPI);
-            times = 1;
-            result = parameterProcessor;
-
-            new HeaderProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = headerProcessor;
-
-            new ExampleProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = exampleProcessor;
-
-            new LinkProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = linkProcessor;
-
-            new CallbackProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = callbackProcessor;
-
-            new SecuritySchemeProcessor(mockResolverCache, openAPI);
-            times = 1;
-            result = securitySchemeProcessor;
-
-            schemaProcessor.processSchema(refModel);
-            times = 1;
-
-            resolvedModel.getProperties();
-            times = 1;
-
-        }};
-
-        new ComponentsProcessor(openAPI, mockResolverCache).processComponents();
-
-        new FullVerifications(){{}};
-
-        final Map<String, Schema> definitions = openAPI.getComponents().getSchemas();
-        assertEquals(definitions.size(), 1);
-
-        final Schema foo = definitions.get("foo");
-        assertEquals(foo, resolvedModel);
     }
 }

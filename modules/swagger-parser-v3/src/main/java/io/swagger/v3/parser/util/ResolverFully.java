@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -56,7 +57,7 @@ public class ResolverFully {
     private Map<String, Link> links;
     private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
     private Map<String, Callback> callbacks;
-    
+
     public void resolveFully(OpenAPI openAPI) {
         Components components = openAPI.getComponents();
         if (components != null && components.getRequestBodies() != null) {
@@ -85,7 +86,7 @@ public class ResolverFully {
             if (headers == null) {
                 headers = new HashMap<>();
             }
-        }  
+        }
 
         if (components != null && components.getParameters() != null) {
             parameters = components.getParameters();
@@ -243,7 +244,7 @@ public class ResolverFully {
         }
         return header;
     }
-  
+
     public Link resolveLink(Link link){
         RefFormat refFormat = computeRefFormat(link.get$ref());
         String $ref = link.get$ref();
@@ -272,7 +273,7 @@ public class ResolverFully {
         }
         return requestBody;
     }
-    
+
     public Callback resolveCallback(Callback callback){
         RefFormat refFormat = computeRefFormat(callback.get$ref());
         String $ref = callback.get$ref();
@@ -379,17 +380,30 @@ public class ResolverFully {
             boolean adjacent = (hasAllOf && hasAnyOf) || (hasAllOf && hasOneOf) || (hasAnyOf && hasOneOf);
 
             if (aggregateCombinators && (hasAllOf || adjacent)) {
-                Schema combinedModel = SchemaTypeUtil.createSchema(composedSchema.getType(), composedSchema.getFormat());
+                Schema combinedModel = null;
+                if (SpecVersion.V30.equals(composedSchema.getSpecVersion())) {
+                    combinedModel = SchemaTypeUtil.createSchema(getSchemaType(composedSchema), composedSchema.getFormat());
+                } else {
+                    combinedModel = new JsonSchema();
+                    combinedModel.setFormat(composedSchema.getFormat());
+                    combinedModel.setTypes(composedSchema.getTypes());
+                }
+
+//                combinedModel.setDefault(composedSchema.getDefault());
                 Set<Object> examples = new HashSet<>();
+                Set<Object> defaultValues = new HashSet<>();
 
                 if (hasAllOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAllOf(), examples);
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAllOf(), examples, defaultValues);
                 }
                 if (hasOneOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getOneOf(), examples);
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getOneOf(), examples, defaultValues);
                 }
                 if (hasAnyOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples);
+                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples, defaultValues);
+                }
+                if (defaultValues.size() == 1) {
+                    combinedModel.setDefault(defaultValues.iterator().next());
                 }
 
                 if (schema.getExample() != null) {
@@ -400,6 +414,24 @@ public class ResolverFully {
 
                 if(schema.getXml()!= null){
                     combinedModel.setXml(schema.getXml());
+                }
+
+                if (schema.getDescription() != null) {
+                    combinedModel.setDescription(schema.getDescription());
+                }
+
+                if (schema.getExtensions() != null) {
+                    Map<String, Object> extensions = schema.getExtensions();
+                    for (String key : extensions.keySet()) {
+                        combinedModel.addExtension(key, extensions.get(key));
+                    }
+                }
+
+                if (schema.getProperties() != null) {
+                    if (combinedModel.getProperties() == null) {
+                        combinedModel.setProperties(new HashMap<>());
+                    }
+                    combinedModel.getProperties().putAll(schema.getProperties());
                 }
 
                 result = combinedModel;
@@ -431,8 +463,12 @@ public class ResolverFully {
                 Schema property = updated.get(key);
 
                 if (property.getProperties() != model.getProperties()) {
-                    if (property.getType() == null) {
-                        property.setType("object");
+                    if (!hasSchemaType(property)) {
+                        if (SpecVersion.V30.equals(property.getSpecVersion())) {
+                            property.setType("object");
+                        } else {
+                            property.addType("object");
+                        }
                     }
                     model.addProperties(key, property);
                 } else {
@@ -448,6 +484,22 @@ public class ResolverFully {
         return result;
     }
 
+    protected String getSchemaType(Schema schema) {
+        if (SpecVersion.V30.equals(schema.getSpecVersion())) {
+            return schema.getType();
+        }
+        if (schema.getTypes() != null && schema.getTypes().size() == 1) {
+            return (String)schema.getTypes().iterator().next();
+        }
+        return null;
+    }
+
+    protected boolean hasSchemaType(Schema schema) {
+        if (SpecVersion.V30.equals(schema.getSpecVersion())) {
+            return schema.getType() != null;
+        }
+        return schema.getTypes() != null && schema.getTypes().size() > 0;
+    }
     public Map<String,Example> resolveExample(Map<String,Example> examples){
 
         Map<String,Example> resolveExamples = examples;
@@ -469,10 +521,9 @@ public class ResolverFully {
     }
 
     private void aggregateSchemaCombinators(ComposedSchema sourceSchema, Schema targetSchema,
-                                            List<Schema> schemasToAggregate, Set<Object> examples) {
+                                            List<Schema> schemasToAggregate, Set<Object> examples, Set<Object> defaultValues) {
 
         Set<String> requiredProperties = new HashSet<>();
-
         for (Schema innerModel : schemasToAggregate) {
             Schema resolved = resolveSchema(innerModel);
             Map<String, Schema> properties = resolved.getProperties();
@@ -496,11 +547,88 @@ public class ResolverFully {
             if (resolved.getExample() != null) {
                 examples.add(resolved.getExample());
             }
+            if (sourceSchema.getDefault() != null && resolved.getDefault() == null)
+                defaultValues.add(sourceSchema.getDefault());
+            else
+                defaultValues.add(resolved.getDefault());
+
+            if (resolved.getExtensions() != null) {
+                Map<String, Object> extensions = resolved.getExtensions();
+                for (String key : extensions.keySet()) {
+                    targetSchema.addExtension(key, extensions.get(key));
+                }
+            }
             if (sourceSchema.getExtensions() != null) {
                 Map<String, Object> extensions = sourceSchema.getExtensions();
                 for (String key : extensions.keySet()) {
                     targetSchema.addExtension(key, sourceSchema.getExtensions().get(key));
                 }
+            }
+            if (resolved.getMaximum() != null) {
+                targetSchema.setMaximum(resolved.getMaximum());
+            }
+            if (resolved.getExclusiveMaximum() != null) {
+                targetSchema.setExclusiveMaximum(resolved.getExclusiveMaximum());
+            }
+            if (resolved.getMinimum() != null) {
+                targetSchema.setMinimum(resolved.getMinimum());
+            }
+            if (resolved.getExclusiveMinimum() != null) {
+                targetSchema.setExclusiveMinimum(resolved.getExclusiveMinimum());
+            }
+            if (resolved.getMaxLength() != null) {
+                targetSchema.setMaxLength(resolved.getMaxLength());
+            }
+            if (resolved.getMinLength() != null) {
+                targetSchema.setMinLength(resolved.getMinLength());
+            }
+            if (resolved.getPattern() != null) {
+                targetSchema.setPattern(resolved.getPattern());
+            }
+            if (resolved.getMaxItems() != null) {
+                targetSchema.setMaxItems(resolved.getMaxItems());
+            }
+            if (resolved.getMinItems() != null) {
+                targetSchema.setMinItems(resolved.getMinItems());
+            }
+            if (resolved.getUniqueItems() != null) {
+                targetSchema.setUniqueItems(resolved.getUniqueItems());
+            }
+            if (resolved.getMaxProperties() != null) {
+                targetSchema.setMaxProperties(resolved.getMaxProperties());
+            }
+            if (resolved.getMinProperties() != null) {
+                targetSchema.setMinProperties(resolved.getMinProperties());
+            }
+            if (resolved.getType() != null) {
+                targetSchema.setType(resolved.getType());
+            }
+            if (resolved.getDescription() != null) {
+                targetSchema.setDescription(resolved.getDescription());
+            }
+            if (resolved.getFormat() != null) {
+                targetSchema.setFormat(resolved.getFormat());
+            }
+            if (resolved.getNullable() != null) {
+                targetSchema.setNullable(resolved.getNullable());
+            }
+            if (resolved.getReadOnly() != null) {
+                targetSchema.setReadOnly(resolved.getReadOnly());
+            }
+            if (resolved.getWriteOnly() != null) {
+                targetSchema.setWriteOnly(resolved.getWriteOnly());
+            }
+            if (resolved.getExclusiveMaximumValue() != null) {
+                targetSchema.setExclusiveMaximumValue(resolved.getExclusiveMaximumValue());
+            }
+            if (resolved.getExclusiveMinimumValue() != null) {
+                targetSchema.setExclusiveMinimumValue(resolved.getExclusiveMinimumValue());
+            }
+            if (resolved.getMaxContains() != null) {
+                targetSchema.setMaxContains(resolved.getMaxContains());
+            }
+            if (resolved.getMinContains() != null) {
+                targetSchema.setMinContains(resolved.getMinContains());
             }
         }
 

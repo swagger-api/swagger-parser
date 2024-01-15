@@ -1,0 +1,8 @@
+get:
+  operationId: listPets
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "./def.yml#/components/schemas/Pet"

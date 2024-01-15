@@ -1,0 +1,64 @@
+openapi: 3.1.0
+servers:
+  - url: https://someserver.com/v1
+info:
+  title: openapi 3.1.0 sample spec
+  version: 0.0.1
+  description: sample spec for testing openapi functionality, built from json schema
+    tests for draft2020-12
+tags: []
+paths: {}
+components:
+  schemas:
+    ConstValidation:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: 2
+    ConstWithObject:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const:
+        foo: bar
+        baz: bax
+    ConstWithArray:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const:
+        - foo: bar
+    ConstWithNull:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: null
+    ConstWithFalseDoesNotMatch0:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: false
+    ConstWithTrueDoesNotMatch1:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: true
+    ConstWithArrayFalseDoesNotMatch0:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const:
+        - false
+    ConstWithArrayTrueDoesNotMatch1:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const:
+        - true
+    ConstWithAFalseDoesNotMatchA0:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const:
+        a: false
+    ConstWithATrueDoesNotMatchA1:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const:
+        a: true
+    ConstWith0DoesNotMatchOtherZeroLikeTypes:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: 0
+    ConstWith1DoesNotMatchTrue:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: 1
+    ConstWith20MatchesIntegerAndFloatTypes:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: -2.0
+    ConstFloatAndIntegersAreEqualUpTo64BitRepresentationLimits:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: 9007199254740992
+    ConstNulCharactersInStrings:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      const: "hello\0there"

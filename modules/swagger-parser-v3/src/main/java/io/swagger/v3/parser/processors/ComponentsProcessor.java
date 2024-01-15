@@ -35,19 +35,24 @@ public class ComponentsProcessor {
     private final SecuritySchemeProcessor securitySchemeProcessor;
 
     public ComponentsProcessor(OpenAPI openApi,ResolverCache cache){
+        this(openApi, cache, false);
+
+    }
+    public ComponentsProcessor(OpenAPI openApi,ResolverCache cache, boolean openapi31){
         this.cache = cache;
         this.openApi = openApi;
-        this.schemaProcessor = new SchemaProcessor(cache,openApi);
-        this.responseProcessor = new ResponseProcessor(cache, openApi);
-        this.requestBodyProcessor = new RequestBodyProcessor(cache, openApi);
-        this.parameterProcessor = new ParameterProcessor(cache, openApi);
-        this.headerProcessor = new HeaderProcessor(cache, openApi);
+        this.schemaProcessor = new SchemaProcessor(cache,openApi, openapi31);
+        this.responseProcessor = new ResponseProcessor(cache, openApi, openapi31);
+        this.requestBodyProcessor = new RequestBodyProcessor(cache, openApi, openapi31);
+        this.parameterProcessor = new ParameterProcessor(cache, openApi, openapi31);
+        this.headerProcessor = new HeaderProcessor(cache, openApi, openapi31);
         this.exampleProcessor = new ExampleProcessor(cache,openApi);
-        this.linkProcessor = new LinkProcessor(cache,openApi);
-        this.callbackProcessor = new CallbackProcessor(cache,openApi);
+        this.linkProcessor = new LinkProcessor(cache,openApi, openapi31);
+        this.callbackProcessor = new CallbackProcessor(cache,openApi, openapi31);
         this.securitySchemeProcessor = new SecuritySchemeProcessor(cache,openApi);
 
     }
+
 
 
     public void processComponents() {

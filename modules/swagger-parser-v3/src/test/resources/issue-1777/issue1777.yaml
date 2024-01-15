@@ -1,0 +1,56 @@
+openapi: "3.0.0"
+info:
+  title: API-Template
+  description: |
+    Single or multilined API description. Can be written on HTML or [CommonMark](http://commonmark.org/help/)
+  version: v1
+
+tags:
+  - name: Customers
+    description: "Operations and resources related to customers"
+
+paths:
+  /customers/{customerId}:
+    parameters:
+      - $ref: '#/components/parameters/customerIdPathParam'
+    get:
+      summary: Retrieve customer information
+      description: Description for operation that allows retrieve customer information
+      operationId: retrieveCustomerInfo
+      tags:
+        - Customers
+      responses:
+        '200':
+          description: Customer response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customer'
+
+components:
+  parameters:
+    customerIdPathParam:
+      name: customerId
+      in: path
+      required: true
+      description: The id of the customer
+      schema:
+        $ref: '#/components/schemas/uuid'
+
+  schemas:
+    uuid:
+      type: string
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+
+    customer:
+      type: object
+      properties:
+        id:
+          description: The id of the customer
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          x-apigen-mapping:
+            field: id

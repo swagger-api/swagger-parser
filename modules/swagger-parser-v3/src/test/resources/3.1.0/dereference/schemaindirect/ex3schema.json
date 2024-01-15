@@ -1,0 +1,9 @@
+{
+  "type": "object", 
+  "description": "desc ex3schema",
+  "properties": {
+    "prop1": {
+      "type": "string"
+    }
+  }
+}

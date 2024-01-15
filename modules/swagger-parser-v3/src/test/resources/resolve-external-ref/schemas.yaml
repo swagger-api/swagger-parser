@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: Common Schemas Domain
+  description: Common Schemas for Back Office REST APIs
+  version: 1.0.0
+components:
+  schemas:
+    objectData:
+      required:
+        - id
+      type: object
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              nullable: true
+              description: System unique id for the entity in PeopleSoft
+    objectMetaResponse:
+      allOf:
+        - type: object
+          properties:
+            boEnvironment:
+              type: string
+              minLength: 1
+              maxLength: 8
+              example: FNBSA01
+            boEntityId:
+              type: string
+              maxLength: 15
+              nullable: true
+            status:
+              type: string
+              minLength: 5
+              enum:
+                - Error
+                - Success
+              example: Error
+            reQueueFlag:
+              type: boolean
+              example: true
+              default: false
+    schemaResponseError:
+      required:
+        - errors
+        - jsonapi
+        - meta
+      type: object
+      properties:
+        meta:
+          allOf:
+            - "$ref": "#/components/schemas/objectMetaResponse"
+    schemaResponseSuccess:
+      required:
+        - data
+        - jsonapi
+        - meta
+      type: object
+      properties:
+        jsonapi:
+        meta:
+          allOf:
+            - "$ref": "#/components/schemas/objectMetaResponse"
+        data:
+          allOf:
+            - "$ref": "#/components/schemas/objectData"

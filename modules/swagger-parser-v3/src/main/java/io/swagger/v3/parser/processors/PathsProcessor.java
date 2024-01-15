@@ -37,12 +37,16 @@ public class PathsProcessor {
     public PathsProcessor(ResolverCache cache, OpenAPI openAPI) {
         this(cache, openAPI, new OpenAPIResolver.Settings());
     }
+
     public PathsProcessor(ResolverCache cache, OpenAPI openAPI, OpenAPIResolver.Settings settings) {
+        this(cache, openAPI, settings, false);
+    }
+    public PathsProcessor(ResolverCache cache, OpenAPI openAPI, OpenAPIResolver.Settings settings, boolean openapi31) {
         this.openAPI = openAPI;
         this.cache = cache;
         this.settings = settings;
-        parameterProcessor = new ParameterProcessor(cache, openAPI);
-        operationProcessor = new OperationProcessor(cache, openAPI);
+        parameterProcessor = new ParameterProcessor(cache, openAPI, openapi31);
+        operationProcessor = new OperationProcessor(cache, openAPI, openapi31);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
@@ -55,8 +59,6 @@ public class PathsProcessor {
 
         for (String pathStr : pathMap.keySet()) {
             PathItem pathItem = pathMap.get(pathStr);
-
-            addParametersToEachOperation(pathItem);
 
             if (pathItem.get$ref() != null) {
 
@@ -71,6 +73,8 @@ public class PathsProcessor {
                     pathItem = resolvedPath;
                 }
             }
+
+            addParametersToEachOperation(pathItem);
 
             //at this point we can process this path
             final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
@@ -168,10 +172,6 @@ public class PathsProcessor {
         if(response.getContent() != null) {
             Map<String, MediaType> content = response.getContent();
             for (String key: content.keySet()) {
-                MediaType mediaType = content.get(key);
-                if (mediaType.getSchema() != null) {
-                    updateRefs(mediaType.getSchema(), pathRef);
-                }
                 Map<String, Example> examples = content.get(key).getExamples();
                 if (examples != null) {
                     for( Example example:examples.values()){
@@ -277,20 +277,20 @@ public class PathsProcessor {
         }
         return false;
     }
-    
+
     protected boolean isAbsoluteRef(String ref) {
     	if(!ref.startsWith(".")) {
              return true;
         }
          return false;
     }
-    
+
     protected String computeRef(String ref, String prefix) {
     	if(isLocalRef(ref)) return computeLocalRef(ref, prefix);
     	if(isAbsoluteRef(ref)) return ref;
     	return computeRelativeRef(ref, prefix);
     }
-    
+
     protected String computeRelativeRef(String ref, String prefix) {
          if(ref.startsWith("./")) {
             return ref;

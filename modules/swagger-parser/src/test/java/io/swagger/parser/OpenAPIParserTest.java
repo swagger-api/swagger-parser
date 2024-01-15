@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -27,8 +28,22 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNull;
 
 public class OpenAPIParserTest {
+
+    @Test
+    public void testNPE_1685() {
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue1685.json", null, options);
+        assertNull(swaggerParseResult.getOpenAPI());
+        assertNotNull(swaggerParseResult.getMessages());
+        assertTrue(swaggerParseResult.getMessages().size() == 2);
+        assertEquals(swaggerParseResult.getMessages().get(0), "attribute notswagger is unexpected");
+        assertEquals(swaggerParseResult.getMessages().get(1), "attribute swagger is missing");
+    }
 
     @Test
     public void testIssue1608(){
@@ -48,26 +63,6 @@ public class OpenAPIParserTest {
         assertNotNull(result.getOpenAPI());
         assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("RedisResource"));
         assertNotNull(result.getOpenAPI().getComponents().getSchemas().get("identificacion_usuario_aplicacion"));
-    }
-
-    @Test
-    public void testIssue1621() {
-        final ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
-        parseOptions.setResolveCombinators(false);
-        OpenAPIParser openAPIParser = new OpenAPIParser();
-        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue-1621/example.openapi.yaml", null, parseOptions);
-        assertEquals(0, swaggerParseResult.getMessages().size());
-        OpenAPI api = swaggerParseResult.getOpenAPI();
-        assertEquals("POST Example", api.getPaths()
-                .get("/example")
-                .getPost()
-                .getRequestBody()
-                .getContent()
-                .get("application/json")
-                .getSchema()
-                .getTitle());
     }
 
     @Test
@@ -123,8 +118,8 @@ public class OpenAPIParserTest {
         SwaggerParseResult result = new OpenAPIParser().readLocation("issue895.yaml", null, null);
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
-        assertEquals(result.getMessages().get(0),"attribute info.contact.test");
-        assertEquals(result.getMessages().get(1),"attribute info.license.test1");
+        assertEquals(result.getMessages().get(0),"info.contact.test");
+        assertEquals(result.getMessages().get(1),"info.license.test1");
 
     }
 
@@ -480,18 +475,6 @@ public class OpenAPIParserTest {
     }
 
     @Test
-
-    public void testIssue844() {
-        OpenAPIParser openApiParser = new OpenAPIParser();
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-
-        OpenAPI openAPI = openApiParser.readLocation("reusableParametersWithExternalRef.json", null, options).getOpenAPI();
-        assertNotNull(openAPI);
-        assertEquals(openAPI.getPaths().get("/pets/{id}").getGet().getParameters().get(0).getIn(), "header");
-    }
-
-    @Test
     public void testIssue258() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -560,10 +543,10 @@ public class OpenAPIParserTest {
     public void testIssue959() {
         OpenAPIParser openAPIParser = new OpenAPIParser();
         SwaggerParseResult result =  openAPIParser.readLocation("issue959.json",null,null);
-        assertEquals(result.getMessages().get(0),"attribute paths.'/pets/{petId}'(get).parameters.There are duplicate parameter values");
+        assertEquals(result.getMessages().get(0),"paths.'/pets/{petId}'(get).parameters. There are duplicate parameter values");
 
         result =  openAPIParser.readLocation("issue959PathLevelDuplication.json",null,null);
-        assertEquals(result.getMessages().get(0),"attribute paths.'/pets'.There are duplicate parameter values");
+        assertEquals(result.getMessages().get(0),"paths.'/pets'. There are duplicate parameter values");
 
     }
 
@@ -591,7 +574,7 @@ public class OpenAPIParserTest {
         assertTrue(required.contains("Amount"));
         assertTrue(required.contains("Currency"));
     }
-  
+
     public void testIssue1086() {
         OpenAPIParser openApiParser = new OpenAPIParser();
         ParseOptions options = new ParseOptions();
@@ -662,6 +645,130 @@ public class OpenAPIParserTest {
         SwaggerParseResult result = new OpenAPIParser().readLocation("exampleSpecs\\specs\\issue1553.yaml", null, options);
 
         assertEquals("/api/customer1/v1", result.getOpenAPI().getServers().get(0).getUrl());
+    }
+
+    @org.testng.annotations.Test(description = "convert response schema")
+    public void testIssue1552() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIParser parser = new OpenAPIParser();
+        SwaggerParseResult result = parser.readContents(
+                "swagger: \"2.0\"\n"
+                        + "info:\n"
+                        + "  version: \"1.0\"\n"
+                        + "  title: \"test\"\n"
+                        + "host: \"foo\"\n"
+                        + "paths:\n"
+                        + "  /example:\n"
+                        + "    get:\n"
+                        + "      consumes:\n"
+                        + "        - \"application/json\"\n"
+                        + "      produces:\n"
+                        + "        - \"application/json\"\n"
+                        + "      responses:\n"
+                        + "        200:\n"
+                        + "          $ref: \"#/responses/something\"\n"
+                        + "responses:\n"
+                        + "  something:\n"
+                        + "    description: \"my response\"\n"
+                        + "    schema:\n"
+                        + "      title: \"my schema\"\n"
+                        + "      properties:\n"
+                        + "        foo:\n"
+                        + "          type: string\n"
+                        + "", null, options);
+        Schema<?> schema = result.getOpenAPI().getPaths()
+                .get("/example").getGet()
+                .getResponses().get("200").getContent()
+                .get("application/json").getSchema();
+        assertNotNull(schema.getTitle());  // found title
+        assertNotNull(schema.getProperties().get("foo"));
+    }
+
+    @org.testng.annotations.Test(description = "convert response schema")
+    public void testIssue1552AdditionalProps() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setInferSchemaType(false);
+        OpenAPIParser parser = new OpenAPIParser();
+        SwaggerParseResult result = parser.readContents(
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  title: Some API\n" +
+                        "  description: >-\n" +
+                        "    This is the Some Api\n" +
+                        "  version: 2.0.0\n" +
+                        "basePath: /somepath\n" +
+                        "schemes:\n" +
+                        "  - https\n" +
+                        "consumes:\n" +
+                        "  - application/json\n" +
+                        "produces:\n" +
+                        "  - application/json\n" +
+                        "paths:\n" +
+                        "  /somepath:\n" +
+                        "    get:\n" +
+                        "      description: >\n" +
+                        "        my description\n" +
+                        "      operationId: MyGet\n" +
+                        "      responses:\n" +
+                        "        '200':\n" +
+                        "          $ref: '#/responses/Response'\n" +
+                        "responses:\n" +
+                        "  Response:\n" +
+                        "    description: Response\n" +
+                        "    schema:\n" +
+                        "      type: object\n" +
+                        "      required:\n" +
+                        "        - Report\n" +
+                        "      properties:\n" +
+                        "        Report:\n" +
+                        "          type: string\n" +
+                        "      additionalProperties: false", null, options);
+        assertEquals(Yaml.pretty(result), "messages: []\n" +
+                "openAPI:\n" +
+                "  openapi: 3.0.1\n" +
+                "  info:\n" +
+                "    title: Some API\n" +
+                "    description: This is the Some Api\n" +
+                "    version: 2.0.0\n" +
+                "  servers:\n" +
+                "  - url: /somepath\n" +
+                "  paths:\n" +
+                "    /somepath:\n" +
+                "      get:\n" +
+                "        description: |\n" +
+                "          my description\n" +
+                "        operationId: MyGet\n" +
+                "        responses:\n" +
+                "          \"200\":\n" +
+                "            description: Response\n" +
+                "            content:\n" +
+                "              application/json:\n" +
+                "                schema:\n" +
+                "                  required:\n" +
+                "                  - Report\n" +
+                "                  type: object\n" +
+                "                  properties:\n" +
+                "                    Report:\n" +
+                "                      type: string\n" +
+                "                  additionalProperties: false\n" +
+                "  components:\n" +
+                "    responses:\n" +
+                "      Response:\n" +
+                "        description: Response\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              required:\n" +
+                "              - Report\n" +
+                "              type: object\n" +
+                "              properties:\n" +
+                "                Report:\n" +
+                "                  type: string\n" +
+                "              additionalProperties: false\n" +
+                "  x-original-swagger-version: \"2.0\"\n" +
+                "openapi31: false\n");
     }
 }
 

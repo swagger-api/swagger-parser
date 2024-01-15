@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -52,13 +53,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
@@ -69,6 +64,8 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAPIDeserializerTest {
+
+    List<AuthorizationValue> auths = new ArrayList<>();
 
     @Test
     public void testIssue1072() throws Exception {
@@ -161,6 +158,127 @@ public class OpenAPIDeserializerTest {
 
     }
 
+    @Test
+    public void testIdentifierAndUrlInvalid() throws Exception {
+        String yaml = "openapi: 3.1.0\n" +
+                      "servers:\n" +
+                      "  - url: 'http://abc:5555/mypath'\n" +
+                      "info:\n" +
+                      "  version: '1.0'\n" +
+                      "  title: dd\n" +
+                      "  license:\n" +
+                      "    name: test\n" +
+                      "    url: http://example.com\n" +
+                      "    identifier: test\n" +
+                      "paths:\n" +
+                      "  /resource1/Id:\n" +
+                      "    post:\n" +
+                      "      description: ''\n" +
+                      "      operationId: postOp\n" +
+                      "      responses:\n" +
+                      "        '200':\n" +
+                      "          description: Successful\n" +
+                      "        '401':\n" +
+                      "          description: Access Denied\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          application/json:\n" +
+                      "            schema:\n" +
+                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "        required: true\n" +
+                      "components:\n" +
+                      "  schemas:\n" +
+                      "    mydefinition: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        assertEquals(result.getMessages().size(), 1);
+        assertTrue(result.getMessages().get(0).contains("identifier"));
+    }
+
+    @Test
+    public void testUrlValid() {
+        String yaml = "openapi: 3.1.0\n" +
+                      "servers:\n" +
+                      "  - url: 'http://abc:5555/mypath'\n" +
+                      "info:\n" +
+                      "  version: '1.0'\n" +
+                      "  title: dd\n" +
+                      "  license:\n" +
+                      "    name: test\n" +
+                      "    url: http://example.com\n" +
+                      "paths:\n" +
+                      "  /resource1/Id:\n" +
+                      "    post:\n" +
+                      "      description: ''\n" +
+                      "      operationId: postOp\n" +
+                      "      responses:\n" +
+                      "        '200':\n" +
+                      "          description: Successful\n" +
+                      "        '401':\n" +
+                      "          description: Access Denied\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          application/json:\n" +
+                      "            schema:\n" +
+                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "        required: true\n" +
+                      "components:\n" +
+                      "  schemas:\n" +
+                      "    mydefinition: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        assertEquals(result.getMessages().size(), 0);
+    }
+
+    @Test
+    public void testIdentifierValid() {
+        String yaml = "openapi: 3.1.0\n" +
+                      "servers:\n" +
+                      "  - url: 'http://abc:5555/mypath'\n" +
+                      "info:\n" +
+                      "  version: '1.0'\n" +
+                      "  title: dd\n" +
+                      "  license:\n" +
+                      "    name: test\n" +
+                      "    identifier: abc\n" +
+                      "paths:\n" +
+                      "  /resource1/Id:\n" +
+                      "    post:\n" +
+                      "      description: ''\n" +
+                      "      operationId: postOp\n" +
+                      "      responses:\n" +
+                      "        '200':\n" +
+                      "          description: Successful\n" +
+                      "        '401':\n" +
+                      "          description: Access Denied\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          application/json:\n" +
+                      "            schema:\n" +
+                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "        required: true\n" +
+                      "components:\n" +
+                      "  schemas:\n" +
+                      "    mydefinition: {}";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+
+        SwaggerParseResult result = parser.readContents(yaml,null,null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        assertEquals(result.getMessages().size(), 0);
+    }
 
     @Test
     public void testSecurityDeserialization() throws Exception {
@@ -710,7 +828,7 @@ public class OpenAPIDeserializerTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
         assertEquals(result.getMessages(), emptyList());
-        
+
         OpenAPI openAPI = result.getOpenAPI();
 
         Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
@@ -795,7 +913,7 @@ public class OpenAPIDeserializerTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readContents(yaml, null, null);
         assertEquals(result.getMessages(), Arrays.asList("attribute paths.'/store/inventory'(post).requestBody.content.'application/json'.schema.items is missing"));
-        
+
         OpenAPI openAPI = result.getOpenAPI();
 
         Schema body = openAPI.getPaths().get("/store/inventory").getPost().getRequestBody().getContent().get("application/json").getSchema();
@@ -929,11 +1047,11 @@ public class OpenAPIDeserializerTest {
                 "    ObjectEnum:\n" +
                 "      type: object\n" +
                 "      enum:\n" +
-                "        - make: Toyota\n" + 
+                "        - make: Toyota\n" +
                 "          model: Prius\n" +
-                "        - make: Honda\n" + 
+                "        - make: Honda\n" +
                 "          model: Pilot\n" +
-                "        - make: Nissan\n" + 
+                "        - make: Nissan\n" +
                 "          model: Leaf\n" +
                 "        - null\n";
 
@@ -970,14 +1088,14 @@ public class OpenAPIDeserializerTest {
         assertEquals(new BigDecimal("1.6161"), numberValues.get(2));
         assertEquals(new BigDecimal("3.14"), numberValues.get(3));
         assertEquals(numberImpl.getDefault(), new BigDecimal("3.14"));
-        
+
         Schema booleanModel = resolved.getComponents().getSchemas().get("BooleanEnum");
         assertEquals("boolean", booleanModel.getType());
         List<Object> booleanValues = booleanModel.getEnum();
         assertEquals(2, booleanValues.size());
         assertEquals(Boolean.TRUE, booleanValues.get(0));
         assertEquals(Boolean.FALSE, booleanValues.get(1));
-        
+
         Schema arrayModel = resolved.getComponents().getSchemas().get("ArrayEnum");
         assertEquals("array", arrayModel.getType());
         List<Object> arrayValues = arrayModel.getEnum();
@@ -986,7 +1104,7 @@ public class OpenAPIDeserializerTest {
         assertEquals(arrayValues.get(1), null);
         assertEquals(arrayValues.get(2), JsonNodeFactory.instance.arrayNode().add( "Pilot").add( "Passport"));
         assertEquals(arrayValues.get(3), JsonNodeFactory.instance.arrayNode().add( "Rogue").add( "Leaf"));
-        
+
         Schema objectModel = resolved.getComponents().getSchemas().get("ObjectEnum");
         assertEquals("object", objectModel.getType());
         List<Object> objectValues = objectModel.getEnum();
@@ -1221,6 +1339,216 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testBodyContent() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"requestBody\": {"
+            + "            \"description\": \"Content empty\","
+            + "            \"content\": {"
+            + "            }"
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      },"
+            + "      \"put\": {"
+            + "        \"requestBody\": {"
+            + "            \"description\": \"Content undefined\""
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+        assertEquals( post.getRequestBody().getContent(), null, "Empty content");
+        assertEquals
+            (result.getMessages().contains("attribute paths.'/operations'(post).requestBody.content with no media type is unsupported"),
+             true,
+             "Empty content error reported");
+
+        Operation put = result.getOpenAPI().getPaths().get( "/operations").getPut();
+        assertEquals( put.getRequestBody().getContent(), null, "Empty content");
+        assertEquals
+            (result.getMessages().contains("attribute paths.'/operations'(put).requestBody.content is missing"),
+             true,
+             "Missing content error reported");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
+    }
+
+    @Test
+    public void testEncodingNotApplicable() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Encodings\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/properties\": {"
+            + "      \"post\": {"
+            + "        \"requestBody\": {"
+            + "          \"content\": {"
+            + "            \"multipart/form-data\": {"
+            + "              \"schema\": {"
+            + "                \"type\": \"object\","
+            + "                \"properties\": {"
+            + "                  \"X\": {"
+            + "                    \"type\": \"integer\""
+            + "                  },"
+            + "                  \"Y\": {"
+            + "                    \"type\": \"integer\""
+            + "                  }"
+            + "                }"
+            + "              },"
+            + "              \"encoding\": {"
+            + "                \"X\": {"
+            + "                  \"contentType\": \"application/json\""
+            + "                },"
+            + "                \"Z\": {"
+            + "                  \"contentType\": \"text/plain\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    },"
+            + "    \"/propertiesNone\": {"
+            + "      \"post\": {"
+            + "        \"requestBody\": {"
+            + "          \"content\": {"
+            + "            \"multipart/form-data\": {"
+            + "              \"schema\": {"
+            + "                \"type\": \"object\""
+            + "              },"
+            + "              \"encoding\": {"
+            + "                \"X\": {"
+            + "                  \"contentType\": \"application/json\""
+            + "                },"
+            + "                \"Z\": {"
+            + "                  \"contentType\": \"text/plain\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    },"
+            + "    \"/schemaNone\": {"
+            + "      \"post\": {"
+            + "        \"requestBody\": {"
+            + "          \"content\": {"
+            + "            \"application/x-www-form-urlencoded\": {"
+            + "              \"encoding\": {"
+            + "                \"X\": {"
+            + "                  \"contentType\": \"application/json\""
+            + "                },"
+            + "                \"Z\": {"
+            + "                  \"contentType\": \"text/plain\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    },"
+            + "    \"/schemaRef\": {"
+            + "      \"post\": {"
+            + "        \"requestBody\": {"
+            + "          \"content\": {"
+            + "            \"application/x-www-form-urlencoded\": {"
+            + "              \"schema\": {"
+            + "                \"$ref\": \"#/components/schemas/encoded\""
+            + "              },"
+            + "              \"encoding\": {"
+            + "                \"X\": {"
+            + "                  \"contentType\": \"application/json\""
+            + "                },"
+            + "                \"Z\": {"
+            + "                  \"contentType\": \"text/plain\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        },"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  },"
+            + "  \"components\": {"
+            + "    \"schemas\": {"
+            + "      \"encoded\": {"
+            + "        \"type\": \"object\","
+            + "        \"properties\": {"
+            + "          \"X\": {"
+            + "            \"type\": \"integer\""
+            + "          },"
+            + "          \"Y\": {"
+            + "            \"type\": \"integer\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+
+        assertEquals
+            ( result.getMessages(),
+
+              Arrays.asList
+              ( "attribute paths.'/properties'(post).requestBody.content.'multipart/form-data'.encoding.Z is unexpected",
+                "attribute paths.'/propertiesNone'(post).requestBody.content.'multipart/form-data'.encoding.X is unexpected",
+                "attribute paths.'/propertiesNone'(post).requestBody.content.'multipart/form-data'.encoding.Z is unexpected",
+                "attribute paths.'/schemaNone'(post).requestBody.content.'application/x-www-form-urlencoded'.encoding.X is unexpected",
+                "attribute paths.'/schemaNone'(post).requestBody.content.'application/x-www-form-urlencoded'.encoding.Z is unexpected"),
+
+              "Error messages");
+    }
+
+    @Test
     public void testStyleInvalid() {
         String json =
             "{"
@@ -1268,6 +1596,161 @@ public class OpenAPIDeserializerTest {
         SwaggerParseResult result = parser.readContents(json, null, null);
         assertTrue(result.getMessages().size() == 1);
         assertEquals(result.getMessages().get(0), "attribute paths.'/realize/{param}'(post).parameters.[param].style is not of type `StyleEnum`");
+    }
+
+    @Test
+    public void testParamContent() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"parameters\": ["
+            + "          {"
+            + "            \"name\": \"param0\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "            }"
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param1\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              }"
+            + "            }"
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param2\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              },"
+            + "              \"application/json\": {"
+            + "                \"schema\": {"
+            + "                  \"type\": \"object\""
+            + "                }"
+            + "              }"
+            + "            }"
+            + "          }"
+            + "        ],"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+
+        Parameter param0 =
+            post.getParameters().stream()
+            .filter( p -> "param0".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param0"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param0].content with no media type is unsupported"),
+             true,
+             "No media types error reported");
+        assertEquals( param0.getContent(), null, "Empty content");
+
+        Parameter param1 =
+            post.getParameters().stream()
+            .filter( p -> "param1".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param1"));
+        assertEquals( param1.getContent().size(), 1, "Valid content size");
+
+        Parameter param2 =
+            post.getParameters().stream()
+            .filter( p -> "param2".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param2"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param2].content with multiple media types is unsupported"),
+             true,
+             "Multiple media types error reported");
+        assertEquals( param2.getContent(), null, "Content with multiple media types");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
+    }
+
+    @Test
+    public void testParamData() {
+        String json =
+            "{"
+            + "  \"openapi\": \"3.0.0\","
+            + "  \"info\": {"
+            + "    \"title\": \"Operations\","
+            + "    \"version\": \"0.0.0\""
+            + "  },"
+            + "  \"paths\": {"
+            + "    \"/operations\": {"
+            + "      \"post\": {"
+            + "        \"parameters\": ["
+            + "          {"
+            + "            \"name\": \"param0\","
+            + "            \"in\": \"query\""
+            + "          },"
+            + "          {"
+            + "            \"name\": \"param2\","
+            + "            \"in\": \"query\","
+            + "            \"content\": {"
+            + "              \"text/plain\": {"
+            + "              }"
+            + "            },"
+            + "            \"schema\": {"
+            + "               \"type\": \"object\""
+            + "              }"
+            + "            }"
+            + "        ],"
+            + "        \"responses\": {"
+            + "          \"default\": {"
+            + "            \"description\": \"None\""
+            + "          }"
+            + "        }"
+            + "      }"
+            + "    }"
+            + "  }"
+            + "}"
+            ;
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        Operation post = result.getOpenAPI().getPaths().get( "/operations").getPost();
+
+        Parameter param0 =
+            post.getParameters().stream()
+            .filter( p -> "param0".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param0"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param0].content is missing"),
+             true,
+             "No schema or content error reported");
+        assertEquals( param0.getContent(), null, "No schema or content");
+
+        Parameter param2 =
+            post.getParameters().stream()
+            .filter( p -> "param2".equals( p.getName()))
+            .findFirst()
+            .orElseThrow( () -> new IllegalStateException( "Can't find parameter=param2"));
+        assertEquals
+            (result.getMessages().contains( "attribute paths.'/operations'(post).parameters.[param2].content when schema defined is unsupported"),
+             true,
+             "Both schema and content error reported");
+        assertEquals( param2.getContent(), null, "Content when schema defined");
+
+        assertEquals( result.getMessages().size(), 2, "Messages");
     }
 
     @Test
@@ -1820,7 +2303,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testAllOfSchema(@Injectable List<AuthorizationValue> auths){
+    public void testAllOfSchema(){
         String yaml = "openapi: '3.0'\n" +
             "components:\n" +
             "  schemas:\n" +
@@ -1839,40 +2322,40 @@ public class OpenAPIDeserializerTest {
             "        properties:\n" +
             "          name:\n" +
             "            type: string\n";
-  
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-  
+
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-  
+
         SwaggerParseResult result = parser.readContents(yaml,auths,options);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<>(messageList);
-  
+
         Schema catSchema = result.getOpenAPI().getComponents().getSchemas().get("Cat");
         assertTrue(catSchema != null);
         assertTrue(catSchema instanceof ComposedSchema);
-        
+
         ComposedSchema catCompSchema = (ComposedSchema) catSchema;
         List<Schema> allOfSchemas = catCompSchema.getAllOf();
         assertTrue(allOfSchemas != null);
         assertEquals(allOfSchemas.size(), 2);
-        
+
         Schema refPetSchema = allOfSchemas.get(0);
         assertTrue(refPetSchema != null);
         assertEquals(refPetSchema.get$ref(), "#/components/schemas/Pet");
-  
+
         Schema otherSchema = allOfSchemas.get(1);
         assertTrue(otherSchema != null);
         assertTrue(otherSchema.getProperties() != null);
         Schema nameProp = (Schema) otherSchema.getProperties().get("name");
         assertTrue(nameProp != null);
         assertEquals(nameProp.getType(), "string");
-        
-    }  
-  
+
+    }
+
     @Test
-    public void testOneOfSchema(@Injectable List<AuthorizationValue> auths){
+    public void testOneOfSchema(){
         String yaml = "openapi: '3.0'\n" +
             "components:\n" +
             "  schemas:\n" +
@@ -1890,88 +2373,88 @@ public class OpenAPIDeserializerTest {
             "          type: string\n" +
             "    Pet:\n" +
             "      oneOf: \n" +
-            "       - $ref: '#/components/schemas/Cat'\n" +      
+            "       - $ref: '#/components/schemas/Cat'\n" +
             "       - $ref: '#/components/schemas/Dog'\n" +
             "       - type: object\n" +
             "         # neither a `Cat` nor a `Dog`\n" +
             "         properties:\n" +
             "           name:\n" +
             "             type: string\n" ;
-  
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-  
+
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-  
+
         SwaggerParseResult result = parser.readContents(yaml,auths,options);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<>(messageList);
-  
+
         Schema petSchema = result.getOpenAPI().getComponents().getSchemas().get("Pet");
         assertTrue(petSchema != null);
         assertTrue(petSchema instanceof ComposedSchema);
-        
+
         ComposedSchema petCompSchema = (ComposedSchema) petSchema;
         List<Schema> oneOfSchemas = petCompSchema.getOneOf();
         assertTrue(oneOfSchemas != null);
         assertEquals(oneOfSchemas.size(), 3);
-        
+
         Schema refCatSchema = oneOfSchemas.get(0);
         assertTrue(refCatSchema != null);
         assertEquals(refCatSchema.get$ref(), "#/components/schemas/Cat");
-  
+
         Schema refDogSchema = oneOfSchemas.get(1);
         assertTrue(refDogSchema != null);
         assertEquals(refDogSchema.get$ref(), "#/components/schemas/Dog");
-        
+
         Schema otherSchema = oneOfSchemas.get(2);
         assertTrue(otherSchema != null);
         Schema nameProp = (Schema) otherSchema.getProperties().get("name");
         assertTrue(nameProp != null);
         assertEquals(nameProp.getType(), "string");
-        
-    }  
+
+    }
 
     @Test
-    public void testAnyOfSchema(@Injectable List<AuthorizationValue> auths){
+    public void testAnyOfSchema(){
         String yaml = "openapi: '3.0'\n" +
             "components:\n" +
             "  schemas:\n" +
             "    id:\n" +
             "      anyOf: \n" +
-            "       - type: string\n" +      
+            "       - type: string\n" +
             "       - type: number\n" ;
-  
+
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-  
+
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-  
+
         SwaggerParseResult result = parser.readContents(yaml,auths,options);
         List<String> messageList = result.getMessages();
         Set<String> messages = new HashSet<>(messageList);
-  
+
         Schema idSchema = result.getOpenAPI().getComponents().getSchemas().get("id");
         assertTrue(idSchema != null);
         assertTrue(idSchema instanceof ComposedSchema);
-        
+
         ComposedSchema idCompSchema = (ComposedSchema) idSchema;
         List<Schema> anyOfSchemas = idCompSchema.getAnyOf();
         assertTrue(anyOfSchemas != null);
         assertEquals(anyOfSchemas.size(), 2);
-        
+
         Schema stringSchema = anyOfSchemas.get(0);
         assertTrue(stringSchema != null);
         assertEquals(stringSchema.getType(), "string");
-  
+
         Schema numberSchema = anyOfSchemas.get(1);
         assertTrue(numberSchema != null);
         assertEquals(numberSchema.getType(), "number");
-        
-    }  
-    
+
+    }
+
     @Test
-    public void propertyTest(@Injectable List<AuthorizationValue> auths){
+    public void propertyTest(){
         String yaml = "openapi: 3.0.1\n"+
                         "paths:\n"+
                         "  /primitiveBody/inline:\n" +
@@ -2010,7 +2493,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testExamples(@Injectable List<AuthorizationValue> auths){
+    public void testExamples(){
         String yaml = "openapi: 3.0.1\n"+
                         "info:\n"+
                         "  title: httpbin\n"+
@@ -2152,7 +2635,7 @@ public class OpenAPIDeserializerTest {
 
 
     @Test
-    public void testSchemaExample(@Injectable List<AuthorizationValue> auths){
+    public void testSchemaExample(){
         String yaml = "openapi: '3.0.1'\n" +
                 "components:\n" +
                 "  schemas:\n"+
@@ -2188,7 +2671,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(stateSchemaProperty.getExample(),"CA" );
     }
 
-    @Test   
+    @Test
     public void testExampleVsExamples(){
         String json =
             "{" +
@@ -2269,24 +2752,24 @@ public class OpenAPIDeserializerTest {
         assertEqualsNoOrder
             (result.getMessages().toArray(),
              new Object[] {
-                "attribute components.parameters.withBoth.[withBoth].examples already defined -- ignoring \"example\" field",
-                "attribute components.parameters.withContentBoth.[withContentBoth].content.'application/json'.examples already defined -- ignoring \"example\" field",
-                "attribute components.requestBodies.withBodyBoth.content.'application/json'.examples already defined -- ignoring \"example\" field",
-                "attribute components.headers.withBoth.examples already defined -- ignoring \"example\" field"
+                "components.parameters.withBoth.[withBoth].examples already defined -- ignoring \"example\" field",
+                "components.parameters.withContentBoth.[withContentBoth].content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "components.requestBodies.withBodyBoth.content.'application/json'.examples already defined -- ignoring \"example\" field",
+                "components.headers.withBoth.examples already defined -- ignoring \"example\" field"
              },
              "Expected warnings not found");
-        
+
         OpenAPI openAPI = result.getOpenAPI();
 
         Parameter param;
         param = openAPI.getComponents().getParameters().get("withExample");
         assertNull( param.getExamples(), "Examples,");
         assertNotNull( param.getExample(), "Example,");
-        
+
         param = openAPI.getComponents().getParameters().get("withExamples");
         assertNotNull( param.getExamples(), "Examples,");
         assertNull( param.getExample(), "Example,");
-        
+
         param = openAPI.getComponents().getParameters().get("withBoth");
         assertNotNull( param.getExamples(), "Examples,");
         assertNull( param.getExample(), "Example,");
@@ -2295,24 +2778,24 @@ public class OpenAPIDeserializerTest {
         header = openAPI.getComponents().getHeaders().get("withExample");
         assertNull( header.getExamples(), "Examples,");
         assertNotNull( header.getExample(), "Example,");
-        
+
         header = openAPI.getComponents().getHeaders().get("withExamples");
         assertNotNull( header.getExamples(), "Examples,");
         assertNull( header.getExample(), "Example,");
-        
+
         header = openAPI.getComponents().getHeaders().get("withBoth");
         assertNotNull( header.getExamples(), "Examples,");
         assertNull( header.getExample(), "Example,");
-        
+
         MediaType mediaType;
         mediaType = openAPI.getComponents().getParameters().get("withContentExample").getContent().get( "application/json");
         assertNull( mediaType.getExamples(), "Examples,");
         assertNotNull( mediaType.getExample(), "Example,");
-        
+
         mediaType = openAPI.getComponents().getParameters().get("withContentExamples").getContent().get( "application/json");
         assertNotNull( mediaType.getExamples(), "Examples,");
         assertNull( mediaType.getExample(), "Example,");
-        
+
         mediaType = openAPI.getComponents().getParameters().get("withContentBoth").getContent().get( "application/json");
         assertNotNull( mediaType.getExamples(), "Examples,");
         assertNull( mediaType.getExample(), "Example,");
@@ -2320,7 +2803,7 @@ public class OpenAPIDeserializerTest {
         mediaType = openAPI.getComponents().getRequestBodies().get("withBodyExample").getContent().get( "application/json");
         assertNull( mediaType.getExamples(), "Examples,");
         assertNotNull( mediaType.getExample(), "Example,");
-        
+
         mediaType = openAPI.getComponents().getRequestBodies().get("withBodyExamples").getContent().get( "application/json");
         assertNotNull( mediaType.getExamples(), "Examples,");
         assertNull( mediaType.getExample(), "Example,");
@@ -2331,7 +2814,262 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testOptionalParameter(@Injectable List<AuthorizationValue> auths) {
+    public void testIssue1454AllOfDefaultValue(){
+        String json =
+                "{" +
+                "  \"openapi\": \"3.0.1\"," +
+                "  \"info\": {" +
+                "    \"title\": \"Here be enum bugs\"," +
+                "    \"description\": \"OpenAPI spec to test the enum parsing bugs.\"," +
+                "    \"version\": \"1.0.0\"" +
+                "  }," +
+                "  \"paths\": {" +
+                "    \"/enum/parse/bug\": {" +
+                "      \"post\": {" +
+                "        \"summary\": \"Test enum parse bug\"," +
+                "        \"requestBody\": {" +
+                "          \"content\": {" +
+                "            \"application/json\": {" +
+                "              \"schema\": {" +
+                "                \"$ref\": \"#/components/schemas/SchemaWithDefaultAndEnum\"" +
+                "              }" +
+                "            }" +
+                "          }" +
+                "        }," +
+                "        \"responses\": {" +
+                "          \"default\": {" +
+                "            \"description\": \"Successful response\"" +
+                "          }" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }," +
+                "  \"components\": {" +
+                "    \"schemas\": {" +
+                "      \"SchemaWithDefaultAndEnum\": {" +
+                "        \"type\": \"object\"," +
+                "        \"properties\": {" +
+                "          \"enumProperty\": {" +
+                "            \"description\": \"This schema with set default enum value and enum ref shows default SCHEMA_DEFAULT value in Swagger Editor, but is null when parsed with OpenAPIV3Parser.\"," +
+                "            \"allOf\": [" +
+                "              {" +
+                "                \"$ref\": \"#/components/schemas/Enum\"" +
+                "              }" +
+                "            ]," +
+                "            \"default\": \"SCHEMA_DEFAULT\"" +
+                "          }" +
+                "        }" +
+                "      }," +
+                "      \"Enum\": {" +
+                "        \"type\": \"string\"," +
+                "        \"enum\": [" +
+                "          \"SCHEMA_DEFAULT\"," +
+                "          \"NOT_DEFAULT\"" +
+                "        ]" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
+
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, null);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnum")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+        OpenAPIV3Parser parser2 = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult result2 = parser2.readContents(json, null, options);
+        OpenAPI openAPI2 = result2.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI2.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnum")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+    }
+
+    @Test
+    public void testIssue1454AllOfEnumWithDefaultValue(){
+        String json =
+                "{" +
+                "  \"openapi\": \"3.0.1\"," +
+                "  \"info\": {" +
+                "    \"title\": \"Here be enum bugs\"," +
+                "    \"description\": \"OpenAPI spec to test the enum parsing bugs.\"," +
+                "    \"version\": \"1.0.0\"" +
+                "  }," +
+                "  \"paths\": {" +
+                "    \"/enum/parse/bug\": {" +
+                "      \"post\": {" +
+                "        \"summary\": \"Test enum parse bug\"," +
+                "        \"requestBody\": {" +
+                "          \"content\": {" +
+                "            \"application/json\": {" +
+                "              \"schema\": {" +
+                "                \"$ref\": \"#/components/schemas/SchemaWithEnumWithDefault\"" +
+                "              }" +
+                "            }" +
+                "          }" +
+                "        }," +
+                "        \"responses\": {" +
+                "          \"default\": {" +
+                "            \"description\": \"Successful response\"" +
+                "          }" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }," +
+                "  \"components\": {" +
+                "    \"schemas\": {" +
+                "      \"SchemaWithEnumWithDefault\": {" +
+                "        \"type\": \"object\"," +
+                "        \"properties\": {" +
+                "          \"enumProperty\": {" +
+                "            \"description\": \"This schema with set default enum value and enum ref shows default SCHEMA_DEFAULT value in Swagger Editor, but is null when parsed with OpenAPIV3Parser.\"," +
+                "            \"allOf\": [" +
+                "              {" +
+                "                \"$ref\": \"#/components/schemas/EnumWithDefault\"" +
+                "              }" +
+                "            ]" +
+                "          }" +
+                "        }" +
+                "      }," +
+                "      \"EnumWithDefault\": {" +
+                "        \"type\": \"string\"," +
+                "        \"enum\": [" +
+                "          \"SCHEMA_DEFAULT\"," +
+                "          \"NOT_DEFAULT\"" +
+                "        ]," +
+                "        \"default\": \"SCHEMA_DEFAULT\"" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
+
+        // it is really expected to be working in resolve=false mode?
+//        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+//        SwaggerParseResult result = parser.readContents(json, null, new ParseOptions());
+//        OpenAPI openAPI = result.getOpenAPI();
+//        assertEquals(((Map<String, Schema>)openAPI.getComponents()
+//                .getSchemas()
+//                .get("SchemaWithEnumWithDefault")
+//                .getProperties())
+//                .get("enumProperty")
+//                .getDefault(), "SCHEMA_DEFAULT");
+
+        OpenAPIV3Parser parser2 = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult result2 = parser2.readContents(json, null, options);
+        OpenAPI openAPI2 = result2.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI2.getComponents()
+                .getSchemas()
+                .get("SchemaWithEnumWithDefault")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+    }
+
+    @Test
+    public void testIssue1454WithDefaultAllOfEnumWithDefaultValue(){
+        String json =
+                "{" +
+                "  \"openapi\": \"3.0.1\"," +
+                "  \"info\": {" +
+                "    \"title\": \"Here be enum bugs\"," +
+                "    \"description\": \"OpenAPI spec to test the enum parsing bugs.\"," +
+                "    \"version\": \"1.0.0\"" +
+                "  }," +
+                "  \"paths\": {" +
+                "    \"/enum/parse/bug\": {" +
+                "      \"post\": {" +
+                "        \"summary\": \"Test enum parse bug\"," +
+                "        \"requestBody\": {" +
+                "          \"content\": {" +
+                "            \"application/json\": {" +
+                "              \"schema\": {" +
+                "                \"$ref\": \"#/components/schemas/SchemaWithDefaultAndEnumWithDefault\"" +
+                "              }" +
+                "            }" +
+                "          }" +
+                "        }," +
+                "        \"responses\": {" +
+                "          \"default\": {" +
+                "            \"description\": \"Successful response\"" +
+                "          }" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }," +
+                "  \"components\": {" +
+                "    \"schemas\": {" +
+                "      \"SchemaWithDefaultAndEnumWithDefault\": {" +
+                "        \"type\": \"object\"," +
+                "        \"properties\": {" +
+                "          \"enumProperty\": {" +
+                "            \"description\": \"This schema with set default enum value and enum ref shows default SCHEMA_DEFAULT value in Swagger Editor, but is null when parsed with OpenAPIV3Parser.\"," +
+                "            \"allOf\": [" +
+                "              {" +
+                "                \"$ref\": \"#/components/schemas/EnumWithDefault\"" +
+                "              }" +
+                "            ]," +
+                "            \"default\": \"SCHEMA_DEFAULT\"" +
+                "          }" +
+                "        }" +
+                "      }," +
+                "      \"EnumWithDefault\": {" +
+                "        \"type\": \"string\"," +
+                "        \"enum\": [" +
+                "          \"SCHEMA_DEFAULT\"," +
+                "          \"NOT_DEFAULT\"" +
+                "        ]," +
+                "        \"default\": \"SCHEMA_DEFAULT\"" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
+
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(json, null, new ParseOptions());
+        OpenAPI openAPI = result.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnumWithDefault")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+        OpenAPIV3Parser parser2 = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setResolveCombinators(true);
+        SwaggerParseResult result2 = parser2.readContents(json, null, options);
+        OpenAPI openAPI2 = result2.getOpenAPI();
+        assertEquals(((Map<String, Schema>)openAPI2.getComponents()
+                .getSchemas()
+                .get("SchemaWithDefaultAndEnumWithDefault")
+                .getProperties())
+                .get("enumProperty")
+                .getDefault(), "SCHEMA_DEFAULT");
+
+    }
+
+    @Test
+    public void testOptionalParameter() {
         String yaml = "openapi: 3.0.1\n" +
                 "paths:\n" +
                 "  \"/pet\":\n" +
@@ -2366,7 +3104,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertFalse(parameter.getRequired());
     }
 
-    @Test void testDiscriminatorObject(@Injectable List<AuthorizationValue> auths){
+    @Test void testDiscriminatorObject(){
         String yaml = "openapi: '3.0.1'\n" +
                 "components:\n" +
                 "  schemas:\n" +
@@ -2423,7 +3161,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testEmpty(@Injectable List<AuthorizationValue> auths) {
+    public void testShouldReturnEmpty() {
         String json = "{}";
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
@@ -2439,7 +3177,7 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
-    public void testAlmostEmpty(@Injectable List<AuthorizationValue> auths) {
+    public void testAlmostEmpty() {
         String yaml = "openapi: '3.0.1'\n" +
                       "new: extra";
 
@@ -2602,29 +3340,32 @@ public class OpenAPIDeserializerTest {
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
 
-        PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
+        PathItem petByStatusEndpoint = paths.get("/pet/findByStatusContent");
         Assert.assertNotNull(petByStatusEndpoint.getGet());
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().size(), 3);
+
         Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),3);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().size(),1);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExample(),null);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getExamples().get("list").getSummary(),"List of Names");
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/json").getSchema().getType(),"array");
 
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(1).getContent());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().size(),1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("list").getValue(),"<Users><User name='Bob'/><User name='Diane'/><User name='Mary'/><User name='Bill'/></Users>");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getSummary());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getSummary(),"Empty list");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(1).getContent().get("application/xml").getExamples().get("empty").getValue(),"<Users/>");
 
-        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary());
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getSummary(),"Empty list");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("application/xml").getExamples().get("empty").getValue(),"<Users/>");
-
-
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
-        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
+        Assert.assertNotNull(petByStatusEndpoint.getGet().getParameters().get(2).getContent());
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().size(),1);
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("list").getSummary(),"List of names");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("list").getValue(),"Bob,Diane,Mary,Bill");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("empty").getSummary(),"Empty");
+        Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(2).getContent().get("text/plain").getExamples().get("empty").getValue(),"");
 
         PathItem petEndpoint = paths.get("/pet");
         Assert.assertNotNull(petEndpoint.getPut());
@@ -2695,27 +3436,27 @@ public class OpenAPIDeserializerTest {
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.in is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.scheme is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.openIdConnectUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth'.tokenUrl is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth_password'.authorizationUrl is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.petstore_auth_clientCredentials'.authorizationUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.scheme is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.flows is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.api_key'.openIdConnectUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.name is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.in is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.flows is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.http'.openIdConnectUrl is missing"));
-        
+
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.name is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.in is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.scheme is missing"));
         assertTrue(!messages.contains("attribute components.securitySchemes'.openID'.flows is missing"));
-        
-        
-        
+
+
+
         final OpenAPI openAPI = result.getOpenAPI();
         Assert.assertNotNull(openAPI);
 
@@ -2728,19 +3469,19 @@ public class OpenAPIDeserializerTest {
 
         securityScheme = securitySchemes.get("remote_reference");
         assertTrue(securityScheme.get$ref().equals("http://localhost:${dynamicPort}/remote/security#/petstore_remote"));
-        
+
         securityScheme = securitySchemes.get("petstore_auth");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("petstore_auth_password");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("petstore_auth_clientCredentials");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("petstore_auth_authorizationCode");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OAUTH2);
-        
+
         securityScheme = securitySchemes.get("api_key");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.APIKEY);
         assertTrue(securityScheme.getIn()== SecurityScheme.In.HEADER);
@@ -2755,7 +3496,7 @@ public class OpenAPIDeserializerTest {
         securityScheme = securitySchemes.get("openID");
         assertTrue(securityScheme.getType()== SecurityScheme.Type.OPENIDCONNECT);
     }
-    
+
     @Test(dataProvider = "data")
     public void readExtensions(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
@@ -2825,7 +3566,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -2849,7 +3590,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByStatus");
@@ -2875,7 +3616,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem petByStatusEndpoint = paths.get("/pet/findByTags");
@@ -2889,7 +3630,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getExplode(), Boolean.TRUE);
         Assert.assertEquals(petByStatusEndpoint.getGet().getParameters().get(0).getStyle(), StyleEnum.FORM);
     }
-    
+
     @Test(dataProvider = "data")
     public void readProducesTestEndpoint(JsonNode rootNode) throws Exception {
         final OpenAPIDeserializer deserializer = new OpenAPIDeserializer();
@@ -2902,7 +3643,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
         //parameters operation get
         PathItem producesTestEndpoint = paths.get("/producesTest");
@@ -2969,7 +3710,7 @@ public class OpenAPIDeserializerTest {
 
         final Paths paths = openAPI.getPaths();
         Assert.assertNotNull(paths);
-        Assert.assertEquals(paths.size(), 18);
+        Assert.assertEquals(paths.size(), 19);
 
 
         PathItem petRef = paths.get("/pathItemRef");
@@ -3191,7 +3932,7 @@ public class OpenAPIDeserializerTest {
         Assert.assertEquals(items.getItems().get$ref(),"#/components/schemas/bank_account");
 
     }
-    
+
     @DataProvider(name="data")
     private Object[][] getRootNode() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -3199,5 +3940,237 @@ public class OpenAPIDeserializerTest {
         return new Object[][]{new Object[]{rootNode}};
     }
 
+    @Test
+    public void testIssue1761() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setInferSchemaType(false);
+        SwaggerParseResult result = parser.readLocation("./src/test/resources/issue-1761.yaml", null, options);
+
+        assertEquals(Yaml.pretty(result.getOpenAPI()), "openapi: 3.0.3\n" +
+                "info:\n" +
+                "  title: openapi 3.0.3 sample spec\n" +
+                "  description: \"sample spec for testing openapi functionality, built from json schema\\\n" +
+                "    \\ tests for draft6\"\n" +
+                "  version: 0.0.1\n" +
+                "servers:\n" +
+                "- url: /\n" +
+                "paths: {}\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    SimpleEnumValidation:\n" +
+                "      enum:\n" +
+                "      - 1\n" +
+                "      - 2\n" +
+                "      - 3\n" +
+                "    HeterogeneousEnumValidation:\n" +
+                "      enum:\n" +
+                "      - 6\n" +
+                "      - foo\n" +
+                "      - []\n" +
+                "      - true\n" +
+                "      - foo: 12\n" +
+                "    HeterogeneousEnumWithNullValidation:\n" +
+                "      enum:\n" +
+                "      - 6\n" +
+                "      - null\n" +
+                "    EnumsInProperties:\n" +
+                "      required:\n" +
+                "      - bar\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        foo:\n" +
+                "          enum:\n" +
+                "          - foo\n" +
+                "        bar:\n" +
+                "          enum:\n" +
+                "          - bar\n" +
+                "    EnumWithEscapedCharacters:\n" +
+                "      enum:\n" +
+                "      - |-\n" +
+                "        foo\n" +
+                "        bar\n" +
+                "      - \"foo\\rbar\"\n" +
+                "    EnumWithFalseDoesNotMatch0:\n" +
+                "      enum:\n" +
+                "      - false\n" +
+                "    EnumWithTrueDoesNotMatch1:\n" +
+                "      enum:\n" +
+                "      - true\n" +
+                "    EnumWith0DoesNotMatchFalse:\n" +
+                "      enum:\n" +
+                "      - 0\n" +
+                "    EnumWith1DoesNotMatchTrue:\n" +
+                "      enum:\n" +
+                "      - 1\n" +
+                "    NulCharactersInStrings:\n" +
+                "      enum:\n" +
+                "      - \"hello\\0there\"\n" +
+                "  x-schema-test-examples:\n" +
+                "    SimpleEnumValidation:\n" +
+                "      OneOfTheEnumIsValid:\n" +
+                "        description: one of the enum is valid\n" +
+                "        data: 1\n" +
+                "        valid: true\n" +
+                "      SomethingElseIsInvalid:\n" +
+                "        description: something else is invalid\n" +
+                "        data: 4\n" +
+                "        valid: false\n" +
+                "    HeterogeneousEnumValidation:\n" +
+                "      OneOfTheEnumIsValid:\n" +
+                "        description: one of the enum is valid\n" +
+                "        data: []\n" +
+                "        valid: true\n" +
+                "      SomethingElseIsInvalid:\n" +
+                "        description: something else is invalid\n" +
+                "        valid: false\n" +
+                "      ObjectsAreDeepCompared:\n" +
+                "        description: objects are deep compared\n" +
+                "        data:\n" +
+                "          foo: false\n" +
+                "        valid: false\n" +
+                "      ValidObjectMatches:\n" +
+                "        description: valid object matches\n" +
+                "        data:\n" +
+                "          foo: 12\n" +
+                "        valid: true\n" +
+                "      ExtraPropertiesInObjectIsInvalid:\n" +
+                "        description: extra properties in object is invalid\n" +
+                "        data:\n" +
+                "          foo: 12\n" +
+                "          boo: 42\n" +
+                "        valid: false\n" +
+                "    HeterogeneousEnumWithNullValidation:\n" +
+                "      NullIsValid:\n" +
+                "        description: null is valid\n" +
+                "        valid: true\n" +
+                "      NumberIsValid:\n" +
+                "        description: number is valid\n" +
+                "        data: 6\n" +
+                "        valid: true\n" +
+                "      SomethingElseIsInvalid:\n" +
+                "        description: something else is invalid\n" +
+                "        data: test\n" +
+                "        valid: false\n" +
+                "    EnumsInProperties:\n" +
+                "      BothPropertiesAreValid:\n" +
+                "        description: both properties are valid\n" +
+                "        data:\n" +
+                "          foo: foo\n" +
+                "          bar: bar\n" +
+                "        valid: true\n" +
+                "      WrongFooValue:\n" +
+                "        description: wrong foo value\n" +
+                "        data:\n" +
+                "          foo: foot\n" +
+                "          bar: bar\n" +
+                "        valid: false\n" +
+                "      WrongBarValue:\n" +
+                "        description: wrong bar value\n" +
+                "        data:\n" +
+                "          foo: foo\n" +
+                "          bar: bart\n" +
+                "        valid: false\n" +
+                "      MissingOptionalPropertyIsValid:\n" +
+                "        description: missing optional property is valid\n" +
+                "        data:\n" +
+                "          bar: bar\n" +
+                "        valid: true\n" +
+                "      MissingRequiredPropertyIsInvalid:\n" +
+                "        description: missing required property is invalid\n" +
+                "        data:\n" +
+                "          foo: foo\n" +
+                "        valid: false\n" +
+                "      MissingAllPropertiesIsInvalid:\n" +
+                "        description: missing all properties is invalid\n" +
+                "        data: {}\n" +
+                "        valid: false\n" +
+                "    EnumWithEscapedCharacters:\n" +
+                "      Member1IsValid:\n" +
+                "        description: member 1 is valid\n" +
+                "        data: |-\n" +
+                "          foo\n" +
+                "          bar\n" +
+                "        valid: true\n" +
+                "      Member2IsValid:\n" +
+                "        description: member 2 is valid\n" +
+                "        data: \"foo\\rbar\"\n" +
+                "        valid: true\n" +
+                "      AnotherStringIsInvalid:\n" +
+                "        description: another string is invalid\n" +
+                "        data: abc\n" +
+                "        valid: false\n" +
+                "    EnumWithFalseDoesNotMatch0:\n" +
+                "      FalseIsValid:\n" +
+                "        description: false is valid\n" +
+                "        data: false\n" +
+                "        valid: true\n" +
+                "      IntegerZeroIsInvalid:\n" +
+                "        description: integer zero is invalid\n" +
+                "        data: 0\n" +
+                "        valid: false\n" +
+                "      FloatZeroIsInvalid:\n" +
+                "        description: float zero is invalid\n" +
+                "        data: 0.0\n" +
+                "        valid: false\n" +
+                "    EnumWithTrueDoesNotMatch1:\n" +
+                "      TrueIsValid:\n" +
+                "        description: true is valid\n" +
+                "        data: true\n" +
+                "        valid: true\n" +
+                "      IntegerOneIsInvalid:\n" +
+                "        description: integer one is invalid\n" +
+                "        data: 1\n" +
+                "        valid: false\n" +
+                "      FloatOneIsInvalid:\n" +
+                "        description: float one is invalid\n" +
+                "        data: 1.0\n" +
+                "        valid: false\n" +
+                "    EnumWith0DoesNotMatchFalse:\n" +
+                "      FalseIsInvalid:\n" +
+                "        description: false is invalid\n" +
+                "        data: false\n" +
+                "        valid: false\n" +
+                "      IntegerZeroIsValid:\n" +
+                "        description: integer zero is valid\n" +
+                "        data: 0\n" +
+                "        valid: true\n" +
+                "      FloatZeroIsValid:\n" +
+                "        description: float zero is valid\n" +
+                "        data: 0.0\n" +
+                "        valid: true\n" +
+                "    EnumWith1DoesNotMatchTrue:\n" +
+                "      TrueIsInvalid:\n" +
+                "        description: true is invalid\n" +
+                "        data: true\n" +
+                "        valid: false\n" +
+                "      IntegerOneIsValid:\n" +
+                "        description: integer one is valid\n" +
+                "        data: 1\n" +
+                "        valid: true\n" +
+                "      FloatOneIsValid:\n" +
+                "        description: float one is valid\n" +
+                "        data: 1.0\n" +
+                "        valid: true\n" +
+                "    NulCharactersInStrings:\n" +
+                "      MatchStringWithNul:\n" +
+                "        description: match string with nul\n" +
+                "        data: \"hello\\0there\"\n" +
+                "        valid: true\n" +
+                "      DoNotMatchStringLackingNul:\n" +
+                "        description: do not match string lacking nul\n" +
+                "        data: hellothere\n" +
+                "        valid: false\n");
+    }
+
+    @Test
+    public void testIssue1572() {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setInferSchemaType(false);
+        SwaggerParseResult result = parser.readLocation("./src/test/resources/space in name/issue-1572.yaml", null, options);
+
+        assertNotNull(result.getOpenAPI());
+    }
 
 }

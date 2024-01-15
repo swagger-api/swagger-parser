@@ -1,0 +1,225 @@
+openapi: "3.1.0"
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+    identifier: test
+servers:
+  - url: http://petstore.swagger.io/v1
+webhooks:
+  # Each webhook needs a name
+  newPet:
+    # This is a Path Item Object, the only difference is that the request is initiated by the API provider
+    post:
+      requestBody:
+        description: Information about a new pet in the system
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+      responses:
+        "200":
+          description: Return a 200 status to indicate that the data was received successfully
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listPets
+      tags:
+        - pets
+      x-extension: test
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: An paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a pet
+      operationId: createPets
+      tags:
+        - pets
+      responses:
+        "201":
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type:
+          - string
+          - integer
+        tag:
+          type: string
+    Pets:
+      $id: test
+      $anchor: test
+      type: array
+      items:
+        $ref: "#/components/schemas/Pet"
+        description: desc
+        format: int32
+    Schema2020_12:
+      type: object
+      title: schema 2020-12
+      required:
+        - country
+      properties:
+        country:
+          enum:
+            - usa
+            - canada
+            - eu
+          default: eu
+          type: string
+          widget: Select
+      if:
+        properties:
+          country:
+            const: canada
+            type: string
+      then:
+        properties:
+          maple_trees:
+            type: number
+      else:
+        required:
+          - accept
+        properties:
+          accept:
+            const: "true"
+            type: boolean
+      const: const text
+      examples:
+        - sample1 
+        - sample2
+      $id: schemaId
+      $comment: comment for testing
+      propertyNames:
+        pattern: "^[A-Za-z_][A-Za-z0-9_]*$"
+      unevaluatedProperties:
+        type: object
+      unevaluatedItems:
+        type: object
+      prefixItems:
+        - description: Name
+          type: string
+        - description: Age
+          type: integer
+      contains:
+        type: integer
+      maxContains: 4
+      minContains: 2
+      $anchor: anchor text
+      $schema: https://json-schema.org/draft/2020-12/schema
+      contentSchema:
+        type: string
+      dependentSchemas:
+        credit_card:
+          required:
+            - billing_address
+          properties:
+            billing_address:
+              type: string
+      dependentRequired:
+        credit_card:
+          - billing_address
+      patternProperties:
+        ^S_:
+          type: string
+        ^I_:
+          type: integer
+      contentEncoding: base64
+      contentMediaType: text/html
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    DiscriminatorExtension:
+      oneOf:
+        - $ref: '#/components/schemas/Cat'
+        - $ref: '#/components/schemas/Dog'
+        - $ref: '#/components/schemas/Lizard'
+      discriminator:
+        propertyName: petType
+        x-extension: test
+  pathItems:
+    pets:
+      get:
+        description: Returns all pets from the system that the user has access to
+        responses:
+          '200':
+            description: A list of pets.
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/pet'
+

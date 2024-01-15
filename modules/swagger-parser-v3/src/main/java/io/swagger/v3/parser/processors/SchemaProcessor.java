@@ -8,8 +8,10 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.ResolverCache;
+import io.swagger.v3.parser.extensions.JsonSchemaParserExtension;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RefUtils;
 
 import java.util.HashMap;
@@ -22,17 +24,37 @@ import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 public class SchemaProcessor {
     private final ExternalRefProcessor externalRefProcessor;
+    private boolean openapi31;
+    private final ResolverCache cache;
+    private OpenAPI openAPI;
 
 
     public SchemaProcessor(ResolverCache cache, OpenAPI openAPI) {
+        this(cache,openAPI, false);
+    }
+
+    public SchemaProcessor(ResolverCache cache, OpenAPI openAPI, boolean openapi31) {
+        this.openapi31 = openapi31;
+        this.cache = cache;
+        this.openAPI = openAPI;
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }
 
 
     public void processSchema(Schema schema) {
+
         if (schema == null) {
             return;
         }
+        if (openapi31) {
+            List<JsonSchemaParserExtension> jsonschemaExtensions = OpenAPIDeserializer.getJsonSchemaParserExtensions();
+            for (JsonSchemaParserExtension jsonschemaExtension: jsonschemaExtensions) {
+                if (jsonschemaExtension.resolveSchema(schema, cache, openAPI, openapi31)) {
+                    return;
+                }
+            }
+        }
+
         if (schema.get$ref() != null) {
             processReferenceSchema(schema);
         } else {
@@ -59,7 +81,7 @@ public class SchemaProcessor {
         }
         if(schema.getAdditionalProperties() != null){
             processAdditionalProperties(schema);
-            
+
         }
         if (schema.getDiscriminator() != null) {
             processDiscriminatorSchema(schema);
@@ -107,17 +129,17 @@ public class SchemaProcessor {
             processReferenceSchema(schema);
         }
 
-         Map<String, Schema> properties = schema.getProperties();
-         if (properties != null) {
-             for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
-                 Schema property = propertyEntry.getValue();
-                 if(property.get$ref() != null) {
-                     processReferenceSchema(property);
-                 }else {
-                     processSchemaType(property);
-                 }
-             }
-         }
+        Map<String, Schema> properties = schema.getProperties();
+        if (properties != null) {
+            for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
+                Schema property = propertyEntry.getValue();
+                if(property.get$ref() != null) {
+                    processReferenceSchema(property);
+                }else {
+                    processSchemaType(property);
+                }
+            }
+        }
     }
 
     public void processComposedSchema(ComposedSchema composedSchema) {

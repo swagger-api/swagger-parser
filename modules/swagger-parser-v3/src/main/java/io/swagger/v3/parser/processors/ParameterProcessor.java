@@ -26,11 +26,14 @@ public class ParameterProcessor {
     private final OpenAPI openAPI;
     private final ExternalRefProcessor externalRefProcessor;
 
-
     public ParameterProcessor(ResolverCache cache, OpenAPI openAPI) {
+        this(cache, openAPI, false);
+    }
+
+    public ParameterProcessor(ResolverCache cache, OpenAPI openAPI, boolean openapi31) {
         this.cache = cache;
         this.openAPI = openAPI;
-        this.schemaProcessor = new SchemaProcessor(cache,openAPI);
+        this.schemaProcessor = new SchemaProcessor(cache,openAPI, openapi31);
         this.exampleProcessor = new ExampleProcessor(cache,openAPI);
         this.externalRefProcessor = new ExternalRefProcessor(cache, openAPI);
     }

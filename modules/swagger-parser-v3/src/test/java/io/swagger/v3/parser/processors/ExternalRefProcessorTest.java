@@ -12,7 +12,7 @@ import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
-import mockit.StrictExpectations;
+import mockit.Expectations;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -34,14 +34,15 @@ public class ExternalRefProcessorTest {
     @Injectable
 	OpenAPI openAPI;
 
+    @Injectable Schema mockedModel;
+
     @Test
-    public void testProcessRefToExternalDefinition_NoNameConflict(
-            @Injectable final Schema mockedModel) throws Exception {
+    public void testProcessRefToExternalDefinition_NoNameConflict() throws Exception {
 
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final RefFormat refFormat = RefFormat.URL;
 
-        new StrictExpectations() {{
+        new Expectations() {{
 			cache.getRenamedRef(ref);
 			times = 1;
 			result = null;
@@ -73,7 +74,7 @@ public class ExternalRefProcessorTest {
 
 
     @Test
-    public void testNestedExternalRefs(@Injectable final Schema mockedModel){
+    public void testNestedExternalRefs(){
     	final RefFormat refFormat = RefFormat.URL;
 
     	//Swagger test instance
@@ -150,7 +151,7 @@ public class ExternalRefProcessorTest {
 
 
 	@Test
-	public void testRelativeRefIncludingUrlRef(@Injectable final Schema mockedModel)
+	public void testRelativeRefIncludingUrlRef()
 			throws Exception {
 		final RefFormat refFormat = RefFormat.RELATIVE;
 

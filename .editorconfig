@@ -15,6 +15,7 @@ charset = utf-8
 
 [modules/swagger-parser-v3/src/test/resources/**/*.json]
 trim_trailing_whitespace = false
-
+insert_final_newline = false
 [modules/swagger-parser-v3/src/test/resources/**/*.yaml]
 trim_trailing_whitespace = false
+insert_final_newline = false

@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Test issue 1572 - space in path to OpenAPI doc
+  version: "1"
+servers:
+  - url: /
+paths:
+  /:
+    get:
+      responses:
+        200:
+          description: Normal

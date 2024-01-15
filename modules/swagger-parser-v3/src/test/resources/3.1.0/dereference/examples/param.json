@@ -1,0 +1,8 @@
+{
+    "externalDirectParameter": {
+        "name": "externalDirectParameter",
+        "in": "query",
+        "description": "this is externalDirectParameter stored in external file",
+        "required": true
+    }
+}
