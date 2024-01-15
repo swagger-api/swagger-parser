@@ -270,18 +270,15 @@ public final class ExternalRefProcessor {
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
-        PathItem existingPathItem = paths.get("/"+possiblyConflictingDefinitionName);
+        PathItem existingPathItem = paths.get(possiblyConflictingDefinitionName);
 
         if (existingPathItem != null) {
             LOGGER.debug("A model for " + existingPathItem + " already exists");
             if(existingPathItem.get$ref() != null) {
                 // use the new model
                 existingPathItem = null;
-            }else {
-                return pathItem;
             }
         }
-
         newRef = possiblyConflictingDefinitionName;
         cache.putRenamedRef($ref, newRef);
 
