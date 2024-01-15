@@ -3162,4 +3162,99 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertEquals(openAPI.getPaths().get("/pets").getGet().getResponses().get("200").getHeaders().get("x-next").get$ref(), "#/components/headers/LocationInHeaders");
     }
+
+    @Test(description = "Test safe resolving")
+    public void test31SafeURLResolving() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Collections.emptyList();
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas30SafeUrlResolvingWithPetstore.yaml", null, parseOptions);
+        if (result.getMessages() != null) {
+            for (String message : result.getMessages()) {
+                assertTrue(message.contains("Server returned HTTP response code: 403"));
+            }
+        }
+    }
+
+    @Test(description = "Test safe resolving with blocked URL")
+    public void test31SafeURLResolvingWithBlockedURL() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Arrays.asList("petstore3.swagger.io");
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas30SafeUrlResolvingWithPetstore.yaml", null, parseOptions);
+
+        if (result.getMessages() != null) {
+            for (String message : result.getMessages()) {
+                assertTrue(
+                        message.contains("Server returned HTTP response code: 403") ||
+                                message.contains("URL is part of the explicit denylist. URL [https://petstore3.swagger.io/api/v3/openapi.json]"));
+            }
+        }
+    }
+
+    @Test(description = "Test safe resolving with turned off safelyResolveURL option")
+    public void test31SafeURLResolvingWithTurnedOffSafeResolving() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(false);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Arrays.asList("petstore3.swagger.io");
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas30SafeUrlResolvingWithPetstore.yaml", null, parseOptions);
+        if (result.getMessages() != null) {
+            for (String message : result.getMessages()) {
+                assertTrue(message.contains("Server returned HTTP response code: 403"));
+            }
+        }
+    }
+
+    @Test(description = "Test safe resolving with localhost and blocked url")
+    public void test31SafeURLResolvingWithLocalhostAndBlockedURL() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas30SafeUrlResolvingWithLocalhost.yaml", null, parseOptions);
+        if (result.getMessages() != null) {
+            for (String message : result.getMessages()) {
+                assertTrue(
+                        message.contains("Server returned HTTP response code: 403") ||
+                                message.contains("IP is restricted"));
+            }
+        }
+    }
+
+    @Test(description = "Test safe resolving with localhost url")
+    public void test31SafeURLResolvingWithLocalhost() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> blockList = Arrays.asList("petstore.swagger.io");
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        String error = "URL is part of the explicit denylist. URL [https://petstore.swagger.io/v2/swagger.json]";
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas30SafeUrlResolvingWithLocalhost.yaml", null, parseOptions);
+
+        if (result.getMessages() != null) {
+            for (String message : result.getMessages()) {
+                assertTrue(
+                        message.contains("Server returned HTTP response code: 403") ||
+                                message.contains("IP is restricted") ||
+                                message.contains(error)
+                );
+            }
+        }
+    }
 }
