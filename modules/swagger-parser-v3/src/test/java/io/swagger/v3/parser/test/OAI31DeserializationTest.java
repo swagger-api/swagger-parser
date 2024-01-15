@@ -1045,7 +1045,7 @@ public class OAI31DeserializationTest {
         parseOptions.setRemoteRefAllowList(allowList);
         parseOptions.setRemoteRefBlockList(blockList);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithPetstore.yaml", null, parseOptions);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas31SafeUrlResolvingWithPetstore.yaml", null, parseOptions);
         if (result.getMessages() != null) {
             for (String message : result.getMessages()) {
                 assertTrue(message.contains("Server returned HTTP response code: 403"));
@@ -1063,7 +1063,7 @@ public class OAI31DeserializationTest {
         parseOptions.setRemoteRefAllowList(allowList);
         parseOptions.setRemoteRefBlockList(blockList);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithPetstore.yaml", null, parseOptions);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas31SafeUrlResolvingWithPetstore.yaml", null, parseOptions);
 
         if (result.getMessages() != null) {
             for (String message : result.getMessages()) {
@@ -1084,7 +1084,7 @@ public class OAI31DeserializationTest {
         parseOptions.setRemoteRefAllowList(allowList);
         parseOptions.setRemoteRefBlockList(blockList);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithPetstore.yaml", null, parseOptions);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas31SafeUrlResolvingWithPetstore.yaml", null, parseOptions);
         if (result.getMessages() != null) {
             for (String message : result.getMessages()) {
                 assertTrue(message.contains("Server returned HTTP response code: 403"));
@@ -1098,7 +1098,7 @@ public class OAI31DeserializationTest {
         parseOptions.setResolveFully(true);
         parseOptions.setSafelyResolveURL(true);
 
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithLocalhost.yaml", null, parseOptions);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas31SafeUrlResolvingWithLocalhost.yaml", null, parseOptions);
         if (result.getMessages() != null) {
             for (String message : result.getMessages()) {
                 assertTrue(
@@ -1117,7 +1117,7 @@ public class OAI31DeserializationTest {
         parseOptions.setRemoteRefBlockList(blockList);
 
         String error = "URL is part of the explicit denylist. URL [https://petstore.swagger.io/v2/swagger.json]";
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("3.1.0/resolve/safeResolving/safeUrlResolvingWithLocalhost.yaml", null, parseOptions);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("safeResolving/oas31SafeUrlResolvingWithLocalhost.yaml", null, parseOptions);
 
         if (result.getMessages() != null) {
             for (String message : result.getMessages()) {
