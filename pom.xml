@@ -365,9 +365,9 @@
         </dependencies>
     </dependencyManagement>
     <modules>
+        <module>modules/swagger-parser-safe-url-resolver</module>
         <module>modules/swagger-parser</module>
         <module>modules/swagger-compat-spec-parser</module>
-        <module>modules/swagger-parser-safe-url-resolver</module>
     </modules>
     <repositories>
         <repository>
