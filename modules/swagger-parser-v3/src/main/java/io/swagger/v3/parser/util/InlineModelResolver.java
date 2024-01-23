@@ -735,6 +735,9 @@ public class InlineModelResolver {
     }
 
     private boolean isObjectSchema(Schema schema) {
+        if (schema == null) {
+            return false;
+        }
         return schema instanceof ObjectSchema
                 || "object".equalsIgnoreCase(schema.getType())
                 || (schema.getType() == null && schema.getProperties() != null && !schema.getProperties().isEmpty()
