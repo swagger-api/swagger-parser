@@ -1464,4 +1464,13 @@ public class OpenAPIResolverTest {
         return new Random().ints(50000, 60000).findFirst().getAsInt();
     }
 
+    @Test
+    public void testResolveArraySchemaItemsNullPointerException() {
+        final ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        final String actualLocation = "C:/Users/ggregory/git/r/api-gateway/ais-swagger-test-fixtures/src/test/resources/APIs-guru/openapi-directory-master/APIs/clearblade.com/3.0/swagger.yaml";
+        final OpenAPI output = new OpenAPIV3Parser().read(actualLocation, null, options);
+        new OpenAPIResolver(output, null, actualLocation).resolve();
+    }
+    
 }
