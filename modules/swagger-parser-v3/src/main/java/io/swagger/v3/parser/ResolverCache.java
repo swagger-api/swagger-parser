@@ -18,6 +18,8 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.PathUtils;
 import io.swagger.v3.parser.util.RefUtils;
@@ -146,6 +148,10 @@ public class ResolverCache {
         String contents = externalFileCache.get(file);
 
         if (contents == null) {
+            if(parseOptions.isSafelyResolveURL()){
+                checkUrlIsPermitted(file);
+            }
+
             if(parentDirectory != null) {
                 contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
             }
@@ -372,6 +378,17 @@ public class ResolverCache {
             }
         }
         return null;
+    }
+
+    protected void checkUrlIsPermitted(String refSet) {
+        try {
+            PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(),
+                    parseOptions.getRemoteRefBlockList());
+
+            permittedUrlsChecker.verify(refSet);
+        } catch (HostDeniedException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public boolean hasReferencedKey(String modelKey) {

@@ -65,6 +65,9 @@ public class SchemaProcessor {
 
     public void processSchemaType(Schema schema){
 
+        if (schema == null) {
+            return;
+        }
         if (schema instanceof ArraySchema) {
             processArraySchema((ArraySchema) schema);
         }
@@ -215,7 +218,7 @@ public class SchemaProcessor {
     public void processArraySchema(ArraySchema arraySchema) {
 
         final Schema items = arraySchema.getItems();
-        if (items.get$ref() != null) {
+        if (items != null && items.get$ref() != null) {
             processReferenceSchema(items);
         }else{
             processSchemaType(items);
