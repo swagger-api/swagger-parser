@@ -14,10 +14,14 @@ import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -923,4 +927,42 @@ public class V2ConverterTest {
         assertEquals(companiesSchema.getClass(), ObjectSchema.class);
 
     }
+
+    /**
+     * A clone (almost) of {@link OpenAPIV3Parser#readContents(String, List, ParseOptions)}.
+     */
+    private OpenAPI read(String location, List<AuthorizationValue> auths, ParseOptions resolve, final List<SwaggerParserExtension> parserExtensions) {
+        if (location == null) {
+            return null;
+        }
+        SwaggerParseResult parsed;
+        for (SwaggerParserExtension extension : parserExtensions) {
+            parsed = extension.readLocation(location, auths, resolve);
+            if (parsed.getMessages() != null) {
+                for (String message : parsed.getMessages()) {
+                    // LOGGER.info("{}: {}", extension, message);
+                }
+            }
+            final OpenAPI result = parsed.getOpenAPI();
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Tests an NPE when bother the old and new parser are on the classpath. The only way to test this is cloning the
+     * {@link OpenAPIV3Parser#readContents(String, List, ParseOptions)} to see the NPE when we pass in the extentions. Instead of, for example, mocking the call
+     * to {@link io.swagger.v3.parser.OpenAPIV3Parser.getExtensions()}.
+     */
+    @Test
+    public void testIssue2046() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        // This should not throw an NPE:
+        final OpenAPI openAPI = read("I/do/not/exist/on/the/file/system/I/really/do/not.yaml", null, options, Arrays.asList(new SwaggerConverter()));
+        Assert.assertNull(openAPI);
+    }
+
 }
