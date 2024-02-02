@@ -172,6 +172,10 @@ public class PathsProcessor {
         if(response.getContent() != null) {
             Map<String, MediaType> content = response.getContent();
             for (String key: content.keySet()) {
+                MediaType mediaType = content.get(key);
+                if (mediaType.getSchema() != null) {
+                    updateRefs(mediaType.getSchema(), pathRef);
+                }
                 Map<String, Example> examples = content.get(key).getExamples();
                 if (examples != null) {
                     for( Example example:examples.values()){
@@ -285,10 +289,18 @@ public class PathsProcessor {
          return false;
     }
 
+    private boolean isInternalSchemaRef(String $ref) {
+        if($ref.startsWith("#/components/schemas")) {
+            return true;
+        }
+        return false;
+    }
+
     protected String computeRef(String ref, String prefix) {
-    	if(isLocalRef(ref)) return computeLocalRef(ref, prefix);
-    	if(isAbsoluteRef(ref)) return ref;
-    	return computeRelativeRef(ref, prefix);
+        if(isLocalRef(ref)&& !isInternalSchemaRef(ref)) return computeLocalRef(ref, prefix);
+        if(isAbsoluteRef(ref)) return ref;
+        if(isInternalSchemaRef(ref)) return ref;
+        return computeRelativeRef(ref, prefix);
     }
 
     protected String computeRelativeRef(String ref, String prefix) {

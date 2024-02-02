@@ -43,6 +43,18 @@ import static org.testng.Assert.*;
 public class OpenAPIV3ParserTest {
     List<AuthorizationValue> auths = new ArrayList<>();
 
+    @Test
+    public void testFailedToResolveResponseReferences() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-2037/openapi.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        Assert.assertTrue(openAPI.getPaths().get("/get").get$ref() == null);
+        Assert.assertEquals(openAPI.getPaths().get("/get").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ResponsesRef");
+    }
+
 
     @Test
     public void testFailedToResolveExternalReferences() {
