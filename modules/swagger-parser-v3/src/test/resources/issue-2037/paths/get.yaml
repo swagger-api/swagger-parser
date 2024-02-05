@@ -1,0 +1,20 @@
+endpoint:
+  get:
+    operationId: get
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/RequestBodyRef'
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: '#/ResponsesRef'
+
+RequestBodyRef:
+  type: string
+
+ResponsesRef:
+  type: string
