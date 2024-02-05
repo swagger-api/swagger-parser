@@ -1,0 +1,8 @@
+openapi: 3.0.3
+info:
+  title: title
+  version: LATEST
+
+paths:
+  /get:
+    $ref: 'paths/get.yaml#/endpoint'
