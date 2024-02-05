@@ -3,6 +3,7 @@ package io.swagger.parser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -10,6 +11,7 @@ import static org.testng.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.util.*;
 
 import io.swagger.models.*;
@@ -18,7 +20,6 @@ import io.swagger.parser.util.ParseOptions;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.testng.reporters.Files;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -1586,7 +1587,7 @@ public class SwaggerParserTest {
 
     @Test(description = "A string example should not be over quoted when parsing a yaml node")
     public void readingSpecNodeShouldNotOverQuotingStringExample() throws Exception {
-        String yaml = Files.readFile(new File("src/test/resources/over-quoted-example.yaml"));
+        String yaml = new String(Files.readAllBytes(new File("src/test/resources/over-quoted-example.yaml").toPath()), "UTF-8");
         JsonNode rootNode = Yaml.mapper().readValue(yaml, JsonNode.class);
         SwaggerParser parser = new SwaggerParser();
         Swagger swagger = parser.read(rootNode, true);
@@ -1789,5 +1790,90 @@ public class SwaggerParserTest {
         Model userAddress = definitions.get("User_address");
         assertTrue(userAddress.getProperties().containsKey("city"));
         assertTrue(userAddress.getProperties().containsKey("street"));
+    }
+
+    @Test(description = "Test safe resolving")
+    public void test20SafeURLResolving() throws IOException {
+        String yaml = new String(Files.readAllBytes(new File("src/test/resources/safelyResolve/oas20SafeUrlResolvingWithPetstore.yaml").toPath()), "UTF-8");
+        JsonNode jsonNodeSwagger = Yaml.mapper().readValue(yaml, JsonNode.class);
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Collections.emptyList();
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        new SwaggerParser().read(jsonNodeSwagger, null, parseOptions);
+    }
+
+    @Test(description = "Test safe resolving with blocked URL")
+    public void test20SafeURLResolvingWithBlockedURL() throws IOException {
+        String yaml = new String(Files.readAllBytes(new File("src/test/resources/safelyResolve/oas20SafeUrlResolvingWithPetstore.yaml").toPath()), "UTF-8");
+        JsonNode jsonNodeSwagger = Yaml.mapper().readValue(yaml, JsonNode.class);
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Arrays.asList("petstore3.swagger.io");
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        assertThrows(RuntimeException.class, () -> {
+            new SwaggerParser().read(jsonNodeSwagger, null, parseOptions);
+        });
+    }
+
+    @Test(description = "Test safe resolving with turned off safelyResolveURL option")
+    public void test20SafeURLResolvingWithTurnedOffSafeResolving() throws IOException {
+        String yaml = new String(Files.readAllBytes(new File("src/test/resources/safelyResolve/oas20SafeUrlResolvingWithPetstore.yaml").toPath()), "UTF-8");
+        JsonNode jsonNodeSwagger = Yaml.mapper().readValue(yaml, JsonNode.class);
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(false);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Arrays.asList("petstore3.swagger.io");
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        new SwaggerParser().read(jsonNodeSwagger, null, parseOptions);
+    }
+
+    @Test(description = "Test safe resolving with localhost and blocked url")
+    public void test20SafeURLResolvingWithLocalhostAndBlockedURL() throws IOException {
+        String yaml = new String(Files.readAllBytes(new File("src/test/resources/safelyResolve/oas20SafeUrlResolvingWithLocalhost.yaml").toPath()), "UTF-8");
+        JsonNode jsonNodeSwagger = Yaml.mapper().readValue(yaml, JsonNode.class);
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Arrays.asList("petstore.swagger.io");
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        assertThrows(RuntimeException.class, () -> {
+            new SwaggerParser().read(jsonNodeSwagger, null, parseOptions);
+        });    }
+
+    @Test(description = "Test safe resolving with localhost url")
+    public void test20SafeURLResolvingWithLocalhost() throws IOException {
+        String yaml = new String(Files.readAllBytes(new File("src/test/resources/safelyResolve/oas20SafeUrlResolvingWithLocalhost.yaml").toPath()), "UTF-8");
+        JsonNode jsonNodeSwagger = Yaml.mapper().readValue(yaml, JsonNode.class);
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setSafelyResolveURL(true);
+        List<String> allowList = Collections.emptyList();
+        List<String> blockList = Collections.emptyList();
+        parseOptions.setRemoteRefAllowList(allowList);
+        parseOptions.setRemoteRefBlockList(blockList);
+
+        assertThrows(RuntimeException.class, () -> {
+            new SwaggerParser().read(jsonNodeSwagger, null, parseOptions);
+        });
     }
 }
