@@ -1,0 +1,47 @@
+openapi: 3.0.0
+info:
+  title: Yes No On Off string test
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    EnumNoQuotes:
+      type: string
+      enum:
+        - some_string
+        - y
+        - Y
+        - yes
+        - Yes
+        - YES
+        - n
+        - N
+        - no
+        - No
+        - NO
+        - on
+        - On
+        - ON
+        - off
+        - Off
+        - OFF
+    EnumWithQuotes:
+      type: string
+      enum:
+        - some_string
+        - 'y'
+        - 'Y'
+        - 'yes'
+        - 'Yes'
+        - 'YES'
+        - 'n'
+        - 'N'
+        - 'no'
+        - 'No'
+        - 'NO'
+        - 'on'
+        - 'On'
+        - 'ON'
+        - 'off'
+        - 'Off'
+        - 'OFF'
