@@ -1,0 +1,179 @@
+swagger: "2.0"
+info:
+  description: "hhhhhhhhhh\r\niiiiiiii\r\njjjjjjjjjj"
+  version: "1.0"
+  title: "test1"
+host: "127.0.0.1:5555"
+basePath: "/rad/P1:rad1"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+  - "application/xml"
+  - "text/xml"
+  - "text/html"
+  - "application/x-www-form-urlencoded"
+  - "application/vnd.api+json"
+produces:
+  - "application/json"
+  - "application/xml"
+  - "text/xml"
+  - "text/html"
+  - "application/x-www-form-urlencoded"
+  - "application/vnd.api+json"
+paths:
+  /test/{id}-{name}:
+    options:
+      operationId: "testidname_GET_1"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "name"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "age"
+          in: "header"
+          required: false
+          type: "number"
+          format: "float"
+        - name: "sex"
+          in: "formData"
+          required: false
+          type: "boolean"
+        - name: "date"
+          in: "header"
+          required: false
+          type: "string"
+          format: "date"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/testidname_GET_response"
+        401:
+          description: "Access Denied"
+    head:
+      operationId: "testidname_POST_1"
+      consumes:
+        - "application/json"
+        - "application/vnd.api+json"
+        - "application/x-www-form-urlencoded"
+        - "application/xml"
+        - "text/html"
+        - "text/xml"
+      produces:
+        - "application/json"
+        - "application/vnd.api+json"
+        - "application/x-www-form-urlencoded"
+        - "application/xml"
+        - "text/html"
+        - "text/xml"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "name"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "age"
+          in: "header"
+          required: false
+          type: "number"
+          format: "float"
+        - name: "sex"
+          in: "query"
+          required: false
+          type: "boolean"
+        - name: "date"
+          in: "query"
+          required: false
+          type: "string"
+          format: "date"
+        - in: "body"
+          name: "R1Reffered"
+          required: false
+          schema:
+            $ref: "#/definitions/R1"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/testidname_POST_response"
+        401:
+          description: "Access Denied"
+  /test:
+    delete:
+      operationId: "test_DELETE_2"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/vnd.api+json"
+      parameters:
+        - name: "id"
+          in: "header"
+          required: true
+          type: "string"
+        - name: "name"
+          in: "header"
+          required: true
+          type: "string"
+        - name: "age"
+          in: "header"
+          required: false
+          type: "number"
+          format: "float"
+        - name: "sex"
+          in: "header"
+          required: false
+          type: "boolean"
+        - name: "date"
+          in: "header"
+          required: false
+          type: "string"
+          format: "date"
+        - in: "body"
+          name: "R1Reffered"
+          required: false
+          schema:
+            $ref: "#/definitions/R1"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/test_DELETE_response"
+        401:
+          description: "Access Denied"
+definitions:
+  out:
+    properties:
+      o1:
+        type: "string"
+  testidname_GET_response:
+    required:
+      - "out"
+    properties:
+      out:
+        $ref: "#/definitions/out"
+  test_DELETE_response:
+    required:
+      - "out"
+    properties:
+      out:
+        $ref: "#/definitions/out"
+  testidname_POST_response:
+    required:
+      - "out"
+    properties:
+      out:
+        $ref: "#/definitions/out"
+  R1:
+    required:
+      - "id"
+    properties:
+      id:
+        type: "string"

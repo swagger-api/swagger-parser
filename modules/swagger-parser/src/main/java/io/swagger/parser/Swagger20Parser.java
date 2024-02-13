@@ -37,7 +37,7 @@ public class Swagger20Parser implements SwaggerParserExtension {
     @Override
     public SwaggerDeserializationResult readWithInfo(String location, List<AuthorizationValue> auths) {
         String data;
-
+        SwaggerDeserializationResult errorOutput = new SwaggerDeserializationResult();
         try {
             location = location.replaceAll("\\\\","/");
             if (location.toLowerCase().startsWith("http")) {
@@ -61,26 +61,28 @@ public class Swagger20Parser implements SwaggerParserExtension {
                 ObjectMapper mapper = Json.mapper();
                 rootNode = mapper.readTree(data);
             } else {
-                rootNode = deserializeYaml(data);
+                rootNode = deserializeYaml(data, errorOutput);
             }
             return readWithInfo(rootNode);
         }
         catch (SSLHandshakeException e) {
-            SwaggerDeserializationResult output = new SwaggerDeserializationResult();
-            output.message("unable to read location `" + location + "` due to a SSL configuration error.  " +
+            errorOutput.message("unable to read location `" + location + "` due to a SSL configuration error.  " +
                     "It is possible that the server SSL certificate is invalid, self-signed, or has an untrusted " +
                     "Certificate Authority.");
-            return output;
+            return errorOutput;
         }
         catch (Exception e) {
-            SwaggerDeserializationResult output = new SwaggerDeserializationResult();
-            output.message("unable to read location `" + location + "`");
-            return output;
+            errorOutput.message("unable to read location `" + location + "`");
+            return errorOutput;
         }
     }
 
     protected JsonNode deserializeYaml(String data) throws IOException{
-        return DeserializationUtils.readYamlTree(data);
+        return deserializeYaml(data, null);
+    }
+
+    protected JsonNode deserializeYaml(String data, SwaggerDeserializationResult errorOutput) throws IOException{
+        return DeserializationUtils.readYamlTree(data, errorOutput);
     }
 
     @Override
@@ -161,7 +163,17 @@ public class Swagger20Parser implements SwaggerParserExtension {
         if (node == null) {
             return null;
         }
-
-        return Json.mapper().convertValue(node, Swagger.class);
+        try {
+            // try first core deserializer, to ensure unchanged behaviour for working specs
+            return Json.mapper().convertValue(node, Swagger.class);
+        } catch (Exception e) {
+            LOGGER.error("Exception deserializing via core Json.mapper(), trying parser deserialization");
+            SwaggerDeserializationResult result = (new SwaggerDeserializer()).deserialize(node);
+            Swagger convertValue = result.getSwagger();
+            if (System.getProperty("debugParser") != null) {
+                LOGGER.info("\n\nSwagger Tree convertValue : \n" + ReflectionToStringBuilder.toString(convertValue, ToStringStyle.MULTI_LINE_STYLE) + "\n\n");
+            }
+            return convertValue;
+        }
     }
 }

@@ -8,14 +8,14 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
-import io.swagger.parser.util.DeserializationUtils;
-import io.swagger.parser.util.PathUtils;
-import io.swagger.parser.util.RefUtils;
-import io.swagger.parser.util.SwaggerDeserializer;
+import io.swagger.parser.util.*;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -52,6 +52,7 @@ public class ResolverCache {
     private final Path parentDirectory;
     private final String parentUrl;
     private final String rootPath;
+    private final ParseOptions parseOptions;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
     private Set<String> referencedModelKeys = new HashSet<>();
@@ -62,9 +63,14 @@ public class ResolverCache {
     private Map<String, String> renameCache = new ConcurrentHashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
+        this(swagger, auths, parentFileLocation, new ParseOptions());
+    }
+
+    public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation, ParseOptions parseOptions) {
         this.swagger = swagger;
         this.auths = auths;
         this.rootPath = parentFileLocation;
+        this.parseOptions = parseOptions;
 
         if(parentFileLocation != null) {
             if(parentFileLocation.startsWith("http")) {
@@ -114,6 +120,10 @@ public class ResolverCache {
         String contents = externalFileCache.get(file);
 
         if (contents == null) {
+            if(parseOptions.isSafelyResolveURL()){
+                checkUrlIsPermitted(file);
+            }
+
             if(parentDirectory != null) {
                 contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
             }
@@ -152,9 +162,28 @@ public class ResolverCache {
         updateLocalRefs(file, result);
 
         resolutionCache.put(ref, result);
+        
+        if (result instanceof BodyParameter) {
+        	loadRef(ref, refFormat, (BodyParameter) result);
+        }
 
         return result;
     }
+
+	private void loadRef(String ref, RefFormat refFormat, final BodyParameter bodyParameter) {
+		final Model schema = bodyParameter.getSchema();
+		if (schema instanceof RefModel && refFormat != RefFormat.INTERNAL) {
+			loadRef(ref, refFormat, (RefModel) schema);
+		}
+	}
+
+	private void loadRef(String ref, RefFormat refFormat, final RefModel refModel) {
+		final String rootRef = ref.substring(0, ref.indexOf('#'));
+		final String externalRef = RefUtils.isAnExternalRefFormat(refModel.getRefFormat()) ? refModel.getReference()
+				: rootRef + refModel.getReference();
+		final Model derefModel = loadRef(externalRef, refFormat, Model.class);
+		swagger.addDefinition(refModel.getSimpleRef(), derefModel);
+	}
 
     protected JsonNode deserialize(String contents, String file) {
         return DeserializationUtils.deserializeIntoTree(contents, file);
@@ -269,6 +298,17 @@ public class ResolverCache {
             }
         }
         return null;
+    }
+
+    protected void checkUrlIsPermitted(String refSet) {
+        try {
+            PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(),
+                    parseOptions.getRemoteRefBlockList());
+
+            permittedUrlsChecker.verify(refSet);
+        } catch (HostDeniedException exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
     }
 
     public boolean hasReferencedKey(String modelKey) {

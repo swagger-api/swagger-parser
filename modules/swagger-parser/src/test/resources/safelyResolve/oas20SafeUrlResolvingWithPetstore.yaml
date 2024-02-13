@@ -1,0 +1,26 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: ssrf-test
+
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /devices:
+    get:
+      operationId: getDevices
+      responses:
+        '200':
+          description: All the devices
+          schema:
+            $ref: 'https://petstore3.swagger.io/api/v3/openapi.json'
+  /pets:
+    get:
+      operationId: getPets
+      responses:
+        '200':
+          description: All the pets
+          schema:
+            $ref: 'https://petstore.swagger.io/v2/swagger.json'

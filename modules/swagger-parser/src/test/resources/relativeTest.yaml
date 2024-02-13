@@ -1,0 +1,10 @@
+RelativeObj:
+  type: object
+  properties:
+    lorem:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string 

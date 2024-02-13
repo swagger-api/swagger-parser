@@ -3,6 +3,7 @@ package io.swagger.parser.processors;
 import io.swagger.models.Operation;
 import io.swagger.models.RefResponse;
 import io.swagger.models.Response;
+import io.swagger.models.Responses;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.ResolverCache;
@@ -26,7 +27,7 @@ public class OperationProcessor {
         final List<Parameter> processedOperationParameters = parameterProcessor.processParameters(operation.getParameters());
         operation.setParameters(processedOperationParameters);
 
-        final Map<String, Response> responses = operation.getResponses();
+        final Responses responses = operation.getResponsesObject();
 
         if (responses != null) {
             for (String responseCode : responses.keySet()) {

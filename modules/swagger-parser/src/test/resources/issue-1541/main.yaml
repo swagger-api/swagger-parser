@@ -1,0 +1,38 @@
+swagger: '2.0'
+info:
+  title: 'Issue 1541'
+  version: '1.0'
+consumes:
+  - application/json
+paths:
+  /inline_response:
+    get:
+      responses:
+        '200':
+          description: ok
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              a:
+                type: number
+  /ref_response:
+    get:
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/ref_response_object'
+definitions:
+  ref_response_object:
+    type: object
+    additionalProperties: false
+    properties:
+      a:
+        type: number
+      b:
+        type: object
+        additionalProperties: false
+        properties:
+          c: { type: number }
+          d: { type: string }

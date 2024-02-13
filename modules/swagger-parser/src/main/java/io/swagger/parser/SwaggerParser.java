@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.util.DeserializationUtils;
+import io.swagger.parser.util.InlineModelResolver;
+import io.swagger.parser.util.ParseOptions;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 
@@ -24,6 +26,7 @@ public class SwaggerParser {
         location = location.replaceAll("\\\\", "/");
         List<SwaggerParserExtension> parserExtensions = getExtensions();
         SwaggerDeserializationResult output = new SwaggerDeserializationResult();
+        List<SwaggerDeserializationResult> results = new ArrayList<>();
         try {
             if (auths == null) {
                 auths = new ArrayList<AuthorizationValue>();
@@ -43,14 +46,22 @@ public class SwaggerParser {
                 if (output != null && output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
                     return output;
                 }
+                results.add(output);
             }
             if (output == null) {
                 output = new SwaggerDeserializationResult()
                         .message("The swagger definition could not be read");
             }
         }catch (Exception e) {
-                output.setMessages(Arrays.asList(e.getMessage()));
+                output.message(e.getMessage());
             }
+        if (output.getMessages() == null && output.getSwagger() == null){
+            for(int i = 0; i<results.size();i++){
+                if (results.get(i).getMessages()!= null && results.get(i).getSwagger()!= null){
+                    output.setMessages(results.get(i).getMessages());
+                }
+            }
+        }
         return output;
     }
 
@@ -59,6 +70,12 @@ public class SwaggerParser {
     }
 
     public Swagger read(String location, List<AuthorizationValue> auths, boolean resolve) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(resolve);
+        return read(location, auths, options);
+    }
+
+    public Swagger read(String location, List<AuthorizationValue> auths, ParseOptions options) {
         if (location == null) {
             return null;
         }
@@ -68,11 +85,16 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().read(location, auths);
             if (output != null) {
-            	if(resolve){
-            		return new SwaggerResolver(output, auths, location).resolve();
-            	} else {
-            		return output;
-            	}
+                if (options != null) {
+                    if (options.isResolve()) {
+                        output = new SwaggerResolver(output, auths, location, null, options).resolve();
+                    }
+                    if (options.isFlatten()) {
+                        InlineModelResolver inlineModelResolver = new InlineModelResolver();
+                        inlineModelResolver.flatten(output);
+                    }
+                }
+                return output;
             }
         } catch (IOException e) {
         }
@@ -99,7 +121,7 @@ public class SwaggerParser {
     }
 
     protected JsonNode deserializeYaml(String data) throws IOException{
-        return DeserializationUtils.readYamlTree(data);
+        return DeserializationUtils.readYamlTree(data, null);
     }
 
     public SwaggerDeserializationResult readWithInfo(String swaggerAsString, boolean resolve) {
@@ -146,14 +168,20 @@ public class SwaggerParser {
     }
 
     public Swagger read(JsonNode node) {
-        return read(node, new ArrayList<AuthorizationValue>(), false);
+        return read(node, false);
     }
 
     public Swagger read(JsonNode node, boolean resolve) {
-        return read(node, new ArrayList<AuthorizationValue>(), resolve);
+        return read(node, new ArrayList<>(), resolve);
     }
 
     public Swagger read(JsonNode node, List<AuthorizationValue> authorizationValues, boolean resolve) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(resolve);
+        return read(node, authorizationValues, options);
+    }
+
+    public Swagger read(JsonNode node, List<AuthorizationValue> authorizationValues, ParseOptions options) {
         if (node == null) {
             return null;
         }
@@ -164,11 +192,16 @@ public class SwaggerParser {
         try {
             output = new Swagger20Parser().read(node);
             if (output != null) {
-                if (resolve) {
-                    return new SwaggerResolver(output, authorizationValues).resolve();
-                } else {
-                    return output;
+                if (options != null) {
+                    if (options.isResolve()) {
+                        output = new SwaggerResolver(output, authorizationValues, null, null, options).resolve();
+                    }
+                    if (options.isFlatten()) {
+                        InlineModelResolver inlineModelResolver = new InlineModelResolver();
+                        inlineModelResolver.flatten(output);
+                    }
                 }
+                return output;
             }
         } catch (IOException e) {
         }

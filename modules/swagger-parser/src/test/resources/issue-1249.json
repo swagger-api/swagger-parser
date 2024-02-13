@@ -1,0 +1,35 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"version": "1.0.0",
+		"title": "Example API"
+	},
+	"host": "example.com",
+	"basePath": "/",
+	"paths": {
+		"/api/admin/{account}/users/{user}": {
+			"post": {
+				"operationId": "addUser",
+				"parameters": [
+					{
+						"name": "account",
+						"in": "path",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"name": "user",
+						"in": "path",
+						"required": false,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK"
+					}
+				}
+			}
+		}
+	}
+}

@@ -3,4 +3,4 @@ Paging2:
     total_items:
       type: integer
     foobar:
-      $ref: '../common2/bar.yaml#/Foobar'
+      $ref: './common2/bar.yaml#/Foobar'

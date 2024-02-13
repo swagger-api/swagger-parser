@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.models.Responses;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
@@ -184,7 +185,7 @@ public class ResolverCacheTest {
     @Test
     public void testLoadInternalResponseRef(@Injectable Response mockedResponse) throws Exception {
         Swagger swagger = new Swagger();
-        Map<String,Response> responses = new HashMap<>();
+        Responses responses = new Responses();
         responses.put("foo", mockedResponse);
         swagger.setResponses(responses);
 
@@ -198,7 +199,7 @@ public class ResolverCacheTest {
     @Test
     public void testLoadInternalResponseRefWithSpaces(@Injectable Response mockedResponse) throws Exception {
         Swagger swagger = new Swagger();
-        Map<String,Response> responses = new HashMap<>();
+        Responses responses = new Responses();
         responses.put("foo bar", mockedResponse);
         swagger.setResponses(responses);
 

@@ -210,7 +210,7 @@ public class SwaggerResolverTest {
                                 .responseSchema(new RefModel(remoteRef)))));
 
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
-        final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
+        final Response response = swagger.getPaths().get("/fun").getGet().getResponsesObject().get("200");
         final RefModel ref = (RefModel) response.getResponseSchema();
         assertEquals(ref.get$ref(), "#/definitions/Tag");
         assertNotNull(swagger.getDefinitions().get("Tag"));
@@ -237,7 +237,7 @@ public class SwaggerResolverTest {
                                                 new RefProperty(REMOTE_REF_YAML))))));
 
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
-        final Response response = swagger.getPaths().get("/fun").getGet().getResponses().get("200");
+        final Response response = swagger.getPaths().get("/fun").getGet().getResponsesObject().get("200");
         final ArrayModel array = (ArrayModel) response.getResponseSchema();
         assertNotNull(array.getItems());
 
@@ -290,7 +290,7 @@ public class SwaggerResolverTest {
         swagger.response("foo", new Response().description("ok!"));
 
         final Swagger resolved = new SwaggerResolver(swagger, null).resolve();
-        Response response = resolved.getPath("/fun").getGet().getResponses().get("200");
+        Response response = resolved.getPath("/fun").getGet().getResponsesObject().get("200");
         assertTrue(response.getDescription().equals("ok!"));
         assertTrue(response instanceof Response);
     }

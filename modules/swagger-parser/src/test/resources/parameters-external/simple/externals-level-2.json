@@ -1,0 +1,42 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Pets Store"
+  },
+  "parameters": {
+    "P-Level2Thing1": {
+      "in": "body",
+      "name": "Level2Thing1",
+      "schema": {
+        "type": "string"
+      }
+    },
+    "P-Level2Thing2": {
+      "name": "Level2Thing2",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/D-Level2Thing3"
+      }
+    },
+    "P-Level2Thing3": {
+      "name": "Level2Thing3",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/D-Level2Thing4"
+      }
+    }
+  },
+  "definitions": {
+    "D-Level2Thing3": {
+      "name": "Level2Thing3",
+      "type": "string"
+    },
+    "D-Level2Thing4": {
+      "name": "Level2Thing4",
+      "type": "string"
+    }
+  }
+}

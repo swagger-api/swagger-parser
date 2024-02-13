@@ -1,0 +1,12 @@
+get:
+  description: A list of events
+  operationId: getEvents
+  responses:
+    200:
+      description: OK
+      schema:
+        type: object
+        properties:
+          paging:
+#            type: string
+            $ref: 'paging2.yaml#/Paging2'

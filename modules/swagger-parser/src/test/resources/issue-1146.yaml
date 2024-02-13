@@ -1,0 +1,39 @@
+swagger: "2.0"
+info:
+  description: "Test"
+  version: "1.0.0"
+  title: "Swagger v2 example"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "petstore.swagger.io"
+basePath: "/v2"
+schemes:
+  - "https"
+  - "http"
+paths:
+  /brands/{brand-id}/stations:
+    get:
+      tags:
+        - Brand
+      summary: Returns a list of the brand's stations
+      operationId: getBrandStations
+      parameters:
+        - $ref: "#/parameters/brand-id"
+        - in: query
+          name: available-to-client-only
+          required: true
+          type: boolean
+      responses:
+        200:
+          description: OK
+parameters:
+  brand-id:
+    in: path
+    description: this is a test
+    name: brand-id
+    required: true
+    type: string

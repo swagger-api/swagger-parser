@@ -66,12 +66,12 @@ paths:
           description: order placed for purchasing the pet
           required: true
           schema:
-            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Order'
+            $ref: 'https://petstore.swagger.io/v2/swagger.json#/definitions/Order'
       responses:
         '200':
           description: successful operation
           schema:
-            $ref: 'http://petstore.swagger.io/v2/swagger.json#/definitions/Order'
+            $ref: 'https://petstore.swagger.io/v2/swagger.json#/definitions/Order'
         '400':
           description: Invalid Order
 
