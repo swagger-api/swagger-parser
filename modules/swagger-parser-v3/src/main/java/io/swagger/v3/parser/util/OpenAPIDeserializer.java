@@ -2426,6 +2426,10 @@ public class OpenAPIDeserializer {
 				.filter(in -> in.toString().equals(securitySchemeIn))
 				.findFirst();
 
+		if (inRequired && securitySchemeIn != null && !matchingIn.isPresent()) {
+			result.invalidType(location, "in", "cookie|header|query", node);
+		}
+
 		securityScheme.setIn(matchingIn.orElse(null));
 
 		value = getString("scheme", node, schemeRequired, location, result);
