@@ -680,6 +680,11 @@ public class InlineModelResolver {
                 flattenProperties(properties, path);
                 model.setProperties(properties);
             }
+            if (schema instanceof ComposedSchema){
+                model.setAllOf(((ComposedSchema) schema).getAllOf());
+                model.setAnyOf(((ComposedSchema) schema).getAnyOf());
+                model.setOneOf(((ComposedSchema) schema).getOneOf());
+            }
 
             return model;
         }
