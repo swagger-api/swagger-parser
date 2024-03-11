@@ -32,7 +32,6 @@ paths:
                     country: CHN
                     provider: DataZoo
                     description: DataZoo China National ID
-        
         default:
           description: Returns an array of errors
           content:
@@ -110,14 +109,12 @@ paths:
                     country: CHN
                     provider: DataZoo
                     description: DataZoo China National ID
-        
         default:
           description: Returns an array of errors
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Errors'
-
 components:
   schemas:
     Dataset:
@@ -169,7 +166,7 @@ components:
           type: object
           properties:
             request:
-              type: string
+              type: string  
           required:
             - request
       required:
