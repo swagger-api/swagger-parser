@@ -492,6 +492,59 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void testSecurityDefinitionApiKeyWithMissingAttributeIn() {
+        String yaml = "openapi: 3.0.0\n" +
+                "components:\n" +
+                "  securitySchemes:\n" +
+                "    api_key:\n" +
+                "      type: apiKey\n" +
+                "      name: X-API-KEY";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute components.securitySchemes.api_key.in is missing"));
+    }
+
+    @Test
+    public void testSecurityDefinitionApiKeyWithInvalidAttributeIn() {
+        String yaml = "openapi: 3.0.0\n" +
+                "components:\n" +
+                "  securitySchemes:\n" +
+                "    api_key:\n" +
+                "      type: apiKey\n" +
+                "      name: X-API-KEY\n" +
+                "      in: cukie";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertTrue(messages.contains("attribute components.securitySchemes.api_key.in is not of type `cookie|header|query`"));
+    }
+
+    @Test
+    public void testSecurityDefinitionApiKeyValid() {
+        String yaml = "openapi: 3.0.0\n" +
+                "components:\n" +
+                "  securitySchemes:\n" +
+                "    api_key:\n" +
+                "      type: apiKey\n" +
+                "      name: X-API-KEY\n" +
+                "      in: cookie";
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        SwaggerParseResult result = parser.readContents(yaml, null, null);
+        List<String> messageList = result.getMessages();
+        Set<String> messages = new HashSet<>(messageList);
+
+        assertFalse(messages.contains("attribute components.securitySchemes.api_key.in is not of type `cookie|header|query`"));
+    }
+
+    @Test
     public void testRootInfo() {
         String json = "{\n" +
                 "\t\"openapi\": \"3.0.0\",\n" +
