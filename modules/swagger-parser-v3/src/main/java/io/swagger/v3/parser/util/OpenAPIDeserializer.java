@@ -2686,14 +2686,17 @@ public class OpenAPIDeserializer {
 			ComposedSchema composedSchema = new ComposedSchema();
 
 			if (allOfArray != null) {
-
-				for (JsonNode n : allOfArray) {
-					if (n.isObject()) {
-						schema = getSchema((ObjectNode) n, location, result);
-						composedSchema.addAllOfItem(schema);
+				if (allOfArray.size() > 1) {
+					for (JsonNode n : allOfArray) {
+						if (n.isObject()) {
+							schema = getSchema((ObjectNode) n, location, result);
+							composedSchema.addAllOfItem(schema);
+						}
 					}
+					schema = composedSchema;
+				} else if (allOfArray.size() == 1) {
+					schema = getSchema((ObjectNode) allOfArray.get(0), location, result);
 				}
-				schema = composedSchema;
 			}
 			if (anyOfArray != null) {
 
