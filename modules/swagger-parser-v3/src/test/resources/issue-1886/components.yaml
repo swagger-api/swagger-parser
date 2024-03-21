@@ -1,0 +1,19 @@
+Enum1:
+  $ref: schemas/enum1.yaml
+Enum2:
+  type: string
+  enum: [a, b, c]
+  nullable: false
+Enum3:
+  type: string
+  enum: [x, y, z]
+  nullable: true
+
+SimplePojo:
+  $ref: schemas/simple-pojo.yaml
+ArrayPojo:
+  $ref: schemas/array-pojo.yaml
+MapPojo:
+  $ref: schemas/map-pojo.yaml
+SetPojo:
+  $ref: schemas/set-pojo.yaml

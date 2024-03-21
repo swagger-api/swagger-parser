@@ -1,0 +1,18 @@
+title: TranslationItem
+type: object
+allOf:
+  - $ref: additional-properties.yaml
+description: Translation item
+properties:
+  locale:
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: Defines the translation natural language as specified in ISO 639-1,
+      and territory two-letter form of ISO 3166.
+  localeTranslations:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: locale-translation-item.yaml
+

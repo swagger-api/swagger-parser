@@ -1,0 +1,19 @@
+title: LocaleTranslationItem
+type: object
+allOf:
+  - $ref: additional-properties.yaml
+description: Locale Translation item
+properties:
+  fieldName:
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: Defines the name of the field that is translated.
+  fieldValue:
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: Defines the translated value of the field.
+required:
+  - fieldName
+  - fieldValue
