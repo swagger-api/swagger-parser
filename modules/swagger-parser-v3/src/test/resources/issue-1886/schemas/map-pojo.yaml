@@ -1,0 +1,74 @@
+title: MapPojo
+allOf:
+  - $ref: additional-properties.yaml
+x-implements:
+  - Cloneable
+properties:
+  pEnum1:
+    type: object
+    additionalProperties:
+      $ref: '../components.yaml#/Enum1'
+  pEnum2:
+    type: object
+    additionalProperties:
+      $ref: '../components.yaml#/Enum2'
+  pEnum3:
+    type: object
+    additionalProperties:
+      $ref: '../components.yaml#/Enum3'
+  pInteger:
+    type: object
+    additionalProperties:
+      type: integer
+      minimum: 0
+  pNumber:
+    type: object
+    additionalProperties:
+      type: number
+      format: double
+      minimum: 0
+      maximum: 10
+      exclusiveMaximum: true
+  pDate:
+    type: object
+    additionalProperties:
+      type: string
+      format: date
+  pDateTime:
+    type: object
+    additionalProperties:
+      type: string
+      format: date-time
+  pString:
+    type: object
+    additionalProperties:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringRequired:
+    type: object
+    additionalProperties:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringNullable:
+    type: object
+    nullable: true
+    additionalProperties:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringNullableRequired:
+    type: object
+    nullable: true
+    additionalProperties:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+required:
+  - pStringRequired
+  - pStringNullableRequired

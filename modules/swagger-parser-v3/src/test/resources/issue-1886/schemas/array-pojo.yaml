@@ -1,0 +1,74 @@
+title: ArrayPojo
+allOf:
+  - $ref: additional-properties.yaml
+x-implements:
+  - Cloneable
+properties:
+  pEnum1:
+    type: array
+    items:
+      $ref: '../components.yaml#/Enum1'
+  pEnum2:
+    type: array
+    items:
+      $ref: '../components.yaml#/Enum2'
+  pEnum3:
+    type: array
+    items:
+      $ref: '../components.yaml#/Enum3'
+  pInteger:
+    type: array
+    items:
+      type: integer
+      minimum: 0
+  pNumber:
+    type: array
+    items:
+      type: number
+      format: double
+      minimum: 0
+      maximum: 10
+      exclusiveMaximum: true
+  pDate:
+    type: array
+    items:
+      type: string
+      format: date
+  pDateTime:
+    type: array
+    items:
+      type: string
+      format: date-time
+  pString:
+    type: array
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringRequired:
+    type: array
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringNullable:
+    type: array
+    nullable: true
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringNullableRequired:
+    type: array
+    nullable: true
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+required:
+  - pStringRequired
+  - pStringNullableRequired

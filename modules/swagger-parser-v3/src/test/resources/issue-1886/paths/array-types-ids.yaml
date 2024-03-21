@@ -1,0 +1,40 @@
+parameters:
+  - name: id
+    required: true
+    in: path
+    schema:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  - name: ids
+    in: path
+    required: true
+    schema:
+      type: array
+      items:
+        type: string
+        minLength: 1
+        maxLength: 36
+        pattern: '^[A-Z]+$'
+delete:
+  tags:
+    - array-types
+  x-content-language: application/json
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../components.yaml#/ArrayPojo'
+  responses:
+    200:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components.yaml#/ArrayPojo'

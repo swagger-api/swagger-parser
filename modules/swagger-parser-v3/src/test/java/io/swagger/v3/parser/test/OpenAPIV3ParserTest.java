@@ -3269,4 +3269,20 @@ public class OpenAPIV3ParserTest {
             }
         }
     }
+
+    @Test
+    public void testIssue1886() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-1886/openapi.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertEqualsNoOrder(
+            openAPI.getComponents().getSchemas().keySet(),
+            Arrays.asList("ArrayPojo", "Enum1", "Enum1_1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
+                "TransactionsPatchRequestBody", "additional-properties", "array-pojo", "locale-translation-item",
+                "map-pojo", "set-pojo", "simple-pojo", "translation-item")
+        );
+    }
 }
