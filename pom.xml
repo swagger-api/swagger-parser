@@ -393,10 +393,10 @@
     </repositories>
     <properties>
         <!--<maven.compiler.release>8</maven.compiler.release>-->
-        <commons-io-version>2.15.0</commons-io-version>
+        <commons-io-version>2.15.1</commons-io-version>
         <snakeyaml-version>2.2</snakeyaml-version>
         <slf4j-version>2.0.9</slf4j-version>
-        <swagger-core-version>1.6.12</swagger-core-version>
+        <swagger-core-version>1.6.14</swagger-core-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>6.9.6</testng-version>
         <jmockit-version>1.19</jmockit-version>
