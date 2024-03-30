@@ -92,7 +92,7 @@ public class NetworkReferenceTest {
         OpenAPI openAPI = result.getOpenAPI();
 
         assertNotNull(result.getMessages());
-        assertEquals(result.getMessages().size(), 19);
+        assertEquals(result.getMessages().size(), 20);
         assertNotNull(openAPI);
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.asdasd is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.requestBodies.NewItem.descasdasdription is unexpected (./ref.yaml)"));
@@ -103,6 +103,7 @@ public class NetworkReferenceTest {
         assertTrue(result.getMessages().contains("attribute components.parameters.skipParam.[skip].in is not of type `[query|header|path|cookie]` (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.namex is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.name is missing (./ref.yaml)"));
+        assertTrue(result.getMessages().contains("attribute components.securitySchemes.api_key.in is not of type `cookie|header|query` (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.callbacks.webhookVerificationEvent.postx is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.headers.X-Rate-Limit-Limit.descriptasdd is unexpected (./ref.yaml)"));
         assertTrue(result.getMessages().contains("attribute components.links.unsubscribe.parametersx is unexpected (./ref.yaml)"));
