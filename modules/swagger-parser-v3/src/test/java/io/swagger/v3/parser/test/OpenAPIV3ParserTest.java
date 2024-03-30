@@ -3058,7 +3058,6 @@ public class OpenAPIV3ParserTest {
         options.setResolve(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("./swos-443/root.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
-
         assertNotNull(openAPI);
         assertNotNull(result.getMessages());
         assertEquals(result.getMessages().size(), 20);
