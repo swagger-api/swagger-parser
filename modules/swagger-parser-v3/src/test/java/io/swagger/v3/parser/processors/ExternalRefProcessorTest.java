@@ -5,14 +5,18 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Expectations;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -23,6 +27,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 
 
@@ -206,4 +211,19 @@ public class ExternalRefProcessorTest {
         is("./relative-with-url/relative-with-local.yaml#/relative-same-file")
     );
 	}
+
+    @Test
+    public void testHandleComposedSchemasInArrayItems() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-2071/openapi.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertEquals(openAPI.getComponents().getSchemas().size(), 3);
+        assertTrue(openAPI.getComponents().getSchemas().containsKey("Response"));
+        assertTrue(openAPI.getComponents().getSchemas().containsKey("ProductRow"));
+        assertTrue(openAPI.getComponents().getSchemas().containsKey("ProductsRowType"));
+    }
+
 }

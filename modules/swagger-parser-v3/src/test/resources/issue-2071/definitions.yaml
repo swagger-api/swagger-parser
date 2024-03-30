@@ -1,0 +1,25 @@
+components:
+  schemas:
+    Response:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/ProductRow'
+        discriminator:
+          propertyName: type
+          mapping:
+            'product': '#/components/schemas/ProductRow'
+    ProductRow:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/ProductsRowType'
+        payload:
+          type: string
+    ProductsRowType:
+      type: string
+      enum:
+        - product
