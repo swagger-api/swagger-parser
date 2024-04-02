@@ -1,0 +1,85 @@
+title: SetPojo
+allOf:
+  - $ref: additional-properties.yaml
+x-implements:
+  - Cloneable
+properties:
+  pEnum1:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '../components.yaml#/Enum1'
+  pEnum2:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '../components.yaml#/Enum2'
+  pEnum3:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '../components.yaml#/Enum3'
+  pInteger:
+    type: array
+    uniqueItems: true
+    items:
+      type: integer
+      minimum: 0
+  pNumber:
+    type: array
+    uniqueItems: true
+    items:
+      type: number
+      format: double
+      minimum: 0
+      maximum: 10
+      exclusiveMaximum: true
+  pDate:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      format: date
+  pDateTime:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      format: date-time
+  pString:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringRequired:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringNullable:
+    type: array
+    nullable: true
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+  pStringNullableRequired:
+    type: array
+    nullable: true
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+      maxLength: 36
+      pattern: '^[A-Z]+$'
+required:
+  - pStringRequired
+  - pStringNullableRequired

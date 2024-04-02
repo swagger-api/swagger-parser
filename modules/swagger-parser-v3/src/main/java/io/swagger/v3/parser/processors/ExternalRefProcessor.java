@@ -29,6 +29,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -137,10 +138,11 @@ public final class ExternalRefProcessor {
                                 String[] parts = schemaFullRef.split("#/");
                                 String schemaFullRefFilePart = parts[0];
                                 String schemaFullRefInternalRefPart = parts[1];
-                                schemaFullRef = Paths.get(parent, schemaFullRefFilePart).normalize().toString() + "#/" + schemaFullRefInternalRefPart;
+                                schemaFullRef = Paths.get(parent, schemaFullRefFilePart).normalize() + "#/" + schemaFullRefInternalRefPart;
                             } else {
                                 schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
                             }
+                            schemaFullRef = FilenameUtils.separatorsToUnix(schemaFullRef);
                         }
                         schema.set$ref(processRefToExternalSchema(schemaFullRef, ref));
                     }

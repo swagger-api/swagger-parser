@@ -1,0 +1,71 @@
+openapi: 3.0.3
+
+info:
+  title: Arrangement Support
+  version: '1.0'
+  
+paths:
+  /simple-types:
+    $ref: paths/simple-types.yaml
+  /simple-types/{id}/{ids}:
+    $ref: paths/simple-types-ids.yaml
+  /array-types:
+    $ref: paths/array-types.yaml
+  /array-types/{id}/{ids}:
+    $ref: paths/array-types-ids.yaml
+  /set-types:
+    $ref: paths/set-types.yaml
+  /set-types/{id}/{ids}:
+    $ref: paths/set-types-ids.yaml
+  /map-types:
+    $ref: paths/map-types.yaml
+  /map-types/{id}/{ids}:
+    $ref: paths/map-types-ids.yaml
+  /transactions:
+    patch:
+      tags:
+      - transactions
+      summary: patch
+      description: Updates list of transactions
+      operationId: patchTransactions
+      requestBody:
+        description: Updates list of transactions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionsPatchRequestBody'
+      responses:
+        "204":
+          description: OK
+
+components:
+  schemas:
+    TransactionsPatchRequestBody:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          maxLength: 300
+          type: string
+          description: Unique identification for the transaction as used in the external
+            system
+        arrangementId:
+          maxLength: 50
+          type: string
+          description: An external reference to the arrangement the transaction belongs
+            to
+        category:
+          maxLength: 50
+          type: string
+          description: Transaction category
+        billingStatus:
+          maxLength: 8
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+          x-java-type: java.time.OffsetDateTime
+  
