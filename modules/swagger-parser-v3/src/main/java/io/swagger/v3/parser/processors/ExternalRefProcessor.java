@@ -183,10 +183,11 @@ public final class ExternalRefProcessor {
                 ArraySchema arraySchema = (ArraySchema) schema;
                 if (StringUtils.isNotBlank(arraySchema.getItems().get$ref())) {
                     processRefSchema(((ArraySchema) schema).getItems(), file);
-                } else if (arraySchema.getItems() instanceof ComposedSchema) {
-                    ComposedSchema composedSchema = (ComposedSchema) arraySchema.getItems();
-                    processComposedSchema(composedSchema, file);
                 } else {
+                    if (arraySchema.getItems() instanceof ComposedSchema) {
+                        ComposedSchema composedSchema = (ComposedSchema) arraySchema.getItems();
+                        processComposedSchema(composedSchema, file);
+                    }
                     processProperties(arraySchema.getItems().getProperties(), file);
                 }
             }
