@@ -220,10 +220,13 @@ public class ExternalRefProcessorTest {
         SwaggerParseResult parseResult = openApiParser.readLocation("issue-2071/openapi.yaml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
 
-        assertEquals(openAPI.getComponents().getSchemas().size(), 3);
-        assertTrue(openAPI.getComponents().getSchemas().containsKey("Response"));
-        assertTrue(openAPI.getComponents().getSchemas().containsKey("ProductRow"));
-        assertTrue(openAPI.getComponents().getSchemas().containsKey("ProductsRowType"));
+        Map<String, Schema> components = openAPI.getComponents().getSchemas();
+        assertEquals(components.size(), 5);
+        assertTrue(components.containsKey("Response"));
+        assertTrue(components.containsKey("ProductRow"));
+        assertTrue(components.containsKey("ProductRowType"));
+        assertTrue(components.containsKey("OrderRow"));
+        assertTrue(components.containsKey("OrderRowType"));
     }
 
 }

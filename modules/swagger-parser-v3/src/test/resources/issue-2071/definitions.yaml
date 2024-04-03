@@ -5,6 +5,9 @@ components:
       items:
         oneOf:
           - $ref: '#/components/schemas/ProductRow'
+        properties:
+          orderRow:
+            $ref: '#/components/schemas/OrderRow'
         discriminator:
           propertyName: type
           mapping:
@@ -16,10 +19,24 @@ components:
         - type
       properties:
         type:
-          $ref: '#/components/schemas/ProductsRowType'
+          $ref: '#/components/schemas/ProductRowType'
         payload:
           type: string
-    ProductsRowType:
+    ProductRowType:
       type: string
       enum:
         - product
+    OrderRow:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/OrderRowType'
+        payload:
+          type: string
+    OrderRowType:
+      type: string
+      enum:
+        - order
