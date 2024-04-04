@@ -24,7 +24,7 @@ import java.util.Map;
 
 import java.util.List;
 
-
+import static org.junit.Assert.assertFalse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -170,6 +170,8 @@ public class OpenAPIParserTest {
         assertNotNull(result);
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
+        assertTrue(result.getMessages().isEmpty());
+        assertFalse(result.isOpenapi31());
     }
 
     @Test
