@@ -147,36 +147,7 @@ public final class ExternalRefProcessor {
 
             if(schema instanceof ComposedSchema){
                 ComposedSchema composedSchema = (ComposedSchema) schema;
-                if (composedSchema.getAllOf() != null){
-                    for(Schema item : composedSchema.getAllOf()){
-                        if (item.get$ref() != null){
-                            processRefSchema(item,file);
-                        } else{
-                            processSchema(item, file);
-                        }
-                    }
-
-                }if (composedSchema.getOneOf() != null){
-                    for(Schema item : composedSchema.getOneOf()){
-                        if (item.get$ref() != null){
-                            if (item.get$ref() != null){
-                                processRefSchema(item,file);
-                            }else{
-                                processSchema(item, file);
-                            }
-                        }
-                    }
-                }if (composedSchema.getAnyOf() != null){
-                    for(Schema item : composedSchema.getAnyOf()){
-                        if (item.get$ref() != null){
-                            if (item.get$ref() != null){
-                                processRefSchema(item,file);
-                            }else{
-                                processSchema(item, file);
-                            }
-                        }
-                    }
-                }
+                processComposedSchema(composedSchema, file);
             }
             //Loop the properties and recursively call this method;
             Map<String, Schema> subProps = schema.getProperties();
@@ -213,11 +184,50 @@ public final class ExternalRefProcessor {
                 if (StringUtils.isNotBlank(arraySchema.getItems().get$ref())) {
                     processRefSchema(((ArraySchema) schema).getItems(), file);
                 } else {
-                    processProperties(arraySchema.getItems().getProperties() ,file);
+                    if (arraySchema.getItems() instanceof ComposedSchema) {
+                        ComposedSchema composedSchema = (ComposedSchema) arraySchema.getItems();
+                        processComposedSchema(composedSchema, file);
+                    }
+                    processProperties(arraySchema.getItems().getProperties(), file);
                 }
             }
         }
         return newRef;
+    }
+
+    private void processComposedSchema(ComposedSchema composedSchema, String file) {
+        if (composedSchema.getAllOf() != null) {
+            for (Schema item : composedSchema.getAllOf()) {
+                if (item.get$ref() != null) {
+                    processRefSchema(item, file);
+                } else {
+                    processSchema(item, file);
+                }
+            }
+
+        }
+        if (composedSchema.getOneOf() != null) {
+            for (Schema item : composedSchema.getOneOf()) {
+                if (item.get$ref() != null) {
+                    if (item.get$ref() != null) {
+                        processRefSchema(item, file);
+                    } else {
+                        processSchema(item, file);
+                    }
+                }
+            }
+        }
+        if (composedSchema.getAnyOf() != null) {
+            for (Schema item : composedSchema.getAnyOf()) {
+                if (item.get$ref() != null) {
+                    if (item.get$ref() != null) {
+                        processRefSchema(item, file);
+                    } else {
+                        processSchema(item, file);
+                    }
+                }
+            }
+        }
     }
 
     private void processSchema(Schema property, String file) {
