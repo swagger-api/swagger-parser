@@ -1,0 +1,42 @@
+components:
+  schemas:
+    Response:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/ProductRow'
+        properties:
+          orderRow:
+            $ref: '#/components/schemas/OrderRow'
+        discriminator:
+          propertyName: type
+          mapping:
+            'product': '#/components/schemas/ProductRow'
+    ProductRow:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/ProductRowType'
+        payload:
+          type: string
+    ProductRowType:
+      type: string
+      enum:
+        - product
+    OrderRow:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/OrderRowType'
+        payload:
+          type: string
+    OrderRowType:
+      type: string
+      enum:
+        - order
