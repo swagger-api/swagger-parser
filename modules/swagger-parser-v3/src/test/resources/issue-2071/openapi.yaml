@@ -1,0 +1,21 @@
+openapi: 3.0.1
+info:
+  title: API
+  description: API
+  version: LATEST
+paths:
+  /test-path:
+    post:
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'definitions.yaml#/components/schemas/Response'
