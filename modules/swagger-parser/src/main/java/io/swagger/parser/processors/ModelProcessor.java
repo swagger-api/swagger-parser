@@ -37,13 +37,13 @@ public class ModelProcessor {
         } else if (model instanceof ComposedModel) {
             processComposedModel((ComposedModel) model);
         } else if (model instanceof ModelImpl) {
-            processModelImpl((ModelImpl) model);
+            processModelProperties( model);
         }
     }
 
-    private void processModelImpl(ModelImpl modelImpl) {
+    private void processModelProperties(Model model) {
 
-        final Map<String, Property> properties = modelImpl.getProperties();
+        final Map<String, Property> properties = model.getProperties();
 
         if (properties == null) {
             return;
@@ -68,6 +68,7 @@ public class ModelProcessor {
             }
         }
 
+        processModelProperties(composedModel);
     }
 
     private void processArrayModel(ArrayModel arrayModel) {
