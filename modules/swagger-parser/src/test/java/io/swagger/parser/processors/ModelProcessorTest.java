@@ -2,6 +2,7 @@ package io.swagger.parser.processors;
 
 import io.swagger.models.*;
 import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
 import mockit.*;
@@ -149,5 +150,57 @@ public class ModelProcessorTest {
             times = 1;
             result = externalRefProcessor;
         }};
+    }
+
+
+    @Test
+    public void testProcessComposedModelWithProperties(@Injectable final Property property1) throws Exception {
+        setupPropertyAndExternalRefProcessors();
+
+        final String ref1 = "http://my.company.com/path/to/file.json#/foo/bar";
+        final String ref2 = "http://my.company.com/path/to/file.json#/this/that";
+        final String ref3 = "http://my.company.com/path/to/file.json#/hello/world";
+        final String ref4 = "http://my.company.com/path/to/file.json#/hello/ref";
+        final Property property2 = new RefProperty(ref4);
+
+        ModelProcessor modelProcessor = new ModelProcessor(cache, swagger);
+
+        new Expectations() {{
+            externalRefProcessor.processRefToExternalDefinition(ref1, RefFormat.URL);
+            times = 1;
+            result = "bar";
+            externalRefProcessor.processRefToExternalDefinition(ref2, RefFormat.URL);
+            times = 1;
+            result = "that";
+            externalRefProcessor.processRefToExternalDefinition(ref3, RefFormat.URL);
+            times = 1;
+            result = "world";
+            propertyProcessor.processProperty(property1);
+            times = 1;
+            propertyProcessor.processProperty(property2);
+            times = 1;
+        }};
+
+        ComposedModel composedModel = new ComposedModel();
+        composedModel.child(new RefModel(ref1));
+        composedModel.parent(new RefModel(ref2));
+        composedModel.interfaces(Arrays.asList(new RefModel(ref3)));
+        composedModel.addProperty("foo", property1);
+        composedModel.addProperty("bar", property2);
+
+        modelProcessor.processModel(composedModel);
+
+        new FullVerifications() {{
+            externalRefProcessor.processRefToExternalDefinition(ref1, RefFormat.URL);
+            times = 1;
+            externalRefProcessor.processRefToExternalDefinition(ref2, RefFormat.URL);
+            times = 1;
+            externalRefProcessor.processRefToExternalDefinition(ref3, RefFormat.URL);
+            times = 1;
+        }};
+
+        assertEquals(((RefModel) composedModel.getChild()).get$ref(), "#/definitions/bar");
+        assertEquals(((RefModel) composedModel.getParent()).get$ref(), "#/definitions/that");
+        assertEquals((composedModel.getInterfaces().get(0)).get$ref(), "#/definitions/world");
     }
 }
