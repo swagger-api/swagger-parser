@@ -297,4 +297,16 @@ public class RefUtilsTest {
         // relative locations
         assertEquals(ExternalRefProcessor.join("./foo#/definitions/Foo", "./bar#/definitions/Bar"), "./bar#/definitions/Bar");
     }
+
+    @Test
+    public void testRelativeRef() {
+        // Test for #750
+        assertEquals(
+                RefUtils.buildUrl(
+                        "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/specification/storage/resource-manager/Microsoft.Storage/stable/2018-02-01/storage.json",
+                        "../../../../../common-types/resource-management/v1/types.json"
+                ),
+                "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/specification/common-types/resource-management/v1/types.json"
+        );
+    }
 }
