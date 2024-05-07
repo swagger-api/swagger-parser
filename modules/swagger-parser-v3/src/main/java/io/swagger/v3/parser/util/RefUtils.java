@@ -47,14 +47,11 @@ public class RefUtils {
             final String[] filePathElements = file.split("/");
             plausibleName = filePathElements[filePathElements.length - 1];
 
-            final String[] split = plausibleName.split("\\.");
-            // Fix for issue-1621 and issue-1865
-            //validate number of dots
-            if(split.length > 2) {
-                //Remove dot so ref can be interpreted as internal and relative in Swagger-Core schema class 'set$ref'
-                plausibleName = String.join("", Arrays.copyOf(split, split.length - 1));
-            }else{
-                plausibleName = split[0];
+            // Fix for issue-1621 and issue-2092
+            // Remove only the file extension from the plausible name but keep all other dots
+            int lastDotIndex = plausibleName.lastIndexOf('.');
+            if (lastDotIndex > 0) {
+                plausibleName = plausibleName.substring(0, lastDotIndex);
             }
         }
 
@@ -90,7 +87,7 @@ public class RefUtils {
     }
 
     public static String mungedRef(String refString) {
-        // Ref: IETF RFC 3966, Section 5.2.2
+        // Ref: IETF RFC 3986, Section 5.2.2
         if (!refString.contains(":") &&   // No scheme
                 !refString.startsWith("#") && // Path is not empty
                 !refString.startsWith("/") && // Path is not absolute
