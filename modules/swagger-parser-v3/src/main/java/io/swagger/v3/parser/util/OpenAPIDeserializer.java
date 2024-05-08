@@ -352,7 +352,7 @@ public class OpenAPIDeserializer {
 				Components components = getComponents(obj, "components", result);
 				openAPI.setComponents(components);
 				this.components = components;
-                if(result.validateInternalRefs) {
+                if (result.validateInternalRefs) {
                     /* TODO currently only capable of validating if ref is to root schema withing #/components/schemas
                      * need to evaluate json pointer instead to also allow validation of nested schemas
                      * e.g. #/components/schemas/foo/properties/bar
@@ -368,11 +368,8 @@ public class OpenAPIDeserializer {
                 }
 			}
 
-			boolean pathsRequired = true;
-			if (result.isOpenapi31()) {
-				pathsRequired = false;
-			}
-			obj = getObject("paths", rootNode, pathsRequired, location, result);
+			boolean pathsRequired = !result.isOpenapi31();
+            obj = getObject("paths", rootNode, pathsRequired, location, result);
 			if (obj != null) {
 				Paths paths = getPaths(obj, "paths", result);
 				openAPI.setPaths(paths);
@@ -380,7 +377,7 @@ public class OpenAPIDeserializer {
 
 
 			ArrayNode array = getArray("servers", rootNode, false, location, result);
-			if (array != null && array.size() > 0) {
+			if (array != null && !array.isEmpty()) {
 				openAPI.setServers(getServersList(array, String.format("%s.%s", location, "servers"), result, path));
 			} else {
 				Server defaultServer = new Server();
@@ -397,15 +394,15 @@ public class OpenAPIDeserializer {
 			}
 
 			array = getArray("tags", rootNode, false, location, result);
-			if (array != null && array.size() > 0) {
+			if (array != null && !array.isEmpty()) {
 				openAPI.setTags(getTagList(array, "tags", result));
 			}
 
 			array = getArray("security", rootNode, false, location, result);
-			if (array != null && array.size() > 0) {
+			if (array != null && !array.isEmpty()) {
 				List<SecurityRequirement> securityRequirements = getSecurityRequirementsList(array, "security",
 						result);
-				if (securityRequirements != null && securityRequirements.size() > 0) {
+				if (securityRequirements != null && !securityRequirements.isEmpty()) {
 					openAPI.setSecurity(securityRequirements);
 				}
 			}
@@ -420,7 +417,7 @@ public class OpenAPIDeserializer {
 
 
 			Map<String, Object> extensions = getExtensions(rootNode);
-			if (extensions != null && extensions.size() > 0) {
+			if (extensions != null && !extensions.isEmpty()) {
 				openAPI.setExtensions(extensions);
 			}
 
@@ -459,7 +456,7 @@ public class OpenAPIDeserializer {
 
 	boolean isValidURI(String uriString) {
 		try {
-			URI uri = new URI(uriString);
+			new URI(uriString);
 			return true;
 		} catch (Exception exception) {
 			return false;
@@ -467,8 +464,8 @@ public class OpenAPIDeserializer {
 	}
 
 	private void validateReservedKeywords(Map<String, Set<String>> specKeys, String key, String location, ParseResult result) {
-		if(!result.isOaiAuthor() && result.isOpenapi31() && specKeys.get("RESERVED_KEYWORDS").stream()
-				.filter(rk -> key.startsWith(rk))
+		if (!result.isOaiAuthor() && result.isOpenapi31() && specKeys.get("RESERVED_KEYWORDS").stream()
+				.filter(key::startsWith)
 				.findAny()
 				.orElse(null) != null){
 			result.reserved(location, key);
@@ -540,7 +537,7 @@ public class OpenAPIDeserializer {
 			components.setResponses(getResponses(node, String.format("%s.%s", location, "responses"), result,
 					true));
 		}
-		if(result.isOpenapi31()){
+		if (result.isOpenapi31()){
 			node = getObject("pathItems", obj, false, location, result);
 			if (node != null) {
 				components.setPathItems(getPathItems(node, String.format("%s.%s", location, "pathItems"), result, true));
@@ -587,7 +584,7 @@ public class OpenAPIDeserializer {
 		components.setExtensions(new LinkedHashMap<>());
 
 		Map<String, Object> extensions = getExtensions(obj);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			components.setExtensions(extensions);
 		}
 
@@ -615,7 +612,7 @@ public class OpenAPIDeserializer {
 				if (tag != null) {
 					tags.add(tag);
 
-					if (tagsTracker.contains((String) tag.getName())) {
+					if (tagsTracker.contains(tag.getName())) {
 						result.uniqueTags(location, tag.getName());
 					}
 
@@ -651,7 +648,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(obj);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			tag.setExtensions(extensions);
 		}
 
@@ -709,7 +706,7 @@ public class OpenAPIDeserializer {
 			ObjectNode variables = getObject("variables", obj, false, location, result);
 			ServerVariables serverVariables = getServerVariables(variables, String.format("%s.%s", location,
 					"variables"), result);
-			if (serverVariables != null && serverVariables.size() > 0) {
+			if (serverVariables != null && !serverVariables.isEmpty()) {
 				server.setVariables(serverVariables);
 			}
 		}
@@ -744,7 +741,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(obj);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			server.setExtensions(extensions);
 		}
 
@@ -798,7 +795,7 @@ public class OpenAPIDeserializer {
 
 		ArrayNode arrayNode = getArray("enum", obj, false, location, result);
 		if (arrayNode != null) {
-			if (arrayNode.size() == 0 && result.isOpenapi31()) {
+			if (arrayNode.isEmpty() && result.isOpenapi31()) {
 				result.warning(location, "enum array MUST NOT be empty");
 			} else {
 				List<String> _enum = new ArrayList<>();
@@ -823,7 +820,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(obj);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			serverVariable.setExtensions(extensions);
 		}
 
@@ -889,7 +886,7 @@ public class OpenAPIDeserializer {
 			JsonNode pathValue = obj.get(pathName);
 			if (paths instanceof Paths && pathName.startsWith("x-")) {
 				Map<String, Object> extensions = getExtensions(obj);
-				if (extensions != null && extensions.size() > 0) {
+				if (extensions != null && !extensions.isEmpty()) {
 					((Paths)paths).setExtensions(extensions);
 				}
 			} else {
@@ -902,12 +899,11 @@ public class OpenAPIDeserializer {
 					ObjectNode path = (ObjectNode) pathValue;
 					PathItem pathObj = getPathItem(path, String.format("%s.'%s'", location, pathName), result);
                     List<String> eachPart = new ArrayList<>();
-                    Matcher m = Pattern.compile("\\{(.+?)\\}").matcher(pathName);
+                    Matcher m = Pattern.compile("\\{(.+?)}").matcher(pathName);
                     while (m.find()) {
                         eachPart.add(m.group());
                     }
-					eachPart.stream()
-							.forEach(part -> {
+					eachPart.forEach(part -> {
 								String pathParam = part.substring(1, part.length() - 1);
 								boolean definedInPathLevel = isPathParamDefined(pathParam,
 										pathObj.getParameters());
@@ -946,18 +942,14 @@ public class OpenAPIDeserializer {
 	private boolean isPathParamDefined(String pathParam, List<Parameter> parameters) {
 		if (parameters == null || parameters.isEmpty()) {
 			return false;
-		} else {
-			Parameter pathParamDefined = parameters.stream()
-					.filter(parameter -> (parameter.get$ref() != null) || (pathParam.equals(parameter.getName()) &&
-							"path".equals(parameter.getIn())))
-					.findFirst()
-					.orElse(null);
-			if (pathParamDefined == null) {
-				return false;
-			}
 		}
-		return true;
-	}
+        Parameter pathParamDefined = parameters.stream()
+                .filter(parameter -> (parameter.get$ref() != null) || (pathParam.equals(parameter.getName()) &&
+                        "path".equals(parameter.getIn())))
+                .findFirst()
+                .orElse(null);
+        return pathParamDefined != null;
+    }
 
 	private void addToOperationsList(List<Operation> operationsList, Operation operation) {
 		if (operation == null) {
@@ -994,10 +986,10 @@ public class OpenAPIDeserializer {
 				} else {
 					pathItem.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/pathItems"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/pathItems"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type PathItem");
                 }
-				if(result.isOpenapi31()){
+				if (result.isOpenapi31()){
 					String value = getString("summary", obj, false, location, result);
 					if (StringUtils.isNotBlank(value)) {
 						pathItem.setSummary(value);
@@ -1031,12 +1023,12 @@ public class OpenAPIDeserializer {
 		}
 
 		ArrayNode parameters = getArray("parameters", obj, false, location, result);
-		if (parameters != null && parameters.size() > 0) {
+		if (parameters != null && !parameters.isEmpty()) {
 			pathItem.setParameters(getParameterList(parameters, location, result));
 		}
 
 		ArrayNode servers = getArray("servers", obj, false, location, result);
-		if (servers != null && servers.size() > 0) {
+		if (servers != null && !servers.isEmpty()) {
 			pathItem.setServers(getServersList(servers, location, result));
 		}
 
@@ -1098,7 +1090,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(obj);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			pathItem.setExtensions(extensions);
 		}
 
@@ -1132,7 +1124,7 @@ public class OpenAPIDeserializer {
 			}
 
 			Map<String, Object> extensions = getExtensions(node);
-			if (extensions != null && extensions.size() > 0) {
+			if (extensions != null && !extensions.isEmpty()) {
 				externalDocs.setExtensions(extensions);
 			}
 
@@ -1264,7 +1256,7 @@ public class OpenAPIDeserializer {
 			info.setDescription(value);
 		}
 
-		if(result.isOpenapi31()) {
+		if (result.isOpenapi31()) {
 			value = getString("summary", node, false, location, result);
 			if (StringUtils.isNotBlank(value)) {
 				info.setSummary(value);
@@ -1293,7 +1285,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			info.setExtensions(extensions);
 		}
 
@@ -1347,7 +1339,7 @@ public class OpenAPIDeserializer {
 
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			license.setExtensions(extensions);
 		}
 
@@ -1390,7 +1382,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			contact.setExtensions(extensions);
 		}
 
@@ -1450,7 +1442,7 @@ public class OpenAPIDeserializer {
 
                 null;
 
-            if( mediaTypeProperties != null) {
+            if ( mediaTypeProperties != null) {
                 // ... report an error if an encoding is specified for an undefined property
                 mediaType.getEncoding().keySet().stream()
                     .filter( ep -> !mediaTypeProperties.contains( ep))
@@ -1458,7 +1450,7 @@ public class OpenAPIDeserializer {
             }
 		}
 		Map<String, Object> extensions = getExtensions(contentNode);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			mediaType.setExtensions(extensions);
 		}
 
@@ -1550,7 +1542,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			encoding.setExtensions(extensions);
 		}
 
@@ -1577,7 +1569,7 @@ public class OpenAPIDeserializer {
 		Set<String> linkKeys = getKeys(obj);
 		for (String linkName : linkKeys) {
 			if (underComponents) {
-				if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+				if (!Pattern.matches("^[a-zA-Z0-9.\\-_]+$",
 						linkName)) {
 					result.warning(location, "Link name " + linkName + " doesn't adhere to regular expression " +
 							"^[a-zA-Z0-9\\.\\-_]+$");
@@ -1615,7 +1607,7 @@ public class OpenAPIDeserializer {
 				} else {
 					link.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/links"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/links"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Link");
                 }
 				if (result.isOpenapi31()) {
@@ -1643,7 +1635,7 @@ public class OpenAPIDeserializer {
 
 		ObjectNode parametersObject = getObject("parameters", linkNode, false, location, result);
 		if (parametersObject != null) {
-			link.setParameters(getLinkParameters(parametersObject, location, result));
+			link.setParameters(getLinkParameters(parametersObject));
 		}
 
 		String requestBody = getString("requestBody", linkNode, false, location, result);
@@ -1667,7 +1659,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(linkNode);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			link.setExtensions(extensions);
 		}
 
@@ -1683,8 +1675,7 @@ public class OpenAPIDeserializer {
 		return link;
 	}
 
-	private Map<String, String> getLinkParameters(ObjectNode parametersObject, String location, ParseResult result) {
-
+	private Map<String, String> getLinkParameters(ObjectNode parametersObject) {
 		Map<String, String> linkParameters = new LinkedHashMap<>();
 
 		Set<String> keys = getKeys(parametersObject);
@@ -1707,7 +1698,7 @@ public class OpenAPIDeserializer {
 		Set<String> keys = getKeys(node);
 		for (String key : keys) {
 			if (underComponents) {
-				if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+				if (!Pattern.matches("^[a-zA-Z0-9.\\-_]+$",
 						key)) {
 					result.warning(location, "Callback key " + key + " doesn't adhere to regular expression " +
 							"^[a-zA-Z0-9\\.\\-_]+$");
@@ -1732,36 +1723,34 @@ public class OpenAPIDeserializer {
 		Set<String> keys = getKeys(node);
 		for (String name : keys) {
 			JsonNode value = node.get(name);
-			if (node != null) {
-				JsonNode ref = node.get("$ref");
-				if (ref != null) {
-					if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-						String mungedRef = mungedRef(ref.textValue());
-						if (mungedRef != null) {
-							callback.set$ref(mungedRef);
-						} else {
-							callback.set$ref(ref.textValue());
-						}
-                        if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/callbacks"))) {
-                            result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Callback");
-                        }
-						return callback;
-					} else {
-						result.invalidType(location, "$ref", "string", node);
-						return null;
-					}
-				}
-				if(value.isObject()) {
-					callback.addPathItem(name, getPathItem((ObjectNode) value, location, result));
-				}else{
-					result.invalidType(location, name, "object", value);
-				}
+            JsonNode ref = node.get("$ref");
+            if (ref != null) {
+                if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+                    String mungedRef = mungedRef(ref.textValue());
+                    if (mungedRef != null) {
+                        callback.set$ref(mungedRef);
+                    } else {
+                        callback.set$ref(ref.textValue());
+                    }
+                    if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/callbacks"))) {
+                        result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Callback");
+                    }
+                    return callback;
+                } else {
+                    result.invalidType(location, "$ref", "string", node);
+                    return null;
+                }
+            }
+            if (value.isObject()) {
+                callback.addPathItem(name, getPathItem((ObjectNode) value, location, result));
+            } else {
+                result.invalidType(location, name, "object", value);
+            }
 
-				Map<String, Object> extensions = getExtensions(node);
-				if (extensions != null && extensions.size() > 0) {
-					callback.setExtensions(extensions);
-				}
-			}
+            Map<String, Object> extensions = getExtensions(node);
+            if (extensions != null && !extensions.isEmpty()) {
+                callback.setExtensions(extensions);
+            }
 		}
 
 		return callback;
@@ -1799,7 +1788,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			xml.setExtensions(extensions);
 		}
 
@@ -1901,8 +1890,6 @@ public class OpenAPIDeserializer {
 			return null;
 		}
 		Map<String, Parameter> parameters = new LinkedHashMap<>();
-		Set<String> filter = new HashSet<>();
-		Parameter parameter = null;
 
 		Set<String> parameterKeys = getKeys(obj);
 		for (String parameterName : parameterKeys) {
@@ -1918,7 +1905,7 @@ public class OpenAPIDeserializer {
 			if (parameterValue.getNodeType().equals(JsonNodeType.OBJECT)) {
 				ObjectNode parameterObj = (ObjectNode) parameterValue;
 				if (parameterObj != null) {
-					parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName),
+                    Parameter parameter = getParameter(parameterObj, String.format("%s.%s", location, parameterName),
 							result);
 					if (parameter != null) {
 						if (PATH_PARAMETER.equalsIgnoreCase(parameter.getIn()) && Boolean.FALSE.equals(parameter.getRequired())) {
@@ -1995,7 +1982,7 @@ public class OpenAPIDeserializer {
                 }else {
                     parameter.set$ref(ref.textValue());
                 }
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Parameter/Header");
                 }
 				if (result.isOpenapi31()) {
@@ -2011,7 +1998,7 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		String l = null;
+		String l;
 		JsonNode ln = obj.get("name");
 		if (ln != null) {
 			l = ln.asText();
@@ -2104,15 +2091,15 @@ public class OpenAPIDeserializer {
 		ObjectNode contentNode = getObject("content", obj, false, location, result);
 		if (contentNode != null) {
             Content content = getContent(contentNode, String.format("%s.%s", location, "content"), result);
-            if(content.size() == 0) {
+            if (content.isEmpty()) {
                 result.unsupported(location,"content with no media type",contentNode);
                 result.invalid();
             }
-            else if(content.size() > 1) {
+            else if (content.size() > 1) {
                 result.unsupported(location,"content with multiple media types",contentNode);
                 result.invalid();
             }
-            else if(parameter.getSchema() != null) {
+            else if (parameter.getSchema() != null) {
                 result.unsupported(location,"content when schema defined",contentNode);
                 result.invalid();
             }
@@ -2120,7 +2107,7 @@ public class OpenAPIDeserializer {
                 parameter.setContent(content);
             }
 		}
-        else if(parameter.getSchema() == null) {
+        else if (parameter.getSchema() == null) {
             result.missing(location,"content");
         }
 
@@ -2139,7 +2126,7 @@ public class OpenAPIDeserializer {
         }
 
 		Map<String, Object> extensions = getExtensions(obj);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			parameter.setExtensions(extensions);
 		}
 
@@ -2166,7 +2153,7 @@ public class OpenAPIDeserializer {
 		Set<String> headerKeys = getKeys(obj);
 		for (String headerName : headerKeys) {
 			if (underComponents) {
-				if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+				if (!Pattern.matches("^[a-zA-Z0-9.\\-_]+$",
 						headerName)) {
 					result.warning(location, "Header name " + headerName + " doesn't adhere to regular expression " +
 							"^[a-zA-Z0-9\\.\\-_]+$");
@@ -2204,7 +2191,7 @@ public class OpenAPIDeserializer {
 				} else {
 					header.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Header/Parameter");
                 }
 
@@ -2271,7 +2258,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(headerNode);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			header.setExtensions(extensions);
 		}
 
@@ -2296,27 +2283,14 @@ public class OpenAPIDeserializer {
 				Integer integerExample = getInteger(nodeKey, node, false, location, result);
 				if (integerExample != null) {
 					return integerExample;
-				} else {
-					BigDecimal bigDecimalExample = getBigDecimal(nodeKey, node, false, location, result);
-					if (bigDecimalExample != null) {
-						return bigDecimalExample;
-					}
 				}
+                return getBigDecimal(nodeKey, node, false, location, result);
 			} else if (example.getNodeType().equals(JsonNodeType.OBJECT)) {
-				ObjectNode objectValue = getObject(nodeKey, node, false, location, result);
-				if (objectValue != null) {
-					return objectValue;
-				}
+                return getObject(nodeKey, node, false, location, result);
 			} else if (example.getNodeType().equals(JsonNodeType.ARRAY)) {
-				ArrayNode arrayValue = getArray(nodeKey, node, false, location, result);
-				if (arrayValue != null) {
-					return arrayValue;
-				}
+                return getArray(nodeKey, node, false, location, result);
 			} else if (example.getNodeType().equals(JsonNodeType.BOOLEAN)) {
-				Boolean bool = getBoolean(nodeKey, node, false, location, result);
-				if (bool != null) {
-					return bool;
-				}
+                return getBoolean(nodeKey, node, false, location, result);
 			} else if (example.getNodeType().equals(JsonNodeType.NULL)) {
 				return example;
 			}
@@ -2334,7 +2308,7 @@ public class OpenAPIDeserializer {
 		Set<String> securitySchemeKeys = getKeys(obj);
 		for (String securitySchemeName : securitySchemeKeys) {
 			if (underComponents) {
-				if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+				if (!Pattern.matches("^[a-zA-Z0-9.\\-_]+$",
 						securitySchemeName)) {
 					result.warning(location, "SecurityScheme name " + securitySchemeName + " doesn't adhere to " +
 							"regular expression ^[a-zA-Z0-9\\.\\-_]+$");
@@ -2370,7 +2344,7 @@ public class OpenAPIDeserializer {
 				} else {
 					securityScheme.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/securitySchemes"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/securitySchemes"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type securitySchemes");
                 }
 				if (result.isOpenapi31()) {
@@ -2386,10 +2360,8 @@ public class OpenAPIDeserializer {
 			}
 		}
 
-		boolean descriptionRequired, bearerFormatRequired, nameRequired, inRequired, schemeRequired, flowsRequired,
-				openIdConnectRequired;
-		descriptionRequired = bearerFormatRequired = nameRequired = inRequired = schemeRequired = flowsRequired =
-				openIdConnectRequired = false;
+		boolean nameRequired, inRequired, schemeRequired, flowsRequired, openIdConnectRequired;
+        nameRequired = inRequired = schemeRequired = flowsRequired = openIdConnectRequired = false;
 
 		String value = getString("type", node, true, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
@@ -2411,7 +2383,7 @@ public class OpenAPIDeserializer {
 				result.invalidType(location + ".type", "type", "http|apiKey|oauth2|openIdConnect|mutualTLS ", node);
 			}
 		}
-		value = getString("description", node, descriptionRequired, location, result);
+		value = getString("description", node, false, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			securityScheme.setDescription(value);
 		}
@@ -2437,7 +2409,7 @@ public class OpenAPIDeserializer {
 			securityScheme.setScheme(value);
 		}
 
-		value = getString("bearerFormat", node, bearerFormatRequired, location, result);
+		value = getString("bearerFormat", node, false, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			securityScheme.setBearerFormat(value);
 		}
@@ -2453,7 +2425,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			securityScheme.setExtensions(extensions);
 		}
 
@@ -2496,7 +2468,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			oAuthFlows.setExtensions(extensions);
 		}
 
@@ -2519,9 +2491,8 @@ public class OpenAPIDeserializer {
 
 		OAuthFlow oAuthFlow = new OAuthFlow();
 
-		boolean authorizationUrlRequired, tokenUrlRequired, refreshUrlRequired, scopesRequired;
-		authorizationUrlRequired = tokenUrlRequired = refreshUrlRequired = false;
-		scopesRequired = true;
+		boolean authorizationUrlRequired, tokenUrlRequired;
+		authorizationUrlRequired = tokenUrlRequired = false;
 		switch (oAuthFlowType) {
 			case "implicit":
 				authorizationUrlRequired = true;
@@ -2547,12 +2518,12 @@ public class OpenAPIDeserializer {
 			oAuthFlow.setTokenUrl(value);
 		}
 
-		value = getString("refreshUrl", node, refreshUrlRequired, location, result);
+		value = getString("refreshUrl", node, false, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			oAuthFlow.setRefreshUrl(value);
 		}
 
-		ObjectNode scopesObject = getObject("scopes", node, scopesRequired, location, result);
+		ObjectNode scopesObject = getObject("scopes", node, true, location, result);
 
 		Scopes scope = new Scopes();
 		Set<String> keys = getKeys(scopesObject);
@@ -2565,7 +2536,7 @@ public class OpenAPIDeserializer {
 		oAuthFlow.setScopes(scope);
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			oAuthFlow.setExtensions(extensions);
 		}
 
@@ -2629,12 +2600,12 @@ public class OpenAPIDeserializer {
 			discriminator.setMapping(mapping);
 		}
 
-		if(result.isOpenapi31()) {
+		if (result.isOpenapi31()) {
 			Set<String> keys = getKeys(node);
 			for (String key : keys) {
 				if (key.startsWith("x-")) {
 					Map<String, Object> extensions = getExtensions(node);
-					if (extensions != null && extensions.size() > 0) {
+					if (extensions != null && !extensions.isEmpty()) {
 						discriminator.setExtensions(extensions);
 					}
 				}
@@ -2693,7 +2664,7 @@ public class OpenAPIDeserializer {
 
 				for (JsonNode n : allOfArray) {
 					if (n.isObject()) {
-						schema = getSchema((ObjectNode) n, location, result);
+						schema = getSchema(n, location, result);
 						composedSchema.addAllOfItem(schema);
 					}
 				}
@@ -2703,7 +2674,7 @@ public class OpenAPIDeserializer {
 
 				for (JsonNode n : anyOfArray) {
 					if (n.isObject()) {
-						schema = getSchema((ObjectNode) n, location, result);
+						schema = getSchema(n, location, result);
 						composedSchema.addAnyOfItem(schema);
 					}
 				}
@@ -2713,7 +2684,7 @@ public class OpenAPIDeserializer {
 
 				for (JsonNode n : oneOfArray) {
 					if (n.isObject()) {
-						schema = getSchema((ObjectNode) n, location, result);
+						schema = getSchema(n, location, result);
 						composedSchema.addOneOfItem(schema);
 					}
 				}
@@ -2811,11 +2782,11 @@ public class OpenAPIDeserializer {
                  * need to evaluate json pointer instead to also allow validation of nested schemas
                  * e.g. #/components/schemas/foo/properties/bar
                  */
-                if(schema.get$ref().startsWith("#/components/schemas") && StringUtils.countMatches(schema.get$ref(), "/") == 3){
+                if (schema.get$ref().startsWith("#/components/schemas") && StringUtils.countMatches(schema.get$ref(), "/") == 3){
                     String refName  = schema.get$ref().substring(schema.get$ref().lastIndexOf("/")+1);
                     localSchemaRefs.put(refName,location);
                 }
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Schema");
                 }
 				return schema;
@@ -2891,7 +2862,7 @@ public class OpenAPIDeserializer {
 
 		Map<String, Schema> properties = new LinkedHashMap<>();
 		ObjectNode propertiesObj = getObject("properties", node, false, location, result);
-		Schema property = null;
+		Schema property;
 
 		Set<String> keys = getKeys(propertiesObj);
 		for (String name : keys) {
@@ -2900,7 +2871,7 @@ public class OpenAPIDeserializer {
 				result.invalidType(location, "properties", "object", propertyValue);
 			} else {
 				if (propertiesObj != null) {
-					property = getSchema((ObjectNode) propertyValue, location, result);
+					property = getSchema(propertyValue, location, result);
 					if (property != null) {
 						properties.put(name, property);
 					}
@@ -2961,7 +2932,7 @@ public class OpenAPIDeserializer {
             if (defaultObject != null) {
                 schema.setDefault(defaultObject);
             }
-		}else{
+		} else {
 			schema.setDefault(null);
 		}
 
@@ -2971,7 +2942,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			schema.setExtensions(extensions);
 		}
 
@@ -3064,7 +3035,7 @@ public class OpenAPIDeserializer {
                     result.invalidType(location, "required", "string", n);
                 }
             }
-            if (requiredList.size() > 0) {
+            if (!requiredList.isEmpty()) {
                 schema.setRequired(requiredList);
             }
         }
@@ -3091,9 +3062,8 @@ public class OpenAPIDeserializer {
 
         bool =
                 Optional.ofNullable(getBoolean("writeOnly", node, false, location, result)).orElse(false) && Optional.ofNullable(getBoolean("readOnly", node, false, location, result)).orElse(false);
-        if (bool == true) {
+        if (bool) {
             result.warning(location, " writeOnly and readOnly are both present");
-
         }
 
         ObjectNode xmlNode = getObject("xml", node, false, location, result);
@@ -3251,7 +3221,7 @@ public class OpenAPIDeserializer {
 		Set<String> exampleKeys = getKeys(obj);
 		for (String exampleName : exampleKeys) {
 			if (underComponents) {
-				if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+				if (!Pattern.matches("^[a-zA-Z0-9.\\-_]+$",
 						exampleName)) {
 					result.warning(location, "Example name " + exampleName + " doesn't adhere to regular " +
 							"expression ^[a-zA-Z0-9\\.\\-_]+$");
@@ -3305,10 +3275,10 @@ public class OpenAPIDeserializer {
 				} else {
 					example.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/examples"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/examples"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Examples");
                 }
-                if(result.isOpenapi31()){
+                if (result.isOpenapi31()){
                     String value = getString("summary", node, false, location, result);
                     if (StringUtils.isNotBlank(value)) {
                         example.setSummary(value);
@@ -3350,7 +3320,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			example.setExtensions(extensions);
 		}
 
@@ -3415,7 +3385,7 @@ public class OpenAPIDeserializer {
 
 			if (key.startsWith("x-")) {
 				Map<String, Object> extensions = getExtensions(node);
-				if (extensions != null && extensions.size() > 0) {
+				if (extensions != null && !extensions.isEmpty()) {
 					apiResponses.setExtensions(extensions);
 				}
 			} else {
@@ -3447,10 +3417,10 @@ public class OpenAPIDeserializer {
 				} else {
 					apiResponse.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/responses"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/responses"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Response");
                 }
-				if(result.isOpenapi31()){
+				if (result.isOpenapi31()){
 					String value = getString("description", node, false, location, result);
 					if (StringUtils.isNotBlank(value)) {
 						apiResponse.setDescription(value);
@@ -3472,7 +3442,7 @@ public class OpenAPIDeserializer {
 		ObjectNode headerObject = getObject("headers", node, false, location, result);
 		if (headerObject != null) {
 			Map<String, Header> headers = getHeaders(headerObject, String.format("%s.%s", location, "headers"), result, false);
-			if (headers != null && headers.size() > 0) {
+			if (headers != null && !headers.isEmpty()) {
 				apiResponse.setHeaders(headers);
 			}
 		}
@@ -3480,7 +3450,7 @@ public class OpenAPIDeserializer {
 		ObjectNode linksObj = getObject("links", node, false, location, result);
 		if (linksObj != null) {
 			Map<String, Link> links = getLinks(linksObj, String.format("%s.%s", location, "links"), result, false);
-			if (links != null && links.size() > 0) {
+			if (links != null && !links.isEmpty()) {
 				apiResponse.setLinks(links);
 			}
 		}
@@ -3491,7 +3461,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			apiResponse.setExtensions(extensions);
 		}
 
@@ -3508,7 +3478,7 @@ public class OpenAPIDeserializer {
 		return apiResponse;
 	}
 
-	public List<String> getTagsStrings(ArrayNode nodes, String location, ParseResult result) {
+	public List<String> getTagsStrings(ArrayNode nodes) {
 		if (nodes == null)
 			return null;
 
@@ -3529,7 +3499,7 @@ public class OpenAPIDeserializer {
 		Operation operation = new Operation();
 
 		ArrayNode array = getArray("tags", obj, false, location, result);
-		List<String> tags = getTagsStrings(array, String.format("%s.%s", location, "tags"), result);
+		List<String> tags = getTagsStrings(array);
 		if (tags != null) {
 			operation.setTags(tags);
 		}
@@ -3586,7 +3556,7 @@ public class OpenAPIDeserializer {
 		}
 
 		array = getArray("servers", obj, false, location, result);
-		if (array != null && array.size() > 0) {
+		if (array != null && !array.isEmpty()) {
 			operation.setServers(getServersList(array, String.format("%s.%s", location, "servers"), result));
 		}
 
@@ -3599,7 +3569,7 @@ public class OpenAPIDeserializer {
 
 
 		Map<String, Object> extensions = getExtensions(obj);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			operation.setExtensions(extensions);
 		}
 
@@ -3625,24 +3595,24 @@ public class OpenAPIDeserializer {
 			if (node.getNodeType().equals(JsonNodeType.OBJECT)) {
 				SecurityRequirement securityRequirement = new SecurityRequirement();
 				Set<String> keys = getKeys((ObjectNode) node);
-				if (keys.size() == 0) {
+				if (keys.isEmpty()) {
 					securityRequirements.add(securityRequirement);
 				} else {
 					for (String key : keys) {
 						if (key != null) {
 							JsonNode value = node.get(key);
-							if (key != null && JsonNodeType.ARRAY.equals(value.getNodeType())) {
+							if (JsonNodeType.ARRAY.equals(value.getNodeType())) {
 								ArrayNode arrayNode = (ArrayNode) value;
 								List<String> scopes = Stream
 										.generate(arrayNode.elements()::next)
-										.map((n) -> n.asText())
+										.map(JsonNode::asText)
 										.limit(arrayNode.size())
 										.collect(Collectors.toList());
 								securityRequirement.addList(key, scopes);
 							}
 						}
 					}
-					if (securityRequirement.size() > 0) {
+					if (!securityRequirement.isEmpty()) {
 						securityRequirements.add(securityRequirement);
 					}
 				}
@@ -3663,7 +3633,7 @@ public class OpenAPIDeserializer {
 		Set<String> bodyKeys = getKeys(obj);
 		for (String bodyName : bodyKeys) {
 			if (underComponents) {
-				if (!Pattern.matches("^[a-zA-Z0-9\\.\\-_]+$",
+				if (!Pattern.matches("^[a-zA-Z0-9.\\-_]+$",
 						bodyName)) {
 					result.warning(location, "RequestBody name " + bodyName + " doesn't adhere to regular " +
 							"expression ^[a-zA-Z0-9\\.\\-_]+$");
@@ -3700,7 +3670,7 @@ public class OpenAPIDeserializer {
 				} else {
 					body.set$ref(ref.textValue());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/requestBodies"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/requestBodies"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type RequestBody");
                 }
 				if (result.isOpenapi31()) {
@@ -3729,7 +3699,7 @@ public class OpenAPIDeserializer {
 
 		final ObjectNode contentNode = getObject("content", node, true, location, result);
         Content content = getContent(contentNode, location + ".content", result);
-		if(content != null && content.isEmpty()) {
+		if (content != null && content.isEmpty()) {
             result.unsupported(location,"content with no media type",contentNode);
             result.invalid();
         }
@@ -3738,7 +3708,7 @@ public class OpenAPIDeserializer {
         }
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			body.setExtensions(extensions);
 		}
 
@@ -3754,7 +3724,7 @@ public class OpenAPIDeserializer {
 	}
 
 	public String inferTypeFromArray(ArrayNode an) {
-		if (an.size() == 0) {
+		if (an.isEmpty()) {
 			return "string";
 		}
 		String type = null;
@@ -3840,7 +3810,7 @@ public class OpenAPIDeserializer {
         if (boolValue != null) {
             return new JsonSchema().booleanSchemaValue(boolValue);
         }
-        ObjectNode node = null;
+        ObjectNode node;
         if (jsonNode.isObject()) {
             node = (ObjectNode) jsonNode;
         } else {
@@ -3913,7 +3883,7 @@ public class OpenAPIDeserializer {
 
 				if (location.startsWith("paths")) {
 					try {
-						String components[] = ref.asText().split("#/components");
+						String[] components = ref.asText().split("#/components");
 						if ((ref.asText().startsWith("#/components")) && (components.length > 1)) {
 							String[] childComponents = components[1].split("/");
 							String[] newChildComponents = Arrays.copyOfRange(childComponents, 1,
@@ -3936,7 +3906,7 @@ public class OpenAPIDeserializer {
 				} else {
 					schema.set$ref(ref.asText());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
+                if (ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
                     result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Schema");
                 }
 			} else {
@@ -3946,7 +3916,6 @@ public class OpenAPIDeserializer {
 
         getCommonSchemaFields(node, location, result, schema);
         String value;
-        Boolean bool;
         Integer integer;
 
         if (node.get("default") != null) {
@@ -4051,7 +4020,7 @@ public class OpenAPIDeserializer {
 		if (ifObj != null) {
 			Schema _if = getJsonSchema(ifObj, location, result);
 			if (_if != null) {
-				schema.setIf(_if);
+                schema.setIf(_if);
 			}
 		}
 
@@ -4109,7 +4078,7 @@ public class OpenAPIDeserializer {
 		Map<String, Schema> dependentSchemasList = new LinkedHashMap<>();
 		ObjectNode dependentSchemasObj = getObject("dependentSchemas", node, false, location, result);
         if (dependentSchemasObj != null) {
-            Schema dependentSchemas = null;
+            Schema dependentSchemas;
 
             Set<String> dependentSchemasKeys = getKeys(dependentSchemasObj);
             for (String name : dependentSchemasKeys) {
@@ -4126,12 +4095,11 @@ public class OpenAPIDeserializer {
 
 		//prefixItems
 		ArrayNode prefixItemsArray = getArray("prefixItems", node, false, location, result);
-		if(prefixItemsArray != null) {
-			Schema prefixItems = new JsonSchema();
+		if (prefixItemsArray != null) {
 
 			List<Schema> prefixItemsList = new ArrayList<>();
 			for (JsonNode n : prefixItemsArray) {
-                prefixItems = getJsonSchema(n, location, result);
+                Schema prefixItems = getJsonSchema(n, location, result);
                 if (prefixItems != null) {
                     prefixItemsList.add(prefixItems);
                 }
@@ -4151,13 +4119,12 @@ public class OpenAPIDeserializer {
 
 		Map<String, Schema> properties = new LinkedHashMap<>();
 		ObjectNode propertiesObj = getObject("properties", node, false, location, result);
-		Schema property = null;
 
 		Set<String> keys = getKeys(propertiesObj);
 		for (String name : keys) {
 			JsonNode propertyValue = propertiesObj.get(name);
             if (propertiesObj != null) {
-                property = getJsonSchema(propertyValue, location, result);
+                Schema property = getJsonSchema(propertyValue, location, result);
                 if (property != null) {
                     properties.put(name, property);
                 }
@@ -4169,13 +4136,12 @@ public class OpenAPIDeserializer {
 
 		Map<String, Schema> patternProperties = new LinkedHashMap<>();
 		ObjectNode patternPropertiesObj = getObject("patternProperties", node, false, location, result);
-		Schema patternProperty = null;
 
 		Set<String> patternKeys = getKeys(patternPropertiesObj);
 		for (String name : patternKeys) {
 			JsonNode propertyValue = patternPropertiesObj.get(name);
             if (patternPropertiesObj != null) {
-                patternProperty = getJsonSchema(propertyValue, location, result);
+                Schema patternProperty = getJsonSchema(propertyValue, location, result);
                 if (patternProperty != null) {
                     patternProperties.put(name, patternProperty);
                 }
@@ -4207,7 +4173,7 @@ public class OpenAPIDeserializer {
 				exampleList.add(item);
 			}
 		}
-		if(exampleList.size() > 0){
+		if (!exampleList.isEmpty()){
 			schema.setExamples(exampleList);
 		}
 
@@ -4242,7 +4208,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
-		if (extensions != null && extensions.size() > 0) {
+		if (extensions != null && !extensions.isEmpty()) {
 			schema.setExtensions(extensions);
 		}
 
@@ -4371,44 +4337,44 @@ public class OpenAPIDeserializer {
 		}
 
 		public List<String> getMessages() {
-			List<String> messages = new ArrayList<String>();
+			List<String> messages = new ArrayList<>();
 			for (Location l : extra.keySet()) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is unexpected";
 				messages.add(message);
 			}
 			for (Location l : invalidType.keySet()) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is not of type `" + invalidType.get(l) + "`";
 				messages.add(message);
 			}
 			for (Location l : missing) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is missing";
 				messages.add(message);
 			}
 			for (Location l : warnings) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = location + l.key;
 				messages.add(message);
 			}
 			for (Location l : unsupported.keySet()) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is unsupported";
 				messages.add(message);
 			}
 			for (Location l : unique) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is repeated";
 				messages.add(message);
 			}
 			for (Location l : uniqueTags) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is repeated";
 				messages.add(message);
 			}
 			for (Location l : reserved) {
-				String location = l.location.equals("") ? "" : l.location + ".";
+				String location = l.location.isEmpty() ? "" : l.location + ".";
 				String message = "attribute " + location + l.key + " is reserved by The OpenAPI Initiative";
 				messages.add(message);
 			}
