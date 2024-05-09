@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  title: Minimal OpenAPI 3.0 with allOf
+  version: 1.0.0
+paths:
+  /pets:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetCreate'
+      responses:
+        '201':
+          description: Created
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+    Cow:
+      type: object
+    PetCreate:
+      required:
+        - name
+      allOf:
+        - anyOf:
+            - $ref: '#/components/schemas/Pet'
+            - $ref: '#/components/schemas/Cow'
+        - properties:
+            name:
+              type: string
