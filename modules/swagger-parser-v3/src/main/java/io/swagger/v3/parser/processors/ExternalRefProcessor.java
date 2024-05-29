@@ -34,6 +34,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -325,71 +326,75 @@ public final class ExternalRefProcessor {
         cache.putRenamedRef($ref, newRef);
 
         if(pathItem != null) {
-            if(pathItem.readOperationsMap() != null) {
-                final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
-                for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
-                    Operation operation = operationMap.get(httpMethod);
-                    if (operation.getResponses() != null) {
-                        final Map<String, ApiResponse> responses = operation.getResponses();
-                        if (responses != null) {
-                            for (String responseCode : responses.keySet()) {
-                                ApiResponse response = responses.get(responseCode);
-                                if (response != null) {
-                                    Schema schema = null;
-                                    if (response.getContent() != null) {
-                                        Map<String, MediaType> content = response.getContent();
-                                        for (String mediaName : content.keySet()) {
-                                            MediaType mediaType = content.get(mediaName);
-                                            if (mediaType.getSchema() != null) {
-                                                schema = mediaType.getSchema();
-                                                if (schema != null) {
-                                                    processRefSchemaObject(mediaType.getSchema(), $ref);
-                                                }
-                                                if (mediaType.getExamples() != null) {
-                                                    processRefExamples(mediaType.getExamples(), $ref);
-                                                }
-
-                                            }
-                                        }
-                                    }
-                                    if (response.getLinks() != null) {
-                                        processRefLinks(response.getLinks(), $ref);
-                                    }
-                                    if (response.getHeaders() != null) {
-                                        processRefHeaders(response.getHeaders(), $ref);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (operation.getRequestBody() != null) {
-                        RequestBody body = operation.getRequestBody();
-                        if (body.getContent() != null) {
-                            Schema schema;
-                            Map<String, MediaType> content = body.getContent();
-                            for (String mediaName : content.keySet()) {
-                                MediaType mediaType = content.get(mediaName);
-                                if (mediaType.getSchema() != null) {
-                                    schema = mediaType.getSchema();
-                                    if (schema != null) {
-                                        processRefSchemaObject(mediaType.getSchema(), $ref);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    final List<Parameter> parameters = operation.getParameters();
-                    if (parameters != null) {
-                        parameters.stream()
-                            .filter(parameter -> parameter.getSchema() != null)
-                            .forEach(parameter -> this.processRefSchemaObject(parameter.getSchema(), $ref));
-                    }
-                }
-            }
+            processPathItem(pathItem, $ref);
         }
 
         return pathItem;
+    }
+
+    private void processPathItem(PathItem pathItem, String $ref) {
+        if(pathItem.readOperationsMap() != null) {
+            final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
+            for (PathItem.HttpMethod httpMethod : operationMap.keySet()) {
+                Operation operation = operationMap.get(httpMethod);
+                if (operation.getResponses() != null) {
+                    final Map<String, ApiResponse> responses = operation.getResponses();
+                    if (responses != null) {
+                        for (String responseCode : responses.keySet()) {
+                            ApiResponse response = responses.get(responseCode);
+                            if (response != null) {
+                                Schema schema = null;
+                                if (response.getContent() != null) {
+                                    Map<String, MediaType> content = response.getContent();
+                                    for (String mediaName : content.keySet()) {
+                                        MediaType mediaType = content.get(mediaName);
+                                        if (mediaType.getSchema() != null) {
+                                            schema = mediaType.getSchema();
+                                            if (schema != null) {
+                                                processRefSchemaObject(mediaType.getSchema(), $ref);
+                                            }
+                                            if (mediaType.getExamples() != null) {
+                                                processRefExamples(mediaType.getExamples(), $ref);
+                                            }
+
+                                        }
+                                    }
+                                }
+                                if (response.getLinks() != null) {
+                                    processRefLinks(response.getLinks(), $ref);
+                                }
+                                if (response.getHeaders() != null) {
+                                    processRefHeaders(response.getHeaders(), $ref);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (operation.getRequestBody() != null) {
+                    RequestBody body = operation.getRequestBody();
+                    if (body.getContent() != null) {
+                        Schema schema;
+                        Map<String, MediaType> content = body.getContent();
+                        for (String mediaName : content.keySet()) {
+                            MediaType mediaType = content.get(mediaName);
+                            if (mediaType.getSchema() != null) {
+                                schema = mediaType.getSchema();
+                                if (schema != null) {
+                                    processRefSchemaObject(mediaType.getSchema(), $ref);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                final List<Parameter> parameters = operation.getParameters();
+                if (parameters != null) {
+                    parameters.stream()
+                        .filter(parameter -> parameter.getSchema() != null)
+                        .forEach(parameter -> this.processRefSchemaObject(parameter.getSchema(), $ref));
+                }
+            }
+        }
     }
 
     private void processDiscriminator(Discriminator d, String file) {
@@ -925,6 +930,24 @@ public final class ExternalRefProcessor {
                         callback.set$ref(processRefToExternalCallback(callback.get$ref(), format));
                     } else {
                         processRefToExternalCallback(file + callback.get$ref(), RefFormat.RELATIVE);
+                    }
+                }
+            } else {
+                for (String path : callback.keySet()) {
+                    PathItem pathItem = callback.get(path);
+                    if(pathItem != null) {
+                        if (pathItem.get$ref() != null) {
+                            RefFormat pathRefFormat = computeRefFormat(pathItem.get$ref());
+                            String path$ref = pathItem.get$ref();
+                            if (isAnExternalRefFormat(refFormat)) {
+                                pathItem = this.processRefToExternalPathItem(path$ref, pathRefFormat);
+                            } else {
+                                pathItem = cache.loadRef(pathItem.get$ref(), refFormat, PathItem.class);
+                            }
+                            callback.put(path, pathItem);
+                        } else {
+                            this.processPathItem(pathItem, $ref);
+                        }
                     }
                 }
             }

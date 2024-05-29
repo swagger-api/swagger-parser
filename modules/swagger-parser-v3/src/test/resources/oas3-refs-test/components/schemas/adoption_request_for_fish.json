@@ -1,0 +1,19 @@
+{
+    "allOf": [
+        {
+            "$ref": "./adoption_request.json"
+        },
+        {
+            "title": "Adoption Request for Fish",
+            "description": "A fish adoption request.",
+            "type": "object",
+            "properties": {
+                "have_aquarium": {
+                    "description": "Indicates if the adopter has an aquarium.",
+                    "type": "boolean",
+                    "x-redacted": false
+                }
+            }
+        }
+    ]
+}

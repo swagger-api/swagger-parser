@@ -19,8 +19,12 @@ import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
 import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
@@ -155,6 +159,9 @@ public class PathsProcessor {
                 for (String name : callbacks.keySet()) {
                     Callback callback = callbacks.get(name);
                     if (callback != null) {
+                        if(callback.get$ref() != null) {
+                            callback.set$ref(computeRef(callback.get$ref(), pathRef));
+                        }
                         for(String callbackName : callback.keySet()) {
                             PathItem pathItem = callback.get(callbackName);
                             updateRefs(pathItem,pathRef);

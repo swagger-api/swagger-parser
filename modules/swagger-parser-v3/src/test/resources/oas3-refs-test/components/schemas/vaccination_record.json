@@ -1,0 +1,37 @@
+{
+    "title": "Vaccination Record",
+    "description": "Record of an administered vaccination.",
+    "type": "object",
+    "required": [
+        "id",
+        "vaccine_name",
+        "administration_date"
+    ],
+    "properties": {
+        "id": {
+            "allOf": [
+                {
+                    "$ref": "./correlation_id.json"
+                },
+                {
+                    "description": "Unique ID of a vaccination.",
+                    "x-redacted": true
+                }
+            ]
+        },
+        "vaccine_name": {
+            "$ref": "./vaccine_name.json"
+        },
+        "administration_date": {
+            "allOf": [
+                {
+                    "$ref": "./date_no_time.json"
+                },
+                {
+                    "description": "Date vaccine administered.",
+                    "x-redacted": true
+                }
+            ]
+        }
+    }
+}
