@@ -1,0 +1,8 @@
+{
+    "title": "Correlation Id",
+    "description": "A correlation id used for debugging.",
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 100,
+    "pattern": "^.*$"
+}

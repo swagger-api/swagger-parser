@@ -1,0 +1,15 @@
+{
+    "name": "Correlation-Id",
+    "in": "header",
+    "description": "Correlation ID for distributed tracing.",
+    "required": false,
+    "schema": {
+        "$ref": "../../../schemas/correlation_id.json"
+    },
+    "examples": {
+        "correlation_id": {
+            "$ref": "../../../examples/parameter/header/correlation_id.json"
+        }
+    },
+    "x-redacted": true
+}

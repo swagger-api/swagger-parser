@@ -1,0 +1,24 @@
+{
+    "allOf": [
+        {
+            "$ref": "./adoption_request.json"
+        },
+        {
+            "title": "Adoption Request for Lizard",
+            "description": "A lizard adoption request.",
+            "type": "object",
+            "properties": {
+                "have_terrarium": {
+                    "description": "Indicates if the adopter has a terrarium.",
+                    "type": "boolean",
+                    "x-redacted": false
+                },
+                "have_heat_lamp": {
+                    "description": "Indicates if the adopter has a heat lamp.",
+                    "type": "boolean",
+                    "x-redacted": true
+                }
+            }
+        }
+    ]
+}

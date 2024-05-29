@@ -1,0 +1,93 @@
+{
+    "title": "Link Description",
+    "description": "The request-related [HATEOAS link](/api/rest/responses/#hateoas-links) information.",
+    "type": "object",
+    "required": [
+        "href",
+        "rel"
+    ],
+    "properties": {
+        "href": {
+            "description": "The complete target URL. To make the related call, combine the method with this [URI Template-formatted](https://tools.ietf.org/html/rfc6570) link. For pre-processing, include the `$`, `(`, and `)` characters. The `href` is the key HATEOAS component that links a completed call with a subsequent call.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 20000,
+            "pattern": "^.*$",
+            "x-redacted": false
+        },
+        "rel": {
+            "description": "The [link relation type](https://tools.ietf.org/html/rfc5988#section-4), which serves as an ID for a link that unambiguously describes the semantics of the link. See [Link Relations](https://www.iana.org/assignments/link-relations/link-relations.xhtml).",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 100,
+            "pattern": "^.*$",
+            "x-redacted": false
+        },
+        "method": {
+            "description": "The HTTP method required to make the related call.",
+            "type": "string",
+            "enum": [
+                "CONNECT",
+                "DELETE",
+                "GET",
+                "HEAD",
+                "OPTIONS",
+                "PATCH",
+                "POST",
+                "PUT"
+            ],
+            "x-redacted": false
+        },
+        "title": {
+            "description": "The link title.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1000,
+            "pattern": "^.*$",
+            "x-redacted": false
+        },
+        "mediaType": {
+            "description": "The media type, as defined by [RFC 2046](https://www.ietf.org/rfc/rfc2046.txt). Describes the link target.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255,
+            "pattern": "^[a-zA-Z\\-/\\.0-9\\+]+$",
+            "x-redacted": true
+        },
+        "encType": {
+            "description": "The media type in which to submit the request data.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255,
+            "pattern": "^[a-zA-Z\\-/\\.0-9\\+]+$",
+            "default": "application/json",
+            "x-redacted": true
+        },
+        "schema": {
+            "allOf": [
+                {
+                    "$ref": "link_schema.json"
+                },
+                {
+                    "description": "The schema that describes the request data.",
+                    "x-visibility": {
+                        "extent": "INTERNAL"
+                    }
+                }
+            ]
+        },
+        "targetSchema": {
+            "allOf": [
+                {
+                    "$ref": "link_schema.json"
+                },
+                {
+                    "description": "The schema that describes the link target.",
+                    "x-visibility": {
+                        "extent": "INTERNAL"
+                    }
+                }
+            ]
+        }
+    }
+}

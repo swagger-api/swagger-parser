@@ -1,0 +1,57 @@
+{
+    "title": "Error",
+    "description": "The error details.",
+    "type": "object",
+    "required": [
+        "name",
+        "message",
+        "debug_id"
+    ],
+    "properties": {
+        "name": {
+            "description": "The human-readable, unique name of the error.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000,
+            "pattern": "^.*$",
+            "x-redacted": false
+        },
+        "message": {
+            "description": "The message that describes the error.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 100000,
+            "pattern": "^.*$",
+            "x-redacted": true
+        },
+        "debug_id": {
+            "allOf": [
+                {
+                    "$ref": "correlation_id.json"
+                },
+                {
+                    "description": "Trace ID, used for correlation purposes.",
+                    "x-redacted": true
+                }
+            ]
+        },
+        "details": {
+            "description": "An array of additional details about the error.",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10000,
+            "items": {
+                "$ref": "error_details.json"
+            }
+        },
+        "links": {
+            "description": "An array of request-related [HATEOAS links](/api/rest/responses/#hateoas-links).",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10000,
+            "items": {
+                "$ref": "./link_description.json"
+            }
+        }
+    }
+}

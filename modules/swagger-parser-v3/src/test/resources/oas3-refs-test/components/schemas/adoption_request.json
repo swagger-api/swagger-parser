@@ -1,0 +1,54 @@
+{
+    "title": "Adoption Request",
+    "description": "A pet adoption request.",
+    "type": "object",
+    "required": [
+        "animal_type",
+        "pet_id",
+        "adopter_name",
+        "adopter_address"
+    ],
+    "properties": {
+        "animal_type": {
+            "$ref": "./animal_type.json"
+        },
+        "pet_id": {
+            "allOf": [
+                {
+                    "$ref": "correlation_id.json"
+                },
+                {
+                    "title": "Pet Id",
+                    "description": "Unique ID of a pet.",
+                    "x-redacted": true,
+                    "readOnly": true
+                }
+            ]
+        },
+        "adopter_name": {
+            "allOf": [
+                {
+                    "$ref": "vaccine_name.json"
+                },
+                {
+                    "description": "The adopter's name.",
+                    "x-redacted": true
+                }
+            ]
+        },
+        "adopter_alias" : {
+           "$ref": "./alias_array.json"
+        },
+        "adopter_address": {
+            "allOf": [
+                {
+                    "$ref": "full_name.json"
+                },
+                {
+                    "description": "The adopter's address.",
+                    "x-redacted": true
+                }
+            ]
+        }
+    }
+}
