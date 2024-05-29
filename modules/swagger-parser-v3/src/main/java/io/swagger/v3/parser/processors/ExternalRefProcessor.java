@@ -4,10 +4,15 @@ package io.swagger.v3.parser.processors;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -246,9 +251,31 @@ public final class ExternalRefProcessor {
             }
             if (property instanceof ComposedSchema) {
                 ComposedSchema composed = (ComposedSchema) property;
+                final Map<String, String> refMap = Optional.ofNullable(composed.getDiscriminator())
+                                .map(Discriminator::getMapping).orElse(Collections.emptyMap()).entrySet()
+                                .stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+                Map<String, Schema> refCache = (!refMap.isEmpty() &&
+                        (composed.getAnyOf() != null || composed.getOneOf() != null)) ? Stream.of(
+                                composed.getAnyOf(), composed.getOneOf()
+                        )
+                            .filter(Objects::nonNull)
+                            .filter(l -> !l.isEmpty())
+                            .flatMap(Collection::stream)
+                            .filter(s -> s.get$ref() != null)
+                            .collect(Collectors.toMap(Schema::get$ref, Function.identity())) : Collections.emptyMap();
+
                 processProperties(composed.getAllOf(), file);
                 processProperties(composed.getAnyOf(), file);
                 processProperties(composed.getOneOf(), file);
+
+                if (!refMap.isEmpty() && !refCache.isEmpty()) {
+                    refCache.entrySet()
+                            .stream().filter(e -> !e.getKey().equals(e.getValue().get$ref()))
+                            .forEach(entry -> {
+                                String newRef = entry.getValue().get$ref();
+                                property.getDiscriminator().getMapping().put(refMap.get(entry.getKey()), newRef);
+                            });
+                }
             }
         }
     }
