@@ -14,9 +14,12 @@ import io.swagger.v3.parser.models.RefType;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RefUtils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
 import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
@@ -157,33 +160,21 @@ public class SchemaProcessor {
                     }
                 }
             }
-        }if(composedSchema.getOneOf() != null){
-            final List<Schema> schemas = composedSchema.getOneOf();
-            if (schemas != null) {
-                for (Schema schema : schemas) {
-                    if (schema.get$ref() != null) {
-                        String oldRef = schema.get$ref();
-                        processReferenceSchema(schema);
-                        String newRef = schema.get$ref();
-                        changeDiscriminatorMapping(composedSchema, oldRef, newRef);
-                    } else {
-                        processSchemaType(schema);
-                    }
-                }
-            }
-        }if(composedSchema.getAnyOf() != null){
-            final List<Schema> schemas = composedSchema.getAnyOf();
-            if (schemas != null) {
-                for (Schema schema : schemas) {
-                    if (schema.get$ref() != null) {
-                        processReferenceSchema(schema);
-                    } else {
-                        processSchemaType(schema);
-                    }
-                }
-            }
         }
-
+        if(composedSchema.getOneOf() != null || composedSchema.getAnyOf() != null) {
+            Stream.of(composedSchema.getOneOf(), composedSchema.getAnyOf())
+                    .filter(Objects::nonNull).filter(l -> !l.isEmpty()).flatMap(Collection::stream)
+                    .forEach(schema -> {
+                        if (schema.get$ref() != null) {
+                            String oldRef = schema.get$ref();
+                            processReferenceSchema(schema);
+                            String newRef = schema.get$ref();
+                            changeDiscriminatorMapping(composedSchema, oldRef, newRef);
+                        } else {
+                            processSchemaType(schema);
+                        }
+                    });
+        }
     }
 
     private void changeDiscriminatorMapping(ComposedSchema composedSchema, String oldRef, String newRef) {
