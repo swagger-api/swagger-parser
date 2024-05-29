@@ -838,6 +838,9 @@ public final class ExternalRefProcessor {
             if(parameter.getSchema() != null){
                 processRefSchemaObject(parameter.getSchema(), $ref);
             }
+            if(parameter.getExamples() != null) {
+               processRefExamples(parameter.getExamples(), $ref);
+            }
         }
 
         return newRef;
