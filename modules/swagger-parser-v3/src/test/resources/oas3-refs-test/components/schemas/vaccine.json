@@ -1,0 +1,45 @@
+{
+    "title": "Vaccine",
+    "description": "Information about a vaccine that may be administered. Vaccine information is owned by an outside partner. The information is available in the pet store so that employees may administer available vaccines based on the vaccine information.",
+    "type": "object",
+    "required": [
+        "id",
+        "vaccine_name",
+        "number_of_doses"
+    ],
+    "properties": {
+        "id": {
+            "$ref": "./vaccine_id.json"
+        },
+        "vaccine_name": {
+            "$ref": "./vaccine_name.json"
+        },
+        "animal_types": {
+            "description": "The types of animals that may receive this vaccine.",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+                "$ref": "./animal_type.json"
+            }
+        },
+        "number_of_doses": {
+            "description": "The number of doses to administer for the vaccine to be effective.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "x-redacted": false
+        },
+        "interval_between_doses": {
+            "allOf": [
+                {
+                    "$ref": "../../common_components/v5/schema/json/openapi-3.0/components/schemas/date_time/time_duration.json"
+                },
+                {
+                    "description": "The time between doses if more than one dose is required.",
+                    "x-redacted": true
+                }
+            ]
+        }
+    }
+}

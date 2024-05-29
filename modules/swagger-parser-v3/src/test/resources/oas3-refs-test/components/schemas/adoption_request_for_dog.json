@@ -1,0 +1,24 @@
+{
+    "allOf": [
+        {
+            "$ref": "./adoption_request.json"
+        },
+        {
+            "title": "Adoption Request for Dog",
+            "description": "A dog adoption request.",
+            "type": "object",
+            "properties": {
+                "have_collar": {
+                    "description": "Indicates if the adopter has a dog collar.",
+                    "type": "boolean",
+                    "x-redacted": true
+                },
+                "have_leash": {
+                    "description": "Indicates if the adopter has a dog leash.",
+                    "type": "boolean",
+                    "x-redacted": true
+                }
+            }
+        }
+    ]
+}

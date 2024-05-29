@@ -1,0 +1,290 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "OpenAPI 3.0 Specification Reference",
+        "description": "This specification demonstrates ref uses.",
+        "version": "1.1",
+        "contact": {
+            "name": "Another OAS 3 User",
+            "url": "https://example.com/",
+            "email": "antho93@gmail.com"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://{host}/v1/demo",
+            "description": "LIVE",
+            "variables": {
+                "host": {
+                    "enum": [
+                        "api.example.com",
+                        "api-m.example.com"
+                    ],
+                    "default": "api.example.com"
+                }
+            }
+        },
+        {
+            "url": "https://api.sandbox.example.com/v1/demo",
+            "description": "Sandbox."
+        }
+    ],
+    "tags": [
+        {
+            "name": "adoption",
+            "description": "Adopt Pets"
+        }
+    ],
+    "paths": {
+        "/adopt": {
+            "$ref": "./paths/adopt.json"
+        }
+    },
+    "components" : {
+            "schemas": {
+                "an-object": {
+                    "type": "object",
+                    "properties": {
+                        "an-array": {
+                            "$ref": "./components/schemas/alias_array.json"
+                        }
+                    }
+                }
+            },
+            "responses": {
+            "204_response": {
+                "description": "No Content."
+            },
+            "401_error_response": {
+                "description": "Unauthorized.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Unauthorized' error.",
+                                "value": {
+                                    "name": "AUTHENTICATION_FAILURE",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "Authentication failed due to missing Authorization header, or invalid authentication credentials."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "403_error_response": {
+                "description": "Forbidden.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Forbidden' error.",
+                                "value": {
+                                    "name": "NOT_AUTHORIZED",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "Authorization failed due to insufficient permissions."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "404_error_response": {
+                "description": "Not Found.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Not Found' error.",
+                                "value": {
+                                    "name": "RESOURCE_NOT_FOUND",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The specified resource does not exist."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "405_error_response": {
+                "description": "Method Not Allowed.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Method Not Allowed' error.",
+                                "value": {
+                                    "name": "METHOD_NOT_SUPPORTED",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The server does not implement the requested HTTP method."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "406_error_response": {
+                "description": "Not Acceptable.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Not Acceptable' error.",
+                                "value": {
+                                    "name": "MEDIA_TYPE_NOT_ACCEPTABLE",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The server does not implement the media type that would be acceptable to the client."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "410_error_response": {
+                "description": "Gone.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Gone' error.",
+                                "value": {
+                                    "name": "RESOURCE_NOT_AVAILABLE",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The requested resource is no longer available."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "413_error_response": {
+                "description": "Payload Too Large.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Payload Too Large' error.",
+                                "value": {
+                                    "name": "PAYLOAD_TOO_LARGE",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The request entity is larger than the size limit defined by the server."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "415_error_response": {
+                "description": "Unsupported Media Type.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Unsupported Media Type' error.",
+                                "value": {
+                                    "name": "UNSUPPORTED_MEDIA_TYPE",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The server does not support the request payload's media type."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "429_error_response": {
+                "description": "Too Many Requests.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Too Many Requests' error.",
+                                "value": {
+                                    "name": "RATE_LIMIT_REACHED",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "Too many requests. Blocked due to rate limiting."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "500_error_response": {
+                "description": "Internal Server Error.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic internal server error.",
+                                "value": {
+                                    "name": "INTERNAL_SERVER_ERROR",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "An internal server error has occurred."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "503_error_response": {
+                "description": "Service Unavailable.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        },
+                        "examples": {
+                            "generic": {
+                                "summary": "Generic 'Service Unavailable' error.",
+                                "value": {
+                                    "name": "SERVICE_UNAVAILABLE",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "Service Unavailable."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "default_response": {
+                "description": "Default response.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "components/schemas/error.json"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
