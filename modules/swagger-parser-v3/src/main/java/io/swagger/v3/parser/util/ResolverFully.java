@@ -433,6 +433,12 @@ public class ResolverFully {
                     }
                     combinedModel.getProperties().putAll(schema.getProperties());
                 }
+                if (schema.getRequired() != null) {
+                    if (combinedModel.getRequired() == null) {
+                        combinedModel.required(new ArrayList<>());
+                    }
+                    combinedModel.getRequired().addAll(schema.getRequired());
+                }
 
                 result = combinedModel;
 
@@ -541,6 +547,19 @@ public class ResolverFully {
                     }
                 }
             }
+            boolean hasAllOf = innerModel.getAllOf() != null;
+            boolean hasAnyOf = innerModel.getAnyOf() != null;
+            boolean hasOneOf = innerModel.getOneOf() != null;
+            if (hasAllOf) {
+                aggregateSchemaCombinators(sourceSchema, targetSchema, innerModel.getAllOf(), examples, defaultValues);
+            }
+            if (hasOneOf) {
+                aggregateSchemaCombinators(sourceSchema, targetSchema, innerModel.getOneOf(), examples, defaultValues);
+            }
+            if (hasAnyOf) {
+                aggregateSchemaCombinators(sourceSchema, targetSchema, innerModel.getAnyOf(), examples, defaultValues);
+            }
+
             if (resolved.getEnum() != null ){
                 targetSchema.setEnum(resolved.getEnum());
             }
