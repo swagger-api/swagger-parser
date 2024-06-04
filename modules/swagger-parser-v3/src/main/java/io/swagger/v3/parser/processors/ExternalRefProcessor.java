@@ -137,7 +137,8 @@ public final class ExternalRefProcessor {
                             }
                             schemaFullRef = FilenameUtils.separatorsToUnix(schemaFullRef);
                         }
-                        schema.set$ref(processRefToExternalSchema(schemaFullRef, ref));
+                        // Fix for issue-1865: use internal prefix
+                        schema.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(schemaFullRef, ref));
                     }
                 } else {
                     processRefToExternalSchema(file + schema.get$ref(), RefFormat.RELATIVE);
