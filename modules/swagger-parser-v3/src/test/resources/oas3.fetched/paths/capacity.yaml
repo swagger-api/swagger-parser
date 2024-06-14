@@ -1,0 +1,69 @@
+get:
+  description: Returns a list of facilities and plans with their current capacity.
+  operationId: findCapacityForFacility
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CapacityList.yaml'
+          example:
+            capacity:
+              am6:
+                "c2.medium.x86":
+                  level: "string"
+                "m2.xlarge.x86":
+                  level: "string"
+              da11:
+                "c2.medium.x86":
+                  level: "string"
+                "m2.xlarge.x86":
+                  level: "string"
+              sv15:
+                "c2.medium.x86":
+                  level: "string"
+                "m2.xlarge.x86":
+                  level: "string"
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: View capacity
+  tags:
+  - Capacity
+post:
+  deprecated: true
+  description: Validates if a deploy can be fulfilled.
+  operationId: checkCapacityForFacility
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/CapacityInput.yaml'
+    description: Facility to check capacity in
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CapacityCheckPerFacilityList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Check capacity
+  tags:
+  - Capacity

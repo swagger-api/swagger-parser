@@ -1,0 +1,17 @@
+properties:
+  prefix:
+    description: The IPv4 prefix for the route, in CIDR-style notation. For a static default route, this will always be "0.0.0.0/0"
+    type: string
+    example: 0.0.0.0/0
+  next_hop:
+    description: The IPv4 address within the VRF of the host that will handle this route
+    type: string
+    format: ipv4
+    example: 192.168.1.254
+  tags:
+    items:
+      type: string
+    type: array
+required:
+- prefix
+- next_hop

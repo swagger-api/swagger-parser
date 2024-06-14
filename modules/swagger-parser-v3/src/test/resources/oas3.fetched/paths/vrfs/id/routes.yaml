@@ -1,0 +1,92 @@
+post:
+  description: |
+    Create a route in a VRF. Currently only static default routes are supported.
+
+    Notice: VRFs are a test feature currently under active development, and only available to certain users. Please contact Customer Success for more information.
+  operationId: createVrfRoute
+  parameters:
+    - description: VRF UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        format: uuid
+        type: string
+    - $ref: '../../../components/parameters/Include.yaml'
+    - $ref: '../../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/VrfRouteCreateInput.yaml'
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/VrfRoute.yaml'
+      description: OK
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Not Found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unprocessable entity
+  summary: Create a VRF route
+  tags:
+  - VRFs
+
+get:
+  description: Returns the list of routes for the VRF
+  operationId: getVrfRoutes
+  parameters:
+    - description: VRF UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    - $ref: '../../../components/parameters/Include.yaml'
+    - $ref: '../../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/VrfRouteList.yaml'
+      description: OK
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Not Found
+  summary: Retrieve all routes in the VRF
+  tags:
+  - VRFs

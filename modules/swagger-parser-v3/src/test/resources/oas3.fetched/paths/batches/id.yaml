@@ -1,0 +1,69 @@
+delete:
+  description: Deletes the Batch.
+  operationId: deleteBatch
+  parameters:
+  - description: Batch UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Delete all instances created from this batch
+    in: query
+    name: remove_associated_instances
+    schema:
+      default: false
+      type: boolean
+  responses:
+    "204":
+      description: no content
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Delete the Batch
+  tags:
+  - Batches
+get:
+  description: Returns a Batch
+  operationId: findBatchById
+  parameters:
+  - description: Batch UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Batch.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve a Batch
+  tags:
+  - Batches

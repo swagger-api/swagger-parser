@@ -1,0 +1,37 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  invitation:
+    $ref: './Href.yaml'
+  invited_by:
+    $ref: './Href.yaml'
+  invitee:
+    type: string
+    format: email
+  nonce:
+    type: string
+  organization:
+    $ref: './Href.yaml'
+  projects:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  roles:
+    items:
+      type: string
+      enum:
+        - admin
+        - billing
+        - collaborator
+        - limited_collaborator
+    type: array
+  updated_at:
+    format: date-time
+    type: string
+type: object

@@ -1,0 +1,8 @@
+properties:
+  address:
+    type: string
+  default:
+    type: boolean
+required:
+- address
+type: object

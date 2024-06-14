@@ -1,0 +1,10 @@
+properties:
+  cidr:
+    type: integer
+  href:
+    type: string
+  netmask:
+    type: string
+  network:
+    type: string
+type: object

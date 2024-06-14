@@ -1,0 +1,27 @@
+post:
+  description: Validates user data (Userdata)
+  operationId: validateUserdata
+  parameters:
+  - description: Userdata to validate
+    in: query
+    name: userdata
+    schema:
+      type: string
+  responses:
+    "204":
+      description: no content
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Validate user data
+  tags:
+  - Userdata

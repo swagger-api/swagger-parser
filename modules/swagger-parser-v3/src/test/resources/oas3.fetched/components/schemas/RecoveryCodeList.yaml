@@ -1,0 +1,6 @@
+properties:
+  recovery_codes:
+    items:
+      type: string
+    type: array
+type: object

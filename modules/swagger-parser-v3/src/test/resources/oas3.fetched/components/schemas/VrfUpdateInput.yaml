@@ -1,0 +1,24 @@
+properties:
+  bgp_dynamic_neighbors_enabled:
+    description: Toggle to enable the dynamic bgp neighbors feature on the VRF
+    type: boolean
+  bgp_dynamic_neighbors_export_route_map:
+    description: Toggle to export the VRF route-map to the dynamic bgp neighbors
+    type: boolean
+  bgp_dynamic_neighbors_bfd_enabled:
+    description: Toggle BFD on dynamic bgp neighbors sessions
+    type: boolean
+  description:
+    type: string
+  ip_ranges:
+    $ref: './VrfIpRangeUpdateInput.yaml'
+  local_asn:
+    type: integer
+    format: int32
+    description: The new `local_asn` value for the VRF. This field cannot be updated when there are active Interconnection Virtual Circuits associated to the VRF, or if any of the VLANs of the VRF's metal gateway has been assigned on an instance.
+  name:
+    type: string
+  tags:
+    items:
+      type: string
+    type: array

@@ -1,0 +1,62 @@
+get:
+  description: Returns a collection of projects that the current user is a member
+    of.
+  operationId: findProjects
+  parameters:
+  - $ref: '../components/parameters/ProjectName.yaml'
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  - $ref: '../components/parameters/Page.yaml'
+  - $ref: '../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/ProjectList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all projects
+  tags:
+  - Projects
+post:
+  description: Creates a new project for the user default organization. If the user
+    don't have an organization, a new one will be created.
+  operationId: createProject
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/ProjectCreateFromRootInput.yaml'
+    description: Project to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Project.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a project
+  tags:
+  - Projects

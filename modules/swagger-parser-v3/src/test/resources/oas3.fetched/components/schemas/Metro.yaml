@@ -1,0 +1,11 @@
+properties:
+  code:
+    type: string
+  country:
+    type: string
+  id:
+    format: uuid
+    type: string
+  name:
+    type: string
+type: object

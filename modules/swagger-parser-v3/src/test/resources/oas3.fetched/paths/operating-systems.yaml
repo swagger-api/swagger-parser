@@ -1,0 +1,20 @@
+get:
+  description: Provides a listing of available operating systems to provision your
+    new device with.
+  operationId: findOperatingSystems
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/OperatingSystemList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all operating systems
+  tags:
+  - OperatingSystems

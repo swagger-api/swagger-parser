@@ -1,0 +1,5 @@
+type: object
+description: Represents single Firmware set response
+properties:
+  record:
+    $ref: "./FirmwareSet.yaml"

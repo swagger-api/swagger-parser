@@ -1,0 +1,61 @@
+properties:
+  asn:
+    description: Autonomous System Number. ASN is required with Global BGP. With Local
+      BGP the private ASN, 65000, is assigned.
+    example: 65000
+    format: int32
+    type: integer
+  created_at:
+    format: date-time
+    type: string
+  deployment_type:
+    description: |
+      In a Local BGP deployment, a customer uses an internal ASN to control routes within a single Equinix Metal datacenter. This means that the routes are never advertised to the global Internet. Global BGP, on the other hand, requires a customer to have a registered ASN and IP space.
+    enum:
+    - global
+    - local
+    example: local
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  max_prefix:
+    default: 10
+    description: The maximum number of route filters allowed per server
+    type: integer
+  md5:
+    description: (Optional) Password for BGP session in plaintext (not a checksum)
+    nullable: true
+    type: string
+  project:
+    $ref: './Href.yaml'
+  ranges:
+    description: The IP block ranges associated to the ASN (Populated in Global BGP
+      only)
+    items:
+      $ref: './GlobalBgpRange.yaml'
+    type: array
+  requested_at:
+    format: date-time
+    type: string
+  route_object:
+    description: Specifies AS-MACRO (aka AS-SET) to use when building client route
+      filters
+    type: string
+  sessions:
+    description: The direct connections between neighboring routers that want to exchange
+      routing information.
+    items:
+      $ref: './BgpSession.yaml'
+    type: array
+  status:
+    description: Status of the BGP Config. Status "requested" is valid only with the
+      "global" deployment_type.
+    enum:
+    - requested
+    - enabled
+    - disabled
+    type: string
+type: object

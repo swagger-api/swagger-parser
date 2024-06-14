@@ -1,0 +1,30 @@
+properties:
+  cidr:
+    type: integer
+    example: 16
+    description: The size of the VRF IP Reservation's subnet
+  customdata:
+    type: object
+  details:
+    type: string
+  network:
+    type: string
+    example: "10.1.2.0"
+    description: "The starting address for this VRF IP Reservation's subnet"
+  tags:
+    items:
+      type: string
+    type: array
+  type:
+    type: string
+    example: vrf
+    description: "Must be set to 'vrf'"
+  vrf_id:
+    type: string
+    format: uuid
+    description: The ID of the VRF in which this VRF IP Reservation is created. The VRF must have an existing IP Range that contains the requested subnet. This field may be aliased as just 'vrf'.
+required:
+  - cidr
+  - network
+  - type
+  - vrf_id

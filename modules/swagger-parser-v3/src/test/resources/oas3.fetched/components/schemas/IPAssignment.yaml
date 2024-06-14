@@ -1,0 +1,57 @@
+properties:
+  address:
+    type: string
+  address_family:
+    type: integer
+  assigned_to:
+    $ref: './Href.yaml'
+  cidr:
+    type: integer
+  created_at:
+    format: date-time
+    type: string
+  enabled:
+    type: boolean
+  gateway:
+    type: string
+  global_ip:
+    type: boolean
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  manageable:
+    type: boolean
+  management:
+    type: boolean
+  metro:
+    allOf:
+    - $ref: './Metro.yaml'
+    - description: The metro the IP address is in
+  netmask:
+    type: string
+  network:
+    type: string
+  parent_block:
+    $ref: './ParentBlock.yaml'
+  public:
+    type: boolean
+  state:
+    type: string
+    enum:
+      - pending
+      - active
+      - deleting
+    description: |
+      Only set when this is a Metal Gateway Elastic IP Assignment.
+
+      Describes the current configuration state of this IP on the network.
+  next_hop:
+    type: string
+    format: ipv4
+    description: |
+      Only set when this is a Metal Gateway Elastic IP Assignment.
+
+      The IP address within the Metal Gateway to which requests to the Elastic IP are forwarded.
+type: object

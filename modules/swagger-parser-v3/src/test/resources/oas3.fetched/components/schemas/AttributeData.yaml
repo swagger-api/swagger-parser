@@ -1,0 +1,17 @@
+properties:
+  latest:
+    readOnly: true
+    type: boolean
+    description: Boolean flag to know if the firmware set is the latest for the model and vendor
+  model:
+    readOnly: true
+    type: string
+    description: Model on which this firmware set can be applied
+  vendor:
+    readOnly: true
+    type: string
+    description: Vendor on which this firmware set can be applied
+  plan:
+    readOnly: true
+    type: string
+    description: Plan where the firmware set can be applied

@@ -1,0 +1,6 @@
+properties:
+  ssh_keys:
+    items:
+      $ref: './SSHKey.yaml'
+    type: array
+type: object

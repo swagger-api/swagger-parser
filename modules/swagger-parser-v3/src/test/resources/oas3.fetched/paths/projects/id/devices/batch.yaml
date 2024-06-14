@@ -1,0 +1,53 @@
+post:
+  description: |-
+    Creates new devices in batch and provisions them in our datacenter.
+  operationId: createDeviceBatch
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../../components/schemas/InstancesBatchCreateInput.yaml'
+    description: Batches to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/BatchesList.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a devices batch
+  tags:
+  - Batches

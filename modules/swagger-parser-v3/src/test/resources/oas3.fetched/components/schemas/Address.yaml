@@ -1,0 +1,20 @@
+properties:
+  address:
+    type: string
+  address2:
+    type: string
+  city:
+    type: string
+  coordinates:
+    $ref: './Coordinates.yaml'
+  country:
+    type: string
+  state:
+    type: string
+  zip_code:
+    type: string
+required:
+- address
+- zip_code
+- country
+type: object

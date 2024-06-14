@@ -1,0 +1,6 @@
+properties:
+  reservations:
+    items:
+      $ref: './SelfServiceReservationResponse.yaml'
+    type: array
+type: object

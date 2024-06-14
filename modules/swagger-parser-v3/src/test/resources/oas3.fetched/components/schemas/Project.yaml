@@ -1,0 +1,62 @@
+properties:
+  bgp_config:
+    $ref: './Href.yaml'
+  created_at:
+    format: date-time
+    type: string
+  customdata:
+    type: object
+  devices:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  id:
+    format: uuid
+    type: string
+  invitations:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  max_devices:
+    type: object
+  members:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  memberships:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  name:
+    type: string
+    minLength: 1
+    maxLength: 80
+    description: The name of the project. Cannot contain characters encoded in greater than 3 bytes such as emojis.
+  network_status:
+    type: object
+  organization:
+    $ref: './Organization.yaml'
+  payment_method:
+    $ref: './Href.yaml'
+  ssh_keys:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  updated_at:
+    format: date-time
+    type: string
+  volumes:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  type:
+    type: string
+    description: The type of the project. Projects of type `vmce` are part of an in development feature and not available to all customers.
+    enum:
+      - default
+      - vmce
+  tags:
+    items:
+      type: string
+    type: array
+type: object

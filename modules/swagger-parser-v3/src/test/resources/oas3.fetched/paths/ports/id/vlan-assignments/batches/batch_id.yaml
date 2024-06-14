@@ -1,0 +1,48 @@
+get:
+  description: Returns the details of an existing Port-VLAN Assignment batch, including
+    the list of VLANs to assign or unassign, and the current state of the batch.
+  operationId: findPortVlanAssignmentBatchByPortIdAndBatchId
+  parameters:
+  - description: Port UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Batch ID
+    in: path
+    name: batch_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/PortVlanAssignmentBatch.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve a VLAN Assignment Batch's details
+  tags:
+  - Ports

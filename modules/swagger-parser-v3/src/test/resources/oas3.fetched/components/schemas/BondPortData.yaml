@@ -1,0 +1,9 @@
+properties:
+  id:
+    description: ID of the bonding port
+    type: string
+    format: uuid
+  name:
+    description: Name of the port interface for the bond ("bond0")
+    type: string
+type: object

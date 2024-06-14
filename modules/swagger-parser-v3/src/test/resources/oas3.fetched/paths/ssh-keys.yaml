@@ -1,0 +1,55 @@
+get:
+  description: Returns a collection of the user’s ssh keys.
+  operationId: findSSHKeys
+  parameters:
+  - description: Search by key, label, or fingerprint
+    in: query
+    name: search
+    schema:
+      type: string
+  - $ref: '../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/SSHKeyList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all ssh keys
+  tags:
+  - SSHKeys
+post:
+  description: Creates a ssh key.
+  operationId: createSSHKey
+  requestBody:
+    $ref: '../components/requestBodies/SSHKeyCreateInput.yaml'
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/SSHKey.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a ssh key for the current user
+  tags:
+  - SSHKeys

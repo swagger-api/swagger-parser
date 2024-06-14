@@ -1953,6 +1953,18 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorModel");
     }
 
+    @Test
+    public void testExternalRefsNormalization() throws Exception {
+            ParseOptions options = new ParseOptions();
+            options.setResolve(true);
+            SwaggerParseResult result = new OpenAPIV3Parser()
+                            .readLocation("src/test/resources/oas3.fetched/openapi3.yaml", null, options);
+
+            OpenAPI openAPI = result.getOpenAPI();
+            Schema localModel = openAPI.getComponents().getSchemas().get("Event_2");
+            assertNull(localModel);
+    }
+
     private OpenAPI doRelativeFileTest(String location) {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();

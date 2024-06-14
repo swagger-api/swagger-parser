@@ -1,0 +1,6 @@
+properties:
+  api_keys:
+    items:
+      $ref: './AuthToken.yaml'
+    type: array
+type: object

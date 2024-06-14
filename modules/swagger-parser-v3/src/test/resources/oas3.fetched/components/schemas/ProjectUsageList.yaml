@@ -1,0 +1,6 @@
+properties:
+  usages:
+    items:
+      $ref: './ProjectUsage.yaml'
+    type: array
+type: object

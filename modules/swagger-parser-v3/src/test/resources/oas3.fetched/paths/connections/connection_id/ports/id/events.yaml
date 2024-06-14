@@ -1,0 +1,50 @@
+get:
+  description: Returns a list of the interconnection port events
+  operationId: findInterconnectionPortEvents
+  parameters:
+  - description: Interconnection UUID
+    in: path
+    name: connection_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Interconnection Port UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../../../components/parameters/Include.yaml'
+  - $ref: '../../../../../components/parameters/Exclude.yaml'
+  - $ref: '../../../../../components/parameters/Page.yaml'
+  - $ref: '../../../../../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Event.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve interconnection port events
+  tags:
+  - Events

@@ -1,0 +1,39 @@
+properties:
+  id:
+    format: uuid
+    type: string
+  organization:
+    $ref: './Href.yaml'
+  role:
+    description: Either 'primary' or 'secondary'.
+    type: string
+    enum:
+    - primary
+    - secondary
+  status:
+    type: string
+    description: For both Fabric VCs and Dedicated Ports, this will be 'requested' on creation and 'deleting' on deletion. Once the Fabric VC has found its corresponding Fabric connection,
+      this will turn to 'active'. For Dedicated Ports, once the dedicated port is associated, this will also turn to 'active'. For Fabric VCs, this can turn into an 'expired' state if the 
+      service token associated is expired.
+    enum:
+    - requested
+    - active
+    - deleting
+    - expired
+    - delete_failed
+  switch_id:
+    description: A switch 'short ID'
+    type: string
+  virtual_circuits:
+    items:
+      $ref: './VirtualCircuit.yaml'
+    type: array
+  name:
+    type: string
+  speed:
+    type: integer
+  link_status:
+    type: string
+  href:
+    type: string
+type: object

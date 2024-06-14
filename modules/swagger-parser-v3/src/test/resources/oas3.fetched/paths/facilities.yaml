@@ -1,0 +1,50 @@
+get:
+  deprecated: true
+  description: Provides a listing of available datacenters where you can provision
+    Packet devices.
+  operationId: findFacilities
+  parameters:
+  - description: Nested attributes to include. Included objects will return their
+      full attributes. Attribute names can be dotted (up to 3 levels) to included
+      deeply nested objects.
+    in: query
+    name: include
+    schema:
+      items:
+        enum:
+        - address
+        - labels
+        type: string
+      type: array
+    style: form
+  - description: Nested attributes to exclude. Excluded objects will return only the
+      href attribute. Attribute names can be dotted (up to 3 levels) to exclude deeply
+      nested objects.
+    in: query
+    name: exclude
+    schema:
+      default:
+      - address
+      items:
+        enum:
+        - address
+        - labels
+        type: string
+      type: array
+    style: form
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/FacilityList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all facilities
+  tags:
+  - Facilities

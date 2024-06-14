@@ -1,0 +1,38 @@
+properties:
+  avatar_thumb_url:
+    description: Avatar thumbnail URL of the User
+    type: string
+  created_at:
+    description: When the user was created
+    format: date-time
+    type: string
+  email:
+    description: Primary email address of the User
+    type: string
+  first_name:
+    description: First name of the User
+    type: string
+  full_name:
+    description: Full name of the User
+    type: string
+  href:
+    description: API URL uniquely representing the User
+    type: string
+  id:
+    description: ID of the User
+    format: uuid
+    type: string
+  last_name:
+    description: Last name of the User
+    type: string
+  short_id:
+    description: Short ID of the User
+    type: string
+  updated_at:
+    description: When the user details were last updated
+    format: date-time
+    type: string
+required:
+- id
+- short_id
+type: object

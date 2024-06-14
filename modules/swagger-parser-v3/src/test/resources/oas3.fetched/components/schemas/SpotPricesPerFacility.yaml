@@ -1,0 +1,20 @@
+properties:
+  baremetal_0:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  baremetal_1:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  baremetal_2:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  baremetal_2a:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  baremetal_2a2:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  baremetal_3:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  baremetal_s:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  c2.medium.x86:
+    $ref: './SpotPricesPerBaremetal.yaml'
+  m2.xlarge.x86:
+    $ref: './SpotPricesPerBaremetal.yaml'
+type: object

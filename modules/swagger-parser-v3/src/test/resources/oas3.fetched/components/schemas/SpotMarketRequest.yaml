@@ -1,0 +1,30 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  devices_max:
+    type: integer
+  devices_min:
+    type: integer
+  end_at:
+    format: date-time
+    type: string
+  facilities:
+    $ref: './Href.yaml'
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  instances:
+    $ref: './Href.yaml'
+  max_bid_price:
+    format: float
+    type: number
+  metro:
+    allOf:
+    - $ref: './Metro.yaml'
+    - description: The metro the spot market request was created in
+  project:
+    $ref: './Href.yaml'
+type: object

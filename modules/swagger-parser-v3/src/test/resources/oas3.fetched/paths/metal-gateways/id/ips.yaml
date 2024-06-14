@@ -1,0 +1,94 @@
+post:
+  summary: Create a Metal Gateway Elastic IP
+  description: |
+    Create a new Elastic IP on this Metal Gateway.
+
+    Assign an IPv4 range as an elastic IP to the Metal Gateway, with a specified next-hop address contained within the Metal Gateway.
+
+    Notice: Elastic IPs on Metal Gateways are a test feature currently under active development, and only available to certain users. Please contact Customer Success for more information.
+  operationId: createMetalGatewayElasticIp
+  parameters:
+  - description: Metal Gateway UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../components/schemas/MetalGatewayElasticIpCreateInput.yaml"
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: "../../../components/schemas/IPAssignment.yaml"
+      description: Created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Not Found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unprocessable entity
+  tags:
+  - MetalGateways
+
+get:
+  summary: List Metal Gateway Elastic IPs
+  description: Returns the list of Elastic IPs assigned to this Metal Gateway
+  operationId: getMetalGatewayElasticIps
+  parameters:
+  - description: Metal Gateway UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      type: string
+      format: uuid
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../../../components/schemas/IPAssignmentList.yaml"
+      description: OK
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Not Found
+  tags:
+  - MetalGateways

@@ -1,0 +1,48 @@
+properties:
+  customer_ip:
+    description: >-
+      An IP address from the subnet that will be used on the Customer side. This parameter is optional,
+      but if supplied, we will use the other usable IP address in the subnet as the Metal IP. By default,
+      the last usable IP address in the subnet will be used.
+    type: string
+    example: "12.0.0.2"
+  description:
+    type: string
+  md5:
+    description: |
+      The plaintext BGP peering password shared by neighbors as an MD5 checksum:
+      * must be 10-20 characters long
+      * may not include punctuation
+      * must be a combination of numbers and letters
+      * must contain at least one lowercase, uppercase, and digit character
+    type: string
+    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{10,20}$'
+  metal_ip:
+    description: >-
+      An IP address from the subnet that will be used on the Metal side. This parameter is optional,
+      but if supplied, we will use the other usable IP address in the subnet as the Customer IP. By default,
+      the first usable IP address in the subnet will be used.
+    type: string
+    example: "12.0.0.1"
+  name:
+    type: string
+  peer_asn:
+    description: The peer ASN that will be used with the VRF on the Virtual Circuit.
+    type: integer
+  speed:
+    description: Speed can be changed only if it is an interconnection on a Dedicated Port
+    type: string
+  subnet:
+    description: >-
+      The /30 or /31 subnet of one of the VRF IP Blocks that will be used with the VRF for
+      the Virtual Circuit. This subnet does not have to be an existing VRF IP reservation, as we
+      will create the VRF IP reservation on creation if it does not exist. The Metal IP and Customer
+      IP must be IPs from this subnet. For /30 subnets, the network and broadcast IPs cannot be used
+      as the Metal or Customer IP.
+    type: string
+    example: "12.0.0.0/30"
+  tags:
+    items:
+      type: string
+    type: array
+type: object

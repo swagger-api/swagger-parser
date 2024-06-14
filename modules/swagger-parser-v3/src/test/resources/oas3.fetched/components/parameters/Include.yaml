@@ -1,0 +1,12 @@
+description: |-
+  Nested attributes to include. Included objects will return their full
+  attributes. Attribute names can be dotted (up to 3 levels) to included deeply
+  nested objects.
+in: query
+name: include
+schema:
+  items:
+    type: string
+  type: array
+style: form
+explode: false

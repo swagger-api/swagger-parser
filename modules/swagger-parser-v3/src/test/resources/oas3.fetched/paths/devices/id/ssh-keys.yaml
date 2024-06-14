@@ -1,0 +1,33 @@
+get:
+  description: Returns a collection of the device's ssh keys.
+  operationId: findDeviceSSHKeys
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Search by key, label, or fingerprint
+    in: query
+    name: Search string
+    schema:
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/SSHKeyList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve a device's ssh keys
+  tags:
+  - SSHKeys

@@ -1,0 +1,6 @@
+properties:
+  servers:
+    items:
+      $ref: './CapacityCheckPerMetroInfo.yaml'
+    type: array
+type: object

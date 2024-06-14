@@ -1,0 +1,39 @@
+get:
+  description: Retrieve device metadata
+  operationId: findDeviceMetadataByID
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    schema:
+      type: string
+      format: uuid
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Metadata.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Retrieve metadata
+  tags:
+  - Devices

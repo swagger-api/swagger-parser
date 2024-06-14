@@ -1,0 +1,35 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  gateway_address:
+    description: The gateway address with subnet CIDR value for this Metal Gateway.
+      For example, a Metal Gateway using an IP reservation with block 10.1.2.0/27
+      would have a gateway address of 10.1.2.1/27.
+    type: string
+    example: 10.1.2.1/27
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  state:
+    description: The current state of the Metal Gateway. 'Ready' indicates the gateway
+      record has been configured, but is currently not active on the network. 'Active'
+      indicates the gateway has been configured on the network. 'Deleting' is a temporary
+      state used to indicate that the gateway is in the process of being un-configured
+      from the network, after which the gateway record will be deleted.
+    enum:
+    - ready
+    - active
+    - deleting
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  vlan:
+    description: 'The VLAN id of the Virtual Network record associated to this Metal
+      Gateway.'
+    type: integer
+    example: 1001
+type: object

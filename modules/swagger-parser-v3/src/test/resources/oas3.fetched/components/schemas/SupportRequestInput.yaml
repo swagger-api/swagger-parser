@@ -1,0 +1,20 @@
+properties:
+  device_id:
+    type: string
+  message:
+    type: string
+  priority:
+    enum:
+    - urgent
+    - high
+    - medium
+    - low
+    type: string
+  project_id:
+    type: string
+  subject:
+    type: string
+required:
+- subject
+- message
+type: object

@@ -1,0 +1,8 @@
+properties:
+  description:
+    type: string
+  licensee_product_id:
+    type: string
+  size:
+    type: number
+type: object

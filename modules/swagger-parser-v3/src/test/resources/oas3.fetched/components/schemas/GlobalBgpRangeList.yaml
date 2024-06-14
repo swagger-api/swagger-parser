@@ -1,0 +1,6 @@
+properties:
+  global_bgp_ranges:
+    items:
+      $ref: './GlobalBgpRange.yaml'
+    type: array
+type: object

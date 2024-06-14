@@ -1,0 +1,27 @@
+get:
+  description: Show the details for a metro, including name, code, and country.
+  operationId: getMetro
+  parameters:
+  - description: Metro UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Metro.yaml'
+      description: ok
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve a specific Metro's details
+  tags:
+  - Metros

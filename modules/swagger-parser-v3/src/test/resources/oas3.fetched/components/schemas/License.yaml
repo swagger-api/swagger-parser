@@ -1,0 +1,15 @@
+properties:
+  description:
+    type: string
+  id:
+    format: uuid
+    type: string
+  license_key:
+    type: string
+  licensee_product:
+    $ref: './Href.yaml'
+  project:
+    $ref: './Href.yaml'
+  size:
+    type: number
+type: object

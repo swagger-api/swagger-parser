@@ -1,0 +1,20 @@
+properties:
+  facility:
+    type: string
+  name:
+    type: string
+  plan:
+    type: string
+  plan_version:
+    type: string
+  price:
+    type: string
+  quantity:
+    type: string
+  total:
+    type: string
+  type:
+    type: string
+  unit:
+    type: string
+type: object

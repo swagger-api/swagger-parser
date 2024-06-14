@@ -1,0 +1,14 @@
+properties:
+  billing_address:
+    type: object
+  cardholder_name:
+    type: string
+  default:
+    type: boolean
+  expiration_month:
+    type: string
+  expiration_year:
+    type: integer
+  name:
+    type: string
+type: object

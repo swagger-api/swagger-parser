@@ -1,0 +1,6 @@
+properties:
+  servers:
+    items:
+      $ref: './ServerInfo.yaml'
+    type: array
+type: object

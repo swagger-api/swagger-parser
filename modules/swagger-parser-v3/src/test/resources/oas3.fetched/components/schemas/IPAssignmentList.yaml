@@ -1,0 +1,6 @@
+properties:
+  ip_addresses:
+    items:
+      $ref: './IPAssignment.yaml'
+    type: array
+type: object

@@ -1,0 +1,60 @@
+post:
+  description: Creates an email verification request
+  operationId: createValidationRequest
+  parameters:
+  - description: Email for verification request
+    in: query
+    name: login
+    required: true
+    schema:
+      type: string
+  - $ref: '../components/parameters/Include.yaml'
+  responses:
+    "201":
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create an email verification request
+  tags:
+  - UserVerificationTokens
+put:
+  description: Consumes an email verification token and verifies the user associated
+    with it.
+  operationId: consumeVerificationRequest
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/VerifyEmail.yaml'
+    description: Email to create
+    required: true
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  responses:
+    "200":
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Verify a user using an email verification token
+  tags:
+  - UserVerificationTokens

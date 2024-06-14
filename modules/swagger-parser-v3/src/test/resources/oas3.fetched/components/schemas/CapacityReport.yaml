@@ -1,0 +1,5 @@
+additionalProperties:
+  type: object
+  additionalProperties:
+    $ref: './CapacityLevelPerBaremetal.yaml'
+type: object

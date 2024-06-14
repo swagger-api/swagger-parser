@@ -1,0 +1,6 @@
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/SSHKeyCreateInput.yaml'
+description: ssh key to create
+required: true

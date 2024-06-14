@@ -1,0 +1,24 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  id:
+    format: uuid
+    type: string
+  native:
+    type: boolean
+  port:
+    $ref: './Href.yaml'
+  state:
+    enum:
+    - assigned
+    - unassigning
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  virtual_network:
+    $ref: './Href.yaml'
+  vlan:
+    type: integer
+type: object

@@ -1,0 +1,118 @@
+delete:
+  description: Delete a virtual circuit from a Dedicated Port.
+  operationId: deleteVirtualCircuit
+  parameters:
+  - description: Virtual Circuit UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "202":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/VirtualCircuit.yaml'
+      description: accepted
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Delete a virtual circuit
+  tags:
+  - Interconnections
+get:
+  description: Get the details of a virtual circuit
+  operationId: getVirtualCircuit
+  parameters:
+  - description: Virtual Circuit UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/VirtualCircuit.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Get a virtual circuit
+  tags:
+  - Interconnections
+put:
+  description: Update the details of a virtual circuit.
+  operationId: updateVirtualCircuit
+  parameters:
+  - description: Virtual Circuit UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/VirtualCircuitUpdateInput.yaml'
+    description: Updated Virtual Circuit details
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/VirtualCircuit.yaml'
+      description: ok
+    "202":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/VirtualCircuit.yaml'
+      description: accepted
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Update a virtual circuit
+  tags:
+  - Interconnections

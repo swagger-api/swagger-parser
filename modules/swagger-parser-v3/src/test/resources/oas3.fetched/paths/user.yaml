@@ -1,0 +1,57 @@
+get:
+  description: Returns the user object for the currently logged-in user.
+  operationId: findCurrentUser
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/User.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve the current user
+  tags:
+  - Users
+put:
+  description: Updates the currently logged-in user.
+  operationId: updateCurrentUser
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/UserUpdateInput.yaml'
+    description: User to update
+    required: true
+  parameters:
+    - $ref: '../components/parameters/Include.yaml'
+    - $ref: '../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/User.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Update the current user
+  tags:
+  - Users

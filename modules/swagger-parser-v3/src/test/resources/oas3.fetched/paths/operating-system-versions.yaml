@@ -1,0 +1,19 @@
+get:
+  description: Provides a listing of available operating system versions.
+  operationId: findOperatingSystemVersion
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/OperatingSystemList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all operating system versions
+  tags:
+  - OperatingSystems

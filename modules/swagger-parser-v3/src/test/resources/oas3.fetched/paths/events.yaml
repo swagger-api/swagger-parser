@@ -1,0 +1,24 @@
+get:
+  description: Returns a list of the current user’s events
+  operationId: findEvents
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  - $ref: '../components/parameters/Page.yaml'
+  - $ref: '../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/EventList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve current user's events
+  tags:
+  - Events

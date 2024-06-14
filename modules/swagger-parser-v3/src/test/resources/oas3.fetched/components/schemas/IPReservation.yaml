@@ -1,0 +1,83 @@
+properties:
+  addon:
+    type: boolean
+  address:
+    type: string
+  address_family:
+    type: integer
+  assignments:
+    items:
+      $ref: './IPAssignment.yaml'
+    type: array
+  available:
+    type: string
+  bill:
+    type: boolean
+  cidr:
+    type: integer
+  created_at:
+    format: date-time
+    type: string
+  customdata:
+    type: object
+  enabled:
+    type: boolean
+  details:
+    type: string
+  facility:
+    allOf:
+    - $ref: './Facility.yaml'
+    - description: The facility the IP reservation is in. If the facility the IP reservation
+        was requested in is in a metro, a metro value will also be set, and the subsequent
+        IP reservation can be used on a metro level. Can be null if requesting an
+        IP reservation in a metro.
+  gateway:
+    type: string
+  global_ip:
+    type: boolean
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  manageable:
+    type: boolean
+  management:
+    type: boolean
+  metal_gateway:
+    $ref: './MetalGatewayLite.yaml'
+  metro:
+    allOf:
+    - $ref: './Metro.yaml'
+    - description: The metro the IP reservation is in. As long as the IP reservation
+        has a metro, it can be used on a metro level. Can be null if requesting an
+        IP reservation in a facility that is not in a metro.
+  netmask:
+    type: string
+  network:
+    type: string
+  project:
+    $ref: './Project.yaml'
+  project_lite:
+    $ref: './Href.yaml'
+  requested_by:
+    $ref: './Href.yaml'
+  public:
+    type: boolean
+  state:
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+  type:
+    type: string
+    enum:
+    - global_ipv4
+    - public_ipv4
+    - private_ipv4
+    - public_ipv6
+type: object
+additionalProperties: false
+required:
+  -  type

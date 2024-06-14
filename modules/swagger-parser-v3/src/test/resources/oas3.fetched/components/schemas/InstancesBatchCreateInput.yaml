@@ -1,0 +1,18 @@
+properties:
+  batches:
+    items:
+      allOf:
+      - properties:
+          hostnames:
+            items:
+              type: string
+            type: array
+          quantity:
+            type: integer
+            description: The number of devices to create in this batch. The hostname may contain an `{{index}}` placeholder, which will be replaced with the index of the device in the batch. For example, if the hostname is `device-{{index}}`, the first device in the batch will have the hostname `device-01`, the second device will have the hostname `device-02`, and so on.
+      - oneOf:
+        - $ref: 'DeviceCreateInMetroInput.yaml'
+        - $ref: 'DeviceCreateInFacilityInput.yaml'
+    type: array
+type: object
+

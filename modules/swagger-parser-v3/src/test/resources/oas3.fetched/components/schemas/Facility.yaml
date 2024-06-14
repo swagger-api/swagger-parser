@@ -1,0 +1,37 @@
+properties:
+  address:
+    $ref: './Address.yaml'
+  code:
+    type: string
+  features:
+    example:
+    - baremetal
+    - backend_transfer
+    - global_ipv4
+    items:
+      enum:
+      - baremetal
+      - backend_transfer
+      - layer_2
+      - global_ipv4
+      - ibx
+      type: string
+    type: array
+  id:
+    format: uuid
+    type: string
+  ip_ranges:
+    description: IP ranges registered in facility. Can be used for GeoIP location
+    example:
+    - 2604:1380::/36
+    - 147.75.192.0/21
+    items:
+      type: string
+    type: array
+  metro:
+    allOf:
+    - $ref: './Metro.yaml'
+    - description: The metro the facility is in
+  name:
+    type: string
+type: object

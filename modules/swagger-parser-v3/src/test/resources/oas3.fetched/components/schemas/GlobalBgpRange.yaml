@@ -1,0 +1,13 @@
+properties:
+  address_family:
+    type: integer
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  project:
+    $ref: './Href.yaml'
+  range:
+    type: string
+type: object

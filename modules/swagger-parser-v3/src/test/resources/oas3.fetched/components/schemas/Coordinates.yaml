@@ -1,0 +1,6 @@
+properties:
+  latitude:
+    type: string
+  longitude:
+    type: string
+type: object

@@ -1,0 +1,15 @@
+properties:
+  available:
+    description: Returns true if there is enough capacity in the metro to fulfill
+      the quantity set. Returns false if there is not enough.
+    type: boolean
+  metro:
+    description: The metro ID or code sent to check capacity.
+    type: string
+  plan:
+    description: The plan ID or slug sent to check capacity.
+    type: string
+  quantity:
+    description: The number of servers sent to check capacity.
+    type: string
+type: object

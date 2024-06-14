@@ -1,0 +1,92 @@
+get:
+  description: List the virtual circuit record(s) associatiated with a particular
+    interconnection port.
+  operationId: listInterconnectionPortVirtualCircuits
+  parameters:
+  - description: UUID of the interconnection
+    in: path
+    name: connection_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: UUID of the interconnection port
+    in: path
+    name: port_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../../../components/parameters/Include.yaml'
+  - $ref: '../../../../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/VirtualCircuitList.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: List a interconnection port's virtual circuits
+  tags:
+  - Interconnections
+post:
+  description: Create a new Virtual Circuit on a Dedicated Port. To create a regular Virtual Circuit, specify
+    a Virtual Network record and an NNI VLAN value. To create a VRF-based Virtual Circuit, specify the VRF ID and subnet,
+    along with the NNI VLAN value.
+  operationId: createInterconnectionPortVirtualCircuit
+  parameters:
+  - description: UUID of the interconnection
+    in: path
+    name: connection_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: UUID of the interconnection port
+    in: path
+    name: port_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../../../components/schemas/VirtualCircuitCreateInput.yaml'
+    description: Virtual Circuit details
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/VirtualCircuit.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Create a new Virtual Circuit
+  tags:
+  - Interconnections

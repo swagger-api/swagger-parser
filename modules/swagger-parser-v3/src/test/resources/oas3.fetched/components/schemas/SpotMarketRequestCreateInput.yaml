@@ -1,0 +1,76 @@
+properties:
+  devices_max:
+    type: integer
+  devices_min:
+    type: integer
+  end_at:
+    format: date-time
+    type: string
+  facilities:
+    deprecated: true
+    items:
+      format: uuid
+      type: string
+    type: array
+  instance_parameters:
+    properties:
+      always_pxe:
+        type: boolean
+      billing_cycle:
+        type: string
+      customdata:
+        type: object
+      description:
+        type: string
+      features:
+        items:
+          type: string
+        type: array
+      hostname:
+        type: string
+      hostnames:
+        items:
+          type: string
+        type: array
+      locked:
+        type: boolean
+        description: Whether the device should be locked, preventing accidental deletion.
+      no_ssh_keys:
+        type: boolean
+      operating_system:
+        type: string
+      plan:
+        type: string
+      private_ipv4_subnet_size:
+        type: integer
+      project_ssh_keys:
+        items:
+          format: uuid
+          type: string
+        type: array
+      public_ipv4_subnet_size:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      termination_time:
+        format: date-time
+        type: string
+      user_ssh_keys:
+        description: The UUIDs of users whose SSH keys should be included on the provisioned
+          device.
+        items:
+          format: uuid
+          type: string
+        type: array
+      userdata:
+        type: string
+    type: object
+  max_bid_price:
+    format: float
+    type: number
+  metro:
+    description: The metro ID or code the spot market request will be created in.
+    type: string
+type: object

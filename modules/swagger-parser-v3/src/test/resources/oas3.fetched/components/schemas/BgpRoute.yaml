@@ -1,0 +1,6 @@
+properties:
+  exact:
+    type: boolean
+  route:
+    example: 10.32.16.0/31
+    type: string

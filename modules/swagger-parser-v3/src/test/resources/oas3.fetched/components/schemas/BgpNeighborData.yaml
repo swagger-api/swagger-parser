@@ -1,0 +1,61 @@
+properties:
+  address_family:
+    description: Address Family for IP Address. Accepted values are 4 or 6
+    example: 4
+    format: int32
+    type: integer
+  customer_as:
+    description: The customer's ASN. In a local BGP deployment, this will be an internal
+      ASN used to route within the data center. For a global BGP deployment, this
+      will be the your own ASN, configured when you set up BGP for your project.
+    example: 65000
+    format: int32
+    type: integer
+  customer_ip:
+    description: The device's IP address. For an IPv4 BGP session, this is typically
+      the private bond0 address for the device.
+    example: 10.32.16.1 (IPv4) or 2604:1380:4111:2700::1 (IPv6)
+    type: string
+  md5_enabled:
+    description: True if an MD5 password is configured for the project.
+    type: boolean
+  md5_password:
+    description: The MD5 password configured for the project, if set.
+    type: string
+  multihop:
+    description: True when the BGP session should be configured as multihop.
+    type: boolean
+  peer_as:
+    description: The Peer ASN to use when configuring BGP on your device.
+    example: 65530
+    format: int32
+    type: integer
+  peer_ips:
+    description: A list of one or more IP addresses to use for the Peer IP section
+      of your BGP configuration. For non-multihop sessions, this will typically be
+      a single gateway address for the device. For multihop sessions, it will be a
+      list of IPs.
+    example:
+    - 169.254.255.1
+    - 169.254.255.2
+    items:
+      type: string
+    type: array
+  routes_in:
+    description: A list of project subnets
+    example:
+    - exact: true
+      route: 10.32.16.0/31
+    items:
+      $ref: "./BgpRoute.yaml"
+    type: array
+  routes_out:
+    description: A list of outgoing routes. Only populated if the BGP session has
+      default route enabled.
+    example:
+    - exact: true
+      route: 0.0.0.0/0
+    items:
+      $ref: "./BgpRoute.yaml"
+    type: array
+type: object

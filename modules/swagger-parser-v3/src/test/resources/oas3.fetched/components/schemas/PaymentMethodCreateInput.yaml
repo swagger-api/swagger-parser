@@ -1,0 +1,11 @@
+properties:
+  default:
+    type: boolean
+  name:
+    type: string
+  nonce:
+    type: string
+required:
+- name
+- nonce
+type: object

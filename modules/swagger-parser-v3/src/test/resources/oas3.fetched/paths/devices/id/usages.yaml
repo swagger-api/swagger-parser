@@ -1,0 +1,45 @@
+get:
+  description: Returns all usages for a device.
+  operationId: findDeviceUsages
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Filter usages created after this date
+    in: query
+    name: created[after]
+    schema:
+      format: datetime
+      type: string
+  - description: Filter usages created before this date
+    in: query
+    name: created[before]
+    schema:
+      format: datetime
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/DeviceUsageList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all usages for device
+  tags:
+  - Usages

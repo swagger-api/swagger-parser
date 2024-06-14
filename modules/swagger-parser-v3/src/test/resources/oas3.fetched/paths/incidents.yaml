@@ -1,0 +1,18 @@
+get:
+  description: Retrieve the number of incidents.
+  operationId: findIncidents
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve the number of incidents
+  tags:
+  - Incidents

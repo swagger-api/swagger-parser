@@ -1,0 +1,45 @@
+get:
+  description: Returns all usages for a project.
+  operationId: findProjectUsage
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Filter usages created after this date
+    in: query
+    name: created[after]
+    schema:
+      format: datetime
+      type: string
+  - description: Filter usages created before this date
+    in: query
+    name: created[before]
+    schema:
+      format: datetime
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/ProjectUsageList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all usages for project
+  tags:
+  - Usages

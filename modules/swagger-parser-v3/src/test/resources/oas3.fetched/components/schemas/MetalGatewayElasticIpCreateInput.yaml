@@ -1,0 +1,24 @@
+properties:
+  address:
+    type: string
+    description: An IP address (or IP Address range) contained within one of the project's IP Reservations
+    example: "147.75.234.8/31"
+  next_hop:
+    type: string
+    format: ipv4
+    description: An IP address contained within the Metal Gateways' IP Reservation range.
+    example: "192.168.12.13"
+  customdata:
+    type: object
+    additionalProperties: true
+    description: Optional User-defined JSON object value.
+  tags:
+    items:
+      type: string
+    type: array
+    description: Optional list of User-defined tags. Can be used by users to provide additional details or context regarding the purpose or usage of this resource.
+    example: [NY,prod,public]
+required:
+- address
+- next_hop
+type: object

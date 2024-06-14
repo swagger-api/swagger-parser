@@ -1,0 +1,6 @@
+properties:
+  ports:
+    items:
+      $ref: './InterconnectionPort.yaml'
+    type: array
+type: object

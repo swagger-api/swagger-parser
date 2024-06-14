@@ -1,0 +1,16 @@
+properties:
+  ip_reservation_id:
+    description: The UUID an a VRF IP Reservation that belongs to the same project as
+      the one in which the Metal Gateway is to be created. Additionally, the VRF IP Reservation
+      and the Virtual Network must reside in the same Metro.
+    format: uuid
+    type: string
+  virtual_network_id:
+    description: THe UUID of a Metro Virtual Network that belongs to the same project as
+      the one in which the Metal Gateway is to be created. Additionally, the Virtual Network
+      and the VRF IP Reservation must reside in the same metro.
+    format: uuid
+    type: string
+required:
+  - ip_reservation_id
+  - virtual_network_id

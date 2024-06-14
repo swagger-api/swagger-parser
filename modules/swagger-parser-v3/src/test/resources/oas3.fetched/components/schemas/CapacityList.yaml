@@ -1,0 +1,4 @@
+properties:
+  capacity:
+    $ref: './CapacityReport.yaml'
+type: object

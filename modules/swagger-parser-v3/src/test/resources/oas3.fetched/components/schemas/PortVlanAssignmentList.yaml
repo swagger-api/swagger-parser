@@ -1,0 +1,6 @@
+properties:
+  vlan_assignments:
+    items:
+      $ref: './PortVlanAssignment.yaml'
+    type: array
+type: object

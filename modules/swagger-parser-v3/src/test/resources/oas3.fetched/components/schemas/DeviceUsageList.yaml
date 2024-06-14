@@ -1,0 +1,6 @@
+properties:
+  usages:
+    items:
+      $ref: './DeviceUsage.yaml'
+    type: array
+type: object

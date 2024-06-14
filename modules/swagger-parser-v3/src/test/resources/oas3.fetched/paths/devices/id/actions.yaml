@@ -1,0 +1,44 @@
+post:
+  description: 'Performs an action for the given device.  Possible actions include:
+    power_on, power_off, reboot, reinstall, and rescue (reboot the device into rescue
+    OS.)'
+  operationId: performAction
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/DeviceActionInput.yaml'
+    description: Action to perform
+    required: true
+  responses:
+    "202":
+      description: accepted
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Perform an action
+  tags:
+  - Devices

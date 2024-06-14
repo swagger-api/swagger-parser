@@ -1,0 +1,30 @@
+type: object
+required:
+- type
+properties:
+  type:
+    description: Action to perform. See Device.actions for possible actions.
+    type: string
+    enum:
+    - power_on
+    - power_off
+    - reboot
+    - rescue
+    - reinstall
+  force_delete:
+    description: May be required to perform actions under certain conditions
+    type: boolean
+  deprovision_fast:
+    description: When type is `reinstall`, enabling fast deprovisioning will bypass full disk wiping.
+    type: boolean
+  preserve_data:
+    description: When type is `reinstall`, preserve the existing data on all disks except the operating-system disk.
+    type: boolean
+  operating_system:
+    description: When type is `reinstall`, use this `operating_system` (defaults to the current `operating system`)
+    type: string
+    example: ubuntu_22_04
+  ipxe_script_url:
+    description: When type is `reinstall`, use this `ipxe_script_url` (`operating_system` must be `custom_ipxe`, defaults to the current `ipxe_script_url`)
+    type: string
+

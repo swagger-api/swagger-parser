@@ -1,0 +1,50 @@
+get:
+  description: Returns a list of metros and plans with their current capacity.
+  operationId: findOrganizationCapacityPerMetro
+  parameters:
+  - description: Organization UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/CapacityList.yaml'
+          example:
+            capacity:
+              am:
+                "c2.medium.x86":
+                  level: "string"
+                "m2.xlarge.x86":
+                  level: "string"
+              da:
+                "c2.medium.x86":
+                  level: "string"
+                "m2.xlarge.x86":
+                  level: "string"
+              dc:
+                "c2.medium.x86":
+                  level: "string"
+                "m2.xlarge.x86":
+                  level: "string"
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: forbidden
+  summary: View available hardware plans per Metro for given organization
+  tags:
+  - Capacity

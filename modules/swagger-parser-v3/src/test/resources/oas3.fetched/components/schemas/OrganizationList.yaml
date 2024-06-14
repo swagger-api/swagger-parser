@@ -1,0 +1,8 @@
+properties:
+  meta:
+    $ref: './Meta.yaml'
+  organizations:
+    items:
+      $ref: './Organization.yaml'
+    type: array
+type: object

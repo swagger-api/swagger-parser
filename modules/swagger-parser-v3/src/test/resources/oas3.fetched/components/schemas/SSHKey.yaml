@@ -1,0 +1,25 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  entity:
+    $ref: './Href.yaml'
+  fingerprint:
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  key:
+    type: string
+  label:
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+type: object

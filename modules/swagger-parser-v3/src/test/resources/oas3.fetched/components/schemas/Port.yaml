@@ -1,0 +1,40 @@
+description: Port is a hardware port associated with a reserved or instantiated hardware device.
+properties:
+  bond:
+    $ref: './BondPortData.yaml'
+  data:
+    $ref: './PortData.yaml'
+  disbond_operation_supported:
+    description: Indicates whether or not the bond can be broken on the port (when
+      applicable).
+    type: boolean
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  name:
+    type: string
+    example: bond0
+  type:
+    description: Type is either "NetworkBondPort" for bond ports or "NetworkPort" for bondable ethernet ports
+    type: string
+    enum:
+    - NetworkPort
+    - NetworkBondPort
+  network_type:
+    description: Composite network type of the bond
+    type: string
+    enum:
+      - 'layer2-bonded'
+      - 'layer2-individual'
+      - 'layer3'
+      - 'hybrid'
+      - 'hybrid-bonded'
+  native_virtual_network:
+    $ref: './VirtualNetwork.yaml'
+  virtual_networks:
+    items:
+      $ref: './Href.yaml'
+    type: array
+type: object

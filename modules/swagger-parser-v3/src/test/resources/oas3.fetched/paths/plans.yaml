@@ -1,0 +1,52 @@
+get:
+  description: Provides a listing of available plans to provision your device on.
+  operationId: findPlans
+  parameters:
+  - description: Filter plans by its category
+    in: query
+    name: categories
+    schema:
+      type: array
+      items:
+        type: string
+        enum:
+          - compute
+          - storage
+          - vmce
+          - legacy_gen
+          - current_gen
+        example: compute
+  - description: Filter plans by its plan type
+    in: query
+    name: type
+    schema:
+      type: string
+      enum:
+        - standard
+        - workload_optimized
+        - custom
+      example: standard
+  - description: Filter plans by slug
+    in: query
+    name: slug
+    schema:
+      type: string
+      example: c3.small.x86
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/PlanList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all plans
+  tags:
+  - Plans

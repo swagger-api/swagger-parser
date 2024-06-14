@@ -1,0 +1,43 @@
+properties:
+  id:
+    description: The unique identifier for the resource
+    format: uuid
+    readOnly: true
+    type: string
+    example: aea82f16-57ec-412c-9523-b7f2b27635b2
+  bgp_neighbor_asn:
+    description: The ASN of the dynamic BGP neighbor
+    type: integer
+    example: 12345
+  bgp_neighbor_range:
+    description: Network range of the dynamic BGP neighbor in CIDR format
+    type: string
+    example: 192.168.1.0/25
+  metal_gateway:
+    $ref: './VrfMetalGateway.yaml'
+  state:
+    readOnly: true
+    type: string
+    enum:
+      - active
+      - deleting
+      - pending
+      - ready
+  href:
+    type: string
+    readOnly: true
+    example: /bgp-dynamic-neighbors/aea82f16-57ec-412c-9523-b7f2b27635b2
+  created_at:
+    format: date-time
+    readOnly: true
+    type: string
+  created_by:
+    $ref: './UserLimited.yaml'
+  updated_at:
+    format: date-time
+    readOnly: true
+    type: string
+  tags:
+    items:
+      type: string
+    type: array

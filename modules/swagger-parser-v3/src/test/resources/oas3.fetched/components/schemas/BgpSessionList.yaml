@@ -1,0 +1,6 @@
+properties:
+  bgp_sessions:
+    items:
+      $ref: './BgpSession.yaml'
+    type: array
+type: object

@@ -1,0 +1,65 @@
+properties:
+  customer_ip:
+    description: An IP address from the subnet that will be used on the Customer side. This parameter is optional,
+      but if supplied, we will use the other usable IP address in the subnet as the Metal IP. By default,
+      the last usable IP address in the subnet will be used.
+    type: string
+    example: "12.0.0.2"
+  description:
+    type: string
+  md5:
+    description: |
+      The plaintext BGP peering password shared by neighbors as an MD5 checksum:
+      * must be 10-20 characters long
+      * may not include punctuation
+      * must be a combination of numbers and letters
+      * must contain at least one lowercase, uppercase, and digit character
+    nullable: true
+    type: string
+    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{10,20}$'
+  metal_ip:
+    description: An IP address from the subnet that will be used on the Metal side. This parameter is optional,
+      but if supplied, we will use the other usable IP address in the subnet as the Customer IP. By default,
+      the first usable IP address in the subnet will be used.
+    type: string
+    example: "12.0.0.1"
+  name:
+    type: string
+  nni_vlan:
+    maximum: 4094
+    minimum: 2
+    type: integer
+  peer_asn:
+    description: The peer ASN that will be used with the VRF on the Virtual Circuit.
+    type: integer
+  project_id:
+    format: uuid
+    type: string
+  speed:
+    description: speed can be passed as integer number representing bps speed or string
+      (e.g. '52m' or '100g' or '4 gbps')
+    type: integer
+  subnet:
+    description: The /30 or /31 subnet of one of the VRF IP Blocks that will be used with the VRF for
+      the Virtual Circuit. This subnet does not have to be an existing VRF IP reservation, as we
+      will create the VRF IP reservation on creation if it does not exist. The Metal IP and Customer
+      IP must be IPs from this subnet. For /30 subnets, the network and broadcast IPs cannot be used
+      as the Metal or Customer IP. The subnet specified must be contained within an already-defined
+      IP Range for the VRF.
+    type: string
+    example: "12.0.0.0/30"
+  tags:
+    items:
+      type: string
+    type: array
+  vrf:
+    description: The UUID of the VRF that will be associated with the Virtual Circuit.
+    format: uuid
+    type: string
+type: object
+required:
+- nni_vlan
+- peer_asn
+- project_id
+- subnet
+- vrf

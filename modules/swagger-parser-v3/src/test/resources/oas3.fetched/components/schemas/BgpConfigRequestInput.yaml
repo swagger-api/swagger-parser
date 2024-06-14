@@ -1,0 +1,30 @@
+properties:
+  asn:
+    type: integer
+    minimum: 0
+    maximum: 4294967295
+    description: Autonomous System Number for local BGP deployment.
+    example: 65000
+  deployment_type:
+    description: Wether the BGP deployment is local or global. Local deployments are configured immediately. Global deployments will need to be reviewed by Equinix Metal engineers.
+    type: string
+    example: local
+    enum:
+    - local
+    - global
+  md5:
+    type: string
+    description: |
+      The plaintext password to share between BGP neighbors as an MD5 checksum:
+      * must be 10-20 characters long
+      * may not include punctuation
+      * must be a combination of numbers and letters
+      * must contain at least one lowercase, uppercase, and digit character
+    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{10,20}$'
+  use_case:
+    description: A use case explanation (necessary for global BGP request review).
+    type: string
+required:
+- deployment_type
+- asn
+type: object

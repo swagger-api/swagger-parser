@@ -1,0 +1,8 @@
+properties:
+  quantity:
+    type: string
+  total:
+    type: string
+  unit:
+    type: string
+type: object

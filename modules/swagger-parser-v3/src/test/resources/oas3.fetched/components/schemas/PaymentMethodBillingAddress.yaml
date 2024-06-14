@@ -1,0 +1,8 @@
+properties:
+  country_code_alpha2:
+    type: string
+  postal_code:
+    type: string
+  street_address:
+    type: string
+type: object

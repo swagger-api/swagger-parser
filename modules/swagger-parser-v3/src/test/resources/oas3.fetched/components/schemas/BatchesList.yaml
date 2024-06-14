@@ -1,0 +1,6 @@
+properties:
+  batches:
+    items:
+      $ref: './Batch.yaml'
+    type: array
+type: object

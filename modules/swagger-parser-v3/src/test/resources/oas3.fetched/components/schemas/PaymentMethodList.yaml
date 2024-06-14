@@ -1,0 +1,6 @@
+properties:
+  payment_methods:
+    items:
+      $ref: './PaymentMethod.yaml'
+    type: array
+type: object

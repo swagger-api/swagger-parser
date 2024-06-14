@@ -1,0 +1,13 @@
+properties:
+  address_family:
+    description: Address family for BGP session.
+    enum:
+    - ipv4
+    - ipv6
+    example: ipv4
+    type: string
+  default_route:
+    default: false
+    description: Set the default route policy.
+    type: boolean
+type: object

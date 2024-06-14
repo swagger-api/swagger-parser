@@ -1,0 +1,6 @@
+properties:
+  plans:
+    items:
+      $ref: './Plan.yaml'
+    type: array
+type: object

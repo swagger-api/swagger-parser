@@ -1,0 +1,60 @@
+get:
+  description: Returns the IP Reservation for the VRF.
+  operationId: findVrfIpReservation
+  parameters:
+  - description: VRF UUID
+    in: path
+    name: vrf_id
+    required: true
+    schema:
+      type: string
+      format: uuid
+  - description: IP UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      type: string
+      format: uuid
+  - description: Nested attributes to include. Included objects will return their
+      full attributes. Attribute names can be dotted (up to 3 levels) to included
+      deeply nested objects.
+    in: query
+    name: include
+    schema:
+      items:
+        type: string
+      type: array
+    style: form
+  - description: Nested attributes to exclude. Excluded objects will return only the
+      href attribute. Attribute names can be dotted (up to 3 levels) to exclude deeply
+      nested objects.
+    in: query
+    name: exclude
+    schema:
+      items:
+        type: string
+      type: array
+    style: form
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/VrfIpReservation.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all VRF IP Reservations in the VRF
+  tags:
+    - VRFs

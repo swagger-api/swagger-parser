@@ -1,0 +1,89 @@
+delete:
+  description: Removes the native VLAN from this port
+  operationId: deleteNativeVlan
+  parameters:
+  - description: Port UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Port.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Remove native VLAN
+  tags:
+  - Ports
+post:
+  description: Sets a virtual network on this port as a "native VLAN". The VLAN must
+    have already been assigned using the using the "Assign a port to a virtual network"
+    operation.
+  operationId: assignNativeVlan
+  parameters:
+  - description: Port UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: 'Virtual Network ID. May be the UUID of the Virtual Network record,
+      or the VLAN value itself (ex: ''1001'').'
+    in: query
+    name: vnid
+    required: true
+    schema:
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Port.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Assign a native VLAN
+  tags:
+  - Ports

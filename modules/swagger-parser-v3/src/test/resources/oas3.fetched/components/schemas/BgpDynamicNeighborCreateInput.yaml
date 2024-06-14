@@ -1,0 +1,16 @@
+properties:
+  bgp_neighbor_range:
+    description: Network range of the dynamic BGP neighbor in CIDR format
+    type: string
+    example: 192.168.1.0/25
+  bgp_neighbor_asn:
+    description: The ASN of the dynamic BGP neighbor
+    type: integer
+    example: 12345
+  tags:
+    items:
+      type: string
+    type: array
+required:
+- bgp_neighbor_range
+- bgp_neighbor_asn

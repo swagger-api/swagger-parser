@@ -1,0 +1,1128 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Metal API
+  contact:
+    email: support@equinixmetal.com
+    name: Equinix Metal API Team
+  description: |
+    # Introduction
+    Equinix Metal provides a RESTful HTTP API which can be reached at <https://api.equinix.com/metal/v1>. This document describes the API and how to use it.
+
+    The API allows you to programmatically interact with all
+    of your Equinix Metal resources, including devices, networks, addresses, organizations,
+    projects, and your user account. Every feature of the Equinix Metal web interface is accessible through the API.
+
+    The API docs are generated from the Equinix Metal OpenAPI specification and are officially hosted at <https://metal.equinix.com/developers/api>.
+
+    # Common Parameters
+
+    The Equinix Metal API uses a few methods to minimize network traffic and improve throughput. These parameters are not used in all API calls, but are used often enough to warrant their own section. Look for these parameters in the documentation for the API calls that support them.
+
+    ## Pagination
+
+    Pagination is used to limit the number of results returned in a single request. The API will return a maximum of 100 results per page. To retrieve additional results, you can use the `page` and `per_page` query parameters.
+
+    The `page` parameter is used to specify the page number. The first page is `1`. The `per_page` parameter is used to specify the number of results per page. The maximum number of results differs by resource type.
+
+    ## Sorting
+
+    Where offered, the API allows you to sort results by a specific field. To sort results use the `sort_by` query parameter with the root level field name as the value. The `sort_direction` parameter is used to specify the sort direction, either either `asc` (ascending) or `desc` (descending).
+
+    ## Filtering
+
+    Filtering is used to limit the results returned in a single request. The API supports filtering by certain fields in the response. To filter results, you can use the field as a query parameter.
+
+    For example, to filter the IP list to only return public IPv4 addresses, you can filter by the `type` field, as in the following request:
+
+    ```sh
+    curl -H 'X-Auth-Token: my_authentication_token' \
+      https://api.equinix.com/metal/v1/projects/id/ips?type=public_ipv4
+    ```
+
+    Only IP addresses with the `type` field set to `public_ipv4` will be returned.
+
+    ## Searching
+
+    Searching is used to find matching resources using multiple field comparissons. The API supports searching in resources that define this behavior. Currently the search parameter is only available on devices, ssh_keys, api_keys and memberships endpoints.
+
+    To search resources you can use the `search` query parameter.
+
+    ## Include and Exclude
+
+    For resources that contain references to other resources, sucha as a Device that refers to the Project it resides in, the Equinix Metal API will returns `href` values (API links) to the associated resource.
+
+    ```json
+    {
+      ...
+      "project": {
+        "href": "/metal/v1/projects/f3f131c8-f302-49ef-8c44-9405022dc6dd"
+      }
+    }
+    ```
+
+    If you're going need the project details, you can avoid a second API request.  Specify the contained `href` resources and collections that you'd like to have included in the response using the `include` query parameter.
+
+    For example:
+
+    ```sh
+    curl -H 'X-Auth-Token: my_authentication_token' \
+      https://api.equinix.com/metal/v1/user?include=projects
+    ```
+
+    The `include` parameter is generally accepted in `GET`, `POST`, `PUT`, and `PATCH` requests where `href` resources are presented.
+
+    To have multiple resources include, use a comma-separated list (e.g. `?include=emails,projects,memberships`).
+
+    ```sh
+    curl -H 'X-Auth-Token: my_authentication_token' \
+      https://api.equinix.com/metal/v1/user?include=emails,projects,memberships
+    ```
+
+    You may also include nested associations up to three levels deep using dot notation (`?include=memberships.projects`):
+
+    ```sh
+    curl -H 'X-Auth-Token: my_authentication_token' \
+      https://api.equinix.com/metal/v1/user?include=memberships.projects
+    ```
+
+    To exclude resources, and optimize response delivery, use the `exclude` query parameter. The `exclude` parameter is generally accepted in `GET`, `POST`, `PUT`, and `PATCH` requests for fields with nested object responses. When excluded, these fields will be replaced with an object that contains only an `href` field.
+  license:
+    name: Equinix Metal
+    url: https://metal.equinix.com/legal/
+  termsOfService: https://metal.equinix.com/legal/
+security:
+  - x_auth_token: []
+servers:
+  - url: https://api.equinix.com/metal/v1
+components:
+  parameters:
+    DeviceSearch:
+      $ref: './components/parameters/DeviceSearch.yaml'
+    ProjectName:
+      $ref: './components/parameters/ProjectName.yaml'
+    Page:
+      $ref: './components/parameters/Page.yaml'
+    PerPage:
+      $ref: './components/parameters/PerPage.yaml'
+    Include:
+      $ref: './components/parameters/Include.yaml'
+    Exclude:
+      $ref: './components/parameters/Exclude.yaml'
+  requestBodies:
+    InterconnectionCreateInput:
+      $ref: './components/requestBodies/InterconnectionCreateInput.yaml'
+    InvitationInput:
+      $ref: './components/requestBodies/InvitationInput.yaml'
+    PortAssignInput:
+      $ref: './components/requestBodies/PortAssignInput.yaml'
+    SSHKeyCreateInput:
+      $ref: './components/requestBodies/SSHKeyCreateInput.yaml'
+  schemas:
+    Address:
+      $ref: './components/schemas/Address.yaml'
+    Attribute:
+      $ref: './components/schemas/Attribute.yaml'
+    AttributeData:
+      $ref: './components/schemas/AttributeData.yaml'
+    AuthToken:
+      $ref: './components/schemas/AuthToken.yaml'
+    AuthTokenInput:
+      $ref: './components/schemas/AuthTokenInput.yaml'
+    AuthTokenList:
+      $ref: './components/schemas/AuthTokenList.yaml'
+    BGPSessionInput:
+      $ref: './components/schemas/BGPSessionInput.yaml'
+    Batch:
+      $ref: './components/schemas/Batch.yaml'
+    BatchesList:
+      $ref: './components/schemas/BatchesList.yaml'
+    BgpConfig:
+      $ref: './components/schemas/BgpConfig.yaml'
+    BgpConfigRequestInput:
+      $ref: './components/schemas/BgpConfigRequestInput.yaml'
+    BgpDynamicNeighbor:
+      $ref: './components/schemas/BgpDynamicNeighbor.yaml'
+    BgpDynamicNeighborCreateInput:
+      $ref: './components/schemas/BgpDynamicNeighborCreateInput.yaml'
+    BgpDynamicNeighborList:
+      $ref: './components/schemas/BgpDynamicNeighborList.yaml'
+    BgpNeighborData:
+      $ref: './components/schemas/BgpNeighborData.yaml'
+    BgpSession:
+      $ref: './components/schemas/BgpSession.yaml'
+    BgpSessionList:
+      $ref: './components/schemas/BgpSessionList.yaml'
+    BgpSessionNeighbors:
+      $ref: './components/schemas/BgpSessionNeighbors.yaml'
+    CapacityCheckPerFacilityInfo:
+      $ref: './components/schemas/CapacityCheckPerFacilityInfo.yaml'
+    CapacityCheckPerFacilityList:
+      $ref: './components/schemas/CapacityCheckPerFacilityList.yaml'
+    CapacityCheckPerMetroInfo:
+      $ref: './components/schemas/CapacityCheckPerMetroInfo.yaml'
+    CapacityCheckPerMetroList:
+      $ref: './components/schemas/CapacityCheckPerMetroList.yaml'
+    CapacityInput:
+      $ref: './components/schemas/CapacityInput.yaml'
+    CapacityLevelPerBaremetal:
+      $ref: './components/schemas/CapacityLevelPerBaremetal.yaml'
+    CapacityList:
+      $ref: './components/schemas/CapacityList.yaml'
+    CapacityReport:
+      $ref: './components/schemas/CapacityReport.yaml'
+    Component:
+      $ref: './components/schemas/Component.yaml'
+    Coordinates:
+      $ref: './components/schemas/Coordinates.yaml'
+    CreateEmailInput:
+      $ref: './components/schemas/CreateEmailInput.yaml'
+    CreateSelfServiceReservationRequest:
+      $ref: './components/schemas/CreateSelfServiceReservationRequest.yaml'
+    DedicatedPortCreateInput:
+      $ref: './components/schemas/DedicatedPortCreateInput.yaml'
+    Device:
+      $ref: './components/schemas/Device.yaml'
+    DeviceCreateInput:
+      $ref: './components/schemas/DeviceCreateInput.yaml'
+    DeviceHealthRollup:
+      $ref: './components/schemas/DeviceHealthRollup.yaml'
+    DeviceCreateInFacilityInput:
+      $ref: './components/schemas/DeviceCreateInFacilityInput.yaml'
+    DeviceCreateInMetroInput:
+      $ref: './components/schemas/DeviceCreateInMetroInput.yaml'
+    DeviceList:
+      $ref: './components/schemas/DeviceList.yaml'
+    DeviceUpdateInput:
+      $ref: './components/schemas/DeviceUpdateInput.yaml'
+    DeviceUsage:
+      $ref: './components/schemas/DeviceUsage.yaml'
+    DeviceUsageList:
+      $ref: './components/schemas/DeviceUsageList.yaml'
+    Email:
+      $ref: './components/schemas/Email.yaml'
+    EmailInput:
+      $ref: './components/schemas/EmailInput.yaml'
+    Entitlement:
+      $ref: './components/schemas/Entitlement.yaml'
+    Error:
+      $ref: './components/schemas/Error.yaml'
+    Event:
+      $ref: './components/schemas/Event.yaml'
+    EventList:
+      $ref: './components/schemas/EventList.yaml'
+    FabricServiceToken:
+      $ref: './components/schemas/FabricServiceToken.yaml'
+    Facility:
+      $ref: './components/schemas/Facility.yaml'
+    FacilityInput:
+      $ref: './components/schemas/FacilityInput.yaml'
+    FacilityList:
+      $ref: './components/schemas/FacilityList.yaml'
+    FirmwareSet:
+      $ref: './components/schemas/FirmwareSet.yaml'
+    FirmwareSetList:
+      $ref: './components/schemas/FirmwareSetList.yaml'
+    FirmwareSetListResponse:
+      $ref: './components/schemas/FirmwareSetListResponse.yaml'
+    FirmwareSetResponse:
+      $ref: './components/schemas/FirmwareSetResponse.yaml'
+    GlobalBgpRange:
+      $ref: './components/schemas/GlobalBgpRange.yaml'
+    GlobalBgpRangeList:
+      $ref: './components/schemas/GlobalBgpRangeList.yaml'
+    HardwareReservation:
+      $ref: './components/schemas/HardwareReservation.yaml'
+    HardwareReservationList:
+      $ref: './components/schemas/HardwareReservationList.yaml'
+    Href:
+      $ref: './components/schemas/Href.yaml'
+    IPAddress:
+      $ref: './components/schemas/IPAddress.yaml'
+    IPAssignment:
+      $ref: './components/schemas/IPAssignment.yaml'
+    IPAssignmentInput:
+      $ref: './components/schemas/IPAssignmentInput.yaml'
+    IPAssignmentList:
+      $ref: './components/schemas/IPAssignmentList.yaml'
+    IPAvailabilitiesList:
+      $ref: './components/schemas/IPAvailabilitiesList.yaml'
+    IPReservation:
+      $ref: './components/schemas/IPReservation.yaml'
+    IPReservationList:
+      $ref: './components/schemas/IPReservationList.yaml'
+    IPReservationRequestInput:
+      $ref: './components/schemas/IPReservationRequestInput.yaml'
+    InstancesBatchCreateInput:
+      $ref: './components/schemas/InstancesBatchCreateInput.yaml'
+    Interconnection:
+      $ref: './components/schemas/Interconnection.yaml'
+    InterconnectionList:
+      $ref: './components/schemas/InterconnectionList.yaml'
+    InterconnectionPort:
+      $ref: './components/schemas/InterconnectionPort.yaml'
+    InterconnectionPortList:
+      $ref: './components/schemas/InterconnectionPortList.yaml'
+    InterconnectionUpdateInput:
+      $ref: './components/schemas/InterconnectionUpdateInput.yaml'
+    Invitation:
+      $ref: './components/schemas/Invitation.yaml'
+    InvitationInput:
+      $ref: './components/schemas/InvitationInput.yaml'
+    InvitationList:
+      $ref: './components/schemas/InvitationList.yaml'
+    Invoice:
+      $ref: './components/schemas/Invoice.yaml'
+    InvoiceList:
+      $ref: './components/schemas/InvoiceList.yaml'
+    License:
+      $ref: './components/schemas/License.yaml'
+    LicenseCreateInput:
+      $ref: './components/schemas/LicenseCreateInput.yaml'
+    LicenseList:
+      $ref: './components/schemas/LicenseList.yaml'
+    LicenseUpdateInput:
+      $ref: './components/schemas/LicenseUpdateInput.yaml'
+    LineItem:
+      $ref: './components/schemas/LineItem.yaml'
+    Membership:
+      $ref: './components/schemas/Membership.yaml'
+    MembershipInput:
+      $ref: './components/schemas/MembershipInput.yaml'
+    MembershipList:
+      $ref: './components/schemas/MembershipList.yaml'
+    Meta:
+      $ref: './components/schemas/Meta.yaml'
+    Metadata:
+      $ref: './components/schemas/Metadata.yaml'
+    MetalGateway:
+      $ref: './components/schemas/MetalGateway.yaml'
+    MetalGatewayCreateInput:
+      $ref: './components/schemas/MetalGatewayCreateInput.yaml'
+    MetalGatewayElasticIpCreateInput:
+      $ref: './components/schemas/MetalGatewayElasticIpCreateInput.yaml'
+    MetalGatewayList:
+      $ref: './components/schemas/MetalGatewayList.yaml'
+    MetalGatewayLite:
+      $ref: './components/schemas/MetalGatewayLite.yaml'
+    Metro:
+      $ref: './components/schemas/Metro.yaml'
+    MetroInput:
+      $ref: './components/schemas/MetroInput.yaml'
+    MetroList:
+      $ref: './components/schemas/MetroList.yaml'
+    NewPassword:
+      $ref: './components/schemas/NewPassword.yaml'
+    OperatingSystem:
+      $ref: './components/schemas/OperatingSystem.yaml'
+    OperatingSystemList:
+      $ref: './components/schemas/OperatingSystemList.yaml'
+    Organization:
+      $ref: './components/schemas/Organization.yaml'
+    OrganizationInput:
+      $ref: './components/schemas/OrganizationInput.yaml'
+    OrganizationList:
+      $ref: './components/schemas/OrganizationList.yaml'
+    ParentBlock:
+      $ref: './components/schemas/ParentBlock.yaml'
+    PaymentMethod:
+      $ref: './components/schemas/PaymentMethod.yaml'
+    PaymentMethodBillingAddress:
+      $ref: './components/schemas/PaymentMethodBillingAddress.yaml'
+    PaymentMethodCreateInput:
+      $ref: './components/schemas/PaymentMethodCreateInput.yaml'
+    PaymentMethodList:
+      $ref: './components/schemas/PaymentMethodList.yaml'
+    PaymentMethodUpdateInput:
+      $ref: './components/schemas/PaymentMethodUpdateInput.yaml'
+    Plan:
+      $ref: './components/schemas/Plan.yaml'
+    PlanList:
+      $ref: './components/schemas/PlanList.yaml'
+    Port:
+      $ref: './components/schemas/Port.yaml'
+    PortAssignInput:
+      $ref: './components/schemas/PortAssignInput.yaml'
+    PortConvertLayer3Input:
+      $ref: './components/schemas/PortConvertLayer3Input.yaml'
+    PortVlanAssignment:
+      $ref: './components/schemas/PortVlanAssignment.yaml'
+    PortVlanAssignmentBatch:
+      $ref: './components/schemas/PortVlanAssignmentBatch.yaml'
+    PortVlanAssignmentBatchCreateInput:
+      $ref: './components/schemas/PortVlanAssignmentBatchCreateInput.yaml'
+    PortVlanAssignmentBatchList:
+      $ref: './components/schemas/PortVlanAssignmentBatchList.yaml'
+    PortVlanAssignmentList:
+      $ref: './components/schemas/PortVlanAssignmentList.yaml'
+    Project:
+      $ref: './components/schemas/Project.yaml'
+    ProjectCreateFromRootInput:
+      $ref: './components/schemas/ProjectCreateFromRootInput.yaml'
+    ProjectCreateInput:
+      $ref: './components/schemas/ProjectCreateInput.yaml'
+    ProjectIdName:
+      $ref: './components/schemas/ProjectIdName.yaml'
+    ProjectList:
+      $ref: './components/schemas/ProjectList.yaml'
+    ProjectUpdateInput:
+      $ref: './components/schemas/ProjectUpdateInput.yaml'
+    ProjectUsage:
+      $ref: './components/schemas/ProjectUsage.yaml'
+    ProjectUsageList:
+      $ref: './components/schemas/ProjectUsageList.yaml'
+    RecoveryCodeList:
+      $ref: './components/schemas/RecoveryCodeList.yaml'
+    SSHKey:
+      $ref: './components/schemas/SSHKey.yaml'
+    SSHKeyCreateInput:
+      $ref: './components/schemas/SSHKeyCreateInput.yaml'
+    SSHKeyInput:
+      $ref: './components/schemas/SSHKeyInput.yaml'
+    SSHKeyList:
+      $ref: './components/schemas/SSHKeyList.yaml'
+    SelfServiceReservationItemRequest:
+      $ref: './components/schemas/SelfServiceReservationItemRequest.yaml'
+    SelfServiceReservationItemResponse:
+      $ref: './components/schemas/SelfServiceReservationItemResponse.yaml'
+    SelfServiceReservationList:
+      $ref: './components/schemas/SelfServiceReservationList.yaml'
+    SelfServiceReservationResponse:
+      $ref: './components/schemas/SelfServiceReservationResponse.yaml'
+    ServerInfo:
+      $ref: './components/schemas/ServerInfo.yaml'
+    SpotMarketPricesList:
+      $ref: './components/schemas/SpotMarketPricesList.yaml'
+    SpotMarketPricesPerMetroList:
+      $ref: './components/schemas/SpotMarketPricesPerMetroList.yaml'
+    SpotMarketPricesPerMetroReport:
+      $ref: './components/schemas/SpotMarketPricesPerMetroReport.yaml'
+    SpotMarketRequest:
+      $ref: './components/schemas/SpotMarketRequest.yaml'
+    SpotMarketRequestCreateInput:
+      $ref: './components/schemas/SpotMarketRequestCreateInput.yaml'
+    SpotMarketRequestList:
+      $ref: './components/schemas/SpotMarketRequestList.yaml'
+    SpotPricesDatapoints:
+      $ref: './components/schemas/SpotPricesDatapoints.yaml'
+    SpotPricesDatapointsList:
+      $ref: './components/schemas/SpotPricesDatapointsList.yaml'
+    SpotPricesHistoryReport:
+      $ref: './components/schemas/SpotPricesHistoryReport.yaml'
+    SpotPricesPerBaremetal:
+      $ref: './components/schemas/SpotPricesPerBaremetal.yaml'
+    SpotPricesPerFacility:
+      $ref: './components/schemas/SpotPricesPerFacility.yaml'
+    SpotPricesPerNewFacility:
+      $ref: './components/schemas/SpotPricesPerNewFacility.yaml'
+    SpotPricesReport:
+      $ref: './components/schemas/SpotPricesReport.yaml'
+    SupportRequestInput:
+      $ref: './components/schemas/SupportRequestInput.yaml'
+    TransferRequest:
+      $ref: './components/schemas/TransferRequest.yaml'
+    TransferRequestInput:
+      $ref: './components/schemas/TransferRequestInput.yaml'
+    TransferRequestList:
+      $ref: './components/schemas/TransferRequestList.yaml'
+    UpdateEmailInput:
+      $ref: './components/schemas/UpdateEmailInput.yaml'
+    User:
+      $ref: './components/schemas/User.yaml'
+    UserCreateInput:
+      $ref: './components/schemas/UserCreateInput.yaml'
+    Userdata:
+      $ref: './components/schemas/Userdata.yaml'
+    UserLimited:
+      $ref: './components/schemas/UserLimited.yaml'
+    UserList:
+      $ref: './components/schemas/UserList.yaml'
+    UserLite:
+      $ref: './components/schemas/UserLite.yaml'
+    UserUpdateInput:
+      $ref: './components/schemas/UserUpdateInput.yaml'
+    VerifyEmail:
+      $ref: './components/schemas/VerifyEmail.yaml'
+    VirtualCircuit:
+      $ref: './components/schemas/VirtualCircuit.yaml'
+    VirtualCircuitCreateInput:
+      $ref: './components/schemas/VirtualCircuitCreateInput.yaml'
+    VirtualCircuitList:
+      $ref: './components/schemas/VirtualCircuitList.yaml'
+    VirtualCircuitUpdateInput:
+      $ref: './components/schemas/VirtualCircuitUpdateInput.yaml'
+    VirtualNetwork:
+      $ref: './components/schemas/VirtualNetwork.yaml'
+    VirtualNetworkCreateInput:
+      $ref: './components/schemas/VirtualNetworkCreateInput.yaml'
+    VirtualNetworkList:
+      $ref: './components/schemas/VirtualNetworkList.yaml'
+    VlanFabricVcCreateInput:
+      $ref: './components/schemas/VlanFabricVcCreateInput.yaml'
+    VlanVirtualCircuit:
+      $ref: './components/schemas/VlanVirtualCircuit.yaml'
+    VlanVirtualCircuitCreateInput:
+      $ref: './components/schemas/VlanVirtualCircuitCreateInput.yaml'
+    VlanVirtualCircuitUpdateInput:
+      $ref: './components/schemas/VlanVirtualCircuitUpdateInput.yaml'
+    Vrf:
+      $ref: './components/schemas/Vrf.yaml'
+    VrfCreateInput:
+      $ref: './components/schemas/VrfCreateInput.yaml'
+    VrfFabricVcCreateInput:
+      $ref: './components/schemas/VrfFabricVcCreateInput.yaml'
+    VrfIpRangeCreateInput:
+      $ref: './components/schemas/VrfIpRangeCreateInput.yaml'
+    VrfIpRangeList:
+      $ref: './components/schemas/VrfIpRangeList.yaml'
+    VrfIpRangeUpdateInput:
+      $ref: './components/schemas/VrfIpRangeUpdateInput.yaml'
+    VrfIpReservation:
+      $ref: './components/schemas/VrfIpReservation.yaml'
+    VrfIpReservationCreateInput:
+      $ref: './components/schemas/VrfIpReservationCreateInput.yaml'
+    VrfIpReservationList:
+      $ref: './components/schemas/VrfIpReservationList.yaml'
+    VrfList:
+      $ref: './components/schemas/VrfList.yaml'
+    VrfMetalGateway:
+      $ref: './components/schemas/VrfMetalGateway.yaml'
+    VrfMetalGatewayCreateInput:
+      $ref: './components/schemas/VrfMetalGatewayCreateInput.yaml'
+    VrfRoute:
+      $ref: './components/schemas/VrfRoute.yaml'
+    VrfRouteCreateInput:
+      $ref: './components/schemas/VrfRouteCreateInput.yaml'
+    VrfRouteUpdateInput:
+      $ref: './components/schemas/VrfRouteUpdateInput.yaml'
+    VrfRouteList:
+      $ref: './components/schemas/VrfRouteList.yaml'
+    VrfUpdateInput:
+      $ref: './components/schemas/VrfUpdateInput.yaml'
+    VrfVirtualCircuit:
+      $ref: './components/schemas/VrfVirtualCircuit.yaml'
+    VrfVirtualCircuitCreateInput:
+      $ref: './components/schemas/VrfVirtualCircuitCreateInput.yaml'
+    VrfVirtualCircuitUpdateInput:
+      $ref: './components/schemas/VrfVirtualCircuitUpdateInput.yaml'
+  securitySchemes:
+    x_auth_token:
+      in: header
+      name: X-Auth-Token
+      type: apiKey
+      x-displayName: X-Auth-Token
+      description: |+
+        HTTP header containing the User or Project API key that will be used to authenticate the request.
+paths:
+  /api-keys/{id}:
+    $ref: ./paths/api-keys/id.yaml
+  /batches/{id}:
+    $ref: ./paths/batches/id.yaml
+  /bgp/sessions/{id}:
+    $ref: ./paths/bgp/sessions/id.yaml
+  /bgp-dynamic-neighbors/{id}:
+    $ref: ./paths/bgp-dynamic-neighbors/id.yaml
+  /capacity:
+    $ref: ./paths/capacity.yaml
+  /capacity/metros:
+    $ref: ./paths/capacity/metros.yaml
+  /connections/{connection_id}:
+    $ref: ./paths/connections/connection_id.yaml
+  /connections/{connection_id}/events:
+    $ref: ./paths/connections/connection_id/events.yaml
+  /connections/{connection_id}/ports:
+    $ref: ./paths/connections/connection_id/ports.yaml
+  /connections/{connection_id}/virtual-circuits:
+    $ref: ./paths/connections/connection_id/virtual-circuits.yaml
+  /connections/{connection_id}/ports/{id}:
+    $ref: ./paths/connections/connection_id/ports/id.yaml
+  /connections/{connection_id}/ports/{id}/events:
+    $ref: ./paths/connections/connection_id/ports/id/events.yaml
+  /connections/{connection_id}/ports/{port_id}/virtual-circuits:
+    $ref: ./paths/connections/connection_id/ports/port_id/virtual-circuits.yaml
+  /devices/{id}:
+    $ref: ./paths/devices/id.yaml
+  /devices/{id}/actions:
+    $ref: ./paths/devices/id/actions.yaml
+  /devices/{id}/bandwidth:
+    $ref: ./paths/devices/id/bandwidth.yaml
+  /devices/{id}/bgp/neighbors:
+    $ref: ./paths/devices/id/bgp/neighbors.yaml
+  /devices/{id}/bgp/sessions:
+    $ref: ./paths/devices/id/bgp/sessions.yaml
+  /devices/{id}/customdata:
+    $ref: ./paths/devices/id/customdata.yaml
+  /devices/{id}/diagnostics/screenshot:
+    $ref: ./paths/devices/id/diagnostics/screenshot.yaml
+  /devices/{id}/diagnostics/health/rollup:
+    $ref: ./paths/devices/id/diagnostics/health/rollup.yaml
+  /devices/{id}/events:
+    $ref: ./paths/devices/id/events.yaml
+  /devices/{id}/firmware-sets:
+    $ref: ./paths/devices/id/firmware-sets.yaml
+  /devices/{id}/ips:
+    $ref: ./paths/devices/id/ips.yaml
+  /devices/{id}/metadata:
+    $ref: ./paths/devices/id/metadata.yaml
+  /devices/{id}/ssh-keys:
+    $ref: ./paths/devices/id/ssh-keys.yaml
+  /devices/{id}/traffic:
+    $ref: ./paths/devices/id/traffic.yaml
+  /devices/{id}/usages:
+    $ref: ./paths/devices/id/usages.yaml
+  /devices/{id}/userdata:
+    $ref: ./paths/devices/id/userdata.yaml
+  /devices/{instance_id}/ips/{id}/customdata:
+    $ref: ./paths/devices/instance_id/ips/id/customdata.yaml
+  /emails:
+    $ref: ./paths/emails.yaml
+  /emails/{id}:
+    $ref: ./paths/emails/id.yaml
+  /events:
+    $ref: ./paths/events.yaml
+  /events/{id}:
+    $ref: ./paths/events/id.yaml
+  /facilities:
+    $ref: ./paths/facilities.yaml
+  /hardware-reservations/{id}:
+    $ref: ./paths/hardware-reservations/id.yaml
+  /hardware-reservations/{id}/activate:
+    $ref: ./paths/hardware-reservations/id/activate.yaml
+  /hardware-reservations/{id}/move:
+    $ref: ./paths/hardware-reservations/id/move.yaml
+  /incidents:
+    $ref: ./paths/incidents.yaml
+  /invitations:
+    $ref: ./paths/invitations.yaml
+  /invitations/{id}:
+    $ref: ./paths/invitations/id.yaml
+  /invoices/{id}:
+    $ref: ./paths/invoices/id.yaml
+  /ips/{id}:
+    $ref: ./paths/ips/id.yaml
+  /ips/{id}/available:
+    $ref: ./paths/ips/id/available.yaml
+  /ips/{id}/customdata:
+    $ref: ./paths/ips/id/customdata.yaml
+  /licenses/{id}:
+    $ref: ./paths/licenses/id.yaml
+  /locations/metros:
+    $ref: ./paths/locations/metros.yaml
+  /locations/metros/{id}:
+    $ref: ./paths/locations/metros/id.yaml
+  /market/spot/prices:
+    $ref: ./paths/market/spot/prices.yaml
+  /market/spot/prices/history:
+    $ref: ./paths/market/spot/prices/history.yaml
+  /market/spot/prices/metros:
+    $ref: ./paths/market/spot/prices/metros.yaml
+  /memberships/{id}:
+    $ref: ./paths/memberships/id.yaml
+  /metal-gateways/{id}:
+    $ref: ./paths/metal-gateways/id.yaml
+  /metal-gateways/{id}/bgp-dynamic-neighbors:
+    $ref: ./paths/metal-gateways/id/bgp-dynamic-neighbors.yaml
+  /metal-gateways/{id}/ips:
+    $ref: ./paths/metal-gateways/id/ips.yaml
+  /operating-system-versions:
+    $ref: ./paths/operating-system-versions.yaml
+  /operating-systems:
+    $ref: ./paths/operating-systems.yaml
+  /organizations:
+    $ref: ./paths/organizations.yaml
+  /organizations/{id}:
+    $ref: ./paths/organizations/id.yaml
+  /organizations/{id}/capacity:
+    $ref: ./paths/organizations/id/capacity.yaml
+  /organizations/{id}/capacity/metros:
+    $ref: ./paths/organizations/id/capacity/metros.yaml
+  /organizations/{id}/customdata:
+    $ref: ./paths/organizations/id/customdata.yaml
+  /organizations/{id}/devices:
+    $ref: ./paths/organizations/id/devices.yaml
+  /organizations/{id}/events:
+    $ref: ./paths/organizations/id/events.yaml
+  /organizations/{id}/facilities:
+    $ref: ./paths/organizations/id/facilities.yaml
+  /organizations/{id}/firmware-sets:
+    $ref: ./paths/organizations/id/firmware-sets.yaml
+  /organizations/{id}/invitations:
+    $ref: ./paths/organizations/id/invitations.yaml
+  /organizations/{id}/invoices:
+    $ref: ./paths/organizations/id/invoices.yaml
+  /organizations/{id}/operating-systems:
+    $ref: ./paths/organizations/id/operating-systems.yaml
+  /organizations/{id}/payment-methods:
+    $ref: ./paths/organizations/id/payment-methods.yaml
+  /organizations/{id}/plans:
+    $ref: ./paths/organizations/id/plans.yaml
+  /organizations/{id}/projects:
+    $ref: ./paths/organizations/id/projects.yaml
+  /organizations/{id}/transfers:
+    $ref: ./paths/organizations/id/transfers.yaml
+  /organizations/{organization_id}/connections:
+    $ref: ./paths/organizations/organization_id/connections.yaml
+  /payment-methods/{id}:
+    $ref: ./paths/payment-methods/id.yaml
+  /plans:
+    $ref: ./paths/plans.yaml
+  /ports/{id}:
+    $ref: ./paths/ports/id.yaml
+  /ports/{id}/assign:
+    $ref: ./paths/ports/id/assign.yaml
+  /ports/{id}/bond:
+    $ref: ./paths/ports/id/bond.yaml
+  /ports/{id}/convert/layer-2:
+    $ref: ./paths/ports/id/convert/layer-2.yaml
+  /ports/{id}/convert/layer-3:
+    $ref: ./paths/ports/id/convert/layer-3.yaml
+  /ports/{id}/disbond:
+    $ref: ./paths/ports/id/disbond.yaml
+  /ports/{id}/native-vlan:
+    $ref: ./paths/ports/id/native-vlan.yaml
+  /ports/{id}/unassign:
+    $ref: ./paths/ports/id/unassign.yaml
+  /ports/{id}/vlan-assignments:
+    $ref: ./paths/ports/id/vlan-assignments.yaml
+  /ports/{id}/vlan-assignments/{assignment_id}:
+    $ref: ./paths/ports/id/vlan-assignments/assignment_id.yaml
+  /ports/{id}/vlan-assignments/batches:
+    $ref: ./paths/ports/id/vlan-assignments/batches.yaml
+  /ports/{id}/vlan-assignments/batches/{batch_id}:
+    $ref: ./paths/ports/id/vlan-assignments/batches/batch_id.yaml
+  /projects:
+    $ref: ./paths/projects.yaml
+  /projects/{id}:
+    $ref: ./paths/projects/id.yaml
+  /projects/{id}/api-keys:
+    $ref: ./paths/projects/id/api-keys.yaml
+  /projects/{id}/batches:
+    $ref: ./paths/projects/id/batches.yaml
+  /projects/{id}/bgp-config:
+    $ref: ./paths/projects/id/bgp-config.yaml
+  /projects/{id}/bgp-configs:
+    $ref: ./paths/projects/id/bgp-configs.yaml
+  /projects/{id}/bgp/sessions:
+    $ref: ./paths/projects/id/bgp/sessions.yaml
+  /projects/{id}/customdata:
+    $ref: ./paths/projects/id/customdata.yaml
+  /projects/{id}/devices:
+    $ref: ./paths/projects/id/devices.yaml
+  /projects/{id}/devices/batch:
+    $ref: ./paths/projects/id/devices/batch.yaml
+  /projects/{id}/events:
+    $ref: ./paths/projects/id/events.yaml
+  /projects/{id}/facilities:
+    $ref: ./paths/projects/id/facilities.yaml
+  /projects/{id}/firmware-sets:
+    $ref: ./paths/projects/id/firmware-sets.yaml
+  /projects/{id}/global-bgp-ranges:
+    $ref: ./paths/projects/id/global-bgp-ranges.yaml
+  /projects/{id}/hardware-reservations:
+    $ref: ./paths/projects/id/hardware-reservations.yaml
+  /projects/{id}/ips:
+    $ref: ./paths/projects/id/ips.yaml
+  /projects/{id}/licenses:
+    $ref: ./paths/projects/id/licenses.yaml
+  /projects/{id}/plans:
+    $ref: ./paths/projects/id/plans.yaml
+  /projects/{id}/spot-market-requests:
+    $ref: ./paths/projects/id/spot-market-requests.yaml
+  /projects/{id}/ssh-keys:
+    $ref: ./paths/projects/id/ssh-keys.yaml
+  /projects/{id}/transfers:
+    $ref: ./paths/projects/id/transfers.yaml
+  /projects/{id}/usages:
+    $ref: ./paths/projects/id/usages.yaml
+  /projects/{id}/virtual-networks:
+    $ref: ./paths/projects/id/virtual-networks.yaml
+  /projects/{id}/vrfs:
+    $ref: ./paths/projects/id/vrfs.yaml
+  /projects/{project_id}/connections:
+    $ref: ./paths/projects/project_id/connections.yaml
+  /projects/{project_id}/invitations:
+    $ref: ./paths/projects/project_id/invitations.yaml
+  /projects/{project_id}/ips/{id}/customdata:
+    $ref: ./paths/projects/project_id/ips/id/customdata.yaml
+  /projects/{project_id}/memberships:
+    $ref: ./paths/projects/project_id/memberships.yaml
+  /projects/{project_id}/metal-gateways:
+    $ref: ./paths/projects/project_id/metal-gateways.yaml
+  /projects/{project_id}/self-service/reservations:
+    $ref: ./paths/projects/project_id/self-service/reservations.yaml
+  /projects/{project_id}/self-service/reservations/{id}:
+    $ref: ./paths/projects/project_id/self-service/reservations/id.yaml
+  /reset-password:
+    $ref: ./paths/reset-password.yaml
+  /routes/{id}:
+    $ref: ./paths/routes/id.yaml
+  /routes/{id}/events:
+    $ref: ./paths/routes/id/events.yaml
+  /spot-market-requests/{id}:
+    $ref: ./paths/spot-market-requests/id.yaml
+  /ssh-keys:
+    $ref: ./paths/ssh-keys.yaml
+  /ssh-keys/{id}:
+    $ref: ./paths/ssh-keys/id.yaml
+  /support-requests:
+    $ref: ./paths/support-requests.yaml
+  /transfers/{id}:
+    $ref: ./paths/transfers/id.yaml
+  /user:
+    $ref: ./paths/user.yaml
+  /user/api-keys:
+    $ref: ./paths/user/api-keys.yaml
+  /user/api-keys/{id}:
+    $ref: ./paths/user/api-keys/id.yaml
+  /user/otp/app:
+    $ref: ./paths/user/otp/app.yaml
+  /user/otp/recovery-codes:
+    $ref: ./paths/user/otp/recovery-codes.yaml
+  /user/otp/sms:
+    $ref: ./paths/user/otp/sms.yaml
+  /user/otp/sms/receive:
+    $ref: ./paths/user/otp/sms/receive.yaml
+  /user/otp/verify/{otp}:
+    $ref: ./paths/user/otp/verify/otp.yaml
+  /userdata/validate:
+    $ref: ./paths/userdata/validate.yaml
+  /users:
+    $ref: ./paths/users.yaml
+  /users/{id}:
+    $ref: ./paths/users/id.yaml
+  /users/{id}/customdata:
+    $ref: ./paths/users/id/customdata.yaml
+  /verify-email:
+    $ref: ./paths/verify-email.yaml
+  /virtual-circuits/{id}/events:
+    $ref: ./paths/virtual-circuits/id/events.yaml
+  /virtual-circuits/{id}:
+    $ref: ./paths/virtual-circuits/id.yaml
+  /virtual-networks/{id}:
+    $ref: ./paths/virtual-networks/id.yaml
+  /vrfs/{id}:
+    $ref: ./paths/vrfs/id.yaml
+  /vrfs/{id}/ips:
+    $ref: ./paths/vrfs/id/ips.yaml
+  /vrfs/{vrf_id}/ips/{id}:
+    $ref: ./paths/vrfs/vrf_id/ips/id.yaml
+  /vrfs/{id}/routes:
+    $ref: ./paths/vrfs/id/routes.yaml
+tags:
+  - description: |+
+      Nearly all of the endpoints in the API require authentication. Authentication is performed by providing an authentication token (interchangeably referred to as an API key) in the `X-Auth-Token` HTTP request header.
+
+      <!-- ReDoc-Inject: <security-definitions> -->
+
+      User API keys can be obtained by creating them in the Equinix Metal Portal or by using the [Create a User API Key](#operation/createAPIKey) endpoint.
+
+      Project API keys can also be obtained by creating them in the Equinix Metal Portal or by using the [Create a Project API Key](#operation/createProjectAPIKey) endpoint. Project API keys are scoped to a single project and can only be used to access resources within that project.
+
+      For example, to use an authenticated API token, you would make a request like the following:
+
+      ```bash
+      curl -H 'X-Auth-Token: my_authentication_token' \
+        https://api.equinix.com/metal/v1/user/api-keys
+      ```
+
+      Applications can take advantage of the Equinix Metal API and API keys to perform any of the actions that can be performed in the Equinix Metal Portal. For example, you can use the API to create and manage devices, projects, and other resources.
+
+      API keys can be deleted without affecting any of the resources created with them. Access to applications using the API can be revoked by deleting the API key used to authenticate the application.
+    name: Authentication
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/users/#api-keys
+  - description: |
+      Equinix Metal uses conventional HTTP response codes to indicate the success or failure of an API request.
+
+      In general: Codes in the 2xx range indicate success. Codes in the 4xx range indicate an error that failed given the information provided (e.g., a required parameter was omitted, a charge failed, etc.). Codes in the 5xx range indicate an error with Equinix Metal's servers (these are rare).
+
+      | Code                               | Summary
+      | ---------------------------------- | ------------------------------------------------------
+      | 200 OK                             | Everything worked as expected.
+      | 201 Create                         | Everything worked as expected, the resource was created.
+      | 422 Bad Request                    | The request was unacceptable, often due to missing a required parameter.
+      | 401 Unauthorized                   | No valid API key provided.
+      | 404 Not Found                      | The requested resource doesn't exist.
+      | 500, 502, 503, 504 - Server Errors | Something went wrong on Equinix Metal's end. (These are rare.)
+
+      Errors (4xx, 5xx) reported by the API will include a JSON error response.  This response will be structured as one of the following:
+
+      ```json
+      {"error": "the error message"}
+      ```
+
+      or
+
+      ```json
+      {"errors": ["one error", "another error"}
+      ```
+
+      The JSON response is not guaranteed so check the HTTP status message. JSON may not be included if the error is reported by an API intermediary, like a loadbalancer service.
+    name: Errors
+  - description: >
+      Manage device batches. See project endpoints to list batches for a
+      particular project. Check out the product docs to learn more about [Batch
+      Deployment](https://metal.equinix.com/developers/docs/deploy/batch-deployment/).
+    name: Batches
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/deploy/batch-deployment/
+  - description: >
+      Manage BGP configs and sessions. See device endpoints to create and list BGP
+      sessions for a particular device. Check out the product docs to learn more
+      about [Local and Global
+      BGP](https://metal.equinix.com/developers/docs/networking/local-global-bgp/).
+    name: BGP
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/bgp/bgp-on-equinix-metal/
+  - description: >
+      Capacity Management. Check out the product docs to learn more about
+      [Capacity](https://metal.equinix.com/developers/docs/locations/capacity/).
+    name: Capacity
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/locations/capacity/
+  - description: >
+      Network Interconnections. See Instructions to create Network
+      Interconnections at Check out the product docs to learn more about [Equinix
+      Fabric](https://metal.equinix.com/developers/docs/networking/fabric/).
+    name: Interconnections
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/equinix-interconnect/introduction/
+  - description: >
+      Device Management. Check out the product docs to learn more about [Server
+      Devices](https://metal.equinix.com/developers/docs/servers/).
+    name: Devices
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/deploy/on-demand/
+  - description: Email Management
+    name: Emails
+  - description: Event Management
+    name: Events
+  - description: >
+      Facility Management. Check out the product docs to learn more about
+      [Facilities](https://metal.equinix.com/developers/docs/locations/).
+    name: Facilities
+  - description: >
+      Firmware Sets Management. Notice: Firmware Sets are a test feature currently under active development, and only available to certain users. Please contact Customer Success for more information.
+    name: Firmware Sets
+  - description: >
+      Console Log Details. Notice: This is a test feature currently under active development, and only available to certain users. Please contact Customer Success for more information.
+    name: Console Log Details
+  - description: >
+      Global BGP Range Management
+    name: GlobalBgpRanges
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/bgp/global-bgp/
+  - description: >
+      Hardware Reservation Management. Check out the product docs to learn more
+      about [Reserved
+      Hardware](https://metal.equinix.com/developers/docs/deploy/reserved/).
+    name: HardwareReservations
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/deploy/reserved/
+  - description: >
+      Incident Management
+    name: Incidents
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/locations/maintenance/
+  - description: >
+      Manage invitations. See project endpoints to create a new invitation. Check
+      out the product docs to learn more about
+      [Invitations](https://metal.equinix.com/developers/docs/accounts/).
+    name: Invitations
+  - description: >
+      Manage IP addresses. See device and project endpoints to list and create IP
+      assignments for a particular project or device. Check out the product docs
+      to learn more about [the basic networking
+      features](https://metal.equinix.com/developers/docs/networking/standard-ips/).
+    name: IPAddresses
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/networking/
+  - description: >
+      Manage licenses. See project endpoints to list and create licenses for a
+      particular project.
+    name: Licenses
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/operating-systems/licensed/
+  - description: >
+      Membership Management (Project). Check out the product docs to learn more
+      about [Membership](https://metal.equinix.com/developers/docs/accounts/).
+    name: Memberships
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/projects/#inviting-a-user-to-a-project
+  - description: >
+      Device Metadata
+    name: Metadata
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/server-metadata/metadata/
+  - description: >
+      Metal Gateway Management.Check out the product docs to learn more about
+      [Metal
+      Gateways](https://metal.equinix.com/developers/docs/networking/metal-gateway/).
+    name: MetalGateways
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/networking/metal-gateway/
+  - description: Metro Management. Check out the product docs to learn more about [Metros](https://metal.equinix.com/developers/docs/locations/metros/).
+    name: Metros
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/locations/metros/
+  - description: >
+      Operating System Management. Check out the product docs to learn more about
+      [Operating Systems
+      choices](https://metal.equinix.com/developers/docs/operating-systems/).
+    name: OperatingSystems
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/operating-systems/supported/
+  - description:
+      Organizations Management. Check out the product docs to learn more
+      about [Organizations](https://metal.equinix.com/developers/docs/accounts/).
+    name: Organizations
+  - description: >
+      OTP Management. Check out the product docs to learn more about [OTP](https://metal.equinix.com/developers/docs/accounts/two-factor-authentication/).
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/two-factor-authentication/
+    name: OTPs
+  - description: >
+      Password Reset Token Management
+    name: PasswordResetTokens
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/users/#security-settings
+  - description: >
+      Payment Method Management
+    name: PaymentMethods
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/billing/payment-methods/
+  - description: >
+      Plan Management (Device). Check out the product docs to learn more
+      about [Device Plans](https://metal.equinix.com/developers/docs/servers/).
+    name: Plans
+  - description: >
+      Port ManagementCheck out the product docs to learn more about [Port
+      configurations](https://metal.equinix.com/developers/docs/layer2-networking/overview/).
+    name: Ports
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/layer2-networking/overview/
+  - description: >
+      Project Management. Check out the product docs to learn more about
+      [Projects](https://metal.equinix.com/developers/docs/accounts/projects/).
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/projects/
+    name: Projects
+  - description: >
+      Self Service Reservations
+    name: SelfServiceReservations
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/deploy/reserved/
+  - description: >
+      Spot Market Pricing and Requests Management. Check out the product docs to learn more
+      about [Spot Market
+      features](https://metal.equinix.com/developers/docs/deploy/spot-market/).
+    name: SpotMarket
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/deploy/spot-market/
+  - description: >
+      Manage SSH keys. See project endpoints to list and create project-level SSH
+      keys.
+    name: SSHKeys
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/ssh-keys/
+  - description: >
+      Support request
+    name: SupportRequest
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/support/
+  - description: >
+      Project Transfer Requests Management
+    name: TransferRequests
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/projects/#transferring-a-project
+  - description: >
+      Two Factor Authentication Management. Check out the product docs to learn
+      more about
+      [2FA](https://metal.equinix.com/developers/docs/accounts/two-factor-authentication/).
+    name: TwoFactorAuth
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/two-factor-authentication/
+  - description: Usage Management
+    name: Usages
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/billing/checking-usage/
+  - description: >
+      Userdata Management
+    name: Userdata
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/server-metadata/user-data/
+  - description: >
+      User Management
+    name: Users
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/users/
+  - description: >
+      User Verification Token Management
+    name: UserVerificationTokens
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/accounts/organizations/#managing-team-members
+  - description: >
+      Manage virtual networks (VLANs). See project endpoints to list and create
+      virtual networks. Check out the product docs to learn more about
+      [VLANs](https://metal.equinix.com/developers/docs/networking/layer2/).
+    name: VLANs
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/networking/layer2/
+  - description: >
+      Volume Management (Block Storage). Notice: Block storage support will
+      be deprecated soon. Please check here: https://metal.equinix.com/developers/docs/resilience-recovery/elastic-block-storage/
+      for more details.
+    name: Volumes
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/resilience-recovery/elastic-block-storage/
+  - description: >
+      VRF Management. A VRF is a project-scoped virtual router resource that defines a collection of customer-managed IP blocks that can be used in BGP peering on one or more virtual networks. Metal Gateways and Interconnection Virtual Circuits can take advantage of VRFs to enable Layer 3 routing with bespoke network ranges. Notice: VRFs are a test feature currently under active development, and only available to certain users. Please contact Customer Success for more information.
+    name: VRFs
+x-tagGroups:
+  - name: Accounts and Organization
+    tags:
+      - Authentication
+      - Emails
+      - Invitations
+      - Memberships
+      - Organizations
+      - OTPs
+      - PasswordResetTokens
+      - PaymentMethods
+      - Projects
+      - SSHKeys
+      - SupportRequest
+      - TransferRequests
+      - TwoFactorAuth
+      - Users
+      - UserVerificationTokens
+  - name: Services and Billing
+    tags:
+      - Events
+      - Facilities
+      - Incidents
+      - Invoices
+      - Licenses
+      - Metros
+      - Plans
+      - Usages
+  - name: Servers
+    tags:
+      - Devices
+      - Batches
+      - Capacity
+      - HardwareReservations
+      - OperatingSystems
+      - Ports
+      - SelfServiceReservations
+      - SpotMarket
+      - Userdata
+      - Volumes
+  - name: Networking
+    tags:
+      - BGP
+      - Interconnections
+      - IPAddresses
+      - MetalGateways
+      - VLANs
+      - VRFs

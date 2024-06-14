@@ -1,0 +1,16 @@
+properties:
+  vlan_assignments:
+    items:
+      properties:
+        native:
+          type: boolean
+        state:
+          enum:
+          - assigned
+          - unassigned
+          type: string
+        vlan:
+          type: string
+      type: object
+    type: array
+type: object

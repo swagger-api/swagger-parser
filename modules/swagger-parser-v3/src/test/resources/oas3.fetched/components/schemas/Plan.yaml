@@ -1,0 +1,140 @@
+properties:
+  available_in:
+    description: Shows which facilities the plan is available in, and the facility-based
+      price if it is different from the default price.
+    items:
+      type: object
+      properties:
+        href:
+          description: href to the Facility
+          type: string
+        price:
+          type: object
+          properties:
+            hour:
+              type: number
+              format: double
+              example: 1.23
+    type: array
+  available_in_metros:
+    description: Shows which metros the plan is available in, and the metro-based
+      price if it is different from the default price.
+    items:
+      type: object
+      properties:
+        href:
+          description: href to the Metro
+          type: string
+        price:
+          type: object
+          properties:
+            hour:
+              type: number
+              format: double
+              example: 1.23
+    type: array
+  categories:
+    description: Categories of the plan, like compute or storage. A Plan can belong to multiple categories.
+    items:
+      type: string
+    type: array
+  class:
+    type: string
+    example: m3.large.x86
+  description:
+    type: string
+  deployment_types:
+    items:
+      type: string
+      enum:
+        - on_demand
+        - spot_market
+    type: array
+    minItems: 0
+    uniqueItems: true
+  id:
+    format: uuid
+    type: string
+  legacy:
+    description: Deprecated. Always return false
+    type: boolean
+    x-deprecated: true
+  line:
+    type: string
+  name:
+    type: string
+  pricing:
+    type: object
+  slug:
+    type: string
+    example: m3.large.x86
+  specs:
+    type: object
+    properties:
+      cpus:
+        type: array
+        items:
+          type: object
+          properties:
+            count:
+              type: integer
+            type:
+              type: string
+      memory:
+        type: object
+        properties:
+          total:
+            type: string
+      drives:
+        type: array
+        items:
+          type: object
+          properties:
+            count:
+              type: integer
+            type:
+              type: string
+              enum:
+                - HDD
+                - SSD
+                - NVME
+            size:
+              type: string
+              example: 3.84TB
+            category:
+              type: string
+              enum:
+                - boot
+                - cache
+                - storage
+      nics:
+        type: array
+        items:
+          type: object
+          properties:
+            count:
+              type: integer
+              example: 2
+            type:
+              type: string
+              enum:
+                - 1Gbps
+                - 10Gbps
+                - 25Gbps
+      features:
+        type: object
+        properties:
+          raid:
+            type: boolean
+          txt:
+            type: boolean
+          uefi:
+            type: boolean
+  type:
+    description: The plan type
+    type: string
+    enum:
+      - standard
+      - workload_optimized
+      - custom
+type: object

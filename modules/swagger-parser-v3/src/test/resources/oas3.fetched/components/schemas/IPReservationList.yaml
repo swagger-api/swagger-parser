@@ -1,0 +1,10 @@
+properties:
+  ip_addresses:
+    items:
+      anyOf:
+      - $ref: './IPReservation.yaml'
+      - $ref: './VrfIpReservation.yaml'
+    type: array
+  meta:
+    $ref: './Meta.yaml'
+type: object

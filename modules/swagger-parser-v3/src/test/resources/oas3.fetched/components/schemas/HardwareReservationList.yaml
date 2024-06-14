@@ -1,0 +1,8 @@
+properties:
+  hardware_reservations:
+    items:
+      $ref: './HardwareReservation.yaml'
+    type: array
+  meta:
+    $ref: './Meta.yaml'
+type: object

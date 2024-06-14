@@ -1,0 +1,6 @@
+properties:
+  ip_addresses:
+    items:
+      $ref: './VrfIpReservation.yaml'
+    type: array
+type: object

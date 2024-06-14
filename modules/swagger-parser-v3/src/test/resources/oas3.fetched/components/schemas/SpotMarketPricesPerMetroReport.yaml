@@ -1,0 +1,16 @@
+properties:
+  am:
+    $ref: './SpotPricesPerFacility.yaml'
+  ch:
+    $ref: './SpotPricesPerFacility.yaml'
+  da:
+    $ref: './SpotPricesPerFacility.yaml'
+  la:
+    $ref: './SpotPricesPerFacility.yaml'
+  ny:
+    $ref: './SpotPricesPerFacility.yaml'
+  sg:
+    $ref: './SpotPricesPerFacility.yaml'
+  sv:
+    $ref: './SpotPricesPerFacility.yaml'
+type: object
