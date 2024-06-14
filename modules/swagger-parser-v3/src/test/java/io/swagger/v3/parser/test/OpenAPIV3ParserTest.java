@@ -3286,4 +3286,16 @@ public class OpenAPIV3ParserTest {
                 "map-pojo", "set-pojo", "simple-pojo", "translation-item")
         );
     }
+
+    @Test
+    public void testIssue2081() {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue2081/openapi.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        Yaml.prettyPrint(openAPI);
+        assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getRequired().size(), 1);
+        assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getProperties().size(), 2);
+    }
 }
