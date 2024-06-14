@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Example Duplicate Refs API
+  contact:
+    email: support@example.com
+    name: Example API Team
+  description: |
+    Sample API spec to validate handling of different file paths that reference the same file
+  license:
+    name: Equinix Metal
+    url: https://metal.equinix.com/legal/
+  termsOfService: https://metal.equinix.com/legal/
+servers:
+  - url: https://api.example.com/duplicateRefs
+components:
+  schemas:
+    Error:
+      $ref: "./components/schemas/Error.yaml"
+    Event:
+      $ref: "./components/schemas/Event.yaml"
+    EventList:
+      $ref: "./components/schemas/EventList.yaml"
+paths:
+  /connections/{connection_id}/ports/{id}/events:
+    $ref: ./paths/connections/connection_id/ports/id/events.yaml
+  /devices/{id}/events:
+    $ref: ./paths/devices/id/events.yaml
+  /events:
+    $ref: ./paths/events.yaml
+  /events/{id}:
+    $ref: ./paths/events/id.yaml
+  /organizations/{id}/events:
+    $ref: ./paths/organizations/id/events.yaml
+  /projects/{id}/events:
+    $ref: ./paths/projects/id/events.yaml
+  /routes/{id}/events:
+    $ref: ./paths/routes/id/events.yaml
+  /virtual-circuits/{id}/events:
+    $ref: ./paths/virtual-circuits/id/events.yaml
