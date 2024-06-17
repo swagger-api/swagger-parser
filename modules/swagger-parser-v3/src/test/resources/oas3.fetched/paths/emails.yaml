@@ -1,0 +1,32 @@
+post:
+  description: Add a new email address to the current user.
+  operationId: createEmail
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/CreateEmailInput.yaml'
+    description: Email to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Email.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create an email
+  tags:
+  - Emails

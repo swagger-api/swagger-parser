@@ -1,0 +1,58 @@
+get:
+  description: |-
+    Get spot market prices for a given plan and facility in a fixed period of time
+
+    *Note: In the `200` response, the property `datapoints` contains arrays of `[float, integer]`.*
+  operationId: findSpotMarketPricesHistory
+  parameters:
+  - description: Facility to check spot market prices
+    in: query
+    name: facility
+    required: true
+    schema:
+      type: string
+  - description: Plan to check spot market prices
+    in: query
+    name: plan
+    required: true
+    schema:
+      type: string
+  - description: Metro to check spot market price history
+    in: query
+    name: metro
+    schema:
+      type: string
+  - description: Timestamp from range
+    in: query
+    name: from
+    required: true
+    schema:
+      type: string
+  - description: Timestamp to range
+    in: query
+    name: until
+    required: true
+    schema:
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/SpotPricesHistoryReport.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Get spot market prices for a given period of time
+  tags:
+  - SpotMarket

@@ -1,0 +1,41 @@
+properties:
+  amount:
+    format: float
+    type: number
+  balance:
+    format: float
+    type: number
+  created_on:
+    format: date
+    type: string
+  credit_amount:
+    format: float
+    type: number
+  credits_applied:
+    format: float
+    type: number
+  currency:
+    example: USD
+    type: string
+  due_on:
+    format: date
+    type: string
+  id:
+    format: uuid
+    type: string
+  items:
+    items:
+      $ref: './LineItem.yaml'
+    type: array
+  number:
+    type: string
+  project:
+    $ref: './ProjectIdName.yaml'
+  reference_number:
+    type: string
+  status:
+    type: string
+  target_date:
+    format: date
+    type: string
+type: object

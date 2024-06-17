@@ -1,0 +1,4 @@
+properties:
+  spot_market_prices:
+    $ref: './SpotMarketPricesPerMetroReport.yaml'
+type: object

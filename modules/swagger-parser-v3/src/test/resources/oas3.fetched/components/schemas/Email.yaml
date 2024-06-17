@@ -1,0 +1,13 @@
+properties:
+  address:
+    type: string
+  default:
+    type: boolean
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  verified:
+    type: boolean
+type: object

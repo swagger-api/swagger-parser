@@ -1,0 +1,11 @@
+properties:
+  request_ips:
+    items:
+      properties:
+        address_family:
+          type: integer
+        public:
+          type: boolean
+      type: object
+    type: array
+type: object

@@ -1,0 +1,33 @@
+get:
+  description: Provides a listing of available BGP sessions for the project.
+  operationId: findProjectBgpSessions
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/BgpSessionList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all BGP sessions for project
+  tags:
+  - BGP

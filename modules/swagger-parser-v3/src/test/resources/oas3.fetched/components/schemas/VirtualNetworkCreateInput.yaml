@@ -1,0 +1,23 @@
+properties:
+  description:
+    type: string
+  facility:
+    deprecated: true
+    description: The UUID (or facility code) for the Facility in which to create this
+      Virtual network.
+    type: string
+  metro:
+    description: The UUID (or metro code) for the Metro in which to create this Virtual
+      Network.
+    type: string
+  vxlan:
+    description: VLAN ID between 2-3999. Must be unique for the project within the
+      Metro in which this Virtual Network is being created. If no value is specified,
+      the next-available VLAN ID in the range 1000-1999 will be automatically selected.
+    example: 1099
+    type: integer
+  tags:
+    items:
+      type: string
+    type: array
+type: object

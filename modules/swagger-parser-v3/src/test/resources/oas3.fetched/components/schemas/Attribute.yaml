@@ -1,0 +1,17 @@
+properties:
+  namespace:
+    readOnly: true
+    type: string
+    description: Attribute namespace
+  created_at:
+    readOnly: true
+    type: string
+    format: date-time
+    description: Datetime when the block was created.
+  updated_at:
+    readOnly: true
+    type: string
+    format: date-time
+    description: Datetime when the block was updated.
+  data:
+    $ref: "./AttributeData.yaml"

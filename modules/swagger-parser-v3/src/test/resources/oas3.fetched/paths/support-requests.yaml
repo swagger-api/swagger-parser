@@ -1,0 +1,40 @@
+post:
+  description: Support Ticket.
+  operationId: requestSuppert
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/SupportRequestInput.yaml'
+    description: Support Request to create
+    required: true
+  responses:
+    "204":
+      description: no content
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a support ticket
+  tags:
+  - SupportRequest

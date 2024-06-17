@@ -1,0 +1,7 @@
+properties:
+  user_token:
+    description: User verification token
+    type: string
+    writeOnly: true
+required: 
+  -  user_token

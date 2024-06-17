@@ -1,0 +1,88 @@
+get:
+  description: Returns the list of VRFs for a single project.
+  operationId: findVrfs
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  - description: Filter by Metro ID (uuid) or Metro Code
+    in: query
+    name: metro
+    schema:
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/VrfList.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all VRFs in the project
+  tags:
+  - VRFs
+post:
+  description: Creates a new VRF in the specified project
+  operationId: createVrf
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/VrfCreateInput.yaml'
+    description: VRF to create
+    required: true
+  responses:
+    "201":
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Vrf.yaml'
+        description: created
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a new VRF in the specified project
+  tags:
+  - VRFs

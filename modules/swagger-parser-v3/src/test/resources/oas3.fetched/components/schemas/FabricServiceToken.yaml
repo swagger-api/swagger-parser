@@ -1,0 +1,48 @@
+properties:
+  expires_at:
+    description: The expiration date and time of the Fabric service token. Once a
+      service token is expired, it is no longer redeemable.
+    format: date-time
+    type: string
+  id:
+    description: |-
+      The UUID that can be used on the Fabric Portal to redeem either an A-Side or Z-Side Service Token.
+      For Fabric VCs (Metal Billed), this UUID will represent an A-Side Service Token, which will allow interconnections
+      to be made from Equinix Metal to other Service Providers on Fabric. For Fabric VCs (Fabric Billed), this UUID will
+      represent a Z-Side Service Token, which will allow interconnections to be made to connect an owned Fabric Port or 
+      Virtual Device to Equinix Metal.
+    format: uuid
+    type: string
+  max_allowed_speed:
+    description: |-
+      The maximum speed that can be selected on the Fabric Portal when configuring a interconnection with either 
+      an A-Side or Z-Side Service Token. For Fabric VCs (Metal Billed), this is what the billing is based off of, and can be one
+      of the following options, '50mbps', '200mbps', '500mbps', '1gbps', '2gbps', '5gbps' or '10gbps'. For Fabric VCs
+      (Fabric Billed), this will default to 10Gbps.
+    type: integer
+    example: 10000000000
+  role:
+    description: Either primary or secondary, depending on which interconnection the service token is associated to.
+    enum:
+    - primary
+    - secondary
+    type: string
+  service_token_type:
+    description: Either 'a_side' or 'z_side', depending on which type of Fabric VC was requested.
+    enum:
+    - a_side
+    - z_side
+    type: string
+  state:
+    description: |-
+      The state of the service token that corresponds with the service
+      token state on Fabric. An 'inactive' state refers to a token that has not been
+      redeemed yet on the Fabric side, an 'active' state refers to a token that has
+      already been redeemed, and an 'expired' state refers to a token that has reached
+      its expiry time.
+    enum:
+    - inactive
+    - active
+    - expired
+    type: string
+type: object

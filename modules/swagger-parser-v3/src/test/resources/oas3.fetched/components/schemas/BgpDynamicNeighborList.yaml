@@ -1,0 +1,8 @@
+properties:
+  bgp_dynamic_neighbors:
+    items:
+      $ref: './BgpDynamicNeighbor.yaml'
+    type: array
+  meta:
+    $ref: './Meta.yaml'
+type: object

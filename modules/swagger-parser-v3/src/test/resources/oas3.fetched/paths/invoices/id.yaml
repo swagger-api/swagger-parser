@@ -1,0 +1,33 @@
+get:
+  description: Returns the invoice identified by the provided id
+  operationId: getInvoiceById
+  parameters:
+  - description: Invoice UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Invoice.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve an invoice
+  tags:
+  - Invoices

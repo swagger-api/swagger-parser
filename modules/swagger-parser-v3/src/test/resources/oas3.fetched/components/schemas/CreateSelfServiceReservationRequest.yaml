@@ -1,0 +1,23 @@
+properties:
+  item:
+    items:
+      $ref: './SelfServiceReservationItemRequest.yaml'
+    type: array
+  notes:
+    type: string
+  period:
+    properties:
+      count:
+        enum:
+        - 12
+        - 36
+        type: integer
+      unit:
+        enum:
+        - monthly
+        type: string
+    type: object
+  start_date:
+    format: date-time
+    type: string
+type: object

@@ -1,0 +1,27 @@
+properties:
+  address_family:
+    description: Address Family for IP Address
+    enum:
+    - 4
+    - 6
+    example: 4
+    format: int32
+    type: integer
+  cidr:
+    description: Cidr Size for the IP Block created. Valid values depends on
+      the operating system being provisioned. (28..32 for IPv4 addresses, 124..127
+      for IPv6 addresses)
+    example: 28
+    format: int32
+    type: integer
+  ip_reservations:
+    description: UUIDs of any IP reservations to use when assigning IPs
+    items:
+      type: string
+    type: array
+  public:
+    default: true
+    description: Address Type for IP Address
+    example: false
+    type: boolean
+type: object

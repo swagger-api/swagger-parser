@@ -1,0 +1,61 @@
+properties:
+  id:
+    description: The unique identifier for the newly-created resource
+    format: uuid
+    type: string
+    readOnly: true
+    example: e1ff9c2b-051a-4688-965f-153e274f77e0
+  status:
+    description: The status of the route. Potential values are "pending", "active", "deleting", and "error", representing various lifecycle states of the route and whether or not it has been successfully configured on the network
+    type: string
+    readOnly: true
+    example: active
+    enum:
+    - pending
+    - active
+    - deleting
+    - error
+  prefix:
+    description: The IPv4 prefix for the route, in CIDR-style notation
+    type: string
+    example: 0.0.0.0/0
+  next_hop:
+    description: The next-hop IPv4 address for the route
+    type: string
+    format: ipv4
+    example: 192.168.1.254
+  type:
+    description: VRF route type, like 'bgp', 'connected', and 'static'. Currently, only static routes are supported
+    type: string
+    readOnly: true
+    example: static
+    enum:
+    - static
+  created_at:
+    format: date-time
+    type: string
+    readOnly: true
+  updated_at:
+    format: date-time
+    type: string
+    readOnly: true
+  metal_gateway:
+    description:  A link to the Metal Gateway to which this VRF Route is associated
+    readOnly: true
+    $ref: './VrfMetalGateway.yaml'
+  virtual_network:
+    description: A link to the Virtual Network to which this VRF Route is associated, through the Metal Gateway
+    readOnly: true
+    $ref: './VirtualNetwork.yaml'
+  vrf:
+    description: A link to the VRF within which this route exists
+    readOnly: true
+    $ref: './Vrf.yaml'
+  href:
+    type: string
+    readOnly: true
+    example: /routes/e1ff9c2b-051a-4688-965f-153e274f77e0
+  tags:
+    items:
+      type: string
+    type: array

@@ -1,0 +1,213 @@
+properties:
+  always_pxe:
+    default: false
+    description: |-
+      When true, devices with a `custom_ipxe` OS will always boot to iPXE. The
+      default setting of false ensures that iPXE will be used on only the
+      first boot.
+    type: boolean
+  billing_cycle:
+    description: The billing cycle of the device.
+    enum:
+    - hourly
+    - daily
+    - monthly
+    - yearly
+    type: string
+  customdata:
+    description: |-
+      Customdata is an arbitrary JSON value that can be accessed via the
+      metadata service.
+    default: {}
+    type: object
+    additionalProperties: true
+  description:
+    description: |-
+      Any description of the device or how it will be used. This may be used
+      to inform other API consumers with project access.
+    type: string
+  features:
+    description: |-
+      The features attribute allows you to optionally specify what features your server should have.
+
+      In the API shorthand syntax, all features listed are `required`:
+
+      ```
+      { "features": ["tpm"] }
+      ```
+
+      Alternatively, if you do not require a certain feature, but would prefer to be assigned a server with that feature if there are any available, you may specify that feature with a `preferred` value. The request will not fail if we have no servers with that feature in our inventory. The API offers an alternative syntax for mixing preferred and required features:
+
+      ```
+      { "features": { "tpm": "required", "raid": "preferred" } }
+      ```
+
+      The request will only fail if there are no available servers matching the required `tpm` criteria.
+    items:
+      type: string
+    type: array
+  hardware_reservation_id:
+    default: ""
+    description: |-
+      The Hardware Reservation UUID to provision. Alternatively, `next-available` can be specified to select from any of the available hardware reservations. An error will be returned if the requested reservation option is not available.
+
+      See [Reserved Hardware](https://metal.equinix.com/developers/docs/deploy/reserved/) for more details.
+    example: next-available
+    type: string
+  hostname:
+    description: The hostname to use within the operating system. The same hostname
+      may be used on multiple devices within a project.
+    type: string
+  ip_addresses:
+    default:
+    - address_family: 4
+      public: true
+    - address_family: 4
+      public: false
+    - address_family: 6
+      public: true
+    description: |-
+      The `ip_addresses attribute will allow you to specify the addresses you want created with your device.
+
+      The default value configures public IPv4, public IPv6, and private IPv4.
+
+      Private IPv4 address is required. When specifying `ip_addresses`, one of the array items must enable private IPv4.
+
+      Some operating systems require public IPv4 address. In those cases you will receive an error message if public IPv4 is not enabled.
+
+      For example, to only configure your server with a private IPv4 address, you can send `{ "ip_addresses": [{ "address_family": 4, "public": false }] }`.
+
+      It is possible to request a subnet size larger than a `/30` by assigning addresses using the UUID(s) of ip_reservations in your project.
+
+      For example, `{ "ip_addresses": [..., {"address_family": 4, "public": true, "ip_reservations": ["uuid1", "uuid2"]}] }`
+
+      To access a server without public IPs, you can use our Out-of-Band console access (SOS) or proxy through another server in the project with public IPs enabled.
+    items:
+      $ref: './IPAddress.yaml'
+    type: array
+  ipxe_script_url:
+    description: |-
+      When set, the device will chainload an iPXE Script at boot fetched from the supplied URL.
+
+      See [Custom iPXE](https://metal.equinix.com/developers/docs/operating-systems/custom-ipxe/) for more details.
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/operating-systems/custom-ipxe/
+    type: string
+  locked:
+    default: false
+    description: Whether the device should be locked, preventing accidental deletion.
+    type: boolean
+  network_frozen:
+    description: If true, this instance can not be converted to a different network
+      type.
+    type: boolean
+  no_ssh_keys:
+    default: false
+    description: Overrides default behaviour of attaching all of the organization
+      members ssh keys and project ssh keys to device if no specific keys specified
+    type: boolean
+  operating_system:
+    description: The slug of the operating system to provision. Check the Equinix
+      Metal operating system documentation for rules that may be imposed per operating
+      system, including restrictions on IP address options and device plans.
+    type: string
+  plan:
+    description: The slug of the device plan to provision.
+    type: string
+    example: "c3.large.x86"
+  private_ipv4_subnet_size:
+    default: 28
+    description: Deprecated. Use ip_addresses. Subnet range for addresses allocated
+      to this device.
+    format: int32
+    type: integer
+    x-deprecated: true
+  project_ssh_keys:
+    description: |+
+      A list of UUIDs identifying the device parent project
+      that should be authorized to access this device (typically
+      via /root/.ssh/authorized_keys). These keys will also appear in the device metadata.
+
+      If no SSH keys are specified (`user_ssh_keys`, `project_ssh_keys`, and `ssh_keys` are all empty lists or omitted),
+      all parent project keys, parent project members keys and organization members keys will be included. This behaviour can
+      be changed with 'no_ssh_keys' option to omit any SSH key being added.
+    items:
+      format: uuid
+      type: string
+    type: array
+  public_ipv4_subnet_size:
+    default: 31
+    description: Deprecated. Use ip_addresses. Subnet range for addresses allocated
+      to this device. Your project must have addresses available for a non-default
+      request.
+    format: int32
+    type: integer
+    x-deprecated: true
+  spot_instance:
+    type: boolean
+    description: Create a spot instance. Spot instances are created with a maximum
+      bid price. If the bid price is not met, the spot instance will be terminated as indicated by the `termination_time` field.
+  spot_price_max:
+    format: float
+    type: number
+    example: 1.23
+    description: The maximum amount to bid for a spot instance.
+  ssh_keys:
+    description: |
+      A list of new or existing project ssh_keys
+      that should be authorized to access this device (typically
+      via /root/.ssh/authorized_keys). These keys will also
+      appear in the device metadata.
+
+      These keys are added in addition to any keys defined by
+        `project_ssh_keys` and `user_ssh_keys`.
+    items:
+      $ref: './SSHKeyInput.yaml'
+    type: array
+  storage:
+    $ref: './Storage.yaml'
+  tags:
+    items:
+      type: string
+    type: array
+  termination_time:
+    description: |
+      When the device will be terminated. If you don't supply timezone info, the timestamp is assumed to be in UTC.
+
+      This is commonly set in advance for
+      ephemeral spot market instances but this field may also be set with
+      on-demand and reservation instances to automatically delete the resource
+      at a given time. The termination time can also be used to release a
+      hardware reservation instance at a given time, keeping the reservation
+      open for other uses.  On a spot market device, the termination time will
+      be set automatically when outbid.
+    format: date-time
+    example: "2021-09-03T16:32:00+03:00"
+    type: string
+  user_ssh_keys:
+    description: |
+      A list of UUIDs identifying the users
+      that should be authorized to access this device (typically
+      via /root/.ssh/authorized_keys).  These keys will also
+      appear in the device metadata.
+
+      The users must be members of the project or organization.
+
+      If no SSH keys are specified (`user_ssh_keys`, `project_ssh_keys`, and `ssh_keys` are all empty lists or omitted),
+      all parent project keys, parent project members keys and organization members keys will be included. This behaviour can
+      be changed with 'no_ssh_keys' option to omit any SSH key being added.
+    items:
+      format: uuid
+      type: string
+    type: array
+  userdata:
+    description: |-
+      The userdata presented in the metadata service for this device.  Userdata is fetched and interpreted by the operating system installed on the device. Acceptable formats are determined by the operating system, with the exception of a special iPXE enabling syntax which is handled before the operating system starts.
+
+      See [Server User Data](https://metal.equinix.com/developers/docs/servers/user-data/) and [Provisioning with Custom iPXE](https://metal.equinix.com/developers/docs/operating-systems/custom-ipxe/#provisioning-with-custom-ipxe) for more details.
+    type: string
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/servers/user-data/
+required:
+- plan
+- operating_system

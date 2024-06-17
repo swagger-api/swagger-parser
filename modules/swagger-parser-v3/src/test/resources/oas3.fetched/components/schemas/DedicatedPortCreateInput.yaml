@@ -1,0 +1,53 @@
+properties:
+  billing_account_name:
+    description: The billing account name of the Equinix Fabric account.
+    type: string
+  contact_email:
+    description: The preferred email used for communication and notifications about the Equinix Fabric interconnection. Required when using a Project API key. Optional and defaults to the primary user email address when using a User API key.
+    type: string
+    format: email
+  description:
+    type: string
+  metro:
+    description: A Metro ID or code. For interconnections with Dedicated Ports, this will be the location of the issued Dedicated Ports.
+    type: string
+  mode:
+    description: |-
+      The mode of the interconnection (only relevant to Dedicated Ports). Fabric VCs won't have this field. Can be either 'standard' or 'tunnel'.
+        The default mode of an interconnection on a Dedicated Port is 'standard'. The mode can only be changed when there are no associated virtual circuits on the interconnection.
+        In tunnel mode, an 802.1q tunnel is added to a port to send/receive double tagged packets from server instances.
+    enum:
+    - standard
+    - tunnel
+    example: standard
+    type: string
+  name:
+    type: string
+  project:
+    type: string
+  redundancy:
+    description: Either 'primary' or 'redundant'.
+    type: string
+  speed:
+    description: |-
+      A interconnection speed, in bps, mbps, or gbps. For Dedicated Ports, this can be 10Gbps or 100Gbps.
+    type: integer
+    example: 10000000000
+  tags:
+    items:
+      type: string
+    type: array
+  type:
+    description: When requesting for a dedicated port, the value of this field should be 'dedicated'.
+    type: string
+    enum:
+    - dedicated
+  use_case:
+    description: The intended use case of the dedicated port.
+    type: string
+required:
+- name
+- metro
+- type
+- redundancy
+type: object

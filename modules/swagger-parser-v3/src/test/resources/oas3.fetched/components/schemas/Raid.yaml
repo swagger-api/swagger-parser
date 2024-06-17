@@ -1,0 +1,10 @@
+properties:
+  devices:
+    items:
+      type: string
+    type: array
+  level:
+    type: string
+  name:
+    type: string
+type: object

@@ -1,0 +1,79 @@
+get:
+  description: List the connections belonging to the organization
+  operationId: organizationListInterconnections
+  parameters:
+  - description: UUID of the organization
+    in: path
+    name: organization_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/InterconnectionList.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: List organization connections
+  tags:
+  - Interconnections
+post:
+  description: Creates a new interconnection request. A Project ID must be specified in
+    the request body for connections on shared ports.
+  operationId: createOrganizationInterconnection
+  parameters:
+  - description: UUID of the organization
+    in: path
+    name: organization_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  requestBody:
+    $ref: '../../../components/requestBodies/InterconnectionCreateInput.yaml'
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Interconnection.yaml'
+      description: created
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Request a new interconnection for the organization
+  tags:
+  - Interconnections

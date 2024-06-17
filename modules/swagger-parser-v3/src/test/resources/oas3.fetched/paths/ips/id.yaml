@@ -1,0 +1,137 @@
+delete:
+  description: |
+    This call can be used to un-assign an IP assignment or delete
+    an IP reservation.
+
+    Un-assign an IP address record.
+    Use the assignment UUID you
+    get after attaching the IP. This will remove the relationship between an IP and the device or metal gateway and will make the IP address available to be assigned to another device, once the IP has been un-configured from the network.
+
+    Delete an IP reservation.
+    Use the reservation UUID you get after adding the IP to the project. This will permanently delete the IP block reservation from the project.
+  operationId: deleteIPAddress
+  parameters:
+  - description: IP Address UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "204":
+      description: no content
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Unassign an ip address
+  tags:
+  - IPAddresses
+get:
+  description: Returns a single ip address if the user has access.
+  operationId: findIPAddressById
+  parameters:
+  - description: IP Address UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../../components/schemas/IPAssignment.yaml'
+              - $ref: '../../components/schemas/IPReservation.yaml'
+              - $ref: '../../components/schemas/VrfIpReservation.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve an ip address
+  tags:
+  - IPAddresses
+patch:
+  description: Update details about an ip address
+  operationId: updateIPAddress
+  parameters:
+  - description: IP Address UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/IPAssignmentUpdateInput.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            oneOf:
+            - $ref: '../../components/schemas/IPAssignment.yaml'
+            - $ref: '../../components/schemas/IPReservation.yaml'
+            - $ref: '../../components/schemas/VrfIpReservation.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Update an ip address
+  tags:
+  - IPAddresses

@@ -1,0 +1,48 @@
+get:
+  description: Returns all invoices for an organization
+  operationId: findOrganizationInvoices
+  parameters:
+  - description: Organization UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: page number
+    in: query
+    name: page
+    schema:
+      type: integer
+  - description: per page
+    in: query
+    name: per_page
+    schema:
+      type: integer
+  - description: filter by status
+    in: query
+    name: status
+    schema:
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/InvoiceList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all invoices for an organization
+  tags:
+  - Invoices

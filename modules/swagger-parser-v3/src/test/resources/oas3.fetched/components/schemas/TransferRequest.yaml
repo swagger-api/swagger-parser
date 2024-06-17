@@ -1,0 +1,17 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  project:
+    $ref: './Href.yaml'
+  target_organization:
+    $ref: './Href.yaml'
+  updated_at:
+    format: date-time
+    type: string
+type: object

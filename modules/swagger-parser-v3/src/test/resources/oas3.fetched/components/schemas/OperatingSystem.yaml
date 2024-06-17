@@ -1,0 +1,35 @@
+properties:
+  distro:
+    type: string
+  distro_label:
+    type: string
+  id:
+    format: uuid
+    type: string
+  licensed:
+    description: Licenced OS is priced according to pricing property
+    type: boolean
+  name:
+    type: string
+  preinstallable:
+    description: Servers can be already preinstalled with OS in order to shorten provision
+      time.
+    type: boolean
+  pricing:
+    description: This object contains price per time unit and optional multiplier
+      value if licence price depends on hardware plan or components (e.g. number of
+      cores)
+    type: object
+  provisionable_on:
+    items:
+      type: string
+    type: array
+  slug:
+    type: string
+  version:
+    type: string
+  default_operating_system:
+    description: Default operating system for the distro.
+    readOnly: true
+    type: boolean
+type: object

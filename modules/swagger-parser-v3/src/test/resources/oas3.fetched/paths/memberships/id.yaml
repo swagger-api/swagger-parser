@@ -1,0 +1,128 @@
+delete:
+  description: Deletes the membership.
+  operationId: deleteMembership
+  parameters:
+  - description: Membership UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "204":
+      description: no content
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Delete the membership
+  tags:
+  - Memberships
+get:
+  description: Returns a single membership.
+  operationId: findMembershipById
+  parameters:
+  - description: Membership UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Membership.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve a membership
+  tags:
+  - Memberships
+put:
+  description: Updates the membership.
+  operationId: updateMembership
+  parameters:
+  - description: Membership UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/MembershipInput.yaml'
+    description: Membership to update
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Membership.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Update the membership
+  tags:
+  - Memberships

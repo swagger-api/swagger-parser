@@ -1,0 +1,41 @@
+get:
+  description: Provides a summary of the BGP neighbor data associated to the BGP sessions
+    for this device.
+  operationId: getBgpNeighborData
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/BgpSessionNeighbors.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve BGP neighbor data for this device
+  tags:
+  - Devices

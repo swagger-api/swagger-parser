@@ -1,0 +1,8 @@
+properties:
+  address:
+    type: string
+  customdata:
+    type: object
+required:
+- address
+type: object

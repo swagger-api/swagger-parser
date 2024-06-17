@@ -1,0 +1,77 @@
+delete:
+  summary: Delete a VRF BGP Dynamic Neighbor
+  description: Trigger the removal of a BGP Neighbor range from a VRF
+  operationId: deleteBgpDynamicNeighborById
+  parameters:
+    - description: BGP Dynamic Neighbor UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    - $ref: '../../components/parameters/Include.yaml'
+    - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "202":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/BgpDynamicNeighbor.yaml'
+      description: Accepted
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Not Found
+  tags:
+  - VRFs
+
+get:
+  summary: Retrieve a BGP Dynamic Neighbor
+  description: Return a single BGP Dynamic Neighbor resource
+  operation: findBgpDynamicNeighborById
+  parameters:
+    - description: BGP Dynamic Neighbor UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        format: uuid
+        type: string
+    - $ref: '../../components/parameters/Include.yaml'
+    - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/BgpDynamicNeighbor.yaml'
+        description: OK
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Not Found
+  tags:
+  - VRFs

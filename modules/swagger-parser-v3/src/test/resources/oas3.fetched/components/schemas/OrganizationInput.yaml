@@ -1,0 +1,25 @@
+properties:
+  address:
+    $ref: './Address.yaml'
+  billing_address:
+    $ref: './Address.yaml'
+  customdata:
+    type: object
+  description:
+    type: string
+  enforce_2fa_at:
+    description: Force to all members to have enabled the two factor authentication
+      after that date, unless the value is null
+    format: date-time
+    type: string
+  logo:
+    description: The logo for the organization; must be base64-encoded image data
+    format: byte
+    type: string
+  name:
+    type: string
+  twitter:
+    type: string
+  website:
+    type: string
+type: object

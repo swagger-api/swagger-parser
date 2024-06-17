@@ -1,0 +1,74 @@
+get:
+  description: List the connections belonging to the project
+  operationId: projectListInterconnections
+  parameters:
+  - description: UUID of the project
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  - $ref: '../../../components/parameters/Page.yaml'
+  - $ref: '../../../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/InterconnectionList.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: List project connections
+  tags:
+  - Interconnections
+post:
+  description: Creates a new interconnection request
+  operationId: createProjectInterconnection
+  parameters:
+  - description: UUID of the project
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  requestBody:
+    $ref: '../../../components/requestBodies/InterconnectionCreateInput.yaml'
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Interconnection.yaml'
+      description: created
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Request a new interconnection for the project's organization
+  tags:
+  - Interconnections

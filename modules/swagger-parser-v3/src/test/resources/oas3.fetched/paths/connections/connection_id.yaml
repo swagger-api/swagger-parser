@@ -1,0 +1,112 @@
+delete:
+  description: Delete a interconnection, its associated ports and virtual circuits.
+  operationId: deleteInterconnection
+  parameters:
+  - description: Interconnection UUID
+    in: path
+    name: connection_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "202":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Interconnection.yaml'
+      description: accepted
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Delete interconnection
+  tags:
+  - Interconnections
+get:
+  description: Get the details of a interconnection
+  operationId: getInterconnection
+  parameters:
+  - description: Interconnection UUID
+    in: path
+    name: connection_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Interconnection.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Get interconnection
+  tags:
+  - Interconnections
+put:
+  description: Update the details of a interconnection
+  operationId: updateInterconnection
+  parameters:
+  - description: Interconnection UUID
+    in: path
+    name: connection_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/InterconnectionUpdateInput.yaml'
+    description: Updated interconnection details
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Interconnection.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Update interconnection
+  tags:
+  - Interconnections

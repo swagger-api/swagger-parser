@@ -1,0 +1,16 @@
+properties:
+  health_rollup:
+    readOnly: true
+    type: string
+    description: Health Status
+    enum:
+      - ok
+      - warning
+      - critical
+  updated_at:
+    readOnly: true
+    type: string
+    format: date-time
+    description: Last update of health status.
+type: object
+description: Represents a Device Health Status

@@ -1,0 +1,41 @@
+get:
+  description: Returns a single hardware reservation
+  operationId: findHardwareReservationById
+  parameters:
+  - description: HardwareReservation UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/HardwareReservation.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve a hardware reservation
+  tags:
+  - HardwareReservations

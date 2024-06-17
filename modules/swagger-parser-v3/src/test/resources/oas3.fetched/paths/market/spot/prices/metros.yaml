@@ -1,0 +1,36 @@
+get:
+  description: Get Equinix Metal current spot market prices for all metros.
+  operationId: findMetroSpotMarketPrices
+  parameters:
+  - description: Metro to filter spot market prices
+    in: query
+    name: metro
+    schema:
+      type: string
+  - description: Plan to filter spot market prices
+    in: query
+    name: plan
+    schema:
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/SpotMarketPricesPerMetroList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Get current spot market prices for metros
+  tags:
+  - SpotMarket

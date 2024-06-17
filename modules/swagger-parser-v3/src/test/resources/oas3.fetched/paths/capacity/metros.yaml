@@ -1,0 +1,74 @@
+get:
+  description: Returns a list of metros and plans with their current capacity.
+  operationId: findCapacityForMetro
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/CapacityList.yaml'
+          example:
+            capacity:
+              am:
+                "c2.medium.x86":
+                  level: "string"
+                  available_servers: 25
+                "m2.xlarge.x86":
+                  level: "string"
+                  available_servers: 15
+              da:
+                "c2.medium.x86":
+                  level: "string"
+                  available_servers: 26
+                "m2.xlarge.x86":
+                  level: "string"
+                  available_servers: 11
+              dc:
+                "c2.medium.x86":
+                  level: "string"
+                  available_servers: 14
+                "m2.xlarge.x86":
+                  level: "string"
+                  available_servers: 10
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: View capacity for metros
+  tags:
+  - Capacity
+post:
+  description: Validates if a deploy can be fulfilled in a metro.
+  operationId: checkCapacityForMetro
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/CapacityInput.yaml'
+    description: Metro to check capacity in
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/CapacityCheckPerMetroList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Check capacity for a metro
+  tags:
+  - Capacity

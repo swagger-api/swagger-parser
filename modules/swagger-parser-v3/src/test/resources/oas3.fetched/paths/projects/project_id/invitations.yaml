@@ -1,0 +1,90 @@
+get:
+  description: Returns all invitations in a project.
+  operationId: findProjectInvitations
+  parameters:
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Page.yaml'
+  - $ref: '../../../components/parameters/PerPage.yaml'
+  - description: Project UUID
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/InvitationList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve project invitations
+  tags:
+  - Projects
+post:
+  description: In order to add a user to a project, they must first be invited.
+  operationId: createProjectInvitation
+  parameters:
+  - description: Project UUID
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  requestBody:
+    $ref: '../../../components/requestBodies/InvitationInput.yaml'
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Invitation.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create an invitation for a project
+  tags:
+  - Projects

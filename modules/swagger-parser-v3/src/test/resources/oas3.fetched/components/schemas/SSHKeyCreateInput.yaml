@@ -1,0 +1,18 @@
+properties:
+  instances_ids:
+    description: |-
+      List of instance UUIDs to associate SSH key with, when empty array is sent all instances belonging
+            to entity will be included
+    items:
+      format: uuid
+      type: string
+    type: array
+  key:
+    type: string
+  label:
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+type: object

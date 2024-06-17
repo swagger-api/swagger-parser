@@ -1,0 +1,41 @@
+get:
+  description: Retrieve an instance bandwidth for a given period of time.
+  operationId: findInstanceBandwidth
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Timestamp from range
+    in: query
+    name: from
+    required: true
+    schema:
+      type: string
+  - description: Timestamp to range
+    in: query
+    name: until
+    required: true
+    schema:
+      type: string
+  responses:
+    "200":
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve an instance bandwidth
+  tags:
+  - Devices

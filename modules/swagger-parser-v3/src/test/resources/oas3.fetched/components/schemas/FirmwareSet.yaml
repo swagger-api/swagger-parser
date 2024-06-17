@@ -1,0 +1,36 @@
+properties:
+  uuid:
+    readOnly: true
+    type: string
+    description: Firmware Set UUID
+    format: uuid
+    example: "0516463a-47ee-4809-9a66-ece8c740eed9"
+  name:
+    readOnly: true
+    type: string
+    description: Firmware Set Name
+  created_at:
+    readOnly: true
+    type: string
+    format: date-time
+    description: Datetime when the block was created.
+  updated_at:
+    readOnly: true
+    type: string
+    format: date-time
+    description: Datetime when the block was updated.
+  attributes:
+    type: array
+    description: Represents a list of attributes
+    items:
+      $ref: "./Attribute.yaml"
+  component_firmware:
+    type: array
+    description: List of components versions
+    items:
+      $ref: "./Component.yaml"
+required:
+  - uuid
+  - name
+type: object
+description: Represents a Firmware Set

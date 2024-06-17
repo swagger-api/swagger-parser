@@ -1,0 +1,14 @@
+properties:
+  disks:
+    items:
+      $ref: './Disk.yaml'
+    type: array
+  raid:
+    items:
+      $ref: './Raid.yaml'
+    type: array
+  filesystems:
+    items:
+      $ref: './Filesystem.yaml'
+    type: array
+type: object

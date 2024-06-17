@@ -1,0 +1,59 @@
+properties:
+  address_family:
+    type: integer
+  cidr:
+    type: integer
+  created_at:
+    format: date-time
+    type: string
+  created_by:
+    $ref: './Href.yaml'
+  details:
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  metal_gateway:
+    $ref: './MetalGatewayLite.yaml'
+  netmask:
+    type: string
+  network:
+    type: string
+  project:
+    $ref: './Project.yaml'
+  state:
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+  type:
+    type: string
+    enum:
+    - vrf
+  vrf:
+    $ref: './Vrf.yaml'
+  public:
+    type: boolean
+  management:
+    type: boolean
+  manageable:
+    type: boolean
+  customdata:
+    type: object
+  bill:
+    type: boolean
+  project_lite:
+    $ref: './Project.yaml'
+  address:
+    type: string
+  gateway:
+    type: string
+  metro:
+    $ref: './Metro.yaml'
+required:
+  - vrf
+  - type
+type: object

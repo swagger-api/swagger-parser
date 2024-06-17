@@ -1,0 +1,53 @@
+get:
+  description: Show the port's current VLAN assignments, including if this VLAN is
+    set as native, and the current state of the assignment (ex. 'assigned' or 'unassigning')
+  operationId: findPortVlanAssignments
+  parameters:
+  - description: Port UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Nested attributes to include. Included objects will return their
+      full attributes. Attribute names can be dotted (up to 3 levels) to included
+      deeply nested objects.
+    in: query
+    name: include
+    schema:
+      default:
+      - port
+      - virtual_network
+      items:
+        type: string
+      type: array
+    style: form
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/PortVlanAssignmentList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: List Current VLAN assignments for a port
+  tags:
+  - Ports

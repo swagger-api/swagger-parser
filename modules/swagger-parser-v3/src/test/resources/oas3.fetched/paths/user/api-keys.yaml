@@ -1,0 +1,72 @@
+post:
+  description: Creates a API key for the current user.
+  operationId: createAPIKey
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/AuthTokenInput.yaml'
+    description: API key to create
+    required: true
+  parameters:
+  - $ref: '../../components/parameters/Include.yaml'
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/AuthToken.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create an API key
+  tags:
+  - Authentication
+get:
+  description: Returns all API keys for the current user.
+  operationId: findAPIKeys
+  parameters:
+  - description: Search by description
+    in: query
+    name: search
+    schema:
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/AuthTokenList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all user API keys
+  tags:
+  - Authentication

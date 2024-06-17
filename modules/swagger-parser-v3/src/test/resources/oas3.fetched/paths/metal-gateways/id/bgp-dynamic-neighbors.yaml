@@ -1,0 +1,94 @@
+post:
+  summary: Create a VRF BGP Dynamic Neighbor range
+  description: |
+    Create a VRF BGP Dynamic Neighbor range.
+
+    BGP Dynamic Neighbor records are limited to 2 per Virtual Network.
+
+    Notice: VRFs are a test feature currently under active development, and only available to certain users. Please contact Customer Success for more information.
+  operationId: createBgpDynamicNeighbor
+  parameters:
+    - description: Metal Gateway UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        format: uuid
+        type: string
+    - $ref: '../../../components/parameters/Include.yaml'
+    - $ref: '../../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../components/schemas/BgpDynamicNeighborCreateInput.yaml"
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/BgpDynamicNeighbor.yaml'
+      description: Created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Not Found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unprocessable entity
+  tags:
+  - VRFs
+
+get:
+  description: Returns the list of VRF BGP Dynamic Neighbors for this Metal Gateway
+  operationId: getBgpDynamicNeighbors
+  summary: List BGP Dynamic Neighbors
+  parameters:
+    - description: Metal Gateway UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    - $ref: '../../../components/parameters/Include.yaml'
+    - $ref: '../../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/BgpDynamicNeighborList.yaml'
+      description: OK
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: Not Found
+  tags:
+  - VRFs

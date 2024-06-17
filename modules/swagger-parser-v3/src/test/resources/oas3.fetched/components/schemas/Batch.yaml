@@ -1,0 +1,25 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  devices:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  error_messages:
+    items:
+      type: string
+    type: array
+  id:
+    format: uuid
+    type: string
+  project:
+    $ref: './Href.yaml'
+  quantity:
+    type: integer
+  state:
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+type: object

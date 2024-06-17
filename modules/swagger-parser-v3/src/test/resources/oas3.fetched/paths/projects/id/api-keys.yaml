@@ -1,0 +1,81 @@
+get:
+  description: Returns all API keys for a specific project.
+  operationId: findProjectAPIKeys
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/AuthTokenList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all API keys for the project.
+  tags:
+  - Authentication
+post:
+  description: Creates an API key for a project.
+  operationId: createProjectAPIKey
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/AuthTokenInput.yaml'
+    description: API Key to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/AuthToken.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create an API key for a project.
+  tags:
+  - Authentication

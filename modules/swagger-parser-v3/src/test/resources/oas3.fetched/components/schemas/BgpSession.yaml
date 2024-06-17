@@ -1,0 +1,41 @@
+properties:
+  address_family:
+    enum:
+    - ipv4
+    - ipv6
+    type: string
+  created_at:
+    format: date-time
+    type: string
+  default_route:
+    type: boolean
+  device:
+    $ref: './Href.yaml'
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  learned_routes:
+    items:
+      description: IPv4 or IPv6 range
+      example: 10.32.16.0/31
+      type: string
+    type: array
+  status:
+    description: ' The status of the BGP Session. Multiple status values may be reported
+      when the device is connected to multiple switches, one value per switch. Each
+      status will start with "unknown" and progress to "up" or "down" depending on
+      the connected device. Subsequent "unknown" values indicate a problem acquiring
+      status from the switch. '
+    enum:
+    - unknown
+    - up
+    - down
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+required:
+- address_family
+type: object

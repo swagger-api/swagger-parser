@@ -1,0 +1,128 @@
+get:
+  description: Provides a paginated list of IP reservations for a single project.
+  operationId: findIPReservations
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Filter project IP reservations by reservation type
+    in: query
+    name: types
+    schema:
+      items:
+        type: string
+        enum:
+          - global_ipv4
+          - private_ipv4
+          - public_ipv4
+          - public_ipv6
+          - vrf
+      type: array
+    style: form
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  - description: Items returned per page
+    in: query
+    name: per_page
+    schema:
+      default: 250 
+      format: int32
+      maximum: 1000
+      minimum: 1
+      type: integer
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/IPReservationList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all ip reservations
+  tags:
+  - IPAddresses
+post:
+  description: Request more IP space for a project in order to have additional IP
+    addresses to assign to devices.  If the request is within the max quota, an IP
+    reservation will be created. If the project will exceed its IP quota, a request
+    will be submitted for review, and will return an IP Reservation with a `state`
+    of `pending`. You can automatically have the request fail with HTTP status 422
+    instead of triggering the review process by providing the `fail_on_approval_required`
+    parameter set to `true` in the request.
+  operationId: requestIPReservation
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          oneOf:
+          - $ref: '../../../components/schemas/IPReservationRequestInput.yaml'
+          - $ref: '../../../components/schemas/VrfIpReservationCreateInput.yaml'
+    description: IP Reservation Request to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            oneOf:
+            - $ref: '../../../components/schemas/IPReservation.yaml'
+            - $ref: '../../../components/schemas/VrfIpReservation.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Requesting IP reservations
+  tags:
+  - IPAddresses

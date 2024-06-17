@@ -1,0 +1,19 @@
+get:
+  description: Provides a listing of available metros
+  operationId: findMetros
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/MetroList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all metros
+  tags:
+  - Metros

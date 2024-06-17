@@ -1,0 +1,35 @@
+get:
+  description: Returns all invitations in current user.
+  operationId: findInvitations
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Page.yaml'
+  - $ref: '../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/InvitationList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve current user invitations
+  tags:
+  - Users

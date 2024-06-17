@@ -1,0 +1,88 @@
+get:
+  description: View all spot market requests for a given project.
+  operationId: listSpotMarketRequests
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/SpotMarketRequestList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: List spot market requests
+  tags:
+  - SpotMarket
+post:
+  description: |-
+    Creates a new spot market request.
+
+    Type-specific options (such as operating_system for baremetal devices) should be included in the main data structure alongside hostname and plan.
+
+    The features attribute allows you to optionally specify what features your server should have. For example, if you require a server with a TPM chip, you may specify `{ "features": { "tpm": "required" } }` (or `{ "features": ["tpm"] }` in shorthand).
+
+    The request will fail if there are no available servers matching your criteria. Alternatively, if you do not require a certain feature, but would prefer to be assigned a server with that feature if there are any available, you may specify that feature with a preferred value (see the example request below).
+
+    The request will not fail if we have no servers with that feature in our inventory.
+  operationId: createSpotMarketRequest
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/SpotMarketRequestCreateInput.yaml'
+    description: Spot Market Request to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/SpotMarketRequest.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a spot market request
+  tags:
+  - SpotMarket

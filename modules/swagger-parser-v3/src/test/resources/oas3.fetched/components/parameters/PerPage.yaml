@@ -1,0 +1,9 @@
+description: Items returned per page
+in: query
+name: per_page
+schema:
+  default: 10
+  format: int32
+  maximum: 1000
+  minimum: 1
+  type: integer

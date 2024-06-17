@@ -1,0 +1,45 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  error_messages:
+    items:
+      type: string
+    type: array
+  id:
+    format: uuid
+    type: string
+  port:
+    $ref: './Port.yaml'
+  quantity:
+    type: integer
+  state:
+    enum:
+    - queued
+    - in_progress
+    - completed
+    - failed
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  vlan_assignments:
+    items:
+      properties:
+        id:
+          format: uuid
+          type: string
+        native:
+          type: boolean
+        state:
+          enum:
+          - assigned
+          - unassigned
+          type: string
+        vlan:
+          type: integer
+      type: object
+    type: array
+  project:
+    $ref: './Href.yaml'
+type: object

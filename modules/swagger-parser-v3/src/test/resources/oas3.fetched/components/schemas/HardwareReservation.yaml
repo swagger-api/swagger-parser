@@ -1,0 +1,46 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  custom_rate:
+    description: Amount that will be charged for every billing_cycle.
+    example: 1050.5
+    format: float
+    type: number
+  device:
+    $ref: './Device.yaml'
+  facility:
+    $ref: './Facility.yaml'
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  need_of_service:
+    description: Whether this Device requires assistance from Equinix Metal.
+    type: boolean
+  plan:
+    $ref: './Plan.yaml'
+  project:
+    $ref: './Project.yaml'
+  provisionable:
+    description: Whether the reserved server is provisionable or not. Spare devices
+      can't be provisioned unless they are activated first.
+    type: boolean
+  short_id:
+    description: Short version of the ID.
+    format: string
+    type: string
+  spare:
+    description: Whether the Hardware Reservation is a spare. Spare Hardware Reservations
+      are used when a Hardware Reservations requires service from Equinix Metal
+    type: boolean
+  switch_uuid:
+    description: Switch short id. This can be used to determine if two devices are
+      connected to the same switch, for example.
+    type: string
+  termination_time:
+    description: Expiration date for the reservation.
+    format: date-time
+    type: string
+type: object

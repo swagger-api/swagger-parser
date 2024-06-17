@@ -1,0 +1,33 @@
+get:
+  description: List the virtual circuit record(s) associated with a particular interconnection id.
+  operationId: listInterconnectionVirtualCircuits
+  parameters:
+  - description: UUID of the interconnection
+    in: path
+    name: connection_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/VirtualCircuitList.yaml'
+      description: ok
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: List a interconnection's virtual circuits
+  tags:
+  - Interconnections

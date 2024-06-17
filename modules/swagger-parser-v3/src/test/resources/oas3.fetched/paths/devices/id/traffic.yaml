@@ -1,0 +1,84 @@
+get:
+  description: Returns traffic for a specific device.
+  operationId: findTraffic
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Traffic direction
+    in: query
+    name: direction
+    required: true
+    schema:
+      enum:
+      - inbound
+      - outbound
+      type: string
+  - description: Traffic interval
+    in: query
+    name: interval
+    schema:
+      enum:
+      - minute
+      - hour
+      - day
+      - week
+      - month
+      - year
+      - hour_of_day
+      - day_of_week
+      - day_of_month
+      - month_of_year
+      type: string
+  - description: Traffic bucket
+    in: query
+    name: bucket
+    schema:
+      enum:
+      - internal
+      - external
+      type: string
+  - name: timeframe
+    in: query
+    schema:
+      properties:
+        ended_at:
+          format: date-time
+          type: string
+        started_at:
+          format: date-time
+          type: string
+      required:
+      - started_at
+      - ended_at
+      type: object
+    style: deepObject
+    explode: true
+  responses:
+    "200":
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve device traffic
+  tags:
+  - Devices

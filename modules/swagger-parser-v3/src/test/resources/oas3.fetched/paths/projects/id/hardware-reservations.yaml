@@ -1,0 +1,64 @@
+get:
+  description: Provides a collection of hardware reservations for a given project.
+  operationId: findProjectHardwareReservations
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Search by facility code, plan name, project name, reservation short ID or device hostname
+    in: query
+    name: query
+    schema:
+      type: string
+  - description: Filter by hardware reservation state
+    in: query
+    name: state
+    schema:
+      enum:
+      - active
+      - spare
+      - need_of_service
+      type: string
+  - description: Filter hardware reservation that is provisionable
+    in: query
+    name: provisionable
+    schema:
+      enum:
+      - only
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  - $ref: '../../../components/parameters/Page.yaml'
+  - $ref: '../../../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/HardwareReservationList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve all hardware reservations for a given project
+  tags:
+  - HardwareReservations

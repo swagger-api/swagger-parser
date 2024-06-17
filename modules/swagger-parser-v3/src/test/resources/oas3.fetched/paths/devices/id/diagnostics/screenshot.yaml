@@ -1,0 +1,39 @@
+get:
+  description: Capture a screenshot from the device, if supported, via the BMC.
+  operationId: captureScreenshot
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  tags:
+    - Console Log Details
+  responses:
+    "200":
+      description: An image file
+      content:
+        application/jpeg:
+          schema:
+            type: string
+            format: binary
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not found
+    "501":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not implemented for device

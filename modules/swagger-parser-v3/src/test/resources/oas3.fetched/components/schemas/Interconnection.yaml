@@ -1,0 +1,78 @@
+properties:
+  contact_email:
+    type: string
+  description:
+    type: string
+  facility:
+    $ref: './Href.yaml'
+  id:
+    format: uuid
+    type: string
+  metro:
+    allOf:
+    - $ref: './Metro.yaml'
+    description: |-
+      The location of where the shared or Dedicated Port is located. For interconnections with Dedicated Ports,
+        this will be the location of the Dedicated Ports. For Fabric VCs (Metal Billed), this is where interconnection will be originating from, as we pre-authorize the use of one of our shared ports
+        as the origin of the interconnection using A-Side service tokens. We only allow local connections for Fabric VCs (Metal Billed), so the destination location must be the same as the origin. For Fabric VCs (Fabric Billed), 
+        this will be the destination of the interconnection. We allow remote connections for Fabric VCs (Fabric Billed), so the origin of the interconnection can be a different metro set here.
+  mode:
+    description: |-
+      The mode of the interconnection (only relevant to Dedicated Ports). Shared connections won't have this field. Can be either 'standard' or 'tunnel'.
+        The default mode of an interconnection on a Dedicated Port is 'standard'. The mode can only be changed when there are no associated virtual circuits on the interconnection.
+        In tunnel mode, an 802.1q tunnel is added to a port to send/receive double tagged packets from server instances.
+    enum:
+    - standard
+    - tunnel
+    example: standard
+    type: string
+  name:
+    type: string
+  organization:
+    $ref: './Href.yaml'
+  ports:
+    items:
+      $ref: './InterconnectionPort.yaml'
+    type: array
+    description: For Fabric VCs, these represent Virtual Port(s) created for the interconnection. For dedicated interconnections, these represent the Dedicated Port(s).
+  redundancy:
+    type: string
+    enum:
+    - primary
+    - redundant
+    description: Either 'primary', meaning a single interconnection, or 'redundant', meaning a redundant interconnection.
+  service_tokens:
+    items:
+      $ref: './FabricServiceToken.yaml'
+    type: array
+    description: For Fabric VCs (Metal Billed), this will show details of the A-Side service tokens issued for the interconnection. For Fabric VCs (Fabric Billed), this will show the details of the Z-Side service tokens issued for the interconnection. Dedicated interconnections will not have any service tokens issued.
+      There will be one per interconnection, so for redundant interconnections, there should be two service tokens issued.
+  speed:
+    description: For interconnections on Dedicated Ports and shared connections, this represents the interconnection's speed in bps. For Fabric VCs, this field refers to the maximum speed of the interconnection in bps. This value will default to 10Gbps for Fabric VCs (Fabric Billed).
+    type: integer
+    example: 10000000000
+  status:
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+  token:
+    format: uuid
+    type: string
+    description: This token is used for shared interconnections to be used as the Fabric Token. This field is entirely deprecated.
+  type:
+    type: string
+    enum:
+    - shared
+    - dedicated
+    description: The 'shared' type of interconnection refers to shared connections, or later also known as Fabric Virtual Connections (or Fabric VCs). The 'dedicated' type of interconnection refers to interconnections created with Dedicated Ports.
+  created_at:
+    format: date-time
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  requested_by:
+    $ref: './Href.yaml'
+type: object

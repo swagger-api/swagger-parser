@@ -1,0 +1,49 @@
+properties:
+  address:
+    $ref: './Address.yaml'
+  billing_address:
+    $ref: './Address.yaml'
+  created_at:
+    format: date-time
+    type: string
+  credit_amount:
+    format: float
+    type: number
+  customdata:
+    type: object
+  description:
+    type: string
+  enforce_2fa_at:
+    description: Force to all members to have enabled the two factor authentication
+      after that date, unless the value is null
+    format: date-time
+    type: string
+  id:
+    format: uuid
+    type: string
+  logo:
+    type: string
+  members:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  memberships:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  name:
+    type: string
+  projects:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  terms:
+    type: integer
+  twitter:
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  website:
+    type: string
+type: object

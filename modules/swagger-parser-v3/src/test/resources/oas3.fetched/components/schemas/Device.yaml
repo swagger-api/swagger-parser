@@ -1,0 +1,181 @@
+properties:
+  always_pxe:
+    type: boolean
+  billing_cycle:
+    type: string
+  bonding_mode:
+    type: integer
+  created_at:
+    format: date-time
+    type: string
+  created_by:
+    allOf:
+    - $ref: './UserLite.yaml'
+    - description: The user that created the device.
+  customdata:
+    default: {}
+    type: object
+    additionalProperties: true
+  description:
+    type: string
+  facility:
+    $ref: './Facility.yaml'
+  firmware_set_id:
+    description: The UUID of the firmware set to associate with the device.
+    format: uuid
+    type: string
+  hardware_reservation:
+    $ref: './Href.yaml'
+  hostname:
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  image_url:
+    type: string
+  ip_addresses:
+    items:
+      $ref: './IPAssignment.yaml'
+    type: array
+  ipxe_script_url:
+    type: string
+  iqn:
+    type: string
+  locked:
+    type: boolean
+    description: Prevents accidental deletion of this resource when set to true.
+  metro:
+    allOf:
+    - $ref: './Metro.yaml'
+    - description: The metro the facility is in
+  network_frozen:
+    type: boolean
+    description: Whether network mode changes such as converting to/from Layer2 or Layer3 networking, bonding or disbonding network interfaces are permitted for the device.
+  network_ports:
+    description:
+      By default, servers at Equinix Metal are configured in a “bonded” mode
+      using LACP (Link Aggregation Control Protocol). Each 2-NIC server is
+      configured with a single bond (namely bond0) with both interfaces eth0
+      and eth1 as members of the bond in a default Layer 3 mode. Some device
+      plans may have a different number of ports and bonds available.
+    type: array
+    items:
+      $ref: './Port.yaml'
+  operating_system:
+    $ref: './OperatingSystem.yaml'
+  actions:
+    description: Actions supported by the device instance.
+    items:
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+      type: object
+    type: array
+  plan:
+    $ref: './Plan.yaml'
+  project:
+    allOf:
+    - $ref: './Href.yaml'
+    - description: Full version of project object when included
+  project_lite:
+    allOf:
+    - $ref: './Href.yaml'
+    - description: Lite version of project object when included
+  provisioning_events:
+    items:
+      $ref: './Event.yaml'
+    type: array
+  provisioning_percentage:
+    description: Only visible while device provisioning
+    format: float
+    type: number
+  root_password:
+    description: Root password is automatically generated when server is provisioned
+      and it is removed after 24 hours
+    type: string
+  short_id:
+    type: string
+  spot_instance:
+    description: Whether or not the device is a spot instance.
+    type: boolean
+  spot_price_max:
+    description: |-
+      The maximum price per hour you are willing to pay to keep this spot
+      instance.  If you are outbid, the termination will be set allowing two
+      minutes before shutdown.
+    format: float
+    type: number
+  ssh_keys:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  state:
+    type: string
+    enum:
+      - queued
+      - provisioning
+      - deprovisioning
+      - reinstalling
+      - active
+      - inactive
+      - failed
+      - powering_on
+      - powering_off
+      - deleted
+    description: |-
+      The current state the instance is in.
+
+      * When an instance is initially created it will be in the `queued` state until it is picked up by the provisioner.
+      * Once provisioning has begun on the instance it's state will move to `provisioning`.
+      * When an instance is deleted, it will move to `deprovisioning` state until the deprovision is completed and the instance state moves to `deleted`.
+      * If an instance fails to provision or deprovision it will move to `failed` state.
+      * Once an instance has completed provisioning it will move to `active` state.
+      * If an instance is currently powering off or powering on it will move to `powering_off` or `powering_on` states respectively. 
+      * When the instance is powered off completely it will move to the `inactive` state.
+      * When an instance is powered on completely it will move to the `active` state.
+      * Using the reinstall action to install a new OS on the instance will cause the instance state to change to `reinstalling`.
+      * When the reinstall action is complete the instance will move to `active` state.
+  storage:
+    $ref: './Storage.yaml'
+  switch_uuid:
+    description: |-
+      Switch short id. This can be used to determine if two devices are
+      connected to the same switch, for example.
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+  termination_time:
+    description: |-
+      When the device will be terminated. If you don't supply timezone info, the timestamp is assumed to be in UTC.
+
+      This is commonly set in advance for
+      ephemeral spot market instances but this field may also be set with
+      on-demand and reservation instances to automatically delete the resource
+      at a given time. The termination time can also be used to release a
+      hardware reservation instance at a given time, keeping the reservation
+      open for other uses.  On a spot market device, the termination time will
+      be set automatically when outbid.
+    format: date-time
+    example: "2021-09-03T16:32:00+03:00"
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  user:
+    type: string
+  userdata:
+    type: string
+  volumes:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  sos:
+    description: Hostname used to connect to the instance via the SOS (Serial over SSH) out-of-band console.
+    type: string
+type: object

@@ -1,0 +1,6 @@
+properties:
+  vrfs:
+    items:
+      $ref: './Vrf.yaml'
+    type: array
+type: object

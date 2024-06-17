@@ -1,0 +1,36 @@
+properties:
+  always_pxe:
+    type: boolean
+  billing_cycle:
+    type: string
+  customdata:
+    default: {}
+    type: object
+    additionalProperties: true
+  description:
+    type: string
+  hostname:
+    type: string
+  firmware_set_id:
+    type: string
+  ipxe_script_url:
+    type: string
+  locked:
+    type: boolean
+    description: Whether the device should be locked, preventing accidental deletion.
+  network_frozen:
+    description: If true, this instance can not be converted to a different network
+      type.
+    type: boolean
+  spot_instance:
+    type: boolean
+    description: Can be set to false to convert a spot-market instance to on-demand.
+    externalDocs:
+      url: https://metal.equinix.com/developers/docs/deploy/spot-market/#converting-a-spot-market-server-to-on-demand
+  tags:
+    items:
+      type: string
+    type: array
+  userdata:
+    type: string
+type: object

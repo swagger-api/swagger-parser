@@ -1,0 +1,91 @@
+get:
+  description: Return all metal gateways for a project
+  operationId: findMetalGatewaysByProject
+  parameters:
+  - description: Project UUID
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  - $ref: '../../../components/parameters/Page.yaml'
+  - $ref: '../../../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/MetalGatewayList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Returns all metal gateways for a project
+  tags:
+  - MetalGateways
+post:
+  description: Create a metal gateway in a project
+  operationId: createMetalGateway
+  parameters:
+  - description: Project UUID
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  - $ref: '../../../components/parameters/Exclude.yaml'
+  - $ref: '../../../components/parameters/Page.yaml'
+  - $ref: '../../../components/parameters/PerPage.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          oneOf:
+          - $ref: '../../../components/schemas/MetalGatewayCreateInput.yaml'
+          - $ref: '../../../components/schemas/VrfMetalGatewayCreateInput.yaml'
+    description: Metal Gateway to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            oneOf:
+            - $ref: '../../../components/schemas/MetalGateway.yaml'
+            - $ref: '../../../components/schemas/VrfMetalGateway.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a metal gateway
+  tags:
+  - MetalGateways

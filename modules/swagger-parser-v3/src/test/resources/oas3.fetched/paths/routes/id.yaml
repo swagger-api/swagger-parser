@@ -1,0 +1,137 @@
+delete:
+  summary: Delete a VRF Route
+  description: Trigger the deletion of a VRF Route resource. The status of the route will update to 'deleting', and the route resource will remain accessible while background operations remove the route from the network. Once the route has been removed from the network, the resource will be fully deleted.
+  operationId: deleteVrfRouteById
+  parameters:
+    - description: VRF Route UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    - $ref: '../../components/parameters/Include.yaml'
+    - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "202":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/VrfRoute.yaml'
+      description: Accepted
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Not Found
+  tags:
+  - VRFs
+
+get:
+  summary: Retrieve a VRF Route
+  description: Returns a single VRF Route resource
+  operationId: findVrfRouteById
+  parameters:
+    - description: VRF Route UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        format: uuid
+        type: string
+    - $ref: '../../components/parameters/Include.yaml'
+    - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/VrfRoute.yaml'
+        description: OK
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Not Found
+  tags:
+  - VRFs
+
+put:
+  summary: Update a VRF Route
+  description: Requests a VRF Route be redeployed across the network. Updating the prefix or next-hop address on a route is not currently supported.
+  operationId: updateVrfRouteById
+  parameters:
+    - description: VRF Route UUID
+      in: path
+      name: id
+      required: true
+      schema:
+        format: uuid
+        type: string
+    - $ref: '../../components/parameters/Include.yaml'
+    - $ref: '../../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/VrfRouteUpdateInput.yaml'
+    required: true
+  responses:
+    "202":
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/VrfRoute.yaml'
+        description: Accepted
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Not Found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Unprocessable Entity
+    "429":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: Too Many Requests
+  tags:
+  - VRFs

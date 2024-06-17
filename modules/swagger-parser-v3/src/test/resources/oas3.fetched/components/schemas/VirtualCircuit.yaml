@@ -1,0 +1,3 @@
+oneOf:
+- $ref: './VlanVirtualCircuit.yaml'
+- $ref: './VrfVirtualCircuit.yaml'

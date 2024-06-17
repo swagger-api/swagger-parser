@@ -1,0 +1,10 @@
+properties:
+  key:
+    type: string
+  label:
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+type: object

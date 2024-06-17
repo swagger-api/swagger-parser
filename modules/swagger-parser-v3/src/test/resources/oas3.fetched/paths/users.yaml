@@ -1,0 +1,63 @@
+get:
+  description: Returns a list of users that the are accessible to the current user
+    (all users in the current user’s projects, essentially).
+  operationId: findUsers
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  - $ref: '../components/parameters/Page.yaml'
+  - $ref: '../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/UserList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all users
+  tags:
+  - Users
+post:
+  description: Creates a user.
+  operationId: createUser
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/UserCreateInput.yaml'
+    description: User to create
+    required: true
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/User.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+          example:
+            errors:
+              - "Email address username@example.com has already been taken"
+      description: unprocessable entity
+  summary: Create a user
+  tags:
+  - Users

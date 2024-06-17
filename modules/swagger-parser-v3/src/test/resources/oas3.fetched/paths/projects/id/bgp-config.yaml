@@ -1,0 +1,47 @@
+get:
+  description: Returns a bgp config
+  operationId: findBgpConfigByProject
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/BgpConfig.yaml'
+      description: |
+        ok
+
+        When BGP configuration is not enabled empty structure is returned.
+        When BGP configuration is disabled after being enabled BGP configuration data is returned with status disabled.
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: |
+        not found
+
+        The project was not found.
+  summary: Retrieve a bgp config
+  tags:
+  - BGP

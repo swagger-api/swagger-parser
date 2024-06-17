@@ -1,0 +1,31 @@
+get:
+  tags:
+  - Devices
+  summary: Get Device's associated Firmware Set
+  description: Returns the firmware set associated with the device. If a custom firmware set is associated with the device, then it is returned. Otherwise, if a default firmware set is available it is returned.
+  operationId: getDeviceFirmwareSets
+  parameters:
+  - description: Device UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/FirmwareSetResponse.yaml'
+    "401":
+      $ref: '../../../components/schemas/Error.yaml'
+    "404":
+      $ref: '../../../components/schemas/Error.yaml'
+    "500":
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'

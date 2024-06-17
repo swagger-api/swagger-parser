@@ -1,0 +1,84 @@
+get:
+  description: Returns a list of organizations that are accessible to the current
+    user.
+  operationId: findOrganizations
+  parameters:
+  - description: Include, exclude or show only personal organizations.
+    in: query
+    name: personal
+    schema:
+      enum:
+      - include
+      - exclude
+      - only
+      type: string
+  - description: Include, exclude or show only organizations that have no projects.
+    in: query
+    name: without_projects
+    schema:
+      enum:
+      - include
+      - exclude
+      - only
+      type: string
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  - $ref: '../components/parameters/Page.yaml'
+  - $ref: '../components/parameters/PerPage.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/OrganizationList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all organizations
+  tags:
+  - Organizations
+post:
+  description: Creates an organization.
+  operationId: createOrganization
+  parameters:
+  - $ref: '../components/parameters/Include.yaml'
+  - $ref: '../components/parameters/Exclude.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/OrganizationInput.yaml'
+    description: Organization to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Organization.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create an organization
+  tags:
+  - Organizations

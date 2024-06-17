@@ -1,0 +1,8 @@
+properties:
+  routes:
+    items:
+      $ref: './VrfRoute.yaml'
+    type: array
+  meta:
+    $ref: './Meta.yaml'
+type: object

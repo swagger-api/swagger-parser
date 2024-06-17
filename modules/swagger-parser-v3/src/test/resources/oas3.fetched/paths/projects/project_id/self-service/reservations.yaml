@@ -1,0 +1,83 @@
+get:
+  description: Returns all reservations.
+  operationId: findSelfServiceReservations
+  parameters:
+  - $ref: '../../../../components/parameters/Page.yaml'
+  - $ref: '../../../../components/parameters/PerPage.yaml'
+  - description: Project UUID
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Filter reservations by items category
+    in: query
+    name: categories
+    schema:
+      type: array
+      items:
+        type: string
+        enum:
+          - compute
+          - storage
+          - vmce
+          - legacy_gen
+          - current_gen
+        example: compute
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/SelfServiceReservationList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Retrieve all reservations
+  tags:
+  - SelfServiceReservations
+post:
+  description: Creates a reservation.
+  operationId: createSelfServiceReservation
+  parameters:
+  - description: Project UUID
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../../components/schemas/CreateSelfServiceReservationRequest.yaml'
+    description: reservation to create
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/SelfServiceReservationResponse.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a reservation
+  tags:
+  - SelfServiceReservations

@@ -1,0 +1,26 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  description:
+    description: Available only for API keys
+    type: string
+  id:
+    format: uuid
+    type: string
+  project:
+    allOf:
+    - $ref: './Project.yaml'
+    - description: Available only for project tokens
+  read_only:
+    type: boolean
+  token:
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  user:
+    allOf:
+    - $ref: './User.yaml'
+    - description: Available only for user tokens
+type: object

@@ -1,0 +1,30 @@
+properties:
+  ams1:
+    $ref: './SpotPricesPerFacility.yaml'
+  atl1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  dfw1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  ewr1:
+    $ref: './SpotPricesPerFacility.yaml'
+  fra1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  iad1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  lax1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  nrt1:
+    $ref: './SpotPricesPerFacility.yaml'
+  ord1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  sea1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  sin1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  sjc1:
+    $ref: './SpotPricesPerFacility.yaml'
+  syd1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+  yyz1:
+    $ref: './SpotPricesPerNewFacility.yaml'
+type: object

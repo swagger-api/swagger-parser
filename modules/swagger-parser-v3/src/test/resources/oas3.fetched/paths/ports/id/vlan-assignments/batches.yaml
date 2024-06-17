@@ -1,0 +1,95 @@
+get:
+  description: Show all the VLAN assignment batches that have been created for managing
+    this port's VLAN assignments
+  operationId: findPortVlanAssignmentBatches
+  parameters:
+  - description: Port UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/PortVlanAssignmentBatchList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: List the VLAN Assignment Batches for a port
+  tags:
+  - Ports
+post:
+  description: Create a new asynchronous batch request which handles adding and/or
+    removing the VLANs to which the port is assigned.
+  operationId: createPortVlanAssignmentBatch
+  parameters:
+  - description: Port UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../../components/parameters/Include.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../../components/schemas/PortVlanAssignmentBatchCreateInput.yaml'
+    description: VLAN Assignment batch details
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/PortVlanAssignmentBatch.yaml'
+      description: created
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Create a new Port-VLAN Assignment management batch
+  tags:
+  - Ports
+

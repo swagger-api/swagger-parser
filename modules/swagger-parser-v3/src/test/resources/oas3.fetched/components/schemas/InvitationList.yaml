@@ -1,0 +1,6 @@
+properties:
+  invitations:
+    items:
+      $ref: './Membership.yaml'
+    type: array
+type: object

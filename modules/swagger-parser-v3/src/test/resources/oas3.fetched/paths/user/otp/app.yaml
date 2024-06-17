@@ -1,0 +1,36 @@
+delete:
+  description: Disables two factor authentication.
+  operationId: disableTfaApp
+  responses:
+    "204":
+      description: no content
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Disable two factor authentication
+  tags:
+  - TwoFactorAuth
+post:
+  description: Enables two factor authentication using authenticator app.
+  operationId: enableTfaApp
+  responses:
+    "200":
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Enable two factor auth using app
+  tags:
+  - TwoFactorAuth

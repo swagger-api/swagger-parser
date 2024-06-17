@@ -1,0 +1,8 @@
+properties:
+  mac:
+    description: MAC address is set for NetworkPort ports
+    type: string
+  bonded:
+    description: Bonded is true for NetworkPort ports in a bond and NetworkBondPort ports that are active
+    type: boolean
+type: object

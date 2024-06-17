@@ -1,0 +1,18 @@
+properties:
+  amount:
+    format: float
+    type: number
+  currency:
+    type: string
+  description:
+    type: string
+  details:
+    type: string
+  plan:
+    $ref: './Plan.yaml'
+  unit:
+    type: string
+  unit_price:
+    format: float
+    type: number
+type: object

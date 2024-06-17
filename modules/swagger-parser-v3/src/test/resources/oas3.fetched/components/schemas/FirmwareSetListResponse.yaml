@@ -1,0 +1,20 @@
+type: object
+description: Represents collection of Firmware Sets
+properties:
+  page_size:
+    description: Max number of items returned in a page
+    type: integer
+  page:
+    description: Page returned
+    type: integer
+  page_count:
+    description: Items returned in current page
+    type: integer
+  total_pages:
+    description: Total count of pages
+    type: integer
+  total_record_count:
+    description: Total count of items
+    type: integer
+  records:
+    $ref: "./FirmwareSetList.yaml"

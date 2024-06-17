@@ -1,0 +1,32 @@
+properties:
+  description:
+    type: string
+  feature_access:
+    type: object
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  instance_quota:
+    type: object
+  ip_quota:
+    type: object
+  name:
+    type: string
+  project_quota:
+    default: 0
+    type: integer
+  slug:
+    type: string
+  volume_limits:
+    type: object
+  volume_quota:
+    type: object
+  weight:
+    type: integer
+required:
+- id
+- slug
+- weight
+type: object

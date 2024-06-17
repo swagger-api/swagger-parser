@@ -1,0 +1,39 @@
+properties:
+  assigned_to:
+    $ref: './Href.yaml'
+  assigned_to_virtual_circuit:
+    description: True if the virtual network is attached to a virtual circuit. False
+      if not.
+    type: boolean
+  description:
+    type: string
+  facility:
+    $ref: './Href.yaml'
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  instances:
+    description: A list of instances with ports currently associated to this Virtual
+      Network.
+    items:
+      $ref: './Href.yaml'
+    type: array
+  metal_gateways:
+    description: A list of metal gateways currently associated to this Virtual Network.
+    items:
+      $ref: './MetalGatewayLite.yaml'
+    type: array
+  metro:
+    $ref: './Href.yaml'
+  metro_code:
+    description: The Metro code of the metro in which this Virtual Network is defined.
+    type: string
+  vxlan:
+    type: integer
+  tags:
+    items:
+      type: string
+    type: array
+type: object

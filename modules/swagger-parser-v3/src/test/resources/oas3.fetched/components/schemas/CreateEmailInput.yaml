@@ -1,0 +1,6 @@
+properties:
+  address:
+    type: string
+required:
+- address
+type: object

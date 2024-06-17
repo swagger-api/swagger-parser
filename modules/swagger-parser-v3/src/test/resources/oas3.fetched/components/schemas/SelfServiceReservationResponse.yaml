@@ -1,0 +1,40 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  item:
+    items:
+      $ref: './SelfServiceReservationItemResponse.yaml'
+    type: array
+  notes:
+    type: string
+  organization:
+    type: string
+  organization_id:
+    format: uuid
+    type: string
+  period:
+    properties:
+      count:
+        enum:
+        - 12
+        - 36
+        type: integer
+      unit:
+        enum:
+        - monthly
+        type: string
+    type: object
+  project:
+    type: string
+  project_id:
+    format: uuid
+    type: string
+  start_date:
+    format: date-time
+    type: string
+  status:
+    type: string
+  total_cost:
+    type: integer
+type: object

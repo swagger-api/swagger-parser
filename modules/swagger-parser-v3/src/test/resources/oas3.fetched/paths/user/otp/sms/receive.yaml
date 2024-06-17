@@ -1,0 +1,33 @@
+post:
+  description: Sends an OTP to the user's mobile phone.
+  operationId: receiveCodes
+  responses:
+    "204":
+      description: no content
+    "400":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: bad request
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+    "500":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: internal server error
+  summary: Receive an OTP per sms
+  tags:
+  - OTPs

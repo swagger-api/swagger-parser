@@ -1,0 +1,10 @@
+properties:
+  details:
+    type: string
+  customdata:
+    type: object
+  tags:
+    items:
+      type: string
+    type: array
+type: object

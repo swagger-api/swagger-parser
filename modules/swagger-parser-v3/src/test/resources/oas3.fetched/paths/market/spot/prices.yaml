@@ -1,0 +1,36 @@
+get:
+  description: Get Equinix Metal current spot market prices.
+  operationId: findSpotMarketPrices
+  parameters:
+  - description: Facility to check spot market prices
+    in: query
+    name: facility
+    schema:
+      type: string
+  - description: Plan to check spot market prices
+    in: query
+    name: plan
+    schema:
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/SpotMarketPricesList.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Get current spot market prices
+  tags:
+  - SpotMarket

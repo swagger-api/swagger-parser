@@ -1,0 +1,26 @@
+properties:
+  invitee:
+    type: string
+    format: email
+  message:
+    type: string
+  organization_id:
+    type: string
+    format: uuid
+  projects_ids:
+    items:
+      type: string
+      format: uuid
+    type: array
+  roles:
+    items:
+      type: string
+      enum:
+        - admin
+        - billing
+        - collaborator
+        - limited_collaborator
+    type: array
+required:
+- invitee
+type: object

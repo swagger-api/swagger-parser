@@ -1,0 +1,43 @@
+get:
+  description: Provides the custom metadata stored for this IP Assignment in json
+    format
+  operationId: findIPAssignmentCustomdata
+  parameters:
+  - description: Instance UUID
+    in: path
+    name: instance_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Ip Assignment UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve the custom metadata of an IP Assignment
+  tags:
+  - Devices

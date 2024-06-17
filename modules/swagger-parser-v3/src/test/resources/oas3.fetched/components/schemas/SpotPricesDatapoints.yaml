@@ -1,0 +1,6 @@
+properties:
+  datapoints:
+    items:
+      $ref: './SpotPricesDatapointsList.yaml'
+    type: array
+type: object

@@ -1,0 +1,12 @@
+properties:
+  device:
+    type: string
+  format:
+    type: string
+  point:
+    type: string
+  options:
+    items:
+      type: string
+    type: array
+type: object

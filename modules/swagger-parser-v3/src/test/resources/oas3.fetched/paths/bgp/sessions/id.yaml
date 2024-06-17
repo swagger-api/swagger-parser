@@ -1,0 +1,124 @@
+delete:
+  description: Deletes the BGP session.
+  operationId: deleteBgpSession
+  parameters:
+  - description: BGP session UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "204":
+      description: no content
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Delete the BGP session
+  tags:
+  - BGP
+get:
+  description: Returns a BGP session
+  operationId: findBgpSessionById
+  parameters:
+  - description: BGP session UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../../components/parameters/Include.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/BgpSession.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve a BGP session
+  tags:
+  - BGP
+put:
+  description: Updates the BGP session by either enabling or disabling the default
+    route functionality.
+  operationId: updateBgpSession
+  parameters:
+  - description: BGP session UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: boolean
+    description: Default route
+    required: true
+  responses:
+    "200":
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: forbidden
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: not found
+    "422":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'
+      description: unprocessable entity
+  summary: Update the BGP session
+  tags:
+  - BGP

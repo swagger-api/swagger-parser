@@ -1,0 +1,4 @@
+type: array
+description: Represents a list of FirmwareSets
+items:
+  $ref: "./FirmwareSet.yaml"

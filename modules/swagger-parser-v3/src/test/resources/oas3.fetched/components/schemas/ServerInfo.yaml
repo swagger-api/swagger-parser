@@ -1,0 +1,14 @@
+properties:
+  facility:
+    deprecated: true
+    type: string
+  metro:
+    description: The metro ID or code to check the capacity in.
+    type: string
+  plan:
+    description: The plan ID or slug to check the capacity of.
+    type: string
+  quantity:
+    description: The number of servers to check the capacity of.
+    type: string
+type: object

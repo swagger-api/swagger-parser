@@ -1,0 +1,4 @@
+properties:
+  default:
+    type: boolean
+type: object

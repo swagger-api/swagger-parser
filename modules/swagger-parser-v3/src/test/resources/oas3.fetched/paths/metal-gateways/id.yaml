@@ -1,0 +1,74 @@
+delete:
+  description: Deletes a metal gateway and any elastic IP assignments associated with this metal gateway.
+  operationId: deleteMetalGateway
+  parameters:
+  - description: Metal Gateway UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "202":
+      description: accepted
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../../components/schemas/MetalGateway.yaml'
+              - $ref: '../../components/schemas/VrfMetalGateway.yaml'
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Deletes the metal gateway
+  tags:
+  - MetalGateways
+get:
+  description: Returns a specific metal gateway
+  operationId: findMetalGatewayById
+  parameters:
+  - description: Metal Gateway UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - $ref: '../../components/parameters/Include.yaml'
+  - $ref: '../../components/parameters/Exclude.yaml'
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            oneOf:
+            - $ref: '../../components/schemas/MetalGateway.yaml'
+            - $ref: '../../components/schemas/VrfMetalGateway.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Returns the metal gateway
+  tags:
+  - MetalGateways

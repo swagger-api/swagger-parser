@@ -1,0 +1,6 @@
+properties:
+  transfers:
+    items:
+      $ref: './TransferRequest.yaml'
+    type: array
+type: object

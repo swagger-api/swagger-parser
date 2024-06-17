@@ -1,0 +1,6 @@
+properties:
+  invoices:
+    items:
+      $ref: './Invoice.yaml'
+    type: array
+type: object

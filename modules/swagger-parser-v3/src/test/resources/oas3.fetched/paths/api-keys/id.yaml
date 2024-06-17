@@ -1,0 +1,29 @@
+delete:
+  description: Deletes the API key.
+  operationId: deleteAPIKey
+  parameters:
+  - description: API Key UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "204":
+      description: no content
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+      description: not found
+  summary: Delete the API key
+  tags:
+  - Authentication

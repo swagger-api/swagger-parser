@@ -1,0 +1,27 @@
+properties:
+  comments:
+    type: string
+  customdata:
+    type: object
+  details:
+    type: string
+  facility:
+    type: string
+  fail_on_approval_required:
+    type: boolean
+  metro:
+    description: The code of the metro you are requesting the IP reservation in.
+    example: SV
+    type: string
+  quantity:
+    type: integer
+  tags:
+    items:
+      type: string
+    type: array
+  type:
+    type: string
+required:
+- type
+- quantity
+type: object

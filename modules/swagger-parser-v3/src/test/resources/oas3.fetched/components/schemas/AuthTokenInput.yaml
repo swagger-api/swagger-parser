@@ -1,0 +1,6 @@
+properties:
+  description:
+    type: string
+  read_only:
+    type: boolean
+type: object

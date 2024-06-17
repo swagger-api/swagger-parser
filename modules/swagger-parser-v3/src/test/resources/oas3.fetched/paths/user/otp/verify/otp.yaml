@@ -1,0 +1,29 @@
+post:
+  description: It verifies the user once a valid OTP is provided. It gives back a
+    session token, essentially logging in the user.
+  operationId: findEnsureOtp
+  parameters:
+  - description: OTP
+    in: path
+    name: otp
+    required: true
+    schema:
+      type: string
+  responses:
+    "204":
+      description: no content
+    "400":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: bad request
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/schemas/Error.yaml'
+      description: unauthorized
+  summary: Verify user by providing an OTP
+  tags:
+  - OTPs

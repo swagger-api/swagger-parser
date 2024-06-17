@@ -1,0 +1,52 @@
+properties:
+  id:
+    format: uuid
+    type: string
+  name:
+    type: string
+  description:
+    description: Optional field that can be set to describe the VRF
+    type: string
+  bill:
+    type: boolean
+    default: false
+    description: True if the VRF is being billed. Usage will start when the first VRF Virtual Circuit is active, and will only stop when the VRF has been deleted.
+  bgp_dynamic_neighbors_enabled:
+    description: Toggle to enable the dynamic bgp neighbors feature on the VRF
+    type: boolean
+  bgp_dynamic_neighbors_export_route_map:
+    description: Toggle to export the VRF route-map to the dynamic bgp neighbors
+    type: boolean
+  bgp_dynamic_neighbors_bfd_enabled:
+    description: Toggle BFD on dynamic bgp neighbors sessions
+    type: boolean
+  local_asn:
+    description: A 4-byte ASN associated with the VRF.
+    type: integer
+    format: int32
+  virtual_circuits:
+    description: Virtual circuits that are in the VRF
+    type: array
+    items:
+      $ref: './VrfVirtualCircuit.yaml'
+  ip_ranges:
+    $ref: './VrfIpRangeList.yaml'
+  project:
+    $ref: './Project.yaml'
+  metro:
+    $ref: './Metro.yaml'
+  created_by:
+    $ref: './User.yaml'
+  href:
+    type: string
+  created_at:
+    format: date-time
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+type: object

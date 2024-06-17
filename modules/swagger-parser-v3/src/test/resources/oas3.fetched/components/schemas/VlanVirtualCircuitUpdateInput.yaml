@@ -1,0 +1,17 @@
+properties:
+  description:
+    type: string
+  name:
+    type: string
+  speed:
+    description: Speed can be changed only if it is an interconnection on a Dedicated Port
+    type: string
+  tags:
+    items:
+      type: string
+    type: array
+  vnid:
+    description: A Virtual Network record UUID or the VNID of a Metro Virtual Network in
+      your project.
+    type: string
+type: object

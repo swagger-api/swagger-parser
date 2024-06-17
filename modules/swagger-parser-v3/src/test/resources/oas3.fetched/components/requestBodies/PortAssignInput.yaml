@@ -1,0 +1,6 @@
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/PortAssignInput.yaml'
+description: 'Virtual Network ID. May be the UUID of the Virtual Network record, or the VLAN value itself (ex: ''1001'').'
+required: true

@@ -1,0 +1,34 @@
+properties:
+  created_at:
+    format: date-time
+    type: string
+  created_by:
+    $ref: './Href.yaml'
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  ip_reservation:
+    $ref: './VrfIpReservation.yaml'
+  project:
+    $ref: './Project.yaml'
+  state:
+    description: The current state of the Metal Gateway. 'Ready' indicates the gateway
+      record has been configured, but is currently not active on the network. 'Active'
+      indicates the gateway has been configured on the network. 'Deleting' is a temporary
+      state used to indicate that the gateway is in the process of being un-configured
+      from the network, after which the gateway record will be deleted.
+    enum:
+    - ready
+    - active
+    - deleting
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+  virtual_network:
+    $ref: './VirtualNetwork.yaml'
+  vrf:
+    $ref: './Vrf.yaml'
+type: object

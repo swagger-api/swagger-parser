@@ -1,0 +1,7 @@
+properties:
+  bgp_neighbors:
+    description: A list of BGP session neighbor data
+    items:
+      $ref: './BgpNeighborData.yaml'
+    type: array
+type: object

@@ -1,0 +1,3 @@
+allOf:
+- $ref: './FacilityInput.yaml'
+- $ref: './DeviceCreateInput.yaml'

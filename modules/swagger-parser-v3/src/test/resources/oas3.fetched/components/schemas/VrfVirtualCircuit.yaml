@@ -1,0 +1,90 @@
+required:
+- vrf
+properties:
+  customer_ip:
+    description: >-
+      An IP address from the subnet that will be used on the Customer side. This parameter is optional,
+      but if supplied, we will use the other usable IP address in the subnet as the Metal IP. By default,
+      the last usable IP address in the subnet will be used.
+    type: string
+    example: "12.0.0.2"
+  description:
+    type: string
+  id:
+    format: uuid
+    type: string
+  md5:
+    description: >-
+      The MD5 password for the BGP peering in plaintext (not a checksum).
+    type: string
+  metal_ip:
+    description: >-
+      An IP address from the subnet that will be used on the Metal side. This parameter is optional,
+      but if supplied, we will use the other usable IP address in the subnet as the Customer IP. By default,
+      the first usable IP address in the subnet will be used.
+    type: string
+    example: "12.0.0.1"
+  name:
+    type: string
+  port:
+    $ref: './Href.yaml'
+  nni_vlan:
+    type: integer
+  peer_asn:
+    description: The peer ASN that will be used with the VRF on the Virtual Circuit.
+    type: integer
+  project:
+    $ref: './Href.yaml'
+  speed:
+    description: integer representing bps speed
+    type: integer
+  status:
+    type: string
+    description: >-
+      The status changes of a VRF virtual circuit are generally the same as Virtual Circuits that aren't in a VRF.
+      However, for VRF Virtual Circuits on Fabric VCs, the status will change to 'waiting_on_peering_details' once
+      the Fabric service token associated with the virtual circuit has been redeemed on Fabric, and Metal has found
+      the associated Fabric connection. At this point, users can update the subnet, MD5 password, customer IP and/or
+      metal IP accordingly. For VRF Virtual Circuits on Dedicated Ports, we require all peering details to be set on
+      creation of a VRF Virtual Circuit. The status will change to `changing_peering_details` whenever an active VRF
+      Virtual Circuit has any of its peering details updated.
+    # NOTE: Any new additions to the enum will affect users using generated SDKs.
+    enum: 
+    - pending
+    - waiting_on_peering_details
+    - activating
+    - changing_peering_details
+    - deactivating
+    - deleting
+    - active
+    - expired
+    - activation_failed
+    - changing_peering_details_failed
+    - deactivation_failed
+    - delete_failed
+  subnet:
+    description: >-
+      The /30 or /31 subnet of one of the VRF IP Blocks that will be used with the VRF for
+      the Virtual Circuit. This subnet does not have to be an existing VRF IP reservation, as we
+      will create the VRF IP reservation on creation if it does not exist. The Metal IP and Customer
+      IP must be IPs from this subnet. For /30 subnets, the network and broadcast IPs cannot be used
+      as the Metal or Customer IP.
+    type: string
+    example: "12.0.0.0/30"
+  tags:
+    items:
+      type: string
+    type: array
+  type:
+    type: string
+    enum:
+    - vrf
+  vrf:
+    $ref: './Vrf.yaml'
+  created_at:
+    format: date-time
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+type: object

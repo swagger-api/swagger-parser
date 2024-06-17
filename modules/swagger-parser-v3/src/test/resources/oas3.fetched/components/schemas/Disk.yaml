@@ -1,0 +1,10 @@
+properties:
+  device:
+    type: string
+  wipeTable:
+    type: boolean
+  partitions:
+    items:
+      $ref: './Partition.yaml'
+    type: array
+type: object

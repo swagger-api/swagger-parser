@@ -1,0 +1,40 @@
+get:
+  description: Returns a reservation
+  operationId: findSelfServiceReservation
+  parameters:
+  - description: Reservation short_id
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - description: Project UUID
+    in: path
+    name: project_id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/SelfServiceReservationResponse.yaml'
+      description: ok
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: unauthorized
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../components/schemas/Error.yaml'
+      description: not found
+  summary: Retrieve a reservation
+  tags:
+  - SelfServiceReservations

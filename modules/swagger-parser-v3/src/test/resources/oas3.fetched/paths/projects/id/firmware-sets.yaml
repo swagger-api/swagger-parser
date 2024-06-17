@@ -1,0 +1,41 @@
+get:
+  tags:
+  - Firmware Sets
+  summary: Get Project's Firmware Sets
+  description: Returns all firmware sets associated with the project or organization.
+  operationId: getProjectFirmwareSets
+  parameters:
+  - description: Project UUID
+    in: path
+    name: id
+    required: true
+    schema:
+      format: uuid
+      type: string
+  - name: page
+    in: query
+    description: page number to return
+    schema:
+      type: integer
+  - name: per_page
+    in: query
+    description: items returned per page.
+    schema:
+      type: integer
+  responses:
+    "200":
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/FirmwareSetListResponse.yaml'
+    "401":
+      $ref: '../../../components/schemas/Error.yaml'   
+    "404":
+      $ref: '../../../components/schemas/Error.yaml'
+    "500":
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Error.yaml'

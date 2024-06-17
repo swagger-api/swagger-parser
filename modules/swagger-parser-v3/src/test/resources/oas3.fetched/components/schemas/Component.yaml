@@ -1,0 +1,55 @@
+properties:
+  uuid:
+    readOnly: true
+    type: string
+    description: Component UUID
+    format: uuid
+    example: "0516463a-47ee-4809-9a66-ece8c740eed9"
+  vendor:
+    readOnly: true
+    type: string
+    description: Component vendor
+    example: "equinix"
+  model:
+    readOnly: true
+    type: array
+    description: List of models where this component version can be applied
+    items:
+      type: string
+      example: romed8hm3
+  filename:
+    readOnly: true
+    type: string
+    description: name of the file
+  version:
+    readOnly: true
+    type: string
+    description: Version of the component
+    example: 1.5.0
+  component:
+    readOnly: true
+    type: string
+    description: Component type
+    example: bmc
+  checksum:
+    readOnly: true
+    type: string
+    description: File checksum
+  upstream_url:
+    readOnly: true
+    type: string
+    description: Location of the file
+  repository_url:
+    readOnly: true
+    type: string
+    description: Location of the file in the repository
+  created_at:
+    readOnly: true
+    type: string
+    format: date-time
+    description: Datetime when the block was created.
+  updated_at:
+    readOnly: true
+    type: string
+    format: date-time
+    description: Datetime when the block was updated.

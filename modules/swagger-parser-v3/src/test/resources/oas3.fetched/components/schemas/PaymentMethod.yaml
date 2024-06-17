@@ -1,0 +1,37 @@
+properties:
+  billing_address:
+    $ref: './PaymentMethodBillingAddress.yaml'
+  card_type:
+    type: string
+  cardholder_name:
+    type: string
+  created_at:
+    format: date-time
+    type: string
+  created_by_user:
+    $ref: './Href.yaml'
+  default:
+    type: boolean
+  email:
+    type: string
+  expiration_month:
+    type: string
+  expiration_year:
+    type: string
+  id:
+    format: uuid
+    type: string
+  name:
+    type: string
+  organization:
+    $ref: './Href.yaml'
+  projects:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  type:
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+type: object

@@ -1,0 +1,45 @@
+properties:
+  avatar:
+    format: binary
+    type: string
+  company_name:
+    type: string
+  company_url:
+    type: string
+  customdata:
+    type: object
+  emails:
+    items:
+      $ref: './EmailInput.yaml'
+    type: array
+  first_name:
+    type: string
+  last_name:
+    type: string
+  level:
+    type: string
+  password:
+    type: string
+  phone_number:
+    type: string
+  social_accounts:
+    type: object
+  timezone:
+    type: string
+  title:
+    type: string
+  two_factor_auth:
+    type: string
+  verified_at:
+    format: date-time
+    type: string
+  invitation_id:
+    type: string
+    format: uuid
+  nonce:
+    type: string
+required:
+- first_name
+- last_name
+- emails
+type: object

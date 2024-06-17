@@ -1,0 +1,4 @@
+properties:
+  mount:
+    $ref: './Mount.yaml'
+type: object

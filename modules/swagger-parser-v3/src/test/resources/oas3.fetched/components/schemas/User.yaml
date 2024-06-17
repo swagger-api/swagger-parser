@@ -1,0 +1,54 @@
+properties:
+  avatar_thumb_url:
+    type: string
+  avatar_url:
+    type: string
+  created_at:
+    format: date-time
+    type: string
+  customdata:
+    type: object
+  default_organization_id:
+    type: string
+    format: uuid
+  default_project_id:
+    type: string
+    format: uuid
+  email:
+    type: string
+  emails:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  first_name:
+    type: string
+  fraud_score:
+    type: string
+  full_name:
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  last_login_at:
+    format: date-time
+    type: string
+  last_name:
+    type: string
+  max_organizations:
+    type: integer
+  max_projects:
+    type: integer
+  phone_number:
+    type: string
+  short_id:
+    type: string
+  timezone:
+    type: string
+  two_factor_auth:
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+type: object

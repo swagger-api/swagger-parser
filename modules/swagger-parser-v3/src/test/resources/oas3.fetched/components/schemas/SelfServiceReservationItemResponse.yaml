@@ -1,0 +1,29 @@
+properties:
+  amount:
+    format: float
+    type: number
+  id:
+    type: string
+  metro_code:
+    type: string
+  metro_id:
+    format: uuid
+    type: string
+  metro_name:
+    type: string
+  plan_id:
+    format: uuid
+    type: string
+  plan_name:
+    type: string
+  plan_slug:
+    type: string
+  plan_categories:
+    type: array
+    items:
+      type: string
+  quantity:
+    type: integer
+  term:
+    type: string
+type: object

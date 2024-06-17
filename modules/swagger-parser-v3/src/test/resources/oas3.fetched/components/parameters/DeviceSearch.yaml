@@ -1,0 +1,5 @@
+description: Search by hostname, description, short_id, reservation short_id, tags, plan name, plan slug, facility code, facility name, operating system name, operating system slug, IP addresses.
+in: query
+name: search
+schema:
+  type: string
