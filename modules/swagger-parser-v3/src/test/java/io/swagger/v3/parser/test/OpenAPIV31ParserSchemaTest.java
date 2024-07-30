@@ -165,7 +165,7 @@ public class OpenAPIV31ParserSchemaTest {
     public void test$idUrlExternal() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-uri-external/root.json").getAbsolutePath(), null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-uri-external/root.json").toURI().toASCIIString(), null, p);
         compare("$id-uri-external", swaggerParseResult);
     }
 
@@ -173,7 +173,7 @@ public class OpenAPIV31ParserSchemaTest {
     public void test$idUrlEnclosing() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-uri-enclosing/root.json").getAbsolutePath(), null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-uri-enclosing/root.json").toURI().toASCIIString(), null, p);
         compare("$id-uri-enclosing", swaggerParseResult);
     }
 
@@ -181,14 +181,14 @@ public class OpenAPIV31ParserSchemaTest {
     public void test$idUrlDirect() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-uri-direct/root.json").getAbsolutePath(), null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-uri-direct/root.json").toURI().toASCIIString(), null, p);
         compare("$id-uri-direct", swaggerParseResult);
     }
     @Test
     public void test$idUrlUnresolvable() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-unresolvable/root.json").getAbsolutePath(), null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$id-unresolvable/root.json").toURI().toASCIIString(), null, p);
         compare("$id-unresolvable", swaggerParseResult);
     }
 
@@ -196,7 +196,7 @@ public class OpenAPIV31ParserSchemaTest {
     public void testAnchorExt() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-external/root.json").getAbsolutePath(), null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-external/root.json").toURI().toASCIIString(), null, p);
         compare("$anchor-external", swaggerParseResult);
     }
 
@@ -204,7 +204,7 @@ public class OpenAPIV31ParserSchemaTest {
     public void testAnchorInt() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-internal/root.json").getAbsolutePath(), null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-internal/root.json").toURI().toASCIIString(), null, p);
         compare("$anchor-internal", swaggerParseResult);
     }
 
@@ -212,7 +212,7 @@ public class OpenAPIV31ParserSchemaTest {
     public void testAnchorUnresolve() throws Exception {
         ParseOptions p = new ParseOptions();
         p.setResolve(true);
-        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-not-found/root.json").getAbsolutePath(), null, p);
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-not-found/root.json").toURI().toASCIIString(), null, p);
         compare("$anchor-not-found", swaggerParseResult);
     }
 
@@ -220,7 +220,7 @@ public class OpenAPIV31ParserSchemaTest {
         ObjectMapper mapper = Json31.mapper().copy();
         mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
         mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
-        String actual = mapper.writer(new DefaultPrettyPrinter()).writeValueAsString(result.getOpenAPI());
+        String actual = mapper.writer(new DefaultPrettyPrinter()).writeValueAsString(result.getOpenAPI()).replace("\r\n", "\n");
         org.testng.Assert.assertEquals(actual,
                 FileUtils.readFileToString(new File("src/test/resources/3.1.0/dereference/schema/" + dir + "/dereferenced.json")));
     }

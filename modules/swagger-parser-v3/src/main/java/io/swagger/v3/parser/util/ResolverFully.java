@@ -493,13 +493,6 @@ public class ResolverFully {
                 Schema property = updated.get(key);
 
                 if (property.getProperties() != model.getProperties()) {
-                    if (!hasSchemaType(property)) {
-                        if (SpecVersion.V30.equals(property.getSpecVersion())) {
-                            property.setType("object");
-                        } else {
-                            property.addType("object");
-                        }
-                    }
                     model.addProperties(key, property);
                 } else {
                     LOGGER.debug("not adding recursive properties, using generic object");

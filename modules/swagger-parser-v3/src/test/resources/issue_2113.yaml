@@ -1,0 +1,29 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Issue X
+servers:
+  - url: http://petstore.swagger.io/api
+paths:
+  /foo:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Foo'
+        required: true
+      responses:
+        200:
+          description: ok
+components:
+  schemas:
+    Foo:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Goo"
+    Goo:
+      type: object
+      properties:
+        goo:
+          title: "Goo"
