@@ -8,6 +8,7 @@ root = true
 # Indentation style
 # Possible values - tab, space
 indent_style = space
+end_of_line = lf
 
 # File character encoding
 # Possible values - latin1, utf-8, utf-16be, utf-16le
