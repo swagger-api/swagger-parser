@@ -34,6 +34,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
+import io.swagger.v3.parser.util.RefUtils;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -90,6 +91,20 @@ public final class ExternalRefProcessor {
         String renamedRef = cache.getRenamedRef($ref);
         if(renamedRef != null) {
             return renamedRef;
+        }
+
+        RefFormat format = computeRefFormat($ref);
+        if (format.equals(RefFormat.RELATIVE)) {
+            String normalizedRef = "./" + Paths.get($ref).normalize().toString();
+            if (!normalizedRef.equals($ref)) {
+                System.out.println("Normalized " + $ref + " to " + normalizedRef);
+                renamedRef = cache.getRenamedRef($ref);
+                if (renamedRef != null) {
+                    return renamedRef;
+                } else {
+                    $ref = normalizedRef;
+                }
+            }
         }
 
         final Schema schema = cache.loadRef($ref, refFormat, Schema.class);
