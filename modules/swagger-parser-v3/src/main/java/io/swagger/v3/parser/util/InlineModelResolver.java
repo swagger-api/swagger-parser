@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -417,7 +416,7 @@ public class InlineModelResolver {
     }
 
     private String resolveModelName(String title, String key) {
-        if (StringUtils.isBlank(title)) {
+        if (title == null) {
             return uniqueName(key);
         } else {
             return uniqueName(title);
