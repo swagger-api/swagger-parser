@@ -1,5 +1,6 @@
 package io.swagger.v3.parser.processors;
 
+import static org.testng.Assert.assertEquals;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
@@ -13,154 +14,169 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
-import mockit.*;
-import org.testng.annotations.Test;
-
-
 import java.util.Arrays;
 import java.util.List;
-
-import static org.testng.Assert.assertEquals;
-
+import mockit.Expectations;
+import mockit.FullVerifications;
+import mockit.Injectable;
+import mockit.Mocked;
+import org.testng.annotations.Test;
 
 public class ParameterProcessorTest {
 
+  @Injectable
+  ResolverCache cache;
 
-    @Injectable
-    ResolverCache cache;
+  @Injectable
+  OpenAPI openAPI;
 
-    @Injectable
-    OpenAPI openAPI;
+  @Mocked
+  SchemaProcessor modelProcessor;
 
-    @Mocked
-    SchemaProcessor modelProcessor;
+  @Injectable
+  boolean openapi31;
 
-    @Injectable
-    boolean openapi31;
+  @Injectable
+  HeaderParameter headerParameter;
 
-    @Injectable
-    HeaderParameter headerParameter;
+  @Injectable
+  QueryParameter queryParameter;
 
-    @Injectable
-    QueryParameter queryParameter;
+  @Injectable
+  CookieParameter cookieParameter;
 
-    @Injectable
-    CookieParameter cookieParameter;
+  @Injectable
+  PathParameter pathParameter;
 
-    @Injectable
-    PathParameter pathParameter;
+  @Injectable
+  HeaderParameter resolvedHeaderParam;
 
-    @Injectable
-    HeaderParameter resolvedHeaderParam;
+  @Injectable
+  Schema bodyParamSchema;
 
-    @Injectable
-    Schema bodyParamSchema;
+  @Test
+  public void testProcessParameters_TypesThatAreNotRefOrBody() throws Exception {
+    expectedModelProcessorCreation();
+    new Expectations() {
+      {
+        headerParameter.getSchema();
+        result = null;
+        headerParameter.getContent();
+        result = null;
+        queryParameter.getSchema();
+        result = null;
+        queryParameter.getContent();
+        result = null;
+        cookieParameter.getSchema();
+        result = null;
+        cookieParameter.getContent();
+        result = null;
+        pathParameter.getSchema();
+        result = null;
+        pathParameter.getContent();
+        result = null;
+      }
+    };
+    final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31)
+      .processParameters(Arrays.asList(
+        headerParameter,
+        queryParameter,
+        cookieParameter,
+        pathParameter
+      ));
 
-    @Test
-    public void testProcessParameters_TypesThatAreNotRefOrBody() throws Exception {
-        expectedModelProcessorCreation();
-        new Expectations() {
-            {
-                headerParameter.getSchema();
-                result = null;
-                headerParameter.getContent();
-                result = null;
-                queryParameter.getSchema();
-                result = null;
-                queryParameter.getContent();
-                result = null;
-                cookieParameter.getSchema();
-                result = null;
-                cookieParameter.getContent();
-                result = null;
-                pathParameter.getSchema();
-                result = null;
-                pathParameter.getContent();
-                result = null;
-            }
-        };
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31)
-                .processParameters(Arrays.asList(headerParameter,
-                        queryParameter,
-                        cookieParameter,
-                        pathParameter));
+    new FullVerifications() {{
+      headerParameter.get$ref();
+      times = 1;
+      queryParameter.get$ref();
+      times = 1;
+      cookieParameter.get$ref();
+      times = 1;
+      pathParameter.get$ref();
+      times = 1;
+    }};
 
-        new FullVerifications() {{
-            headerParameter.get$ref();
-            times = 1;
-            queryParameter.get$ref();
-            times = 1;
-            cookieParameter.get$ref();
-            times = 1;
-            pathParameter.get$ref();
-            times = 1;
-        }};
+    assertEquals(processedParameters.size(), 4);
+    assertEquals(processedParameters.get(0), headerParameter);
+    assertEquals(processedParameters.get(1), queryParameter);
+    assertEquals(processedParameters.get(2), cookieParameter);
+    assertEquals(processedParameters.get(3), pathParameter);
+  }
 
-        assertEquals(processedParameters.size(), 4);
-        assertEquals(processedParameters.get(0), headerParameter);
-        assertEquals(processedParameters.get(1), queryParameter);
-        assertEquals(processedParameters.get(2), cookieParameter);
-        assertEquals(processedParameters.get(3), pathParameter);
-    }
+  @Test
+  public void testProcessParameters_RefToHeader() throws Exception {
+    expectedModelProcessorCreation();
 
-    @Test
-    public void testProcessParameters_RefToHeader() throws Exception {
-        expectedModelProcessorCreation();
+    final String ref = "#/components/parameters/foo";
+    Parameter refParameter = new Parameter().$ref(ref);
 
-        final String ref = "#/components/parameters/foo";
-        Parameter refParameter = new Parameter().$ref(ref);
+    expectLoadingRefFromCache(ref, RefFormat.INTERNAL, resolvedHeaderParam);
+    new Expectations() {
+      {
+        resolvedHeaderParam.getSchema();
+        result = null;
+        resolvedHeaderParam.getContent();
+        result = null;
+      }
+    };
 
-        expectLoadingRefFromCache(ref, RefFormat.INTERNAL, resolvedHeaderParam);
-        new Expectations() {
-            {
-                resolvedHeaderParam.getSchema();
-                result = null;
-                resolvedHeaderParam.getContent();
-                result = null;
-            }
-        };
+    final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31).processParameters(Arrays.asList(refParameter));
 
-        final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31).processParameters(Arrays.asList(refParameter));
+    new FullVerifications() {{
+    }};
 
-        new FullVerifications(){{}};
+    assertEquals(processedParameters.size(), 1);
+    assertEquals(processedParameters.get(0), resolvedHeaderParam);
+  }
 
-        assertEquals(processedParameters.size(), 1);
-        assertEquals(processedParameters.get(0), resolvedHeaderParam);
-    }
+  private void expectLoadingRefFromCache(
+    final String ref, final RefFormat refFormat,
+    final Parameter resolvedParam
+  ) {
+    new Expectations() {{
+      cache.loadRef(ref, refFormat, Parameter.class);
+      times = 1;
+      result = resolvedParam;
+    }};
+  }
 
-    private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
-                                           final Parameter resolvedParam) {
-        new Expectations() {{
-            cache.loadRef(ref, refFormat, Parameter.class);
-            times = 1;
-            result = resolvedParam;
-        }};
-    }
+  @Test
+  public void testProcessParameters_BodyParameter() throws Exception {
+    final SchemaProcessor[] schemaProcessor1 = {new SchemaProcessor(cache, openAPI, openapi31)};
+    new Expectations() {{
+      schemaProcessor1[0] = new SchemaProcessor(cache, openAPI, openapi31);
+      times = 1;
 
-    @Test
-    public void testProcessParameters_BodyParameter() throws Exception {
-        final SchemaProcessor[] schemaProcessor1 = {new SchemaProcessor(cache, openAPI, openapi31)};
-        new Expectations() {{
-            schemaProcessor1[0] = new SchemaProcessor(cache, openAPI, openapi31);
-            times = 1;
+    }};
 
-        }};
+    RequestBody bodyParameter = new RequestBody().content(new Content().addMediaType("*/*", new MediaType().schema(bodyParamSchema)));
 
-        RequestBody bodyParameter = new RequestBody().content(new Content().addMediaType("*/*",new MediaType().schema(bodyParamSchema)));
+    new Expectations() {{
+      schemaProcessor1[0].processSchema(bodyParamSchema);
+      times = 1;
+    }};
 
-        new Expectations(){{
-            schemaProcessor1[0].processSchema(bodyParamSchema); times=1;
-        }};
+    new RequestBodyProcessor(cache, openAPI, openapi31).processRequestBody(bodyParameter);
 
-        new RequestBodyProcessor(cache, openAPI, openapi31).processRequestBody(bodyParameter);
+    new FullVerifications() {{
+    }};
+  }
 
-        new FullVerifications(){{}};
-    }
+  @Test
+  public void testProcessParameters_PreservePathRef() throws Exception {
+    ParameterProcessor processor = new ParameterProcessor(cache, openAPI, openapi31);
+    List<Parameter> parameters =
+      Arrays.asList(new PathParameter().$ref("#/paths/~1test/get/parameters/0"), new PathParameter().$ref("#/no-paths/~1test/get/parameters/0"));
+    List<Parameter> processedParameters = processor.processParameters(parameters);
 
-    private void expectedModelProcessorCreation() {
-        new Expectations() {{
-            new SchemaProcessor(cache, openAPI, openapi31);
-            times = 1;
-        }};
-    }
+    assertEquals(processedParameters.size(), 1);
+    assertEquals(processedParameters.get(0).get$ref(), "#/paths/~1test/get/parameters/0");
+  }
+
+  private void expectedModelProcessorCreation() {
+    new Expectations() {{
+      new SchemaProcessor(cache, openAPI, openapi31);
+      times = 1;
+    }};
+  }
 }
