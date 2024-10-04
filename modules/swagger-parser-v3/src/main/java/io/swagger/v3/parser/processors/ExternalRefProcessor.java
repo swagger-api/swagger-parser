@@ -215,22 +215,18 @@ public final class ExternalRefProcessor {
         if (composedSchema.getOneOf() != null) {
             for (Schema item : composedSchema.getOneOf()) {
                 if (item.get$ref() != null) {
-                    if (item.get$ref() != null) {
-                        processRefSchema(item, file);
-                    } else {
-                        processSchema(item, file);
-                    }
+                    processRefSchema(item, file);
+                } else {
+                    processSchema(item, file);
                 }
             }
         }
         if (composedSchema.getAnyOf() != null) {
             for (Schema item : composedSchema.getAnyOf()) {
                 if (item.get$ref() != null) {
-                    if (item.get$ref() != null) {
-                        processRefSchema(item, file);
-                    } else {
-                        processSchema(item, file);
-                    }
+                    processRefSchema(item, file);
+                } else {
+                    processSchema(item, file);
                 }
             }
         }
