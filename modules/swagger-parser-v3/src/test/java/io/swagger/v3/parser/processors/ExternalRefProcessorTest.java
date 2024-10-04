@@ -229,4 +229,29 @@ public class ExternalRefProcessorTest {
         assertTrue(components.containsKey("OrderRowType"));
     }
 
+    @Test
+    public void testHandleInlineRefsInComposedSchemas() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-2104/openapi.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        Map<String, Schema> components = openAPI.getComponents().getSchemas();
+        assertEquals(components.size(), 4);
+        assertTrue(components.containsKey("ResponseAllOf"));
+        assertTrue(components.containsKey("ResponseOneOf"));
+        assertTrue(components.containsKey("ResponseAnyOf"));
+        assertTrue(components.containsKey("Product"));
+
+        Schema allOfInlineProduct = (Schema)((Schema)components.get("ResponseAllOf").getAllOf().get(1)).getProperties().get("product");
+        assertThat(allOfInlineProduct.get$ref(), is("#/components/schemas/Product"));
+
+        Schema oneOfInlineProduct = (Schema)((Schema)components.get("ResponseOneOf").getOneOf().get(1)).getProperties().get("product");
+        assertThat(oneOfInlineProduct.get$ref(), is("#/components/schemas/Product"));
+
+        Schema anyOfInlineProduct = (Schema)((Schema)components.get("ResponseAnyOf").getAnyOf().get(1)).getProperties().get("product");
+        assertThat(anyOfInlineProduct.get$ref(), is("#/components/schemas/Product"));
+    }
+
 }
