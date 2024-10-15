@@ -71,7 +71,7 @@ public class OperationProcessor {
                 ApiResponse response = responses.get(responseCode);
                 if(response != null) {
                     //This part allows parser to put response inline without the resolveFully option set to true
-                    if (response.get$ref() != null) {
+                    if (response.get$ref() != null && cache != null && cache.getParseOptions() != null && cache.getParseOptions().isResolveResponses()) {
 
                         responseProcessor.processResponse(response);
 
