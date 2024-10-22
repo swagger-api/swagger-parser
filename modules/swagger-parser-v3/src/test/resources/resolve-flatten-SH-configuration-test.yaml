@@ -1,0 +1,43 @@
+openapi: 3.0.1
+info:
+  title: Simple API
+  version: 1.0.0
+
+paths:
+  /users:
+    get:
+      summary: Get list of users
+      operationId: getUsers
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+components:
+  responses:
+    SuccessResponse:
+      description: A successful response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                email:
+                  type: string
+    NotFoundResponse:
+      description: Not Found response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Resource not found"
