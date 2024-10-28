@@ -3352,4 +3352,16 @@ public class OpenAPIV3ParserTest {
         assertNull(openAPI.getComponents().getSchemas().get("#/components/schemas/inline_response_404"));
         assertNull(openAPI.getComponents().getSchemas().get("#/components/schemas/inline_response_200"));
     }
+
+    @Test(description = "responses should be inline with using resolveFully = true")
+    public void testResolveFullyResponses(){
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolve-responses-test.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNull(openAPI.getPaths().get("/users").getGet().getResponses().get("400").get$ref());
+
+    }
 }
