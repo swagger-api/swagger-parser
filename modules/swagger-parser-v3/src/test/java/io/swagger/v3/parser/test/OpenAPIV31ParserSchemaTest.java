@@ -8,9 +8,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.swagger.v3.core.util.Json31;
-import io.swagger.v3.core.util.Yaml31;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -23,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Random;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -219,32 +215,6 @@ public class OpenAPIV31ParserSchemaTest {
         SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-not-found/root.json").getAbsolutePath(), null, p);
         compare("$anchor-not-found", swaggerParseResult);
     }
-
-    @Test (enabled = false)
-    public void testa() throws Exception {
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        //parseOptions.setResolveFully(true);
-        //
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8002/api/v31/openapi.json", null, parseOptions);
-        // SwaggerParseResult result = new OpenAPIV3Parser().readLocation("https://petstore31.swagger.io/api/v31/openapi.json", null, parseOptions);
-        OpenAPI openAPI = result.getOpenAPI();
-
-        if (result.getMessages() != null) {
-            result.getMessages()
-                    .forEach(System.err::println); // validation errors and warnings
-        }
-
-        if (openAPI != null) {
-            final Map<String, Schema> schemas = openAPI.getComponents()
-                    .getSchemas();
-/*            schemas.entrySet()
-                    .stream()
-                    .forEach(this::printSchema);*/
-        }
-        Yaml31.prettyPrint(openAPI);
-    }
-
 
     public void compare(String dir, SwaggerParseResult result) throws Exception {
         ObjectMapper mapper = Json31.mapper().copy();
