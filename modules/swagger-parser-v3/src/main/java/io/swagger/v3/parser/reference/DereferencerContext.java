@@ -20,6 +20,7 @@ public class DereferencerContext {
     protected SwaggerParseResult swaggerParseResult;
     protected boolean addParametersToEachOperation = true;
     protected String currentUri;
+    protected Map<String, String> idsCache = new LinkedHashMap<>();
 
     private Map<String, Reference> referenceSet = new LinkedHashMap<>();
 
@@ -112,6 +113,19 @@ public class DereferencerContext {
 
     public DereferencerContext referenceSet(Map<String, Reference> referenceSet) {
         this.referenceSet = referenceSet;
+        return this;
+    }
+
+    public Map<String, String> getIdsCache() {
+        return idsCache;
+    }
+
+    public void setIdsCache(Map<String, String> idsCache) {
+        this.idsCache = idsCache;
+    }
+
+    public DereferencerContext idsCache(Map<String, String> idsCache) {
+        this.idsCache = idsCache;
         return this;
     }
 
