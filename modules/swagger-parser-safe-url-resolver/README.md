@@ -23,19 +23,19 @@ This behavior can also be customized with the allowlist and denylist in the cons
 Add the following to you `pom.xml` file under `dependencies`
 ```xml
 <dependency>
-    <groupId>io.swagger.parser.v3</groupId>
+    <groupId>io.swagger</groupId>
     <artifactId>swagger-parser-safe-url-resolver</artifactId>
     // version of swagger-parser being used
-    <version>2.1.14</version> 
+    <version>${swagger-parser-v1-version}</version> 
 </dependency>
 ```
 
 ## Example usage
 
 ```java
-import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
-import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
-import io.swagger.v3.parser.urlresolver.models.ResolvedUrl;
+import io.swagger.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.parser.urlresolver.exceptions.HostDeniedException;
+import io.swagger.parser.urlresolver.models.ResolvedUrl;
 
 import java.util.List;
 

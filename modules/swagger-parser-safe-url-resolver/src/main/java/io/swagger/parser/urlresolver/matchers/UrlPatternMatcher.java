@@ -1,6 +1,6 @@
-package io.swagger.v3.parser.urlresolver.matchers;
+package io.swagger.parser.urlresolver.matchers;
 
-import io.swagger.v3.parser.urlresolver.utils.NetUtils;
+import io.swagger.parser.urlresolver.utils.NetUtils;
 
 import java.net.IDN;
 import java.net.MalformedURLException;
