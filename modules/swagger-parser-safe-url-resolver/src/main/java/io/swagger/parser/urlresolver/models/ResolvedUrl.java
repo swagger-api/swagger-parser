@@ -1,4 +1,4 @@
-package io.swagger.v3.parser.urlresolver.models;
+package io.swagger.parser.urlresolver.models;
 
 public class ResolvedUrl {
 

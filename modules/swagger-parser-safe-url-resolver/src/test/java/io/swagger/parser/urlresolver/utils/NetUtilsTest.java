@@ -1,4 +1,4 @@
-package io.swagger.v3.parser.urlresolver.utils;
+package io.swagger.parser.urlresolver.utils;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

@@ -14,8 +14,8 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
 import io.swagger.parser.util.*;
-import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
-import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
+import io.swagger.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.parser.urlresolver.exceptions.HostDeniedException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
