@@ -413,10 +413,10 @@
     <properties>
         <maven.compiler.release>8</maven.compiler.release>
         <snakeyaml-version>2.3</snakeyaml-version>
-        <swagger-parser-v2-version>1.0.71</swagger-parser-v2-version>
+        <swagger-parser-v2-version>1.0.72</swagger-parser-v2-version>
         <commons-io-version>2.17.0</commons-io-version>
         <slf4j-version>2.0.9</slf4j-version>
-        <swagger-core-version>2.2.25</swagger-core-version>
+        <swagger-core-version>2.2.26</swagger-core-version>
         <swagger-core-v2-version>1.6.14</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>7.10.2</testng-version>
