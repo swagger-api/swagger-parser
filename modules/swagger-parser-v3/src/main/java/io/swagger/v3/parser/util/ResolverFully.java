@@ -52,6 +52,7 @@ public class ResolverFully {
     private Map<String, Schema> resolvedModels = new HashMap<>();
     private Map<String, Example> examples;
     private Map<String, Parameter> parameters;
+    private Map<String, ApiResponse> responses;
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
     private Map<String, Link> links;
@@ -71,6 +72,13 @@ public class ResolverFully {
             schemas = components.getSchemas();
             if (schemas == null) {
                 schemas = new HashMap<>();
+            }
+        }
+
+        if (components != null && components.getResponses() != null) {
+            responses = components.getResponses();
+            if (responses == null) {
+                responses = new HashMap<>();
             }
         }
 
@@ -178,8 +186,10 @@ public class ResolverFully {
             // responses
             ApiResponses responses = op.getResponses();
             if(responses != null) {
+                ApiResponses resolvedResponses = new ApiResponses();
                 for(String code : responses.keySet()) {
                     ApiResponse response = responses.get(code);
+                    response = response.get$ref() != null ? resolveResponse(response) : response;
                     if (response.getContent() != null) {
                         Map<String, MediaType> content = response.getContent();
                         for(String mediaType: content.keySet()){
@@ -205,7 +215,9 @@ public class ResolverFully {
                             link.setValue(resolvedValue);
                         }
                     }
+                    resolvedResponses.addApiResponse(code, response);
                 }
+                op.setResponses(resolvedResponses);
             }
         }
     }
@@ -272,6 +284,18 @@ public class ResolverFully {
             }
         }
         return requestBody;
+    }
+
+    public ApiResponse resolveResponse(ApiResponse apiResponse){
+        RefFormat refFormat = computeRefFormat(apiResponse.get$ref());
+        String $ref = apiResponse.get$ref();
+        if (!isAnExternalRefFormat(refFormat)){
+            if (responses != null && !responses.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return responses.getOrDefault(referenceKey, apiResponse);
+            }
+        }
+        return apiResponse;
     }
 
     public Callback resolveCallback(Callback callback){

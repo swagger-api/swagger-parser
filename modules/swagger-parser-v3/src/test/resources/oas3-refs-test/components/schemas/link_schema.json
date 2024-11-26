@@ -1,0 +1,136 @@
+{
+    "title": "Link Schema",
+    "description": "The request data or link target.",
+    "type": "object",
+    "properties": {
+        "additionalItems": {
+            "title": "Additional Items",
+            "description": "Any additional items.",
+            "type": "object",
+            "x-redacted": false
+        },
+        "dependencies": {
+            "title": "Dependencies",
+            "description": "The dependencies.",
+            "type": "object",
+            "x-redacted": false
+        },
+        "items": {
+            "title": "Items",
+            "description": "An item.",
+            "type": "object",
+            "x-redacted": false
+        },
+        "definitions": {
+            "title": "Definitions",
+            "description": "The definitions.",
+            "type": "object",
+            "x-redacted": false
+        },
+        "patternProperties": {
+            "title": "Pattern Properties",
+            "description": "The pattern properties.",
+            "type": "object",
+            "x-redacted": false
+        },
+        "properties": {
+            "title": "Properties",
+            "description": "The properties.",
+            "type": "object",
+            "x-redacted": false
+        },
+        "allOf": {
+            "description": "An array of sub-schemas. The data must validate against all sub-schemas.",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10000,
+            "items": {
+                "title": "All Of Item",
+                "description": "A sub-schema against which the data must validate.",
+                "type": "object",
+                "x-redacted": true
+            }
+        },
+        "anyOf": {
+            "description": "An array of sub-schemas. The data must validate against one or more sub-schemas.",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10000,
+            "items": {
+                "title": "Any Of Item",
+                "description": "A sub-schema against which the data must validate.",
+                "type": "object",
+                "x-redacted": true
+            }
+        },
+        "oneOf": {
+            "description": "An array of sub-schemas. The data must validate against one sub-schema.",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10000,
+            "items": {
+                "title": "One Of Item",
+                "description": "A sub-schema against which the data must validate.",
+                "type": "object",
+                "x-redacted": false
+            }
+        },
+        "not": {
+            "title": "Not",
+            "description": "Not.",
+            "type": "object",
+            "x-redacted": false
+        },
+        "links": {
+            "description": "An array of links.",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10000,
+            "items": {
+                "title": "Link",
+                "description": "A link.",
+                "type": "object",
+                "x-redacted": false
+            }
+        },
+        "fragmentResolution": {
+            "description": "The fragment resolution.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000,
+            "pattern":  "^.*$",
+            "x-redacted": false
+        },
+        "media": {
+            "title": "Media",
+            "description": "The media type and context-encoding scheme.",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "description": "The media type. See [Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types](https://tools.ietf.org/html/rfc2046).",
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 255,
+                    "pattern": "^[a-zA-Z\\-/\\.0-9\\+]+$",
+                    "x-redacted": false
+                },
+                "binaryEncoding": {
+                    "description": "The content-encoding scheme. See [Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies](https://tools.ietf.org/html/rfc2045).",
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 255,
+                    "pattern": "^[a-zA-Z\\-/\\.0-9\\+]+$",
+                    "x-redacted": false
+                }
+            }
+        },
+        "pathStart": {
+            "description": "To apply this schema to the instances' URIs, start the URIs with this value.",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000,
+            "format": "uri",
+            "x-redacted": true
+        }
+    }
+}

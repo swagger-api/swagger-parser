@@ -302,6 +302,17 @@ public class ReferenceVisitor extends AbstractVisitor {
     }
 
     public JsonNode parse(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
+        // check if the URL is defined as $id in current document
+        if (context.getIdsCache().containsKey(absoluteUri)) {
+            return deserializeIntoTree(context.getIdsCache().get(absoluteUri));
+        } else {
+            Traverser idsTraverser = new IdsTraverser(context);
+            idsTraverser.traverse(context.getOpenApi(), null);
+            if (context.getIdsCache().containsKey(absoluteUri)) {
+                return deserializeIntoTree(context.getIdsCache().get(absoluteUri));
+            }
+        }
+
         return deserializeIntoTree(readURI(absoluteUri, auths));
     }
 

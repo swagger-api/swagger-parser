@@ -1,0 +1,17 @@
+{
+    "title": "Links",
+    "description": "Resource links.",
+    "type": "array",
+    "minItems": 1,
+    "maxItems": 100,
+    "items": {
+        "allOf": [
+            {
+                "$ref": "../../common_components/v5/schema/json/openapi-3.0/components/schemas/rest/link_description.json"
+            },
+            {
+                "x-redacted": false
+            }
+        ]
+    }
+}

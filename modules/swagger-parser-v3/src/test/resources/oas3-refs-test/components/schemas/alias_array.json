@@ -1,0 +1,15 @@
+{
+  "type": "array",
+  "title": "AdopterAlias",
+  "items": {
+    "allOf": [
+      {
+        "$ref": "full_name.json"
+      },
+      {
+        "description": "The adopter's address.",
+        "x-redacted": true
+      }
+    ]
+  }
+}

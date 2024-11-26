@@ -786,6 +786,17 @@ public class OpenAPI31Traverser implements Traverser {
 
         if (StringUtils.isNotBlank(schema.get$id())) {
             inheritedIds.add(schema.get$id());
+            try {
+                String resolvedURI = visitor.reference.getUri();
+                for (String id : inheritedIds) {
+                    String urlWithoutHash = ReferenceUtils.toBaseURI(id);
+                    resolvedURI = ReferenceUtils.resolve(urlWithoutHash, resolvedURI);
+                    resolvedURI = ReferenceUtils.toBaseURI(resolvedURI);
+                }
+                context.getIdsCache().put(resolvedURI, Json31.pretty(schema));
+            } catch (Exception e) {
+               //
+            }
         }
         Schema resolved = visitor.visitSchema(schema, inheritedIds);
 
@@ -913,6 +924,9 @@ public class OpenAPI31Traverser implements Traverser {
         mergeSchemas(schema, resolved);
         visitedMap.put(schema, deepcopy(resolved, Schema.class));
         visiting.remove(schema);
+        if (StringUtils.isNotBlank(schema.get$id())) {
+            inheritedIds.remove(schema.get$id());
+        }
         return resolved;
 
     }

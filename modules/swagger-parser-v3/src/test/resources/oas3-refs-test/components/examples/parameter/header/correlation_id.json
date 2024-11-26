@@ -1,0 +1,5 @@
+{
+  "summary": "A correlation id.",
+  "description": "A correlation-id header with a randomized id value.",
+  "value": "7758b780aaaca"
+}

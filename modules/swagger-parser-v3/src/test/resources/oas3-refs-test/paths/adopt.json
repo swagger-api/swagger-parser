@@ -1,0 +1,171 @@
+{
+    "post": {
+        "tags": [
+            "pets"
+        ],
+        "summary": "Adopt Pet",
+        "description": "Adopt a pet.",
+        "operationId": "adopt",
+        "x-slo": {
+            "response_time_95th_percentile": 220,
+            "error_rate": 0.004
+        },
+        "parameters": [
+            {
+                "$ref": "../components/parameters/header/adopt/correlation_id.json"
+            }
+        ],
+        "requestBody": {
+            "required": true,
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "anyOf": [
+                            {
+                                "$ref": "../components/schemas/adoption_request_for_bird.json"
+                            },
+                            {
+                                "$ref": "../components/schemas/adoption_request_for_cat.json"
+                            },
+                            {
+                                "$ref": "../components/schemas/adoption_request_for_dog.json"
+                            },
+                            {
+                                "$ref": "../components/schemas/adoption_request_for_fish.json"
+                            },
+                            {
+                                "$ref": "../components/schemas/adoption_request_for_lizard.json"
+                            }
+                        ],
+                        "discriminator": {
+                            "propertyName": "animal_type",
+                            "mapping": {
+                                "BIRD": "../components/schemas/adoption_request_for_bird.json",
+                                "CAT": "../components/schemas/adoption_request_for_cat.json",
+                                "DOG": "../components/schemas/adoption_request_for_dog.json",
+                                "FISH": "../components/schemas/adoption_request_for_fish.json",
+                                "LIZARD": "../components/schemas/adoption_request_for_lizard.json"
+                            }
+                        }
+                    },
+                    "examples": {
+                        "success": {
+                            "summary": "Successful Adoption Request",
+                            "description": "A request for adoption resulting in success.",
+                            "value": {
+                                "pet_id": "d1ef2439-3a70-4d0b-aef0-48a9a485ef95",
+                                "adopter_name": {
+                                    "name": "Suzy McGee"
+                                },
+                                "adopter_alias": [
+                                 "Suzy M"
+                                ],
+                                "adopter_address": {
+                                    "address_line_1": "23 Maple Ave",
+                                    "address_line_2": "Apt 3",
+                                    "admin_area_2": "Bangor",
+                                    "admin_area_1": "ME",
+                                    "postal_code": "04401",
+                                    "country_code": "US"
+                                },
+                                "animal_type": "CAT",
+                                "have_litter_box": true,
+                                "have_scratching_post": false
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "responses": {
+            "204": {
+                "description": "Successful adoption."
+            },
+            "400": {
+                "description": "Bad request.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "../components/schemas/error.json"
+                        },
+                        "examples": {
+                            "missing_pet_id": {
+                                "summary": "Missing required parameter, pet_id.",
+                                "value": {
+                                    "name": "INVALID_REQUEST",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "Request is not well-formed, syntactically incorrect, or violates schema.",
+                                    "details": [
+                                        {
+                                            "field": "/pet_id",
+                                            "location": "body",
+                                            "issue": "MISSING_REQUIRED_PARAMETER",
+                                            "description": "A required field or parameter is missing."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "403": {
+                "$ref": "../openapi.json#/components/responses/403_error_response"
+            },
+            "422": {
+                "description": "Unprocessable entity.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "../components/schemas/error.json"
+                        },
+                        "examples": {
+                            "risk_assessment_deny": {
+                                "summary": "Deny adoption based on risk assessment.",
+                                "value": {
+                                    "name": "UNPROCESSABLE_ENTITY",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The requested action could not be performed, semantically incorrect, or failed business validation.",
+                                    "details": [
+                                        {
+                                            "issue": "RISK_ASSESSMENT_DENY",
+                                            "description": "Risk assessment determined that the requested action is denied."
+                                        }
+                                    ]
+                                }
+                            },
+                            "unknown_pet_id": {
+                                "summary": "Pet with id not found.",
+                                "value": {
+                                    "name": "UNPROCESSABLE_ENTITY",
+                                    "debug_id": "b1d1f06c7246c",
+                                    "message": "The requested action could not be performed, semantically incorrect, or failed business validation.",
+                                    "details": [
+                                        {
+                                            "field": "/pet_id",
+                                            "location": "body",
+                                            "value": "d1ef2439-3a70-4d0b-aef0-48a9a485ef97",
+                                            "issue": "PET_NOT_FOUND",
+                                            "description": "No pet found with the specified id."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "500": {
+                "$ref": "../openapi.json#/components/responses/500_error_response"
+            },
+            "default": {
+                "$ref": "../openapi.json#/components/responses/default_response"
+            }
+        },
+        "callbacks": {
+            "vaccination_complete": {
+                "$ref": "../components/callbacks/pets.id.order-vaccination/post/vaccination_complete.json"
+            }
+        }
+    }
+}

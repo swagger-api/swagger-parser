@@ -1,0 +1,200 @@
+openapi: 3.0.1
+info:
+  title: Example API with Error Responses
+  description: An example API with 4xx responses as references.
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    description: Staging server
+paths:
+  /users:
+    get:
+      summary: Get list of users
+      description: Returns a list of users
+      responses:
+        '200':
+          description: A list of users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Server error
+        '400':
+          $ref: "#/components/responses/BadRequest"
+    post:
+      summary: Create a new user
+      description: Creates a new user in the system
+      requestBody:
+        $ref: "#/components/requestBodies/UserStructure"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /users/{userId}:
+    get:
+      summary: Get a user by ID
+      description: Retrieves a specific user by their ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          description: Server error
+    put:
+      summary: Update a user by ID
+      description: Updates a user's data
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200':
+          description: User updated successfully
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          description: Server error
+    delete:
+      summary: Delete a user by ID
+      description: Deletes a specific user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          description: Server error
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The user's unique ID
+        name:
+          type: string
+          description: The user's name
+        email:
+          type: string
+          description: The user's email address
+        age:
+          type: integer
+          description: The user's age
+      required:
+        - id
+        - name
+        - email
+    UserInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The user's name
+        email:
+          type: string
+          description: The user's email address
+        age:
+          type: integer
+          description: The user's age
+      required:
+        - name
+        - email
+  responses:
+    BadRequest:
+      description: Bad request due to invalid input data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message explaining why the request was invalid
+              code:
+                type: integer
+                description: Error code
+    NotFound:
+      description: The requested resource was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message explaining why the resource was not found
+              code:
+                type: integer
+                description: Error code
+    UnprocessableEntity:
+      description: Request was well-formed but contains invalid data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Explanation of why the request could not be processed
+              code:
+                type: integer
+                description: Error code
+  requestBodies:
+    UserStructure:
+      content:
+        application/json:
+          schema: 
+            type: object
+            properties:
+              name:
+                type: string
+                maxLength: 10
+                minLength: 1
+              surname:
+                type: string
+                maxLength: 10
+                minLength: 1
+          
+    

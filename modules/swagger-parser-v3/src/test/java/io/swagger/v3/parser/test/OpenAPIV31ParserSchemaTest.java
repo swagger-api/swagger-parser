@@ -216,7 +216,6 @@ public class OpenAPIV31ParserSchemaTest {
         compare("$anchor-not-found", swaggerParseResult);
     }
 
-
     public void compare(String dir, SwaggerParseResult result) throws Exception {
         ObjectMapper mapper = Json31.mapper().copy();
         mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);

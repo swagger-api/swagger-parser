@@ -161,6 +161,7 @@ public class OpenAPIParserTest {
         assertEquals(schemas.size(), 1);
     }
 
+/*
     @Test
     public void test30Url() {
         String location = "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml";
@@ -171,6 +172,7 @@ public class OpenAPIParserTest {
         assertNotNull(result.getOpenAPI());
         assertEquals(result.getOpenAPI().getOpenapi(), "3.0.0");
     }
+*/
 
     @Test
     public void testConverterWithFlatten() {

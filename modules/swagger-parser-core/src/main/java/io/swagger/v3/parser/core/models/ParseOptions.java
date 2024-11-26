@@ -15,7 +15,7 @@ public class ParseOptions {
     private boolean validateInternalRefs = true;
     private boolean legacyYamlDeserialization = false;
     private boolean resolveRequestBody = false;
-
+    private boolean resolveResponses = false;
     private boolean oaiAuthor;
     private boolean inferSchemaType = true;
     private boolean safelyResolveURL;
@@ -160,5 +160,13 @@ public class ParseOptions {
 
     public void setRemoteRefBlockList(List<String> remoteRefBlockList) {
         this.remoteRefBlockList = remoteRefBlockList;
+    }
+
+    public boolean isResolveResponses() {
+        return resolveResponses;
+    }
+
+    public void setResolveResponses(boolean resolveResponses) {
+        this.resolveResponses = resolveResponses;
     }
 }
