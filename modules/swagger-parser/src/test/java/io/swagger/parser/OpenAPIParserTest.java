@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
@@ -31,6 +32,22 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNull;
 
 public class OpenAPIParserTest {
+
+    @Test
+    public void testIssue_1599() {
+        OpenAPIParser openAPIParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setFlatten(true);
+        SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("petStore1599.yaml", null, options);
+        assertNotNull(swaggerParseResult.getOpenAPI());
+        OpenAPI openAPI = swaggerParseResult.getOpenAPI();
+        assertTrue(openAPI.getComponents().getSchemas().size() == 5);
+        assertNull(openAPI.getComponents().getSchemas().get("pet_category"));
+        assertNull(openAPI.getComponents().getSchemas().get("pet_body"));
+        assertNull(((Schema)openAPI.getComponents().getSchemas().get("Pet").getProperties().get("category")).get$ref());
+    }
 
     @Test
     public void testNPE_1685() {

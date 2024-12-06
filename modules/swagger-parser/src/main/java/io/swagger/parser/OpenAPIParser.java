@@ -18,7 +18,6 @@ public class OpenAPIParser {
                 return output;
             }
         }
-
         return output;
     }
 
