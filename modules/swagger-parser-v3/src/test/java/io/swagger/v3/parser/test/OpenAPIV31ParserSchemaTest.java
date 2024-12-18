@@ -25,8 +25,6 @@ import java.util.Random;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class OpenAPIV31ParserSchemaTest {
     protected int serverPort = getDynamicPort();
@@ -217,7 +215,6 @@ public class OpenAPIV31ParserSchemaTest {
         SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-not-found/root.json").getAbsolutePath(), null, p);
         compare("$anchor-not-found", swaggerParseResult);
     }
-
 
     public void compare(String dir, SwaggerParseResult result) throws Exception {
         ObjectMapper mapper = Json31.mapper().copy();

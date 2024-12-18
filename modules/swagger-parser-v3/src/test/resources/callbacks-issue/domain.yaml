@@ -32,3 +32,14 @@ components:
           responses:
             '202':
               description: Your server returns this code if it accepts the message it was sent
+  schemas:
+    WebhookVerification:
+      type: string
+  parameters:
+    x-api-key:
+      name: Correlation-Id
+      in: header
+      description: description
+      required: false
+      schema:
+        type: string

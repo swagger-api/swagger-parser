@@ -766,8 +766,9 @@ public class OpenAPIResolverTest {
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        // Added this parseOption to make requestBody inline in the operation resolve processing flow.
+        // Added this parseOption to make requestBody/response inline in the operation resolve processing flow.
         options.setResolveRequestBody(true);
+        options.setResolveResponses(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, null, options).getOpenAPI();
 
@@ -776,7 +777,7 @@ public class OpenAPIResolverTest {
         assertTrue(openAPI.getPaths().get("/resource").getPost().getRequestBody().getContent() != null);
         assertTrue(openAPI.getPaths().get("/resource").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ObjectSchema);
 
-        // Responses are already by default made inline in case referenced.
+        // Responses should be inline
         assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").get$ref() == null);
         assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").getContent() != null);
         assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ObjectSchema);
@@ -1285,6 +1286,8 @@ public class OpenAPIResolverTest {
     @Test(description = "resolve top-level responses")
     public void testSharedResponses() {
         final OpenAPI swagger = new OpenAPI();
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveResponses(true);
         List<Parameter> parameters = new ArrayList<>();
         parameters.add(0,new Parameter().$ref("username"));
         swagger.path("/fun", new PathItem()
@@ -1294,7 +1297,7 @@ public class OpenAPIResolverTest {
 
         swagger.components(new Components().addResponses("foo", new ApiResponse().description("ok!")));
 
-        final OpenAPI resolved = new OpenAPIResolver(swagger, null).resolve();
+        final OpenAPI resolved = new OpenAPIResolver(swagger, null, null, null, parseOptions).resolve();
         ApiResponse response = resolved.getPaths().get("/fun").getGet().getResponses().get("200");
         assertTrue(response.getDescription().equals("ok!"));
         assertTrue(response instanceof ApiResponse);

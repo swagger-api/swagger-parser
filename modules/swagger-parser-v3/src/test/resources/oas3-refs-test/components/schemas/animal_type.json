@@ -1,0 +1,20 @@
+{
+    "title": "Animal Type",
+    "description": "Type of animal.",
+    "type": "string",
+    "enum": [
+        "BIRD",
+        "CAT",
+        "DOG",
+        "FISH",
+        "LIZARD"
+    ],
+    "x-enumDescriptions": {
+        "BIRD": "A warm-blooded egg-laying vertebrate distinguished by the possession of feathers, wings, and a beak and (typically) by being able to fly.",
+        "CAT": "A small domesticated carnivorous mammal with soft fur, a short snout, and retractable claws.",
+        "DOG": "A domesticated carnivorous mammal that typically has a long snout, an acute sense of smell, non-retractable claws, and a barking, howling, or whining voice.",
+        "FISH": "A limbless cold-blooded vertebrate animal with gills and fins and living wholly in water.",
+        "LIZARD": "A reptile that typically has a long body and tail, four legs, movable eyelids, and a rough, scaly, or spiny skin."
+    },
+    "x-redacted": true
+}

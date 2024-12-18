@@ -170,6 +170,7 @@ public class OpenAPIV3ParserTest {
     public void testParametersAndResponsesAsNumbers() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveResponses(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("src/test/resources/parametersAsNumbers/swagger.yaml", null, options);
 
         Assert.assertNotNull(result);
@@ -1214,6 +1215,7 @@ public class OpenAPIV3ParserTest {
     public void testIssue834() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveResponses(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-834/index.yaml", null, options);
         assertNotNull(result.getOpenAPI());
 
@@ -1247,8 +1249,8 @@ public class OpenAPIV3ParserTest {
     public void testIssue811() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveResponses(true);
         final OpenAPI openAPI = new OpenAPIV3Parser().readLocation("oapi-reference-test/index.yaml", null, options).getOpenAPI();
-
         Assert.assertNotNull(openAPI);
         Assert.assertEquals(openAPI.getPaths().get("/").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(),"#/components/schemas/schema-with-reference");
     }
@@ -1940,7 +1942,9 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveResponses(true);
         SwaggerParseResult readResult = parser.readLocation("src/test/resources/relative-issue/api.yaml", null, options);
+        Yaml.prettyPrint(readResult.getOpenAPI());
         Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/scans").getGet().getResponses().get("500").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorMessage");
     }
 
@@ -1949,6 +1953,7 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveResponses(true);
         SwaggerParseResult readResult = parser.readLocation("src/test/resources/codegen-remote-responses/openapi.yaml", null, options);
         Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorModel");
     }
@@ -1957,6 +1962,7 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveResponses(true);
         SwaggerParseResult readResult = parser.readLocation(location, null, options);
 
         if (readResult.getMessages().size() > 0) {
@@ -2769,6 +2775,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
+        options.setResolveResponses(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, auths, options).getOpenAPI();
 
@@ -3297,5 +3304,64 @@ public class OpenAPIV3ParserTest {
         Yaml.prettyPrint(openAPI);
         assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getRequired().size(), 1);
         assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getProperties().size(), 2);
+    }
+
+    @Test(description = "responses should be inline")
+    public void testFullyResolveResponses() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveResponses(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolve-responses-test.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNull(openAPI.getPaths().get("/users").getGet().getResponses().get("400").get$ref());
+        assertNull(openAPI.getPaths().get("/users").getPost().getResponses().get("400").get$ref());
+        assertNull(openAPI.getPaths().get("/users").getPost().getResponses().get("422").get$ref());
+        assertNull(openAPI.getPaths().get("/users/{userId}").getGet().getResponses().get("404").get$ref());
+        assertNull(openAPI.getPaths().get("/users/{userId}").getPut().getResponses().get("400").get$ref());
+        assertNull(openAPI.getPaths().get("/users/{userId}").getPut().getResponses().get("404").get$ref());
+        assertNull(openAPI.getPaths().get("/users/{userId}").getDelete().getResponses().get("400").get$ref());
+        assertNull(openAPI.getPaths().get("/users/{userId}").getDelete().getResponses().get("404").get$ref());
+    }
+
+    @Test(description = "responses should not be inline")
+    public void testResolveResponsesRef() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolve-responses-test.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertEquals(openAPI.getPaths().get("/users").getGet().getResponses().get("400").get$ref(), "#/components/responses/BadRequest");
+        assertEquals(openAPI.getPaths().get("/users").getPost().getResponses().get("400").get$ref(), "#/components/responses/BadRequest");
+        assertEquals(openAPI.getPaths().get("/users").getPost().getResponses().get("422").get$ref(), "#/components/responses/UnprocessableEntity");
+        assertEquals(openAPI.getPaths().get("/users/{userId}").getGet().getResponses().get("404").get$ref(), "#/components/responses/NotFound");
+        assertEquals(openAPI.getPaths().get("/users/{userId}").getPut().getResponses().get("400").get$ref(), "#/components/responses/BadRequest");
+        assertEquals(openAPI.getPaths().get("/users/{userId}").getPut().getResponses().get("404").get$ref(), "#/components/responses/NotFound");
+        assertEquals(openAPI.getPaths().get("/users/{userId}").getDelete().getResponses().get("400").get$ref(), "#/components/responses/BadRequest");
+        assertEquals(openAPI.getPaths().get("/users/{userId}").getDelete().getResponses().get("404").get$ref(), "#/components/responses/NotFound");
+    }
+
+    @Test
+    public void testResolveOASWithFlatten(){
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolve-flatten-SH-configuration-test.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNull(openAPI.getComponents().getSchemas().get("#/components/schemas/inline_response_404"));
+        assertNull(openAPI.getComponents().getSchemas().get("#/components/schemas/inline_response_200"));
+    }
+
+    @Test(description = "responses should be inline with using resolveFully = true")
+    public void testResolveFullyResponses(){
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("resolve-responses-test.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNull(openAPI.getPaths().get("/users").getGet().getResponses().get("400").get$ref());
+
     }
 }

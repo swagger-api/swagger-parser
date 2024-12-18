@@ -272,6 +272,7 @@ public class NetworkReferenceTest {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        options.setResolveResponses(true);
         SwaggerParseResult result = parser.readLocation("http://remote1/resources/swagger.yaml", auths, options);
 
         OpenAPI swagger = result.getOpenAPI();
