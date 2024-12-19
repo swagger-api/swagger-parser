@@ -180,8 +180,9 @@ public class InlineModelResolver {
                           if (existing != null) {
                               am.setItems(new Schema().$ref(existing));
                           } else {
-                              am.setItems(new Schema().$ref(modelName));
+                              am.setItems(new Schema().$ref(modelName + "_inner"));
                               addGenerated(modelName, am);
+                              openAPI.getComponents().addSchemas(modelName+ "_inner", inner);
                               openAPI.getComponents().addSchemas(modelName, am);
                           }
                       }else if (inner instanceof ComposedSchema && this.flattenComposedSchemas){
