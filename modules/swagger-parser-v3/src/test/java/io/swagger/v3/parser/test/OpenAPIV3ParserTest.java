@@ -3303,7 +3303,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertEqualsNoOrder(
             openAPI.getComponents().getSchemas().keySet(),
-            Arrays.asList("ArrayPojo", "Enum1", "Enum1_1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
+            Arrays.asList("ArrayPojo", "Enum1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
                 "TransactionsPatchRequestBody", "additional-properties", "array-pojo", "locale-translation-item",
                 "map-pojo", "set-pojo", "simple-pojo", "translation-item")
         );
