@@ -95,7 +95,7 @@ public final class ExternalRefProcessor {
 
         RefFormat format = computeRefFormat($ref);
         if (format.equals(RefFormat.RELATIVE)) {
-            String normalizedRef = "./" + Paths.get($ref).normalize().toString();
+            String normalizedRef = RefUtils.mungedRef(Paths.get($ref).normalize().toString());
             if (!normalizedRef.equals($ref)) {
                 System.out.println("Normalized " + $ref + " to " + normalizedRef);
                 renamedRef = cache.getRenamedRef($ref);
