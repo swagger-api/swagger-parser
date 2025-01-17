@@ -121,7 +121,7 @@ components:
                 schema:
                   type: array
                   items:
-                    $ref: '#/components/schemas/pet'
+                    $ref: "#/components/schemas/pet"
   parameters:
     User:
       in: query

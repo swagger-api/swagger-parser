@@ -8,7 +8,7 @@ info:
 paths:
   '/buckets/{bucketKey}/details':
     parameters:
-      - $ref: '#/components/parameters/bucketKey'
+      - $ref: "#/components/parameters/bucketKey"
     get:
       operationId: get_bucket_details
       description: test
@@ -17,23 +17,23 @@ paths:
           description: Default response
     responses:
       '200':
-        $ref: '#/components/responses/OK'
+        $ref: "#/components/responses/OK"
   '/buckets/{bucketKey}/objects/{objectName}':
     parameters:
-      - $ref: '#/components/parameters/bucketKey'
-      - $ref: '#/components/parameters/objectName'
+      - $ref: "#/components/parameters/bucketKey"
+      - $ref: "#/components/parameters/objectName"
     put:
       operationId: upload_object
       description: test
       responses:
         '200':
-          $ref: '#/components/responses/OK'
+          $ref: "#/components/responses/OK"
     get:
       operationId: get_object
       description: test
       responses:
         '200':
-          $ref: '#/components/responses/OK'
+          $ref: "#/components/responses/OK"
 components:
   parameters:
     bucketKey:

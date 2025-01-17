@@ -2,7 +2,7 @@ components:
   schemas:
     Pet:
       allOf:
-        - $ref: '#/components/schemas/NewPet'
+        - $ref: "#/components/schemas/NewPet"
         - required:
           - id
           properties:

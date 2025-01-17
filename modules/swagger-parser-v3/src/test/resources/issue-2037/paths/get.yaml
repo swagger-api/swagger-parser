@@ -5,13 +5,13 @@ endpoint:
       content:
         application/json:
           schema:
-            $ref: '#/RequestBodyRef'
+            $ref: "#/RequestBodyRef"
     responses:
       '200':
         content:
           application/json:
             schema:
-              $ref: '#/ResponsesRef'
+              $ref: "#/ResponsesRef"
 
 RequestBodyRef:
   type: string

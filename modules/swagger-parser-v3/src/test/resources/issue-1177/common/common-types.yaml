@@ -8,7 +8,7 @@ components:
     PetsList:
       type: array
       items:
-        $ref: '#/components/schemas/Pet'
+        $ref: "#/components/schemas/Pet"
 
     Pet:
       type: object
@@ -16,7 +16,7 @@ components:
         petType:
           type: string
         breed:
-          $ref: '#/components/schemas/Breed'
+          $ref: "#/components/schemas/Breed"
 
     Breed:
       type: object

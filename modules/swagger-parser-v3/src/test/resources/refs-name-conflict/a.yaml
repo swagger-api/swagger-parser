@@ -15,7 +15,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PersonObj'
+                $ref: "#/components/schemas/PersonObj"
   /oldPerson:
     post:
       summary: Create old person

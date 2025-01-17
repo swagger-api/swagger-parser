@@ -11,7 +11,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Bar'
+                $ref: "#/components/schemas/Bar"
 components:
   schemas:
     Foo:
@@ -25,9 +25,9 @@ components:
         foo1:
           description: An instance of Foo
           allOf:
-            - $ref: '#/components/schemas/Foo'
+            - $ref: "#/components/schemas/Foo"
         foo2:
-          $ref: '#/components/schemas/Foo'
+          $ref: "#/components/schemas/Foo"
     Test:
       oneOf:
         - $ref: "#/components/schemas/Foo"
@@ -65,9 +65,9 @@ components:
             addresses:
               type: array
               items:
-                $ref: '#/components/schemas/address-model'
+                $ref: "#/components/schemas/address-model"
             phones:
               type: array
               items:
-                $ref: '#/components/schemas/phone-model'
-        - $ref: '#/components/schemas/audit-model'
+                $ref: "#/components/schemas/phone-model"
+        - $ref: "#/components/schemas/audit-model"

@@ -203,9 +203,9 @@ components:
           type: string
     DiscriminatorExtension:
       oneOf:
-        - $ref: '#/components/schemas/Cat'
-        - $ref: '#/components/schemas/Dog'
-        - $ref: '#/components/schemas/Lizard'
+        - $ref: "#/components/schemas/Cat"
+        - $ref: "#/components/schemas/Dog"
+        - $ref: "#/components/schemas/Lizard"
       discriminator:
         propertyName: petType
         x-extension: test
@@ -221,5 +221,5 @@ components:
                 schema:
                   type: array
                   items:
-                    $ref: '#/components/schemas/pet'
+                    $ref: "#/components/schemas/pet"
 

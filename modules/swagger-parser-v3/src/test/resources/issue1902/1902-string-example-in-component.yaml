@@ -17,7 +17,7 @@ paths:
           content:
             application/json:
               example:
-                $ref: '#/components/examples/Things'
+                $ref: "#/components/examples/Things"
 
 components:
   examples:

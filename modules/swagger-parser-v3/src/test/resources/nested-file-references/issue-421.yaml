@@ -34,17 +34,17 @@ paths:
       parameters:
         - $ref: './common/issue-421-parms.yaml#/petIdParam'
       requestBody:
-        $ref: '#/components/requestBodies/requestBody'
+        $ref: "#/components/requestBodies/requestBody"
       responses:
         '200':
           description: successful operation
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/ApiResponse"
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/ApiResponse"
         '405':
           description: Invalid input
   /store/order:

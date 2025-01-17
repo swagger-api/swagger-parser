@@ -33,7 +33,7 @@ components:
             errors:
               type: array
               items:
-                $ref: '#/components/schemas/standard_error'
+                $ref: "#/components/schemas/standard_error"
             info:
               type: string
             trace_id:
@@ -54,7 +54,7 @@ components:
     standard_response_res_one:
       type: object
       allOf:
-        - $ref: '#/components/schemas/standard_response_result'
+        - $ref: "#/components/schemas/standard_response_result"
       properties:
         data:
           properties:

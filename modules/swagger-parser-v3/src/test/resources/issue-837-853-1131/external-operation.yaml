@@ -10,7 +10,7 @@ post:
               type: string
         examples:
           testExample:
-            $ref: '#/components/examples/testExample'
+            $ref: "#/components/examples/testExample"
   responses:
     '201':
       description: New guest added to event list
@@ -22,7 +22,7 @@ post:
                 type: string
           examples:
             testExample:
-              $ref: '#/components/examples/testExample'
+              $ref: "#/components/examples/testExample"
 components:
   examples:
     testExample:
