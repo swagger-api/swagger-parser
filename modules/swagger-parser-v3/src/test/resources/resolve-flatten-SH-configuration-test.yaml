@@ -10,9 +10,9 @@ paths:
       operationId: getUsers
       responses:
         '200':
-          $ref: '#/components/responses/SuccessResponse'
+          $ref: "#/components/responses/SuccessResponse"
         '404':
-          $ref: '#/components/responses/NotFoundResponse'
+          $ref: "#/components/responses/NotFoundResponse"
 
 components:
   responses:

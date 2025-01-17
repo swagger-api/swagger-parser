@@ -29,7 +29,7 @@ paths:
           description: Type of NF
           required: false
           schema:
-            $ref: '#/components/schemas/NFType'
+            $ref: "#/components/schemas/NFType"
         - name: limit
           in: query
           description: How many items to return at one time
@@ -128,7 +128,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NFProfile'
+                $ref: "#/components/schemas/NFProfile"
         '400':
           $ref: 'TS29571_CommonData.yaml#/components/responses/400'
         '401':
@@ -176,7 +176,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NFProfile'
+              $ref: "#/components/schemas/NFProfile"
         required: true
       responses:
         '200':
@@ -184,7 +184,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NFProfile'
+                $ref: "#/components/schemas/NFProfile"
           headers:
             Accept-Encoding:
               description: Accept-Encoding, described in IETF RFC 7694
@@ -195,7 +195,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NFProfile'
+                $ref: "#/components/schemas/NFProfile"
           headers:
             Location:
               description: 'Contains the URI of the newly created resource, according to the structure: {apiRoot}/nnrf-nfm/v1/nf-instances/{nfInstanceId}'
@@ -257,7 +257,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NFProfile'
+                $ref: "#/components/schemas/NFProfile"
         '204':
           description: Expected response with empty body
         '400':
@@ -327,7 +327,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SubscriptionData'
+              $ref: "#/components/schemas/SubscriptionData"
         required: true
       responses:
         '201':
@@ -335,7 +335,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SubscriptionData'
+                $ref: "#/components/schemas/SubscriptionData"
           headers:
             Location:
               description: 'Contains the URI of the newly created resource, according to the structure: {apiRoot}/nnrf-nfm/v1/subscriptions/{subscriptionId}'
@@ -375,7 +375,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: '#/components/schemas/NotificationData'
+                      $ref: "#/components/schemas/NotificationData"
               responses:
                 '204':
                   description: Expected response to a successful callback processing
@@ -431,7 +431,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SubscriptionData'
+                $ref: "#/components/schemas/SubscriptionData"
         '204':
           description: No Content
         '400':
@@ -522,9 +522,9 @@ components:
         nfInstanceName:
           type: string
         nfType:
-          $ref: '#/components/schemas/NFType'
+          $ref: "#/components/schemas/NFType"
         nfStatus:
-          $ref: '#/components/schemas/NFStatus'
+          $ref: "#/components/schemas/NFStatus"
         heartBeatTimer:
           type: integer
         plmnList:
@@ -545,7 +545,7 @@ components:
         perPlmnSnssaiList:
           type: array
           items:
-            $ref: '#/components/schemas/PlmnSnssai'
+            $ref: "#/components/schemas/PlmnSnssai"
           minItems: 1
         nsiList:
           type: array
@@ -553,9 +553,9 @@ components:
             type: string
           minItems: 1
         fqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
         interPlmnFqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
         ipv4Addresses:
           type: array
           items:
@@ -579,7 +579,7 @@ components:
         allowedNfTypes:
           type: array
           items:
-            $ref: '#/components/schemas/NFType'
+            $ref: "#/components/schemas/NFType"
           minItems: 1
         allowedNfDomains:
           type: array
@@ -606,78 +606,78 @@ components:
         locality:
           type: string
         udrInfo:
-          $ref: '#/components/schemas/UdrInfo'
+          $ref: "#/components/schemas/UdrInfo"
         udrInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/UdrInfo'
+            $ref: "#/components/schemas/UdrInfo"
           minItems: 1
         udmInfo:
-          $ref: '#/components/schemas/UdmInfo'
+          $ref: "#/components/schemas/UdmInfo"
         udmInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/UdmInfo'
+            $ref: "#/components/schemas/UdmInfo"
           minItems: 1
         ausfInfo:
-          $ref: '#/components/schemas/AusfInfo'
+          $ref: "#/components/schemas/AusfInfo"
         ausfInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/AusfInfo'
+            $ref: "#/components/schemas/AusfInfo"
           minItems: 1
         amfInfo:
-          $ref: '#/components/schemas/AmfInfo'
+          $ref: "#/components/schemas/AmfInfo"
         amfInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/AmfInfo'
+            $ref: "#/components/schemas/AmfInfo"
           minItems: 1
         smfInfo:
-          $ref: '#/components/schemas/SmfInfo'
+          $ref: "#/components/schemas/SmfInfo"
         smfInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/SmfInfo'
+            $ref: "#/components/schemas/SmfInfo"
           minItems: 1
         upfInfo:
-          $ref: '#/components/schemas/UpfInfo'
+          $ref: "#/components/schemas/UpfInfo"
         upfInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/UpfInfo'
+            $ref: "#/components/schemas/UpfInfo"
           minItems: 1
         pcfInfo:
-          $ref: '#/components/schemas/PcfInfo'
+          $ref: "#/components/schemas/PcfInfo"
         pcfInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/PcfInfo'
+            $ref: "#/components/schemas/PcfInfo"
           minItems: 1
         bsfInfo:
-          $ref: '#/components/schemas/BsfInfo'
+          $ref: "#/components/schemas/BsfInfo"
         bsfInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/BsfInfo'
+            $ref: "#/components/schemas/BsfInfo"
           minItems: 1
         chfInfo:
-          $ref: '#/components/schemas/ChfInfo'
+          $ref: "#/components/schemas/ChfInfo"
         chfInfoExt:
           type: array
           items:
-            $ref: '#/components/schemas/ChfInfo'
+            $ref: "#/components/schemas/ChfInfo"
           minItems: 1
         nefInfo:
-          $ref: '#/components/schemas/NefInfo'
+          $ref: "#/components/schemas/NefInfo"
         nrfInfo:
-          $ref: '#/components/schemas/NrfInfo'
+          $ref: "#/components/schemas/NrfInfo"
         nwdafInfo:
-          $ref: '#/components/schemas/NwdafInfo'
+          $ref: "#/components/schemas/NwdafInfo"
         pcscfInfo:
           type: array
           items:
-            $ref: '#/components/schemas/PcscfInfo'
+            $ref: "#/components/schemas/PcscfInfo"
           minItems: 1
         customInfo:
           type: object
@@ -689,7 +689,7 @@ components:
         nfServices:
           type: array
           items:
-            $ref: '#/components/schemas/NFService'
+            $ref: "#/components/schemas/NFService"
           minItems: 1
         nfProfileChangesSupportInd:
           type: boolean
@@ -702,11 +702,11 @@ components:
         defaultNotificationSubscriptions:
           type: array
           items:
-            $ref: '#/components/schemas/DefaultNotificationSubscription'
+            $ref: "#/components/schemas/DefaultNotificationSubscription"
         lmfInfo:
-          $ref: '#/components/schemas/LmfInfo'
+          $ref: "#/components/schemas/LmfInfo"
         gmlcInfo:
-          $ref: '#/components/schemas/GmlcInfo'
+          $ref: "#/components/schemas/GmlcInfo"
         nfSetIdList:
           type: array
           items:
@@ -724,31 +724,31 @@ components:
         serviceInstanceId:
           type: string
         serviceName:
-          $ref: '#/components/schemas/ServiceName'
+          $ref: "#/components/schemas/ServiceName"
         versions:
           type: array
           items:
-            $ref: '#/components/schemas/NFServiceVersion'
+            $ref: "#/components/schemas/NFServiceVersion"
           minItems: 1
         scheme:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/UriScheme'
         nfServiceStatus:
-          $ref: '#/components/schemas/NFServiceStatus'
+          $ref: "#/components/schemas/NFServiceStatus"
         fqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
         interPlmnFqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
         ipEndPoints:
           type: array
           items:
-            $ref: '#/components/schemas/IpEndPoint'
+            $ref: "#/components/schemas/IpEndPoint"
           minItems: 1
         apiPrefix:
           type: string
         defaultNotificationSubscriptions:
           type: array
           items:
-            $ref: '#/components/schemas/DefaultNotificationSubscription'
+            $ref: "#/components/schemas/DefaultNotificationSubscription"
           minItems: 1
         allowedPlmns:
           type: array
@@ -763,7 +763,7 @@ components:
         allowedNfTypes:
           type: array
           items:
-            $ref: '#/components/schemas/NFType'
+            $ref: "#/components/schemas/NFType"
           minItems: 1
         allowedNfDomains:
           type: array
@@ -790,7 +790,7 @@ components:
         recoveryTime:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
         chfServiceInfo:
-          $ref: '#/components/schemas/ChfServiceInfo'
+          $ref: "#/components/schemas/ChfServiceInfo"
         supportedFeatures:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
         nfServiceSetIdList:
@@ -836,7 +836,7 @@ components:
         ipv6Address:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv6Addr'
         transport:
-          $ref: '#/components/schemas/TransportProtocol'
+          $ref: "#/components/schemas/TransportProtocol"
         port:
           type: integer
           minimum: 0
@@ -853,15 +853,15 @@ components:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         subscrCond:
           oneOf:
-            - $ref: '#/components/schemas/NfInstanceIdCond'
-            - $ref: '#/components/schemas/NfTypeCond'
-            - $ref: '#/components/schemas/ServiceNameCond'
-            - $ref: '#/components/schemas/AmfCond'
-            - $ref: '#/components/schemas/GuamiListCond'
-            - $ref: '#/components/schemas/NetworkSliceCond'
-            - $ref: '#/components/schemas/NfGroupCond'
-            - $ref: '#/components/schemas/NfSetCond'
-            - $ref: '#/components/schemas/NfServiceSetCond'
+            - $ref: "#/components/schemas/NfInstanceIdCond"
+            - $ref: "#/components/schemas/NfTypeCond"
+            - $ref: "#/components/schemas/ServiceNameCond"
+            - $ref: "#/components/schemas/AmfCond"
+            - $ref: "#/components/schemas/GuamiListCond"
+            - $ref: "#/components/schemas/NetworkSliceCond"
+            - $ref: "#/components/schemas/NfGroupCond"
+            - $ref: "#/components/schemas/NfSetCond"
+            - $ref: "#/components/schemas/NfServiceSetCond"
         subscriptionId:
           type: string
           pattern: '^([0-9]{5,6}-)?[^-]+$'
@@ -871,18 +871,18 @@ components:
         reqNotifEvents:
           type: array
           items:
-            $ref: '#/components/schemas/NotificationEventType'
+            $ref: "#/components/schemas/NotificationEventType"
           minItems: 1
         plmnId:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/PlmnId'
         nid:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/Nid'
         notifCondition:
-           $ref: '#/components/schemas/NotifCondition'
+           $ref: "#/components/schemas/NotifCondition"
         reqNfType:
-          $ref: '#/components/schemas/NFType'
+          $ref: "#/components/schemas/NFType"
         reqNfFqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
         reqSnssais:
           type: array
           items:
@@ -908,14 +908,14 @@ components:
         required: [ nfGroupId ]
       properties:
         nfType:
-          $ref: '#/components/schemas/NFType'
+          $ref: "#/components/schemas/NFType"
     ServiceNameCond:
       type: object
       required:
         - serviceName
       properties:
         serviceName:
-          $ref: '#/components/schemas/ServiceName'
+          $ref: "#/components/schemas/ServiceName"
     AmfCond:
       type: object
       anyOf:
@@ -986,22 +986,22 @@ components:
         supiRanges:
           type: array
           items:
-            $ref: '#/components/schemas/SupiRange'
+            $ref: "#/components/schemas/SupiRange"
           minItems: 1
         gpsiRanges:
           type: array
           items:
-            $ref: '#/components/schemas/IdentityRange'
+            $ref: "#/components/schemas/IdentityRange"
           minItems: 1
         externalGroupIdentifiersRanges:
           type: array
           items:
-            $ref: '#/components/schemas/IdentityRange'
+            $ref: "#/components/schemas/IdentityRange"
           minItems: 1
         supportedDataSets:
           type: array
           items:
-            $ref: '#/components/schemas/DataSetId'
+            $ref: "#/components/schemas/DataSetId"
           minItems: 1
     SupiRange:
       type: object
@@ -1042,17 +1042,17 @@ components:
         supiRanges:
           type: array
           items:
-            $ref: '#/components/schemas/SupiRange'
+            $ref: "#/components/schemas/SupiRange"
           minItems: 1
         gpsiRanges:
           type: array
           items:
-            $ref: '#/components/schemas/IdentityRange'
+            $ref: "#/components/schemas/IdentityRange"
           minItems: 1
         externalGroupIdentifiersRanges:
           type: array
           items:
-            $ref: '#/components/schemas/IdentityRange'
+            $ref: "#/components/schemas/IdentityRange"
           minItems: 1
         routingIndicators:
           type: array
@@ -1068,7 +1068,7 @@ components:
         supiRanges:
           type: array
           items:
-            $ref: '#/components/schemas/SupiRange'
+            $ref: "#/components/schemas/SupiRange"
           minItems: 1
         routingIndicators:
           type: array
@@ -1100,7 +1100,7 @@ components:
         taiRangeList:
           type: array
           items:
-            $ref: '#/components/schemas/TaiRange'
+            $ref: "#/components/schemas/TaiRange"
           minItems: 1
         backupInfoAmfFailure:
           type: array
@@ -1113,7 +1113,7 @@ components:
             $ref: 'TS29571_CommonData.yaml#/components/schemas/Guami'
           minItems: 1
         n2InterfaceAmfInfo:
-          $ref: '#/components/schemas/N2InterfaceAmfInfo'
+          $ref: "#/components/schemas/N2InterfaceAmfInfo"
     SmfInfo:
       type: object
       required:
@@ -1122,7 +1122,7 @@ components:
         sNssaiSmfInfoList:
           type: array
           items:
-            $ref: '#/components/schemas/SnssaiSmfInfoItem'
+            $ref: "#/components/schemas/SnssaiSmfInfoItem"
           minItems: 1
         taiList:
           type: array
@@ -1132,10 +1132,10 @@ components:
         taiRangeList:
           type: array
           items:
-            $ref: '#/components/schemas/TaiRange'
+            $ref: "#/components/schemas/TaiRange"
           minItems: 1
         pgwFqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
         accessType:
           type: array
           items:
@@ -1152,7 +1152,7 @@ components:
         dnnSmfInfoList:
           type: array
           items:
-            $ref: '#/components/schemas/DnnSmfInfoItem'
+            $ref: "#/components/schemas/DnnSmfInfoItem"
           minItems: 1
     DnnSmfInfoItem:
       type: object
@@ -1169,7 +1169,7 @@ components:
         sNssaiUpfInfoList:
           type: array
           items:
-            $ref: '#/components/schemas/SnssaiUpfInfoItem'
+            $ref: "#/components/schemas/SnssaiUpfInfoItem"
           minItems: 1
         smfServingArea:
           type: array
@@ -1179,7 +1179,7 @@ components:
         interfaceUpfInfoList:
           type: array
           items:
-            $ref: '#/components/schemas/InterfaceUpfInfoItem'
+            $ref: "#/components/schemas/InterfaceUpfInfoItem"
           minItems: 1
         iwkEpsInd:
           type: boolean
@@ -1200,9 +1200,9 @@ components:
             $ref: 'TS29571_CommonData.yaml#/components/schemas/Tai'
           minItems: 1
         wAgfInfo:
-          $ref: '#/components/schemas/WAgfInfo'
+          $ref: "#/components/schemas/WAgfInfo"
         tngfInfo:
-          $ref: '#/components/schemas/TngfInfo'
+          $ref: "#/components/schemas/TngfInfo"
     SnssaiUpfInfoItem:
       type: object
       required:
@@ -1214,7 +1214,7 @@ components:
         dnnUpfInfoList:
           type: array
           items:
-            $ref: '#/components/schemas/DnnUpfInfoItem'
+            $ref: "#/components/schemas/DnnUpfInfoItem"
           minItems: 1
     DnnUpfInfoItem:
       type: object
@@ -1236,12 +1236,12 @@ components:
         ipv4AddressRanges:
           type: array
           items:
-            $ref: '#/components/schemas/Ipv4AddressRange'
+            $ref: "#/components/schemas/Ipv4AddressRange"
           minItems: 1
         ipv6PrefixRanges:
           type: array
           items:
-            $ref: '#/components/schemas/Ipv6PrefixRange'
+            $ref: "#/components/schemas/Ipv6PrefixRange"
           minItems: 1
     InterfaceUpfInfoItem:
       type: object
@@ -1249,7 +1249,7 @@ components:
         - interfaceType
       properties:
         interfaceType:
-          $ref: '#/components/schemas/UPInterfaceType'
+          $ref: "#/components/schemas/UPInterfaceType"
         ipv4EndpointAddresses:
           type: array
           items:
@@ -1261,7 +1261,7 @@ components:
             $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv6Addr'
           minItems: 1
         endpointFqdn:
-            $ref: '#/components/schemas/Fqdn'
+            $ref: "#/components/schemas/Fqdn"
         networkInstance:
           type: string
     UPInterfaceType:
@@ -1286,7 +1286,7 @@ components:
             $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv6Addr'
           minItems: 1
         endpointFqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
     TngfInfo:
       type: object
       properties:
@@ -1301,7 +1301,7 @@ components:
             $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv6Addr'
           minItems: 1
         endpointFqdn:
-          $ref: '#/components/schemas/Fqdn'
+          $ref: "#/components/schemas/Fqdn"
     PcfInfo:
       type: object
       properties:
@@ -1315,12 +1315,12 @@ components:
         supiRanges:
           type: array
           items:
-            $ref: '#/components/schemas/SupiRange'
+            $ref: "#/components/schemas/SupiRange"
           minItems: 1
         gpsiRanges:
           type: array
           items:
-            $ref: '#/components/schemas/IdentityRange'
+            $ref: "#/components/schemas/IdentityRange"
           minItems: 1
         rxDiamHost:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/DiameterIdentity'
@@ -1342,12 +1342,12 @@ components:
         ipv4AddressRanges:
           type: array
           items:
-            $ref: '#/components/schemas/Ipv4AddressRange'
+            $ref: "#/components/schemas/Ipv4AddressRange"
           minItems: 1
         ipv6PrefixRanges:
           type: array
           items:
-            $ref: '#/components/schemas/Ipv6PrefixRange'
+            $ref: "#/components/schemas/Ipv6PrefixRange"
           minItems: 1
     ChfInfo:
       type: object
@@ -1355,17 +1355,17 @@ components:
         supiRangeList:
           type: array
           items:
-            $ref: '#/components/schemas/SupiRange'
+            $ref: "#/components/schemas/SupiRange"
           minItems: 1
         gpsiRangeList:
           type: array
           items:
-            $ref: '#/components/schemas/IdentityRange'
+            $ref: "#/components/schemas/IdentityRange"
           minItems: 1
         plmnRangeList:
           type: array
           items:
-            $ref: '#/components/schemas/PlmnRange'
+            $ref: "#/components/schemas/PlmnRange"
           minItems: 1
     Ipv4AddressRange:
       type: object
@@ -1388,7 +1388,7 @@ components:
         - callbackUri
       properties:
         notificationType:
-          $ref: '#/components/schemas/NotificationType'
+          $ref: "#/components/schemas/NotificationType"
         callbackUri:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
         n1MessageClass:
@@ -1467,12 +1467,12 @@ components:
           - required: [ nfProfile ]
       properties:
         event:
-          $ref: '#/components/schemas/NotificationEventType'
+          $ref: "#/components/schemas/NotificationEventType"
         nfInstanceUri:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
         nfProfile:
           allOf:
-            - $ref: '#/components/schemas/NFProfile'
+            - $ref: "#/components/schemas/NFProfile"
             - not:
                 required: [ interPlmnFqdn ]
             - not:
@@ -1488,7 +1488,7 @@ components:
                   type: array
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/NFService'
+                      - $ref: "#/components/schemas/NFService"
                       - not:
                           required: [ interPlmnFqdn ]
                       - not:
@@ -1598,7 +1598,7 @@ components:
         tacRangeList:
           type: array
           items:
-            $ref: '#/components/schemas/TacRange'
+            $ref: "#/components/schemas/TacRange"
           minItems: 1
         nid:
           $ref: 'TS29571_CommonData.yaml#/components/schemas/Nid'
@@ -1639,62 +1639,62 @@ components:
         servedUdrInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/UdrInfo'
+            $ref: "#/components/schemas/UdrInfo"
           minProperties: 1
         servedUdmInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/UdmInfo'
+            $ref: "#/components/schemas/UdmInfo"
           minProperties: 1
         servedAusfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/AusfInfo'
+            $ref: "#/components/schemas/AusfInfo"
           minProperties: 1
         servedAmfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/AmfInfo'
+            $ref: "#/components/schemas/AmfInfo"
           minProperties: 1
         servedSmfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/SmfInfo'
+            $ref: "#/components/schemas/SmfInfo"
           minProperties: 1
         servedUpfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/UpfInfo'
+            $ref: "#/components/schemas/UpfInfo"
           minProperties: 1
         servedPcfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/PcfInfo'
+            $ref: "#/components/schemas/PcfInfo"
           minProperties: 1
         servedBsfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/BsfInfo'
+            $ref: "#/components/schemas/BsfInfo"
           minProperties: 1
         servedChfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/ChfInfo'
+            $ref: "#/components/schemas/ChfInfo"
           minProperties: 1
         servedNefInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/NefInfo'
+            $ref: "#/components/schemas/NefInfo"
           minProperties: 1
         servedNwdafInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/NwdafInfo'
+            $ref: "#/components/schemas/NwdafInfo"
           minProperties: 1
         servedPcscfInfo:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/PcscfInfo'
+            $ref: "#/components/schemas/PcscfInfo"
           minProperties: 1
     PlmnSnssai:
       type: object
@@ -1715,9 +1715,9 @@ components:
       type: object
       properties:
         pfdData:
-          $ref: '#/components/schemas/PfdData'
+          $ref: "#/components/schemas/PfdData"
         afEeData:
-          $ref: '#/components/schemas/AfEventExposureData'
+          $ref: "#/components/schemas/AfEventExposureData"
     PfdData:
       type: object
       properties:
@@ -1752,7 +1752,7 @@ components:
         taiRangeList:
           type: array
           items:
-            $ref: '#/components/schemas/TaiRange'
+            $ref: "#/components/schemas/TaiRange"
           minItems: 1
     LmfInfo:
       type: object

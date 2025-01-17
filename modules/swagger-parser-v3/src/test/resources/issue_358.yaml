@@ -19,7 +19,7 @@ paths:
         default:
           description: OK
     parameters:
-      - $ref: '#/components/parameters/pathParam'
+      - $ref: "#/components/parameters/pathParam"
 components:
   parameters:
     pathParam:

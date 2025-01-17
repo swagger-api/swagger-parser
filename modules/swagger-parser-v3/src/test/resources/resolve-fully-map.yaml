@@ -17,7 +17,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MyModelMap'
+                $ref: "#/components/schemas/MyModelMap"
 components:
   schemas:
     MyModel:

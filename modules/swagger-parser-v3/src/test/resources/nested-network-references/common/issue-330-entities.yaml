@@ -6,7 +6,7 @@ components:
         street:
           type: string
         phone:
-          $ref: '#/components/schemas/Phone'
+          $ref: "#/components/schemas/Phone"
     Phone:
       title: the phone number
       type: string

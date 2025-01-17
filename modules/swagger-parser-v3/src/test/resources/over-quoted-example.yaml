@@ -11,7 +11,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CustomerType'
+                $ref: "#/components/schemas/CustomerType"
 info:
   version: ''
   title: ''

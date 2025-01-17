@@ -23,14 +23,14 @@ paths:
           schema:
             type: integer
       requestBody:
-        $ref: '#/components/requestBodies/TrazabilidadBodyRequest'
+        $ref: "#/components/requestBodies/TrazabilidadBodyRequest"
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BodyOutResponse'
+                $ref: "#/components/schemas/BodyOutResponse"
         '400':
           $ref: >-
             exceptions.yml#/components/responses/400
@@ -47,7 +47,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/TrazabilidadBodyRequest'
+            $ref: "#/components/schemas/TrazabilidadBodyRequest"
       description: body request
       required: true
   schemas:

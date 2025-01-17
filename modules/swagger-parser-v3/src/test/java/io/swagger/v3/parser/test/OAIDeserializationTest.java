@@ -109,10 +109,10 @@ public class OAIDeserializationTest {
         //         content:
         //           application/json:
         //             schema:
-        //               $ref: '#/components/schemas/ThingRequest'
+        //               $ref: \"#/components/schemas/ThingRequest\"
         //       responses:
         //         "401":
-        //           $ref: '#/components/responses/ErrorObj'
+        //           $ref: \"#/components/responses/ErrorObj\"
         //         default:
         //           description: Default response is just a string
         //           content:
@@ -126,7 +126,7 @@ public class OAIDeserializationTest {
         //       content:
         //         application/json:
         //           schema:
-        //             $ref: '#/components/schemas/NotAddedYet'
+        //             $ref: \"#/components/schemas/NotAddedYet\"
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);

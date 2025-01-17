@@ -48,7 +48,7 @@ public class AnchorTest {
                 "          content:\n" +
                 "            '*/*':\n" +
                 "              schema:\n" +
-                "                $ref: '#/components/schemas/OperationType'\n" +
+                "                $ref: \"#/components/schemas/OperationType\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    OperationType:\n" +

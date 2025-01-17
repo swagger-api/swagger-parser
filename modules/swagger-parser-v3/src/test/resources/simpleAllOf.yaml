@@ -10,8 +10,8 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/FirstType'
-                - $ref: '#/components/schemas/SecondType'
+                - $ref: "#/components/schemas/FirstType"
+                - $ref: "#/components/schemas/SecondType"
   /bar:
     get:
       responses:
@@ -20,8 +20,8 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/FirstType'
-                - $ref: '#/components/schemas/SecondType'
+                - $ref: "#/components/schemas/FirstType"
+                - $ref: "#/components/schemas/SecondType"
                 example:
                   someProperty: ABC
                   someOtherProperty: 42

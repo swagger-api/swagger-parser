@@ -325,7 +325,7 @@ public class OpenAPIV3ParserTest {
                 "          content:\n" +
                 "            application/json:\n" +
                 "              schema:\n" +
-                "                $ref: '#/components/schemas/Person'\n" +
+                "                $ref: \"#/components/schemas/Person\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    Person:\n" +
@@ -336,7 +336,7 @@ public class OpenAPIV3ParserTest {
                 "        name:\n" +
                 "          type: string\n" +
                 "        employee:\n" +
-                "          $ref: '#/components/schemas/Employee'";
+                "          $ref: \"#/components/schemas/Employee\"";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1643, null, options);
 
         Assert.assertNotNull(result);
@@ -369,7 +369,7 @@ public class OpenAPIV3ParserTest {
                 "          content:\n" +
                 "            application/json:\n" +
                 "              schema:\n" +
-                "                $ref: '#/components/schemas/Person'\n" +
+                "                $ref: \"#/components/schemas/Person\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    Person:\n" +
@@ -380,7 +380,7 @@ public class OpenAPIV3ParserTest {
                 "        name:\n" +
                 "          type: string\n" +
                 "        employee:\n" +
-                "          $ref: '#/components/schemas/Employee'";
+                "          $ref: \"#/components/schemas/Employee\"";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(issue1643, null, options);
 
         Assert.assertNotNull(result);
@@ -1428,7 +1428,7 @@ public class OpenAPIV3ParserTest {
                 "        200:\n" +
                 "          description: OK\n" +
                 "  /foo2:\n" +
-                "    $ref: '#/paths/~1foo'";
+                "    $ref: \"#/paths/~1foo\"";
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         OpenAPI openAPI = (parser.readContents(yaml,null,null)).getOpenAPI();
@@ -1515,14 +1515,14 @@ public class OpenAPIV3ParserTest {
                         "paths:\n" +
                         "  /reports/{id}:\n" +
                         "    parameters:\n" +
-                        "        - $ref: '#/parameters/report-id'\n" +
+                        "        - $ref: \"#/parameters/report-id\"\n" +
                         "    put:\n" +
                         "      parameters:\n" +
                         "        - name: id\n" +
                         "          in: body\n" +
                         "          required: true\n" +
                         "          schema:\n" +
-                        "            $ref: '#/components/schemas/report'\n" +
+                        "            $ref: \"#/components/schemas/report\"\n" +
                         "      responses:\n" +
                         "        200:\n" +
                         "          description: ok\n" +
@@ -1552,7 +1552,7 @@ public class OpenAPIV3ParserTest {
                         "paths:\n" +
                         "  '/foos/{id}':\n" +
                         "    parameters:\n" +
-                        "      - $ref: '#/components/parameters/foo-id'\n" +
+                        "      - $ref: \"#/components/parameters/foo-id\"\n" +
                         "    get:\n" +
                         "      responses:\n" +
                         "        '200':\n" +
@@ -1560,7 +1560,7 @@ public class OpenAPIV3ParserTest {
                         "          content:\n" +
                         "            '*/*':\n" +
                         "              schema:\n" +
-                        "                $ref: '#/components/schemas/foo'\n" +
+                        "                $ref: \"#/components/schemas/foo\"\n" +
                         "    put:\n" +
                         "      responses:\n" +
                         "        '200':\n" +
@@ -1568,12 +1568,12 @@ public class OpenAPIV3ParserTest {
                         "          content:\n" +
                         "            '*/*':\n" +
                         "              schema:\n" +
-                        "                $ref: '#/components/schemas/foo'\n" +
+                        "                $ref: \"#/components/schemas/foo\"\n" +
                         "      requestBody:\n" +
                         "        content:\n" +
                         "          application/json:\n" +
                         "            schema:\n" +
-                        "              $ref: '#/components/schemas/foo'\n" +
+                        "              $ref: \"#/components/schemas/foo\"\n" +
                         "        required: true\n" +
                         "components:\n" +
                         "  parameters:\n" +
@@ -2105,7 +2105,7 @@ public class OpenAPIV3ParserTest {
                 "      '200':\n" +
                 "        description: OK\n" +
                 "        schema: null\n" +
-                "        $ref: '#/components/schemas/Content'\n" +
+                "        $ref: \"#/components/schemas/Content\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    Content:\n" +
@@ -2141,7 +2141,7 @@ public class OpenAPIV3ParserTest {
                 "          content:\n" +
                 "            '*/*':\n" +
                 "              schema:\n" +
-                "                $ref: '#/components/schemas/Content'\n" +
+                "                $ref: \"#/components/schemas/Content\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    Content:\n" +
@@ -2174,8 +2174,8 @@ public class OpenAPIV3ParserTest {
                 "            The account could not be created because a credential didn't meet\n" +
                 "            the complexity requirements.\n" +
                 "          x-error-refs:\n" +
-                "            - $ref: '#/x-error-defs/credentialTooShort'\n" +
-                "            - $ref: '#/x-error-defs/credentialTooLong'\n" +
+                "            - $ref: \"#/x-error-defs/credentialTooShort\"\n" +
+                "            - $ref: \"#/x-error-defs/credentialTooLong\"\n" +
                 "x-error-defs:\n" +
                 "  credentialTooShort:\n" +
                 "    errorID: credentialTooShort";
@@ -2270,19 +2270,19 @@ public class OpenAPIV3ParserTest {
                         "    post:\n" +
                         "      responses:\n" +
                         "        '200':\n" +
-                        "          $ref: '#/components/schemas/Schema'\n" +
+                        "          $ref: \"#/components/schemas/Schema\"\n" +
                         "        '400':\n" +
                         "          definitions: this is right\n" +
                         "          description: Bad Request\n" +
                         "          content:\n" +
                         "            '*/*':\n" +
                         "              schema:\n" +
-                        "                $ref: '#/components/schemas/Schema'\n" +
+                        "                $ref: \"#/components/schemas/Schema\"\n" +
                         "      requestBody:\n" +
                         "        content:\n" +
                         "          application/json:\n" +
                         "            schema:\n" +
-                        "              $ref: '#/components/schemas/Schema'\n" +
+                        "              $ref: \"#/components/schemas/Schema\"\n" +
                         "        required: true\n" +
                         "info:\n" +
                         "  version: ''\n" +
@@ -2311,7 +2311,7 @@ public class OpenAPIV3ParserTest {
                         "          content:\n" +
                         "            '*/*':\n" +
                         "              schema:\n" +
-                        "                $ref: '#/components/schemas/Simple'\n" +
+                        "                $ref: \"#/components/schemas/Simple\"\n" +
                         "components:\n" +
                         "  schemas:\n" +
                         "    Simple:\n" +
@@ -2373,7 +2373,7 @@ public class OpenAPIV3ParserTest {
                         "    PetArray:\n" +
                         "      type: array\n" +
                         "      items:\n" +
-                        "        $ref: '#/components/schemas/Pet'\n" +
+                        "        $ref: \"#/components/schemas/Pet\"\n" +
                         "      description: An array of Pets\n" +
                         "      x-my-tag: An extension tag\n" +
                         "    Pet:\n" +

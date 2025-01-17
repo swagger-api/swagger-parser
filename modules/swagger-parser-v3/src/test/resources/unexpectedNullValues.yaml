@@ -23,7 +23,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DatasetDetail'
+                $ref: "#/components/schemas/DatasetDetail"
               examples:
                 123:
                   value:
@@ -38,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Errors'
+                $ref: "#/components/schemas/Errors"
   /verify:
     post:
       summary: |
@@ -101,7 +101,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DatasetDetail'
+                $ref: "#/components/schemas/DatasetDetail"
               examples:
                 123:
                   value:
@@ -116,7 +116,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Errors'
+                $ref: "#/components/schemas/Errors"
 
 components:
   schemas:
@@ -163,7 +163,7 @@ components:
       description: The high level details of a Dataset that is available within a country
       type: object
       allOf:
-        - $ref: '#/components/schemas/Dataset'
+        - $ref: "#/components/schemas/Dataset"
       properties:
         schema:
           type: object

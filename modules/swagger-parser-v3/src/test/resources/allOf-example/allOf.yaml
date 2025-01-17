@@ -20,14 +20,14 @@ paths:
     get:
       operationId: description
       parameters:
-        - $ref: '#/components/parameters/UserId'
+        - $ref: "#/components/parameters/UserId"
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DescriptionUrl'
+                $ref: "#/components/schemas/DescriptionUrl"
 components:
   parameters:
     UserId:
@@ -53,4 +53,4 @@ components:
             url:
               type: string
               description: Url with information or picture of the product
-        - $ref: '#/components/schemas/Description'
+        - $ref: "#/components/schemas/Description"

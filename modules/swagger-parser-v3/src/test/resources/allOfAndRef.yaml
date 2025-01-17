@@ -12,7 +12,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserEx'
+                $ref: "#/components/schemas/UserEx"
 components:
   schemas:
     User:
@@ -25,7 +25,7 @@ components:
         - username
     UserEx:
       allOf:
-        - $ref: '#/components/schemas/User'
+        - $ref: "#/components/schemas/User"
         - type: object
           properties:
             id:

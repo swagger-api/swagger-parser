@@ -12,7 +12,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
 components:
   schemas:
     Dog:
@@ -31,5 +31,5 @@ components:
           type: integer
     Pet:
       oneOf:
-        - $ref: '#/components/schemas/Cat'
-        - $ref: '#/components/schemas/Dog'
+        - $ref: "#/components/schemas/Cat"
+        - $ref: "#/components/schemas/Dog"

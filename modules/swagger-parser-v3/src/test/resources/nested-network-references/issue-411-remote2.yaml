@@ -8,7 +8,7 @@ pathItems:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/Success'
+                $ref: "#/components/schemas/Success"
 parameters:
   skip:
     in: query

@@ -13,7 +13,7 @@ paths:
       description: It gets pets
       operationId: getPetById
       parameters:
-        - $ref: '#/components/parameters/limit'
+        - $ref: "#/components/parameters/limit"
       responses:
         '200':
           description: successful operation

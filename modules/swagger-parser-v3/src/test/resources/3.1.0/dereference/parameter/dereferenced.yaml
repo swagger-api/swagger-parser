@@ -5,13 +5,13 @@ components:
   parameters:
     userId:
       description: userId description
-      $ref: '#/components/parameters/indirection1'
+      $ref: "#/components/parameters/indirection1"
     indirection1:
       description: indirection1 description
-      $ref: '#/components/parameters/indirection2'
+      $ref: "#/components/parameters/indirection2"
     indirection2:
       description: indirection2 description
-      $ref: '#/components/parameters/userIdRef'
+      $ref: "#/components/parameters/userIdRef"
     userIdRef:
       name: userId
       in: query
@@ -21,10 +21,10 @@ components:
       explode: true
     userIdExt:
       description: userId description
-      $ref: '#/components/parameters/indirection1Ext'
+      $ref: "#/components/parameters/indirection1Ext"
     indirection1Ext:
       description: indirection1 description
-      $ref: '#/components/parameters/indirection2Ext'
+      $ref: "#/components/parameters/indirection2Ext"
     indirection2Ext:
       name: externalParameter
       in: query

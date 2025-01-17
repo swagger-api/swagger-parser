@@ -21,14 +21,14 @@ components:
       'https://yourdomain.com/css/yourCallbackEndpoint':
         post:
           parameters:
-            - $ref: '#/components/parameters/x-api-key'
+            - $ref: "#/components/parameters/x-api-key"
           requestBody:
             required: true
             description: description
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/WebhookVerification'
+                  $ref: "#/components/schemas/WebhookVerification"
           responses:
             '202':
               description: Your server returns this code if it accepts the message it was sent

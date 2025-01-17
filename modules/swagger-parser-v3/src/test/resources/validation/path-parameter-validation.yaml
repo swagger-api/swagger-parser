@@ -19,7 +19,7 @@ paths:
     get:
       operationId: ReadUser
       parameters:
-      - $ref: '#/components/parameters/accountId'
+      - $ref: "#/components/parameters/accountId"
       responses:
         '200':
           description: 200 response

@@ -1,6 +1,6 @@
     Cat:
       allOf:
-      - $ref: '#/components/schemas/Pet'
+      - $ref: "#/components/schemas/Pet"
       # all other properties specific to a `Cat`
       type: object
       properties:
