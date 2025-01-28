@@ -783,7 +783,16 @@ public class OpenAPIResolverTest {
         assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ObjectSchema);
     }
 
+    @Test
+    public void testIssue2113() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
 
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue_2113.yaml", auths, options).getOpenAPI();
+        ObjectSchema schema = (ObjectSchema) openAPI.getPaths().get("/foo").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        assertNull(schema.getProperties().get("goo").getType());
+    }
 
     @Test
     public void selfReferenceTest() {
