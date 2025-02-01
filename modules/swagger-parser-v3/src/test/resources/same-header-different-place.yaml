@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  version: "1.0.0"
+  title: Simple Inventory API
+paths:
+  /api:
+    get:
+      parameters:
+        - $ref: 'http://localhost:${dynamicPort}/issue-domain/#/components/parameters/testHeader'
+      responses:
+        '200':
+          description: yet another success
+          headers:
+            testHeader:
+              $ref: 'http://localhost:${dynamicPort}/issue-domain/#/components/parameters/testHeader'
+  /api2:
+    get:
+      parameters:
+        - $ref: 'http://localhost:${dynamicPort}/issue-domain/#/components/parameters/testHeader'
+      responses:
+        '200':
+          description: yet another success
+          headers:
+            testHeader:
+              $ref: 'http://localhost:${dynamicPort}/issue-domain/#/components/parameters/testHeader'
