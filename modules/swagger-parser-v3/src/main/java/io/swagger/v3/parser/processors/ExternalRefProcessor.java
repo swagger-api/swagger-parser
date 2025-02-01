@@ -86,7 +86,14 @@ public final class ExternalRefProcessor {
         return tryName;
     }
 
+    private String normalizeRelativeRef(String $ref, RefFormat refFormat) {
+        if (refFormat == RefFormat.RELATIVE && !$ref.startsWith("./")) {
+            return "./" + $ref;
+        }
+        return $ref;
+    }
     public String processRefToExternalSchema(String $ref, RefFormat refFormat) {
+        $ref = normalizeRelativeRef($ref, refFormat);
         String renamedRef = cache.getRenamedRef($ref);
         if(renamedRef != null) {
             return renamedRef;
