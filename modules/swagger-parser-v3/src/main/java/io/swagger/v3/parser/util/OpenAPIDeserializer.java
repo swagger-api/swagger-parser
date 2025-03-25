@@ -2246,7 +2246,7 @@ public class OpenAPIDeserializer {
                 header.setStyle(Header.StyleEnum.SIMPLE);
             }
         } else {
-            if (value.equals(Header.StyleEnum.SIMPLE.toString())) {
+            if (style.equals(Header.StyleEnum.SIMPLE.toString())) {
                 header.setStyle(Header.StyleEnum.SIMPLE);
             } else {
                 result.invalidType(location, "style", "simple", headerNode);
