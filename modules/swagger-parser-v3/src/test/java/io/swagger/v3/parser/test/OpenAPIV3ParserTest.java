@@ -3362,6 +3362,63 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult parseResult = openApiParser.readLocation("resolve-responses-test.yaml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertNull(openAPI.getPaths().get("/users").getGet().getResponses().get("400").get$ref());
+    }
 
+    @Test(description = "style and explode should not be set with explicitStyleAndExplode = false")
+    public void testStyleAndExplodeNotExplicit(){
+        ParseOptions options = new ParseOptions();
+        options.setExplicitStyleAndExplode(false);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("style-explode.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(0).getStyle().toString(), "form");
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(0).getExplode(), true);
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(1).getStyle().toString(), "spaceDelimited");
+        assertNull(openAPI.getPaths().get("/test").getGet().getParameters().get(1).getExplode());
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(2).getExplode(), true);
+        assertNull(openAPI.getPaths().get("/test").getGet().getParameters().get(2).getStyle());
+        assertNull(openAPI.getPaths().get("/test").getGet().getParameters().get(6).getStyle());
+        assertNull(openAPI.getPaths().get("/test").getGet().getParameters().get(6).getExplode());
+        assertNull(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("bar").getExplode());
+        assertNull(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("bar").getStyle());
+        assertEquals(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("foo").getExplode(), false);
+        assertNull(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("foo").getStyle());
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("file").getStyle().toString(), "form");
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("file").getExplode(), true);
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyStyle").getStyle().toString(), "form");
+        assertNull(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyStyle").getExplode());
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyExplode").getExplode(), true);
+        assertNull(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyExplode").getStyle());
+        assertNull(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithout").getStyle());
+        assertNull(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithout").getExplode());
+    }
+
+    @Test(description = "style and explode should be set with explicitStyleAndExplode = true")
+    public void testStyleAndExplodeExplicit(){
+        ParseOptions options = new ParseOptions();
+        options.setExplicitStyleAndExplode(true);
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("style-explode.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(0).getStyle().toString(), "form");
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(0).getExplode(), true);
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(1).getStyle().toString(), "spaceDelimited");
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(1).getExplode(), false);
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(2).getStyle().toString(), "form");
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(2).getExplode(), true);
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(6).getStyle().toString(), "simple");
+        assertEquals(openAPI.getPaths().get("/test").getGet().getParameters().get(6).getExplode(), false);
+        assertEquals(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("bar").getExplode(), false);
+        assertEquals(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("bar").getStyle().toString(), "simple");
+        assertEquals(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("foo").getExplode(), false);
+        assertNull(openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders().get("foo").getStyle());
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("file").getStyle().toString(), "form");
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("file").getExplode(), true);
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyStyle").getStyle().toString(), "form");
+        assertNull(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyStyle").getExplode());
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyExplode").getExplode(), true);
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithOnlyExplode").getStyle().toString(), "form");
+        assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithout").getStyle().toString(), "form");
+        assertNull(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithout").getExplode());
     }
 }

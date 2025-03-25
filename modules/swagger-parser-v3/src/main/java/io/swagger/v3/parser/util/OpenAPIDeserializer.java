@@ -305,6 +305,7 @@ public class OpenAPIDeserializer {
             rootParse.setInferSchemaType(options.isInferSchemaType());
             rootParse.setAllowEmptyStrings(options.isAllowEmptyString());
             rootParse.setValidateInternalRefs(options.isValidateInternalRefs());
+            rootParse.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
             OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.openapi31(rootParse.isOpenapi31());
             result.setOpenAPI(api);
@@ -1520,7 +1521,9 @@ public class OpenAPIDeserializer {
 		value = getString("style", node, false, location, result);
 
 		if (StringUtils.isBlank(value)) {
-			encoding.setStyle(Encoding.StyleEnum.FORM);
+            if (result.isExplicitStyleAndExplode()) {
+                encoding.setStyle(Encoding.StyleEnum.FORM);
+            }
 		} else {
 			if (value.equals(Encoding.StyleEnum.FORM.toString())) {
 				encoding.setStyle(Encoding.StyleEnum.FORM);
@@ -2131,9 +2134,9 @@ public class OpenAPIDeserializer {
             Boolean explode = getBoolean("explode", obj, false, location, result);
             if (explode != null) {
                 parameter.setExplode(explode);
-            } else if (StyleEnum.FORM.equals(parameter.getStyle())) {
+            } else if (StyleEnum.FORM.equals(parameter.getStyle()) && result.isExplicitStyleAndExplode()) {
                 parameter.setExplode(Boolean.TRUE);
-            } else {
+            } else if (result.isExplicitStyleAndExplode()){
                 parameter.setExplode(Boolean.FALSE);
             }
         }
@@ -2237,14 +2240,25 @@ public class OpenAPIDeserializer {
 			header.setDeprecated(deprecated);
 		}
 
+        String style = getString("style", headerNode, false, location, result);
+        if (StringUtils.isBlank(style)) {
+            if (result.isExplicitStyleAndExplode()) {
+                header.setStyle(Header.StyleEnum.SIMPLE);
+            }
+        } else {
+            if (value.equals(Header.StyleEnum.SIMPLE.toString())) {
+                header.setStyle(Header.StyleEnum.SIMPLE);
+            } else {
+                result.invalidType(location, "style", "simple", headerNode);
+            }
+        }
+
 		Boolean explode = getBoolean("explode", headerNode, false, location, result);
 		if (explode != null) {
 			header.setExplode(explode);
-		} else {
+		} else if (result.isExplicitStyleAndExplode()){
 			header.setExplode(Boolean.FALSE);
 		}
-
-		header.setStyle(Header.StyleEnum.SIMPLE);
 
 		ObjectNode headerObject = getObject("schema", headerNode, false, location, result);
 		if (headerObject != null) {
@@ -3369,11 +3383,13 @@ public class OpenAPIDeserializer {
 
 	public void setStyle(String value, Parameter parameter, String location, ObjectNode obj, ParseResult result) {
 		if (StringUtils.isBlank(value)) {
-			if (QUERY_PARAMETER.equals(parameter.getIn()) || COOKIE_PARAMETER.equals(parameter.getIn())) {
-				parameter.setStyle(StyleEnum.FORM);
-			} else if (PATH_PARAMETER.equals(parameter.getIn()) || HEADER_PARAMETER.equals(parameter.getIn())) {
-				parameter.setStyle(StyleEnum.SIMPLE);
-			}
+            if (result.isExplicitStyleAndExplode()) {
+                if (QUERY_PARAMETER.equals(parameter.getIn()) || COOKIE_PARAMETER.equals(parameter.getIn())) {
+                    parameter.setStyle(StyleEnum.FORM);
+                } else if (PATH_PARAMETER.equals(parameter.getIn()) || HEADER_PARAMETER.equals(parameter.getIn())) {
+                    parameter.setStyle(StyleEnum.SIMPLE);
+                }
+            }
 		} else {
 			if (value.equals(StyleEnum.FORM.toString())) {
 				parameter.setStyle(StyleEnum.FORM);
@@ -4275,6 +4291,8 @@ public class OpenAPIDeserializer {
 		private boolean openapi31 = false;
 		private boolean oaiAuthor = false;
 
+        private boolean explicitStyleAndExplode = true;
+
 		public boolean isInferSchemaType() {
 			return inferSchemaType;
 		}
@@ -4369,6 +4387,19 @@ public class OpenAPIDeserializer {
 			this.oaiAuthor = oaiAuthor;
 			return this;
 		}
+
+        public boolean isExplicitStyleAndExplode() {
+            return explicitStyleAndExplode;
+        }
+
+        public void setExplicitStyleAndExplode(boolean explicitStyleAndExplode) {
+            this.explicitStyleAndExplode = explicitStyleAndExplode;
+        }
+
+        public ParseResult explicitStyleAndExplode(boolean explicitStyleAndExplode) {
+            this.explicitStyleAndExplode = explicitStyleAndExplode;
+            return this;
+        }
 
 		public List<String> getMessages() {
 			List<String> messages = new ArrayList<String>();
