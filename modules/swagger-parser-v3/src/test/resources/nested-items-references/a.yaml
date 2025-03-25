@@ -12,7 +12,7 @@ components:
         zs:
           type: array
           items:
-            $ref: '#/components/schemas/z'
+            $ref: "#/components/schemas/z"
     z:
       type: object
       properties:
@@ -20,7 +20,7 @@ components:
           type: object
           additionalProperties:
             type: array
-            $ref: '#/components/schemas/w'
+            $ref: "#/components/schemas/w"
     w:
       type: object
       properties:

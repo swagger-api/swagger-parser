@@ -43,13 +43,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pet'
+                  $ref: "#/components/schemas/Pet"
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     post:
       description: Creates a new pet in the store.  Duplicates are allowed
       operationId: addPet
@@ -59,20 +59,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewPet'
+              $ref: "#/components/schemas/NewPet"
       responses:
         '200':
           description: pet response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /pets/{id}:
     get:
       description: Returns a user based on a single ID, if the user does not have access to the pet
@@ -91,13 +91,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     delete:
       description: deletes a single pet based on the ID supplied
       operationId: deletePet
@@ -117,12 +117,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Pet:
       allOf:
-        - $ref: '#/components/schemas/NewPet'
+        - $ref: "#/components/schemas/NewPet"
         - required:
             - id
           properties:

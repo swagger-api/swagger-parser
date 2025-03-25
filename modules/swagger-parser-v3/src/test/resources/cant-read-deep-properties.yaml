@@ -31,7 +31,7 @@ paths:
                   projects:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Project'
+                      $ref: "#/components/schemas/Project"
         '400':
           description: Invalid
         '401':
@@ -51,9 +51,9 @@ components:
         - project_type
       properties:
         user:
-          $ref: '#/components/schemas/User'
+          $ref: "#/components/schemas/User"
         project_type:
-          $ref: '#/components/schemas/TypeProject/properties/id'
+          $ref: "#/components/schemas/TypeProject/properties/id"
     User:
       type: object
       required:

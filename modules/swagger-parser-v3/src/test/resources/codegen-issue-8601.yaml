@@ -22,7 +22,7 @@ paths:
           application/json:
             schema:
               allOf:
-                - $ref: '#/components/schemas/Test1'
+                - $ref: "#/components/schemas/Test1"
                 - type: object
       responses:
         default:

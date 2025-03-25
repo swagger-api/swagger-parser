@@ -8,7 +8,7 @@ components:
             type: string
           examples:
             ex1:
-              $ref: '#/components/examples/ex1'
+              $ref: "#/components/examples/ex1"
 
   examples:
     ex1:

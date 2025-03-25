@@ -5,7 +5,7 @@ info:
 components:
   schemas:
     Parse:
-      $ref: '#/components/schemas/ParseEnum'
+      $ref: "#/components/schemas/ParseEnum"
       description: Overwritten description
     ParseEnum:
       title: Parse It

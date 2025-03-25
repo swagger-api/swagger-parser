@@ -115,7 +115,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SoundSummary'
+                $ref: "#/components/schemas/SoundSummary"
   '/{playerId}/volume':
     get:
       description: gets player volume
@@ -144,14 +144,14 @@ paths:
         - sound
       operationId: playerStatus
       parameters:
-        - $ref: '#/components/parameters/playerId'
+        - $ref: "#/components/parameters/playerId"
       responses:
         '200':
           description: ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SoundZoneStatus'
+                $ref: "#/components/schemas/SoundZoneStatus"
   '/{playerId}/pause':
     post:
       description: pause a player
@@ -191,7 +191,7 @@ components:
         zones:
           type: array
           items:
-            $ref: '#/components/schemas/SoundZone'
+            $ref: "#/components/schemas/SoundZone"
     SoundZone:
       properties:
         id:
@@ -209,9 +209,9 @@ components:
     SoundZoneStatus:
       properties:
         currentTrack:
-          $ref: '#/components/schemas/ActiveTrack'
+          $ref: "#/components/schemas/ActiveTrack"
         nextTrack:
-          $ref: '#/components/schemas/Track'
+          $ref: "#/components/schemas/Track"
         relTime:
           type: integer
           format: int32

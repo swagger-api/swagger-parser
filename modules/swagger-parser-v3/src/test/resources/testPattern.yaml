@@ -20,7 +20,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SomeObj'
+              $ref: "#/components/schemas/SomeObj"
         required: true
       responses:
         200:

@@ -12,9 +12,9 @@ components:
       type: object
       properties:
         lat:
-          $ref: '#/components/schemas/Lat'
+          $ref: "#/components/schemas/Lat"
         long:
-          $ref: '#/components/schemas/Long'
+          $ref: "#/components/schemas/Long"
       required:
         - lat
         - long

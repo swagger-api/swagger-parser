@@ -21,7 +21,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: "#/components/schemas/User"
         '500':
           description: Server error
         '400':
@@ -37,11 +37,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         '400':
           $ref: "#/components/responses/BadRequest"
         '422':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: "#/components/responses/UnprocessableEntity"
   /users/{userId}:
     get:
       summary: Get a user by ID
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         '404':
           $ref: "#/components/responses/NotFound"
         '500':
@@ -77,7 +77,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInput'
+              $ref: "#/components/schemas/UserInput"
       responses:
         '200':
           description: User updated successfully

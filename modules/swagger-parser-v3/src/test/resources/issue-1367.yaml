@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TestDTO'
+                $ref: "#/components/schemas/TestDTO"
 components:
   schemas:
     TestDTO:
@@ -36,7 +36,7 @@ components:
         choice:
           description: Choice description
           allOf:
-            - $ref: '#/components/schemas/TestEnum'
+            - $ref: "#/components/schemas/TestEnum"
     TestEnum:
       type: string
       enum:

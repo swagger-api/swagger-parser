@@ -11,4 +11,4 @@ components:
       type: object
       properties:
         val:
-          $ref: '#/components/schemas/String'
+          $ref: "#/components/schemas/String"

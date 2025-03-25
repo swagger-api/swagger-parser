@@ -13,8 +13,8 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Book'
-                  - $ref: '#/components/schemas/Movie'
+                  - $ref: "#/components/schemas/Book"
+                  - $ref: "#/components/schemas/Movie"
 
   /anyOf:
     get:
@@ -25,8 +25,8 @@ paths:
             application/json:
               schema:
                 anyOf:
-                  - $ref: '#/components/schemas/Movie'
-                  - $ref: '#/components/schemas/Book'
+                  - $ref: "#/components/schemas/Movie"
+                  - $ref: "#/components/schemas/Book"
 
   /mixed-array:
     get:

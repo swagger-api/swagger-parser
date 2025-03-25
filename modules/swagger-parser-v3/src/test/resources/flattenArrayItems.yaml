@@ -70,7 +70,7 @@ paths:
             schema:
               type: object
               allOf:
-                - $ref: '#/components/schemas/Address'
+                - $ref: "#/components/schemas/Address"
                 - type: object
                   required:
                     - gps
@@ -82,7 +82,7 @@ paths:
               type: array
               items:
                 allOf:
-                  - $ref: '#/components/schemas/Address2'
+                  - $ref: "#/components/schemas/Address2"
                   - type: object
                     required:
                       - gps2

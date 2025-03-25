@@ -126,7 +126,7 @@ public class RelativeReferenceTest {
                 "        - emailAddress\n" +
                 "      properties:\n" +
                 "        id:\n" +
-                "          $ref: '#/components/schemas/ID'\n" +
+                "          $ref: \"#/components/schemas/ID\"\n" +
                 "        emailAddress:\n" +
                 "          type: string\n" +
                 "          format: email\n" +

@@ -9,7 +9,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PetCreate'
+              $ref: "#/components/schemas/PetCreate"
       responses:
         '201':
           description: Created
@@ -27,8 +27,8 @@ components:
         - name
       allOf:
         - anyOf:
-            - $ref: '#/components/schemas/Pet'
-            - $ref: '#/components/schemas/Cow'
+            - $ref: "#/components/schemas/Pet"
+            - $ref: "#/components/schemas/Cow"
         - properties:
             name:
               type: string
