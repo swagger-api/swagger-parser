@@ -21,6 +21,7 @@ public class ParseOptions {
     private boolean safelyResolveURL;
     private List<String> remoteRefAllowList;
     private List<String> remoteRefBlockList;
+    private boolean explicitStyleAndExplode = true;
 
 
     public boolean isResolve() {
@@ -169,4 +170,13 @@ public class ParseOptions {
     public void setResolveResponses(boolean resolveResponses) {
         this.resolveResponses = resolveResponses;
     }
+
+    public boolean isExplicitStyleAndExplode() {
+        return explicitStyleAndExplode;
+    }
+
+    public void setExplicitStyleAndExplode(boolean explicitStyleAndExplode) {
+        this.explicitStyleAndExplode = explicitStyleAndExplode;
+    }
+
 }
