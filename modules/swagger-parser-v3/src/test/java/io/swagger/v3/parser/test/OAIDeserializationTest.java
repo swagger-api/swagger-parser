@@ -11,7 +11,6 @@ import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -136,5 +135,34 @@ public class OAIDeserializationTest {
         assertTrue(result.getMessages().contains("attribute info is missing"));
         assertTrue(result.getMessages().contains("attribute components.responses.ErrorObj.content.'application/json'.schema.NotAddedYet is missing"));
         assertTrue(result.getMessages().contains("attribute paths.'/thingy'(post).requestBody.content.'application/json'.schema.#/components/schemas/ThingRequest is missing"));
+    }
+
+    @Test
+    public void testDeserializeSchemaWithDefaultProperty() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("/schemas-default-value/default.yaml", null, null);
+        assertEquals(result.getMessages().size(),0);
+        assertNotNull(result.getOpenAPI());
+    }
+
+    @Test
+    public void testDeserializeSchemaWithNullDefaultProperty() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("/schemas-default-value/defaultNull.yaml", null, null);
+        assertEquals(result.getMessages().size(),0);
+        assertNotNull(result.getOpenAPI());
+    }
+
+    @Test
+    public void testDeserializeSchemaWithNullDefaultAndNullableTrueProperty() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("/schemas-default-value/defaultNullAndNullableTrue.yaml", null, null);
+        assertEquals(result.getMessages().size(),0);
+        assertNotNull(result.getOpenAPI());
+    }
+
+    @Test
+    public void testDeserializeSchemaWithNullDefaultAndNullableFalseProperty() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("/schemas-default-value/defaultNullAndNullableFalse.yaml", null, null);
+        assertEquals(result.getMessages().size(),1);
+        assertEquals(result.getMessages().get(0), "attribute components.schemas.Test.default is not of type `non-null string`");
+        assertNotNull(result.getOpenAPI());
     }
 }
