@@ -1879,7 +1879,6 @@ public class OpenAPIDeserializer {
 		return value;
 	}
 
-
 	public Integer getInteger(String key, ObjectNode node, boolean required, String location, ParseResult result) {
 		Integer value = null;
 		JsonNode v = node.get(key);
@@ -2747,7 +2746,7 @@ public class OpenAPIDeserializer {
 				}
 			}
 			schema = items;
-		}else if (itemsNode != null){
+		} else if (itemsNode != null) {
 			Schema items = new Schema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getSchema(itemsNode, location, result));
@@ -2905,7 +2904,7 @@ public class OpenAPIDeserializer {
 
 		Map<String, Schema> properties = new LinkedHashMap<>();
 		ObjectNode propertiesObj = getObject("properties", node, false, location, result);
-		Schema property = null;
+		Schema property;
 
 		Set<String> keys = getKeys(propertiesObj);
 		for (String name : keys) {
@@ -2925,10 +2924,24 @@ public class OpenAPIDeserializer {
 			schema.setProperties(properties);
 		}
 
+        bool = getBoolean("nullable", node, false, location, result);
+        if (bool != null) {
+            schema.setNullable(bool);
+        }
+
 		//sets default value according to the schema type
 		if (node.get("default") != null && result.isInferSchemaType()) {
+            boolean nullable = schema.getNullable() == null || schema.getNullable();
+            boolean isDefaultNodeTypeNull = node.get("default") != null && node.get("default").isNull();
             if (!StringUtils.isBlank(schema.getType())) {
-                if (schema.getType().equals("array")) {
+                if (isDefaultNodeTypeNull) {
+                    if (nullable) {
+                        schema.setDefault(null);
+                    } else {
+                        String expectedType = String.format("non-null %s", schema.getType());
+                        result.invalidType(location, "default", expectedType, node);
+                    }
+                } else if (schema.getType().equals("array")) {
                     ArrayNode array = getArray("default", node, false, location, result);
                     if (array != null) {
                         schema.setDefault(array);
@@ -2975,13 +2988,8 @@ public class OpenAPIDeserializer {
             if (defaultObject != null) {
                 schema.setDefault(defaultObject);
             }
-		}else{
+		} else {
 			schema.setDefault(null);
-		}
-
-		bool = getBoolean("nullable", node, false, location, result);
-		if (bool != null) {
-			schema.setNullable(bool);
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
