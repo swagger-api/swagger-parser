@@ -1269,7 +1269,7 @@ public class SwaggerDeserializer {
         License license = license(obj, location, result);
         info.license(license);
 
-        value = getString("version", node, false, location, result);
+        value = getString("version", node, true, location, result);
         info.version(value);
 
         // extra keys

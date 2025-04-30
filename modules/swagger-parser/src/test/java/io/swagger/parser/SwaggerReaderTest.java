@@ -251,6 +251,7 @@ public class SwaggerReaderTest {
             "swagger: '2.0'\n" +
             "info:\n" +
             "  title: nice\n" +
+            "  version: '1'\n" +
             "paths: {}\n" +
             "definitions:\n" +
             "  Empty:\n" +
