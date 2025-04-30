@@ -1876,4 +1876,12 @@ public class SwaggerParserTest {
             new SwaggerParser().read(jsonNodeSwagger, null, parseOptions);
         });
     }
+
+    @Test
+    public void testIssueSwg14378() {
+
+        SwaggerDeserializationResult result = new SwaggerParser().readWithInfo("src/test/resources/issue-swg-14378.yaml", null, false);
+        assertNotNull(result);
+        assertEquals("attribute info.version is missing",result.getMessages().get(0));
+    }
 }
