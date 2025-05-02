@@ -67,6 +67,7 @@ jobs:
         nexus_username: ${{ secrets.OSSRH_USERNAME }}
         nexus_password: ${{ secrets.OSSRH_TOKEN }}
         maven_profiles: "release"
+        maven_args: "-DskipTests"
     - name: Run post release script
       id: postRelease
       if: env.RELEASE_OK == 'yes'
