@@ -36,5 +36,6 @@ sed -i -e "s/$sc_find/$sc_replace/g" $CUR/README.md
 #####################
 ### build and test maven ###
 #####################
-mvn --no-transfer-progress -B install --file pom.xml
+ulimit -n 16384
+mvn --no-transfer-progress -B install --file pom.xml -Dsurefire.forkCount=4 -DargLine="-XX:-OmitStackTraceInFastThrow" -Dsurefire.useFile=false
 

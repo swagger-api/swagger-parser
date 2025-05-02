@@ -15,4 +15,5 @@ SC_RELEASE_TAG="v$SC_VERSION"
 #####################
 ### build and test maven ###
 #####################
-mvn --no-transfer-progress -B install --file pom.xml
+ulimit -n 16384
+mvn --no-transfer-progress -B install --file pom.xml -Dsurefire.forkCount=4 -DargLine="-XX:-OmitStackTraceInFastThrow" -Dsurefire.useFile=false
