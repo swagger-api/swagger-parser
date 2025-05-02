@@ -41,7 +41,7 @@ jobs:
             echo "POM VERSION" ${MY_POM_VERSION}
             if [[ $MY_POM_VERSION =~ ^.*SNAPSHOT$ ]];
             then
-                mvn --no-transfer-progress -B clean deploy
+                mvn --no-transfer-progress -B clean deploy -Dsurefire.forkCount=4 -DargLine="-XX:-OmitStackTraceInFastThrow" -Dsurefire.useFile=false
             else
                 echo "not deploying release: " ${MY_POM_VERSION}
             fi
