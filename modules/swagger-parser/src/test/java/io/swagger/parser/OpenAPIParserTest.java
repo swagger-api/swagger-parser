@@ -17,13 +17,12 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.core.util.Json;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import org.junit.Test;
+
+import org.testng.annotations.Test;
 import org.testng.Assert;
 
 import java.util.Map;
-
 import java.util.List;
-
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -772,5 +771,6 @@ public class OpenAPIParserTest {
                 "  x-original-swagger-version: \"2.0\"\n" +
                 "openapi31: false\n");
     }
+
 }
 

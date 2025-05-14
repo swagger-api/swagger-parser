@@ -173,7 +173,8 @@ public class OpenAPIDeserializer {
             "default", "discriminator", "readOnly", "writeOnly", "xml", "externalDocs", "example", "deprecated",
 			"const", "examples", "$id", "$comment", "if", "then", "else", "unevaluatedProperties","unevaluatedItems", "prefixItems",
             "contains","contentEncoding","contentMediaType","$anchor","$schema","contentSchema","propertyNames",
-            "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties", "$vocabulary", "$dynamicAnchor"));
+            "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties", "$vocabulary",
+            "$dynamicAnchor", "$dynamicRef"));
 	protected static Set<String> EXAMPLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
 			"value", "externalValue"));
 	protected static Set<String> HEADER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "name", "in", "description",
@@ -4120,9 +4121,7 @@ public class OpenAPIDeserializer {
 							dependentRequired.add(n.textValue());
 						}
 					}
-					if (dependentRequired != null) {
-						dependentRequiredList.put(name, dependentRequired);
-					}
+                    dependentRequiredList.put(name, dependentRequired);
 				}
 			}
 		}
@@ -4143,14 +4142,12 @@ public class OpenAPIDeserializer {
                     dependentSchemasList.put(name, dependentSchemas);
                 }
             }
-            if (dependentSchemasObj != null) {
-                schema.setDependentSchemas(dependentSchemasList);
-            }
+            schema.setDependentSchemas(dependentSchemasList);
         }
 
 		//prefixItems
 		ArrayNode prefixItemsArray = getArray("prefixItems", node, false, location, result);
-		if(prefixItemsArray != null) {
+		if (prefixItemsArray != null) {
 			Schema prefixItems = new JsonSchema();
 
 			List<Schema> prefixItemsList = new ArrayList<>();
@@ -4180,11 +4177,9 @@ public class OpenAPIDeserializer {
 		Set<String> keys = getKeys(propertiesObj);
 		for (String name : keys) {
 			JsonNode propertyValue = propertiesObj.get(name);
-            if (propertiesObj != null) {
-                property = getJsonSchema(propertyValue, location, result);
-                if (property != null) {
-                    properties.put(name, property);
-                }
+            property = getJsonSchema(propertyValue, location, result);
+            if (property != null) {
+                properties.put(name, property);
             }
 		}
 		if (propertiesObj != null) {
@@ -4248,6 +4243,11 @@ public class OpenAPIDeserializer {
         value = getString("$dynamicAnchor", node, false, location, result);
         if (value != null) {
             schema.set$dynamicAnchor(value);
+        }
+
+        value = getString("$dynamicRef", node, false, location, result);
+        if (value != null) {
+            schema.set$dynamicRef(value);
         }
 
 		value = getString("$id", node, false, location, result);
