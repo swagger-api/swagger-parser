@@ -12,6 +12,7 @@
     <artifactId>swagger-compat-spec-parser</artifactId>
     <packaging>jar</packaging>
     <name>swagger-compat-spec-parser</name>
+    <description>swagger-compat-spec-parser</description>
     <dependencies>
         <dependency>
             <groupId>io.swagger</groupId>
