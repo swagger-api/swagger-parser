@@ -12,6 +12,7 @@
     <version>1.0.75-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
+    <description>swagger-parser-project</description>
     <developers>
         <developer>
             <id>fehguy</id>
@@ -51,16 +52,6 @@
         <developerConnection>scm:git:git@github.com:swagger-api/swagger-parser.git</developerConnection>
         <url>https://github.com/swagger-api/swagger-parser</url>
     </scm>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
     <build>
         <defaultGoal>install</defaultGoal>
         <resources>
@@ -226,18 +217,15 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.7.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                    <stagingProgressTimeoutMinutes>30</stagingProgressTimeoutMinutes>
-                    <!--                    <skipStaging>true</skipStaging>
-                                        <skipRemoteStaging>true</skipRemoteStaging>
-                                        <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>-->
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                    <waitMaxTime>3600</waitMaxTime>
                 </configuration>
             </plugin>
         </plugins>
@@ -369,28 +357,6 @@
         <module>modules/swagger-parser</module>
         <module>modules/swagger-compat-spec-parser</module>
     </modules>
-    <repositories>
-        <repository>
-            <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>sonatype-releases</id>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-    </repositories>
     <properties>
         <!--<maven.compiler.release>8</maven.compiler.release>-->
         <commons-io-version>2.15.1</commons-io-version>
@@ -403,6 +369,5 @@
         <wiremock-version>2.27.2</wiremock-version>
         <surefire-version>2.22.2</surefire-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
 </project>

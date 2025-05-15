@@ -11,6 +11,7 @@
     <artifactId>swagger-parser</artifactId>
     <packaging>jar</packaging>
     <name>swagger-parser</name>
+    <description>swagger-parser</description>
     <profiles>
         <profile>
             <id>test-single</id>

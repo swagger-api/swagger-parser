@@ -12,6 +12,7 @@
     <artifactId>swagger-parser-safe-url-resolver</artifactId>
     <packaging>jar</packaging>
     <name>swagger-parser-safe-url-resolver</name>
+    <description>swagger-parser-safe-url-resolver</description>
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>

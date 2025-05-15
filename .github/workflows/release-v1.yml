@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: tibdex/github-app-token@v1
       id: generate-token
       with:
@@ -24,10 +24,11 @@ jobs:
       uses: actions/setup-java@v4
       with:
         java-version: 8
-        server-id: ossrh
+        server-id: central
         server-username: MAVEN_USERNAME
         server-password: MAVEN_PASSWORD
         distribution: 'temurin'
+        gpg-private-key: ${{ secrets.OSSRH_GPG_PRIVATE_KEY }}
     - name: Cache local Maven repository
       uses: actions/cache@v4
       with:
@@ -58,16 +59,10 @@ jobs:
         git config --global user.name "GitHub Action"
         git config --global hub.protocol https
         git remote set-url origin https://\${{ secrets.GITHUB_TOKEN }}:x-oauth-basic@github.com/swagger-api/swagger-parser.git
-    - name: Run maven deploy/release (action-maven-publish)
-      uses: samuelmeuli/action-maven-publish@v1
+    - name:  Run maven deploy/release
       if: env.RELEASE_OK == 'yes'
-      with:
-        gpg_private_key: ${{ secrets.OSSRH_GPG_PRIVATE_KEY }}
-        gpg_passphrase: ${{ secrets.OSSRH_GPG_PRIVATE_PASSPHRASE }}
-        nexus_username: ${{ secrets.OSSRH_USERNAME }}
-        nexus_password: ${{ secrets.OSSRH_TOKEN }}
-        maven_profiles: "release"
-        maven_args: "-DskipTests"
+      run: |
+        ./mvnw -DskipTests --no-transfer-progress -B -Prelease deploy
     - name: Run post release script
       id: postRelease
       if: env.RELEASE_OK == 'yes'
@@ -84,8 +79,8 @@ jobs:
 
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS:  true
-      MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-      MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      MAVEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SC_VERSION:
       SC_NEXT_VERSION:

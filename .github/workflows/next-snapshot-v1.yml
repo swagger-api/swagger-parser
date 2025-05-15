@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: tibdex/github-app-token@v1
       id: generate-token
       with:
@@ -24,7 +24,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         java-version: 11
-        server-id: ossrh
+        server-id: central
         server-username: MAVEN_USERNAME
         server-password: MAVEN_PASSWORD
         distribution: 'temurin'
@@ -84,5 +84,5 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SC_VERSION:
       SC_NEXT_VERSION:
-      GPG_PRIVATE_KEY: ${{ secrets.OSSRH_GPG_PRIVATE_KEY }}
-      GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_PRIVATE_PASSPHRASE }}
+      GPG_PRIVATE_KEY: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
