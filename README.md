@@ -118,7 +118,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>1.0.74</version>
+  <version>1.0.75</version>
 </dependency>
 
 ```
@@ -128,7 +128,7 @@ To add swagger parsing support for older versions of swagger, add the `compat` m
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-compat-spec-parser</artifactId>
-  <version>1.0.74</version>
+  <version>1.0.75</version>
 </dependency>
 
 ```
