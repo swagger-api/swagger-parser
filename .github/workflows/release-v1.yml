@@ -62,7 +62,7 @@ jobs:
     - name:  Run maven deploy/release
       if: env.RELEASE_OK == 'yes'
       run: |
-        ./mvnw -DskipTests --no-transfer-progress -B -Prelease deploy
+        mvn -DskipTests --no-transfer-progress -B -Prelease deploy
     - name: Run post release script
       id: postRelease
       if: env.RELEASE_OK == 'yes'
