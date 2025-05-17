@@ -10,6 +10,7 @@
     <artifactId>swagger-parser-v2-converter</artifactId>
     <packaging>jar</packaging>
     <name>swagger-parser-v2-converter</name>
+    <description>swagger-parser-v2-converter</description>
     <build>
         <plugins>
             <plugin>

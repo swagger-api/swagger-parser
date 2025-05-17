@@ -13,7 +13,7 @@
     <artifactId>swagger-parser-cli</artifactId>
     <packaging>jar</packaging>
     <name>swagger-parser (executable)</name>
-
+    <description>swagger-parser (executable)</description>
     <build>
         <finalName>swagger-parser-cli</finalName>
         <resources>

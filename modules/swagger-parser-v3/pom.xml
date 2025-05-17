@@ -10,6 +10,7 @@
     <artifactId>swagger-parser-v3</artifactId>
     <packaging>jar</packaging>
     <name>swagger-parser-v3</name>
+    <description>swagger-parser-v3</description>
     <dependencies>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
