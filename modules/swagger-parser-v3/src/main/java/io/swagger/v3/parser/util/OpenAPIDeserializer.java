@@ -1153,26 +1153,31 @@ public class OpenAPIDeserializer {
 
 	public String getString(String key, ObjectNode node, boolean required, String location, ParseResult
 			result, Set<String> uniqueValues, boolean noInvalidError) {
-		String value = null;
-		JsonNode v = node.get(key);
-		if (node == null || v == null) {
-			if (required) {
-				result.missing(location, key);
-				result.invalid();
-			}
-		} else if (!v.isValueNode()) {
-			if (!noInvalidError) {
-				result.invalidType(location, key, "string", node);
-			}
-        } else if (!v.isNull()) {
-			value = v.asText();
-			if (uniqueValues != null && !uniqueValues.add(value)) {
-				result.unique(location, "operationId");
-				result.invalid();
-			}
-		}
-		return value;
+		return getString(key, node, required, location, result, uniqueValues, noInvalidError, false);
 	}
+
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult
+            result, Set<String> uniqueValues, boolean noInvalidError, boolean missingForNullNode) {
+        String value = null;
+        JsonNode v = node.get(key);
+        if (node == null || v == null || (v.isNull() && missingForNullNode)) {
+            if (required) {
+                result.missing(location, key);
+                result.invalid();
+            }
+        } else if (!v.isValueNode()) {
+            if (!noInvalidError) {
+                result.invalidType(location, key, "string", node);
+            }
+        } else if (!v.isNull()) {
+            value = v.asText();
+            if (uniqueValues != null && !uniqueValues.add(value)) {
+                result.unique(location, "operationId");
+                result.invalid();
+            }
+        }
+        return value;
+    }
 
 	public String getString(String key, ObjectNode node, boolean required, String location, ParseResult
 			result, Set<String> uniqueValues) {
@@ -1289,7 +1294,7 @@ public class OpenAPIDeserializer {
 			info.setLicense(license);
 		}
 
-		value = getString("version", node, true, location, result);
+		value = getString("version", node, true, location, result, null, false, true);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			info.setVersion(value);
 		}

@@ -3421,4 +3421,12 @@ public class OpenAPIV3ParserTest {
         assertEquals(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithout").getStyle().toString(), "form");
         assertNull(openAPI.getPaths().get("/test").getPost().getRequestBody().getContent().get("multipart/form-data").getEncoding().get("fileWithout").getExplode());
     }
+
+    @Test(description = "null version should cause a message")
+    public void testVersion(){
+        ParseOptions options = new ParseOptions();
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        SwaggerParseResult parseResult = openApiParser.readLocation("version-missing.yaml", null, options);
+        assertEquals(parseResult.getMessages().get(0), "attribute info.version is missing");
+    }
 }
