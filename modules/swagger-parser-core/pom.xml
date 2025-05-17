@@ -9,7 +9,8 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>swagger-parser-core</artifactId>
     <packaging>jar</packaging>
-    <name>swagger-parser</name>
+    <name>swagger-parser-core</name>
+    <description>swagger-parser-core</description>
     <dependencies>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
@@ -17,13 +18,4 @@
             <version>${swagger-core-version}</version>
         </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>
