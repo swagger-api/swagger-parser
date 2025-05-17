@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
     <description>swagger-parser-project</description>
+    <url>https://github.com/swagger-api/swagger-parser</url>
     <developers>
         <developer>
             <id>fehguy</id>
