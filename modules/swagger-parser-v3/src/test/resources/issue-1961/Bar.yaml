@@ -1,0 +1,13 @@
+components:
+  schemas:
+    Bar:
+      anyOf:
+      - $ref: ./Foo.yaml#/components/schemas/FooBar
+    BarType:
+      enum:
+      - All
+      - OEM
+      type: string
+info:
+  title: '#Issue1961.Bar'
+openapi: 3.0.1
