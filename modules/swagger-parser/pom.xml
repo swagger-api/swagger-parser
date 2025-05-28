@@ -3,14 +3,14 @@
     <parent>
         <groupId>io.swagger.parser.v3</groupId>
         <artifactId>swagger-parser-project</artifactId>
-        <version>2.1.27-SNAPSHOT</version>
+        <version>2.1.30-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>swagger-parser</artifactId>
     <packaging>jar</packaging>
     <name>swagger-parser</name>
-
+    <description>swagger-parser</description>
     <dependencies>
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
@@ -30,12 +30,6 @@
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
             <version>${jmockit-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

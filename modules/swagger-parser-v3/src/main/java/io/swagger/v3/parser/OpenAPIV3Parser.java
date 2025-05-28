@@ -176,7 +176,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             SwaggerParseResult result;
             if (options != null) {
                 result = parseJsonNode(location, rootNode, options);
-            }else {
+            } else {
                 result = parseJsonNode(location, rootNode);
             }
             if (result.getOpenAPI() != null) {

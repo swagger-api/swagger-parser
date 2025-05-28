@@ -3,13 +3,14 @@
     <parent>
         <groupId>io.swagger.parser.v3</groupId>
         <artifactId>swagger-parser-project</artifactId>
-        <version>2.1.27-SNAPSHOT</version>
+        <version>2.1.30-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>swagger-parser-v2-converter</artifactId>
     <packaging>jar</packaging>
     <name>swagger-parser-v2-converter</name>
+    <description>swagger-parser-v2-converter</description>
     <build>
         <plugins>
             <plugin>

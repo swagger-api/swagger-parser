@@ -6,13 +6,14 @@
     <parent>
         <groupId>io.swagger.parser.v3</groupId>
         <artifactId>swagger-parser-project</artifactId>
-        <version>2.1.27-SNAPSHOT</version>
+        <version>2.1.30-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
 
     </parent>
 
     <artifactId>swagger-parser-safe-url-resolver</artifactId>
-
+    <name>swagger-parser-safe-url-resolver</name>
+    <description>swagger-parser-safe-url-resolver</description>
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
