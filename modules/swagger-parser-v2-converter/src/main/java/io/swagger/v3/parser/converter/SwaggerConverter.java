@@ -104,7 +104,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         SwaggerParseResult out = convert(result);
         if (out != null && out.getOpenAPI() != null && options != null) {
             if (options.isResolveFully()) {
-                new ResolverFully(options.isResolveCombinators()).resolveFully(out.getOpenAPI());
+                new ResolverFully(options).resolveFully(out.getOpenAPI());
             }
             if (options.isFlatten()) {
                 try {
