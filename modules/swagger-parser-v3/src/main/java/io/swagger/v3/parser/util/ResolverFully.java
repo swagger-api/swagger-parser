@@ -15,6 +15,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.models.RefFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class ResolverFully {
 
     private boolean aggregateCombinators;
 
-
+    private ParseOptions parseOptions = new ParseOptions();
 
     public ResolverFully() {
         this(true);
@@ -46,6 +47,15 @@ public class ResolverFully {
 
     public ResolverFully(boolean aggregateCombinators) {
         this.aggregateCombinators = aggregateCombinators;
+    }
+
+    public ResolverFully(ParseOptions options) {
+        if (options != null) {
+            this.aggregateCombinators = options.isResolveCombinators();
+        } else {
+            this.aggregateCombinators = true;
+        }
+        this.parseOptions = options;
     }
 
     private Map<String, Schema> schemas;
@@ -493,7 +503,7 @@ public class ResolverFully {
                 Schema property = updated.get(key);
 
                 if (property.getProperties() != model.getProperties()) {
-                    if (!hasSchemaType(property)) {
+                    if (!hasSchemaType(property) && parseOptions.isExplicitObjectSchema()) {
                         if (SpecVersion.V30.equals(property.getSpecVersion())) {
                             property.setType("object");
                         } else {

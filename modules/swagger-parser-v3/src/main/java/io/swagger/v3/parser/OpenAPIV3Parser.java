@@ -227,7 +227,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                                 dereferencer.dereference(dereferencerContext, dereferencers.iterator());
                             }
                             if (options.isResolveFully()) {
-                                new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                                new ResolverFully(options).resolveFully(result.getOpenAPI());
                             }
                         } else {
                             String msg = "Resolution of OAS 3.1 spec disabled by 'disableOas31Resolve' env variable";
@@ -239,7 +239,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                                 location, null, options);
                         resolver.resolve(result);
                         if (options.isResolveFully()) {
-                            new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                            new ResolverFully(options).resolveFully(result.getOpenAPI());
                         }
                     }
 
