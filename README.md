@@ -668,6 +668,7 @@ final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions)
 This option allows you to customize the processing of schema properties when the type is not specified. By default it is set to `true`.
 - `true` : when the type is not defined for property, ‘object’ is set.
 - `false` : the property remains undefined when no type is specified
+It's only applied when `resolveFully` is set to `true`.
 
 ### Extensions
 This project has a core artifact--`swagger-parser`, which uses Java Service Provider Interface (SPI) so additional extensions can be added. 

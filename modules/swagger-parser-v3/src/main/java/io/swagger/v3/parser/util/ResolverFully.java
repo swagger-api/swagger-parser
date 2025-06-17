@@ -39,7 +39,15 @@ public class ResolverFully {
 
     private boolean aggregateCombinators;
 
-    private ParseOptions parseOptions;
+    private ParseOptions parseOptions = new ParseOptions();
+
+    public ResolverFully() {
+        this(true);
+    }
+
+    public ResolverFully(boolean aggregateCombinators) {
+        this.aggregateCombinators = aggregateCombinators;
+    }
 
     public ResolverFully(ParseOptions options) {
         if (options != null) {
