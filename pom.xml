@@ -372,7 +372,7 @@
         <swagger-parser-v2-version>1.0.75</swagger-parser-v2-version>
         <commons-io-version>2.19.0</commons-io-version>
         <slf4j-version>2.0.9</slf4j-version>
-        <swagger-core-version>2.2.32</swagger-core-version>
+        <swagger-core-version>2.2.34</swagger-core-version>
         <swagger-core-v2-version>1.6.16</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>7.11.0</testng-version>
