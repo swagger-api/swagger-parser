@@ -60,7 +60,7 @@ public class RelativeReferenceTest {
     @Test
     public void testIssueServerUrlValidation() throws Exception {
         new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}));
+            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}), null, null);
             times = 1;
             result = spec;
         }};
@@ -73,7 +73,7 @@ public class RelativeReferenceTest {
     @Test
     public void testIssue213() throws Exception {
         new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}));
+            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}), null, null);
             times = 1;
             result = spec;
 

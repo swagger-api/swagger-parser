@@ -14,7 +14,11 @@ import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -23,6 +27,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 
 public class RemoteUrl {
@@ -104,6 +109,10 @@ public class RemoteUrl {
     }
 
     public static String urlToString(String url, List<AuthorizationValue> auths) throws Exception {
+        return urlToString(url, auths, null, null);
+    }
+
+    public static String urlToString(String url, List<AuthorizationValue> auths, final Integer connectionTimeout, final Integer readTimeout) throws Exception {
         InputStream is = null;
         BufferedReader br = null;
 
@@ -141,6 +150,7 @@ public class RemoteUrl {
                 } else {
                     conn = inUrl.openConnection();
                 }
+                setConnectionTimeouts(connectionTimeout, readTimeout, conn);
                 CONNECTION_CONFIGURATOR.process(conn);
                 for (AuthorizationValue item : header) {
                     conn.setRequestProperty(item.getKeyName(), item.getValue());
@@ -186,6 +196,15 @@ public class RemoteUrl {
             if (br != null) {
                 br.close();
             }
+        }
+    }
+
+    private static void setConnectionTimeouts(final Integer connectionTimeout, final Integer readTimeout, final URLConnection conn) {
+        if (Objects.nonNull(connectionTimeout)) {
+            conn.setConnectTimeout(connectionTimeout);
+        }
+        if (Objects.nonNull(readTimeout)) {
+            conn.setReadTimeout(readTimeout);
         }
     }
 

@@ -40,7 +40,7 @@ public class LocalReferenceTest {
     @Test
     public void testAuth() throws Exception  {
         new Expectations() {{
-            remoteUrl.urlToString("https://remote-server.com/issue-454.yaml", new ArrayList<>());
+            remoteUrl.urlToString("https://remote-server.com/issue-454.yaml", new ArrayList<>(), null, null);
             result = issue_454_yaml;
 
             remoteUrl.urlToString("https://remote-components.com/issue-454-components", new ArrayList<>());

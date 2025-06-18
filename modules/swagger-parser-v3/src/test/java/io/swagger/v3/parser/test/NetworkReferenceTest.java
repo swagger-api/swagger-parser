@@ -83,7 +83,7 @@ public class NetworkReferenceTest {
 
         new Expectations() {
             {
-                remoteUrl.urlToString("http://localhost:8080/swos-443/root.yaml", new ArrayList<>());
+                remoteUrl.urlToString("http://localhost:8080/swos-443/root.yaml", new ArrayList<>(), null, null);
                 result = issue_443_yaml;
                 remoteUrl.urlToString("http://localhost:8080/swos-443/ref.yaml", new ArrayList<>());
                 result = issue_443_ref_yaml;
@@ -119,7 +119,7 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue323() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://localhost:8080/nested-file-references/issue-323.yaml", new ArrayList<>());
+            remoteUrl.urlToString("http://localhost:8080/nested-file-references/issue-323.yaml", new ArrayList<>(), null, null);
             result = issue_323_yaml;
 
             remoteUrl.urlToString("http://localhost:8080/nested-file-references/eventsCase9.yaml", new ArrayList<>());
@@ -149,7 +149,7 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue328() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328.yaml", new ArrayList<>());
+            remoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328.yaml", new ArrayList<>(), null, null);
             result = issue_328_yaml;
 
             remoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328-events.yaml", new ArrayList<>());
@@ -178,7 +178,7 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue330() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<>());
+            remoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<>(), null, null);
             result = issue_330_yaml;
 
             remoteUrl.urlToString("http://server1/resources/common/paging.yaml", new ArrayList<>());
@@ -208,7 +208,7 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue335() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<>());
+            remoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<>(), null, null);
             result = issue_335_json;
 
             remoteUrl.urlToString("http://server1/resources/Bar.json", new ArrayList<>());
@@ -262,7 +262,7 @@ public class NetworkReferenceTest {
         auths.add(auth);
 
         new Expectations() {{
-            remoteUrl.urlToString("http://remote1/resources/swagger.yaml", auths);
+            remoteUrl.urlToString("http://remote1/resources/swagger.yaml", auths, null, null);
             result = issue_411_server;
 
             remoteUrl.urlToString("http://remote2/resources/foo", auths);
@@ -310,7 +310,7 @@ public class NetworkReferenceTest {
         final List< AuthorizationValue > auths = new ArrayList<>();
 
         new Expectations() {{
-            remoteUrl.urlToString("http://www.example.io/one/two/swagger.json", auths);
+            remoteUrl.urlToString("http://www.example.io/one/two/swagger.json", auths, null, null);
             result = issue_742_json;
         }};
 

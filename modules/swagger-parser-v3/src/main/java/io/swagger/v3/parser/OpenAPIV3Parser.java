@@ -19,6 +19,13 @@ import io.swagger.v3.parser.util.InlineModelResolver;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.RemoteUrl;
 import io.swagger.v3.parser.util.ResolverFully;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.SSLHandshakeException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -30,12 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
-import javax.net.ssl.SSLHandshakeException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OpenAPIV3Parser implements SwaggerParserExtension {
 
@@ -55,6 +56,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     /**
      * Locates extensions on the current thread class loader and then, if it differs from this class classloader (as in
      * OSGi), locates extensions from this class classloader as well.
+     *
      * @return a list of extensions
      */
     public static List<SwaggerParserExtension> getExtensions() {
@@ -92,7 +94,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     @Override
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
         try {
-            final String content = readContentFromLocation(url, emptyListIfNull(auth));
+            final String content = readContentFromLocation(url, emptyListIfNull(auth), options);
             LOGGER.debug("Loaded raw data: {}", content);
             return readContents(content, auth, options, url);
         } catch (ReadContentException e) {
@@ -141,8 +143,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     public SwaggerParseResult parseJsonNode(String path, JsonNode node) {
-        return new OpenAPIDeserializer().deserialize(node, path,new ParseOptions());
+        return new OpenAPIDeserializer().deserialize(node, path, new ParseOptions());
     }
+
     public SwaggerParseResult parseJsonNode(String path, JsonNode node, ParseOptions options) {
         return new OpenAPIDeserializer().deserialize(node, path, options, options.isOaiAuthor());
     }
@@ -154,7 +157,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     public SwaggerParseResult readContents(String swaggerAsString, List<AuthorizationValue> auth, ParseOptions options,
-                                            String location) {
+                                           String location) {
         if (swaggerAsString == null || swaggerAsString.trim().isEmpty()) {
             return SwaggerParseResult.ofError("Null or empty definition");
         }
@@ -183,7 +186,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                 result = resolve(result, auth, options, location);
             }
             if (deserializationUtilsResult.getMessages() != null) {
-                for (String s: deserializationUtilsResult.getMessages()) {
+                for (String s : deserializationUtilsResult.getMessages()) {
                     result.message(getParseErrorMessage(s, location));
                 }
             }
@@ -202,11 +205,11 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
 
     @Deprecated
     public SwaggerParseResult readWithInfo(String location, List<AuthorizationValue> auths) {
-        return readContents(readContentFromLocation(location, auths), auths, null);
+        return readContents(readContentFromLocation(location, auths, null), auths, null);
     }
 
     private SwaggerParseResult resolve(SwaggerParseResult result, List<AuthorizationValue> auth, ParseOptions options,
-            String location) {
+                                       String location) {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
@@ -248,7 +251,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                     final InlineModelResolver inlineModelResolver =
                             new InlineModelResolver(options.isFlattenComposedSchemas(),
                                     options.isCamelCaseFlattenNaming(), options.isSkipMatches());
-                    if (result.getOpenAPI()!= null) {
+                    if (result.getOpenAPI() != null) {
                         inlineModelResolver.flatten(result.getOpenAPI());
                     }
                 }
@@ -283,11 +286,15 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         return YAML_MAPPER;
     }
 
-    private String readContentFromLocation(String location, List<AuthorizationValue> auth) {
+    private String readContentFromLocation(String location, List<AuthorizationValue> auth, ParseOptions options) {
         final String adjustedLocation = location.replaceAll("\\\\", "/");
         try {
             if (adjustedLocation.toLowerCase().startsWith("http")) {
-                return RemoteUrl.urlToString(adjustedLocation, auth);
+                if (Objects.isNull(options)) {
+                    return RemoteUrl.urlToString(adjustedLocation, auth);
+                } else {
+                    return RemoteUrl.urlToString(adjustedLocation, auth, options.getConnectionTimeout(), options.getReadTimeout());
+                }
             } else if (adjustedLocation.toLowerCase().startsWith("jar:")) {
                 final InputStream in = new URI(adjustedLocation).toURL().openStream();
                 return IOUtils.toString(in, encoding);
@@ -320,13 +327,13 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
      */
     @Deprecated
     protected List<AuthorizationValue> transform(List<AuthorizationValue> input) {
-        if(input == null) {
+        if (input == null) {
             return null;
         }
 
         List<AuthorizationValue> output = new ArrayList<>();
 
-        for(AuthorizationValue value : input) {
+        for (AuthorizationValue value : input) {
             AuthorizationValue v = new AuthorizationValue();
 
             v.setKeyName(value.getKeyName());

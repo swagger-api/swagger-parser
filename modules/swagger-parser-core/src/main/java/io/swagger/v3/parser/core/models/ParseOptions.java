@@ -23,6 +23,8 @@ public class ParseOptions {
     private List<String> remoteRefBlockList;
     private boolean explicitStyleAndExplode = true;
     private boolean explicitObjectSchema = true;
+    private Integer connectionTimeout;
+    private Integer readTimeout;
 
 
     public boolean isResolve() {
@@ -188,4 +190,19 @@ public class ParseOptions {
         this.explicitObjectSchema = explicitObjectSchema;
     }
 
+    public Integer getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(Integer connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public Integer getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Integer readTimeout) {
+        this.readTimeout = readTimeout;
+    }
 }
