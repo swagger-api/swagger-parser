@@ -65,11 +65,8 @@ public class PathsProcessor {
             PathItem pathItem = pathMap.get(pathStr);
 
             if (pathItem.get$ref() != null) {
-
                 PathItem resolvedPath = processReferencePath(pathItem);
-
                 String pathRef = pathItem.get$ref().split("#")[0];
-
                 if (resolvedPath != null) {
                     updateRefs(resolvedPath, pathRef);
                     //we need to put the resolved path into swagger object
@@ -83,7 +80,6 @@ public class PathsProcessor {
             //at this point we can process this path
             final List<Parameter> processedPathParameters = parameterProcessor.processParameters(pathItem.getParameters());
             pathItem.setParameters(processedPathParameters);
-
 
             final Map<PathItem.HttpMethod, Operation> operationMap = pathItem.readOperationsMap();
 
