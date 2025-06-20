@@ -31,6 +31,8 @@ public class RemoteUrl {
 
 
     private static final String TRUST_ALL = String.format("%s.trustAll", RemoteUrl.class.getName());
+    private static final String CONNECT_TIMEOUT = String.format("%s.connectTimeout", RemoteUrl.class.getName());
+    private static final String READ_TIMEOUT = String.format("%s.readTimeout", RemoteUrl.class.getName());
     private static final ConnectionConfigurator CONNECTION_CONFIGURATOR = createConnectionConfigurator();
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
     private static final String ACCEPT_HEADER_VALUE = "application/json, application/yaml, */*";
@@ -141,6 +143,21 @@ public class RemoteUrl {
                 } else {
                     conn = inUrl.openConnection();
                 }
+                Integer connectTimeout = System.getProperty(CONNECT_TIMEOUT) != null ? Integer.parseInt(System.getProperty(CONNECT_TIMEOUT) : null;
+                if (connectTimeout == null) {
+                    connectTimeout = System.getenv(CONNECT_TIMEOUT) != null ? Integer.parseInt(System.getenv(CONNECT_TIMEOUT)) : null;
+                }
+                Integer readTimeout = System.getProperty(READ_TIMEOUT) != null ? Integer.parseInt(System.getProperty(READ_TIMEOUT)) : null;
+                if (readTimeout == null) {
+                    readTimeout = System.getenv(READ_TIMEOUT) != null ? Integer.parseInt(System.getenv(READ_TIMEOUT)) : null;
+                }
+                if (connectTimeout != null && connectTimeout > 0) {
+                    conn.setConnectTimeout(connectTimeout);
+                }
+                if (readTimeout != null && readTimeout > 0) {
+                    conn.setReadTimeout(readTimeout);
+                }
+
                 CONNECTION_CONFIGURATOR.process(conn);
                 for (AuthorizationValue item : header) {
                     conn.setRequestProperty(item.getKeyName(), item.getValue());
