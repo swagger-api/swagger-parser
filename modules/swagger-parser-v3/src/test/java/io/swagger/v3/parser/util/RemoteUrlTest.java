@@ -8,6 +8,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,8 +21,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static io.swagger.v3.parser.util.RemoteUrl.CONNECTION_TIMEOUT;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class RemoteUrlTest {
 
@@ -127,5 +132,24 @@ public class RemoteUrlTest {
                     .withHeader("Content-Type", "application/json")
                 ));
         return expectedBody;
+    }
+
+    @Test
+    public void testConnectionTimeoutEnforced() throws Exception {
+        System.setProperty("io.swagger.v3.parser.util.RemoteUrl.trustAll", "true");
+        RemoteUrl.ConnectionConfigurator configurator = RemoteUrl.createConnectionConfigurator();
+        URL url = new URL("https://10.255.255.1"); // non-routable IP to simulate timeout
+        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+
+        configurator.process(conn);
+
+        long start = System.nanoTime();
+        try {
+            conn.connect();
+        } catch (SocketTimeoutException e) {
+            long duration = (System.nanoTime() - start) / 1_000_000; // Convert nanoseconds to milliseconds
+            assertTrue(duration >= CONNECTION_TIMEOUT - 500, "Timeout was too short");
+            assertTrue(duration <= CONNECTION_TIMEOUT + 2000, "Timeout was not enforced properly (took too long)");
+        }
     }
 }

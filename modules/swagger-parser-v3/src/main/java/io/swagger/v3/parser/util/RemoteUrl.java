@@ -14,7 +14,11 @@ import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -35,8 +39,10 @@ public class RemoteUrl {
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
     private static final String ACCEPT_HEADER_VALUE = "application/json, application/yaml, */*";
     private static final String USER_AGENT_HEADER_VALUE = "Apache-HttpClient/Swagger";
+    static final int CONNECTION_TIMEOUT = 30000;
+    static final int READ_TIMEOUT = 60000;
 
-    private static ConnectionConfigurator createConnectionConfigurator() {
+    static ConnectionConfigurator createConnectionConfigurator() {
         if (Boolean.parseBoolean(System.getProperty(TRUST_ALL))) {
             try {
                 // Create a trust manager that does not validate certificate chains
@@ -73,6 +79,8 @@ public class RemoteUrl {
                             final HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
                             httpsConnection.setSSLSocketFactory(sf);
                             httpsConnection.setHostnameVerifier(trustAllNames);
+                            httpsConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                            httpsConnection.setReadTimeout(READ_TIMEOUT);
                         }
                     }
                 };
@@ -86,7 +94,8 @@ public class RemoteUrl {
 
             @Override
             public void process(URLConnection connection) {
-                // Do nothing
+                connection.setConnectTimeout(CONNECTION_TIMEOUT);
+                connection.setReadTimeout(READ_TIMEOUT);
             }
         };
     }
@@ -198,7 +207,7 @@ public class RemoteUrl {
         to.add(value);
     }
 
-    private interface ConnectionConfigurator {
+    interface ConnectionConfigurator {
 
         void process(URLConnection connection);
     }
