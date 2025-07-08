@@ -114,7 +114,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.1.30</version>
+  <version>2.1.31</version>
 </dependency>
 ```
 
