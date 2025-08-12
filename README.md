@@ -114,7 +114,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.1.29</version>
+  <version>2.1.31</version>
 </dependency>
 ```
 
@@ -654,6 +654,21 @@ components:
           type: string
           example: "94022"
 ```
+#### 5. explicitObjectSchema:
+
+```java
+ParseOptions parseOptions = new ParseOptions();
+parseOptions.setResolve(true); // implicit
+parseOptions.setResolveFully(true);
+parseOptions.setResolveCombinators(false);
+parseOptions.setExplicitObjectSchema(false); // default is true
+final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions);
+```
+
+This option allows you to customize the processing of schema properties when the type is not specified. By default it is set to `true`.
+- `true` : when the type is not defined for property, ‘object’ is set.
+- `false` : the property remains undefined when no type is specified
+It's only applied when `resolveFully` is set to `true`.
 
 ### Extensions
 This project has a core artifact--`swagger-parser`, which uses Java Service Provider Interface (SPI) so additional extensions can be added. 

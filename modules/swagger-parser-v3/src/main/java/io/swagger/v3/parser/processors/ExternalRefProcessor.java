@@ -794,7 +794,6 @@ public final class ExternalRefProcessor {
         if(renamedRef != null) {
             return renamedRef;
         }
-
         final Parameter parameter = cache.loadRef($ref, refFormat, Parameter.class);
 
         if(parameter == null) {

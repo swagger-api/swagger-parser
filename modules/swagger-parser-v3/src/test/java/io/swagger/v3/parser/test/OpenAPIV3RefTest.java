@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.testng.Assert;
@@ -33,6 +35,31 @@ public class OpenAPIV3RefTest {
         options.setResolve(true);
         oas = new OpenAPIV3Parser().read("oas3-refs-test/openapi.json", null, options);
     }
+
+    @Test
+    public void testRefContainingDot() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("resolve-dot-containing-ref/standaloneSpec.yaml", null, options);
+
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertTrue(result.getMessages().isEmpty(), "No error messages should be present");
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters());
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters().get(0).getName(), "FbtPrincipalIdentity");
+    }
+
+    @Test
+    public void testExternalRefContainingDot() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("resolve-dot-containing-ref/externalRefSpec.yaml", null, options);
+
+        Assert.assertNotNull(result.getOpenAPI());
+        Assert.assertTrue(result.getMessages().isEmpty(), "No error messages should be present");
+        Assert.assertNotNull(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters());
+        Assert.assertEquals(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters().get(0).getName(), "FbtPrincipalIdentity");
+    }
+
     @Test
     public void testParameterExampleRefProcessed() {
         String paramName = "correlation_id";
@@ -85,3 +112,4 @@ public class OpenAPIV3RefTest {
         assertEquals(adopterAlias.getItems().getAllOf().size(), 2, "Processed schemas items");
     }
 }
+

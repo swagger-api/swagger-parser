@@ -22,6 +22,7 @@ public class ParseOptions {
     private List<String> remoteRefAllowList;
     private List<String> remoteRefBlockList;
     private boolean explicitStyleAndExplode = true;
+    private boolean explicitObjectSchema = true;
 
 
     public boolean isResolve() {
@@ -177,6 +178,14 @@ public class ParseOptions {
 
     public void setExplicitStyleAndExplode(boolean explicitStyleAndExplode) {
         this.explicitStyleAndExplode = explicitStyleAndExplode;
+    }
+
+    public boolean isExplicitObjectSchema() {
+        return explicitObjectSchema;
+    }
+
+    public void setExplicitObjectSchema(boolean explicitObjectSchema) {
+        this.explicitObjectSchema = explicitObjectSchema;
     }
 
 }

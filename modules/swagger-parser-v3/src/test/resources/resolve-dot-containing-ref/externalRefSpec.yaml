@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+  description: Test API with dot-containing $ref
+paths:
+  /endpoint:
+    get:
+      summary: summary
+      operationId: id
+      description: Test description
+      parameters:
+        - $ref: 'resolve-dot-containing-ref/externalRefDomain.yaml#/components/parameters/FbtPrincipalIdentity_V3.1'
+      responses:
+        '200':
+          description: get description
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/item'
+components:
+  schemas:
+    item:
+      type: object

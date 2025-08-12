@@ -43,8 +43,9 @@ public class ParameterProcessor {
         if($ref != null){
             RefFormat refFormat = computeRefFormat(parameter.get$ref());
             if (isAnExternalRefFormat(refFormat)){
-                final String newRef = externalRefProcessor.processRefToExternalParameter($ref, refFormat);
+                String newRef = externalRefProcessor.processRefToExternalParameter($ref, refFormat);
                 if (newRef != null) {
+                    newRef = "#/components/parameters/" + newRef;
                     parameter.set$ref(newRef);
                 }
             }
@@ -75,11 +76,9 @@ public class ParameterProcessor {
     }
 
    public List<Parameter> processParameters(List<Parameter> parameters) {
-
         if (parameters == null) {
             return null;
         }
-
         final List<Parameter> processedPathLevelParameters = new ArrayList<>();
         final List<Parameter> refParameters = new ArrayList<>();
 
@@ -98,7 +97,6 @@ public class ParameterProcessor {
                     //result.warning(location, "The parameter should use Reference Object to link to parameters that are defined at the OpenAPI Object's components/parameters.");
                     continue;
                 }
-
                 if(resolvedParameter == null) {
                     // can't resolve it!
                     processedPathLevelParameters.add(parameter);

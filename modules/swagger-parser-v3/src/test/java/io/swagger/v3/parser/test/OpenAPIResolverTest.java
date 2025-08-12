@@ -45,6 +45,7 @@ import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -597,7 +598,7 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
-        ResolverFully resolverUtil = new ResolverFully();
+        ResolverFully resolverUtil = new ResolverFully(options);
         resolverUtil.resolveFully(openAPI);
 
 
@@ -643,7 +644,7 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
-        ResolverFully resolverUtil = new ResolverFully();
+        ResolverFully resolverUtil = new ResolverFully(options);
         resolverUtil.resolveFully(openAPI);
         Parameter param = openAPI.getPaths().get("/test/method").getPost().getParameters().get(0);
 
@@ -1474,6 +1475,30 @@ public class OpenAPIResolverTest {
         final String actualLocation = "C:/Users/ggregory/git/r/api-gateway/ais-swagger-test-fixtures/src/test/resources/APIs-guru/openapi-directory-master/APIs/clearblade.com/3.0/swagger.yaml";
         final OpenAPI output = new OpenAPIV3Parser().read(actualLocation, null, options);
         new OpenAPIResolver(output, null, actualLocation).resolve();
+    }
+
+    @Test(dataProvider = "explicitObjectSchemaProvider")
+    public void testIssue2113(boolean explicitObjectSchema) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setExplicitObjectSchema(explicitObjectSchema);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue_2113.yaml", auths, options).getOpenAPI();
+        ObjectSchema schema = (ObjectSchema) openAPI.getPaths().get("/foo").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        if (explicitObjectSchema) {
+            assertEquals(schema.getProperties().get("goo").getType(), "object");
+        } else {
+            assertNull(schema.getProperties().get("goo").getType());
+        }
+    }
+
+    @DataProvider(name = "explicitObjectSchemaProvider")
+    public Object[][] explicitObjectSchemaProvider() {
+        return new Object[][] {
+                { true },
+                { false }
+        };
     }
     
 }

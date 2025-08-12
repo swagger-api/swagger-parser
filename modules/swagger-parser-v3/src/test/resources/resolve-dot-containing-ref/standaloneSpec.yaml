@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+  description: Test API with dot-containing $ref
+paths:
+  /endpoint:
+    get:
+      summary: summary
+      operationId: id
+      description: Test description
+      parameters:
+        - $ref: '#/components/parameters/FbtPrincipalIdentity_V3.1'
+      responses:
+        '200':
+          description: get description
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/item'
+components:
+  parameters:
+    FbtPrincipalIdentity_V3.1:
+      name: FbtPrincipalIdentity
+      in: query
+      schema:
+        type: string
+    FbtPrincipalIdentity_V31:
+      name: FbtPrincipalIdentity
+      in: query
+      schema:
+        type: string
+  schemas:
+    item:
+      type: object
