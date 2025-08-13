@@ -169,7 +169,7 @@ public final class ExternalRefProcessor {
                 } else if (additionalProperty instanceof ArraySchema) {
                     ArraySchema arrayProp = (ArraySchema) additionalProperty;
                     if (arrayProp.getItems() != null && arrayProp.getItems().get$ref() != null &&
-                            StringUtils.isNotBlank(arrayProp.get$ref())) {
+                            StringUtils.isNotBlank(arrayProp.getItems().get$ref())) {
                         processRefSchema(arrayProp.getItems(), file);
                     }
                 } else if (additionalProperty.getAdditionalProperties() != null && additionalProperty.getAdditionalProperties() instanceof Schema) {
