@@ -29,6 +29,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 
 public class ExternalRefProcessorTest {
@@ -252,6 +253,24 @@ public class ExternalRefProcessorTest {
 
         Schema anyOfInlineProduct = (Schema)((Schema)components.get("ResponseAnyOf").getAnyOf().get(1)).getProperties().get("product");
         assertThat(anyOfInlineProduct.get$ref(), is("#/components/schemas/Product"));
+    }
+
+    @Test
+    public void testAdditionalPropertiesReferenceResolution() {
+        String inputSpec = "src/test/resources/issue-2218/main.yaml";
+        List<AuthorizationValue> authorizationValues = null;
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(inputSpec, authorizationValues, options);
+
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        assertNotNull(schemas, "Schemas should not be null");
+        Assert.assertTrue(schemas.containsKey("FlagsOfFlags"), "FlagsOfFlags schema should be resolved and available in components");
+        Assert.assertTrue(schemas.containsKey("Flags"), "Flags schema should be resolved and available in components");
+        Assert.assertTrue(schemas.containsKey("Flag"), "Flag schema should be resolved and available in components");
     }
 
 }
