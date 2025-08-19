@@ -112,7 +112,7 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Foo").get$ref(), "#/components/schemas/foomodel");
+        Assert.assertEquals(result.getOpenAPI().getComponents().getSchemas().get("Foo").get$ref(), "#/components/schemas/foo.model");
     }
 
     @Test
