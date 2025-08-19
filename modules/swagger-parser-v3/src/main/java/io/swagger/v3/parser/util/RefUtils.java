@@ -3,20 +3,16 @@ package io.swagger.v3.parser.util;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.processors.ExternalRefProcessor;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RefUtils {
 
@@ -225,8 +221,6 @@ public class RefUtils {
     }
 
     private static String readAll(Path path) throws IOException {
-        try (InputStream inputStream = new FileInputStream(path.toFile())) {
-            return IOUtils.toString(inputStream, UTF_8);
-        }
+        return new String(Files.readAllBytes(path), UTF_8);
     }
 }
