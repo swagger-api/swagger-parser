@@ -35,6 +35,7 @@ public class ReferenceVisitor extends AbstractVisitor {
     protected OpenAPI31Traverser openAPITraverser;
     protected Reference reference;
     protected DereferencerContext context;
+    private PermittedUrlsChecker permittedUrlsChecker;
 
     public ReferenceVisitor(
             Reference reference,
@@ -59,6 +60,8 @@ public class ReferenceVisitor extends AbstractVisitor {
         this.visited = visited;
         this.visitedMap = visitedMap;
         this.context = context;
+        this.permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getRemoteRefAllowList(),
+                context.getParseOptions().getRemoteRefBlockList());
     }
 
     public String toBaseURI(String uri) throws Exception{
@@ -193,11 +196,11 @@ public class ReferenceVisitor extends AbstractVisitor {
     }
 
     @Override
-    public String readHttp(String uri, List<AuthorizationValue> auths) throws Exception {
+    public String readHttp(String uri, List<AuthorizationValue> auths, PermittedUrlsChecker permittedUrlsChecker) throws Exception {
         if(context.getParseOptions().isSafelyResolveURL()){
-            checkUrlIsPermitted(uri);
+            permittedUrlsChecker.verify(uri);
         }
-        return RemoteUrl.urlToString(uri, auths);
+        return RemoteUrl.urlToString(uri, auths, permittedUrlsChecker);
     }
 
     public<T> T resolveRef(T visiting, String ref, Class<T> clazz, BiFunction<T, ReferenceVisitor, T> traverseFunction){
@@ -313,13 +316,6 @@ public class ReferenceVisitor extends AbstractVisitor {
             }
         }
 
-        return deserializeIntoTree(readURI(absoluteUri, auths));
-    }
-
-    protected void checkUrlIsPermitted(String refSet) throws HostDeniedException {
-        PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getRemoteRefAllowList(),
-                context.getParseOptions().getRemoteRefBlockList());
-
-        permittedUrlsChecker.verify(refSet);
+        return deserializeIntoTree(readURI(absoluteUri, auths, permittedUrlsChecker));
     }
 }
