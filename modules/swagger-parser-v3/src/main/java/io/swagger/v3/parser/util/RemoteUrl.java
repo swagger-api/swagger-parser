@@ -84,13 +84,9 @@ public class RemoteUrl {
                 LOGGER.error("Not Supported", e);
             }
         }
-        return new ConnectionConfigurator() {
-
-            @Override
-            public void process(URLConnection connection) {
-                connection.setConnectTimeout(CONNECTION_TIMEOUT);
-                connection.setReadTimeout(READ_TIMEOUT);
-            }
+        return connection -> {
+            connection.setConnectTimeout(CONNECTION_TIMEOUT);
+            connection.setReadTimeout(READ_TIMEOUT);
         };
     }
 
@@ -121,17 +117,7 @@ public class RemoteUrl {
                 final URL inUrl = new URL(cleanUrl(url));
                 final List<AuthorizationValue> query = new ArrayList<>();
                 final List<AuthorizationValue> header = new ArrayList<>();
-                if (auths != null && !auths.isEmpty()) {
-                    for (AuthorizationValue auth : auths) {
-                        if (auth.getUrlMatcher() != null && auth.getUrlMatcher().test(inUrl)) {
-                            if ("query".equals(auth.getType())) {
-                                appendValue(inUrl, auth, query);
-                            } else if ("header".equals(auth.getType())) {
-                                appendValue(inUrl, auth, header);
-                            }
-                        }
-                    }
-                }
+                filterAndAssignAuthValues(auths, inUrl, query, header);
                 conn = prepareConnection(query, inUrl);
                 CONNECTION_CONFIGURATOR.process(conn);
                 setRequestHeaders(header, conn);
@@ -158,6 +144,20 @@ public class RemoteUrl {
         } catch (Exception e) {
             LOGGER.error("unable to read {}", e.getMessage());
             throw e;
+        }
+    }
+
+    private static void filterAndAssignAuthValues(List<AuthorizationValue> auths, URL inUrl, List<AuthorizationValue> query, List<AuthorizationValue> header) {
+        if (auths != null && !auths.isEmpty()) {
+            for (AuthorizationValue auth : auths) {
+                if (auth.getUrlMatcher() != null && auth.getUrlMatcher().test(inUrl)) {
+                    if ("query".equals(auth.getType())) {
+                        appendValue(inUrl, auth, query);
+                    } else if ("header".equals(auth.getType())) {
+                        appendValue(inUrl, auth, header);
+                    }
+                }
+            }
         }
     }
 
@@ -209,15 +209,13 @@ public class RemoteUrl {
 
     private static boolean isRedirect(HttpURLConnection conn) throws IOException {
         int code = conn.getResponseCode();
-        return code == 301 || code == 302 || code == 307 || code == 308;
+        return code == 301 || code == 302 || code == 303 || code == 307 || code == 308;
     }
 
     private static void appendValue(URL url, AuthorizationValue value, Collection<AuthorizationValue> to) {
-        if (value instanceof ManagedValue) {
-            if (!((ManagedValue) value).process(url)) {
+        if (value instanceof ManagedValue && !((ManagedValue) value).process(url)) {
                 return;
             }
-        }
         to.add(value);
     }
 
