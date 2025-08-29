@@ -55,20 +55,13 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-version}</version>
                 <dependencies>
-                    <!--dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit4</artifactId>
-                        <version>3.0.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-testng</artifactId>
-                        <version>3.1.2</version>
-                    </dependency-->
                 </dependencies>
                 <configuration>
                     <testNGArtifactName>none:none</testNGArtifactName>
                     <argLine>-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar --add-opens java.base/java.lang=ALL-UNNAMED -Djdk.attach.allowAttachSelf</argLine>
+                    <systemPropertyVariables>
+                        <io.swagger.v3.parser.util.RemoteUrl.trustAll>true</io.swagger.v3.parser.util.RemoteUrl.trustAll>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>

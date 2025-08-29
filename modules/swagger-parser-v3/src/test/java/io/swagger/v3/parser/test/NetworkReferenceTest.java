@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.test;
 
 
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
@@ -12,6 +11,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import static org.testng.Assert.assertTrue;
 
 public class NetworkReferenceTest {
     @Mocked
-    public RemoteUrl remoteUrl = new RemoteUrl();
+    public RemoteUrl remoteUrl;
 
     private static String issue_323_yaml, issue_323_events_yaml, issue_323_paging_yaml, issue_323_bar_yaml;
     private static String issue_328_yaml, issue_328_events_yaml, issue_328_paging_yaml, issue_328_bar_yaml;
@@ -39,55 +39,55 @@ public class NetworkReferenceTest {
     private static String issue_407_json;
     private static String issue_411_server, issue_411_components;
     private static String issue_742_json;
-    private static String issue_443_yaml,issue_443_ref_yaml ;
+    private static String issue_443_yaml, issue_443_ref_yaml;
 
     static {
         try {
-            issue_323_yaml          = readFile("src/test/resources/nested-file-references/issue-323.yaml");
-            issue_323_events_yaml   = readFile("src/test/resources/nested-file-references/eventsCase9.yaml");
-            issue_323_paging_yaml   = readFile("src/test/resources/nested-file-references/common/pagingWithFolderRef.yaml");
-            issue_323_bar_yaml      = readFile("src/test/resources/nested-file-references/common/common2/bar.yaml");
+            issue_323_yaml = readFile("src/test/resources/nested-file-references/issue-323.yaml");
+            issue_323_events_yaml = readFile("src/test/resources/nested-file-references/eventsCase9.yaml");
+            issue_323_paging_yaml = readFile("src/test/resources/nested-file-references/common/pagingWithFolderRef.yaml");
+            issue_323_bar_yaml = readFile("src/test/resources/nested-file-references/common/common2/bar.yaml");
 
-            issue_328_yaml          = readFile("src/test/resources/nested-file-references/issue-328.yaml");
-            issue_328_events_yaml   = readFile("src/test/resources/nested-file-references/issue-328-events.yaml");
-            issue_328_paging_yaml   = readFile("src/test/resources/nested-file-references/common/issue-328-paging.yaml");
-            issue_328_bar_yaml      = readFile("src/test/resources/nested-file-references/common/common2/issue-328-bar.yaml");
+            issue_328_yaml = readFile("src/test/resources/nested-file-references/issue-328.yaml");
+            issue_328_events_yaml = readFile("src/test/resources/nested-file-references/issue-328-events.yaml");
+            issue_328_paging_yaml = readFile("src/test/resources/nested-file-references/common/issue-328-paging.yaml");
+            issue_328_bar_yaml = readFile("src/test/resources/nested-file-references/common/common2/issue-328-bar.yaml");
 
-            issue_330_yaml          = readFile("src/test/resources/nested-network-references/issue-330.yaml");
-            issue_330_paging_yaml   = readFile("src/test/resources/nested-network-references/common/issue-330-paging.yaml");
-            issue_330_users_yaml    = readFile("src/test/resources/nested-network-references/common/issue-330-users.yaml");
+            issue_330_yaml = readFile("src/test/resources/nested-network-references/issue-330.yaml");
+            issue_330_paging_yaml = readFile("src/test/resources/nested-network-references/common/issue-330-paging.yaml");
+            issue_330_users_yaml = readFile("src/test/resources/nested-network-references/common/issue-330-users.yaml");
             issue_330_entities_yaml = readFile("src/test/resources/nested-network-references/common/issue-330-entities.yaml");
 
-            issue_335_json          = readFile("src/test/resources/nested-file-references/issue-335.json");
-            issue_335_bar_json      = readFile("src/test/resources/nested-file-references/issue-335-bar.json");
+            issue_335_json = readFile("src/test/resources/nested-file-references/issue-335.json");
+            issue_335_bar_json = readFile("src/test/resources/nested-file-references/issue-335-bar.json");
 
-            issue_407_json          = readFile("src/test/resources/petstore.yaml");
+            issue_407_json = readFile("src/test/resources/petstore.yaml");
 
-            issue_411_server        = readFile("src/test/resources/nested-network-references/issue-411-server.yaml");
-            issue_411_components    = readFile("src/test/resources/nested-network-references/issue-411-remote2.yaml");
+            issue_411_server = readFile("src/test/resources/nested-network-references/issue-411-server.yaml");
+            issue_411_components = readFile("src/test/resources/nested-network-references/issue-411-remote2.yaml");
 
-            issue_742_json          = readFile("src/test/resources/issue-742.json");
-            issue_443_yaml          = readFile("src/test/resources/swos-443/root.yaml");
-            issue_443_ref_yaml      = readFile("src/test/resources/swos-443/ref.yaml");
-        }
-        catch(Exception e) {
+            issue_742_json = readFile("src/test/resources/issue-742.json");
+            issue_443_yaml = readFile("src/test/resources/swos-443/root.yaml");
+            issue_443_ref_yaml = readFile("src/test/resources/swos-443/ref.yaml");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Test(description = "option true, adds Original Location to messages when ref is remote")
-    public void testValidateExternalRefsTrueRemote() throws Exception{
+    public void testValidateExternalRefsTrueRemote() throws Exception {
         ParseOptions options = new ParseOptions();
         options.setValidateExternalRefs(true);
         options.setResolve(true);
 
         new Expectations() {
             {
-                remoteUrl.urlToString("http://localhost:8080/swos-443/root.yaml", new ArrayList<>());
+                RemoteUrl.urlToString("http://localhost:8080/swos-443/root.yaml", new ArrayList<>());
                 result = issue_443_yaml;
-                remoteUrl.urlToString("http://localhost:8080/swos-443/ref.yaml", new ArrayList<>());
+                RemoteUrl.urlToString("http://localhost:8080/swos-443/ref.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
                 result = issue_443_ref_yaml;
-            }};
+            }
+        };
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8080/swos-443/root.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
 
@@ -119,16 +119,16 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue323() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://localhost:8080/nested-file-references/issue-323.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/issue-323.yaml", new ArrayList<>());
             result = issue_323_yaml;
 
-            remoteUrl.urlToString("http://localhost:8080/nested-file-references/eventsCase9.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/eventsCase9.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_323_events_yaml;
 
-            remoteUrl.urlToString("http://localhost:8080/nested-file-references/common/pagingWithFolderRef.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/common/pagingWithFolderRef.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_323_paging_yaml;
 
-            remoteUrl.urlToString("http://localhost:8080/nested-file-references/common/common2/bar.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/common/common2/bar.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_323_bar_yaml;
         }};
 
@@ -149,16 +149,16 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue328() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328.yaml", new ArrayList<>());
             result = issue_328_yaml;
 
-            remoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328-events.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328-events.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_328_events_yaml;
 
-            remoteUrl.urlToString("http://localhost:8080/resources/swagger/common/issue-328-paging.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/common/issue-328-paging.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_328_paging_yaml;
 
-            remoteUrl.urlToString("http://localhost:8080/resources/swagger/common/common2/issue-328-bar.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/common/common2/issue-328-bar.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_328_bar_yaml;
         }};
 
@@ -178,16 +178,16 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue330() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<>());
             result = issue_330_yaml;
 
-            remoteUrl.urlToString("http://server1/resources/common/paging.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://server1/resources/common/paging.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_330_paging_yaml;
 
-            remoteUrl.urlToString("http://server1/resources/common/users.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://server1/resources/common/users.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_330_users_yaml;
 
-            remoteUrl.urlToString("http://server2/resources/common/entities.yaml", new ArrayList<>());
+            RemoteUrl.urlToString("http://server2/resources/common/entities.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_330_entities_yaml;
         }};
         ParseOptions options = new ParseOptions();
@@ -208,10 +208,10 @@ public class NetworkReferenceTest {
     @Test
     public void testIssue335() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<>());
+            RemoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<>());
             result = issue_335_json;
 
-            remoteUrl.urlToString("http://server1/resources/Bar.json", new ArrayList<>());
+            RemoteUrl.urlToString("http://server1/resources/Bar.json", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_335_bar_json;
         }};
 
@@ -231,7 +231,7 @@ public class NetworkReferenceTest {
     @Test
     public void testPathReference() throws Exception {
         new Expectations() {{
-            remoteUrl.urlToString("http://petstore.swagger.io/v2/swagger.json", new ArrayList<>());
+            RemoteUrl.urlToString("http://petstore.swagger.io/v2/swagger.json", new ArrayList<>(), (PermittedUrlsChecker) any);
             result = issue_407_json;
 
         }};
@@ -251,21 +251,21 @@ public class NetworkReferenceTest {
 
         final SwaggerParseResult result = parser.readContents(yaml);
         Assert.assertNotNull(result.getOpenAPI());
-        assertTrue(result.getMessages().size() == 0);
-        assertTrue(result.getOpenAPI().getComponents().getSchemas().size() == 3);
+        assertEquals(result.getMessages().size(), 0);
+        assertEquals(result.getOpenAPI().getComponents().getSchemas().size(), 3);
     }
 
     @Test
     public void testIssue411() throws Exception {
-        final List< AuthorizationValue > auths = new ArrayList<>();
+        final List<AuthorizationValue> auths = new ArrayList<>();
         AuthorizationValue auth = new AuthorizationValue("Authorization", "OMG_SO_SEKR3T", "header");
         auths.add(auth);
 
         new Expectations() {{
-            remoteUrl.urlToString("http://remote1/resources/swagger.yaml", auths);
+            RemoteUrl.urlToString("http://remote1/resources/swagger.yaml", auths);
             result = issue_411_server;
 
-            remoteUrl.urlToString("http://remote2/resources/foo", auths);
+            RemoteUrl.urlToString("http://remote2/resources/foo", auths, (PermittedUrlsChecker) any);
             result = issue_411_components;
         }};
 
@@ -278,9 +278,9 @@ public class NetworkReferenceTest {
         OpenAPI swagger = result.getOpenAPI();
         assertNotNull(swagger.getPaths().get("/health"));
         PathItem health = swagger.getPaths().get("/health");
-        assertTrue(health.getGet().getParameters().size() == 0);
+        assertEquals(health.getGet().getParameters().size(), 0);
         Schema responseRef = health.getGet().getResponses().get("200").getContent().get("*/*").getSchema();
-        assertTrue(responseRef.get$ref() != null);
+        assertNotNull(responseRef.get$ref());
 
 
         assertEquals(responseRef.get$ref(), "#/components/schemas/Success");
@@ -299,7 +299,7 @@ public class NetworkReferenceTest {
         assertNotNull(error);
         Schema errorProp = error.getContent().get("*/*").getSchema();
         assertNotNull(errorProp);
-        assertTrue(errorProp.get$ref() != null);
+        assertNotNull(errorProp.get$ref());
         assertEquals(errorProp.get$ref(), "#/components/schemas/Error");
 
         assertTrue(swagger.getComponents().getSchemas().get("Error") instanceof Schema);
@@ -307,10 +307,10 @@ public class NetworkReferenceTest {
 
     @Test
     public void testIssue742() throws Exception {
-        final List< AuthorizationValue > auths = new ArrayList<>();
+        final List<AuthorizationValue> auths = new ArrayList<>();
 
         new Expectations() {{
-            remoteUrl.urlToString("http://www.example.io/one/two/swagger.json", auths);
+            RemoteUrl.urlToString("http://www.example.io/one/two/swagger.json", auths);
             result = issue_742_json;
         }};
 
@@ -321,18 +321,18 @@ public class NetworkReferenceTest {
 
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertNotNull(result.getOpenAPI().getServers());
-        Assert.assertEquals(result.getOpenAPI().getServers().size(), 4);
-        Assert.assertEquals(result.getOpenAPI().getServers().get(0).getDescription(), "An absolute path");
-        Assert.assertEquals(result.getOpenAPI().getServers().get(0).getUrl(), "https://api.absolute.org/v2");
-        Assert.assertEquals(result.getOpenAPI().getServers().get(1).getDescription(), "Server relative to root path");
-        Assert.assertEquals(result.getOpenAPI().getServers().get(1).getUrl(), "http://www.example.io/api/v2");
-        Assert.assertEquals(result.getOpenAPI().getServers().get(2).getDescription(), "Server relative path 1");
-        Assert.assertEquals(result.getOpenAPI().getServers().get(2).getUrl(), "http://www.example.io/one/two/path/v2");
-        Assert.assertEquals(result.getOpenAPI().getServers().get(3).getDescription(), "Server relative path 2");
-        Assert.assertEquals(result.getOpenAPI().getServers().get(3).getUrl(), "http://www.example.io/one/v2");
+        Assert.assertEquals(4, result.getOpenAPI().getServers().size());
+        Assert.assertEquals("An absolute path", result.getOpenAPI().getServers().get(0).getDescription());
+        Assert.assertEquals("https://api.absolute.org/v2", result.getOpenAPI().getServers().get(0).getUrl());
+        Assert.assertEquals("Server relative to root path", result.getOpenAPI().getServers().get(1).getDescription());
+        Assert.assertEquals("http://www.example.io/api/v2", result.getOpenAPI().getServers().get(1).getUrl());
+        Assert.assertEquals("Server relative path 1", result.getOpenAPI().getServers().get(2).getDescription());
+        Assert.assertEquals("http://www.example.io/one/two/path/v2", result.getOpenAPI().getServers().get(2).getUrl());
+        Assert.assertEquals("Server relative path 2", result.getOpenAPI().getServers().get(3).getDescription());
+        Assert.assertEquals("http://www.example.io/one/v2", result.getOpenAPI().getServers().get(3).getUrl());
     }
 
     static String readFile(String name) throws Exception {
-        return new String(Files.readAllBytes(new File(name).toPath()), Charset.forName("UTF-8"));
+        return new String(Files.readAllBytes(new File(name).toPath()), StandardCharsets.UTF_8);
     }
 }
