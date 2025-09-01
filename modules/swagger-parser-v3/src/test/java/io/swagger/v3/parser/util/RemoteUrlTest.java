@@ -2,16 +2,19 @@ package io.swagger.v3.parser.util;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -35,15 +38,21 @@ public class RemoteUrlTest {
 
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         wireMockServer.stop();
     }
 
     @BeforeMethod
-    public void setUp() throws Exception {
-        wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
+    public void setUp() {
+        System.setProperty("io.swagger.v3.parser.util.RemoteUrl.trustAll", "true");
+        wireMockServer = new WireMockServer(
+                WireMockConfiguration.options()
+                        .port(0) // disables HTTP
+                        .httpsPort(WIRE_MOCK_PORT) // enables HTTPS
+        );
         wireMockServer.start();
-        WireMock.configureFor(WIRE_MOCK_PORT);
+        WireMock.configureFor("https", LOCALHOST, WIRE_MOCK_PORT); // Use HTTPS for WireMock
+
     }
 
     @Test
@@ -62,7 +71,7 @@ public class RemoteUrlTest {
         assertEquals(actualBody, expectedBody);
 
         verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
-            .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER)));
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER)));
     }
 
     @Test
@@ -73,13 +82,13 @@ public class RemoteUrlTest {
         final String headerName = "Authorization";
         final String headerValue = "foobar";
         final AuthorizationValue authorizationValue = new AuthorizationValue(headerName, headerValue, "header");
-        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Collections.singletonList(authorizationValue));
 
         assertEquals(actualBody, expectedBody);
 
         verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
-                        .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
-                        .withHeader(headerName, equalTo(headerValue))
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+                .withHeader(headerName, equalTo(headerValue))
         );
     }
 
@@ -91,14 +100,14 @@ public class RemoteUrlTest {
         final String headerName = "Authorization";
         final String headerValue = "foobar";
         final AuthorizationValue authorizationValue = new AuthorizationValue(headerName, headerValue, "header",
-            url -> url.toString().startsWith("http://localhost"));
-        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
+                url -> url.toString().startsWith("https://localhost"));
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Collections.singletonList(authorizationValue));
 
         assertEquals(actualBody, expectedBody);
 
         verify(getRequestedFor(urlEqualTo("/v2/pet/1"))
-                        .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
-                        .withHeader(headerName, equalTo(headerValue))
+                .withHeader("Accept", equalTo(EXPECTED_ACCEPTS_HEADER))
+                .withHeader(headerName, equalTo(headerValue))
         );
     }
 
@@ -110,33 +119,32 @@ public class RemoteUrlTest {
         final String headerValue = "foobar";
         String authorization = "Authorization";
         final AuthorizationValue authorizationValue = new AuthorizationValue(authorization,
-            headerValue, "header", u -> false);
-        final String actualBody = RemoteUrl.urlToString(getUrl(), Arrays.asList(authorizationValue));
+                headerValue, "header", u -> false);
+        final String actualBody = RemoteUrl.urlToString(getUrl(), Collections.singletonList(authorizationValue));
 
         assertEquals(actualBody, expectedBody);
 
         List<LoggedRequest> requests = WireMock.findAll(getRequestedFor(urlEqualTo("/v2/pet/1")));
-        assertEquals(1, requests.size());
+        assertEquals(requests.size(), 1);
         assertFalse(requests.get(0).containsHeader(authorization));
     }
 
     private String getUrl() {
-        return String.format("http://%s:%d/v2/pet/1", LOCALHOST, WIRE_MOCK_PORT);
+        return String.format("https://%s:%d/v2/pet/1", LOCALHOST, WIRE_MOCK_PORT);
     }
 
     private String setupStub() {
         final String expectedBody = "a really good body";
         stubFor(get(urlEqualTo("/v2/pet/1"))
                 .willReturn(aResponse()
-                    .withBody(expectedBody)
-                    .withHeader("Content-Type", "application/json")
+                        .withBody(expectedBody)
+                        .withHeader("Content-Type", "application/json")
                 ));
         return expectedBody;
     }
 
     @Test
     public void testConnectionTimeoutEnforced() throws Exception {
-        System.setProperty("io.swagger.v3.parser.util.RemoteUrl.trustAll", "true");
         RemoteUrl.ConnectionConfigurator configurator = RemoteUrl.createConnectionConfigurator();
         URL url = new URL("https://10.255.255.1"); // non-routable IP to simulate timeout
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -151,5 +159,57 @@ public class RemoteUrlTest {
             assertTrue(duration >= CONNECTION_TIMEOUT - 500, "Timeout was too short");
             assertTrue(duration <= CONNECTION_TIMEOUT + 2000, "Timeout was not enforced properly (took too long)");
         }
+    }
+
+    @Test(expectedExceptions = IOException.class)
+    public void testTooManyRedirectsThrowsException() throws Exception {
+        String nextPath = "/redirect";
+        // Chain 6 redirects
+        for (int i = 0; i < 6; i++) {
+            String target = "/redirect" + (i + 1);
+            stubFor(get(urlEqualTo(nextPath))
+                    .willReturn(aResponse()
+                            .withStatus(302)
+                            .withHeader("Location", wireMockServer.baseUrl() + target)));
+            nextPath = target;
+        }
+
+        // Add stub for /redirect6 to return a 200 OK response, but it's not expected to be reached
+        stubFor(get(urlEqualTo(nextPath))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("Final destination")));
+
+        String startUrl = String.format("https://%s:%d/redirect", LOCALHOST, WIRE_MOCK_PORT);
+
+        try {
+            RemoteUrl.urlToString(startUrl, null, new PermittedUrlsCheckerAllowLocal());
+        } catch (IOException e) {
+            assertTrue(e.getMessage().contains("Too many redirects"));
+            throw e;
+        }
+    }
+
+    @Test(expectedExceptions = HostDeniedException.class)
+    public void testRedirectWithForbiddenProtocolThrowsException() throws Exception {
+        String nextPath = "/redirect";
+        for (int i = 0; i < 3; i++) {
+            String target = "/redirect" + (i + 1);
+            stubFor(get(urlEqualTo(nextPath))
+                    .willReturn(aResponse()
+                            .withStatus(302)
+                            .withHeader("Location", "ftp://localhost/" + target)));
+            nextPath = target;
+        }
+
+        // Add stub for /redirect3 to return a 200 OK response, but it's not expected to be reached
+        stubFor(get(urlEqualTo(nextPath))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("Final destination")));
+
+        String startUrl = String.format("https://%s:%d/redirect", LOCALHOST, WIRE_MOCK_PORT);
+
+        RemoteUrl.urlToString(startUrl, null, new PermittedUrlsCheckerAllowLocal());
     }
 }

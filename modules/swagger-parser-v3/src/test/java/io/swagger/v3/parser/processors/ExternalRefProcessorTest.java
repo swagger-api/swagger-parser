@@ -11,11 +11,11 @@ import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.models.RefFormat;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
-import mockit.Expectations;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,9 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -35,42 +32,33 @@ import static org.testng.Assert.assertNotNull;
 public class ExternalRefProcessorTest {
 
     @Injectable
-	ResolverCache cache;
+    ResolverCache cache;
 
     @Injectable
-	OpenAPI openAPI;
+    OpenAPI openAPI;
 
-    @Injectable Schema mockedModel;
+    @Injectable
+    Schema mockedModel;
 
     @Test
-    public void testProcessRefToExternalDefinition_NoNameConflict() throws Exception {
+    public void testProcessRefToExternalDefinition_NoNameConflict() {
 
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final RefFormat refFormat = RefFormat.URL;
 
         new Expectations() {{
-			cache.getRenamedRef(ref);
-			times = 1;
-			result = null;
+            times = 1;
+
+            cache.getRenamedRef(ref);
 
             cache.loadRef(ref, refFormat, Schema.class);
-            times = 1;
             result = mockedModel;
 
-			openAPI.getComponents();
-			times = 1;
-			result = new Components();
-
-			openAPI.getComponents().getSchemas();
-			times = 1;
-			result = null;
 
             cache.putRenamedRef(ref, "bar");
-            openAPI.getComponents().addSchemas("bar", mockedModel); times=1;
+            openAPI.getComponents().addSchemas("bar", mockedModel);
 
-			cache.addReferencedKey("bar");
-			times = 1;
-			result = null;
+            cache.addReferencedKey("bar");
         }};
 
         String newRef = new ExternalRefProcessor(cache, openAPI).processRefToExternalSchema(ref, refFormat);
@@ -78,140 +66,132 @@ public class ExternalRefProcessorTest {
     }
 
 
-
     @Test
-    public void testNestedExternalRefs(){
-    	final RefFormat refFormat = RefFormat.URL;
+    public void testNestedExternalRefs() {
+        final RefFormat refFormat = RefFormat.URL;
 
-    	//Swagger test instance
-    	OpenAPI testedOpenAPI = new OpenAPI();
+        //Swagger test instance
+        OpenAPI testedOpenAPI = new OpenAPI();
 
-    	//Start with customer, add address property to it
-    	final String customerURL = "http://my.company.com/path/to/customer.json#/definitions/Customer";
+        //Start with customer, add address property to it
+        final String customerURL = "http://my.company.com/path/to/customer.json#/definitions/Customer";
 
-    	final Schema customerModel = new Schema();
-    	Map<String,Schema> custProps = new HashMap<>();
-    	Schema address = new Schema();
-    	final String addressURL = "http://my.company.com/path/to/address.json#/definitions/Address";
-    	address.set$ref(addressURL);
-    	custProps.put("Address", address);
+        final Schema customerModel = new Schema();
+        Map<String, Schema> custProps = new HashMap<>();
+        Schema address = new Schema();
+        final String addressURL = "http://my.company.com/path/to/address.json#/definitions/Address";
+        address.set$ref(addressURL);
+        custProps.put("Address", address);
 
-    	//Create a 'local' reference to something in #/definitions, this should be ignored a no longer result in a null pointer exception
-    	final String loyaltyURL = "#/definitions/LoyaltyScheme";
+        //Create a 'local' reference to something in #/definitions, this should be ignored a no longer result in a null pointer exception
+        final String loyaltyURL = "#/definitions/LoyaltyScheme";
 
-    	Schema loyaltyProp = new Schema();
-    	loyaltyProp.set$ref(loyaltyURL);
-    	loyaltyProp.setName("LoyaltyCardNumber");
-    	List<String> required = new ArrayList<>();
-    	required.add("LoyaltyCardNumber");
-    	loyaltyProp.setRequired(required);
+        Schema loyaltyProp = new Schema();
+        loyaltyProp.set$ref(loyaltyURL);
+        loyaltyProp.setName("LoyaltyCardNumber");
+        List<String> required = new ArrayList<>();
+        required.add("LoyaltyCardNumber");
+        loyaltyProp.setRequired(required);
 
-    	custProps.put("Loyalty", loyaltyProp);
-    	customerModel.setProperties(custProps);
+        custProps.put("Loyalty", loyaltyProp);
+        customerModel.setProperties(custProps);
 
-    	//create address model, add Contact Ref Property to it
-    	final Schema addressModel = new Schema();
-    	Map<String, Schema> addressProps = new HashMap<>();
-    	Schema contact = new Schema();
-    	final String contactURL = "http://my.company.com/path/to/Contact.json#/definitions/Contact";
-    	contact.set$ref(contactURL);
-    	addressProps.put("Contact", contact);
-    	addressModel.setProperties(addressProps);
+        //create address model, add Contact Ref Property to it
+        final Schema addressModel = new Schema();
+        Map<String, Schema> addressProps = new HashMap<>();
+        Schema contact = new Schema();
+        final String contactURL = "http://my.company.com/path/to/Contact.json#/definitions/Contact";
+        contact.set$ref(contactURL);
+        addressProps.put("Contact", contact);
+        addressModel.setProperties(addressProps);
 
 
-    	//Create contact model, with basic type property
-    	final Schema contactModel = new Schema();
-    	Schema contactProp = new StringSchema();
-    	contactProp.setName("PhoneNumber");
-		List<String> requiredList = new ArrayList<>();
-		requiredList.add("PhoneNumber");
-    	contactProp.setRequired(requiredList);
-    	Map<String, Schema> contactProps = new HashMap<>();
-    	contactProps.put("PhoneNumber", contactProp);
-    	contactModel.setProperties(contactProps);
+        //Create contact model, with basic type property
+        final Schema contactModel = new Schema();
+        Schema contactProp = new StringSchema();
+        contactProp.setName("PhoneNumber");
+        List<String> requiredList = new ArrayList<>();
+        requiredList.add("PhoneNumber");
+        contactProp.setRequired(requiredList);
+        Map<String, Schema> contactProps = new HashMap<>();
+        contactProps.put("PhoneNumber", contactProp);
+        contactModel.setProperties(contactProps);
 
-    	new Expectations(){{
-    		cache.loadRef(customerURL, refFormat, Schema.class);
-    		result = customerModel;
-    		times = 1;
+        new Expectations() {{
+            cache.loadRef(customerURL, refFormat, Schema.class);
+            result = customerModel;
+            times = 1;
 
-    		cache.loadRef(addressURL, refFormat, Schema.class);
-    		result = addressModel;
-    		times = 1;
+            cache.loadRef(addressURL, refFormat, Schema.class);
+            result = addressModel;
 
-    		cache.loadRef(contactURL, refFormat, Schema.class);
-    		result = contactModel;
-    		times = 1;
- 		}};
+            cache.loadRef(contactURL, refFormat, Schema.class);
+            result = contactModel;
+        }};
 
-		new ExternalRefProcessor(cache, testedOpenAPI).processRefToExternalSchema(customerURL, refFormat);
+        new ExternalRefProcessor(cache, testedOpenAPI).processRefToExternalSchema(customerURL, refFormat);
 
-		assertThat(testedOpenAPI.getComponents().getSchemas().get("Customer"), notNullValue());
-		assertThat(testedOpenAPI.getComponents().getSchemas().get("Contact"), notNullValue());
-		assertThat(testedOpenAPI.getComponents().getSchemas().get("Address"), notNullValue());
+        assertNotNull(testedOpenAPI.getComponents().getSchemas().get("Customer"));
+        assertNotNull(testedOpenAPI.getComponents().getSchemas().get("Contact"));
+        assertNotNull(testedOpenAPI.getComponents().getSchemas().get("Address"));
     }
 
 
-	@Mocked
-	RemoteUrl remoteUrl;
+    @Mocked
+    RemoteUrl remoteUrl;
 
 
-	@Test
-	public void testRelativeRefIncludingUrlRef()
-			throws Exception {
-		final RefFormat refFormat = RefFormat.RELATIVE;
+    @Test
+    public void testRelativeRefIncludingUrlRef() throws Exception {
+        final RefFormat refFormat = RefFormat.RELATIVE;
 
-		final String url = "https://my.example.remote.url.com/globals.yaml";
+        final String url = "https://my.example.remote.url.com/globals.yaml";
 
-		final String expectedResult = "components:\n" +
-				"  schemas:\n" +
-				"    link-object:\n" +
-				"      type: object\n" +
-				"      additionalProperties:\n" +
-				"        \"$ref\": \"#/components/schemas/rel-data\"\n" +
-				"    rel-data:\n" +
-				"      type: object\n" +
-				"      required:\n" +
-				"      - href\n" +
-				"      properties:\n" +
-				"        href:\n" +
-				"          type: string\n" +
-				"        note:\n" +
-				"          type: string\n" +
-				"    result:\n" +
-				"      type: object\n" +
-				"      properties:\n" +
-				"        name:\n" +
-				"          type: string\n" +
-				"        _links:\n" +
-				"          \"$ref\": \"#/components/schemas/link-object\"\n" +
-				"";
-		List<AuthorizationValue> auths = null;
+        final String expectedResult = "components:\n" +
+                "  schemas:\n" +
+                "    link-object:\n" +
+                "      type: object\n" +
+                "      additionalProperties:\n" +
+                "        \"$ref\": \"#/components/schemas/rel-data\"\n" +
+                "    rel-data:\n" +
+                "      type: object\n" +
+                "      required:\n" +
+                "      - href\n" +
+                "      properties:\n" +
+                "        href:\n" +
+                "          type: string\n" +
+                "        note:\n" +
+                "          type: string\n" +
+                "    result:\n" +
+                "      type: object\n" +
+                "      properties:\n" +
+                "        name:\n" +
+                "          type: string\n" +
+                "        _links:\n" +
+                "          \"$ref\": \"#/components/schemas/link-object\"\n";
 
-		new Expectations() {{
-			RemoteUrl.urlToString(url, auths);
-			times = 1;
-			result = expectedResult;
-		}};
+        new Expectations() {{
+            RemoteUrl.urlToString(url, null, (PermittedUrlsChecker) any);
+            times = 1;
+            result = expectedResult;
+        }};
 
-		OpenAPI mockedOpenAPI = new OpenAPI();
-		mockedOpenAPI.setComponents(new Components());
-		mockedOpenAPI.getComponents().setSchemas(new HashMap<>());
-		ResolverCache mockedResolverCache = new ResolverCache(mockedOpenAPI, null, null);
+        OpenAPI mockedOpenAPI = new OpenAPI();
+        mockedOpenAPI.setComponents(new Components());
+        mockedOpenAPI.getComponents().setSchemas(new HashMap<>());
+        ResolverCache mockedResolverCache = new ResolverCache(mockedOpenAPI, null, null);
 
-		ExternalRefProcessor processor = new ExternalRefProcessor(mockedResolverCache, mockedOpenAPI);
+        ExternalRefProcessor processor = new ExternalRefProcessor(mockedResolverCache, mockedOpenAPI);
 
-		processor.processRefToExternalSchema("./relative-with-url/relative-with-url.yaml#/relative-with-url", refFormat);
-		assertThat(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Foo")).get$ref(),
-				is("https://my.example.remote.url.com/globals.yaml#/components/schemas/link-object")
-		);
-		assertThat(mockedOpenAPI.getComponents().getSchemas().keySet().contains("link-object"), is(true));
-		assertThat(mockedOpenAPI.getComponents().getSchemas().keySet().contains("rel-data"), is(true));
-		// assert that ref is relative ref is resolved. and the file path is from root yaml file.
-		assertThat(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Bar")).get$ref(),
-        is("./relative-with-url/relative-with-local.yaml#/relative-same-file")
-    );
-	}
+        processor.processRefToExternalSchema("./relative-with-url/relative-with-url.yaml#/relative-with-url", refFormat);
+        assertEquals(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Foo")).get$ref(),
+                "https://my.example.remote.url.com/globals.yaml#/components/schemas/link-object");
+        assertTrue(mockedOpenAPI.getComponents().getSchemas().containsKey("link-object"));
+        assertTrue(mockedOpenAPI.getComponents().getSchemas().containsKey("rel-data"));
+        // assert that ref is relative ref is resolved. and the file path is from root yaml file.
+        assertEquals(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Bar")).get$ref(),
+                "./relative-with-url/relative-with-local.yaml#/relative-same-file");
+    }
 
     @Test
     public void testHandleComposedSchemasInArrayItems() {
@@ -245,14 +225,14 @@ public class ExternalRefProcessorTest {
         assertTrue(components.containsKey("ResponseAnyOf"));
         assertTrue(components.containsKey("Product"));
 
-        Schema allOfInlineProduct = (Schema)((Schema)components.get("ResponseAllOf").getAllOf().get(1)).getProperties().get("product");
-        assertThat(allOfInlineProduct.get$ref(), is("#/components/schemas/Product"));
+        Schema allOfInlineProduct = (Schema) ((Schema) components.get("ResponseAllOf").getAllOf().get(1)).getProperties().get("product");
+        assertEquals(allOfInlineProduct.get$ref(), "#/components/schemas/Product");
 
-        Schema oneOfInlineProduct = (Schema)((Schema)components.get("ResponseOneOf").getOneOf().get(1)).getProperties().get("product");
-        assertThat(oneOfInlineProduct.get$ref(), is("#/components/schemas/Product"));
+        Schema oneOfInlineProduct = (Schema) ((Schema) components.get("ResponseOneOf").getOneOf().get(1)).getProperties().get("product");
+        assertEquals(oneOfInlineProduct.get$ref(), "#/components/schemas/Product");
 
-        Schema anyOfInlineProduct = (Schema)((Schema)components.get("ResponseAnyOf").getAnyOf().get(1)).getProperties().get("product");
-        assertThat(anyOfInlineProduct.get$ref(), is("#/components/schemas/Product"));
+        Schema anyOfInlineProduct = (Schema) ((Schema) components.get("ResponseAnyOf").getAnyOf().get(1)).getProperties().get("product");
+        assertEquals(anyOfInlineProduct.get$ref(), "#/components/schemas/Product");
     }
 
     @Test

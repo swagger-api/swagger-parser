@@ -3,10 +3,8 @@ package io.swagger.v3.parser.util;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.processors.ExternalRefProcessor;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,6 +15,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RefUtils {
 
@@ -50,10 +50,10 @@ public class RefUtils {
             final String[] split = plausibleName.split("\\.");
             // Fix for issue-1621 and issue-1865
             //validate number of dots
-            if(split.length > 2) {
+            if (split.length > 2) {
                 //Remove dot so ref can be interpreted as internal and relative in Swagger-Core schema class 'set$ref'
                 plausibleName = String.join("", Arrays.copyOf(split, split.length - 1));
-            }else{
+            } else {
                 plausibleName = split[0];
             }
         }
@@ -66,9 +66,9 @@ public class RefUtils {
             return Optional.empty();
         }
         return Optional.of(ref.split(REFERENCE_SEPARATOR))
-            .filter(it -> it.length == 2)
-            .map(it -> it[0])
-            .filter(it -> !it.isEmpty());
+                .filter(it -> it.length == 2)
+                .map(it -> it[0])
+                .filter(it -> !it.isEmpty());
     }
 
     public static boolean isAnExternalRefFormat(RefFormat refFormat) {
@@ -76,14 +76,16 @@ public class RefUtils {
     }
 
     public static RefFormat computeRefFormat(String ref) {
-        RefFormat result = RefFormat.INTERNAL;
+        RefFormat result;
         ref = mungedRef(ref);
-        if(ref.startsWith("http")||ref.startsWith("https")) {
+        if (ref.startsWith("http") || ref.startsWith("https")) {
             result = RefFormat.URL;
-        } else if(ref.startsWith(REFERENCE_SEPARATOR)) {
+        } else if (ref.startsWith(REFERENCE_SEPARATOR)) {
             result = RefFormat.INTERNAL;
-        } else if(ref.startsWith(".") || ref.startsWith("/") || ref.indexOf(REFERENCE_SEPARATOR) > 0) {
+        } else if (ref.startsWith(".") || ref.startsWith("/") || ref.indexOf(REFERENCE_SEPARATOR) > 0) {
             result = RefFormat.RELATIVE;
+        } else {
+            result = RefFormat.INTERNAL;
         }
 
         return result;
@@ -103,7 +105,7 @@ public class RefUtils {
 
 
     public static String readExternalUrlRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
-                                            String rootPath) {
+                                            String rootPath, PermittedUrlsChecker permittedUrlsChecker) {
 
         if (!RefUtils.isAnExternalRefFormat(refFormat)) {
             throw new RuntimeException("Ref is not external");
@@ -113,12 +115,12 @@ public class RefUtils {
 
         try {
             if (refFormat == RefFormat.URL) {
-                result = RemoteUrl.urlToString(file, auths);
+                result = RemoteUrl.urlToString(file, auths, permittedUrlsChecker);
             } else {
                 //its assumed to be a relative ref
                 String url = buildUrl(rootPath, file);
 
-                return readExternalRef(url, RefFormat.URL, auths, null);
+                return readExternalRef(url, RefFormat.URL, auths, null, permittedUrlsChecker);
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to load " + refFormat + " ref: " + file, e);
@@ -129,7 +131,7 @@ public class RefUtils {
     }
 
     public static String readExternalClasspathRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
-                                                  String rootPath) {
+                                                  String rootPath, PermittedUrlsChecker permittedUrlsChecker) {
 
         if (!RefUtils.isAnExternalRefFormat(refFormat)) {
             throw new RuntimeException("Ref is not external");
@@ -139,7 +141,7 @@ public class RefUtils {
 
         try {
             if (refFormat == RefFormat.URL) {
-                result = RemoteUrl.urlToString(file, auths);
+                result = RemoteUrl.urlToString(file, auths, permittedUrlsChecker);
             } else {
                 //its assumed to be a relative ref
                 String pathRef = ExternalRefProcessor.join(rootPath, file);
@@ -155,24 +157,32 @@ public class RefUtils {
     }
 
     public static String buildUrl(String rootPath, String relativePath) {
-      if(rootPath == null || relativePath == null) {
-          return null;
-      }
+        if (rootPath == null || relativePath == null) {
+            return null;
+        }
 
-      try {
-          int until = rootPath.lastIndexOf("/")+1;
-          String root = rootPath.substring(0, until);
-          URL rootUrl = new URL(root);
-          URL finalUrl = new URL(rootUrl, relativePath);
-          return finalUrl.toString();
-      }
-      catch(Exception e) {
-          throw new RuntimeException(e);
-      }
+        try {
+            int until = rootPath.lastIndexOf("/") + 1;
+            String root = rootPath.substring(0, until);
+            URL rootUrl = new URL(root);
+            URL finalUrl = new URL(rootUrl, relativePath);
+            return finalUrl.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @deprecated - new readExternalRef with PermittedUrlsChecker is preferred because it prevents bypassing security checks
+     */
+    @Deprecated
+    public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
+                                         Path parentDirectory) {
+        return readExternalRef(file, refFormat, auths, parentDirectory, null);
     }
 
     public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
-                                         Path parentDirectory) {
+                                         Path parentDirectory, PermittedUrlsChecker permittedUrlsChecker) {
 
         if (!RefUtils.isAnExternalRefFormat(refFormat)) {
             throw new RuntimeException("Ref is not external");
@@ -182,12 +192,12 @@ public class RefUtils {
 
         try {
             if (refFormat == RefFormat.URL) {
-                result = RemoteUrl.urlToString(file, auths);
+                result = RemoteUrl.urlToString(file, auths, permittedUrlsChecker);
             } else {
                 //its assumed to be a relative file ref
                 final Path pathToUse = parentDirectory.resolve(file).normalize();
 
-                if(Files.exists(pathToUse)) {
+                if (Files.exists(pathToUse)) {
                     result = readAll(pathToUse);
                 } else {
                     String url = file;
@@ -206,18 +216,18 @@ public class RefUtils {
                     }
                     final Path pathToUse2 = parentDirectory.resolve(url).normalize();
 
-                    if(Files.exists(pathToUse2)) {
+                    if (Files.exists(pathToUse2)) {
                         result = readAll(pathToUse2);
                     }
                 }
-                if (result == null){
+                if (result == null) {
                     result = ClasspathHelper.loadFileFromClasspath(file);
                 }
 
 
             }
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file + " path: "+parentDirectory, e);
+            throw new RuntimeException("Unable to load " + refFormat + " ref: " + file + " path: " + parentDirectory, e);
         }
 
         return result;

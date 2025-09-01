@@ -4,18 +4,17 @@ package io.swagger.v3.parser.test;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
 import mockit.Mocked;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 import static org.testng.Assert.assertNotNull;
@@ -26,43 +25,43 @@ public class RelativeReferenceTest {
     @Mocked
     RemoteUrl remoteUrl;
 
-    static final String spec =
+    private static final String SPEC =
             "openapi: 3.0.0\n" +
-            "servers:\n" +
-            "  - url: /\n" +
-            "  - url: https://localhost:8080/{version}\n" +
-            "    description: The local server\n" +
-            "    variables:\n" +
-            "      version:\n" +
-            "        default: v2\n" +
-            "        enum:\n" +
-            "          - v1\n" +
-            "          - v2\n"+
-            "info:\n" +
-            "  description: It works.\n" +
-            "  version: 1.0.0\n" +
-            "  title: My API\n" +
-            "paths:\n" +
-            "  /samplePath:\n" +
-            "    $ref: './path/samplePath.yaml'";
-    static final String samplePath =
+                    "servers:\n" +
+                    "  - url: /\n" +
+                    "  - url: https://localhost:8080/{version}\n" +
+                    "    description: The local server\n" +
+                    "    variables:\n" +
+                    "      version:\n" +
+                    "        default: v2\n" +
+                    "        enum:\n" +
+                    "          - v1\n" +
+                    "          - v2\n" +
+                    "info:\n" +
+                    "  description: It works.\n" +
+                    "  version: 1.0.0\n" +
+                    "  title: My API\n" +
+                    "paths:\n" +
+                    "  /samplePath:\n" +
+                    "    $ref: './path/samplePath.yaml'";
+    private static final String SAMPLE_PATH =
             "get:\n" +
-            "  responses:\n" +
-            "    '200':\n" +
-            "      description: It works\n" +
-            "  requestBody:\n" +
-            "    content:\n" +
-            "      application/json:\n" +
-            "        schema:\n" +
-            "          type: object\n" +
-            "    required: true";
+                    "  responses:\n" +
+                    "    '200':\n" +
+                    "      description: It works\n" +
+                    "  requestBody:\n" +
+                    "    content:\n" +
+                    "      application/json:\n" +
+                    "        schema:\n" +
+                    "          type: object\n" +
+                    "    required: true";
 
     @Test
     public void testIssueServerUrlValidation() throws Exception {
         new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}));
+            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList());
             times = 1;
-            result = spec;
+            result = SPEC;
         }};
 
         SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("http://foo.bar.com/swagger.json", null, new ParseOptions());
@@ -73,13 +72,13 @@ public class RelativeReferenceTest {
     @Test
     public void testIssue213() throws Exception {
         new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Arrays.asList(new AuthorizationValue[]{}));
+            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList());
             times = 1;
-            result = spec;
+            result = SPEC;
 
-            RemoteUrl.urlToString("http://foo.bar.com/path/samplePath.yaml", Arrays.asList(new AuthorizationValue[]{}));
+            RemoteUrl.urlToString("http://foo.bar.com/path/samplePath.yaml", Collections.emptyList(), (PermittedUrlsChecker) any);
             times = 1;
-            result = samplePath;
+            result = SAMPLE_PATH;
         }};
 
 
@@ -133,25 +132,21 @@ public class RelativeReferenceTest {
                 "          minLength: 6\n" +
                 "          maxLength: 254";
 
-        OpenAPI swagger = (new OpenAPIV3Parser().readContents(yaml,null, null)).getOpenAPI();
+        OpenAPI swagger = (new OpenAPIV3Parser().readContents(yaml, null, null)).getOpenAPI();
         assertNotNull(swagger.getComponents().getSchemas().get("ID"));
     }
 
     @Test
     public void testResolveRelativePaths() {
-    	ParseOptions options = new ParseOptions();
+        ParseOptions options = new ParseOptions();
         options.setResolve(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readLocation("/relative-references-example/openapi.yaml", null, options);
 
-    	Assert.assertNotNull(parseResult.getOpenAPI());
+        Assert.assertNotNull(parseResult.getOpenAPI());
 
-    	HashSet<String> validationMessages = new HashSet<>(null != parseResult.getMessages() ? parseResult.getMessages() : new ArrayList<>());
+        HashSet<String> validationMessages = new HashSet<>(null != parseResult.getMessages() ? parseResult.getMessages() : new ArrayList<>());
 
-
-    	//validationMessages.forEach(msg->System.out.println(msg));
-        //OpenAPI specification = parseResult.getOpenAPI();
-    	Assert.assertTrue(validationMessages.isEmpty(), validationMessages.toString());
-
+        Assert.assertTrue(validationMessages.isEmpty(), validationMessages.toString());
     }
 
     @Test

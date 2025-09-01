@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.processors.ExternalRefProcessor;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Expectations;
@@ -43,13 +44,16 @@ public class RefUtilsTest {
     AuthorizationValue auth1;
     @Injectable
     AuthorizationValue auth2;
+
+    private PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker();
+
     public RefUtilsTest() {
         List<AuthorizationValue> auths = new ArrayList<>();
         auths.add(auth1);
         auths.add(auth2);
     }
     @Test
-    public void testComputeDefinitionName() throws Exception {
+    public void testComputeDefinitionName() {
         //URL refs
         doComputeDefinitionNameTestCase("http://my.company.com/path/to/file.json", "file");
         doComputeDefinitionNameTestCase("http://my.company.com/path/to/file.json#/foo", "foo");
@@ -87,18 +91,8 @@ public class RefUtilsTest {
         assertEquals(expectedDefinitionName, RefUtils.computeDefinitionName(ref));
     }
 
-    private Map<String, Schema> createMap(String... keys) {
-        Map<String, Schema> definitionMap = new HashMap<>();
-
-        for (String key : keys) {
-            definitionMap.put(key, new Schema());
-        }
-
-        return definitionMap;
-    }
-
     @Test
-    public void testIsAnExternalRefFormat() throws Exception {
+    public void testIsAnExternalRefFormat() {
         final RefFormat[] values = RefFormat.values();
 
         for (RefFormat value : values) {
@@ -118,7 +112,8 @@ public class RefUtilsTest {
     }
 
 
-    @Mocked RemoteUrl remoteUrl;
+    @Mocked
+    RemoteUrl remoteUrl;
 
     @Test
     public void testReadExternalRef_UrlFormat() throws Exception {
@@ -127,13 +122,13 @@ public class RefUtilsTest {
         final String expectedResult = "really good json";
 
         new Expectations() {{
-            RemoteUrl.urlToString(url, auths);
+            RemoteUrl.urlToString(url, auths, permittedUrlsChecker);
             times = 1;
             result = expectedResult;
         }};
 
-        String actualResult = RefUtils.readExternalRef(url, RefFormat.URL, auths, null);
-        assertEquals(expectedResult, actualResult);
+        String actualResult = RefUtils.readExternalRef(url, RefFormat.URL, auths, null, permittedUrlsChecker);
+        assertEquals(actualResult, expectedResult);
     }
 
     @Rule
@@ -145,12 +140,12 @@ public class RefUtilsTest {
         final String url = "http://my.company.com/path/to/file.json";
 
         new Expectations() {{
-            RemoteUrl.urlToString(url, auths);
+            RemoteUrl.urlToString(url, auths, permittedUrlsChecker);
             times = 1;
             result = new Exception();
         }};
         thrown.expect(RuntimeException.class);
-        RefUtils.readExternalRef(url, RefFormat.URL, auths, null);
+        RefUtils.readExternalRef(url, RefFormat.URL, auths, null, permittedUrlsChecker);
     }
 
     @Mocked IOUtils ioUtils;
@@ -164,6 +159,7 @@ public class RefUtilsTest {
         f.createNewFile();
         return f;
     }
+
     @Test
     public void testReadExternalRef_RelativeFileFormat(
     ) throws Exception {
@@ -180,8 +176,8 @@ public class RefUtilsTest {
 
         }};
 
-        String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
-        assertEquals(expectedResult, actualResult);
+        String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory, permittedUrlsChecker);
+        assertEquals(actualResult, expectedResult);
 
     }
 
@@ -211,7 +207,6 @@ public class RefUtilsTest {
     public void testReadExternalRef_RelativeFileFormat_ExceptionThrown() throws Exception {
         final String filePath = "file.json";
         File file = tempFile(filePath);
-        final String expectedResult = "really good json";
 
         setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
@@ -229,16 +224,16 @@ public class RefUtilsTest {
                 return ((Exception)o).getCause().getClass().equals(IOException.class);
             }
         });
-        RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory);
+        RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory, permittedUrlsChecker);
     }
 
     @Test
-    public void testReadExternalRef_InternalFormat() throws Exception {
+    public void testReadExternalRef_InternalFormat() {
 
         final String file = "#/defintiions/foo";
 
         try {
-            RefUtils.readExternalRef(file, RefFormat.INTERNAL, auths, null);
+            RefUtils.readExternalRef(file, RefFormat.INTERNAL, auths, null, permittedUrlsChecker);
             fail("Should have thrown an exception");
         } catch (RuntimeException e) {
 
@@ -302,50 +297,38 @@ public class RefUtilsTest {
 
     @Test
     public void shouldReturnEmptyExternalPathForInternalReference() {
-        // given
         String ref = "#/components/test";
 
-        // when
         Optional<String> externalPath = RefUtils.getExternalPath(ref);
 
-        // then
-        assertThat(externalPath.isPresent(), is(false));
+        assertFalse(externalPath.isPresent());
     }
 
     @Test
     public void shouldReturnEmptyExternalPathForNullReference() {
-        // given
         String ref = null;
 
-        // when
         Optional<String> externalPath = RefUtils.getExternalPath(ref);
 
-        // then
-        assertThat(externalPath.isPresent(), is(false));
+        assertFalse(externalPath.isPresent());
     }
 
     @Test
     public void shouldReturnEmptyExternalPathForEmptyReference() {
-        // given
         String ref = "";
 
-        // when
         Optional<String> externalPath = RefUtils.getExternalPath(ref);
 
-        // then
-        assertThat(externalPath.isPresent(), is(false));
+        assertFalse(externalPath.isPresent());
     }
 
     @Test
     public void shouldReturnEmptyExternalPathForInvalidReference() {
-        // given
         String ref = "test";
 
-        // when
         Optional<String> externalPath = RefUtils.getExternalPath(ref);
 
-        // then
-        assertThat(externalPath.isPresent(), is(false));
+        assertFalse(externalPath.isPresent());
     }
 
     @Test
@@ -357,8 +340,8 @@ public class RefUtilsTest {
         Optional<String> externalPath = RefUtils.getExternalPath(ref);
 
         // then
-        assertThat(externalPath.isPresent(), is(true));
-        assertThat(externalPath.get(), equalTo("test.yaml"));
+        assertTrue(externalPath.isPresent());
+        assertEquals(externalPath.get(), "test.yaml");
     }
 
     @Test
@@ -370,8 +353,8 @@ public class RefUtilsTest {
         Optional<String> externalPath = RefUtils.getExternalPath(ref);
 
         // then
-        assertThat(externalPath.isPresent(), is(true));
-        assertThat(externalPath.get(), equalTo("http://localhost/schema.json"));
+        assertTrue(externalPath.isPresent());
+        assertEquals(externalPath.get(), "http://localhost/schema.json");
 
     }
 }
