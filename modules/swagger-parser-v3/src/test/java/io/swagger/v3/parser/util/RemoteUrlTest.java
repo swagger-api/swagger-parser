@@ -193,7 +193,6 @@ public class RemoteUrlTest {
     @Test(expectedExceptions = HostDeniedException.class)
     public void testRedirectWithForbiddenProtocolThrowsException() throws Exception {
         String nextPath = "/redirect";
-        // Chain 6 redirects
         for (int i = 0; i < 3; i++) {
             String target = "/redirect" + (i + 1);
             stubFor(get(urlEqualTo(nextPath))
@@ -203,7 +202,7 @@ public class RemoteUrlTest {
             nextPath = target;
         }
 
-        // Add stub for /redirect6 to return a 200 OK response, but it's not expected to be reached
+        // Add stub for /redirect3 to return a 200 OK response, but it's not expected to be reached
         stubFor(get(urlEqualTo(nextPath))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -211,11 +210,6 @@ public class RemoteUrlTest {
 
         String startUrl = String.format("https://%s:%d/redirect", LOCALHOST, WIRE_MOCK_PORT);
 
-        try {
-            RemoteUrl.urlToString(startUrl, null, new PermittedUrlsCheckerAllowLocal());
-        } catch (IOException e) {
-            assertTrue(e.getMessage().contains("Too many redirects"));
-            throw e;
-        }
+        RemoteUrl.urlToString(startUrl, null, new PermittedUrlsCheckerAllowLocal());
     }
 }

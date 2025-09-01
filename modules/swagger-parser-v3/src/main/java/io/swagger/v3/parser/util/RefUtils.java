@@ -172,6 +172,15 @@ public class RefUtils {
         }
     }
 
+    /**
+     * @deprecated - new readExternalRef with PermittedUrlsChecker is preferred because it prevents bypassing security checks
+     */
+    @Deprecated
+    public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
+                                         Path parentDirectory) {
+        return readExternalRef(file, refFormat, auths, parentDirectory, null);
+    }
+
     public static String readExternalRef(String file, RefFormat refFormat, List<AuthorizationValue> auths,
                                          Path parentDirectory, PermittedUrlsChecker permittedUrlsChecker) {
 
