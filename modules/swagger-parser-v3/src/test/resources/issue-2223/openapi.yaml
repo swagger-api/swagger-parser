@@ -1,0 +1,246 @@
+openapi: 3.1.1
+info:
+  title: Ferguson Customer Public API
+  description: Services that provide access to Ferguson's customer information
+  contact:
+    name: Ferguson Middleware Services team
+  license:
+    name: Ferguson Services
+    url: 'https://ferguson.com/licenses/LICENSE-1.0.html'
+  version: v1.0
+servers:
+  - url: https://localhost:8083/customer-publicapi-v1/svc
+    description: Development
+tags:
+  - name: domain
+    description: Customer
+  - name: visibility
+    description: public
+paths:
+  /{mainCustomerId}/billToZip/{billToZipCode}:
+    get:
+      operationId: getMainCustomerInfoBillZipcode
+      summary: Service to get Customer information from main Customer account and associated billTo zipcode
+      description: Service to get related Customer information
+      parameters:
+        - $ref: '#/components/parameters/transId'
+        - $ref: '#/components/parameters/mainCustomerId'
+        - $ref: '#/components/parameters/billToZipCode'
+
+      responses:
+        '200':
+          description: Request Successful
+          headers:
+            trans-id:
+              $ref: '#/components/headers/trans-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customerInfoResponse'
+
+        '400':
+          description: Bad request
+          headers:
+            trans-id:
+              $ref: '#/components/headers/trans-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/validationErrors'
+
+        '404':
+          description: Not Found
+          headers:
+            trans-id:
+              $ref: '#/components/headers/trans-id'
+        '500':
+          description: Internal Error
+          headers:
+            trans-id:
+              $ref: '#/components/headers/trans-id'
+            fe-resp-code:
+              $ref: '#/components/headers/fe-resp-code'
+            fe-resp-msg:
+              $ref: '#/components/headers/fe-resp-msg'
+
+components:
+  schemas:
+    regionId:
+      type: string
+      description: Region Id
+      example: "RICH"
+    branchId:
+      type: string
+      description: Branch Id
+      example: "1350"
+    customerType:
+      type: string
+      enum:
+        - MASTER
+        - MAIN
+        - JOB
+    customerName:
+      type: string
+      description: Account name
+      example: "WP CLARKS FARM LLC"
+    contractIds:
+      type: array
+      items:
+        type: string
+        description: Contract Id
+    customerNumber:
+      type: string
+      description: Customer Id
+      example: "276962"
+    jobName:
+      type: string
+      description: Job name
+      example: "OTIS HATFIELD"
+    jobNumber:
+      type: string
+      description: Customer Id of the Job
+      example: "93738"
+    billingAddress:
+      description: Billing address of the account
+      type: object
+      properties:
+        streets:
+          title: Line(s) of Street Address
+          type: array
+          items:
+            type: string
+            example: "1250 W. Mockingbird Lane"
+        city:
+          title: City
+          type: string
+          example: "Newport News"
+        state:
+          title: State Code
+          type: string
+          example: VA
+        postalCode:
+          title: Postal Code
+          type: string
+          example: 23606
+
+    customerInfoResponse:
+      title: Customer Info Response with master, main and job info
+      type: object
+      properties:
+        masterCustomerNumber:
+          type: string
+          description: Master customer number
+          example: '371394'
+        customerType:
+          $ref: '#/components/schemas/customerType'
+        mainCustomers:
+          type: array
+          items:
+            $ref: '#/components/schemas/mainCustomer'
+    mainCustomer:
+      type: object
+      properties:
+        customerType:
+          $ref: '#/components/schemas/customerType'
+        regionId:
+          $ref: '#/components/schemas/regionId'
+        branchId:
+          $ref: '#/components/schemas/branchId'
+        customerName:
+          $ref: '#/components/schemas/customerName'
+        contractIds:
+          $ref: '#/components/schemas/contractIds'
+        customerNumber:
+          $ref: '#/components/schemas/customerNumber'
+        billingAddress:
+          type: array
+          items:
+            $ref: '#/components/schemas/billingAddress'
+        mainCustomerJobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/mainCustomerJob'
+
+    mainCustomerJob:
+      type: object
+      properties:
+        customerType:
+          $ref: '#/components/schemas/customerType'
+        regionId:
+          $ref: '#/components/schemas/regionId'
+        branchId:
+          $ref: '#/components/schemas/branchId'
+        jobName:
+          $ref: '#/components/schemas/jobName'
+        contractIds:
+          $ref: '#/components/schemas/contractIds'
+        jobNumber:
+          $ref: '#/components/schemas/jobNumber'
+        billingAddress:
+          type: array
+          items:
+            $ref: '#/components/schemas/billingAddress'
+    validationError:
+      title: Parameter Validation Error
+      type: object
+      x-allArgsConstructor: true
+      properties:
+        errorCode:
+          title: Error Code
+          description: Error Code indicating the nature of the error.
+          type: string
+          example: dataerror.k8.app.zipcode.invalid
+        errorMsg:
+          title: Error Message
+          description: Human readable message associated with the errorCode.
+          type: string
+          example: invalid zipcode format
+        field:
+          title: Parameter in Error
+          type: string
+          example: billToZipCode
+    validationErrors:
+      title: List of Validation Errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/validationError'
+  headers:
+    fe-resp-code:
+      schema:
+        type: string
+        example: severe.error
+      description: Response code
+    fe-resp-msg:
+      schema:
+        type: string
+        example: Severe Error
+      description: Response message
+    trans-id:
+      schema:
+        type: string
+      description: Transaction Id (passed in by consumer or generated by the service)
+
+  parameters:
+    transId:
+      name: trans-id
+      in: header
+      description: Transaction Id (Provided by service consumer)
+      required: false
+      schema:
+        type: string
+    mainCustomerId:
+      name: mainCustomerId
+      in: path
+      description: Main Customer id
+      required: true
+      schema:
+        type: string
+    billToZipCode:
+      name: billToZipCode
+      in: path
+      description: Billed to zip code associated with the Main Account
+      required: true
+      schema:
+        type: string
+        pattern: '^(\\d{5})([-\\s]*\\d{4})?$'
