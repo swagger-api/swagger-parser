@@ -207,6 +207,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
 
     private SwaggerParseResult resolve(SwaggerParseResult result, List<AuthorizationValue> auth, ParseOptions options,
             String location) {
+        if (location != null) {
+            location = location.replace('\\', '/');
+        }
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
@@ -284,7 +287,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     private String readContentFromLocation(String location, List<AuthorizationValue> auth) {
-        final String adjustedLocation = location.replaceAll("\\\\", "/");
+        final String adjustedLocation = location.replace('\\', '/');
         try {
             if (adjustedLocation.toLowerCase().startsWith("http")) {
                 return RemoteUrl.urlToString(adjustedLocation, auth);
