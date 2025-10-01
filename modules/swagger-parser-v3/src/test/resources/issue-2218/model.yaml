@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info:
+  description: Description
+  version: 1.0.0
+  title: A title
+paths: {}
+components:
+  schemas:
+    Flag:
+      type: object
+      description: Active flag
+      properties:
+        isActive:
+          type: boolean
+    Flags:
+      type: object
+      description: Map of flags
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/Flag'
+    FlagsOfFlags:
+      type: object
+      description: Flag of flag configuration
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/Flags'

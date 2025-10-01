@@ -17,6 +17,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.ClasspathHelper;
 import io.swagger.v3.parser.util.RemoteUrl;
 import org.apache.commons.io.IOUtils;
@@ -68,18 +69,18 @@ public interface Visitor {
         }
     }
 
-    default String readClasspath(String classPath) throws Exception {
+    default String readClasspath(String classPath) {
         return ClasspathHelper.loadFileFromClasspath(classPath);
     }
-    default String readHttp(String uri, List<AuthorizationValue> auths) throws Exception {
-        return RemoteUrl.urlToString(uri, auths);
+    default String readHttp(String uri, List<AuthorizationValue> auths, PermittedUrlsChecker permittedUrlsChecker) throws Exception {
+        return RemoteUrl.urlToString(uri, auths, permittedUrlsChecker);
     }
 
-    default String readURI(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
+    default String readURI(String absoluteUri, List<AuthorizationValue> auths, PermittedUrlsChecker permittedUrlsChecker) throws Exception {
         URI resolved = new URI(absoluteUri);
         if (StringUtils.isNotBlank(resolved.getScheme())) {
             if (resolved.getScheme().startsWith("http")) {
-                return readHttp(absoluteUri, auths);
+                return readHttp(absoluteUri, auths, permittedUrlsChecker);
             } else if (resolved.getScheme().startsWith("file")) {
                 return readFile(resolved.getPath());
             } else if (resolved.getScheme().startsWith("classpath")) {

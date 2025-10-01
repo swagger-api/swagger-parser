@@ -8,6 +8,7 @@ import io.swagger.v3.parser.reference.Reference;
 import io.swagger.v3.parser.reference.ReferenceVisitor;
 import io.swagger.v3.parser.reference.Traverser;
 import io.swagger.v3.parser.reference.Visitor;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +41,7 @@ public class CustomOpenAPIDereferencer extends OpenAPIDereferencer31 {
         }
 
         @Override
-        public String readHttp(String uri, List<AuthorizationValue> auths) throws Exception {
+        public String readHttp(String uri, List<AuthorizationValue> auths, PermittedUrlsChecker permittedUrlsChecker) throws Exception {
 
             if (uri.startsWith("http://example.com/custom")) {
                 return "openapi: 3.1.0\n" +
@@ -57,7 +58,7 @@ public class CustomOpenAPIDereferencer extends OpenAPIDereferencer31 {
                         "          '200':\n" +
                         "            description: OK";
             } else {
-                return super.readHttp(uri, auths);
+                return super.readHttp(uri, auths, permittedUrlsChecker);
             }
         }
     }
