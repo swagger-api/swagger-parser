@@ -79,11 +79,11 @@ public interface Visitor {
     default String readURI(String absoluteUri, List<AuthorizationValue> auths, PermittedUrlsChecker permittedUrlsChecker) throws Exception {
         URI resolved = new URI(absoluteUri);
         if (StringUtils.isNotBlank(resolved.getScheme())) {
-            if (resolved.getScheme().startsWith("http")) {
+            if (resolved.getScheme().toLowerCase().startsWith("http")) {
                 return readHttp(absoluteUri, auths, permittedUrlsChecker);
-            } else if (resolved.getScheme().startsWith("file")) {
+            } else if (resolved.getScheme().toLowerCase().startsWith("file")) {
                 return readFile(resolved.getPath());
-            } else if (resolved.getScheme().startsWith("classpath")) {
+            } else if (resolved.getScheme().toLowerCase().startsWith("classpath")) {
                 return readClasspath(resolved.getPath());
             }
         }
