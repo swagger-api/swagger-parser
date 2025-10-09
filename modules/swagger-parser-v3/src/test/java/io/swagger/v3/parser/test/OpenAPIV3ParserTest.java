@@ -43,6 +43,13 @@ import static org.testng.Assert.*;
 public class OpenAPIV3ParserTest {
     List<AuthorizationValue> auths = new ArrayList<>();
 
+    @Test(description = "Issue 2223: reading 3.1 spec from Windows file path location produces URISyntaxException" )
+    public void testWindowsFilePathRead() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        OpenAPI openAPI = openApiParser.read("\\issue-2223\\openapi.yaml");
+        assertNotNull(openAPI, "OpenAPI object should not be null (no errors during read())");
+    }
+
     @Test
     public void testFailedToResolveResponseReferences() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
@@ -51,7 +58,7 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult parseResult = openApiParser.readLocation("issue-2037/openapi.yaml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
 
-        Assert.assertTrue(openAPI.getPaths().get("/get").get$ref() == null);
+        assertNull(openAPI.getPaths().get("/get").get$ref());
         Assert.assertEquals(openAPI.getPaths().get("/get").getGet().getResponses().get("200").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ResponsesRef");
     }
 
@@ -64,13 +71,13 @@ public class OpenAPIV3ParserTest {
         SwaggerParseResult parseResult = openApiParser.readLocation("resolve-external-ref/failedToResolveExternalRefs.yaml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
 
-        Assert.assertTrue(openAPI.getPaths().get("/permAssignments").get$ref() == null);
-        Assert.assertEquals(openAPI.getPaths().get("/permAssignments").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
-        Assert.assertTrue(openAPI.getPaths().get("/permAssignmentChangeRequests").get$ref() == null);
-        Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChangeRequests").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
-        Assert.assertTrue(openAPI.getPaths().get("/permAssignmentChange").get$ref() == null);
-        Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChange").getGet().getResponses().get("201").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/Error");
-        Assert.assertEquals(openAPI.getPaths().get("/permAssignmentChange").getGet().getResponses().get("404").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/RemoteError");
+        assertNull(openAPI.getPaths().get("/permAssignments").get$ref());
+        assertEquals(openAPI.getPaths().get("/permAssignments").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
+        assertNull(openAPI.getPaths().get("/permAssignmentChangeRequests").get$ref());
+        assertEquals(openAPI.getPaths().get("/permAssignmentChangeRequests").getGet().getResponses().get("202").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/schemaResponseSuccess");
+        assertNull(openAPI.getPaths().get("/permAssignmentChange").get$ref());
+        assertEquals(openAPI.getPaths().get("/permAssignmentChange").getGet().getResponses().get("201").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/Error");
+        assertEquals(openAPI.getPaths().get("/permAssignmentChange").getGet().getResponses().get("404").getContent().get("application/vnd.api+json").getSchema().get$ref(),"#/components/schemas/RemoteError");
 
     }
 
@@ -2188,7 +2195,7 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void testBadFormat() throws Exception {
+    public void testBadFormat() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         final OpenAPI openAPI = parser.read("src/test/resources/bad_format.yaml");
 
