@@ -1,0 +1,17 @@
+components:
+  schemas:
+    FooBar:
+      properties:
+        BypassTypes:
+          items:
+            $ref: ./Bar.yaml#/components/schemas/BarType
+          type: array
+      type: object
+    Foo:
+      properties:
+        MFABypass:
+          $ref: ./Bar.yaml#/components/schemas/Bar
+      type: object
+info:
+  title: '#Issue1961.Foo'
+openapi: 3.0.1
