@@ -1,0 +1,13 @@
+openapi: 3.0.3
+
+components:
+  schemas:
+    ReproducerObject:
+      type: object
+      properties:
+        id:
+          type: integer
+  examples:
+    ReproducerExample:
+      value:
+        id: 1

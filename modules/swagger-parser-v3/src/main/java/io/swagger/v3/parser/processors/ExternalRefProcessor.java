@@ -968,7 +968,7 @@ public final class ExternalRefProcessor {
             if (example.get$ref() != null) {
                 RefFormat ref = computeRefFormat(example.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    processRefExample(example, $ref);
+                    processRefExample(example, file);
                 } else {
                     processRefToExternalExample(file + example.get$ref(), RefFormat.RELATIVE);
                 }
