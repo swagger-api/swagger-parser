@@ -1,0 +1,25 @@
+get:
+  tags:
+    - Rule
+  summary: Search rules (paginated)
+  description: My description
+  operationId: searchRulesPaginated
+  parameters:
+    - name: status
+      in: query
+      description: Filter by rule status (ACTIVE, INACTIVE, ARCHIVED).
+      required: false
+      schema:
+        type: string
+        enum: [ ACTIVE, INACTIVE, ARCHIVED ]
+        description: "Current lifecycle status of the rule."
+      examples:
+        default:
+          $ref: '../../examples/rule/rule-parameters.yml#/StatusQueryParameter'
+  responses:
+    '200':
+      description: OK - Paginated list of rules successfully retrieved.
+      content:
+        application/json:
+          schema:
+            type: object
