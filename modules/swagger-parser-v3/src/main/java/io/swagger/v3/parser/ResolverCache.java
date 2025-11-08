@@ -28,15 +28,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -402,11 +397,33 @@ public class ResolverCache {
     }
 
     public String getRenamedRef(String originalRef) {
-        return renameCache.get(originalRef);
+        return renameCache.get(createRenameCacheKey(originalRef));
     }
 
     public void putRenamedRef(String originalRef, String newRef) {
-        renameCache.put(originalRef, newRef);
+        renameCache.put(createRenameCacheKey(originalRef), newRef);
+    }
+
+    /**
+     * Creates a cache key for the rename cache for the provided reference. For consistent comparisons the external part
+     * is always normalized, e.g. ./components.yaml and components.yaml are considered to reference the same file.
+     *
+     * @param originalRef The reference for which we want to create a rename cache key
+     * @return The appropriate cache key for the reference
+     */
+    private String createRenameCacheKey(String originalRef) {
+        int separatorIndex = originalRef.indexOf("#/");
+        if (separatorIndex == -1) {
+            // Reference doesn't have a local part
+            return URI.create(originalRef).normalize().toString();
+        } else if (separatorIndex == 0) {
+            // Reference doesn't have an external part
+            return originalRef;
+        } else {
+            // Reference with local and external part
+            URI externalRefURI = URI.create(originalRef.substring(0, separatorIndex));
+            return externalRefURI.normalize() + originalRef.substring(separatorIndex);
+        }
     }
 
     public Map<String, Object> getResolutionCache() {

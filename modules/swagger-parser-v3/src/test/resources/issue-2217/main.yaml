@@ -1,0 +1,59 @@
+openapi: "3.0.0"
+info:
+  title: Main test
+  version: 1.1.0
+paths:
+  /int/employees/extended:
+    responses:
+      "200":
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: 'fragments.yaml#/components/schemas/EmployeesInfoPage'
+  /int/employees:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'fragments.yaml#/components/schemas/PostEmployeeRequest'
+        required: true
+      responses:
+        "201":
+          $ref: 'fragments.yaml#/components/responses/EmployeeInfo201'
+  /int/employees/id:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'fragments.yaml#/components/schemas/PutEmployeeRequest'
+        required: true
+      responses:
+        "200":
+          $ref: 'fragments.yaml#/components/responses/EmployeeInfo200'
+        "201":
+          $ref: 'fragments.yaml#/components/responses/EmployeeInfo201'
+  /int/employees/id/request:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'fragments.yaml#/components/schemas/EmployeeIdRequest'
+        required: true
+      responses:
+        "200":
+          $ref: 'fragments.yaml#/components/responses/EmployeeInfo200'
+  /int/employees/id/remove:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'fragments.yaml#/components/schemas/EmployeeIdRequest'
+        required: true
+      responses:
+        "204":
+          description: No Content

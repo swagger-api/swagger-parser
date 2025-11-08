@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -3295,7 +3296,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertEqualsNoOrder(
             openAPI.getComponents().getSchemas().keySet(),
-            Arrays.asList("ArrayPojo", "Enum1", "Enum1_1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
+            Arrays.asList("ArrayPojo", "Enum1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
                 "TransactionsPatchRequestBody", "additional-properties", "array-pojo", "locale-translation-item",
                 "map-pojo", "set-pojo", "simple-pojo", "translation-item")
         );
@@ -3311,6 +3312,26 @@ public class OpenAPIV3ParserTest {
         Yaml.prettyPrint(openAPI);
         assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getRequired().size(), 1);
         assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getProperties().size(), 2);
+    }
+
+    @Test(description = "Should not create duplicate components when using mixed reference patters")
+    public void testIssue2217ExternalReferenceResolution() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-2217/main.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        Assert.assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+
+        // Assert that EmployeeInfo_1 object does not appear in the parsed spec
+        Assert.assertNotNull(openAPI.getComponents(), "Components should exist");
+        if (openAPI.getComponents().getSchemas() != null) {
+            Assert.assertFalse(openAPI.getComponents().getSchemas().containsKey("EmployeeInfo_1"),
+                    "EmployeeInfo_1 should not be created during external reference resolution");
+        }
     }
 
     @Test(description = "responses should be inline")

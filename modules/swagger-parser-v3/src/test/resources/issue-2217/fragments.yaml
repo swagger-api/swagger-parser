@@ -1,0 +1,62 @@
+openapi: "3.0.0"
+info:
+  version: 1.1.0
+  title: fr_fragments
+paths: {}
+components:
+  schemas:
+    CreatedByEmployeeId:
+      type: string
+    EmployeesInfoPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmployeeInfo'
+        pageResponse:
+          $ref: pagination.yaml#/components/schemas/PageResponse
+    ArrayOfGroupsInfo:
+      type: array
+      items:
+        $ref: '#/components/schemas/GroupInfo'
+    EmployeeInfo:
+      type: object
+      properties:
+        employeeId:
+          type: string
+        groupTags:
+          $ref: '#/components/schemas/ArrayOfGroups'
+    ArrayOfGroups:
+      type: array
+      items:
+        $ref: '#/components/schemas/GroupTags'
+    GroupTags:
+      type: object
+      properties:
+        groupTag:
+          $ref: '#/components/schemas/GroupId'
+    GroupId:
+      type: string
+    PostEmployeeRequest:
+      $ref: '#/components/schemas/EmployeeInfo'
+    PutEmployeeRequest:
+      $ref: '#/components/schemas/EmployeeInfo'
+    EmployeeIdRequest:
+      type: object
+      properties:
+        employeeId:
+          type: string
+  responses:
+    EmployeeInfo200:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmployeeInfo'
+    EmployeeInfo201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmployeeInfo'

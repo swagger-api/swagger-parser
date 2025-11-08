@@ -258,4 +258,33 @@ public class ResolverCacheTest {
         cache.putRenamedRef("foo", "bar");
         assertEquals(cache.getRenamedRef("foo"), "bar");
     }
+
+    @Test
+    public void testRenameCacheNormalizationExternalAndLocalPart() {
+        ResolverCache cache = new ResolverCache(openAPI, auths, null);
+
+        assertNull(cache.getRenamedRef("./components.yaml#/foo"));
+        cache.putRenamedRef("./components.yaml#/foo", "bar");
+        assertEquals(cache.getRenamedRef("./components.yaml#/foo"), "bar");
+        assertEquals(cache.getRenamedRef("components.yaml#/foo"), "bar");
+    }
+
+    @Test
+    public void testRenameCacheNormalizationNoLocalPart() {
+        ResolverCache cache = new ResolverCache(openAPI, auths, null);
+
+        assertNull(cache.getRenamedRef("./components.yaml"));
+        cache.putRenamedRef("./components.yaml", "bar");
+        assertEquals(cache.getRenamedRef("./components.yaml"), "bar");
+        assertEquals(cache.getRenamedRef("components.yaml"), "bar");
+    }
+
+    @Test
+    public void testRenameCacheNormalizationNoExternalPart() {
+        ResolverCache cache = new ResolverCache(openAPI, auths, null);
+
+        assertNull(cache.getRenamedRef("#/foo"));
+        cache.putRenamedRef("#/foo", "bar");
+        assertEquals(cache.getRenamedRef("#/foo"), "bar");
+    }
 }
