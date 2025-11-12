@@ -1,0 +1,22 @@
+  get:
+    summary: Get all objects
+    operationId: getObjects
+    responses:
+      '200':
+        description: "List of all the objects."
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                oneOf:
+                  - $ref: './schemas.yaml#/components/schemas/TypeA'
+                  - $ref: './schemas.yaml#/components/schemas/TypeB'
+                discriminator:
+                  propertyName: discriminatorProperty
+                  mapping:
+                    ONE: './schemas.yaml#/components/schemas/TypeA'
+                    TWO: './schemas.yaml#/components/schemas/TypeB'
+                    THREE: './schemas.yaml#/components/schemas/TypeB'
+                    FOUR: './schemas.yaml#/components/schemas/TypeB'
+                    FIVE: './schemas.yaml#/components/schemas/TypeB'
