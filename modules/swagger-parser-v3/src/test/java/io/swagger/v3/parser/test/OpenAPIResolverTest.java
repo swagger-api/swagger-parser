@@ -658,6 +658,60 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    void testIssue2211() {
+        // given
+        String yaml =
+                "        openapi: 3.0.3\n" +
+                "        info:\n" +
+                "          title: technical-definitions\n" +
+                "          description: Commons technical definitions\n" +
+                "          version: 1.0.0\n" +
+                "        paths:\n" +
+                "          /components/parameter:\n" +
+                "            get:\n" +
+                "              tags:\n" +
+                "                - example\n" +
+                "              operationId: getExampleById4\n" +
+                "              parameters:\n" +
+                "                - $ref: '#/components/parameters/Parameter'\n" +
+                "              responses:\n" +
+                "                '200':\n" +
+                "                  description: Successful response\n" +
+                "                  content:\n" +
+                "                    application/json:\n" +
+                "                      schema:\n" +
+                "                        type: object\n" +
+                "                        properties:\n" +
+                "                          message:\n" +
+                "                            type: string\n" +
+                "                            example: Success\n" +
+                "        components:\n" +
+                "          parameters:\n" +
+                "            Parameter:\n" +
+                "              name: id\n" +
+                "              in: query\n" +
+                "              description: The ID of the example to retrieve\n" +
+                "              required: true\n" +
+                "              style: form\n" +
+                "              explode: true\n" +
+                "              schema:\n" +
+                "                type: string\n" +
+                "\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        // when
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yaml, auths, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        // then
+        assertNotNull(openAPI);
+        assertEquals(openAPI.getPaths().get("/components/parameter").getGet().getParameters().get(0).get$ref(), "#/components/parameters/Parameter");
+    }
+
+    @Test
     public void testIssue1352() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -1500,5 +1554,5 @@ public class OpenAPIResolverTest {
                 { false }
         };
     }
-    
+
 }
