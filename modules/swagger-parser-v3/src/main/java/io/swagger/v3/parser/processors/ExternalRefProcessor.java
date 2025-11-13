@@ -250,7 +250,7 @@ public final class ExternalRefProcessor {
                 ComposedSchema composed = (ComposedSchema) property;
                 final Map<String, String> refMap = Optional.ofNullable(composed.getDiscriminator())
                                 .map(Discriminator::getMapping).orElse(Collections.emptyMap()).entrySet()
-                                .stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+                                .stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 Map<String, Schema> refCache = (!refMap.isEmpty() &&
                         (composed.getAnyOf() != null || composed.getOneOf() != null)) ? Stream.of(
                                 composed.getAnyOf(), composed.getOneOf()
