@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class Issue2222Test {
 
     @Test
-    public void testIssue2222() {
+    public void shouldMapSameEntitiesToDifferentDiscriminatorValues() {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-2222/openapi.yaml", null, options);
