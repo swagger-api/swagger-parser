@@ -590,6 +590,52 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
+    public void testSameComponentInRequestAndResponseHeaders() throws IOException {
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-header-different-place-domain.yaml"), "UTF-8");
+        WireMock.stubFor(get(urlPathMatching("/issue-domain"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/json")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/same-header-different-place.yaml"), "UTF-8");
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        final SwaggerParseResult openAPI = parser.readContents(pathFile, null, options);
+        Yaml.prettyPrint(openAPI);
+
+        assertEquals(openAPI.getMessages().size(), 0);
+    }
+
+    @Test
+    public void testSameComponentInRequestAndResponseHeadersValid() throws IOException {
+        String pathFile = FileUtils.readFileToString(new File("src/test/resources/same-header-different-place-domain.yaml"), "UTF-8");
+        WireMock.stubFor(get(urlPathMatching("/issue-domain"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/json")
+                        .withBody(pathFile
+                                .getBytes(StandardCharsets.UTF_8))));
+
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/same-header-different-place-valid.yaml"), "UTF-8");
+        pathFile = pathFile.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        final SwaggerParseResult openAPI = parser.readContents(pathFile, null, options);
+        Yaml.prettyPrint(openAPI);
+
+        assertEquals(openAPI.getMessages().size(), 0);
+    }
+
+    @Test
     public void testIssue1398() {
         ParseOptions options = new ParseOptions();
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue1398.yaml", null, options);
