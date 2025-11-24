@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public class ParserDeduplicationTest {
+public class ParserDeduplicationParameterTest {
 
     @Test
     public void testIssue2102TwoRefsSameNameDifferentIn31() {
