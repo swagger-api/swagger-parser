@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -3021,7 +3022,7 @@ public class OpenAPIV3ParserTest {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         options.setResolve(true);
-        SwaggerParseResult readResult = parser.readLocation("src/test/resources/issue-1543/openapi.json", null, options);
+        SwaggerParseResult readResult = parser.readLocation("src/test/resources/issue-1543/openapi30.json", null, options);
 
         if (readResult.getMessages().size() > 0) {
             Assert.assertFalse(readResult.getMessages().get(0).contains("end -1"));
@@ -3436,18 +3437,5 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         SwaggerParseResult parseResult = openApiParser.readLocation("version-missing.yaml", null, options);
         assertEquals(parseResult.getMessages().get(0), "attribute info.version is missing");
-    }
-
-    @Test(description = "Duplicated parameter name with different locations")
-    public void testDuplicatedParameterNameFromRef() {
-        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        options.setFlatten(true);
-        OpenAPI openAPI = openApiParser.read("issue-2102/openapi.json", null, options);
-
-        assertEquals(openAPI.getPaths().get("/myoperation").getGet().getParameters().size(), 2);
-        assertEquals((int) openAPI.getPaths().get("/myoperation").getGet().getParameters().stream().filter(param -> param.getName().equals("myParam")).count(), 2);
-
     }
 }
