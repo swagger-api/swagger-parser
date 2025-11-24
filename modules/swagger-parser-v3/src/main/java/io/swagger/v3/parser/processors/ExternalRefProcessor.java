@@ -96,8 +96,7 @@ public final class ExternalRefProcessor {
 
         if(schema == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            LOGGER.warn("unable to load model reference from `{}`.  It may not be available or the reference isn't a valid model schema", $ref);
             return $ref;
         }
         String newRef;

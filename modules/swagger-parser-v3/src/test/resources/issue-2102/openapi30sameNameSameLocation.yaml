@@ -1,0 +1,18 @@
+openapi: 3.0.0
+paths:
+  /duplicate:
+    get:
+      parameters:
+        - in: query
+          name: myParam
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/queryMyParam'
+      responses:
+        '200':
+          description: OK
+components:
+  parameters:
+    queryMyParam:
+      in: query
+      name: myParam
+      schema: { type: string, format: date-time }
