@@ -18,6 +18,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
@@ -184,7 +185,13 @@ public class OpenAPIV3ParserTest {
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getOpenAPI());
-        Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getParameters().get(0).getName(), "dealId");
+
+        Parameter param = result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = result.getOpenAPI().getComponents();
+        Parameter refParameter = components.getParameters().get(refName);
+        Assert.assertEquals(refParameter.getName(), "dealId");
+
         Assert.assertEquals(result.getOpenAPI().getPaths().get("/api/deal/{dealId}").getGet().getResponses().get("200").getDescription(), "Success");
     }
 
@@ -1334,14 +1341,22 @@ public class OpenAPIV3ParserTest {
         OpenAPI result = new OpenAPIV3Parser().read("issue-1103/remote-pathItem-swagger.yaml");
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getPaths().get("/Translation/{lang}"));
-        Assert.assertEquals(result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0).getName(), "lang");
+        Parameter param = result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = result.getComponents();
+        Parameter refParameter =  components.getParameters().get(refName);
+        Assert.assertEquals(refParameter.getName(), "lang");
     }
 
     @Test
     public void testRemoteParameterIssue1103() {
         OpenAPI result = new OpenAPIV3Parser().read("issue-1103/remote-parameter-swagger.yaml");
         Assert.assertNotNull(result);
-        Assert.assertEquals(result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0).getName(), "lang");
+        Parameter param = result.getPaths().get("/Translation/{lang}").getPut().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = result.getComponents();
+        Parameter refParameter =  components.getParameters().get(refName);
+        Assert.assertEquals(refParameter.getName(), "lang");
     }
 
     @Test
@@ -1974,7 +1989,7 @@ public class OpenAPIV3ParserTest {
         options.setResolveResponses(true);
         SwaggerParseResult readResult = parser.readLocation(location, null, options);
 
-        if (readResult.getMessages().size() > 0) {
+        if (!readResult.getMessages().isEmpty()) {
             Json.prettyPrint(readResult.getMessages());
         }
         final OpenAPI openAPI = readResult.getOpenAPI();
@@ -1986,10 +2001,16 @@ public class OpenAPIV3ParserTest {
 
         final Operation operation = path.getGet();
         final List<Parameter> operationParams = operation.getParameters();
-        assertParamDetails(operationParams, 0, QueryParameter.class, "param1", "query");
-        assertParamDetails(operationParams, 1, HeaderParameter.class, "param2", "header");
-        assertParamDetails(operationParams, 2, PathParameter.class, "param3", "path");
-        assertParamDetails(operationParams, 3, HeaderParameter.class, "param4", "header");
+        List<Parameter> componentParameters = operationParams.stream()
+                .map(param -> {
+                    String refName = ReferenceUtils.getRefName(param.get$ref());
+                    return openAPI.getComponents().getParameters().get(refName);
+                }).collect(Collectors.toList());
+
+        assertParamDetails(componentParameters, 0, QueryParameter.class, "param1", "query");
+        assertParamDetails(componentParameters, 1, HeaderParameter.class, "param2", "header");
+        assertParamDetails(componentParameters, 2, PathParameter.class, "param3", "path");
+        assertParamDetails(componentParameters, 3, HeaderParameter.class, "param4", "header");
 
         final Map<String, ApiResponse> responsesMap = operation.getResponses();
 
@@ -2264,9 +2285,10 @@ public class OpenAPIV3ParserTest {
         final OpenAPI openAPI = parser.read("src/test/resources/issue_358.yaml");
         assertNotNull(openAPI);
         List<Parameter> parms = openAPI.getPaths().get("/testApi").getGet().getParameters();
-        assertEquals(1, parms.size());
-        assertEquals("pathParam", parms.get(0).getName());
-        assertEquals("string",  parms.get(0).getSchema().getType());
+        // FIXME nid 19.11.2025 : I do not think the behaviour is right. See spec > https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#path-item-object
+        assertEquals(parms.size(), 1);
+        assertEquals(parms.get(0).getName(), "pathParam");
+        assertEquals(parms.get(0).getSchema().getType(), "string");
     }
 
     @Test
@@ -2523,6 +2545,7 @@ public class OpenAPIV3ParserTest {
         parseOptions.setResolveFully(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_877.yaml", null, parseOptions);
         Parameter parameter = openAPI.getPaths().get("/adopt").getGet().getParameters().get(0);
+        // FIXME nid 19.11.2025 : ResolveFully should inline here.
         assertNotNull(parameter);
         assertEquals(parameter.getIn(), "path");
         assertEquals(parameter.getName(), "playerId");
@@ -2770,11 +2793,17 @@ public class OpenAPIV3ParserTest {
 
         // then
         OpenAPI api = result.getOpenAPI();
-        assertEquals(api.getPaths().get("/anPath").getGet().getParameters().get(0).getName(), "customer-id");
-        assertEquals(api.getPaths().get("/anPath").getGet().getParameters().get(1).getName(), "unit-id");
+        Components components = api.getComponents();
+
+        Parameter customerIdParameter = api.getPaths().get("/anPath").getGet().getParameters().get(0);
+        String customerIdRefName = ReferenceUtils.getRefName(customerIdParameter.get$ref());
+        Assert.assertEquals(components.getParameters().get(customerIdRefName).getName(), "customer-id");
+
+        Parameter unitIdParameter = api.getPaths().get("/anPath").getGet().getParameters().get(1);
+        String unitIdRefName = ReferenceUtils.getRefName(unitIdParameter.get$ref());
+        Assert.assertEquals(components.getParameters().get(unitIdRefName).getName(), "unit-id");
 
         assertThat(result.getMessages(), equalTo(emptyList()));
-
     }
 
     @Test

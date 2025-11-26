@@ -8,7 +8,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.testng.Assert;
@@ -45,7 +48,10 @@ public class OpenAPIV3RefTest {
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertTrue(result.getMessages().isEmpty(), "No error messages should be present");
         Assert.assertNotNull(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters());
-        Assert.assertEquals(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters().get(0).getName(), "FbtPrincipalIdentity");
+        Parameter parameter = result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(parameter.get$ref());
+        Components components = result.getOpenAPI().getComponents();
+        Assert.assertEquals(components.getParameters().get(refName).getName(), "FbtPrincipalIdentity");
     }
 
     @Test
@@ -57,7 +63,10 @@ public class OpenAPIV3RefTest {
         Assert.assertNotNull(result.getOpenAPI());
         Assert.assertTrue(result.getMessages().isEmpty(), "No error messages should be present");
         Assert.assertNotNull(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters());
-        Assert.assertEquals(result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters().get(0).getName(), "FbtPrincipalIdentity");
+        Parameter parameter = result.getOpenAPI().getPaths().get("/endpoint").getGet().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(parameter.get$ref());
+        Components components = result.getOpenAPI().getComponents();
+        Assert.assertEquals(components.getParameters().get(refName).getName(), "FbtPrincipalIdentity");
     }
 
     @Test
