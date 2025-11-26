@@ -134,29 +134,14 @@ public class ResolverFully {
     }
 
     public void resolvePath(PathItem pathItem){
+        if (pathItem.getParameters() != null) {
+            pathItem.setParameters(mapToResolvedParameters(pathItem.getParameters()));
+        }
+
         for(Operation op : pathItem.readOperations()) {
             // inputs
             if (op.getParameters() != null) {
-                for (Parameter parameter : op.getParameters()) {
-                    parameter = parameter.get$ref() != null ? resolveParameter(parameter) : parameter;
-                    if (parameter.getSchema() != null) {
-                        Schema resolved = resolveSchema(parameter.getSchema());
-                        if (resolved != null) {
-                            parameter.setSchema(resolved);
-                        }
-                    }
-                    if(parameter.getContent() != null){
-                        Map<String,MediaType> content = parameter.getContent();
-                        for (String key: content.keySet()){
-                            if (content.get(key) != null && content.get(key).getSchema() != null ){
-                                Schema resolvedSchema = resolveSchema(content.get(key).getSchema());
-                                if (resolvedSchema != null) {
-                                    content.get(key).setSchema(resolvedSchema);
-                                }
-                            }
-                        }
-                    }
-                }
+                op.setParameters(mapToResolvedParameters(op.getParameters()));
             }
 
             if (op.getCallbacks() != null){
@@ -230,6 +215,33 @@ public class ResolverFully {
                 op.setResponses(resolvedResponses);
             }
         }
+    }
+
+    private List<Parameter> mapToResolvedParameters(List<Parameter> rawParameters) {
+        List<Parameter> resolvedParameters = new ArrayList<>();
+        for (Parameter parameter : rawParameters) {
+            parameter = parameter.get$ref() != null ? resolveParameter(parameter) : parameter;
+            if (parameter.getSchema() != null) {
+                Schema resolved = resolveSchema(parameter.getSchema());
+                if (resolved != null) {
+                    parameter.setSchema(resolved);
+                }
+            }
+            if (parameter.getContent() != null) {
+                Map<String, MediaType> content = parameter.getContent();
+                for (String key : content.keySet()) {
+                    if (content.get(key) != null && content.get(key).getSchema() != null) {
+                        Schema resolvedSchema = resolveSchema(content.get(key).getSchema());
+                        if (resolvedSchema != null) {
+                            content.get(key).setSchema(resolvedSchema);
+                        }
+                    }
+                }
+            }
+            resolvedParameters.add(parameter);
+        }
+
+        return resolvedParameters;
     }
 
     private void resolveHeaders(Map<String, Header> headers) {
