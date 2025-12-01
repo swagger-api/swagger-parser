@@ -39,6 +39,7 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.reference.DereferencerContext;
 import io.swagger.v3.parser.reference.DereferencersFactory;
 import io.swagger.v3.parser.reference.OpenAPIDereferencer;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.ResolverFully;
 import org.apache.commons.io.FileUtils;
@@ -563,7 +564,11 @@ public class OpenAPIResolverTest {
         assertEquals(id.get$ref(),"#/components/schemas/Pet");
 
         //internal parameter url
-        assertEquals(openAPI.getPaths().get("/store/inventory").getGet().getParameters().get(0), openAPI.getComponents().getParameters().get("limitParam"));
+        Parameter inventoryParam = openAPI.getPaths().get("/store/inventory").getGet().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(inventoryParam.get$ref());
+        assertEquals(refName, "limitParam");
+        Components components = openAPI.getComponents();
+        assertEquals(components.getParameters().get(refName).getName(), "limit");
     }
 
     @Test
@@ -655,6 +660,60 @@ public class OpenAPIResolverTest {
         assertNotNull(am);
         Schema prop = am.getItems();
         assertTrue(prop instanceof Schema);
+    }
+
+    @Test
+    void testIssue2211() {
+        // given
+        String yaml =
+                "        openapi: 3.0.3\n" +
+                "        info:\n" +
+                "          title: technical-definitions\n" +
+                "          description: Commons technical definitions\n" +
+                "          version: 1.0.0\n" +
+                "        paths:\n" +
+                "          /components/parameter:\n" +
+                "            get:\n" +
+                "              tags:\n" +
+                "                - example\n" +
+                "              operationId: getExampleById4\n" +
+                "              parameters:\n" +
+                "                - $ref: '#/components/parameters/Parameter'\n" +
+                "              responses:\n" +
+                "                '200':\n" +
+                "                  description: Successful response\n" +
+                "                  content:\n" +
+                "                    application/json:\n" +
+                "                      schema:\n" +
+                "                        type: object\n" +
+                "                        properties:\n" +
+                "                          message:\n" +
+                "                            type: string\n" +
+                "                            example: Success\n" +
+                "        components:\n" +
+                "          parameters:\n" +
+                "            Parameter:\n" +
+                "              name: id\n" +
+                "              in: query\n" +
+                "              description: The ID of the example to retrieve\n" +
+                "              required: true\n" +
+                "              style: form\n" +
+                "              explode: true\n" +
+                "              schema:\n" +
+                "                type: string\n" +
+                "\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        // when
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yaml, auths, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        // then
+        assertNotNull(openAPI);
+        assertEquals(openAPI.getPaths().get("/components/parameter").getGet().getParameters().get(0).get$ref(), "#/components/parameters/Parameter");
     }
 
     @Test
@@ -1178,7 +1237,9 @@ public class OpenAPIResolverTest {
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final Parameter param = params.get(0);
-        assertEquals(param.getName(), "skip");
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = swagger.getComponents();
+        assertEquals(components.getParameters().get(refName).getName(), "skip");
     }
 
 
@@ -1203,7 +1264,9 @@ public class OpenAPIResolverTest {
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final Parameter param =  params.get(0);
-        assertEquals(param.getName(), "skip");
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = swagger.getComponents();
+        assertEquals(components.getParameters().get(refName).getName(), "skip");
     }
 
     private void testResponseRemoteRefs(String remoteRef) {
@@ -1338,8 +1401,10 @@ public class OpenAPIResolverTest {
 
 
         Parameter param = resolved.getPaths().get("/test").getGet().getParameters().get(0);
-        QueryParameter qp = (QueryParameter) param;
-        //assertEquals(qp.getCollectionFormat(), "csv");
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = resolved.getComponents();
+        QueryParameter refParameter = (QueryParameter) components.getParameters().get(refName);
+        assertEquals(refParameter.getName(), "test");
     }
 
     @Test
@@ -1500,5 +1565,5 @@ public class OpenAPIResolverTest {
                 { false }
         };
     }
-    
+
 }
