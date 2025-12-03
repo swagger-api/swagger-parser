@@ -83,7 +83,11 @@ public class OpenAPIV3RefTest {
         Set<String> allOfs = ((List<Schema>)reqSchema.getAnyOf())
                 .stream().map(Schema::get$ref).collect(Collectors.toSet());
         assertTrue(allOfs.stream().allMatch(s -> s.contains(COMPONENTS_SCHEMAS_REF)),"Schema mappings are processed");
-        assertTrue(allOfs.containsAll(discriminator),"Discriminator mappings are updated");
+        Set<String> allOfsNames = allOfs.stream()
+                .map(of -> of.split("/schemas/")[1]).collect(Collectors.toSet());
+        Collection<String> discriminatorNames = discriminator.stream().map(of -> of.split("/schemas/")[1]
+                .replace(".json","")).collect(Collectors.toSet());
+        assertTrue(allOfsNames.containsAll(discriminatorNames),"Discriminator mappings are updated");
 
     }
 

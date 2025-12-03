@@ -96,8 +96,7 @@ public final class ExternalRefProcessor {
 
         if(schema == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            LOGGER.warn("unable to load model reference from `{}`.  It may not be available or the reference isn't a valid model schema", $ref);
             return $ref;
         }
         String newRef;
@@ -250,7 +249,7 @@ public final class ExternalRefProcessor {
                 ComposedSchema composed = (ComposedSchema) property;
                 final Map<String, String> refMap = Optional.ofNullable(composed.getDiscriminator())
                                 .map(Discriminator::getMapping).orElse(Collections.emptyMap()).entrySet()
-                                .stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+                                .stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 Map<String, Schema> refCache = (!refMap.isEmpty() &&
                         (composed.getAnyOf() != null || composed.getOneOf() != null)) ? Stream.of(
                                 composed.getAnyOf(), composed.getOneOf()

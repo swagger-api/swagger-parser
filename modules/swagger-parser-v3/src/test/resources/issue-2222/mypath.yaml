@@ -1,0 +1,61 @@
+  get:
+    summary: Get all objects
+    operationId: getObjects
+    responses:
+      '200':
+        description: "List of all the objects."
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/TypeA'
+                  - $ref: '#/components/schemas/TypeB'
+                discriminator:
+                  propertyName: discriminatorProperty
+                  mapping:
+                    ONE: '#/components/schemas/TypeA'
+                    TWO: '#/components/schemas/TypeB'
+                    THREE: '#/components/schemas/TypeB'
+                    FOUR: '#/components/schemas/TypeB'
+                    FIVE: '#/components/schemas/TypeB'
+  
+  components:
+    schemas:
+      BaseType:
+        type: object
+        required:
+          - discriminatorProperty
+        properties:
+          discriminatorProperty:
+            type: string
+            description: A property used to determine the concrete object type.
+            enum: [ONE, TWO, THREE, FOUR, FIVE]
+          id:
+            type: string
+            description: Unique identifier for the object.
+      
+      TypeA:
+        allOf:
+          - $ref: '#/components/schemas/BaseType'
+          - type: object
+            properties:
+              discriminatorProperty:
+                type: string
+                enum: [ONE]
+              name:
+                type: string
+                description: A name specific to TypeA.
+      
+      TypeB:
+        allOf:
+          - $ref: '#/components/schemas/BaseType'
+          - type: object
+            properties:
+              discriminatorProperty:
+                type: string
+                enum: [TWO, THREE, FOUR, FIVE]
+              value:
+                type: number
+                description: A numeric value specific to TypeB.
