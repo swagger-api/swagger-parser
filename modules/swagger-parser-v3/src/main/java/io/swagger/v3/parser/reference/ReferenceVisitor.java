@@ -15,9 +15,12 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.RemoteUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +38,8 @@ public class ReferenceVisitor extends AbstractVisitor {
     protected Reference reference;
     protected DereferencerContext context;
     private PermittedUrlsChecker permittedUrlsChecker;
+    private final LoaderOptions loaderOptions;
+
 
     public ReferenceVisitor(
             Reference reference,
@@ -46,6 +51,8 @@ public class ReferenceVisitor extends AbstractVisitor {
         this.visited = visited;
         this.visitedMap = visitedMap;
         this.context = null;
+        this.loaderOptions = DeserializationUtils.buildLoaderOptions();
+
     }
 
     public ReferenceVisitor(
@@ -61,6 +68,7 @@ public class ReferenceVisitor extends AbstractVisitor {
         this.context = context;
         this.permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getRemoteRefAllowList(),
                 context.getParseOptions().getRemoteRefBlockList());
+        this.loaderOptions = DeserializationUtils.buildLoaderOptions();
     }
 
     public String toBaseURI(String uri) throws Exception{
@@ -301,7 +309,25 @@ public class ReferenceVisitor extends AbstractVisitor {
 
     public JsonNode deserializeIntoTree(String content) throws Exception {
         boolean isJson = content.trim().startsWith("{");
-        return isJson ? Json31.mapper().readTree(content) : Yaml31.mapper().readTree(content);
+        if (isJson) {
+            return Json31.mapper().readTree(content);
+        }
+        Yaml yaml = getYaml();
+
+        Object yamlObject = yaml.load(content);
+        return Yaml31.mapper().valueToTree(yamlObject);
+    }
+
+    private Yaml getYaml() {
+        Yaml yaml;
+        String yamlCodePoints = System.getProperty("maxYamlCodePoints");
+        if (yamlCodePoints != null && !yamlCodePoints.isEmpty() && StringUtils.isNumeric(yamlCodePoints)) {
+            loaderOptions.setCodePointLimit(Integer.parseInt(yamlCodePoints));
+            yaml = new Yaml(loaderOptions);
+        } else {
+            yaml = new Yaml();
+        }
+        return yaml;
     }
 
     public JsonNode parse(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
