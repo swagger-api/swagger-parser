@@ -3310,6 +3310,24 @@ public class OpenAPIV3ParserTest {
         assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getProperties().size(), 2);
     }
 
+    @Test(description = "should resolve nested relative references in examples")
+    public void testIssue2229() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-2229/openapi-rest.yml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        Map<String, Example> parameterExamples = openAPI.getPaths().get("/api/v1/rules").getGet().getParameters().get(0).getExamples();
+        assertEquals(parameterExamples.get("default").get$ref(), "#/components/examples/StatusQueryParameter");
+
+        assertNotNull(openAPI.getComponents(), "should have resolved the components");
+        assertNotNull(openAPI.getComponents().getExamples(), "should have resolved the examples");
+        Set<String> exampleNames = new HashSet<>();
+        exampleNames.add("StatusQueryParameter");
+        assertEquals(openAPI.getComponents().getExamples().keySet(), exampleNames);
+    }
+
     @Test(description = "responses should be inline")
     public void testFullyResolveResponses() {
         ParseOptions options = new ParseOptions();
