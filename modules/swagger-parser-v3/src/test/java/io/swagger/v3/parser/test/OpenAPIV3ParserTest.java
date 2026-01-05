@@ -1962,6 +1962,21 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorModel");
     }
 
+    @Test
+    public void testExternalRefsNormalization() throws Exception {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/oas3.fetched/openapi3.yaml", null, options);
+
+        OpenAPI openAPI = result.getOpenAPI();
+        Schema originalModel = openAPI.getComponents().getSchemas().get("Event");
+        Schema duplicateModel = openAPI.getComponents().getSchemas().get("Event_1");
+        System.out.println("component schemas found: " + openAPI.getComponents().getSchemas().keySet());
+        assertNull(duplicateModel);
+        assertNotNull(originalModel);
+    }
+
     private OpenAPI doRelativeFileTest(String location) {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -3292,7 +3307,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertEqualsNoOrder(
             openAPI.getComponents().getSchemas().keySet(),
-            Arrays.asList("ArrayPojo", "Enum1", "Enum1_1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
+            Arrays.asList("ArrayPojo", "Enum1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
                 "TransactionsPatchRequestBody", "additional-properties", "array-pojo", "locale-translation-item",
                 "map-pojo", "set-pojo", "simple-pojo", "translation-item")
         );
