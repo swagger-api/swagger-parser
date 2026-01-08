@@ -67,7 +67,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -261,9 +263,6 @@ public class OpenAPIDeserializer {
 	private static final String COOKIE_PARAMETER = "cookie";
 	private static final String PATH_PARAMETER = "path";
 	private static final String HEADER_PARAMETER = "header";
-	private static final Pattern RFC3339_DATE_TIME_PATTERN = Pattern.compile("^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):" +
-			"(\\d{2}):(\\d{2})(\\.\\d+)?((Z)|([+-]\\d{2}:\\d{2}))$");
-	private static final Pattern RFC3339_DATE_PATTERN = Pattern.compile("^(\\d{4})-(\\d{2})-(\\d{2})$");
 	private static final String REFERENCE_SEPARATOR = "#/";
 
     private static final int MAX_EXTENSION_ENTRIES = 20;
@@ -298,7 +297,7 @@ public class OpenAPIDeserializer {
     public SwaggerParseResult deserialize(JsonNode rootNode, String path, ParseOptions options, boolean isOaiAuthor) {
         basePath = path;
         this.rootNode = rootNode;
-        rootMap = new ObjectMapper().convertValue(rootNode, Map.class);
+        rootMap = convertValue(rootNode, Map.class);
 		SwaggerParseResult result = new SwaggerParseResult();
         try {
             ParseResult rootParse = new ParseResult();
@@ -319,6 +318,13 @@ public class OpenAPIDeserializer {
             }
         }
 		return result;
+	}
+
+	protected <T> T convertValue(JsonNode fromValue, Class<T> toValueType) {
+		if(Object.class.equals(toValueType)) {
+			return Json.mapper().convertValue(fromValue, toValueType);
+		}
+		return new ObjectMapper().convertValue(fromValue, toValueType);
 	}
 
 	public OpenAPI parseRoot(JsonNode node, ParseResult result, String path) {
@@ -519,7 +525,7 @@ public class OpenAPIDeserializer {
 		Set<String> keys = getKeys(node);
 		for (String key : keys) {
 			if (key.startsWith("x-")) {
-				extensions.put(key, Json.mapper().convertValue(node.get(key), Object.class));
+				extensions.put(key, convertValue(node.get(key), Object.class));
 			}
 		}
 
@@ -3229,23 +3235,10 @@ public class OpenAPIDeserializer {
 	 * Returns null if this string can't be parsed as Date.
 	 */
 	private Date toDate(String dateString) {
-		Matcher matcher = RFC3339_DATE_PATTERN.matcher(dateString);
-
 		Date date = null;
-		if (matcher.matches()) {
-			String year = matcher.group(1);
-			String month = matcher.group(2);
-			String day = matcher.group(3);
-
-			try {
-				date =
-						new Calendar.Builder()
-								.setDate(Integer.parseInt(year), Integer.parseInt(month) - 1,
-										Integer.parseInt(day))
-								.build()
-								.getTime();
-			} catch (Exception ignore) {
-			}
+		try {
+			date = new Date(LocalDate.parse(dateString).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+		} catch (Exception ignore) {
 		}
 
 		return date;
@@ -4280,7 +4273,7 @@ public class OpenAPIDeserializer {
 		for (String key : schemaKeys) {
 			validateReservedKeywords(specKeys, key, location, result);
 			if (!specKeys.get("SCHEMA_KEYS").contains(key) && !key.startsWith("x-")) {
-				extensions.put(key, Json.mapper().convertValue(node.get(key), Object.class));
+				extensions.put(key, convertValue(node.get(key), Object.class));
 				schema.setExtensions(extensions);
 			}
 		}
