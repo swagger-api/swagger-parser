@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNull;
@@ -772,5 +773,56 @@ public class OpenAPIParserTest {
                 "openapi31: false\n");
     }
 
+
+  @Test
+  public void testAdditionalPropertiesWithAllOfV1() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "additionalProperties_allOf_v1.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue((Boolean) schema.getAdditionalProperties());
+  }
+    @Test
+    public void testAdditionalPropertiesWithAllOfV2() {
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIParser().readLocation(
+            "additionalProperties_allOf_v2.yaml", null, options);
+        assertNotNull(result.getOpenAPI());
+        Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+        assertNotNull(schema);
+        assertNotNull(schema.getAdditionalProperties());
+        assertTrue((Boolean) schema.getAdditionalProperties());
+    }
+
+  @Test
+  public void testAdditionalPropertiesWithAllOfV3() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "additionalProperties_allOf_v3.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue((Boolean) schema.getAdditionalProperties());
+  }
+
+  @Test
+  public void testAdditionalPropertiesWithAllOfV4() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "additionalProperties_allOf_v4.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertFalse((Boolean) schema.getAdditionalProperties());
+  }
 }
 
