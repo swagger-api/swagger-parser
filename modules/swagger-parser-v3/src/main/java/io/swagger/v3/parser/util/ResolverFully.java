@@ -683,6 +683,9 @@ public class ResolverFully {
             if (resolved.getMinContains() != null) {
                 targetSchema.setMinContains(resolved.getMinContains());
             }
+            if (resolved.getAdditionalProperties() != null) {
+                targetSchema.setAdditionalProperties(resolved.getAdditionalProperties());
+            }
         }
 
         if (requiredProperties.size() > 0) {
