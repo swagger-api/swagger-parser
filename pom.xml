@@ -359,6 +359,11 @@
                 <version>${wiremock-version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>1.7.15.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <modules>
