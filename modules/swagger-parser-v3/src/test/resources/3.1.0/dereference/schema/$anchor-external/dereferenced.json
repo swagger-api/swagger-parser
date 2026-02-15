@@ -11,11 +11,11 @@
             "type" : "string"
           },
           "profile" : {
-            "$ref" : "#/components/schemas/ex"
+            "$ref" : "#/components/schemas/user-profile"
           }
         }
       },
-      "ex" : {
+      "user-profile" : {
         "properties" : {
           "firstName" : {
             "type" : "string"

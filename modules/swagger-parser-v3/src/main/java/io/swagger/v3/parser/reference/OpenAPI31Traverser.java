@@ -936,7 +936,7 @@ public class OpenAPI31Traverser implements Traverser {
         // handle external schema refs - add to components.schemas and return $ref
         if (shouldHandleExternalSchemaRef(resolvedNotNull, schema.get$ref())) {
             String cacheKey = schema.get$ref();
-            String baseName = RefUtils.computeDefinitionName(schema.get$ref());
+            String baseName = computeExternalSchemaName(schema.get$ref());
             return promoteSchemaToComponents(schema, resolved, inheritedIds, cacheKey, baseName);
         }
         // merge ALL STUFF
@@ -1026,6 +1026,24 @@ public class OpenAPI31Traverser implements Traverser {
         if (StringUtils.isNotBlank(schema.get$id())) {
             inheritedIds.remove(schema.get$id());
         }
+    }
+
+    /**
+     * Computes the component name for an external schema ref.
+     * For anchor-style refs (e.g., ./ex.json#user-profile), uses the anchor value as the name.
+     * This is 3.1-specific since $anchor is a JSON Schema 2020-12 feature.
+     * For JSON pointer refs (e.g., ./ex.json#/path/to/Schema), falls back to RefUtils.computeDefinitionName.
+     */
+    private String computeExternalSchemaName(String ref) {
+        int hashIndex = ref.indexOf('#');
+        if (hashIndex >= 0 && hashIndex < ref.length() - 1) {
+            String fragment = ref.substring(hashIndex + 1);
+            // Anchor refs don't start with '/' (JSON pointers do)
+            if (!fragment.startsWith("/")) {
+                return fragment;
+            }
+        }
+        return RefUtils.computeDefinitionName(ref);
     }
 
     /**
