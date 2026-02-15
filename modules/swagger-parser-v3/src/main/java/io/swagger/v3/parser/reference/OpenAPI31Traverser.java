@@ -23,7 +23,12 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
+import io.swagger.v3.parser.util.RefUtils;
+import io.swagger.v3.parser.models.RefFormat;
 import org.apache.commons.lang3.StringUtils;
+
+import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,6 +62,7 @@ public class OpenAPI31Traverser implements Traverser {
 
     public Set<Object> visiting = new HashSet<>();
     protected HashMap<Object, Object> visitedMap = new HashMap<>();
+    protected Map<String, String> processedExternalSchemaRefs = new HashMap<>();
 
     public OpenAPI traverse(OpenAPI openAPI, Visitor visitor) throws Exception {
         if (!(visitor instanceof ReferenceVisitor)) {
@@ -920,6 +926,35 @@ public class OpenAPI31Traverser implements Traverser {
             visiting.remove(schema);
             return handleRootLocalRefs(schema.get$ref(), resolved, context.getOpenApi().getComponents().getSchemas());
         }
+        // handle external schema refs - add to components.schemas and return $ref
+        if (shouldHandleExternalSchemaRef(resolvedNotNull, schema.get$ref())) {
+            String externalRef = schema.get$ref();
+            String refName;
+            
+            // Check if this external ref was already processed
+            if (processedExternalSchemaRefs.containsKey(externalRef)) {
+                refName = processedExternalSchemaRefs.get(externalRef);
+            } else {
+                // Merge schema metadata (like $id) from original schema to resolved before adding to components
+                mergeSchemas(schema, resolved);
+                ensureComponents(context.getOpenApi());
+                if (context.getOpenApi().getComponents().getSchemas() == null) {
+                    context.getOpenApi().getComponents().schemas(new LinkedHashMap<>());
+                }
+                refName = handleExternalSchemaRef(externalRef, resolved, context.getOpenApi().getComponents().getSchemas());
+                processedExternalSchemaRefs.put(externalRef, refName);
+            }
+            
+            finalizeSchemaVisit(schema, resolved, inheritedIds);
+            
+            if (this.getContext().getParseOptions().isResolveFully()) {
+                return resolved;
+            } else {
+                Schema refSchema = new Schema();
+                refSchema.set$ref("#/components/schemas/" + refName);
+                return refSchema;
+            }
+        }
         // merge ALL STUFF
         mergeSchemas(schema, resolved);
         visitedMap.put(schema, deepcopy(resolved, Schema.class));
@@ -981,6 +1016,58 @@ public class OpenAPI31Traverser implements Traverser {
                 !this.getContext().getParseOptions().isResolveFully() &&
                 visitor.reference.getUri().equals(this.getContext().getRootUri()) &&
                 (ReferenceUtils.isLocalRefToComponents(ref) || ReferenceUtils.isAnchorRef(ref));
+    }
+
+    public boolean isExternalRef(String ref) {
+        if (StringUtils.isBlank(ref)) {
+            return false;
+        }
+        RefFormat refFormat = computeRefFormat(ref);
+        return isAnExternalRefFormat(refFormat);
+    }
+
+    public boolean shouldHandleExternalSchemaRef(boolean resolvedNotNull, String ref) {
+        return resolvedNotNull && isExternalRef(ref);
+    }
+
+    private void finalizeSchemaVisit(Schema schema, Schema resolved, List<String> inheritedIds) {
+        visitedMap.put(schema, deepcopy(resolved, Schema.class));
+        visiting.remove(schema);
+        if (StringUtils.isNotBlank(schema.get$id())) {
+            inheritedIds.remove(schema.get$id());
+        }
+    }
+
+    public String handleExternalSchemaRef(String ref, Schema resolved, Map<String, Schema> schemasMap) {
+        // Reuse RefUtils.computeDefinitionName from OpenAPI 3.0 processing
+        String name = RefUtils.computeDefinitionName(ref);
+        String uniqueName = getUniqueSchemaName(schemasMap, name, resolved);
+        schemasMap.put(uniqueName, resolved);
+        return uniqueName;
+    }
+
+    private String getUniqueSchemaName(Map<String, Schema> schemas, String name, Schema schema) {
+        String uniqueName = name;
+        int counter = 0;
+        while (schemas.containsKey(uniqueName)) {
+            Schema existingSchema = schemas.get(uniqueName);
+            if (schemasAreEqual(existingSchema, schema)) {
+                return uniqueName;
+            }
+            counter++;
+            uniqueName = name + "_" + counter;
+        }
+        return uniqueName;
+    }
+
+    private boolean schemasAreEqual(Schema s1, Schema s2) {
+        try {
+            String json1 = Json31.mapper().writeValueAsString(s1);
+            String json2 = Json31.mapper().writeValueAsString(s2);
+            return json1.equals(json2);
+        } catch (JsonProcessingException e) {
+            return false;
+        }
     }
 
     public void ensureComponents(OpenAPI openAPI) {

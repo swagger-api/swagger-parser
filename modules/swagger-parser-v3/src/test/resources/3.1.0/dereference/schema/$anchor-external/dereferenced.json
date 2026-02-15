@@ -11,14 +11,17 @@
             "type" : "string"
           },
           "profile" : {
-            "properties" : {
-              "firstName" : {
-                "type" : "string"
-              },
-              "lastName" : {
-                "type" : "string"
-              }
-            }
+            "$ref" : "#/components/schemas/ex"
+          }
+        }
+      },
+      "ex" : {
+        "properties" : {
+          "firstName" : {
+            "type" : "string"
+          },
+          "lastName" : {
+            "type" : "string"
           }
         }
       }
