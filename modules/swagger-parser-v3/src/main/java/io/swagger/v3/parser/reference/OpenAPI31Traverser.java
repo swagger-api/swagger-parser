@@ -926,34 +926,18 @@ public class OpenAPI31Traverser implements Traverser {
             visiting.remove(schema);
             return handleRootLocalRefs(schema.get$ref(), resolved, context.getOpenApi().getComponents().getSchemas());
         }
+        // handle local refs within external files - promote to components.schemas
+        // This mirrors ExternalRefProcessor.processRefSchema() from the 3.0 code path
+        if (shouldHandleLocalRefInExternalFile(resolvedNotNull, schema.get$ref(), visitor)) {
+            String cacheKey = visitor.reference.getUri() + schema.get$ref();
+            String baseName = ReferenceUtils.getRefName(schema.get$ref());
+            return promoteSchemaToComponents(schema, resolved, inheritedIds, cacheKey, baseName);
+        }
         // handle external schema refs - add to components.schemas and return $ref
         if (shouldHandleExternalSchemaRef(resolvedNotNull, schema.get$ref())) {
-            String externalRef = schema.get$ref();
-            String refName;
-            
-            // Check if this external ref was already processed
-            if (processedExternalSchemaRefs.containsKey(externalRef)) {
-                refName = processedExternalSchemaRefs.get(externalRef);
-            } else {
-                // Merge schema metadata (like $id) from original schema to resolved before adding to components
-                mergeSchemas(schema, resolved);
-                ensureComponents(context.getOpenApi());
-                if (context.getOpenApi().getComponents().getSchemas() == null) {
-                    context.getOpenApi().getComponents().schemas(new LinkedHashMap<>());
-                }
-                refName = handleExternalSchemaRef(externalRef, resolved, context.getOpenApi().getComponents().getSchemas());
-                processedExternalSchemaRefs.put(externalRef, refName);
-            }
-            
-            finalizeSchemaVisit(schema, resolved, inheritedIds);
-            
-            if (this.getContext().getParseOptions().isResolveFully()) {
-                return resolved;
-            } else {
-                Schema refSchema = new Schema();
-                refSchema.set$ref("#/components/schemas/" + refName);
-                return refSchema;
-            }
+            String cacheKey = schema.get$ref();
+            String baseName = RefUtils.computeDefinitionName(schema.get$ref());
+            return promoteSchemaToComponents(schema, resolved, inheritedIds, cacheKey, baseName);
         }
         // merge ALL STUFF
         mergeSchemas(schema, resolved);
@@ -1030,6 +1014,12 @@ public class OpenAPI31Traverser implements Traverser {
         return resolvedNotNull && isExternalRef(ref);
     }
 
+    public boolean shouldHandleLocalRefInExternalFile(boolean resolvedNotNull, String ref, ReferenceVisitor visitor) {
+        return resolvedNotNull &&
+                ReferenceUtils.isLocalRef(ref) &&
+                !visitor.reference.getUri().equals(this.getContext().getRootUri());
+    }
+
     private void finalizeSchemaVisit(Schema schema, Schema resolved, List<String> inheritedIds) {
         visitedMap.put(schema, deepcopy(resolved, Schema.class));
         visiting.remove(schema);
@@ -1038,12 +1028,36 @@ public class OpenAPI31Traverser implements Traverser {
         }
     }
 
-    public String handleExternalSchemaRef(String ref, Schema resolved, Map<String, Schema> schemasMap) {
-        // Reuse RefUtils.computeDefinitionName from OpenAPI 3.0 processing
-        String name = RefUtils.computeDefinitionName(ref);
-        String uniqueName = getUniqueSchemaName(schemasMap, name, resolved);
-        schemasMap.put(uniqueName, resolved);
-        return uniqueName;
+    /**
+     * Promotes a resolved schema to components.schemas and returns either the resolved schema
+     * (resolveFully) or a $ref pointing to the promoted component.
+     */
+    private Schema promoteSchemaToComponents(Schema schema, Schema resolved, List<String> inheritedIds,
+                                             String cacheKey, String baseName) {
+        String refName;
+        if (processedExternalSchemaRefs.containsKey(cacheKey)) {
+            refName = processedExternalSchemaRefs.get(cacheKey);
+        } else {
+            mergeSchemas(schema, resolved);
+            ensureComponents(context.getOpenApi());
+            if (context.getOpenApi().getComponents().getSchemas() == null) {
+                context.getOpenApi().getComponents().schemas(new LinkedHashMap<>());
+            }
+            Map<String, Schema> schemasMap = context.getOpenApi().getComponents().getSchemas();
+            refName = getUniqueSchemaName(schemasMap, baseName, resolved);
+            schemasMap.put(refName, resolved);
+            processedExternalSchemaRefs.put(cacheKey, refName);
+        }
+
+        finalizeSchemaVisit(schema, resolved, inheritedIds);
+
+        if (this.getContext().getParseOptions().isResolveFully()) {
+            return resolved;
+        } else {
+            Schema refSchema = new Schema();
+            refSchema.set$ref("#/components/schemas/" + refName);
+            return refSchema;
+        }
     }
 
     private String getUniqueSchemaName(Map<String, Schema> schemas, String name, Schema schema) {
