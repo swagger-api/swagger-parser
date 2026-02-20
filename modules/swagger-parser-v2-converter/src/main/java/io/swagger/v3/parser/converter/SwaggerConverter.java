@@ -655,10 +655,14 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
     private Map<String, Object> convert(Map<String, Object> vendorExtensions) {
         if (vendorExtensions != null && vendorExtensions.size() > 0) {
-            vendorExtensions.entrySet().removeIf(extension -> (
-                    extension.getKey().equals("x-example")) ||
-                    extension.getKey().equals("x-examples") ||
-                    extension.getKey().equals("x-nullable"));
+            Map<String, Object> result = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> entry : vendorExtensions.entrySet()) {
+                String key = entry.getKey();
+                if (!key.equals("x-example") && !key.equals("x-examples") && !key.equals("x-nullable")) {
+                    result.put(key, entry.getValue());
+                }
+            }
+            return result;
         }
 
         return vendorExtensions;
