@@ -1,0 +1,222 @@
+[
+  {
+    "number": 2275,
+    "title": "[Feature]: Cache the result of deserialization when loading ref",
+    "updated_at": "2026-02-20T14:18:23Z"
+  },
+  {
+    "number": 2266,
+    "title": "[Bug]: External schema resolution broken in OpenAPI 3.1 (works in 3.0)",
+    "updated_at": "2026-02-15T18:07:45Z"
+  },
+  {
+    "number": 2271,
+    "title": "[Bug]: Validation behavior change between openapi-generator 7.13.0 and 7.14.0 against an OpenAPI 3.1 schema with external references",
+    "updated_at": "2026-02-12T23:51:16Z"
+  },
+  {
+    "number": 2112,
+    "title": "BDSA-2018-5289 Mozilla Rhino - 1.7.7.2",
+    "updated_at": "2026-02-12T15:01:42Z"
+  },
+  {
+    "number": 2270,
+    "title": "[Bug]: allOf reference not resolved fully",
+    "updated_at": "2026-02-05T20:57:52Z"
+  },
+  {
+    "number": 2269,
+    "title": "[Bug]: x-nullable lost for shared $ref responses during Swagger 2.0 to OAS3 conversion",
+    "updated_at": "2026-02-04T15:10:59Z"
+  },
+  {
+    "number": 1500,
+    "title": "[bug] For type: date parsed wrong example",
+    "updated_at": "2026-02-04T05:32:18Z"
+  },
+  {
+    "number": 2264,
+    "title": "[Bug]: OpenAPI 3.1 Parser Unexpectedly Merges Identical Inline Objects When resolve=true",
+    "updated_at": "2026-01-30T13:29:40Z"
+  },
+  {
+    "number": 2216,
+    "title": "[Bug]: Parameters components shouldn't be inlined with resolve option set to true",
+    "updated_at": "2026-01-13T11:58:58Z"
+  },
+  {
+    "number": 2248,
+    "title": "[Feature]: Support for OpenAPI Spec 3.2",
+    "updated_at": "2026-01-12T15:26:46Z"
+  },
+  {
+    "number": 2262,
+    "title": "[Bug]: References to elements within jar files cannot be resolved",
+    "updated_at": "2026-01-08T15:35:34Z"
+  },
+  {
+    "number": 2261,
+    "title": "[Feature]: Upgrade to Jackson 3",
+    "updated_at": "2026-01-08T14:02:45Z"
+  },
+  {
+    "number": 2157,
+    "title": "additionalProperties inside ComposedSchema are resolved as null",
+    "updated_at": "2026-01-06T18:54:20Z"
+  },
+  {
+    "number": 2257,
+    "title": "[Feature]: Allow customization of Accept-header In RemoteUrl",
+    "updated_at": "2025-12-15T09:49:52Z"
+  },
+  {
+    "number": 2256,
+    "title": "[Question] [Bug]: Inconsistent Relative Reference Resolution in Nested Schema Contexts",
+    "updated_at": "2025-12-08T20:42:52Z"
+  },
+  {
+    "number": 2253,
+    "title": "[Question]: Duplicate _1 Object generation due to different path prefix",
+    "updated_at": "2025-11-28T09:13:59Z"
+  },
+  {
+    "number": 1422,
+    "title": "Duplicated referenced definitions",
+    "updated_at": "2025-11-15T11:52:11Z"
+  },
+  {
+    "number": 1518,
+    "title": "External ref resolve fails to resolve to same schema and creates duplicate classes",
+    "updated_at": "2025-11-15T11:50:51Z"
+  },
+  {
+    "number": 2217,
+    "title": "[Bug]: Swagger Parser generates duplicate components with sequential suffixes when using mixed reference patterns",
+    "updated_at": "2025-11-09T13:50:50Z"
+  },
+  {
+    "number": 2229,
+    "title": "Fix unresolved relative $ref for examples in parameter definitions",
+    "updated_at": "2025-11-08T18:27:06Z"
+  },
+  {
+    "number": 2244,
+    "title": "[Bug]: Presence of path parameter in parent reference leads to unresolved examples",
+    "updated_at": "2025-11-05T12:43:24Z"
+  },
+  {
+    "number": 2242,
+    "title": "[Bug]: Loss of Float Precision When Reading Yaml Files",
+    "updated_at": "2025-11-03T16:41:44Z"
+  },
+  {
+    "number": 2172,
+    "title": "[OpenAPI v3.1] Arrays now (incorrectly?) parse to JsonSchema rather than ArraySchema",
+    "updated_at": "2025-10-22T15:38:01Z"
+  },
+  {
+    "number": 2091,
+    "title": "RequestBody and Response Examples with relativePath are not resolved",
+    "updated_at": "2025-09-08T13:19:49Z"
+  },
+  {
+    "number": 427,
+    "title": "create OSGi bundle artifacts",
+    "updated_at": "2025-08-31T21:38:08Z"
+  },
+  {
+    "number": 2215,
+    "title": "[Feature]: Introduce resolveResponsesFully",
+    "updated_at": "2025-08-05T10:03:01Z"
+  },
+  {
+    "number": 1091,
+    "title": "Parser ignore the description if it's a $ref",
+    "updated_at": "2025-06-27T06:08:29Z"
+  },
+  {
+    "number": 2201,
+    "title": "[Openapi3.1] Ref inside of Items are not resolved",
+    "updated_at": "2025-06-12T12:07:30Z"
+  },
+  {
+    "number": 2200,
+    "title": "Unquoted integer `example:` value fails to parse when the spec includes a deeply nested schema elsewhere in spec",
+    "updated_at": "2025-06-09T09:13:37Z"
+  },
+  {
+    "number": 2199,
+    "title": "Typo on main page",
+    "updated_at": "2025-06-08T16:10:29Z"
+  },
+  {
+    "number": 2197,
+    "title": "Default server URL \"/\" is added automatically when parsing OpenAPI 3 spec",
+    "updated_at": "2025-05-30T07:02:28Z"
+  },
+  {
+    "number": 2158,
+    "title": "swagger parsers depends on NOT jakarta packages",
+    "updated_at": "2025-05-28T07:26:10Z"
+  },
+  {
+    "number": 2193,
+    "title": "Circular dependencies are not resolved properly with resolveFully",
+    "updated_at": "2025-05-22T12:12:15Z"
+  },
+  {
+    "number": 2192,
+    "title": "Version 2.1.28 seems to break oneOf",
+    "updated_at": "2025-05-19T13:06:34Z"
+  },
+  {
+    "number": 2065,
+    "title": "Unable to Parse Referenced ArraySchema in Swagger File",
+    "updated_at": "2025-05-16T07:35:52Z"
+  },
+  {
+    "number": 2178,
+    "title": "reference name is not displayed to $ref in local file",
+    "updated_at": "2025-05-06T07:10:05Z"
+  },
+  {
+    "number": 2168,
+    "title": "[OpenAPI v3]Not parsed the extensions in schema that with $ref field",
+    "updated_at": "2025-03-27T13:51:54Z"
+  },
+  {
+    "number": 2160,
+    "title": "ResolveFully doesn't resolve request body",
+    "updated_at": "2025-03-12T18:35:31Z"
+  },
+  {
+    "number": 1751,
+    "title": "java.lang.StackOverflowError during parsing recursive schemas/components in ResolverFully.resolveSchema()",
+    "updated_at": "2025-03-11T09:02:03Z"
+  },
+  {
+    "number": 2159,
+    "title": "openapi 3.1: Illegal character in fragment when path reference contains paramneters",
+    "updated_at": "2025-03-07T10:28:09Z"
+  },
+  {
+    "number": 1970,
+    "title": "3.1.0 spec parsing, $defs information omitted",
+    "updated_at": "2025-03-03T07:43:46Z"
+  },
+  {
+    "number": 2102,
+    "title": "Parameters with the same name but different locations are incorrectly returned when using JSON references ($ref) with openapi 3.0.x.",
+    "updated_at": "2025-02-22T11:52:12Z"
+  },
+  {
+    "number": 2147,
+    "title": "cannot deserialize from Object value (Grallvm native executable)",
+    "updated_at": "2025-01-31T10:23:29Z"
+  },
+  {
+    "number": 2149,
+    "title": "OpenAPIV3Parser.resolve() should handle all errors in the entire spec",
+    "updated_at": "2025-01-09T16:15:44Z"
+  }
+]
