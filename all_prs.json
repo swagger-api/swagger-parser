@@ -1,0 +1,16 @@
+[
+  {
+    "id": 3319302831,
+    "number": 2277,
+    "state": "open",
+    "title": "[WIP] Gather open issues and pull requests in Swagger Parser",
+    "body": "- [ ] Understand the repository structure and existing tools\n- [ ] Fetch open issues created/updated after 2025-01-01 using GitHub API\n- [ ] Fetch open PRs created/updated after 2025-01-01 using GitHub API\n- [ ] Create CSV file for issues with: link, title, comments count, PR link (if exists), creation date\n- [ ] Create CSV file for PRs with: link to PR, link to issue, creation date\n- [ ] Create a summary document\n- [ ] Create a script to automate the data gathering process\n- [ ] Test the script and verify outputs\n- [ ] Document the usage\n\n\n---\n\n\ud83d\udd12 GitHub Advanced Security automatically protects Copilot coding agent pull requests. You can protect all pull requests by enabling Advanced Security for your repositories. [Learn more about Advanced Security.](https://gh.io/cca-advanced-security)",
+    "created_at": "2026-02-24T07:33:33Z",
+    "updated_at": "2026-02-24T07:34:33Z",
+    "user": {
+      "login": "Copilot"
+    },
+    "comments": 0,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2277"
+  }
+]

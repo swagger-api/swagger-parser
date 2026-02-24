@@ -1,0 +1,113 @@
+[
+  {
+    "id": 3968754339,
+    "number": 2275,
+    "state": "OPEN",
+    "title": "[Feature]: Cache the result of deserialization when loading ref",
+    "body": "## Feature Description\n\nWhen loading external $ref with swagger-parser, the ResolverCache stores only the read string but still deserialize the whole tree which is particuraly slow for big files.\nMaybe the Resolver could also store the deserialized tree.\n\n## Use Case\n\nWe have a big project with 260+ openapi spec file. \nWe also have a big \"dictionary\" yaml file which define every field (primitive type mostly) of our application. (with currently more than 1100 fields)\nSo every spec file reference ($ref) to fields inside that \"dictionary\" (currently 3300+ ref to that file)\n\nEverytime a ref is parsed by swagger-parser, it get the file contents (String) from the cache but still do the deserialization to JsonNode (see [ResolverCache.java#L170](https://github.com/swagger-api/swagger-parser/blob/master/modules/swagger-parser-v3/src/main/java/io/swagger/v3/parser/ResolverCache.java#L170))\n\n## Suggested Solution (optional)\n\nA suggested solution would be to also (or only) cache the deserialized JsonNode tree.\nI have cloned the repo and applied that suggestion and the result help a lot:\n\nMy application generate source with the openapi-generator-maven-plugin which use swagger-parsers-v3.\nWhen i clean package the application without that fix, the total time (generation + other phases and plugin used for my build) is around 4m49s\nWith that fix, my application is now built in 58s.\n\nI know that the time above is not focused on the swagger-parsers part alone, but it still a huge gap and benefice to enhance that cache.\n\nI can contribute if needed with a PR.\n\n## Alternatives Considered\n\n## Additional Context\n\n\n## Checklist\n\n- [x] I have searched the [existing issues](https://github.com/swagger-api/swagger-parser/issues) to ensure this is not a duplicate.\n- [x] This feature would be useful to more than just my use case.\n- [x] I have provided enough detail for the maintainers to understand the scope of the request.",
+    "user": {
+      "login": "xmourgues"
+    },
+    "labels": [
+      {
+        "name": "Feature",
+        "description": "",
+        "node_id": "MDU6TGFiZWwyMTQwMzY2NTU="
+      }
+    ],
+    "comments": 0,
+    "created_at": "2026-02-20T14:14:42Z",
+    "updated_at": "2026-02-20T14:18:23Z",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2275"
+  },
+  {
+    "id": 3934608821,
+    "number": 2271,
+    "state": "OPEN",
+    "title": "[Bug]: Validation behavior change between openapi-generator 7.13.0 and 7.14.0 against an OpenAPI 3.1 schema with external references",
+    "body": "## Description\n\nValidation behavior against an ISO spec (SOVD, an OpenAPI 3.1 based specification) fails after openapi-generator 7.14.0.\n\nI was guided to report this issue here at openapi-generator repo (https://github.com/OpenAPITools/openapi-generator/issues/22948) because this looks like a parser related issue.\n\n## Affected Version\n\nversion matrix of openapi-generator and swagger-parser\n\n| openapi-generator | swagger-parser  | symptom                   |\n| -------------------- | ----------------- | ---------------------- |\n| 7.13.0                      | 2.1.22                 |  validation succeeds  |\n| 7.14.0                      | 2.1.28                 |  validation fails          |\n| latest                         |2.1.37                | validation fails           |\n\n## Steps to Reproduce\n\nThe below is a very simplified version of the SOVD (ISO 17978) API OpenAPI schema available at:\nhttps://standards.iso.org/iso/17978/\n\nThis issue can be reproduced using below.\nThe original lines/files are described in-line in the below YAML.\nAs you can see below, the issue comes from a reference against the upstream OpenAPI schema itself.\n\nRight now,  I'm not sure if this issue belongs to the ISO SOVD OpenAPI spec. side or openapi-generator/swagger-parser side.\nIf it belongs to the spec. side, I can feedback to the standardization body folks.\n\nPlease save the above YAML as a file, and validate it using openapi-generator-cli 7.13.0 and 7.14.0.\n\nValidation succeeds for 7.13.0 and fails for 7.14.0 with errors in the next section.",
+    "user": {
+      "login": "cedricbu"
+    },
+    "labels": [],
+    "comments": 5,
+    "created_at": "2022-06-15T17:31:37Z",
+    "updated_at": "2025-03-11T09:02:03Z",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2271"
+  },
+  {
+    "id": 788554881,
+    "number": 1518,
+    "state": "OPEN",
+    "title": "External ref resolve fails to resolve to same schema and creates duplicate classes",
+    "body": "As reported in https://github.com/swagger-api/swagger-parser/issues/1081 and\nhttps://github.com/swagger-api/swagger-parser/issues/1422, something gets confused and creates Foo.java and Foo1.java, even though there is just one foo.json model.\n\nThose issues report that the problem has been fixed, but it has not.\n\nIn https://github.com/jimshowalter/swagger-parser-external-ref-bug there is a schema that reproduces the problem.\n\nRun the JavaJAXRSSpecServerCodegen.java code generator on it, and you'll see that it generates a Stunts.java and Stunts1.java, but there is only stunts.json.\n\nAlso in that repo is a fix, or at least a fix that works for us. Look for \"// BEGIN REFERENCE FORK:\".",
+    "user": {
+      "login": "jimshowalter"
+    },
+    "labels": [],
+    "comments": 39,
+    "created_at": "2021-01-18T21:23:51Z",
+    "updated_at": "2025-11-15T11:50:51Z",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1518"
+  },
+  {
+    "id": 752148194,
+    "number": 1500,
+    "state": "OPEN",
+    "title": "[bug] For type: date parsed wrong example",
+    "body": "For type: date parsed wrong example\n\n### Example\n```yaml\ncomponents:\n  schemas:\n    TestDto:\n      type: object\n      properties:\n        universalApplicationId:\n          type: string\n          format: date\n          example: 1987-03-21\n```\nexpected: ```1987-03-21```\nbut after parsing example: ```Sat Mar 21 03:00:00 MSK 1987```",
+    "user": {
+      "login": "dpolyakov987"
+    },
+    "labels": [],
+    "comments": 2,
+    "created_at": "2020-11-27T10:29:09Z",
+    "updated_at": "2026-02-04T05:32:18Z",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1500"
+  },
+  {
+    "id": 686176802,
+    "number": 1422,
+    "state": "OPEN",
+    "title": "Duplicated referenced definitions",
+    "body": "I have the following swagger files with referenced definitions:\n - [File1.txt](https://github.com/swagger-api/swagger-parser/files/5128906/File1.txt)\n\n - [File2.txt](https://github.com/swagger-api/swagger-parser/files/5128908/File2.txt)\n\nWhen reading the parsed model of the first file using version ``1.0.51`` I expected to find the definitions ``File1_parent_definition``, ``File1_referenced_definition`` and ``File2_referenced_definition``, but there is also a ``File1_referenced_definition_2`` created by the reference found in the second file that represents the same as ``File1_referenced_definition``. Since this is a reference to an existing definition, I expected it to point to ``File1_referenced_definition`` instead of creating a duplicate.",
+    "user": {
+      "login": "alejandro-campelo"
+    },
+    "labels": [],
+    "comments": 1,
+    "created_at": "2020-08-26T09:43:55Z",
+    "updated_at": "2025-11-15T11:52:11Z",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1422"
+  },
+  {
+    "id": 440090359,
+    "number": 1091,
+    "state": "OPEN",
+    "title": "Parser ignore the description if it's a $ref",
+    "body": "As said in the title, latest stable release ignores the description if it's a $ref.\nIt looks like a regression to me because it was working properly a few versions back (can't be sure when, I found at using a code generator).\n\n```\n[main] INFO  o.o.codegen.DefaultCodegen - debugging Cateogry: class Schema {\n    type: null\n    format: null\n    $ref: #/components/schemas/Category\n    description: null\n    title: null\n    multipleOf: null\n    maximum: null\n    exclusiveMaximum: null\n    minimum: null\n    exclusiveMinimum: null\n    maxLength: null\n    minLength: null\n    pattern: null\n    maxItems: null\n    minItems: null\n    uniqueItems: null\n    maxProperties: null\n    minProperties: null\n    required: null\n    not: null\n    properties: null\n    additionalProperties: null\n    nullable: null\n    readOnly: null\n    writeOnly: null\n    example: null\n    externalDocs: null\n    deprecated: null\n    discriminator: null\n    xml: null\n}\n```\n\n`description` is null even though I put down something as follows:\n\n```\n       category:\n         $ref: '#/definitions/Category'\n        description: \"description testing\"\n```",
+    "user": {
+      "login": "albator1932"
+    },
+    "labels": [],
+    "comments": 4,
+    "created_at": "2019-05-03T15:09:26Z",
+    "updated_at": "2025-06-27T06:08:29Z",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1091"
+  },
+  {
+    "id": 217185493,
+    "number": 427,
+    "state": "OPEN",
+    "title": "create OSGi bundle artifacts",
+    "body": "Create OSGi bundle artifacts instead of plain JAR similar to swagger-core. It is required to use Swagger parser as dependency of Swagger request validator inside Apache Karaf OSGi container installed as feature.",
+    "user": {
+      "login": "borcsokj"
+    },
+    "labels": [],
+    "comments": 4,
+    "created_at": "2017-03-27T09:26:20Z",
+    "updated_at": "2025-08-31T21:38:08Z",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/427"
+  }
+]

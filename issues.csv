@@ -1,0 +1,8 @@
+Issue Link,Title,Number of Comments,Linked PR,Creation Date,Last Updated
+https://github.com/swagger-api/swagger-parser/issues/2275,[Feature]: Cache the result of deserialization when loading ref,0,,2026-02-20T14:14:42Z,2026-02-20T14:18:23Z
+https://github.com/swagger-api/swagger-parser/issues/2271,[Bug]: Validation behavior change between openapi-generator 7.13.0 and 7.14.0 against an OpenAPI 3.1 schema with external references,5,,2022-06-15T17:31:37Z,2025-03-11T09:02:03Z
+https://github.com/swagger-api/swagger-parser/issues/1518,External ref resolve fails to resolve to same schema and creates duplicate classes,39,,2021-01-18T21:23:51Z,2025-11-15T11:50:51Z
+https://github.com/swagger-api/swagger-parser/issues/1500,[bug] For type: date parsed wrong example,2,,2020-11-27T10:29:09Z,2026-02-04T05:32:18Z
+https://github.com/swagger-api/swagger-parser/issues/1422,Duplicated referenced definitions,1,,2020-08-26T09:43:55Z,2025-11-15T11:52:11Z
+https://github.com/swagger-api/swagger-parser/issues/1091,Parser ignore the description if it's a $ref,4,,2019-05-03T15:09:26Z,2025-06-27T06:08:29Z
+https://github.com/swagger-api/swagger-parser/issues/427,create OSGi bundle artifacts,4,,2017-03-27T09:26:20Z,2025-08-31T21:38:08Z
