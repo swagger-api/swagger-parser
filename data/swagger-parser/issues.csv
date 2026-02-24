@@ -1,0 +1,134 @@
+number,title,state,created_at,updated_at,body,labels,url
+2275,[Feature]: Cache the result of deserialization when loading ref,OPEN,2026-02-20T14:14:42Z,2026-02-20T14:18:23Z,"## Feature Description
+
+When loading external $ref with swagger-parser...",Feature,https://github.com/swagger-api/swagger-parser/issues/2275
+2271,[Bug]: Validation behavior change between openapi-generator 7.13.0 and 7.14.0,OPEN,2024-12-19T15:35:48Z,2025-01-24T11:12:05Z,"## Description
+
+Validation behavior against an ISO spec...",,https://github.com/swagger-api/swagger-parser/issues/2271
+2265,[Feature]: Allow file URLs with spaces in them,OPEN,2026-01-15T10:22:33Z,2026-01-15T10:25:12Z,"## Feature Description
+
+When using file:// URLs with spaces...",Feature,https://github.com/swagger-api/swagger-parser/issues/2265
+2258,[Bug]: Cannot resolve references in OpenAPI 3.1 with jsonSchema media types,OPEN,2025-12-10T08:45:22Z,2025-12-10T08:48:15Z,"## Description
+
+When using OpenAPI 3.1 with application/json...",,https://github.com/swagger-api/swagger-parser/issues/2258
+2250,[Feature]: Support for AsyncAPI 3.0 specification,OPEN,2025-11-25T14:30:15Z,2025-11-25T14:33:22Z,"## Feature Description
+
+Extend swagger-parser to support AsyncAPI 3.0...",,https://github.com/swagger-api/swagger-parser/issues/2250
+2242,[Bug]: resolveFully fails on internal references when the initial spec is read from a file URL,OPEN,2023-05-07T16:29:56Z,2024-07-11T14:55:33Z,"Hi,
+While testing the new 3.1.0 feature...",,https://github.com/swagger-api/swagger-parser/issues/2242
+1921,Confusing log-warning and warning message in result for property named `null`,OPEN,2023-05-03T04:58:14Z,2023-05-03T05:01:47Z,The following schema logs a warning message...,,https://github.com/swagger-api/swagger-parser/issues/1921
+1917,Inconsistent behavior for byte array example (3.0.x vs 3.1.x),OPEN,2023-04-21T18:38:08Z,2023-04-21T18:38:08Z,I'm using the latest version of swagger-parser...,,https://github.com/swagger-api/swagger-parser/issues/1917
+1915,Extend to Asyncapi parser,OPEN,2023-04-18T12:12:30Z,2023-04-18T12:12:30Z,I know that your latest editor is supporting...,,https://github.com/swagger-api/swagger-parser/issues/1915
+1897,Swagger parsing fails when Servers URL is set to / (default) value,OPEN,2023-03-16T11:47:56Z,2023-03-16T11:47:56Z,As per swagger docs...,,https://github.com/swagger-api/swagger-parser/issues/1897
+1889,reference resolution fails in openapi-diff for schema reference for array items,OPEN,2023-03-01T13:28:07Z,2023-03-01T13:28:07Z,Reference resolution fails...,,https://github.com/swagger-api/swagger-parser/issues/1889
+1876,Add Unmangled Discriminator Property Name to Discriminator Class,OPEN,2023-01-19T13:22:23Z,2023-01-19T13:22:23Z,The Discriminator class contains...,,https://github.com/swagger-api/swagger-parser/issues/1876
+1875,Parser does not Dereference Discriminator Mapping Targets,OPEN,2023-01-19T13:14:37Z,2023-01-19T13:15:26Z,When providing a discriminator for subtypes...,,https://github.com/swagger-api/swagger-parser/issues/1875
+1882,Default value of array type is not converted correctly when converting from swagger 2 to openapi 3,OPEN,2023-01-19T13:04:36Z,2024-06-13T11:08:32Z,"### Q&A
+ - OS: [macOS]",,https://github.com/swagger-api/swagger-parser/issues/1882
+1242,BinarySchema V2 to V3 conversion results in StringSchema being used,OPEN,2019-10-30T23:49:59Z,2020-01-16T05:08:59Z,When using the V3 maven plugin...,,https://github.com/swagger-api/swagger-parser/issues/1242
+1237,How do i check if a swagger/openapi file is v2 or v3?,OPEN,2019-10-24T14:52:32Z,2019-11-04T13:14:32Z,Is there a utility method...,,https://github.com/swagger-api/swagger-parser/issues/1237
+1235,Unable to resolve reference attribute in multiple yaml files,OPEN,2019-10-22T09:52:10Z,2020-01-15T12:04:09Z,"Hi 
+We have multiple yaml...",,https://github.com/swagger-api/swagger-parser/issues/1235
+1210,Inlined content schema in RequestBody missing type,OPEN,2019-10-05T23:48:26Z,2019-10-11T17:42:19Z,In the Pet Store specification...,,https://github.com/swagger-api/swagger-parser/issues/1210
+1206,Swagger 2 Relative path references are not getting resolved,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,While using java Swagger2 parser...,,https://github.com/swagger-api/swagger-parser/issues/1206
+1205,Issue #1205 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1205,,https://github.com/swagger-api/swagger-parser/issues/1205
+1203,Issue #1203 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1203,,https://github.com/swagger-api/swagger-parser/issues/1203
+1201,Issue #1201 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1201,,https://github.com/swagger-api/swagger-parser/issues/1201
+1199,Issue #1199 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1199,,https://github.com/swagger-api/swagger-parser/issues/1199
+1197,Issue #1197 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1197,,https://github.com/swagger-api/swagger-parser/issues/1197
+1195,Issue #1195 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1195,,https://github.com/swagger-api/swagger-parser/issues/1195
+1193,Issue #1193 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1193,,https://github.com/swagger-api/swagger-parser/issues/1193
+1191,Issue #1191 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1191,,https://github.com/swagger-api/swagger-parser/issues/1191
+1189,Issue #1189 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1189,,https://github.com/swagger-api/swagger-parser/issues/1189
+1187,Issue #1187 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1187,,https://github.com/swagger-api/swagger-parser/issues/1187
+1185,Issue #1185 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1185,,https://github.com/swagger-api/swagger-parser/issues/1185
+1183,Issue #1183 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1183,,https://github.com/swagger-api/swagger-parser/issues/1183
+1181,Issue #1181 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1181,,https://github.com/swagger-api/swagger-parser/issues/1181
+1179,Issue #1179 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1179,,https://github.com/swagger-api/swagger-parser/issues/1179
+1177,Issue #1177 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1177,,https://github.com/swagger-api/swagger-parser/issues/1177
+1175,Issue #1175 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1175,,https://github.com/swagger-api/swagger-parser/issues/1175
+1173,Issue #1173 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1173,,https://github.com/swagger-api/swagger-parser/issues/1173
+1171,Issue #1171 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1171,,https://github.com/swagger-api/swagger-parser/issues/1171
+1169,Issue #1169 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1169,,https://github.com/swagger-api/swagger-parser/issues/1169
+1167,Issue #1167 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1167,,https://github.com/swagger-api/swagger-parser/issues/1167
+1165,Issue #1165 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1165,,https://github.com/swagger-api/swagger-parser/issues/1165
+1163,Issue #1163 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1163,,https://github.com/swagger-api/swagger-parser/issues/1163
+1161,Issue #1161 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1161,,https://github.com/swagger-api/swagger-parser/issues/1161
+1159,Issue #1159 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1159,,https://github.com/swagger-api/swagger-parser/issues/1159
+1157,Issue #1157 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1157,,https://github.com/swagger-api/swagger-parser/issues/1157
+1155,Issue #1155 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1155,,https://github.com/swagger-api/swagger-parser/issues/1155
+1153,Issue #1153 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1153,,https://github.com/swagger-api/swagger-parser/issues/1153
+1151,Issue #1151 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1151,,https://github.com/swagger-api/swagger-parser/issues/1151
+1149,Issue #1149 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1149,,https://github.com/swagger-api/swagger-parser/issues/1149
+1147,Issue #1147 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1147,,https://github.com/swagger-api/swagger-parser/issues/1147
+1145,Issue #1145 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1145,,https://github.com/swagger-api/swagger-parser/issues/1145
+1143,Issue #1143 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1143,,https://github.com/swagger-api/swagger-parser/issues/1143
+1141,Issue #1141 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1141,,https://github.com/swagger-api/swagger-parser/issues/1141
+1139,Issue #1139 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1139,,https://github.com/swagger-api/swagger-parser/issues/1139
+1137,Issue #1137 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1137,,https://github.com/swagger-api/swagger-parser/issues/1137
+1135,Issue #1135 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1135,,https://github.com/swagger-api/swagger-parser/issues/1135
+1133,Issue #1133 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1133,,https://github.com/swagger-api/swagger-parser/issues/1133
+1131,Issue #1131 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1131,,https://github.com/swagger-api/swagger-parser/issues/1131
+1129,Issue #1129 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1129,,https://github.com/swagger-api/swagger-parser/issues/1129
+1127,Issue #1127 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1127,,https://github.com/swagger-api/swagger-parser/issues/1127
+1125,Issue #1125 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1125,,https://github.com/swagger-api/swagger-parser/issues/1125
+1123,Issue #1123 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1123,,https://github.com/swagger-api/swagger-parser/issues/1123
+1121,Issue #1121 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1121,,https://github.com/swagger-api/swagger-parser/issues/1121
+1119,Issue #1119 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1119,,https://github.com/swagger-api/swagger-parser/issues/1119
+1117,Issue #1117 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1117,,https://github.com/swagger-api/swagger-parser/issues/1117
+1115,Issue #1115 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1115,,https://github.com/swagger-api/swagger-parser/issues/1115
+1113,Issue #1113 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1113,,https://github.com/swagger-api/swagger-parser/issues/1113
+1111,Issue #1111 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1111,,https://github.com/swagger-api/swagger-parser/issues/1111
+1109,Issue #1109 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1109,,https://github.com/swagger-api/swagger-parser/issues/1109
+1107,Issue #1107 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1107,,https://github.com/swagger-api/swagger-parser/issues/1107
+1105,Issue #1105 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1105,,https://github.com/swagger-api/swagger-parser/issues/1105
+1103,Issue #1103 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1103,,https://github.com/swagger-api/swagger-parser/issues/1103
+1101,Issue #1101 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1101,,https://github.com/swagger-api/swagger-parser/issues/1101
+1099,Issue #1099 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1099,,https://github.com/swagger-api/swagger-parser/issues/1099
+1097,Issue #1097 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1097,,https://github.com/swagger-api/swagger-parser/issues/1097
+1095,Issue #1095 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1095,,https://github.com/swagger-api/swagger-parser/issues/1095
+1093,Issue #1093 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1093,,https://github.com/swagger-api/swagger-parser/issues/1093
+1091,Issue #1091 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1091,,https://github.com/swagger-api/swagger-parser/issues/1091
+1089,Issue #1089 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1089,,https://github.com/swagger-api/swagger-parser/issues/1089
+1087,Issue #1087 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1087,,https://github.com/swagger-api/swagger-parser/issues/1087
+1085,Issue #1085 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1085,,https://github.com/swagger-api/swagger-parser/issues/1085
+1083,Issue #1083 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1083,,https://github.com/swagger-api/swagger-parser/issues/1083
+1081,Issue #1081 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1081,,https://github.com/swagger-api/swagger-parser/issues/1081
+1079,Issue #1079 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1079,,https://github.com/swagger-api/swagger-parser/issues/1079
+1077,Issue #1077 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1077,,https://github.com/swagger-api/swagger-parser/issues/1077
+1075,Issue #1075 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1075,,https://github.com/swagger-api/swagger-parser/issues/1075
+1073,Issue #1073 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1073,,https://github.com/swagger-api/swagger-parser/issues/1073
+1071,Issue #1071 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1071,,https://github.com/swagger-api/swagger-parser/issues/1071
+1069,Issue #1069 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1069,,https://github.com/swagger-api/swagger-parser/issues/1069
+1067,Issue #1067 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1067,,https://github.com/swagger-api/swagger-parser/issues/1067
+1065,Issue #1065 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1065,,https://github.com/swagger-api/swagger-parser/issues/1065
+1063,Issue #1063 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1063,,https://github.com/swagger-api/swagger-parser/issues/1063
+1061,Issue #1061 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1061,,https://github.com/swagger-api/swagger-parser/issues/1061
+1059,Issue #1059 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1059,,https://github.com/swagger-api/swagger-parser/issues/1059
+1057,Issue #1057 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1057,,https://github.com/swagger-api/swagger-parser/issues/1057
+1055,Issue #1055 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1055,,https://github.com/swagger-api/swagger-parser/issues/1055
+1053,Issue #1053 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1053,,https://github.com/swagger-api/swagger-parser/issues/1053
+1051,Issue #1051 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1051,,https://github.com/swagger-api/swagger-parser/issues/1051
+1049,Issue #1049 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1049,,https://github.com/swagger-api/swagger-parser/issues/1049
+1047,Issue #1047 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1047,,https://github.com/swagger-api/swagger-parser/issues/1047
+1045,Issue #1045 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1045,,https://github.com/swagger-api/swagger-parser/issues/1045
+1043,Issue #1043 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1043,,https://github.com/swagger-api/swagger-parser/issues/1043
+1041,Issue #1041 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1041,,https://github.com/swagger-api/swagger-parser/issues/1041
+1039,Issue #1039 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1039,,https://github.com/swagger-api/swagger-parser/issues/1039
+1037,Issue #1037 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1037,,https://github.com/swagger-api/swagger-parser/issues/1037
+1035,Issue #1035 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1035,,https://github.com/swagger-api/swagger-parser/issues/1035
+1033,Issue #1033 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1033,,https://github.com/swagger-api/swagger-parser/issues/1033
+1031,Issue #1031 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1031,,https://github.com/swagger-api/swagger-parser/issues/1031
+1029,Issue #1029 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1029,,https://github.com/swagger-api/swagger-parser/issues/1029
+1027,Issue #1027 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1027,,https://github.com/swagger-api/swagger-parser/issues/1027
+1025,Issue #1025 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1025,,https://github.com/swagger-api/swagger-parser/issues/1025
+1023,Issue #1023 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1023,,https://github.com/swagger-api/swagger-parser/issues/1023
+1021,Issue #1021 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1021,,https://github.com/swagger-api/swagger-parser/issues/1021
+1019,Issue #1019 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1019,,https://github.com/swagger-api/swagger-parser/issues/1019
+1017,Issue #1017 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1017,,https://github.com/swagger-api/swagger-parser/issues/1017
+1015,Issue #1015 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1015,,https://github.com/swagger-api/swagger-parser/issues/1015
+1013,Issue #1013 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1013,,https://github.com/swagger-api/swagger-parser/issues/1013
+1011,Issue #1011 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1011,,https://github.com/swagger-api/swagger-parser/issues/1011
+1009,Issue #1009 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1009,,https://github.com/swagger-api/swagger-parser/issues/1009
+1007,Issue #1007 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1007,,https://github.com/swagger-api/swagger-parser/issues/1007
+1005,Issue #1005 - Placeholder,OPEN,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,This is placeholder content for issue 1005,,https://github.com/swagger-api/swagger-parser/issues/1005
