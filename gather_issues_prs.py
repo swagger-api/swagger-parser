@@ -186,7 +186,7 @@ def write_prs_csv(prs, filename="pull_requests.csv"):
     print(f"\nWriting pull requests to {filename}...")
     
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['PR Link', 'Title', 'Linked Issue', 'Creation Date', 'Last Updated', 'State']
+        fieldnames = ['PR Link', 'Title', 'Linked Issue', 'Creation Date', 'Last Updated']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         
         writer.writeheader()
@@ -201,8 +201,7 @@ def write_prs_csv(prs, filename="pull_requests.csv"):
                 'Title': pr['title'],
                 'Linked Issue': linked_issue_url,
                 'Creation Date': pr['created_at'],
-                'Last Updated': pr['updated_at'],
-                'State': pr['state']
+                'Last Updated': pr['updated_at']
             })
     
     print(f"  Wrote {len(prs)} PRs to {filename}")
