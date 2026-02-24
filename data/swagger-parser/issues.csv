@@ -1,0 +1,34 @@
+number,title,state,user,labels,created_at,updated_at,comments
+2275,[Feature]: Cache the result of deserialization when loading ref,OPEN,xmourgues,Feature,2026-02-20T14:14:42Z,2026-02-20T14:18:23Z,0
+2271,[Bug]: Validation behavior change between openapi-generator 7.13.0 and 7.14.0 against an OpenAPI 3.1 schema with external references,OPEN,verve111,,2025-01-24T11:57:08Z,2026-01-06T18:54:20Z,5
+2168,ResolverFully.aggregateSchemaCombinators does not handle additionalProperties correctly,OPEN,terzicaglar,,2025-01-24T11:57:08Z,2025-01-24T11:57:08Z,5
+2155,resolveFully fails on internal references when the initial spec is read from a file URL,OPEN,klease,,2023-05-07T16:29:56Z,2024-07-11T14:55:33Z,1
+2149,OpenAPIV3Parser.resolve() should handle all errors in the entire spec,OPEN,verve111,,2025-01-09T16:07:14Z,2025-01-09T16:15:44Z,0
+2148,Request for a Simplified Swagger Parser with Minimal Dependencies,OPEN,YunaBraska,,2024-12-31T09:35:26Z,2024-12-31T09:35:59Z,0
+1921,Confusing log-warning and warning message in result for property named `null`,OPEN,muehmar,,2023-05-03T04:58:14Z,2023-05-03T05:01:47Z,0
+1917,Inconsistent behavior for byte array example (3.0.x vs 3.1.x),OPEN,padamstx,,2023-04-21T18:38:08Z,2023-04-21T18:38:08Z,0
+1915,Extend to Asyncapi parser,OPEN,thushalya,,2023-04-18T12:12:30Z,2023-04-18T12:12:30Z,0
+1897,Swagger parsing fails when Servers URL is set to / (default) value,OPEN,vpawar-tibco,,2023-03-16T11:47:56Z,2023-03-16T11:47:56Z,0
+1889,reference resolution fails in openapi-diff for schema reference for array items,OPEN,pmhofman,,2023-03-01T13:28:07Z,2023-03-01T13:28:07Z,0
+1876,Add Unmangled Discriminator Property Name to Discriminator Class,OPEN,da1910,,2023-01-19T13:22:23Z,2023-01-19T13:22:23Z,0
+1875,Parser does not Dereference Discriminator Mapping Targets,OPEN,da1910,,2023-01-19T13:14:37Z,2023-01-19T13:15:26Z,0
+1882,Default value of array type is not converted correctly when converting from swagger 2 to openapi 3,OPEN,srijithchandran,,2019-12-06T06:43:24Z,2024-06-13T11:08:32Z,8
+1262,Conversion of json schema in Draft 4 to Schema,OPEN,himanshumps,,2019-11-28T13:47:51Z,2019-12-03T16:56:08Z,1
+1242,BinarySchema V2 to V3 conversion results in StringSchema being used..,OPEN,aaronjwhiteside,,2019-10-30T23:49:59Z,2020-01-16T05:08:59Z,2
+1237,How do i check if a swagger/openapi file is v2 or v3?,OPEN,MaximilianTews,,2019-10-24T14:52:32Z,2019-11-04T13:14:32Z,1
+1235,Unable to resolve reference attribute in multiple yaml files,OPEN,Asisranjan,,2019-10-22T09:52:10Z,2020-01-15T12:04:09Z,6
+1210,Inlined content schema in RequestBody missing type,OPEN,jagnelo,,2019-10-05T23:48:26Z,2019-10-11T17:42:19Z,1
+1206,Swagger 2 Relative path references are not getting resolved,OPEN,realvedantagrawal,,2019-09-27T11:42:18Z,2019-09-27T13:45:53Z,1
+1205,"Enum string value ""YES"" becomes ""true""",OPEN,dcalap,,2019-09-11T08:57:10Z,2019-09-11T08:57:10Z,0
+1096,Add Support for OpenAPI 3.0 Header Parameter Description,OPEN,andrewmichel,,2018-11-08T04:06:42Z,2018-11-08T04:06:42Z,0
+914,Add Support for OpenAPI 3.0 Header Parameter Description,OPEN,leochr,,2017-04-04T21:19:54Z,2017-04-04T21:22:52Z,0
+429,Parser fails when no default value defined,OPEN,dcalap,,2017-03-28T08:24:22Z,2017-03-28T08:24:22Z,0
+427,create OSGi bundle artifacts,OPEN,borcsokj,,2017-03-27T09:26:20Z,2025-08-31T21:38:08Z,4
+425,Binary data is not generated,OPEN,auchri,,2017-03-20T09:33:42Z,2017-06-01T07:43:19Z,3
+424,"Poor error message on incorrectly written inheritance: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'swagger': was expecting ('true', 'false' or 'null')",OPEN,jan-matejka,,2017-03-15T17:31:43Z,2021-10-21T15:08:09Z,1
+403,Warn on formdata parameters with no matching content type,OPEN,dhasenan,,2017-02-27T17:36:21Z,2017-07-24T15:37:16Z,1
+401,Bad interaction between additionalProperties and $ref,OPEN,ranma42,,2017-02-23T10:14:05Z,2024-07-12T09:09:58Z,13
+393,Vendor extension references not resolved,OPEN,arr28,,2017-02-03T22:35:50Z,2017-02-04T22:51:23Z,1
+390,"Bug in PropertyDeserializer when ""enum"":null",OPEN,arcuri82,,2017-01-28T23:09:17Z,2017-02-02T15:57:30Z,2
+377,Providing line and column numbers in parsed Swagger object,OPEN,fmueller,,2017-01-06T10:24:35Z,2019-11-27T19:32:03Z,3
+366,Expose warning for `additionalProperties: true`,OPEN,fehguy,,2016-12-24T23:49:13Z,2016-12-24T23:49:13Z,0
