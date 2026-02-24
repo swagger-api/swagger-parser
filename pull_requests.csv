@@ -1,2 +1,11 @@
 PR Link,Title,Linked Issue,Creation Date,Last Updated
-https://github.com/swagger-api/swagger-parser/pull/2277,[WIP] Gather open issues and pull requests in Swagger Parser,,2026-02-24T07:33:33Z,2026-02-24T07:34:33Z
+https://github.com/swagger-api/swagger-parser/pull/2105,Normalize relative ref paths to avoid duplicating schemas,https://github.com/swagger-api/swagger-parser/issues/2016,2024-06-17T15:07:04Z,2025-11-19T17:51:15Z
+https://github.com/swagger-api/swagger-parser/pull/2243,Issue #2242: Enable BigDecimal for float deserialization,https://github.com/swagger-api/swagger-parser/issues/2242,2025-11-03T16:43:54Z,2025-11-03T16:44:34Z
+https://github.com/swagger-api/swagger-parser/pull/2245,fix: nested example references not resolved when path parameter in reference chain,https://github.com/swagger-api/swagger-parser/issues/2244,2025-11-05T13:11:19Z,2026-01-24T16:14:46Z
+https://github.com/swagger-api/swagger-parser/pull/2247,fix: resolve nested example references in parameter definitions,https://github.com/swagger-api/swagger-parser/issues/2229,2025-11-08T18:25:56Z,2026-01-24T16:15:24Z
+https://github.com/swagger-api/swagger-parser/pull/2254,Issue #2216 and #2211: Parameter inline with setResolve,https://github.com/swagger-api/swagger-parser/issues/2216,2025-12-01T17:10:17Z,2026-01-12T14:52:33Z
+https://github.com/swagger-api/swagger-parser/pull/2263,Issue #2157 Resolve additionalProperties inside ComposedSchema correctly,https://github.com/swagger-api/swagger-parser/issues/2157,2026-01-09T12:00:13Z,2026-01-09T12:00:13Z
+https://github.com/swagger-api/swagger-parser/pull/2267,Fix XXE vulnerability by upgrading transitive Rhino dependency to 1.7.14,,2026-02-02T10:47:13Z,2026-02-02T10:56:16Z
+https://github.com/swagger-api/swagger-parser/pull/2272,fix: external schema resolution in OAS 3.1 files,,2026-02-15T18:00:18Z,2026-02-15T20:15:09Z
+https://github.com/swagger-api/swagger-parser/pull/2276,fix(converter): keep x-nullable in shared $ref responses,,2026-02-20T14:47:53Z,2026-02-20T14:48:22Z
+https://github.com/swagger-api/swagger-parser/pull/2277,Add issue and PR data collection with CSV export,,2026-02-24T07:33:33Z,2026-02-24T08:12:30Z

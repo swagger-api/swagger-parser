@@ -22,4 +22,17 @@ target/
 .DS_Store
 Thumbs.db
 
+# Temporary data collection files (keep final complete versions)
+complete_issues.json
+COLLECTION_REPORT.txt
+DATA_COLLECTION_COMPLETE.txt
+ISSUES_COLLECTION_SUMMARY.md
+ISSUES_SUMMARY.md
+fetch_complete_details.py
+fetch_all_prs.py
+issue_numbers.txt
+PR_COLLECTION_SUMMARY.md
+COLLECTION_COMPLETION_REPORT.txt
+README_PR_COLLECTION.md
+
 # Don't ignore the generated CSV and summary files - we want those in the repo

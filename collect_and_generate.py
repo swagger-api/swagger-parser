@@ -116,7 +116,13 @@ def generate_reports(issues, prs):
             label_counts = {}
             for issue in issues:
                 for label in issue.get('labels', []):
-                    label_name = label.get('name', 'Unknown')
+                    # Handle both string labels and dict labels
+                    if isinstance(label, str):
+                        label_name = label
+                    elif isinstance(label, dict):
+                        label_name = label.get('name', 'Unknown')
+                    else:
+                        label_name = 'Unknown'
                     label_counts[label_name] = label_counts.get(label_name, 0) + 1
             
             if label_counts:
