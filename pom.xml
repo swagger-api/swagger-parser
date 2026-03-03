@@ -373,7 +373,7 @@
         <wiremock-version>2.35.2</wiremock-version>
         <surefire-version>3.2.2</surefire-version>
         <commons-lang-version>3.18.0</commons-lang-version>
-        <jackson-version>2.19.0</jackson-version>
+        <jackson-version>2.21.1</jackson-version>
         <jackson-databind-version>2.19.0</jackson-databind-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
