@@ -1903,6 +1903,29 @@ public class OpenAPIDeserializer {
 		return value;
 	}
 
+	private Number getInteger32or64(String key, ObjectNode node, boolean required, String location, ParseResult result) {
+		Number value = null;
+		JsonNode v = node.get(key);
+		if (node == null || v == null) {
+			if (required) {
+				result.missing(location, key);
+				result.invalid();
+			}
+		} else if (v.getNodeType().equals(JsonNodeType.NUMBER)) {
+			if (v.isInt()) {
+				value = v.intValue();
+			}
+			JsonNode format = node.get("format");
+			if (format != null && format.asText().equals("int64") && v.isLong()) {
+				value = v.longValue();
+			}
+		} else if (!v.isValueNode()) {
+			result.invalidType(location, key, "integer", node);
+		}
+		return value;
+	}
+
+
 	public Map<String, Parameter> getParameters(ObjectNode obj, String location, ParseResult result,
 												boolean underComponents) {
 		if (obj == null) {
@@ -2312,7 +2335,7 @@ public class OpenAPIDeserializer {
 				return getString(nodeKey, node, false, location, result);
 			}
 			if (example.getNodeType().equals(JsonNodeType.NUMBER)) {
-				Integer integerExample = getInteger(nodeKey, node, false, location, result);
+				Number integerExample = getInteger32or64(nodeKey, node, false, location, result);
 				if (integerExample != null) {
 					return integerExample;
 				} else {
@@ -2973,7 +2996,7 @@ public class OpenAPIDeserializer {
                         schema.setDefault(object);
                     }
                 } else if (schema.getType().equals("integer")) {
-                    Integer number = getInteger("default", node, false, location, result);
+                    Number number = getInteger32or64("default", node, false, location, result);
                     if (number != null) {
                         schema.setDefault(number);
                     }
@@ -3043,7 +3066,7 @@ public class OpenAPIDeserializer {
             schema.setMinimum(bigDecimal);
         }
 
-        Integer integer = getInteger("minLength", node, false, location, result);
+		Integer integer = getInteger("minLength", node, false, location, result);
         if (integer != null) {
             schema.setMinLength(integer);
         }
