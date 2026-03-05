@@ -437,7 +437,10 @@ public class ResolverFully {
                     aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples, defaultValues);
                 }
                 if (defaultValues.size() == 1) {
-                    combinedModel.setDefault(defaultValues.iterator().next());
+                    Object defaultValue = defaultValues.iterator().next();
+                    if (defaultValue != null) {
+                        combinedModel.setDefault(defaultValue);
+                    }
                 }
 
                 if (schema.getExample() != null) {
@@ -600,10 +603,11 @@ public class ResolverFully {
             if (resolved.getExample() != null) {
                 examples.add(resolved.getExample());
             }
-            if (sourceSchema.getDefault() != null && resolved.getDefault() == null)
-                defaultValues.add(sourceSchema.getDefault());
-            else
+            if (resolved.getDefault() != null) {
                 defaultValues.add(resolved.getDefault());
+            } else if (sourceSchema.getDefault() != null) {
+                defaultValues.add(sourceSchema.getDefault());
+            }
 
             if (resolved.getExtensions() != null) {
                 Map<String, Object> extensions = resolved.getExtensions();

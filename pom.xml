@@ -295,6 +295,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${swagger-core-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger-core-version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml-version}</version>
@@ -365,7 +375,7 @@
         <swagger-parser-v2-version>1.0.75</swagger-parser-v2-version>
         <commons-io-version>2.20.0</commons-io-version>
         <slf4j-version>2.0.9</slf4j-version>
-        <swagger-core-version>2.2.37</swagger-core-version>
+        <swagger-core-version>2.2.44</swagger-core-version>
         <swagger-core-v2-version>1.6.16</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>7.11.0</testng-version>
