@@ -1413,10 +1413,21 @@ public class OpenAPIV3ParserTest {
     }
 
     @Test
-    public void int64ExampleWithoutOverflow()  {
+    public void int64WithoutOverflow()  {
         OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/int64example.yaml");
-        IntegerSchema date = ((IntegerSchema) openAPI.getPaths().get("/foo").getGet().getResponses().get("200").getContent().get("application/json").getSchema().getProperties().get("date"));
-        Assert.assertEquals(date.getExample().toString(), "1516042231144");
+        Operation get = openAPI.getPaths().get("/foo").getGet();
+        IntegerSchema exampleProperty = ((IntegerSchema) get.getResponses().get("200").getContent().get("application/json").getSchema().getProperties().get("exampleProperty"));
+        Assert.assertEquals(exampleProperty.getExample().toString(), "1516042231144");
+
+        Parameter parameter = get.getParameters().get(0);
+        String maxLong = "9223372036854775807";
+        Assert.assertEquals(parameter.getExample().toString(), maxLong);
+
+        IntegerSchema parameterInt64 = ((IntegerSchema) parameter.getSchema());
+        Assert.assertEquals(parameterInt64.getExample().toString(), maxLong);
+        Assert.assertEquals(parameterInt64.getMinimum().toString(), maxLong);
+        Assert.assertEquals(parameterInt64.getMaximum().toString(), maxLong);
+        Assert.assertEquals(parameterInt64.getDefault().toString(), maxLong);
     }
 
     @Test

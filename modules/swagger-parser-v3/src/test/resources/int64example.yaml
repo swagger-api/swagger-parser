@@ -5,6 +5,17 @@ info:
 paths:
   /foo:
     get:
+      parameters:
+        - in: query
+          name: int64
+          example: 9223372036854775807
+          schema:
+            type: integer
+            format: int64
+            default: 9223372036854775807
+            example: 9223372036854775807
+            minimum: 9223372036854775807
+            maximum: 9223372036854775807
       responses:
         '200':
           description: OK
@@ -13,9 +24,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  date:
+                  exampleProperty:
                     type: integer
                     format: int64
                     example: 1516042231144
                 required:
-                  - date
+                  - exampleProperty
