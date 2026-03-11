@@ -3,15 +3,18 @@ package io.swagger.v3.parser.test;
 
 
 import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -226,28 +229,35 @@ public class FileReferenceTest {
         assertNotNull(swagger.getPaths().get("/pet/{petId}"));
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getGet());
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getGet().getParameters());
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getGet().getParameters().size() == 1);
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getGet().getParameters().get(0).getName().equals("petId"));
+        assertEquals(swagger.getPaths().get("/pet/{petId}").getGet().getParameters().size(), 1);
+
+        Parameter parameter = swagger.getPaths().get("/pet/{petId}").getGet().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(parameter.get$ref());
+        Components components = result.getOpenAPI().getComponents();
+        Parameter refParam = components.getParameters().get(refName);
+
+        assertEquals(refParam.getName(), "petId");
+
         assertTrue(swagger.getComponents().getSchemas().get("Pet") instanceof Schema);
-        assertTrue(swagger.getComponents().getSchemas().get("Pet").getProperties().size() == 6);
+        assertEquals(swagger.getComponents().getSchemas().get("Pet").getProperties().size(), 6);
 
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getPost());
         assertNotNull(swagger.getPaths().get("/pet/{petId}").getPost().getParameters());
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getParameters().size() == 1);
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody() != null);
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref() != null);
+        assertEquals(swagger.getPaths().get("/pet/{petId}").getPost().getParameters().size(), 1);
+        assertNotNull(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody());
+        assertNotNull(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref());
         assertEquals(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref(),"#/components/requestBodies/requestBody");
-        assertTrue(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref().equals("#/components/requestBodies/requestBody"));
+        assertEquals(swagger.getPaths().get("/pet/{petId}").getPost().getRequestBody().get$ref(), "#/components/requestBodies/requestBody");
 
         assertNotNull(swagger.getPaths().get("/store/order"));
         assertNotNull(swagger.getPaths().get("/store/order").getPost());
         assertNotNull(swagger.getPaths().get("/store/order").getPost().getRequestBody());
         assertNotNull(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema());
-        assertTrue(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema().get$ref() != null);
-        assertTrue(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema().get$ref().equals("#/components/schemas/Order"));
+        assertNotNull(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema().get$ref());
+        assertEquals(swagger.getPaths().get("/store/order").getPost().getRequestBody().getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/Order");
 
         assertTrue(swagger.getComponents().getSchemas().get("Order") instanceof Schema);
-        assertTrue(swagger.getComponents().getSchemas().get("Order").getProperties().size() == 6);
+        assertEquals(swagger.getComponents().getSchemas().get("Order").getProperties().size(), 6);
     }
 
     @Test
