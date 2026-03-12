@@ -5,13 +5,19 @@
         "type" : "object",
         "properties" : {
           "profile" : {
-            "type" : "object",
-            "$id" : "./nested/",
-            "properties" : {
-              "avatar" : {
-                "type" : "string"
-              }
-            }
+            "$ref" : "#/components/schemas/UserProfile"
+          }
+        }
+      },
+      "UserProfile" : {
+        "$ref" : "#/components/schemas/ex"
+      },
+      "ex" : {
+        "type" : "object",
+        "$id" : "./nested/",
+        "properties" : {
+          "avatar" : {
+            "type" : "string"
           }
         }
       }
