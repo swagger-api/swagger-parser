@@ -1,0 +1,45 @@
+Issue Link,Title,Number of Comments,Linked PR,Creation Date,Last Updated
+https://github.com/swagger-api/swagger-parser/issues/2275,[Feature]: Cache the result of deserialization when loading ref,0,,2026-02-20T14:14:42Z,2026-02-20T14:18:23Z
+https://github.com/swagger-api/swagger-parser/issues/2266,[Bug]: External schema resolution broken in OpenAPI 3.1 (works in 3.0),3,,2026-01-31T23:44:16Z,2026-02-15T18:07:45Z
+https://github.com/swagger-api/swagger-parser/issues/2271,[Bug]: Validation behavior change between openapi-generator 7.13.0 and 7.14.0 against an OpenAPI 3.1 schema with external references,0,,2026-02-12T23:51:16Z,2026-02-12T23:51:16Z
+https://github.com/swagger-api/swagger-parser/issues/2112,BDSA-2018-5289 Mozilla Rhino - 1.7.7.2,0,,2024-07-25T12:56:59Z,2026-02-12T15:01:42Z
+https://github.com/swagger-api/swagger-parser/issues/2270,[Bug]: allOf reference not resolved fully,0,,2026-02-05T20:57:52Z,2026-02-05T20:57:52Z
+https://github.com/swagger-api/swagger-parser/issues/2269,[Bug]: x-nullable lost for shared $ref responses during Swagger 2.0 to OAS3 conversion,0,,2026-02-03T13:44:59Z,2026-02-04T15:10:59Z
+https://github.com/swagger-api/swagger-parser/issues/1500,[bug] For type: date parsed wrong example,2,,2020-11-27T10:29:09Z,2026-02-04T05:32:18Z
+https://github.com/swagger-api/swagger-parser/issues/2264,[Bug]: OpenAPI 3.1 Parser Unexpectedly Merges Identical Inline Objects When resolve=true,0,,2026-01-28T13:39:22Z,2026-01-30T13:29:40Z
+https://github.com/swagger-api/swagger-parser/issues/2216,[Bug]: Parameters components shouldn't be inlined with resolve option set to true,6,https://github.com/swagger-api/swagger-parser/pull/2254,2025-08-05T11:42:39Z,2026-01-13T11:58:58Z
+https://github.com/swagger-api/swagger-parser/issues/2248,[Feature]: Support for OpenAPI Spec 3.2,1,,2025-11-13T08:47:44Z,2026-01-12T15:26:46Z
+https://github.com/swagger-api/swagger-parser/issues/2262,[Bug]: References to elements within jar files cannot be resolved,0,,2026-01-08T15:35:34Z,2026-01-08T15:35:34Z
+https://github.com/swagger-api/swagger-parser/issues/2261,[Feature]: Upgrade to Jackson 3,0,,2026-01-08T14:02:23Z,2026-01-08T14:02:45Z
+https://github.com/swagger-api/swagger-parser/issues/2157,additionalProperties inside ComposedSchema are resolved as null,5,https://github.com/swagger-api/swagger-parser/pull/2263,2025-01-24T11:57:08Z,2026-01-06T18:54:20Z
+https://github.com/swagger-api/swagger-parser/issues/2257,[Feature]: Allow customization of Accept-header In RemoteUrl,0,,2025-12-15T09:49:52Z,2025-12-15T09:49:52Z
+https://github.com/swagger-api/swagger-parser/issues/2256,[Question] [Bug]: Inconsistent Relative Reference Resolution in Nested Schema Contexts,1,,2025-12-08T19:36:57Z,2025-12-08T20:42:52Z
+https://github.com/swagger-api/swagger-parser/issues/2253,[Question]: Duplicate _1 Object generation due to different path prefix,0,,2025-11-28T08:58:24Z,2025-11-28T09:13:59Z
+https://github.com/swagger-api/swagger-parser/issues/1422,Duplicated referenced definitions,1,,2020-08-26T09:43:55Z,2025-11-15T11:52:11Z
+https://github.com/swagger-api/swagger-parser/issues/1518,External ref resolve fails to resolve to same schema and creates duplicate classes,39,,2021-01-18T21:23:51Z,2025-11-15T11:50:51Z
+https://github.com/swagger-api/swagger-parser/issues/2217,[Bug]: Swagger Parser generates duplicate components with sequential suffixes when using mixed reference patterns,3,,2025-08-06T14:22:29Z,2025-11-09T13:50:50Z
+https://github.com/swagger-api/swagger-parser/issues/2229,Fix unresolved relative $ref for examples in parameter definitions,1,https://github.com/swagger-api/swagger-parser/pull/2247,2025-09-08T13:18:51Z,2025-11-08T18:27:06Z
+https://github.com/swagger-api/swagger-parser/issues/2244,[Bug]: Presence of path parameter in parent reference leads to unresolved examples,0,https://github.com/swagger-api/swagger-parser/pull/2245,2025-11-05T12:43:24Z,2025-11-05T12:43:24Z
+https://github.com/swagger-api/swagger-parser/issues/2242,[Bug]: Loss of Float Precision When Reading Yaml Files,0,https://github.com/swagger-api/swagger-parser/pull/2243,2025-11-03T16:41:06Z,2025-11-03T16:41:44Z
+https://github.com/swagger-api/swagger-parser/issues/2172,[OpenAPI v3.1] Arrays now (incorrectly?) parse to JsonSchema rather than ArraySchema,1,,2025-04-25T03:38:00Z,2025-10-22T15:38:01Z
+https://github.com/swagger-api/swagger-parser/issues/2091,RequestBody and Response Examples with relativePath are not resolved,1,,2024-05-07T07:19:49Z,2025-09-08T13:19:49Z
+https://github.com/swagger-api/swagger-parser/issues/427,create OSGi bundle artifacts,4,,2017-03-27T09:26:20Z,2025-08-31T21:38:08Z
+https://github.com/swagger-api/swagger-parser/issues/2215,[Feature]: Introduce resolveResponsesFully,0,,2025-08-05T10:03:01Z,2025-08-05T10:03:01Z
+https://github.com/swagger-api/swagger-parser/issues/1091,Parser ignore the description if it's a $ref,4,,2019-05-03T15:09:26Z,2025-06-27T06:08:29Z
+https://github.com/swagger-api/swagger-parser/issues/2201,[Openapi3.1] Ref inside of Items are not resolved,1,,2025-06-11T15:22:31Z,2025-06-12T12:07:30Z
+https://github.com/swagger-api/swagger-parser/issues/2200,Unquoted integer `example:` value fails to parse when the spec includes a deeply nested schema elsewhere in spec,0,,2025-06-09T09:13:37Z,2025-06-09T09:13:37Z
+https://github.com/swagger-api/swagger-parser/issues/2199,Typo on main page,0,,2025-06-08T16:10:29Z,2025-06-08T16:10:29Z
+https://github.com/swagger-api/swagger-parser/issues/2197,"Default server URL ""/"" is added automatically when parsing OpenAPI 3 spec",0,,2025-05-29T08:33:51Z,2025-05-30T07:02:28Z
+https://github.com/swagger-api/swagger-parser/issues/2158,swagger parsers depends on NOT jakarta packages,2,,2025-02-19T12:34:59Z,2025-05-28T07:26:10Z
+https://github.com/swagger-api/swagger-parser/issues/2193,Circular dependencies are not resolved properly with resolveFully,0,,2025-05-22T12:11:52Z,2025-05-22T12:12:15Z
+https://github.com/swagger-api/swagger-parser/issues/2192,Version 2.1.28 seems to break oneOf,0,,2025-05-19T13:06:34Z,2025-05-19T13:06:34Z
+https://github.com/swagger-api/swagger-parser/issues/2065,Unable to Parse Referenced ArraySchema in Swagger File,2,,2024-03-20T19:23:10Z,2025-05-16T07:35:52Z
+https://github.com/swagger-api/swagger-parser/issues/2178,reference name is not displayed to $ref in local file,0,,2025-05-06T07:10:05Z,2025-05-06T07:10:05Z
+https://github.com/swagger-api/swagger-parser/issues/2168,[OpenAPI v3]Not parsed the extensions in schema that with $ref field,0,,2025-03-27T13:51:26Z,2025-03-27T13:51:54Z
+https://github.com/swagger-api/swagger-parser/issues/2160,ResolveFully doesn't resolve request body,0,,2025-03-12T18:34:12Z,2025-03-12T18:35:31Z
+https://github.com/swagger-api/swagger-parser/issues/1751,java.lang.StackOverflowError during parsing recursive schemas/components in ResolverFully.resolveSchema(),5,,2022-06-15T17:31:37Z,2025-03-11T09:02:03Z
+https://github.com/swagger-api/swagger-parser/issues/2159,openapi 3.1: Illegal character in fragment when path reference contains paramneters,0,,2025-03-07T10:28:09Z,2025-03-07T10:28:09Z
+https://github.com/swagger-api/swagger-parser/issues/1970,"3.1.0 spec parsing, $defs information omitted",1,,2023-08-31T22:50:45Z,2025-03-03T07:43:46Z
+https://github.com/swagger-api/swagger-parser/issues/2102,Parameters with the same name but different locations are incorrectly returned when using JSON references ($ref) with openapi 3.0.x.,1,,2024-05-16T06:44:39Z,2025-02-22T11:52:12Z
+https://github.com/swagger-api/swagger-parser/issues/2147,cannot deserialize from Object value (Grallvm native executable),4,,2024-12-29T10:10:02Z,2025-01-31T10:23:29Z
+https://github.com/swagger-api/swagger-parser/issues/2149,OpenAPIV3Parser.resolve() should handle all errors in the entire spec,0,,2025-01-09T16:07:14Z,2025-01-09T16:15:44Z

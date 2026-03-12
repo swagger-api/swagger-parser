@@ -1,0 +1,655 @@
+[
+  {
+    "number": 2275,
+    "title": "[Feature]: Cache the result of deserialization when loading ref",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2275",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2026-02-20T14:14:42Z",
+    "updated_at": "2026-02-20T14:18:23Z",
+    "body": "When loading external $ref with swagger-parser, the ResolverCache stores only the read string but still deserialize the whole tree which is particuraly slow for big files.\nMaybe the Resolver could also store the deserialized tree.",
+    "user": {
+      "login": "xmourgues"
+    },
+    "labels": [
+      "Feature"
+    ]
+  },
+  {
+    "number": 2266,
+    "title": "[Bug]: External schema resolution broken in OpenAPI 3.1 (works in 3.0)",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2266",
+    "state": "open",
+    "comments": 3,
+    "created_at": "2026-01-31T23:44:16Z",
+    "updated_at": "2026-02-15T18:07:45Z",
+    "body": "When parsing an OpenAPI 3.1 specification with external schema references (using `$ref` to separate YAML files), the `getComponents().getSchemas()` method returns `null`.",
+    "user": {
+      "login": "Kavan72"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2271,
+    "title": "[Bug]: Validation behavior change between openapi-generator 7.13.0 and 7.14.0 against an OpenAPI 3.1 schema with external references",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2271",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2026-02-12T23:51:16Z",
+    "updated_at": "2026-02-12T23:51:16Z",
+    "body": "Validation behavior against an ISO spec (SOVD, an OpenAPI 3.1 based specification) fails after openapi-generator 7.14.0.",
+    "user": {
+      "login": "thatsdone"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2112,
+    "title": "BDSA-2018-5289 Mozilla Rhino - 1.7.7.2",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2112",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2024-07-25T12:56:59Z",
+    "updated_at": "2026-02-12T15:01:42Z",
+    "body": "Mozilla Rhino is vulnerable to XML external entities (XXE) due to an insecure XML parsing in the toXml function.",
+    "user": {
+      "login": "josebarros2025"
+    },
+    "labels": []
+  },
+  {
+    "number": 2270,
+    "title": "[Bug]: allOf reference not resolved fully",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2270",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2026-02-05T20:57:52Z",
+    "updated_at": "2026-02-05T20:57:52Z",
+    "body": "Setting `resolveFully(true)` does not resolve `$ref` pointers inside `allOf` schemas.",
+    "user": {
+      "login": "julianmclain"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2269,
+    "title": "[Bug]: x-nullable lost for shared $ref responses during Swagger 2.0 to OAS3 conversion",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2269",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2026-02-03T13:44:59Z",
+    "updated_at": "2026-02-04T15:10:59Z",
+    "body": "When converting Swagger 2.0 specifications to OpenAPI 3.0, the `x-nullable` vendor extension is lost for the second and subsequent endpoints when multiple endpoints share the same response definition via `$ref`.",
+    "user": {
+      "login": "esaezgil"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 1500,
+    "title": "[bug] For type: date parsed wrong example",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1500",
+    "state": "open",
+    "comments": 2,
+    "created_at": "2020-11-27T10:29:09Z",
+    "updated_at": "2026-02-04T05:32:18Z",
+    "body": "For type: date parsed wrong example",
+    "user": {
+      "login": "dpolyakov987"
+    },
+    "labels": []
+  },
+  {
+    "number": 2264,
+    "title": "[Bug]: OpenAPI 3.1 Parser Unexpectedly Merges Identical Inline Objects When resolve=true",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2264",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2026-01-28T13:39:22Z",
+    "updated_at": "2026-01-30T13:29:40Z",
+    "body": "When parsing an OpenAPI 3.1 specification with `ParseOptions.setResolve(true)`, the `OpenAPIDereferencer31` unexpectedly merges identical inline objects.",
+    "user": {
+      "login": "harryeti"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2216,
+    "title": "[Bug]: Parameters components shouldn't be inlined with resolve option set to true",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2216",
+    "state": "open",
+    "comments": 6,
+    "created_at": "2025-08-05T11:42:39Z",
+    "updated_at": "2026-01-13T11:58:58Z",
+    "body": "Following the doc, the `resolve` option should resolve refs (for parameters usage) from other external/relative sources/files and **not** replace ref usage by the inline version of the parameter.",
+    "user": {
+      "login": "Curs3W4ll"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2248,
+    "title": "[Feature]: Support for OpenAPI Spec 3.2",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2248",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2025-11-13T08:47:44Z",
+    "updated_at": "2026-01-12T15:26:46Z",
+    "body": "Add support for parsing and validating OpenAPI Specification 3.2.0.",
+    "user": {
+      "login": "caochenlei"
+    },
+    "labels": [
+      "Feature"
+    ]
+  },
+  {
+    "number": 2262,
+    "title": "[Bug]: References to elements within jar files cannot be resolved",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2262",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2026-01-08T15:35:34Z",
+    "updated_at": "2026-01-08T15:35:34Z",
+    "body": "When an openapi spec is contained in a jar file and read using a jar URI, references to elements within that spec cannot be resolved.",
+    "user": {
+      "login": "TijsSchoneveld"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2261,
+    "title": "[Feature]: Upgrade to Jackson 3",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2261",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2026-01-08T14:02:23Z",
+    "updated_at": "2026-01-08T14:02:45Z",
+    "body": "I have swagger parser as dependency and this provides Jackson 2 as transient dependencies. I would like to get rid of Jackson 2 dependencies.",
+    "user": {
+      "login": "dickerpulli"
+    },
+    "labels": [
+      "Feature"
+    ]
+  },
+  {
+    "number": 2157,
+    "title": "additionalProperties inside ComposedSchema are resolved as null",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2157",
+    "state": "open",
+    "comments": 5,
+    "created_at": "2025-01-24T11:57:08Z",
+    "updated_at": "2026-01-06T18:54:20Z",
+    "body": "When I parse an OpenAPI document, additionalProperties inside ComposedSchema are resolved as null.",
+    "user": {
+      "login": "terzicaglar"
+    },
+    "labels": []
+  },
+  {
+    "number": 2257,
+    "title": "[Feature]: Allow customization of Accept-header In RemoteUrl",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2257",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-12-15T09:49:52Z",
+    "updated_at": "2025-12-15T09:49:52Z",
+    "body": "Currently, the Accept-header is hard coded in `RemoteUrl`. Users can't change it, even if their Api might require different headers.",
+    "user": {
+      "login": "aegliv"
+    },
+    "labels": [
+      "Feature"
+    ]
+  },
+  {
+    "number": 2256,
+    "title": "[Question] [Bug]: Inconsistent Relative Reference Resolution in Nested Schema Contexts",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2256",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2025-12-08T19:36:57Z",
+    "updated_at": "2025-12-08T20:42:52Z",
+    "body": "There seems to be a bug when resolving nested schemas. OpenAPI Generator incorrectly resolves relative $ref paths in schema files when they are referenced through nested contexts.",
+    "user": {
+      "login": "IgorMaj"
+    },
+    "labels": [
+      "Question"
+    ]
+  },
+  {
+    "number": 2253,
+    "title": "[Question]: Duplicate _1 Object generation due to different path prefix",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2253",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-11-28T08:58:24Z",
+    "updated_at": "2025-11-28T09:13:59Z",
+    "body": "I'm trying to parse 2 API Specifications in OpenAPI 3.0.3 using OpenApiGenerator version 7.1.0. This results in BrokenTO and BrokenTO_1 references.",
+    "user": {
+      "login": "constantin-trinkerl-mw"
+    },
+    "labels": [
+      "Question"
+    ]
+  },
+  {
+    "number": 1422,
+    "title": "Duplicated referenced definitions",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1422",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2020-08-26T09:43:55Z",
+    "updated_at": "2025-11-15T11:52:11Z",
+    "body": "I have the following swagger files with referenced definitions that create duplicates.",
+    "user": {
+      "login": "alejandro-campelo"
+    },
+    "labels": []
+  },
+  {
+    "number": 1518,
+    "title": "External ref resolve fails to resolve to same schema and creates duplicate classes",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1518",
+    "state": "open",
+    "comments": 39,
+    "created_at": "2021-01-18T21:23:51Z",
+    "updated_at": "2025-11-15T11:50:51Z",
+    "body": "Something gets confused and creates Foo.java and Foo1.java, even though there is just one foo.json model.",
+    "user": {
+      "login": "jimshowalter"
+    },
+    "labels": []
+  },
+  {
+    "number": 2217,
+    "title": "[Bug]: Swagger Parser generates duplicate components with sequential suffixes when using mixed reference patterns",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2217",
+    "state": "open",
+    "comments": 3,
+    "created_at": "2025-08-06T14:22:29Z",
+    "updated_at": "2025-11-09T13:50:50Z",
+    "body": "When using swagger-parser to resolve and bundle an OpenAPI specification that references external fragments, the library generates duplicate components with sequential suffixes.",
+    "user": {
+      "login": "dbr-cbk"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2229,
+    "title": "Fix unresolved relative $ref for examples in parameter definitions",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2229",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2025-09-08T13:18:51Z",
+    "updated_at": "2025-11-08T18:27:06Z",
+    "body": "In OpenAPI 3.0.3 specifications, when defining parameter examples via `$ref` that point to a relative YAML file path, swagger-parser does not resolve the example correctly.",
+    "user": {
+      "login": "jorgerod"
+    },
+    "labels": []
+  },
+  {
+    "number": 2244,
+    "title": "[Bug]: Presence of path parameter in parent reference leads to unresolved examples",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2244",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-11-05T12:43:24Z",
+    "updated_at": "2025-11-05T12:43:24Z",
+    "body": "When parsing an OpenAPI v3.0.3 specification that contains nested references for an operation with a path parameter, the examples are not resolved.",
+    "user": {
+      "login": "jhemelhof"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2242,
+    "title": "[Bug]: Loss of Float Precision When Reading Yaml Files",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2242",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-11-03T16:41:06Z",
+    "updated_at": "2025-11-03T16:41:44Z",
+    "body": "This happens under all versions of OpenAPI. Value loses precision when reading YAML files.",
+    "user": {
+      "login": "califlower"
+    },
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 2172,
+    "title": "[OpenAPI v3.1] Arrays now (incorrectly?) parse to JsonSchema rather than ArraySchema",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2172",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2025-04-25T03:38:00Z",
+    "updated_at": "2025-10-22T15:38:01Z",
+    "body": "Arrays parse to JsonSchema instead of ArraySchema in 3.1.0, but parsed to ArraySchema in 3.0.x.",
+    "user": {
+      "login": "dominic-jones"
+    },
+    "labels": []
+  },
+  {
+    "number": 2091,
+    "title": "RequestBody and Response Examples with relativePath are not resolved",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2091",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2024-05-07T07:19:49Z",
+    "updated_at": "2025-09-08T13:19:49Z",
+    "body": "We have OpenAPI 3.0.1 spec with examples on relative path, we want to generate a single API file while creating API spec artifact.",
+    "user": {
+      "login": "ramahmoo"
+    },
+    "labels": []
+  },
+  {
+    "number": 427,
+    "title": "create OSGi bundle artifacts",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/427",
+    "state": "open",
+    "comments": 4,
+    "created_at": "2017-03-27T09:26:20Z",
+    "updated_at": "2025-08-31T21:38:08Z",
+    "body": "Create OSGi bundle artifacts instead of plain JAR similar to swagger-core.",
+    "user": {
+      "login": "borcsokj"
+    },
+    "labels": []
+  },
+  {
+    "number": 2215,
+    "title": "[Feature]: Introduce resolveResponsesFully",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2215",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-08-05T10:03:01Z",
+    "updated_at": "2025-08-05T10:03:01Z",
+    "body": "The `resolveResponses` option has been introduced to fix the responses resolving step, but it will automatically inline responses, which we not always want to.",
+    "user": {
+      "login": "Curs3W4ll"
+    },
+    "labels": [
+      "Feature"
+    ]
+  },
+  {
+    "number": 1091,
+    "title": "Parser ignore the description if it's a $ref",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1091",
+    "state": "open",
+    "comments": 4,
+    "created_at": "2019-05-03T15:09:26Z",
+    "updated_at": "2025-06-27T06:08:29Z",
+    "body": "As said in the title, latest stable release ignores the description if it's a $ref.",
+    "user": {
+      "login": "albator1932"
+    },
+    "labels": []
+  },
+  {
+    "number": 2201,
+    "title": "[Openapi3.1] Ref inside of Items are not resolved",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2201",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2025-06-11T15:22:31Z",
+    "updated_at": "2025-06-12T12:07:30Z",
+    "body": "I have an `OrderCreate` Schema that holds properties. References inside Items are not resolved.",
+    "user": {
+      "login": "trubat-d"
+    },
+    "labels": []
+  },
+  {
+    "number": 2200,
+    "title": "Unquoted integer `example:` value fails to parse when the spec includes a deeply nested schema elsewhere in spec",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2200",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-06-09T09:13:37Z",
+    "updated_at": "2025-06-09T09:13:37Z",
+    "body": "Unquoted integer example value fails to parse when the spec includes a deeply nested schema elsewhere.",
+    "user": {
+      "login": "leeturner"
+    },
+    "labels": []
+  },
+  {
+    "number": 2199,
+    "title": "Typo on main page",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2199",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-06-08T16:10:29Z",
+    "updated_at": "2025-06-08T16:10:29Z",
+    "body": "In Dealing with Let's Encrypt, \"may not be sufficient on it's own\", remove the apostrophe so it is instead \"may not be sufficient on its own\".",
+    "user": {
+      "login": "jimshowalter"
+    },
+    "labels": []
+  },
+  {
+    "number": 2197,
+    "title": "Default server URL \"/\" is added automatically when parsing OpenAPI 3 spec",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2197",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-05-29T08:33:51Z",
+    "updated_at": "2025-05-30T07:02:28Z",
+    "body": "When I parse an OpenAPI 3.0 document, a default server with URL \"/\" is automatically added if no servers are defined.",
+    "user": {
+      "login": "Talakafafi"
+    },
+    "labels": []
+  },
+  {
+    "number": 2158,
+    "title": "swagger parsers depends on NOT jakarta packages",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2158",
+    "state": "open",
+    "comments": 2,
+    "created_at": "2025-02-19T12:34:59Z",
+    "updated_at": "2025-05-28T07:26:10Z",
+    "body": "After including swagger-parser as dependency I have runtime exception: java.lang.ClassNotFoundException: javax.xml.bind.annotation.XmlElement",
+    "user": {
+      "login": "SashaVolushkova"
+    },
+    "labels": [
+      "Bug",
+      "P2"
+    ]
+  },
+  {
+    "number": 2193,
+    "title": "Circular dependencies are not resolved properly with resolveFully",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2193",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-05-22T12:11:52Z",
+    "updated_at": "2025-05-22T12:12:15Z",
+    "body": "OpenAPIV3Parser does not seem to work as one would expect when openapi components have circular dependencies.",
+    "user": {
+      "login": "NurmukhametovAlexey"
+    },
+    "labels": []
+  },
+  {
+    "number": 2192,
+    "title": "Version 2.1.28 seems to break oneOf",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2192",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-05-19T13:06:34Z",
+    "updated_at": "2025-05-19T13:06:34Z",
+    "body": "We have a Kotlin interface which gets implemented in multiple data classes. In version 2.1.28 the type got stripped.",
+    "user": {
+      "login": "stratenh"
+    },
+    "labels": []
+  },
+  {
+    "number": 2065,
+    "title": "Unable to Parse Referenced ArraySchema in Swagger File",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2065",
+    "state": "open",
+    "comments": 2,
+    "created_at": "2024-03-20T19:23:10Z",
+    "updated_at": "2025-05-16T07:35:52Z",
+    "body": "The current swagger-parser fails to parse the referenced ArraySchema in the provided Swagger YAML file.",
+    "user": {
+      "login": "rialkush"
+    },
+    "labels": []
+  },
+  {
+    "number": 2178,
+    "title": "reference name is not displayed to $ref in local file",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2178",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-05-06T07:10:05Z",
+    "updated_at": "2025-05-06T07:10:05Z",
+    "body": "I want swagger to display reference name for all linked schemas in UI.",
+    "user": {
+      "login": "SergeyDorozhko"
+    },
+    "labels": []
+  },
+  {
+    "number": 2168,
+    "title": "[OpenAPI v3]Not parsed the extensions in schema that with $ref field",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2168",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-03-27T13:51:26Z",
+    "updated_at": "2025-03-27T13:51:54Z",
+    "body": "In the parsing of schema, it is just processed the `$ref` field and return the schema Object and without processing the extension part.",
+    "user": {
+      "login": "turtle11311"
+    },
+    "labels": []
+  },
+  {
+    "number": 2160,
+    "title": "ResolveFully doesn't resolve request body",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2160",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-03-12T18:34:12Z",
+    "updated_at": "2025-03-12T18:35:31Z",
+    "body": "The references in my requestBody is still something like a reference, they're not getting resolved properly.",
+    "user": {
+      "login": "srija-fiserv"
+    },
+    "labels": []
+  },
+  {
+    "number": 1751,
+    "title": "java.lang.StackOverflowError during parsing recursive schemas/components in ResolverFully.resolveSchema()",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1751",
+    "state": "open",
+    "comments": 5,
+    "created_at": "2022-06-15T17:31:37Z",
+    "updated_at": "2025-03-11T09:02:03Z",
+    "body": "Hello, OWASP ZAP fails to import some OAS that contain recursive schema.",
+    "user": {
+      "login": "cedricbu"
+    },
+    "labels": []
+  },
+  {
+    "number": 2159,
+    "title": "openapi 3.1: Illegal character in fragment when path reference contains paramneters",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2159",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-03-07T10:28:09Z",
+    "updated_at": "2025-03-07T10:28:09Z",
+    "body": "Using `openapi-generator-maven-plugin` 7.12.0 and `swagger-parser` 2.1.25, path references with parameters cause URI syntax exception.",
+    "user": {
+      "login": "richard-melvin"
+    },
+    "labels": []
+  },
+  {
+    "number": 1970,
+    "title": "3.1.0 spec parsing, $defs information omitted",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/1970",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2023-08-31T22:50:45Z",
+    "updated_at": "2025-03-03T07:43:46Z",
+    "body": "3.1.0 spec parsing, $defs information omitted",
+    "user": {
+      "login": "spacether"
+    },
+    "labels": []
+  },
+  {
+    "number": 2102,
+    "title": "Parameters with the same name but different locations are incorrectly returned when using JSON references ($ref) with openapi 3.0.x.",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2102",
+    "state": "open",
+    "comments": 1,
+    "created_at": "2024-05-16T06:44:39Z",
+    "updated_at": "2025-02-22T11:52:12Z",
+    "body": "Multiple parameters with the same name but different locations are wrongly handled by the parser if the parameters are described using JSON references.",
+    "user": {
+      "login": "AdrianVasiliu"
+    },
+    "labels": []
+  },
+  {
+    "number": 2147,
+    "title": "cannot deserialize from Object value (Grallvm native executable)",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2147",
+    "state": "open",
+    "comments": 4,
+    "created_at": "2024-12-29T10:10:02Z",
+    "updated_at": "2025-01-31T10:23:29Z",
+    "body": "Using plain java graalvm native executables cause multiple issues. The parser mostly returns empty OpenAPI objects without any error.",
+    "user": {
+      "login": "YunaBraska"
+    },
+    "labels": []
+  },
+  {
+    "number": 2149,
+    "title": "OpenAPIV3Parser.resolve() should handle all errors in the entire spec",
+    "html_url": "https://github.com/swagger-api/swagger-parser/issues/2149",
+    "state": "open",
+    "comments": 0,
+    "created_at": "2025-01-09T16:07:14Z",
+    "updated_at": "2025-01-09T16:15:44Z",
+    "body": "Currently when any error occurs within resolve(), the exception is thrown and caught by try-catch. It would be perfect to collect all such errors.",
+    "user": {
+      "login": "verve111"
+    },
+    "labels": []
+  }
+]

@@ -1,0 +1,155 @@
+[
+  {
+    "number": 2105,
+    "title": "Normalize relative ref paths to avoid duplicating schemas",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2105",
+    "created_at": "2024-06-17T15:07:04Z",
+    "updated_at": "2025-11-19T17:51:15Z",
+    "comments": 3,
+    "user": {
+      "login": "ctreatma"
+    },
+    "labels": [
+      "Bug",
+      "P2"
+    ],
+    "body": "Currently, if an OpenAPI spec contains multiple relative refs to the same file, but those refs are located in different files and use different relative paths to reach the one file, swagger-parser will create a separate, duplicate schema for each relative path rather than reusing the same schema across all equivalent paths.\n\nFor example, given a spec with the following refs:\n\n- In spec root directory, `$ref: ./components/schemas/Thing.yaml`\n- In components/paths subdirectory, `$ref: ../../components/schemas/Thing.yaml`\n\nThe parser will produce a `Thing` and a `Thing_1` schema object instead of reusing `Thing` for the second, equivalent reference.\n\nThis updates the ref processor to resolve relative paths before processing relative refs in order to produce a single `Thing` schema that is reused for all equivalent references.\n\nFixes #2016, fixes #1518, and maybe others."
+  },
+  {
+    "number": 2243,
+    "title": "Issue #2242: Enable BigDecimal for float deserialization",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2243",
+    "created_at": "2025-11-03T16:43:54Z",
+    "updated_at": "2025-11-03T16:44:34Z",
+    "comments": 0,
+    "user": {
+      "login": "califlower"
+    },
+    "labels": [],
+    "body": "# Pull Request\n\nThank you for contributing to **swagger-parser**!\n\nPlease fill out the following checklist to help us review your PR efficiently.\n\n---\n\n## Description\n\nfixes #2242"
+  },
+  {
+    "number": 2245,
+    "title": "fix: nested example references not resolved when path parameter in reference chain",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2245",
+    "created_at": "2025-11-05T13:11:19Z",
+    "updated_at": "2026-01-24T16:14:46Z",
+    "comments": 0,
+    "user": {
+      "login": "jhemelhof"
+    },
+    "labels": [],
+    "body": "# Pull Request\n\n## Description\n\nFixes: #2244 \n\nThe second parameter of `processRefExample` is the \"externalFile\" but current implementation provided the reference, which isn't correct. That behavior is now fixed with this PR and aligns with what's done for `processRefSchemaObject`."
+  },
+  {
+    "number": 2247,
+    "title": "fix: resolve nested example references in parameter definitions",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2247",
+    "created_at": "2025-11-08T18:25:56Z",
+    "updated_at": "2026-01-24T16:15:24Z",
+    "comments": 0,
+    "user": {
+      "login": "jhemelhof"
+    },
+    "labels": [],
+    "body": "# Pull Request\n\n## Description\n\n\n\nParameter example references weren't updated triggering exceptions when attempting to resolve them later on.\n\nFixes: #2229"
+  },
+  {
+    "number": 2254,
+    "title": "Issue #2216 and #2211: Parameter inline with setResolve",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2254",
+    "created_at": "2025-12-01T17:10:17Z",
+    "updated_at": "2026-01-12T14:52:33Z",
+    "comments": 1,
+    "user": {
+      "login": "nicolaideffremo"
+    },
+    "labels": [],
+    "body": "# Pull Request\n\nThank you for contributing to **swagger-parser**!\n\nPlease fill out the following checklist to help us review your PR efficiently.\n\n---\n\n## Description\n\nAs described in the linked issues parameters with defined `$ref` are replaced bit the definition when parsed with `setResolve(true)`. \n\nFixes: #2216 and #2211"
+  },
+  {
+    "number": 2263,
+    "title": "Issue #2157 Resolve additionalProperties inside ComposedSchema correctly",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2263",
+    "created_at": "2026-01-09T12:00:13Z",
+    "updated_at": "2026-01-09T12:00:13Z",
+    "comments": 0,
+    "user": {
+      "login": "majchinmesh"
+    },
+    "labels": [],
+    "body": "# Pull Request\n\nThank you for contributing to **swagger-parser**!\n\nThis PR addresses the issue #2157. It resolves a problem related to the handling of `additionalProperties` in OpenAPI schemas that combine multiple schemas using `allOf`."
+  },
+  {
+    "number": 2267,
+    "title": "Fix XXE vulnerability by upgrading transitive Rhino dependency to 1.7.14",
+    "state": "open",
+    "draft": true,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2267",
+    "created_at": "2026-02-02T10:47:13Z",
+    "updated_at": "2026-02-02T10:56:16Z",
+    "comments": 0,
+    "user": {
+      "login": "Copilot"
+    },
+    "labels": [],
+    "body": "# Pull Request\n\n**Problem**: Transitive dependency on Mozilla Rhino 1.7.7.2 exposes XXE vulnerability (BDSA-2018-5289) via `toXml` function."
+  },
+  {
+    "number": 2272,
+    "title": "fix: external schema resolution in OAS 3.1 files",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2272",
+    "created_at": "2026-02-15T18:00:18Z",
+    "updated_at": "2026-02-15T20:15:09Z",
+    "comments": 0,
+    "user": {
+      "login": "dennisameling"
+    },
+    "labels": [],
+    "body": "## Description\n\nWhen parsing OpenAPI 3.1 specifications with external schema references (e.g., `$ref: \"./schemas/health.yaml\"`), the parser resolves the schemas correctly but does not add them to `components.schemas`."
+  },
+  {
+    "number": 2276,
+    "title": "fix(converter): keep x-nullable in shared $ref responses",
+    "state": "open",
+    "draft": false,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2276",
+    "created_at": "2026-02-20T14:47:53Z",
+    "updated_at": "2026-02-20T14:48:22Z",
+    "comments": 0,
+    "user": {
+      "login": "esaezgil"
+    },
+    "labels": [],
+    "body": "## Description\n\n- Fixes `x-nullable` vendor extension being lost when multiple endpoints share the same response via `$ref` during Swagger 2.0 to OpenAPI 3.0 conversion"
+  },
+  {
+    "number": 2277,
+    "title": "Add issue and PR data collection with CSV export",
+    "state": "open",
+    "draft": true,
+    "html_url": "https://github.com/swagger-api/swagger-parser/pull/2277",
+    "created_at": "2026-02-24T07:33:33Z",
+    "updated_at": "2026-02-24T08:12:30Z",
+    "comments": 0,
+    "user": {
+      "login": "Copilot"
+    },
+    "labels": [],
+    "body": "- [x] Understand the repository structure and existing tools\n- [x] Fetch open issues created/updated after 2025-01-01 using GitHub API\n- [x] Fetch open PRs created/updated after 2025-01-01 using GitHub API (initially incomplete)"
+  }
+]
