@@ -1560,5 +1560,39 @@ public class OpenAPIResolverTest {
                 { false }
         };
     }
-    
+
+    @Test
+    public void testIssue2292() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("/issue-2292.yaml", auths, options).getOpenAPI();
+
+        // Verify parameter content examples are resolved
+        Parameter filterParam = openAPI.getPaths().get("/users").getPost().getParameters().get(0);
+        Map<String, Example> paramExamples = filterParam.getContent().get("application/json").getExamples();
+        Example resolvedFilterExample = paramExamples.get("simpleFilter");
+        assertNotNull(resolvedFilterExample);
+        assertNull(resolvedFilterExample.get$ref());
+        assertEquals("A sample filter", resolvedFilterExample.getSummary());
+
+        // Verify requestBody content examples are resolved
+        RequestBody requestBody = openAPI.getPaths().get("/users").getPost().getRequestBody();
+        Map<String, Example> requestBodyExamples = requestBody.getContent().get("application/json").getExamples();
+        Example resolvedUserExample = requestBodyExamples.get("defaultUser");
+        assertNotNull(resolvedUserExample);
+        assertNull(resolvedUserExample.get$ref());
+        assertEquals("A sample user", resolvedUserExample.getSummary());
+
+        // Verify response content examples are resolved
+        ApiResponse response = openAPI.getPaths().get("/users").getPost().getResponses().get("200");
+        Map<String, Example> responseExamples = response.getContent().get("application/json").getExamples();
+        Example resolvedResponseExample = responseExamples.get("successResponse");
+        assertNotNull(resolvedResponseExample);
+        assertNull(resolvedResponseExample.get$ref());
+        assertEquals("A sample user", resolvedResponseExample.getSummary());
+    }
+
+
 }
