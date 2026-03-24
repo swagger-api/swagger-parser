@@ -1433,6 +1433,20 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void recursiveResolvingIssue1751() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_1751.yaml", null, parseOptions);
+        try {
+            Json.mapper().writeValueAsString(openAPI);
+        }
+        catch (Exception e) {
+            fail("Recursive loop found");
+        }
+    }
+
+    @Test
     public void recursiveIssue984() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);

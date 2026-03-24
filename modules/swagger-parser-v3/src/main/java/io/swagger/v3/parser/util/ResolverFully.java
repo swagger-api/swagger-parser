@@ -66,7 +66,7 @@ public class ResolverFully {
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
     private Map<String, Link> links;
-    private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
+    private Map<Schema, Schema> resolvedSchemas = new IdentityHashMap<>();
     private Map<String, Callback> callbacks;
 
     public void resolveFully(OpenAPI openAPI) {
@@ -337,6 +337,18 @@ public class ResolverFully {
             return null;
         }
 
+        Schema resolved = resolvedSchemas.get(schema);
+        if (resolved != null) {
+            return resolved;
+        }
+
+        resolved = resolveSchemaImpl(schema);
+        resolvedSchemas.put(schema, resolved);
+        return resolved;
+    }
+
+    private Schema resolveSchemaImpl(Schema schema) {
+
         if(schema.get$ref() != null) {
             String ref= schema.get$ref();
             Schema resolved;
@@ -394,7 +406,7 @@ public class ResolverFully {
                     Schema innerProperty = obj.getProperties().get(propertyName);
                     // reference check
                     if(schema != innerProperty) {
-                        updated.put(propertyName, resolveSchemaProperty(propertyName, innerProperty));
+                        updated.put(propertyName, resolveSchema(innerProperty));
                     }
                 }
                 obj.setProperties(updated);
@@ -499,7 +511,7 @@ public class ResolverFully {
             Map<String, Schema> properties = model.getProperties();
             for (String propertyName : properties.keySet()) {
                 Schema property = (Schema) model.getProperties().get(propertyName);
-                updated.put(propertyName, resolveSchemaProperty(propertyName, property));
+                updated.put(propertyName, resolveSchema(property));
             }
 
             for (String key : updated.keySet()) {
@@ -573,7 +585,7 @@ public class ResolverFully {
             if (resolved.getProperties() != null) {
                 for (String key : properties.keySet()) {
                     Schema prop = (Schema) resolved.getProperties().get(key);
-                    targetSchema.addProperties(key, resolveSchemaProperty(key, prop));
+                    targetSchema.addProperties(key, resolveSchema(prop));
                 }
 
                 if (resolved.getRequired() != null) {
@@ -696,17 +708,6 @@ public class ResolverFully {
             }
             required.addAll(requiredProperties);
             targetSchema.setRequired(required);
-        }
-    }
-
-    private Schema resolveSchemaProperty(String propertyName, Schema innerProperty) {
-        if (resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != innerProperty) {
-            LOGGER.debug("avoiding infinite loop");
-            Schema resolved = resolveSchema(innerProperty);
-            resolvedProperties.put(propertyName, resolved);
-            return resolved;
-        } else {
-            return resolvedProperties.get(propertyName);
         }
     }
 }
