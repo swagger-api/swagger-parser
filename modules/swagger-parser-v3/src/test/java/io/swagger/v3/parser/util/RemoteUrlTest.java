@@ -146,7 +146,7 @@ public class RemoteUrlTest {
     @Test
     public void testConnectionTimeoutEnforced() throws Exception {
         RemoteUrl.ConnectionConfigurator configurator = RemoteUrl.createConnectionConfigurator();
-        URL url = new URL("https://10.255.255.1"); // non-routable IP to simulate timeout
+        URL url = new URL("https://httpbin.org:81/delay/60"); // non-routable IP to simulate timeout
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
         configurator.process(conn);

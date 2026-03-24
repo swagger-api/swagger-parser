@@ -2997,8 +2997,6 @@ public class OpenAPIDeserializer {
             if (defaultObject != null) {
                 schema.setDefault(defaultObject);
             }
-		} else {
-			schema.setDefault(null);
 		}
 
 		Map<String, Object> extensions = getExtensions(node);

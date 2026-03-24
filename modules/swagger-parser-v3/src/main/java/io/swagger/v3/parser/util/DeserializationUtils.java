@@ -79,11 +79,11 @@ public class DeserializationUtils {
         }
 
         public Integer getMaxYamlCodePoints() {
-          return maxYamlCodePoints;
+            return maxYamlCodePoints;
         }
 
         public void setMaxYamlCodePoints(Integer maxYamlCodePoints) {
-          this.maxYamlCodePoints = maxYamlCodePoints;
+            this.maxYamlCodePoints = maxYamlCodePoints;
         }
         
         public Integer getMaxYamlAliasesForCollections() {
@@ -103,7 +103,7 @@ public class DeserializationUtils {
         }
     }
 
-    private static Options options = new Options();
+    private static final Options options = new Options();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeserializationUtils.class);
 
@@ -145,7 +145,6 @@ public class DeserializationUtils {
             addImplicitResolver(Tag.MERGE, MERGE, "<");
             addImplicitResolver(Tag.NULL, NULL, "~nN\0");
             addImplicitResolver(Tag.NULL, EMPTY, null);
-            // addImplicitResolver(Tag.TIMESTAMP, TIMESTAMP, "0123456789");
         }
     }
 
@@ -249,7 +248,7 @@ public class DeserializationUtils {
             return Json.mapper().convertValue(yaml.load(contents), JsonNode.class);
         }
         try {
-            org.yaml.snakeyaml.Yaml yaml = null;
+            org.yaml.snakeyaml.Yaml yaml;
             if (options.isValidateYamlInput()) {
                 yaml = buildSnakeYaml(new CustomSnakeYamlConstructor());
             } else {
@@ -257,7 +256,7 @@ public class DeserializationUtils {
             }
             Object o = yaml.load(contents);
             if (options.isValidateYamlInput()) {
-                boolean res = exceedsLimits(o, null, new Integer(0), new IdentityHashMap<Object, Long>(), deserializationUtilsResult);
+                boolean res = exceedsLimits(o, null, 0, new IdentityHashMap<>(), deserializationUtilsResult);
                 if (res) {
                     LOGGER.warn("Error converting snake-parsed yaml to JsonNode");
                     return getYaml30Mapper().readTree(contents);
@@ -270,8 +269,8 @@ public class DeserializationUtils {
                 //
             }
             return Json.mapper().convertValue(o, JsonNode.class);
-        } catch (Throwable e) {
-            LOGGER.warn("Error snake-parsing yaml content", e);
+        } catch (Exception e) {
+            LOGGER.warn(e.getMessage(), e);
             if (deserializationUtilsResult != null) {
                 deserializationUtilsResult.message(e.getMessage());
             }
@@ -302,8 +301,7 @@ public class DeserializationUtils {
         }
         try {
             LoaderOptions loaderOptions = buildLoaderOptions();
-            org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(constructor, new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new CustomResolver());
-            return yaml;
+            return new org.yaml.snakeyaml.Yaml(constructor, new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new CustomResolver());
         } catch (Exception e) {
             //
             LOGGER.error("error building snakeYaml", e);
@@ -479,8 +477,8 @@ public class DeserializationUtils {
                 throw new SnakeException("StackOverflow safe-checking yaml content (maxDepth " + options.getMaxYamlDepth() + ")", e);
             } catch (DuplicateKeyException e) {
                 throw new SnakeException(e.getProblem().replace("found duplicate key", "Duplicate field"));
-            } catch (Throwable e) {
-                throw new SnakeException("Exception safe-checking yaml content  (maxDepth " + options.getMaxYamlDepth() + ", maxYamlAliasesForCollections " + options.getMaxYamlAliasesForCollections() + ")", e);
+            } catch (Exception e) {
+                throw new SnakeException(e.getMessage() + "; Max code points: " + options.getMaxYamlCodePoints(), e);
             }
         }
     }
