@@ -14,7 +14,7 @@ public class OpenAPIParser {
 
         for(SwaggerParserExtension extension : OpenAPIV3Parser.getExtensions()) {
             output = extension.readLocation(url, auth, options);
-            if(output != null && output.getOpenAPI() != null) {
+            if (output != null && output.getOpenAPI() != null) {
                 return output;
             }
         }
