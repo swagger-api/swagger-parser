@@ -786,9 +786,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
         if (sp instanceof AbstractSerializableParameter) {
             AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
-            if (ap.getDefault() != null) {
-                schema.setDefault(ap.getDefault());
-            }
+            schema.setDefault(ap.getDefault());
         }
         return schema;
     }
@@ -1165,9 +1163,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             if (sp instanceof AbstractSerializableParameter) {
                 AbstractSerializableParameter ap = (AbstractSerializableParameter) sp;
-                if (ap.getDefault() != null) {
-                    schema.setDefault(ap.getDefault());
-                }
+                schema.setDefault(ap.getDefault());
             }
         }
 
