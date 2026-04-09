@@ -16,16 +16,19 @@ public class ReferenceVisitorTest {
     @Test
     public void largeFileShouldBeParsedByJacksonLibraryWhenCodeLimitIsSet() throws Exception {
         System.setProperty("maxYamlCodePoints", "10000000");
-        ReferenceVisitor visitor = new ReferenceVisitor(null, null, null, null);
-        String resourceName = "/issue2059/largeFile.yaml";
-        String content = readResourceAsString(resourceName);
+        try {
+            ReferenceVisitor visitor = new ReferenceVisitor(null, null, null, null);
+            String resourceName = "/issue2059/largeFile.yaml";
+            String content = readResourceAsString(resourceName);
 
-        JsonNode jsonNode = visitor.deserializeIntoTree(content);
+            JsonNode jsonNode = visitor.deserializeIntoTree(content);
 
-        assertNotNull(content);
-        assertFalse(content.isEmpty());
-        assertNotNull(jsonNode);
-        System.clearProperty("maxYamlCodePoints");
+            assertNotNull(content);
+            assertFalse(content.isEmpty());
+            assertNotNull(jsonNode);
+        } finally {
+            System.clearProperty("maxYamlCodePoints");
+        }
     }
 
     @Test

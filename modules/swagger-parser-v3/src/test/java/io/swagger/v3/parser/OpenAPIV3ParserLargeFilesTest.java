@@ -4,7 +4,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertFalse;
@@ -12,7 +12,7 @@ import static org.testng.Assert.assertNotNull;
 
 public class OpenAPIV3ParserLargeFilesTest {
 
-    @BeforeSuite
+    @BeforeClass
     public static void init() {
         System.setProperty("maxYamlCodePoints", "10000000");
     }
