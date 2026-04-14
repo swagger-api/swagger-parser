@@ -37,4 +37,12 @@ public class SwaggerCompatConverterTest {
         BodyParameter bodyParameter = (BodyParameter) swagger2.getPaths().get("/user/createWithArray").getPost().getParameters().get(0);
         assertEquals(((RefProperty)((ArrayModel)bodyParameter.getSchema()).getItems()).get$ref(),"#/definitions/User");
     }
+
+    @Test
+    public void testIssue_1451()throws IOException {
+        SwaggerCompatConverter converter = new SwaggerCompatConverter();
+        Swagger swagger2 = converter.read("specs/v1_2/issue-1451.json");
+        assertNotNull(swagger2);
+        assertEquals(swagger2.getInfo().getContact().getEmail(), "apiteam@swagger.io");
+    }
 }
