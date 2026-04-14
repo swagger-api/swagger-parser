@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Test API
+  title: Test API - additionalProperties schema-object with anyOf
   version: 1.0.0
 paths:
   /test:
@@ -14,14 +14,16 @@ paths:
                 $ref: '#/components/schemas/TestSchema'
 components:
   schemas:
-    ObjectWithAdditionalProperties:
+    Pet:
       type: object
-      additionalProperties: true
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      additionalProperties:
+        type: string
+        minLength: 1
     TestSchema:
-      allOf:
-        - type: object
-          properties:
-            name:
-              type: string
-          additionalProperties: false
-        - $ref: '#/components/schemas/ObjectWithAdditionalProperties'
+      anyOf:
+        - $ref: '#/components/schemas/Pet'
