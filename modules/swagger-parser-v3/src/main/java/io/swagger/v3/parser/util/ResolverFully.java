@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -67,6 +68,7 @@ public class ResolverFully {
     private Map<String, Header> headers;
     private Map<String, Link> links;
     private Map<Schema, Schema> resolvedSchemas = new IdentityHashMap<>();
+    private Set<Schema> schemasInProgress = Collections.newSetFromMap(new IdentityHashMap<>());
     private Map<String, Callback> callbacks;
 
     public void resolveFully(OpenAPI openAPI) {
@@ -336,15 +338,25 @@ public class ResolverFully {
         if (schema == null) {
             return null;
         }
-
-        Schema resolved = resolvedSchemas.get(schema);
-        if (resolved != null) {
-            return resolved;
+        Schema cached = resolvedSchemas.get(schema);
+        if (cached != null) {
+            return cached;
         }
+        if (schemasInProgress.contains(schema)) {
+            return schema;
+        }
+        return resolveAndCache(schema);
+    }
 
-        resolved = resolveSchemaImpl(schema);
-        resolvedSchemas.put(schema, resolved);
-        return resolved;
+    private Schema resolveAndCache(Schema schema) {
+        schemasInProgress.add(schema);
+        try {
+            Schema resolved = resolveSchemaImpl(schema);
+            resolvedSchemas.put(schema, resolved);
+            return resolved;
+        } finally {
+            schemasInProgress.remove(schema);
+        }
     }
 
     private Schema resolveSchemaImpl(Schema schema) {
