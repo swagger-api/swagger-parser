@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info:
+  title: Duplicate Schema Repro
+  version: 1.0.0
+
+paths:
+  /shared-directly:
+    $ref: "./paths/direct.yaml"
+  /shared-nested:
+    $ref: "./paths/nested.yaml"
+
+components:
+  schemas:
+    SharedModel:
+      $ref: "./schemas/shared-model.yaml"
+    Wrapper:
+      $ref: "./schemas/wrapper.yaml"
+    Leaf:
+      $ref: "./schemas/leaf.yaml"
