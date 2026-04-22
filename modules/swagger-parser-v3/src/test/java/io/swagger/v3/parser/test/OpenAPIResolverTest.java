@@ -1498,6 +1498,66 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void recursiveResolvingIssue1751() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_1751.yaml", null, parseOptions);
+        assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+        assertNotNull(openAPI.getComponents().getSchemas().get("NestedObject"), "NestedObject schema should be present");
+        try {
+            String serialized = Json.mapper().writeValueAsString(openAPI);
+            assertNotNull(serialized, "Serialized output should not be null");
+        }
+        catch (Exception e) {
+            fail("Recursive loop found: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void recursiveResolvingIssue1751MutualRecursion() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_1751_mutual_recursion.yaml", null, parseOptions);
+        assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+        assertNotNull(openAPI.getComponents(), "Components should not be null");
+        assertNotNull(openAPI.getComponents().getSchemas().get("SchemaA"), "SchemaA should be present");
+        assertNotNull(openAPI.getComponents().getSchemas().get("SchemaB"), "SchemaB should be present");
+        assertEquals(openAPI.getComponents().getSchemas().get("SchemaA").getType(), "object", "SchemaA should be object type");
+        assertEquals(openAPI.getComponents().getSchemas().get("SchemaB").getType(), "object", "SchemaB should be object type");
+        try {
+            String serialized = Json.mapper().writeValueAsString(openAPI);
+            assertNotNull(serialized, "Serialized output should not be null");
+        }
+        catch (Exception e) {
+            fail("Recursive loop found: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void recursiveResolvingIssue1751RecursiveArrayItems() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_1751_recursive_array.yaml", null, parseOptions);
+        assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+        Schema treeNode = openAPI.getComponents().getSchemas().get("TreeNode");
+        assertNotNull(treeNode, "TreeNode schema should be present");
+        assertEquals(treeNode.getType(), "object", "TreeNode should be object type");
+        Schema valueProperty = (Schema) treeNode.getProperties().get("value");
+        assertNotNull(valueProperty, "TreeNode should have a value property");
+        assertEquals(valueProperty.getType(), "integer", "value property should be integer type");
+        try {
+            String serialized = Json.mapper().writeValueAsString(openAPI);
+            assertNotNull(serialized, "Serialized output should not be null");
+        }
+        catch (Exception e) {
+            fail("Recursive loop found: " + e.getMessage());
+        }
+    }
+
+    @Test
     public void recursiveIssue984() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);

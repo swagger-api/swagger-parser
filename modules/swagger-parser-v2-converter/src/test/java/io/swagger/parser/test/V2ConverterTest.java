@@ -100,6 +100,7 @@ public class V2ConverterTest {
 
     private static final String ISSUE_1767_YAML = "issue-1767.yaml";
     private static final String ISSUE_1796_YAML = "issue-1796.yaml";
+    private static final String ISSUE_2269_YAML = "issue-2269.yaml";
 
     private static final String API_BATCH_PATH = "/api/batch/";
     private static final String PETS_PATH = "/pets";
@@ -926,6 +927,42 @@ public class V2ConverterTest {
         assertEquals(companiesSchema.getType(), "object");
         assertEquals(companiesSchema.getClass(), ObjectSchema.class);
 
+    }
+
+    @Test
+    public void testIssue2269SharedResponseNullable() {
+        SwaggerConverter converter = new SwaggerConverter();
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        SwaggerParseResult result = converter.readLocation(
+                "src/test/resources/" + ISSUE_2269_YAML, null, parseOptions);
+        assertNotNull(result);
+        OpenAPI oas = result.getOpenAPI();
+        assertNotNull(oas);
+
+        for (String endpoint : Arrays.asList("/endpoint1", "/endpoint2")) {
+            Map<String, Schema> properties = oas.getPaths().get(endpoint).getGet()
+                    .getResponses().get("200").getContent().values().iterator().next()
+                    .getSchema().getProperties();
+            assertNotNull(properties, endpoint + " schema properties must not be null");
+
+            Schema nullableField = properties.get("nullable_field");
+            assertNotNull(nullableField, endpoint + " must have nullable_field");
+            assertEquals(nullableField.getNullable(), Boolean.TRUE,
+                    endpoint + " nullable_field must have nullable: true");
+            assertNotNull(nullableField.getExtensions(), endpoint + " nullable_field must retain extensions");
+            assertEquals(nullableField.getExtensions().get("x-internal-note"), "abc",
+                    endpoint + " nullable_field must retain x-internal-note extension");
+
+            Schema nonNullableField = properties.get("non_nullable_field");
+            assertNotNull(nonNullableField, endpoint + " must have non_nullable_field");
+            assertEquals(nonNullableField.getNullable(), Boolean.FALSE,
+                    endpoint + " non_nullable_field must have nullable: false");
+            assertNotNull(nonNullableField.getExtensions(), endpoint + " non_nullable_field must retain extensions");
+            assertEquals(nonNullableField.getExtensions().get("x-internal-note"), "def",
+                    endpoint + " non_nullable_field must retain x-internal-note extension");
+        }
     }
 
     /**
