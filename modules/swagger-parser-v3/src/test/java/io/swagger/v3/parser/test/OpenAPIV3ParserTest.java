@@ -1355,6 +1355,8 @@ public class OpenAPIV3ParserTest {
         Components components = result.getComponents();
         Parameter refParameter =  components.getParameters().get(refName);
         Assert.assertEquals(refParameter.getName(), "lang");
+        Assert.assertNull(param.getName(), "Inlined name must not appear on a $ref-only parameter");
+        Assert.assertNull(param.getIn(), "Inlined 'in' must not appear on a $ref-only parameter");
     }
 
     @Test
@@ -2543,8 +2545,8 @@ public class OpenAPIV3ParserTest {
         parseOptions.setResolveFully(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("src/test/resources/issue_877.yaml", null, parseOptions);
         Parameter parameter = openAPI.getPaths().get("/adopt").getGet().getParameters().get(0);
-        // FIXME nid 19.11.2025 : ResolveFully should inline here.
         assertNotNull(parameter);
+        assertNull(parameter.get$ref(), "resolveFully=true must inline the parameter, removing $ref");
         assertEquals(parameter.getIn(), "path");
         assertEquals(parameter.getName(), "playerId");
     }
