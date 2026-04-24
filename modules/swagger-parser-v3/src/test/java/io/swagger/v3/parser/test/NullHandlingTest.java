@@ -1,12 +1,10 @@
 package io.swagger.v3.parser.test;
 
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -54,7 +52,7 @@ public class NullHandlingTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, null).getOpenAPI();
         assertNotNull(openAPI);
-        
+
         Schema schema = openAPI.getComponents().getSchemas().get("NoDefaultSchema");
         assertNotNull(schema);
         assertNull(schema.getDefault(), "Default should be null");
@@ -76,7 +74,7 @@ public class NullHandlingTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, null).getOpenAPI();
         assertNotNull(openAPI);
-        
+
 
         Schema schema = openAPI.getComponents().getSchemas().get("NullExampleSchema");
         assertNotNull(schema);
@@ -98,7 +96,7 @@ public class NullHandlingTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, null).getOpenAPI();
         assertNotNull(openAPI);
-        
+
 
         Schema schema = openAPI.getComponents().getSchemas().get("NoExampleSchema");
         assertNotNull(schema);
@@ -120,7 +118,7 @@ public class NullHandlingTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, null).getOpenAPI();
         assertNotNull(openAPI);
-        
+
 
         Example example = openAPI.getComponents().getExamples().get("NullExample");
         assertNotNull(example);
@@ -142,7 +140,7 @@ public class NullHandlingTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, null).getOpenAPI();
         assertNotNull(openAPI);
-        
+
 
         Example example = openAPI.getComponents().getExamples().get("NoValueExample");
         assertNotNull(example);
@@ -204,7 +202,7 @@ public class NullHandlingTest {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         options.setResolveCombinators(true);
-        
+
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, options).getOpenAPI();
         assertNotNull(openAPI);
 
@@ -236,10 +234,10 @@ public class NullHandlingTest {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         options.setResolveCombinators(true);
-        
+
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, options).getOpenAPI();
         assertNotNull(openAPI);
-        
+
         Schema combined = openAPI.getComponents().getSchemas().get("CombinedSchema");
         assertNotNull(combined);
         assertNull(combined.getExample(), "Example should be null");
@@ -314,11 +312,11 @@ public class NullHandlingTest {
 
         java.util.List<io.swagger.v3.oas.models.parameters.Parameter> params = openAPI.getPaths().get("/test").getGet().getParameters();
         assertEquals(params.size(), 2);
-        
+
         Schema nullSchema = params.get(0).getSchema();
         assertNull(nullSchema.getExample());
         assertTrue(nullSchema.getExampleSetFlag(), "Should be explicitly set to null");
-        
+
         Schema noExampleSchema = params.get(1).getSchema();
         assertNull(noExampleSchema.getExample());
         assertFalse(noExampleSchema.getExampleSetFlag(), "Should not be set");
@@ -348,13 +346,13 @@ public class NullHandlingTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, null).getOpenAPI();
         assertNotNull(openAPI);
-        
+
         io.swagger.v3.oas.models.media.Content content = openAPI.getPaths().get("/test").getPost().getRequestBody().getContent();
-        
+
         io.swagger.v3.oas.models.media.MediaType jsonMedia = content.get("application/json");
         assertNull(jsonMedia.getExample());
         assertTrue(jsonMedia.getExampleSetFlag(), "Should be explicitly set to null");
-        
+
         io.swagger.v3.oas.models.media.MediaType xmlMedia = content.get("application/xml");
         assertNull(xmlMedia.getExample());
         assertFalse(xmlMedia.getExampleSetFlag(), "Should not be set");
@@ -383,13 +381,13 @@ public class NullHandlingTest {
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, null).getOpenAPI();
         assertNotNull(openAPI);
-        
+
         java.util.Map<String, io.swagger.v3.oas.models.headers.Header> headers = openAPI.getPaths().get("/test").getGet().getResponses().get("200").getHeaders();
-        
+
         Schema nullSchema = headers.get("X-Null-Example").getSchema();
         assertNull(nullSchema.getExample());
         assertTrue(nullSchema.getExampleSetFlag(), "Should be explicitly set to null");
-        
+
         Schema noExampleSchema = headers.get("X-No-Example").getSchema();
         assertNull(noExampleSchema.getExample());
         assertFalse(noExampleSchema.getExampleSetFlag(), "Should not be set");
@@ -426,7 +424,7 @@ public class NullHandlingTest {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         options.setResolveCombinators(true);
-        
+
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, options).getOpenAPI();
         assertNotNull(openAPI);
 
@@ -461,10 +459,10 @@ public class NullHandlingTest {
         ParseOptions options = new ParseOptions();
         options.setResolveFully(true);
         options.setResolveCombinators(false);
-        
+
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml, null, options).getOpenAPI();
         assertNotNull(openAPI);
-        
+
 
         Schema extended = openAPI.getComponents().getSchemas().get("ExtendedSchema");
         assertNotNull(extended);
