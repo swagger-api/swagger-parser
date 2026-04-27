@@ -130,17 +130,8 @@ public final class ExternalRefProcessor {
                 if (isAnExternalRefFormat(ref)) {
                     if (!ref.equals(RefFormat.URL)) {
                         String schemaFullRef = schema.get$ref();
-                        String parent = (file.contains("/")) ? file.substring(0, file.lastIndexOf('/')) : "";
-                        if (!parent.isEmpty() && !schemaFullRef.startsWith("/")) {
-                            if (schemaFullRef.contains("#/")) {
-                                String[] parts = schemaFullRef.split("#/");
-                                String schemaFullRefFilePart = parts[0];
-                                String schemaFullRefInternalRefPart = parts[1];
-                                schemaFullRef = Paths.get(parent, schemaFullRefFilePart).normalize() + "#/" + schemaFullRefInternalRefPart;
-                            } else {
-                                schemaFullRef = Paths.get(parent, schemaFullRef).normalize().toString();
-                            }
-                            schemaFullRef = FilenameUtils.separatorsToUnix(schemaFullRef);
+                        if (!schemaFullRef.startsWith("/")) {
+                            schemaFullRef = join(file, schemaFullRef);
                         }
                         schema.set$ref(processRefToExternalSchema(schemaFullRef, ref));
                     }

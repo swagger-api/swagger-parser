@@ -1,0 +1,10 @@
+get:
+  tags: [Repro]
+  operationId: getSharedNested
+  responses:
+    '200':
+      description: Path that returns a wrapper whose items are the shared model.
+      content:
+        application/json:
+          schema:
+            $ref: "../api.yaml#/components/schemas/Wrapper"

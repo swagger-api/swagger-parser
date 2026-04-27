@@ -35,6 +35,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEqualsNoOrder;
 
 
 public class OpenAPIV3ParserTest {
@@ -560,6 +561,16 @@ public class OpenAPIV3ParserTest {
         }catch (StackOverflowError stackOverflowError){
             fail();
         }
+    }
+
+    @Test
+    public void testIssue1518NestedExternalRefs() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-1518-nested-ref/api.yaml", null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        Set<String> schemaKeys = openAPI.getComponents().getSchemas().keySet();
+        assertEqualsNoOrder(schemaKeys, Arrays.asList("SharedModel", "shared-model", "Wrapper", "Leaf"));
     }
 
     @Test
@@ -3292,7 +3303,7 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = parseResult.getOpenAPI();
         assertEqualsNoOrder(
             openAPI.getComponents().getSchemas().keySet(),
-            Arrays.asList("ArrayPojo", "Enum1", "Enum1_1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
+            Arrays.asList("ArrayPojo", "Enum1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
                 "TransactionsPatchRequestBody", "additional-properties", "array-pojo", "locale-translation-item",
                 "map-pojo", "set-pojo", "simple-pojo", "translation-item")
         );
