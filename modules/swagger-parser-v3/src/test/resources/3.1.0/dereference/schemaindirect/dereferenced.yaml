@@ -4,14 +4,12 @@ servers:
 components:
   schemas:
     Indirection:
+      $ref: "#/components/schemas/ex3schema"
+    IndirectionSiblings:
+      $ref: "#/components/schemas/ex3schema"
+    ex3schema:
       type: object
       description: desc ex3schema
-      properties:
-        prop1:
-          type: string
-    IndirectionSiblings:
-      type: object
-      description: overwritten desc IndirectionSiblings root
       properties:
         prop1:
           type: string

@@ -1,0 +1,22 @@
+components:
+  schemas:
+    ListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        total:
+          type: integer
+      required:
+        - data
+        - total
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string

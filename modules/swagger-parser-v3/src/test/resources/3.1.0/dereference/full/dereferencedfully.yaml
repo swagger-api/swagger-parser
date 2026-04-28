@@ -55,6 +55,24 @@ components:
       properties:
         prop1:
           type: string
+    ex3schema:
+      type: object
+      description: VALUE ex3schema
+      properties:
+        prop1:
+          type: string
+    Indirection_1:
+      type: object
+      description: VALUE ex3schema
+      properties:
+        prop1:
+          type: string
+    IndirectionSiblings_1:
+      type: object
+      description: IndirectionSiblings root
+      properties:
+        prop1:
+          type: string
   parameters:
     userId:
       name: userId

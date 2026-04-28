@@ -1,0 +1,40 @@
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        customer:
+          $ref: '#/components/schemas/Customer'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+      required:
+        - id
+        - customer
+
+    Customer:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+
+    OrderItem:
+      type: object
+      properties:
+        product:
+          type: string
+        quantity:
+          type: integer

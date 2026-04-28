@@ -12,12 +12,15 @@
             "type" : "string"
           },
           "profile" : {
-            "type" : "object",
-            "properties" : {
-              "avatar" : {
-                "type" : "string"
-              }
-            }
+            "$ref" : "#/components/schemas/ex"
+          }
+        }
+      },
+      "ex" : {
+        "type" : "object",
+        "properties" : {
+          "avatar" : {
+            "type" : "string"
           }
         }
       }
