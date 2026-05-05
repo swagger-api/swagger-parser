@@ -385,7 +385,7 @@
         <commons-lang-version>3.20.0</commons-lang-version>
         <jackson-version>2.21.1</jackson-version>
         <jackson-annotations-version>2.21</jackson-annotations-version>
-        <jackson-databind-version>2.21.1</jackson-databind-version>
+        <jackson-databind-version>2.21.3</jackson-databind-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 </project>
