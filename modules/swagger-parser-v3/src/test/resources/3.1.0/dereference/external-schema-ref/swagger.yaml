@@ -1,0 +1,34 @@
+openapi: 3.1.0
+info:
+  title: Backend
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: '{protocol}://{hostname}:{port}'
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+      hostname:
+        default: localhost
+      port:
+        default: '8080'
+paths:
+  /probe/info:
+    get:
+      tags:
+        - health
+      summary: info of the system
+      operationId: probe.info
+      security: []
+      responses:
+        200:
+          description: system is up and running
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/health.yaml#/ProbeInfo'

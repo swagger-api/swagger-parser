@@ -27,17 +27,25 @@ paths:
 components:
   schemas:
     Indirection:
+      $ref: "#/components/schemas/Indirection_2"
+    IndirectionSiblings:
+      $ref: "#/components/schemas/IndirectionSiblings_2"
+    ex3schema:
       type: object
       description: VALUE ex3schema
       properties:
         prop1:
           type: string
-    IndirectionSiblings:
-      type: object
+    Indirection_1:
+      $ref: "#/components/schemas/ex3schema"
+    Indirection_2:
+      $ref: "#/components/schemas/Indirection_1"
+    IndirectionSiblings_1:
+      $ref: "#/components/schemas/ex3schema"
+      description: IndirectionSiblings ex1schema
+    IndirectionSiblings_2:
+      $ref: "#/components/schemas/IndirectionSiblings_1"
       description: IndirectionSiblings root
-      properties:
-        prop1:
-          type: string
   parameters:
     userId:
       description: userId root

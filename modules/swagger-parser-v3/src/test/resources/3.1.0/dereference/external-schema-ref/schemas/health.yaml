@@ -1,0 +1,9 @@
+ProbeInfo:
+  type: object
+  properties:
+    status:
+      type: string
+    version:
+      type: string
+  required:
+    - status
