@@ -1,6 +1,7 @@
 package io.swagger.v3.parser.test;
 
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
@@ -11,6 +12,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.RemoteUrl;
 import mockit.Expectations;
@@ -288,8 +290,12 @@ public class NetworkReferenceTest {
         assertNotNull(swagger.getComponents().getSchemas().get("Success"));
 
         Parameter param = swagger.getPaths().get("/stuff").getGet().getParameters().get(0);
-        assertEquals(param.getIn(), "query");
-        assertEquals(param.getName(), "skip");
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = result.getOpenAPI().getComponents();
+        Parameter refParam = components.getParameters().get(refName);
+
+        assertEquals(refParam.getIn(), "query");
+        assertEquals(refParam.getName(), "skip");
 
         ApiResponse response = swagger.getPaths().get("/stuff").getGet().getResponses().get("200");
         assertNotNull(response);
