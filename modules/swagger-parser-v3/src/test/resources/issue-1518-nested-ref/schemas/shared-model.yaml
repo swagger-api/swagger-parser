@@ -1,0 +1,9 @@
+type: object
+required:
+  - name
+  - leaf
+properties:
+  name:
+    type: string
+  leaf:
+    $ref: "../api.yaml#/components/schemas/Leaf"
