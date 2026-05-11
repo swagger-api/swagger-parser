@@ -393,7 +393,7 @@ public class InlineModelResolver {
             }
         }
     }
-    
+
     private static String pathBody(String pathname)
     {
       String[] parts = pathname.split("/");
@@ -409,7 +409,7 @@ public class InlineModelResolver {
       body.append("body");
       return body.toString();
     }
-    
+
     private static String normalize(String pathPart)
     {
       return pathPart.replace(".", "_");
@@ -486,7 +486,7 @@ public class InlineModelResolver {
                 Schema model = createModelFromProperty(property, modelName);
                 String existing = matchGenerated(model);
                 if (existing != null) {
-                    propsToUpdate.put(key, new Schema().$ref(existing));
+                    propsToUpdate.put(key, new Schema().$ref(RefType.SCHEMAS.getInternalPrefix()+existing));
                 } else {
                     propsToUpdate.put(key, new Schema().$ref(RefType.SCHEMAS.getInternalPrefix()+modelName));
                     modelsToAdd.put(modelName, model);
@@ -503,9 +503,9 @@ public class InlineModelResolver {
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {
-                            ap.setItems(new Schema().$ref(existing));
+                            ap.setItems(new Schema().$ref(RefType.SCHEMAS.getInternalPrefix() + existing));
                         } else {
-                            ap.setItems(new Schema().$ref(modelName));
+                            ap.setItems(new Schema().$ref(RefType.SCHEMAS.getInternalPrefix() + modelName));
                             addGenerated(modelName, innerModel);
                             openAPI.getComponents().addSchemas(modelName, innerModel);
                         }
@@ -515,9 +515,9 @@ public class InlineModelResolver {
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {
-                            ap.setItems(new Schema().$ref(existing));
+                            ap.setItems(new Schema().$ref(RefType.SCHEMAS.getInternalPrefix()+existing));
                         } else {
-                            ap.setItems(new Schema().$ref(modelName));
+                            ap.setItems(new Schema().$ref(RefType.SCHEMAS.getInternalPrefix()+modelName));
                             addGenerated(modelName, innerModel);
                             openAPI.getComponents().addSchemas(modelName, innerModel);
                         }
@@ -532,9 +532,9 @@ public class InlineModelResolver {
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {
-                            property.setAdditionalProperties(new Schema().$ref(existing));
+                            property.setAdditionalProperties(new Schema().$ref(RefType.SCHEMAS.getInternalPrefix()+existing));
                         } else {
-                            property.setAdditionalProperties(new Schema().$ref(modelName));
+                            property.setAdditionalProperties(new Schema().$ref(RefType.SCHEMAS.getInternalPrefix()+modelName));
                             addGenerated(modelName, innerModel);
                             openAPI.getComponents().addSchemas(modelName, innerModel);
                         }

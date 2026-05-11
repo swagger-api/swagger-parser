@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  version: "4"
+  title: dotted-property-names
+  description: |
+    This API has an object in the schema which has a dot in one of the property names (user.id).
+
+  contact:
+    email: "test.test@smartbear.com"
+paths:
+  /path/to/api:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                string.field:
+                  type: string
+                  description: String field - works with a dot in the name
+                object.field:
+                  type: object
+                  description: Object field - works with a dot in the name
+                  properties:
+                    p1:
+                      type: string
+                array.field:
+                  type: array
+                  description: Array of strings field - works with a dot in the name
+                  items:
+                    type: string
+                nodot:
+                  type: array
+                  description: An array of objects - works WITHOUT a dot in the name
+                  items:
+                    type: object
+                    properties:
+                      q1:
+                        type: string
+                objectarray.field:
+                 type: array
+                 description: An array of objects - works with a dot in the name
+                 items:
+                   type: object
+                   properties:
+                     r1:
+                       type: string
+      responses:
+        '200':
+          description: 'success'
