@@ -911,6 +911,26 @@ public class OpenAPI31Traverser implements Traverser {
             }
         }
 
+        Object defsRaw = resolved.getExtensions() != null ? resolved.getExtensions().get("$defs") : null;
+        if (defsRaw instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> defsMap = (Map<String, Object>) defsRaw;
+            Map<String, Object> resolvedDefs = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> entry : defsMap.entrySet()) {
+                if (entry.getValue() instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> defSchemaRaw = (Map<String, Object>) entry.getValue();
+                    Schema defSchema = Json31.mapper().convertValue(defSchemaRaw, Schema.class);
+                    Schema traversedDef = traverseSchema(defSchema, visitor, inheritedIds);
+                    Schema effectiveDef = traversedDef != null ? traversedDef : defSchema;
+                    resolvedDefs.put(entry.getKey(), Json31.mapper().convertValue(effectiveDef, Map.class));
+                } else {
+                    resolvedDefs.put(entry.getKey(), entry.getValue());
+                }
+            }
+            resolved.addExtension("$defs", resolvedDefs);
+        }
+
 
         // only if this is root and local ref
         if (shouldHandleRootLocalRefs(resolvedNotNull, schema.get$ref(), visitor)) {
@@ -1072,6 +1092,12 @@ public class OpenAPI31Traverser implements Traverser {
         }
         if (source.get$anchor() != null){
             target.set$anchor(source.get$anchor());
+        }
+        if (source.get$dynamicAnchor() != null){
+            target.set$dynamicAnchor(source.get$dynamicAnchor());
+        }
+        if (source.get$dynamicRef() != null){
+            target.set$dynamicRef(source.get$dynamicRef());
         }
         if (source.get$comment() != null){
             target.set$comment(source.get$comment());
