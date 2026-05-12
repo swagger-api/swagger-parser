@@ -653,7 +653,7 @@ public class InlineModelResolverTest {
 
         assertNotNull(bodySchema.getProperties().get("address"));
     }
-    
+
     @Test
     public void resolveInlineRequestBody_maxTwoPathParts() throws Exception {
         OpenAPI openAPI = new OpenAPI();
@@ -692,7 +692,7 @@ public class InlineModelResolverTest {
 
         assertNotNull(bodySchema.getProperties().get("address"));
     }
-    
+
     @Test
     public void resolveInlineRequestBody_stripsDotsFromPath() throws Exception {
         OpenAPI openAPI = new OpenAPI();
@@ -724,8 +724,8 @@ public class InlineModelResolverTest {
 
         Operation getOperation = openAPI.getPaths().get("/api/Cloud.Greet.Hello").getGet();
         RequestBody body = getOperation.getRequestBody();
-        assertEquals("use dot as common word separator: as it occurs frequently on OData services", 
-            "#/components/schemas/ApiCloudGreetHelloBody", 
+        assertEquals("use dot as common word separator: as it occurs frequently on OData services",
+            "#/components/schemas/ApiCloudGreetHelloBody",
             body.getContent().get("*/*").getSchema().get$ref());
 
         Schema bodySchema = openAPI.getComponents().getSchemas().get("ApiCloudGreetHelloBody");
@@ -1509,4 +1509,5 @@ public class InlineModelResolverTest {
         assertEquals(userAddress.getWriteOnly(), Boolean.FALSE);
 
     }
+
 }

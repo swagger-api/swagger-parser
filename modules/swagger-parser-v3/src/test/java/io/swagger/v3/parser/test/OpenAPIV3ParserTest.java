@@ -40,6 +40,58 @@ import static org.testng.Assert.*;
 public class OpenAPIV3ParserTest {
     List<AuthorizationValue> auths = new ArrayList<>();
 
+    @Test
+    public void testFlattenOptionOnDottedPropertyNames() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setFlatten(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("dotted-property-names.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertNotNull(openAPI);
+
+        List<String> messages = parseResult.getMessages();
+        if (messages != null) {
+            for (String message : messages) {
+                assertFalse(message.contains("Could not resolve reference"),
+                        "Unexpected resolver error: " + message);
+            }
+        }
+
+        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+        assertNotNull(schemas);
+        assertNotNull(schemas.get("pathtoapi_object.field"), "object.field inline object must be extracted");
+        assertNotNull(schemas.get("pathtoapi_nodot"),        "nodot items object must be extracted");
+        assertNotNull(schemas.get("pathtoapi_objectarray.field"), "objectarray.field items object must be extracted");
+
+        Schema bodySchema = schemas.get("to_api_body");
+        assertNotNull(bodySchema, "request body schema must be extracted");
+
+        // string.field — plain string property, must remain inline (no $ref, no extraction)
+        Schema stringField = (Schema) bodySchema.getProperties().get("string.field");
+        assertNotNull(stringField, "string.field must be present in the body schema");
+        assertNull(stringField.get$ref(), "string.field must not be replaced with a $ref");
+        assertEquals(stringField.getType(), "string", "string.field must remain a string type");
+
+        // object.field — inline object replaced by a $ref
+        String objectFieldRef = ((Schema) bodySchema.getProperties().get("object.field")).get$ref();
+        assertNotNull(objectFieldRef, "object.field must have a $ref");
+        assertTrue(objectFieldRef.startsWith("#/components/schemas/"),
+                "object.field $ref must be a valid JSON Pointer, was: " + objectFieldRef);
+
+        // nodot — array of objects without a dot: items $ref must be valid
+        String nodotRef = ((ArraySchema) bodySchema.getProperties().get("nodot")).getItems().get$ref();
+        assertNotNull(nodotRef, "nodot items must have a $ref");
+        assertTrue(nodotRef.startsWith("#/components/schemas/"),
+                "nodot items $ref must be a valid JSON Pointer, was: " + nodotRef);
+
+        // objectarray.field — array of objects WITH a dot: items $ref must also be valid
+        String dottedRef = ((ArraySchema) bodySchema.getProperties().get("objectarray.field")).getItems().get$ref();
+        assertNotNull(dottedRef, "objectarray.field items must have a $ref");
+        assertTrue(dottedRef.startsWith("#/components/schemas/"),
+                "objectarray.field items $ref must be a valid JSON Pointer, was: " + dottedRef);
+    }
+
     @Test(description = "Issue 2223: reading 3.1 spec from Windows file path location produces URISyntaxException" )
     public void testWindowsFilePathRead() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
