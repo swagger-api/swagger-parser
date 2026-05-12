@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info:
+  title: $id with $ref
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Template:
+      type: object
+      properties:
+        value:
+          type: string
+    Concrete:
+      $id: "https://example.com/schemas/Concrete"
+      $ref: "#/components/schemas/Template"
