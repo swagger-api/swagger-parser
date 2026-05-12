@@ -3310,6 +3310,20 @@ public class OpenAPIV3ParserTest {
         assertEquals(openAPI.getComponents().getSchemas().get("PetCreate").getProperties().size(), 2);
     }
 
+    @Test(description = "should resolve nested referenced examples even when parent reference contains path parameter")
+    public void testIssue2244() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("issue-2244/openapi.yaml", null, options);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        assertNotNull(openAPI.getComponents().getExamples(), "should have resolved the component examples");
+        Set<String> exampleNames = new HashSet<>();
+        exampleNames.add("ReproducerExample");
+        assertEquals(openAPI.getComponents().getExamples().keySet(), exampleNames);
+    }
+
     @Test(description = "responses should be inline")
     public void testFullyResolveResponses() {
         ParseOptions options = new ParseOptions();
