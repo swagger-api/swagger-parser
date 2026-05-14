@@ -794,6 +794,9 @@ public class OpenAPI31Traverser implements Traverser {
                     resolvedURI = ReferenceUtils.toBaseURI(resolvedURI);
                 }
                 context.getIdsCache().put(resolvedURI, Json31.pretty(schema));
+                if (!visitor.reference.getReferenceSet().containsKey(resolvedURI)) {
+                    visitor.reference.getReferenceSet().put(resolvedURI, visitor.reference);
+                }
             } catch (Exception e) {
                //
             }
@@ -919,6 +922,9 @@ public class OpenAPI31Traverser implements Traverser {
             visitedMap.put(schema, deepcopy(schema, Schema.class));
             visiting.remove(schema);
             return handleRootLocalRefs(schema.get$ref(), resolved, context.getOpenApi().getComponents().getSchemas());
+        }
+        if (resolvedNotNull && schema.getProperties() != null && !schema.getProperties().isEmpty()) {
+            traverseSchemaMap(schema.getProperties(), visitor, inheritedIds);
         }
         // merge ALL STUFF
         mergeSchemas(schema, resolved);
