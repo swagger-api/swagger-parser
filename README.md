@@ -165,7 +165,7 @@ working inside a firewall or really know what you're doing, well, there's your r
 
 #### Dealing with Let's Encrypt
 Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_ by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
-JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
+JVM.  Also note that 1.8u101 may _not_ be sufficient on its own.  Some users have reported that certain operating systems are 
 not accepting Let's Encrypt signed certificates.
 
 Your options include:
