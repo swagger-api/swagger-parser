@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -110,17 +111,25 @@ public class ResolverCache {
 
     }
 
+    private <T> T loadSchemaForInternalRef(String ref, Class<T> expectedType) {
+        Object loadedRef = loadInternalRef(ref);
+
+        try{
+            return expectedType.cast(loadedRef);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    private boolean fileIsRootPath(Path file) {
+        return this.rootPath != null && file.normalize().equals(Paths.get(this.rootPath).toAbsolutePath().normalize());
+    }
+
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
         if (refFormat == RefFormat.INTERNAL) {
             //we don't need to go get anything for internal refs
-            Object loadedRef = loadInternalRef(ref);
-
-            try{
-                return expectedType.cast(loadedRef);
-            }
-            catch (Exception e) {
-                return null;
-            }
+            return loadSchemaForInternalRef(ref, expectedType);
         }
 
         final String[] refParts = ref.split("#/");
@@ -131,6 +140,12 @@ public class ResolverCache {
 
         final String file = refParts[0];
         final String definitionPath = refParts.length == 2 ? refParts[1] : null;
+
+        if (this.parentDirectory != null && fileIsRootPath(this.parentDirectory.resolve(file))) {
+            // If the file part of this external ref refers to the same file as the root path, we can treat it like an
+            // internal ref.
+            return loadSchemaForInternalRef("#/" + definitionPath, expectedType);
+        }
 
         //we might have already resolved this ref, so check the resolutionCache
         Object previouslyResolvedEntity = resolutionCache.get(ref);
