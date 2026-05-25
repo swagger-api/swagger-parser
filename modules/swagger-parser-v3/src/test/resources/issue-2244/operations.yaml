@@ -1,0 +1,16 @@
+openapi: 3.0.3
+
+paths:
+  /reproducers/{id}:
+    post:
+      description: Reproducer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "components.yaml#/components/schemas/ReproducerObject"
+              examples:
+                normal:
+                  $ref: "components.yaml#/components/examples/ReproducerExample"
