@@ -1,0 +1,15 @@
+openapi: 3.0.0
+
+components:
+  parameters:
+    testHeader:
+      name: testHeader
+      in: header
+      schema:
+        type: string
+
+    anotherHeader:
+      name: testHeader
+      in: header
+      schema:
+        type: string
