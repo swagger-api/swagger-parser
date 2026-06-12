@@ -1,0 +1,10 @@
+get:
+  tags: [Repro]
+  operationId: getSharedDirectly
+  responses:
+    '200':
+      description: Path that returns the shared model directly.
+      content:
+        application/json:
+          schema:
+            $ref: "../api.yaml#/components/schemas/SharedModel"
