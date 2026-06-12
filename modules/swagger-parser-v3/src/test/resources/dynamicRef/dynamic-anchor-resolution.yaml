@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: $dynamicAnchor preservation
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Node:
+      $id: "https://example.com/schemas/Node"
+      type: object
+      properties:
+        name:
+          type: string
+        children:
+          type: array
+          items:
+            $dynamicRef: "#node"
+      $defs:
+        node:
+          $dynamicAnchor: node
