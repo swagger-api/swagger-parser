@@ -4020,7 +4020,7 @@ public class OpenAPIDeserializer {
 				}
 			}
 
-		} else {
+		} else if (result.isInferSchemaType()) {
 			// may have an enum where type can be inferred
 			JsonNode enumNode = node.get("enum");
 			if (enumNode != null && enumNode.isArray()) {
