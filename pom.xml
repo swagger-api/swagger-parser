@@ -379,7 +379,7 @@
         <swagger-core-v2-version>1.6.16</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>7.11.0</testng-version>
-        <jmockit-version>1.49</jmockit-version>
+        <jmockit-version>1.50</jmockit-version>
         <wiremock-version>2.35.2</wiremock-version>
         <surefire-version>3.5.5</surefire-version>
         <commons-lang-version>3.20.0</commons-lang-version>
