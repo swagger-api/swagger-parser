@@ -28,6 +28,12 @@ public class ReferenceVisitorTest {
         System.clearProperty("maxYamlCodePoints");
     }
 
+    @Test(expectedExceptions = YAMLException.class)
+    public void unsafeYamlTagShouldBeRejected() throws Exception {
+        ReferenceVisitor visitor = new ReferenceVisitor(null, null, null, null);
+        visitor.deserializeIntoTree("!!javax.script.ScriptEngineManager [!!java.net.URLClassLoader [[]]]");
+    }
+
     @Test
     public void largeFileShouldNotBeParsedByJacksonLibraryWhenCodeLimitIsNotSet() throws Exception {
         ReferenceVisitor visitor = new ReferenceVisitor(null, null, null, null);
