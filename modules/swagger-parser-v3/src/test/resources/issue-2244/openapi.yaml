@@ -1,0 +1,10 @@
+openapi: 3.0.3
+
+info:
+  title: Reproducer
+  description: Reproducer for the issue
+  version: 1.0.0
+
+paths:
+  /reproducers/{id}:
+    $ref: "operations.yaml#/paths/~1reproducers~1{id}"
