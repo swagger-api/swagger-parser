@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -232,11 +233,16 @@ public class ReferenceVisitor extends AbstractVisitor {
 
     public Schema resolveSchemaRef(Schema visiting, String ref, List<String> inheritedIds){
         try {
-            String baseURI = this.reference.getUri();
-            for (String id: inheritedIds) {
-                String urlWithoutHash = ReferenceUtils.toBaseURI(id);
-                baseURI = ReferenceUtils.resolve(urlWithoutHash, baseURI);
-                baseURI = ReferenceUtils.toBaseURI(baseURI);
+            String baseURI;
+            if (ref.startsWith("#/components/") || ref.startsWith("#/definitions/")) {
+                baseURI = this.reference.getUri();
+            } else {
+                baseURI = this.reference.getUri();
+                for (String id : inheritedIds) {
+                    String urlWithoutHash = ReferenceUtils.toBaseURI(id);
+                    baseURI = ReferenceUtils.resolve(urlWithoutHash, baseURI);
+                    baseURI = ReferenceUtils.toBaseURI(baseURI);
+                }
             }
             baseURI = ReferenceUtils.resolve(ref, baseURI);
             baseURI = ReferenceUtils.toBaseURI(baseURI);
@@ -272,8 +278,10 @@ public class ReferenceVisitor extends AbstractVisitor {
             if (isAnchor) {
                 resolved.$anchor(null);
             }
+            boolean isOpenApiDocumentRef = ref.startsWith("#/components/") || ref.startsWith("#/definitions/");
+            List<String> traversalIds = isOpenApiDocumentRef ? new ArrayList<>() : inheritedIds;
             ReferenceVisitor visitor = new ReferenceVisitor(referenceObject, openAPITraverser, this.visited, this.visitedMap, context);
-            return openAPITraverser.traverseSchema(resolved, visitor, inheritedIds);
+            return openAPITraverser.traverseSchema(resolved, visitor, traversalIds);
         } catch (Exception e) {
             LOGGER.error("Error resolving schema " + ref, e);
             this.reference.getMessages().add(e.getMessage());
@@ -285,6 +293,10 @@ public class ReferenceVisitor extends AbstractVisitor {
         if(root.isObject()){
             JsonNode anchorNode = root.get("$anchor");
             if (anchorNode != null && anchorNode.isValueNode() && anchor.equals(anchorNode.asText())) {
+                return root;
+            }
+            JsonNode dynamicAnchorNode = root.get("$dynamicAnchor");
+            if (dynamicAnchorNode != null && dynamicAnchorNode.isValueNode() && anchor.equals(dynamicAnchorNode.asText())) {
                 return root;
             }
             Iterator<String> fieldNames = root.fieldNames();

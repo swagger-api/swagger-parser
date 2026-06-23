@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info:
+  title: $id with $ref and nested document ref
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Other:
+      type: string
+      format: date
+    Template:
+      $ref: "#/components/schemas/Other"
+    Concrete:
+      $id: "https://example.com/schemas/Concrete"
+      $ref: "#/components/schemas/Template"
