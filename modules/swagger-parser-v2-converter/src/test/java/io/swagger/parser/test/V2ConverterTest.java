@@ -737,6 +737,45 @@ public class V2ConverterTest {
         assertNotNull(result.getMessages());
     }
 
+    @Test(description = "OpenAPI v2 converter - empty property names report validation messages")
+    public void testEmptyPropertyNameHasMessage() {
+        String swaggerAsString = "{\n" +
+                "  \"swagger\": \"2.0\",\n" +
+                "  \"info\": {\n" +
+                "    \"title\": \"info_title\",\n" +
+                "    \"version\": \"0/0\"\n" +
+                "  },\n" +
+                "  \"paths\": {\n" +
+                "    \"/path\": {\n" +
+                "      \"get\": {\n" +
+                "        \"responses\": {\n" +
+                "          \"200\": {\n" +
+                "            \"description\": \"..\",\n" +
+                "            \"schema\": {\n" +
+                "              \"type\": \"object\",\n" +
+                "              \"properties\": {\n" +
+                "                \"AA\": {\n" +
+                "                  \"type\": \"string\"\n" +
+                "                },\n" +
+                "                \"\": {\n" +
+                "                  \"type\": \"number\"\n" +
+                "                }\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        SwaggerParseResult result = new SwaggerConverter().readContents(swaggerAsString, null, null);
+
+        assertNotNull(result.getMessages());
+        assertTrue(result.getMessages().contains(
+                "attribute paths.'/path'(get).responses.200.schema.properties contains an empty property name"));
+    }
+
 
     @Test(description = "OpenAPI v2 converter - Migrate minLength, maxLength and pattern of String property")
     public void testIssue786() throws Exception {

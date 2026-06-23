@@ -153,6 +153,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
         SwaggerInventory inventory = new SwaggerInventory().process(parse.getSwagger());
 
         Swagger swagger = parse.getSwagger();
+        addEmptyPropertyNameMessages(swagger, output);
 
         if (swagger.getVendorExtensions() != null) {
             openAPI.setExtensions(convert(swagger.getVendorExtensions()));
@@ -663,6 +664,135 @@ public class SwaggerConverter implements SwaggerParserExtension {
             }
         }
         return result;
+    }
+
+    private void addEmptyPropertyNameMessages(Swagger swagger, SwaggerParseResult output) {
+        if (swagger.getDefinitions() != null) {
+            swagger.getDefinitions().forEach((name, model) ->
+                    addEmptyPropertyNameMessages("definitions." + name, model, output));
+        }
+
+        if (swagger.getPaths() != null) {
+            swagger.getPaths().forEach((pathname, path) -> {
+                if (path == null) {
+                    return;
+                }
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'.parameters", path.getParameters(), output);
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'(get)", path.getGet(), output);
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'(put)", path.getPut(), output);
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'(post)", path.getPost(), output);
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'(delete)", path.getDelete(), output);
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'(options)", path.getOptions(), output);
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'(head)", path.getHead(), output);
+                addEmptyPropertyNameMessages("paths.'" + pathname + "'(patch)", path.getPatch(), output);
+            });
+        }
+    }
+
+    private void addEmptyPropertyNameMessages(String location, io.swagger.models.Operation operation,
+                                              SwaggerParseResult output) {
+        if (operation == null) {
+            return;
+        }
+        addEmptyPropertyNameMessages(location + ".parameters", operation.getParameters(), output);
+
+        if (operation.getResponses() != null) {
+            operation.getResponses().forEach((code, response) -> {
+                if (response != null) {
+                    addEmptyPropertyNameMessages(location + ".responses." + code + ".schema",
+                            response.getResponseSchema(), output);
+                }
+            });
+        }
+    }
+
+    private void addEmptyPropertyNameMessages(String location, List<io.swagger.models.parameters.Parameter> parameters,
+                                              SwaggerParseResult output) {
+        if (parameters == null) {
+            return;
+        }
+
+        parameters.forEach(parameter -> {
+            if (parameter == null) {
+                return;
+            }
+            if (parameter instanceof BodyParameter) {
+                BodyParameter bodyParameter = (BodyParameter) parameter;
+                addEmptyPropertyNameMessages(location + ".[" + bodyParameter.getName() + "].schema",
+                        bodyParameter.getSchema(), output);
+            }
+        });
+    }
+
+    private void addEmptyPropertyNameMessages(String location, Model model, SwaggerParseResult output) {
+        if (model == null) {
+            return;
+        }
+
+        if (model instanceof ArrayModel) {
+            addEmptyPropertyNameMessages(location + ".items", ((ArrayModel) model).getItems(), output);
+        } else if (model instanceof ComposedModel) {
+            ComposedModel composedModel = (ComposedModel) model;
+            if (composedModel.getAllOf() != null) {
+                for (int i = 0; i < composedModel.getAllOf().size(); i++) {
+                    addEmptyPropertyNameMessages(location + ".allOf." + i, composedModel.getAllOf().get(i), output);
+                }
+            }
+        }
+
+        addEmptyPropertyNameMessages(location + ".properties", model.getProperties(), output);
+
+        if (model instanceof ModelImpl) {
+            addEmptyPropertyNameMessages(location + ".additionalProperties",
+                    ((ModelImpl) model).getAdditionalProperties(), output);
+        }
+    }
+
+    private void addEmptyPropertyNameMessages(String location, Property property, SwaggerParseResult output) {
+        if (property == null) {
+            return;
+        }
+
+        if (property instanceof ArrayProperty) {
+            addEmptyPropertyNameMessages(location + ".items", ((ArrayProperty) property).getItems(), output);
+        } else if (property instanceof ObjectProperty) {
+            addEmptyPropertyNameMessages(location + ".properties", ((ObjectProperty) property).getProperties(), output);
+        } else if (property instanceof MapProperty) {
+            addEmptyPropertyNameMessages(location + ".additionalProperties",
+                    ((MapProperty) property).getAdditionalProperties(), output);
+        } else if (property instanceof ComposedProperty) {
+            ComposedProperty composedProperty = (ComposedProperty) property;
+            if (composedProperty.getAllOf() != null) {
+                for (int i = 0; i < composedProperty.getAllOf().size(); i++) {
+                    addEmptyPropertyNameMessages(location + ".allOf." + i, composedProperty.getAllOf().get(i), output);
+                }
+            }
+        }
+    }
+
+    private void addEmptyPropertyNameMessages(String location, Map<String, Property> properties,
+                                              SwaggerParseResult output) {
+        if (properties == null) {
+            return;
+        }
+
+        properties.forEach((name, property) -> {
+            if (StringUtils.isEmpty(name)) {
+                addMessage(output, "attribute " + location + " contains an empty property name");
+            }
+            addEmptyPropertyNameMessages(location + "." + name, property, output);
+        });
+    }
+
+    private void addMessage(SwaggerParseResult output, String message) {
+        List<String> messages = output.getMessages();
+        if (messages == null) {
+            messages = new ArrayList<>();
+            output.messages(messages);
+        }
+        if (!messages.contains(message)) {
+            messages.add(message);
+        }
     }
 
     private Schema convertFormDataToSchema(io.swagger.models.parameters.Parameter formParam) {
@@ -1276,4 +1406,3 @@ public class SwaggerConverter implements SwaggerParserExtension {
         }
     }
 }
-
