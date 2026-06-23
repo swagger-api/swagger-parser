@@ -1,0 +1,26 @@
+openapi: 3.0.1
+info:
+  title: Test API - oneOf conflict last wins
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestSchema'
+components:
+  schemas:
+    ObjectWithAdditionalPropertiesTrue:
+      type: object
+      additionalProperties: true
+    ObjectWithAdditionalPropertiesFalse:
+      type: object
+      additionalProperties: false
+    TestSchema:
+      oneOf:
+        - $ref: '#/components/schemas/ObjectWithAdditionalPropertiesTrue'
+        - $ref: '#/components/schemas/ObjectWithAdditionalPropertiesFalse'
