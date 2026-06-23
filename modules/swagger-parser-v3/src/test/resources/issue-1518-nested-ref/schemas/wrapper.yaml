@@ -1,0 +1,8 @@
+type: object
+required:
+  - items
+properties:
+  items:
+    type: array
+    items:
+      $ref: "../api.yaml#/components/schemas/SharedModel"
