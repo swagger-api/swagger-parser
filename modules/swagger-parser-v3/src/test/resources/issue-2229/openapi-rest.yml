@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  title: Rules
+  contact:
+    name: myname
+    email: zzz@mail.com
+  description: API desgined for creating, updating, retrieving, and deleting rules and reference entities (reasons, processes).
+  version: 1.0.2
+security:
+  - itxBearerAuth: []
+servers:
+  - description: The localhost API server.
+    url: '{protocol}://localhost:{port}'
+    variables:
+      protocol:
+        default: 'http'
+      port:
+        default: "8080"
+tags:
+  - name: Rule
+    description: A rule defines when a product should be restricted from certain business processes based on specific conditions.
+paths:
+  /api/v1/rules:
+    $ref: './paths/rules/rules.yml'
