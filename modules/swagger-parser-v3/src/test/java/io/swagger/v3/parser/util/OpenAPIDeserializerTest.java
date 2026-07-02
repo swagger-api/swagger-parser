@@ -3365,6 +3365,42 @@ public class OpenAPIDeserializerTest {
     }
 
     @Test
+    public void readOperationSecurityWithAnonymousAlternative() {
+        final String yaml = "openapi: 3.0.3\n" +
+                "info:\n" +
+                "  title: Security alternatives\n" +
+                "  version: 1.0.0\n" +
+                "paths:\n" +
+                "  /search:\n" +
+                "    get:\n" +
+                "      security:\n" +
+                "        - {}\n" +
+                "        - ApiKeyAuth: []\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "components:\n" +
+                "  securitySchemes:\n" +
+                "    ApiKeyAuth:\n" +
+                "      type: apiKey\n" +
+                "      in: header\n" +
+                "      name: X-API-Key\n";
+
+        final SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, null);
+
+        assertNotNull(result.getOpenAPI());
+        assertTrue(result.getMessages().isEmpty(), result.getMessages().toString());
+
+        final Operation operation = result.getOpenAPI().getPaths().get("/search").getGet();
+        final List<SecurityRequirement> security = operation.getSecurity();
+
+        assertEquals(security.size(), 2);
+        assertTrue(security.get(0).isEmpty());
+        assertTrue(security.get(1).containsKey("ApiKeyAuth"));
+        assertTrue(security.get(1).get("ApiKeyAuth").isEmpty());
+    }
+
+    @Test
     public void readEmptyServerObject() throws Exception {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         final JsonNode rootNode = mapper.readTree(Files.readAllBytes(java.nio.file.Paths.get(getClass().getResource("/oas2.yaml.template").toURI())));
