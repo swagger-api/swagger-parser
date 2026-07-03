@@ -2777,21 +2777,24 @@ public class OpenAPIDeserializer {
 				additionalPropertiesObject != null
 						? getSchema(additionalPropertiesObject, location, result)
 						: additionalPropertiesBoolean;
+		String nodeType = getString("type", node, false, location, result);
 
-		if (additionalProperties != null && result.isInferSchemaType()) {
-			if (schema == null) {
-				schema =
+		if (!SchemaTypeUtil.isPrimitiveType(nodeType)) {
+			if (additionalProperties != null && result.isInferSchemaType()) {
+				if (schema == null) {
+					schema =
 						additionalProperties.equals(Boolean.FALSE)
-								? new ObjectSchema()
-								: new MapSchema();
+							? new ObjectSchema()
+							: new MapSchema();
+				}
+				schema.setAdditionalProperties(additionalProperties);
+			} else if (additionalProperties != null) {
+				if (schema == null) {
+					schema = new Schema();
+				}
+				schema.setAdditionalProperties(additionalProperties);
 			}
-			schema.setAdditionalProperties(additionalProperties);
-		} else if (additionalProperties != null) {
-            if (schema == null) {
-                schema = new Schema();
-            }
-            schema.setAdditionalProperties(additionalProperties);
-        }
+		}
 
 		if (schema == null) {
 			schema = SchemaTypeUtil.createSchemaByType(node);

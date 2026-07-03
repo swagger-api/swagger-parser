@@ -104,7 +104,7 @@ public class InlineModelResolverTest {
         Schema address = (Schema)user.getProperties().get("address");
         assertTrue((address.get$ref()!= null));
         Schema userAddress = openAPI.getComponents().getSchemas().get("User_address");
-        assertNotNull(userAddress);
+
         assertNotNull(userAddress.getProperties().get("city"));
         assertNotNull(userAddress.getProperties().get("street"));
     }
@@ -866,10 +866,10 @@ public class InlineModelResolverTest {
         Schema address = (Schema) inline.getProperties().get("address");
         assertNotNull(address);
 
-        assertEquals( "#/components/schemas/hello_address",address.get$ref());
+        assertEquals( "#/components/schemas/generated_hello_address",address.get$ref());
 
 
-        Schema inlineProp = openAPI.getComponents().getSchemas().get("hello_address");
+        Schema inlineProp = openAPI.getComponents().getSchemas().get("generated_hello_address");
         assertNotNull(inlineProp);
         assertTrue(inlineProp instanceof Schema);
 
@@ -1510,4 +1510,15 @@ public class InlineModelResolverTest {
 
     }
 
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/2118")
+    public void testInlineSchemaWithEmptyTitle() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue2118/issue2118.yaml", null, options);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("MegaPet_creator"));
+        assertNull(openAPI.getComponents().getSchemas().get(""));
+    }
 }

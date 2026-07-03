@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,8 +180,9 @@ public class InlineModelResolver {
                           if (existing != null) {
                               am.setItems(new Schema().$ref(existing));
                           } else {
-                              am.setItems(new Schema().$ref(modelName));
+                              am.setItems(new Schema().$ref(modelName + "_inner"));
                               addGenerated(modelName, am);
+                              openAPI.getComponents().addSchemas(modelName+ "_inner", inner);
                               openAPI.getComponents().addSchemas(modelName, am);
                           }
                       }else if (inner instanceof ComposedSchema && this.flattenComposedSchemas){
@@ -416,7 +418,7 @@ public class InlineModelResolver {
     }
 
     private String resolveModelName(String title, String key) {
-        if (title == null) {
+        if (StringUtils.isBlank(title)) {
             return uniqueName(key);
         } else {
             return uniqueName(title);
@@ -482,7 +484,7 @@ public class InlineModelResolver {
         for (String key : properties.keySet()) {
             Schema property = properties.get(key);
             if (isObjectSchema(property) && property.getProperties() != null && property.getProperties().size() > 0) {
-                String modelName = resolveModelName(property.getTitle(), path + "_" + key);
+                String modelName = resolveModelName(property.getTitle(), "generated_" + path + "_" + key);
                 Schema model = createModelFromProperty(property, modelName);
                 String existing = matchGenerated(model);
                 if (existing != null) {
@@ -499,7 +501,7 @@ public class InlineModelResolver {
                 if (isObjectSchema(inner)) {
                     if (inner.getProperties() != null && inner.getProperties().size() > 0) {
                         flattenProperties(inner.getProperties(), path);
-                        String modelName = resolveModelName(inner.getTitle(), path + "_" + key);
+                        String modelName = resolveModelName(inner.getTitle(), "generated_" + path + "_" + key);
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {
@@ -511,7 +513,7 @@ public class InlineModelResolver {
                         }
                     }else if (inner instanceof ComposedSchema && this.flattenComposedSchemas) {
                         flattenComposedSchema(inner,key);
-                        String modelName = resolveModelName(inner.getTitle(), path + "_" + key);
+                        String modelName = resolveModelName(inner.getTitle(), "generated_" + path + "_" + key);
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {
@@ -528,7 +530,7 @@ public class InlineModelResolver {
                 if (isObjectSchema(inner)) {
                     if (inner.getProperties() != null && inner.getProperties().size() > 0) {
                         flattenProperties(inner.getProperties(), path);
-                        String modelName = resolveModelName(inner.getTitle(), path + "_" + key);
+                        String modelName = resolveModelName(inner.getTitle(), "generated_" + path + "_" + key);
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {

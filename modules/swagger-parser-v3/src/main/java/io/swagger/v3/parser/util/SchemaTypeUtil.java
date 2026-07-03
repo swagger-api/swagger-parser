@@ -15,6 +15,8 @@ import io.swagger.v3.oas.models.media.PasswordSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.UUIDSchema;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 public class SchemaTypeUtil {
@@ -41,6 +43,11 @@ public class SchemaTypeUtil {
     public static final String UUID_FORMAT = "uuid";
 
     public static final String BINARY_AS_STRING = "swaggerParserBinaryAsString";
+    public static final List<String> PRIMITIVE_TYPES = Arrays.asList(INTEGER_TYPE, NUMBER_TYPE, STRING_TYPE, BOOLEAN_TYPE);
+
+    public static boolean isPrimitiveType(String type) {
+        return PRIMITIVE_TYPES.contains(type);
+    }
 
     public static Schema createSchemaByType(ObjectNode node){
         if(node == null) {
