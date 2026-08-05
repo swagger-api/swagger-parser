@@ -76,6 +76,29 @@ public class ExternalRefProcessorTest {
         assertEquals(newRef, "bar");
     }
 
+    // Error introduced by the PR.
+    // Wrong: a missing "../models/foo.model.yaml" becomes
+    // "#/components/schemas/../models/foo.model.yaml" instead of staying unchanged.
+    @Test
+    public void testNestedMissingExternalSchemaRetainsOriginalRef() {
+        final String outerRef = "../schemas/wrapper.yaml";
+        final String missingRef = "../models/foo.model.yaml";
+        final Schema wrapper = new Schema().$ref(missingRef);
+        final OpenAPI testedOpenAPI = new OpenAPI();
+
+        new Expectations() {{
+            cache.loadRef(outerRef, RefFormat.RELATIVE, Schema.class);
+            result = wrapper;
+
+            cache.loadRef(missingRef, RefFormat.RELATIVE, Schema.class);
+            result = null;
+        }};
+
+        new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalSchema(outerRef, RefFormat.RELATIVE);
+
+        assertEquals(wrapper.get$ref(), missingRef);
+    }
 
 
     @Test
