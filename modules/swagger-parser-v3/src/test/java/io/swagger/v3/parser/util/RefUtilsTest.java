@@ -195,10 +195,6 @@ public class RefUtilsTest {
             times = 1;
             result = true;
 
-            pathToUse.toFile();
-            times = 1;
-            result = file;
-
         }};
     }
 
