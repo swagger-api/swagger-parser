@@ -1,0 +1,12 @@
+openapi: 3.1.0
+info:
+  title: $id with $ref and nested file ref
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Template:
+      $ref: "id-with-ref-nested-target.yaml"
+    Concrete:
+      $id: "https://example.com/schemas/Concrete"
+      $ref: "#/components/schemas/Template"
