@@ -27,14 +27,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PcfBinding'
+              $ref: "#/components/schemas/PcfBinding"
       responses:
         '201':
           description: The creation of an individual PCF session binding.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PcfBinding'
+                $ref: "#/components/schemas/PcfBinding"
           headers:
             Location:
               description: 'Contains the URI of the newly created resource, according to the structure: {apiRoot}/nbsf-management/v1/pcfBindings/{bindingId}'
@@ -126,7 +126,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PcfBinding'
+                $ref: "#/components/schemas/PcfBinding"
         '204':
           description: There is no PCF session binding information matching the query parameter(s).
         '400':
@@ -191,14 +191,14 @@ paths:
         content:
           application/merge-patch+json:
             schema:
-              $ref: '#/components/schemas/PcfBindingPatch'
+              $ref: "#/components/schemas/PcfBindingPatch"
       responses:
         '200':
           description: OK (Successful update of the session binding)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PcfBinding'
+                $ref: "#/components/schemas/PcfBinding"
         '400':
           $ref: 'TS29571_CommonData.yaml#/components/responses/400'
         '401':

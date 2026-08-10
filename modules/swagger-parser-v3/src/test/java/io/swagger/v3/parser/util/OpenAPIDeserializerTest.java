@@ -84,7 +84,7 @@ public class OpenAPIDeserializerTest {
                 "          content:\n" +
                 "            application/json:\n" +
                 "              schema:\n" +
-                "                $ref: '#/components/schemas/ComponentA'\n" +
+                "                $ref: \"#/components/schemas/ComponentA\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    ComponentA:\n" +
@@ -95,17 +95,17 @@ public class OpenAPIDeserializerTest {
                 "          properties:\n" +
                 "            attributeWithoutType:\n" +
                 "              allOf:\n" +
-                "              - $ref: '#/components/schemas/ComponentB'\n" +
+                "              - $ref: \"#/components/schemas/ComponentB\"\n" +
                 "              default: \"coucou\"\n" +
                 "            attributeWithWrongType:\n" +
                 "              type: object\n" +
                 "              allOf:\n" +
-                "                - $ref: '#/components/schemas/ComponentB'\n" +
+                "                - $ref: \"#/components/schemas/ComponentB\"\n" +
                 "              default: \"coucou\"\n" +
                 "            correctAttribute:\n" +
                 "              type: string\n" +
                 "              allOf:\n" +
-                "                - $ref: '#/components/schemas/ComponentB'\n" +
+                "                - $ref: \"#/components/schemas/ComponentB\"\n" +
                 "              default: \"coucou\"\n" +
                 "    ComponentB:\n" +
                 "      description: Component B\n" +
@@ -142,7 +142,7 @@ public class OpenAPIDeserializerTest {
                 "        content:\n" +
                 "          application/json:\n" +
                 "            schema:\n" +
-                "              $ref: '#/components/schemas/mydefinition'\n" +
+                "              $ref: \"#/components/schemas/mydefinition\"\n" +
                 "        required: true\n" +
                 "components:\n" +
                 "  schemas:\n" +
@@ -184,7 +184,7 @@ public class OpenAPIDeserializerTest {
                       "        content:\n" +
                       "          application/json:\n" +
                       "            schema:\n" +
-                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "              $ref: \"#/components/schemas/mydefinition\"\n" +
                       "        required: true\n" +
                       "components:\n" +
                       "  schemas:\n" +
@@ -225,7 +225,7 @@ public class OpenAPIDeserializerTest {
                       "        content:\n" +
                       "          application/json:\n" +
                       "            schema:\n" +
-                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "              $ref: \"#/components/schemas/mydefinition\"\n" +
                       "        required: true\n" +
                       "components:\n" +
                       "  schemas:\n" +
@@ -265,7 +265,7 @@ public class OpenAPIDeserializerTest {
                       "        content:\n" +
                       "          application/json:\n" +
                       "            schema:\n" +
-                      "              $ref: '#/components/schemas/mydefinition'\n" +
+                      "              $ref: \"#/components/schemas/mydefinition\"\n" +
                       "        required: true\n" +
                       "components:\n" +
                       "  schemas:\n" +
@@ -713,7 +713,7 @@ public class OpenAPIDeserializerTest {
                 "        name:\n" +
                 "          type: string\n" +
                 "        address:\n" +
-                "          $ref: '#/components/schemas/Address'\n" +
+                "          $ref: \"#/components/schemas/Address\"\n" +
                 "    Address:\n" +
                 "      required:\n" +
                 "        - zip\n" +
@@ -1047,17 +1047,17 @@ public class OpenAPIDeserializerTest {
                 "                type: object\n" +
                 "                properties:\n" +
                 "                  se:\n" +
-                "                    $ref: '#/components/schemas/StringEnum'\n" +
+                "                    $ref: \"#/components/schemas/StringEnum\"\n" +
                 "                  ie:\n" +
-                "                    $ref: '#/components/schemas/IntegerEnum'\n" +
+                "                    $ref: \"#/components/schemas/IntegerEnum\"\n" +
                 "                  ne:\n" +
-                "                    $ref: '#/components/schemas/NumberEnum'\n" +
+                "                    $ref: \"#/components/schemas/NumberEnum\"\n" +
                 "                  be:\n" +
-                "                    $ref: '#/components/schemas/BooleanEnum'\n" +
+                "                    $ref: \"#/components/schemas/BooleanEnum\"\n" +
                 "                  ae:\n" +
-                "                    $ref: '#/components/schemas/ArrayEnum'\n" +
+                "                    $ref: \"#/components/schemas/ArrayEnum\"\n" +
                 "                  oe:\n" +
-                "                    $ref: '#/components/schemas/ObjectEnum'\n" +
+                "                    $ref: \"#/components/schemas/ObjectEnum\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    StringEnum:\n" +
@@ -1217,7 +1217,7 @@ public class OpenAPIDeserializerTest {
                 "                type: object\n" +
                 "                properties:\n" +
                 "                  date:\n" +
-                "                    $ref: '#/components/schemas/DateString'\n" +
+                "                    $ref: \"#/components/schemas/DateString\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    DateString:\n" +
@@ -1282,7 +1282,7 @@ public class OpenAPIDeserializerTest {
                 "                type: object\n" +
                 "                properties:\n" +
                 "                  dateTime:\n" +
-                "                    $ref: '#/components/schemas/DateTimeString'\n" +
+                "                    $ref: \"#/components/schemas/DateTimeString\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    DateTimeString:\n" +
@@ -1354,7 +1354,7 @@ public class OpenAPIDeserializerTest {
                 "                type: object\n" +
                 "                properties:\n" +
                 "                  bytes:\n" +
-                "                    $ref: '#/components/schemas/ByteString'\n" +
+                "                    $ref: \"#/components/schemas/ByteString\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    ByteString:\n" +
@@ -2040,7 +2040,7 @@ public class OpenAPIDeserializerTest {
                         "    Dog:\n" +
                         "      type: object\n" +
                         "      allOf:\n" +
-                        "        - $ref: '#/components/schemas/Pet'\n" +
+                        "        - $ref: \"#/components/schemas/Pet\"\n" +
                         "        - required:\n" +
                         "            - name\n" +
                         "          properties:\n" +
@@ -2097,8 +2097,8 @@ public class OpenAPIDeserializerTest {
                         "    Dog:\n" +
                         "      type: object\n" +
                         "      allOf:\n" +
-                        "        - $ref: '#/components/schemas/Pet'\n" +
-                        "        - $ref: '#/components/schemas/Furry'\n" +
+                        "        - $ref: \"#/components/schemas/Pet\"\n" +
+                        "        - $ref: \"#/components/schemas/Furry\"\n" +
                         "        - required:\n" +
                         "            - name\n" +
                         "          properties:\n" +
@@ -2168,8 +2168,8 @@ public class OpenAPIDeserializerTest {
                 "          type: string\n" +
                 "    Dog:\n" +
                 "      allOf:\n" +
-                "        - $ref: '#/components/schemas/Pet'\n" +
-                "        - $ref: '#/components/schemas/Furry'\n" +
+                "        - $ref: \"#/components/schemas/Pet\"\n" +
+                "        - $ref: \"#/components/schemas/Furry\"\n" +
                 "        - type: object\n" +
                 "          required:\n" +
                 "            - name\n" +
@@ -2369,7 +2369,7 @@ public class OpenAPIDeserializerTest {
             "          type: string\n" +
             "    Cat:\n" +
             "      allOf:\n" +
-            "      - $ref: '#/components/schemas/Pet'\n" +
+            "      - $ref: \"#/components/schemas/Pet\"\n" +
             "      - type: object\n" +
             "        # all other properties specific to a `Cat`\n" +
             "        properties:\n" +
@@ -2426,8 +2426,8 @@ public class OpenAPIDeserializerTest {
             "          type: string\n" +
             "    Pet:\n" +
             "      oneOf: \n" +
-            "       - $ref: '#/components/schemas/Cat'\n" +
-            "       - $ref: '#/components/schemas/Dog'\n" +
+            "       - $ref: \"#/components/schemas/Cat\"\n" +
+            "       - $ref: \"#/components/schemas/Dog\"\n" +
             "       - type: object\n" +
             "         # neither a `Cat` nor a `Dog`\n" +
             "         properties:\n" +
@@ -2561,20 +2561,20 @@ public class OpenAPIDeserializerTest {
                         "        content:\n"+
                         "          application/json:\n"+
                         "            schema:\n"+
-                        "              $ref: '#/components/schemas/AnyValue'\n"+
+                        "              $ref: \"#/components/schemas/AnyValue\"\n"+
                         "            examples:\n"+
                         "              AnObject:\n"+
-                        "                $ref: '#/components/examples/AnObject'\n"+
+                        "                $ref: \"#/components/examples/AnObject\"\n"+
                         "              ANull:\n"+
-                        "                $ref: '#/components/examples/ANull'\n"+
+                        "                $ref: \"#/components/examples/ANull\"\n"+
                         "          application/yaml:\n"+
                         "            schema:\n"+
-                        "              $ref: '#/components/schemas/AnyValue'\n"+
+                        "              $ref: \"#/components/schemas/AnyValue\"\n"+
                         "            examples:\n"+
                         "              AString:\n"+
-                        "                $ref: '#/components/examples/AString'\n"+
+                        "                $ref: \"#/components/examples/AString\"\n"+
                         "              AnArray:\n"+
-                        "                $ref: '#/components/examples/AnArray'\n"+
+                        "                $ref: \"#/components/examples/AnArray\"\n"+
                         "          text/plain:\n"+
                         "            schema:\n"+
                         "              type: string\n"+
@@ -3174,7 +3174,7 @@ public class OpenAPIDeserializerTest {
                 "          cachorro: Dog\n" +
                 "    Cat:\n" +
                 "      allOf:\n" +
-                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - $ref: \"#/components/schemas/Pet\"\n" +
                 "      - type: object\n" +
                 "        # all other properties specific to a `Cat`\n" +
                 "        properties:\n" +
@@ -3182,7 +3182,7 @@ public class OpenAPIDeserializerTest {
                 "            type: string\n" +
                 "    Dog:\n" +
                 "      allOf:\n" +
-                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - $ref: \"#/components/schemas/Pet\"\n" +
                 "      - type: object\n" +
                 "        # all other properties specific to a `Dog`\n" +
                 "        properties:\n" +
@@ -3190,7 +3190,7 @@ public class OpenAPIDeserializerTest {
                 "            type: string\n" +
                 "    Lizard:\n" +
                 "      allOf:\n" +
-                "      - $ref: '#/components/schemas/Pet'\n" +
+                "      - $ref: \"#/components/schemas/Pet\"\n" +
                 "      - type: object\n" +
                 "        # all other properties specific to a `Lizard`\n" +
                 "        properties:\n" +

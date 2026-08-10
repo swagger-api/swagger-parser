@@ -26,7 +26,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/OperationType'
+                $ref: "#/components/schemas/OperationType"
 components:
   schemas:
     OperationType:

@@ -1,0 +1,36 @@
+{
+    "title": "Vaccination Order",
+    "description": "An order to perform a vaccination.",
+    "type": "object",
+    "required": [
+        "vaccine_name",
+        "by_date"
+    ],
+    "properties": {
+        "vaccine_name": {
+            "$ref": "./vaccine_name.json"
+        },
+        "by_date": {
+            "allOf": [
+                {
+                    "$ref": "../../common_components/v5/schema/json/openapi-3.0/components/schemas/date_time/date_no_time.json"
+                },
+                {
+                    "description": "Date vaccine must be administered by.",
+                    "x-redacted": true
+                }
+            ]
+        },
+        "after_date": {
+            "allOf": [
+                {
+                    "$ref": "../../common_components/v5/schema/json/openapi-3.0/components/schemas/date_time/date_no_time.json"
+                },
+                {
+                    "description": "Date vaccine must be administered after.",
+                    "x-redacted": true
+                }
+            ]
+        }
+    }
+}

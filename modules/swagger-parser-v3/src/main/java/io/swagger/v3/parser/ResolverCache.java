@@ -21,9 +21,9 @@ import io.swagger.v3.parser.models.RefType;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import io.swagger.v3.parser.util.DeserializationUtils;
+import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.PathUtils;
 import io.swagger.v3.parser.util.RefUtils;
-import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -72,6 +72,7 @@ public class ResolverCache {
     private Set<String> resolveValidationMessages;
     private final ParseOptions parseOptions;
     protected boolean openapi31;
+    private final PermittedUrlsChecker permittedUrlsChecker;
 
     /*
      * a map that stores original external references, and their associated renamed
@@ -94,6 +95,7 @@ public class ResolverCache {
         this.rootPath = parentFileLocation;
         this.resolveValidationMessages = resolveValidationMessages;
         this.parseOptions = parseOptions;
+        this.permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(), parseOptions.getRemoteRefBlockList());
 
         if(parentFileLocation != null) {
             if(parentFileLocation.startsWith("http") || parentFileLocation.startsWith("jar")) {
@@ -153,13 +155,13 @@ public class ResolverCache {
             }
 
             if(parentDirectory != null) {
-                contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
+                contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory, permittedUrlsChecker);
             }
             else if(rootPath != null && rootPath.startsWith("http")) {
-                contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath);
+                contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath, permittedUrlsChecker);
             }
             else if (rootPath != null) {
-                contents = RefUtils.readExternalClasspathRef(file, refFormat, auths, rootPath);
+                contents = RefUtils.readExternalClasspathRef(file, refFormat, auths, rootPath, permittedUrlsChecker);
 
             }
             externalFileCache.put(file, contents);
@@ -382,9 +384,6 @@ public class ResolverCache {
 
     protected void checkUrlIsPermitted(String refSet) {
         try {
-            PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(),
-                    parseOptions.getRemoteRefBlockList());
-
             permittedUrlsChecker.verify(refSet);
         } catch (HostDeniedException e) {
             throw new RuntimeException(e.getMessage());

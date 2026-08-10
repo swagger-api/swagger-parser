@@ -20,10 +20,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/repository'
+                  $ref: "#/components/schemas/repository"
           links:
             userRepository:
-              $ref: '#/components/links/userRepository'
+              $ref: "#/components/links/userRepository"
   /2.0/repositories/{username}/{slug}:
     get:
       operationId: getRepository
@@ -44,7 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/repository'
+                $ref: "#/components/schemas/repository"
 components:
   links:
     userRepository:
@@ -69,7 +69,7 @@ components:
         slug:
           type: string
         owner:
-          $ref: '#/components/schemas/user'
+          $ref: "#/components/schemas/user"
     pullrequest:
       type: object
       properties:
@@ -78,6 +78,6 @@ components:
         title:
           type: string
         repository:
-          $ref: '#/components/schemas/repository'
+          $ref: "#/components/schemas/repository"
         author:
-          $ref: '#/components/schemas/user'
+          $ref: "#/components/schemas/user"

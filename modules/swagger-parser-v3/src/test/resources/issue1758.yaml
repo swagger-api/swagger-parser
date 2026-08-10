@@ -6,20 +6,20 @@ servers:
 - url: /
 paths:
   /path1:
-    $ref: '#/components/schemas/xFoo'
+    $ref: "#/components/schemas/xFoo"
   /foo:
     get:
       description: ok
       parameters:
-      - $ref: '#/components/schemas/xFoo'
+      - $ref: "#/components/schemas/xFoo"
       requestBody:
-        $ref: '#/components/schemas/xFoo'
+        $ref: "#/components/schemas/xFoo"
       responses:
         default:
           description: ok
           headers:
             three:
-              $ref: '#/components/schemas/xFoo'
+              $ref: "#/components/schemas/xFoo"
         '200':
           description: successful operation
           content:
@@ -27,15 +27,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/parameters/pet'
+                  $ref: "#/components/parameters/pet"
               examples:
                 one:
-                  $ref: '#/components/schemas/xFoo'
+                  $ref: "#/components/schemas/xFoo"
           links:
             user:
-              $ref: '#/components/schemas/xFoo'       
+              $ref: "#/components/schemas/xFoo"       
         '400':
-          $ref: '#/components/schemas/xFoo'
+          $ref: "#/components/schemas/xFoo"
       callbacks:
         mainHook:
           $ref: "#/components/schemas/xFoo"

@@ -35,7 +35,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/TransactionsPatchRequestBody'
+                $ref: "#/components/schemas/TransactionsPatchRequestBody"
       responses:
         "204":
           description: OK

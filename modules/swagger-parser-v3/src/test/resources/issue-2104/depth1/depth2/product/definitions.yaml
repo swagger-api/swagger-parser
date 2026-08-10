@@ -1,0 +1,10 @@
+components:
+  schemas:
+    Product:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        id:
+          type: string

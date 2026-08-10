@@ -16,7 +16,7 @@ components:
           type: string
     Cat:
       allOf:
-        - $ref: '#/components/schemas/Pet'
+        - $ref: "#/components/schemas/Pet"
         - type: object
           properties:
             huntingSkill:
@@ -29,7 +29,7 @@ components:
             - huntingSkill
     Dog:
       allOf:
-        - $ref: '#/components/schemas/Pet'
+        - $ref: "#/components/schemas/Pet"
         - type: object
           properties:
             packSize:
@@ -39,7 +39,7 @@ components:
             - packSize
     Lion:
       oneOf:
-        - $ref: '#/components/schemas/Pet'
+        - $ref: "#/components/schemas/Pet"
         - type: object
           properties:
             huntingSkill:
@@ -52,7 +52,7 @@ components:
             - huntingSkill
     Bear:
       anyOf:
-        - $ref: '#/components/schemas/Pet'
+        - $ref: "#/components/schemas/Pet"
         - type: object
           properties:
             packSize:

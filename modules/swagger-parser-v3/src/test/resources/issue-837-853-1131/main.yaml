@@ -25,7 +25,7 @@ paths:
                 value:
                   test: plain
               local:
-                $ref: '#/components/examples/LocalRef'
+                $ref: "#/components/examples/LocalRef"
               external:
                 $ref: './issue-837-853-1131/components.yaml#/components/examples/ExternalRef'
       responses:
@@ -46,7 +46,7 @@ paths:
                   value:
                     test: plain
                 local:
-                  $ref: '#/components/examples/LocalRef'
+                  $ref: "#/components/examples/LocalRef"
                 external:
                   $ref: './issue-837-853-1131/components.yaml#/components/examples/ExternalRef'
   /guests:

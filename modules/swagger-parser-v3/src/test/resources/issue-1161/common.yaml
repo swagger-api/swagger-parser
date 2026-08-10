@@ -16,9 +16,9 @@ components:
       type: object
       properties:
         primary:
-          $ref: '#/components/schemas/Colour'
+          $ref: "#/components/schemas/Colour"
         secondary:
-          $ref: '#/components/schemas/Colour'
+          $ref: "#/components/schemas/Colour"
     Colour:
       type: string
       enum: ['black', 'white', 'tan', 'red', 'blue']

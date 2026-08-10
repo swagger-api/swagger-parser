@@ -12,7 +12,7 @@ components:
       explode: true
     externalRefIndirectPointer:
       description: externalRefIndirectPointer root
-      $ref: '#/components/parameters/externalRefIndirect3'
+      $ref: "#/components/parameters/externalRefIndirect3"
     externalRefIndirect3:
       name: externalParameter3
       in: query

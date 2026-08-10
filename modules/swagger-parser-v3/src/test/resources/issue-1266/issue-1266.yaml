@@ -17,7 +17,7 @@ components:
       type: object
       x-extension-ref: 2
       allOf:
-        - $ref: '#/components/schemas/ResponseModel'
+        - $ref: "#/components/schemas/ResponseModel"
         - type: object
           required:
             - gps

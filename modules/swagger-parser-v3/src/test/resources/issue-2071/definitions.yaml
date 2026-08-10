@@ -4,14 +4,14 @@ components:
       type: array
       items:
         oneOf:
-          - $ref: '#/components/schemas/ProductRow'
+          - $ref: "#/components/schemas/ProductRow"
         properties:
           orderRow:
-            $ref: '#/components/schemas/OrderRow'
+            $ref: "#/components/schemas/OrderRow"
         discriminator:
           propertyName: type
           mapping:
-            'product': '#/components/schemas/ProductRow'
+            'product': "#/components/schemas/ProductRow"
     ProductRow:
       type: object
       additionalProperties: false
@@ -19,7 +19,7 @@ components:
         - type
       properties:
         type:
-          $ref: '#/components/schemas/ProductRowType'
+          $ref: "#/components/schemas/ProductRowType"
         payload:
           type: string
     ProductRowType:
@@ -33,7 +33,7 @@ components:
         - type
       properties:
         type:
-          $ref: '#/components/schemas/OrderRowType'
+          $ref: "#/components/schemas/OrderRowType"
         payload:
           type: string
     OrderRowType:

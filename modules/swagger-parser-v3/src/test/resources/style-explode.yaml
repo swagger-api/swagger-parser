@@ -1,0 +1,127 @@
+openapi: 3.0.3
+info:
+  title: Example API with Style and Explode
+  version: "1.0.0"
+paths:
+  /test:
+    get:
+      summary: Demonstrate query and header parameters with style/explode variations
+      parameters:
+        # Query parameter with both style and explode
+        - in: query
+          name: foo
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+
+        # Query parameter with only style
+        - in: query
+          name: bar
+          style: spaceDelimited
+          schema:
+            type: array
+            items:
+              type: string
+
+        # Query parameter with only explode
+        - in: query
+          name: baz
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+
+        # Header parameter with both style and explode
+        - in: header
+          name: X-Foo
+          style: simple
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+
+        # Header parameter with only style
+        - in: header
+          name: X-Bar
+          style: simple
+          schema:
+            type: array
+            items:
+              type: string
+
+        # Header parameter with only explode
+        - in: header
+          name: X-Baz
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+
+        # Header parameter without
+        - in: header
+          name: X-FooBar
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Success
+          headers:
+            foo: 
+              description: test
+              style: form
+              explode: false
+              schema: 
+                type: array
+                items:
+                  type: string                
+            bar:
+              description: test
+              schema:
+                type: array
+                items: 
+                  type: string
+
+    post:
+      summary: Demonstrate encoding with style/explode variations
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                fileWithOnlyStyle:
+                  type: string
+                  format: binary
+                fileWithOnlyExplode:
+                  type: string
+                  format: binary
+                fileWithout:
+                  type: string
+                  format: binary
+            encoding:
+              # Encoding with both style and explode
+              file:
+                style: form
+                explode: true
+              # Encoding with only style
+              fileWithOnlyStyle:
+                style: form
+              # Encoding with only explode
+              fileWithOnlyExplode:
+                explode: true
+              fileWithout:
+                contentType: image/png, image/jpeg
+      responses:
+        '200':
+          description: Success

@@ -2,7 +2,7 @@ localArray:
   description: This array has references to this file
   type: array
   items:
-    $ref: '#/referencedByLocalArray'
+    $ref: "#/referencedByLocalArray"
 referencedByLocalArray:
   properties:
     hello1:
@@ -12,9 +12,9 @@ referencedByLocalArray:
 localObject:
   properties:
     hello1:
-      $ref: '#/referencedByLocalElement'
+      $ref: "#/referencedByLocalElement"
     shareprefix:
-      $ref: '#/referencedBy'
+      $ref: "#/referencedBy"
 referencedByLocalElement:
   properties:
     hello1:

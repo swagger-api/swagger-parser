@@ -1,0 +1,24 @@
+components:
+  schemas:
+    ResponseAllOf:
+      allOf:
+        - $ref: '../depth2/product/definitions.yaml#/components/schemas/Product'
+        - type: object
+          properties: 
+            product:
+              $ref: '../depth2/product/definitions.yaml#/components/schemas/Product'
+    ResponseOneOf:
+      oneOf:
+        - $ref: '../depth2/product/definitions.yaml#/components/schemas/Product'
+        - type: object
+          properties: 
+            product:
+              $ref: '../depth2/product/definitions.yaml#/components/schemas/Product'
+    ResponseAnyOf:
+      anyOf:
+        - $ref: '../depth2/product/definitions.yaml#/components/schemas/Product'
+        - type: object
+          properties: 
+            product:
+              $ref: '../depth2/product/definitions.yaml#/components/schemas/Product'
+   

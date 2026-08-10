@@ -1,0 +1,19 @@
+{
+    "allOf": [
+        {
+            "$ref": "./adoption_request.json"
+        },
+        {
+            "title": "Adoption Request for Bird",
+            "description": "A bird adoption request.",
+            "type": "object",
+            "properties": {
+                "have_birdcage": {
+                    "description": "Indicates if the adopter has a birdcage.",
+                    "type": "boolean",
+                    "x-redacted": true
+                }
+            }
+        }
+    ]
+}

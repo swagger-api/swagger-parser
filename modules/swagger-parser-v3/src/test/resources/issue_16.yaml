@@ -12,13 +12,13 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/InternshipResultModel'
+                $ref: "#/components/schemas/InternshipResultModel"
 components:
   schemas:
     InternshipResultModel:
       properties:
         Review:
-          $ref: '#/components/schemas/ReviewModel'
+          $ref: "#/components/schemas/ReviewModel"
     ReviewModel:
       properties:
         Rating:

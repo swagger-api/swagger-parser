@@ -9,7 +9,7 @@ paths:
   /relativeref:
     $ref: './nested/domain.yaml#/components/pathItems/RelativeRef'
   /internalref:
-    $ref: '#/components/pathItems/InternalRef'
+    $ref: "#/components/pathItems/InternalRef"
   /internal:
     get:
       description: Internal PathItem

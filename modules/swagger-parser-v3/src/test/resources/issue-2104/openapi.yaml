@@ -1,0 +1,51 @@
+openapi: 3.0.1
+info:
+  title: API
+  description: API
+  version: LATEST
+paths:
+  /test-all-of:
+    post:
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './depth1/depth2/definitions.yaml#/components/schemas/ResponseAllOf'
+  /test-one-of:
+    post:
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './depth1/depth2/definitions.yaml#/components/schemas/ResponseOneOf'
+  /test-any-of:
+    post:
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './depth1/depth2/definitions.yaml#/components/schemas/ResponseAnyOf'

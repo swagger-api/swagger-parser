@@ -18,7 +18,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
             example:
               id: 10
               name: kitty
@@ -61,7 +61,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectWithNullExample'
+                $ref: "#/components/schemas/ObjectWithNullExample"
               examples:
                 foo:
                   value: '{"foo": "bar"}'
@@ -77,7 +77,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectWithNullInSchemaExample'
+                $ref: "#/components/schemas/ObjectWithNullInSchemaExample"
               examples:
                 a:
                   value: 5
@@ -98,7 +98,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectWithNullPropertyExample'
+                $ref: "#/components/schemas/ObjectWithNullPropertyExample"
 
   /string-with-null-example:
     get:
@@ -109,7 +109,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StringWithNullExample'
+                $ref: "#/components/schemas/StringWithNullExample"
 
   /array-with-null-array-example:
     get:
@@ -120,7 +120,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayWithNullArrayExample'
+                $ref: "#/components/schemas/ArrayWithNullArrayExample"
 
   /array-with-null-item-example:
     get:
@@ -131,7 +131,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayWithNullItemExample'
+                $ref: "#/components/schemas/ArrayWithNullItemExample"
 
   /arrey-with-null-in-array-example:
     get:
@@ -142,7 +142,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayWithNullInArrayExample'
+                $ref: "#/components/schemas/ArrayWithNullInArrayExample"
 components:
   schemas:
     Pet:

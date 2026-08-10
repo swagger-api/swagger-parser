@@ -7,10 +7,10 @@ paths:
   /adopt:
     post:
       requestBody:
-        $ref: '#/components/requestBodies/ASinglePet'
+        $ref: "#/components/requestBodies/ASinglePet"
       responses:
         201:
-          $ref: '#/components/responses/Adopted'
+          $ref: "#/components/responses/Adopted"
 
 components:
   requestBodies:
@@ -20,14 +20,14 @@ components:
       content:
         application/petstore+json:
           schema:
-            $ref: '#/components/schemas/AdoptionRequest'
+            $ref: "#/components/schemas/AdoptionRequest"
   responses:
     Adopted:
       description: Pet successfully adopted
       content:
         application/petstore+json:
           schema:
-            $ref: '#/components/schemas/AdoptionResponse'
+            $ref: "#/components/schemas/AdoptionResponse"
 
   schemas:
     Pets:
@@ -36,7 +36,7 @@ components:
         pets:
           type: array
           items:
-            $ref: '#/components/schemas/Pet'
+            $ref: "#/components/schemas/Pet"
     Pet:
       type: object
       properties:
@@ -54,7 +54,7 @@ components:
           description: Name pet store
           type: string
         pets:
-          $ref: '#/components/schemas/Pets'
+          $ref: "#/components/schemas/Pets"
     AdoptionResponse:
       description: Adoption Response
       type: object

@@ -29,4 +29,4 @@ components:
       description: 'Could be composite key'
       required: true
       schema:
-        $ref: '#/components/schemas/InventoryId'
+        $ref: "#/components/schemas/InventoryId"

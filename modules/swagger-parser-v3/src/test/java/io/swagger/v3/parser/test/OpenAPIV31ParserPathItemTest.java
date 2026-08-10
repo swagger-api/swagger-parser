@@ -253,9 +253,9 @@ public class OpenAPIV31ParserPathItemTest {
                 "        \"200\":\n" +
                 "          description: OK\n" +
                 "  /internalref:\n" +
-                "    $ref: '#/components/pathItems/InternalRef'\n" +
+                "    $ref: \"#/components/pathItems/InternalRef\"\n" +
                 "  /internalreftoexternal:\n" +
-                "    $ref: '#/components/pathItems/InternalRefToExternal'\n" +
+                "    $ref: \"#/components/pathItems/InternalRefToExternal\"\n" +
                 "  /internal:\n" +
                 "    get:\n" +
                 "      description: Internal PathItem\n" +
@@ -314,7 +314,7 @@ public class OpenAPIV31ParserPathItemTest {
                 "        \"200\":\n" +
                 "          description: OK\n" +
                 "  /internalref:\n" +
-                "    $ref: '#/components/pathItems/InternalRef'\n" +
+                "    $ref: \"#/components/pathItems/InternalRef\"\n" +
                 "  /internal:\n" +
                 "    get:\n" +
                 "      description: Internal PathItem\n" +

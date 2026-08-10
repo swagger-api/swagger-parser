@@ -23,7 +23,7 @@ paths:
                   paging:
                     $ref: './paging.yaml#/Paging'
                   items:
-                    $ref: '#/components/schemas/StatusResponse'
+                    $ref: "#/components/schemas/StatusResponse"
 components:
   schemas:
     StatusResponse:

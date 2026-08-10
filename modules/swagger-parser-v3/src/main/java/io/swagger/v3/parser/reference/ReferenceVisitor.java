@@ -15,10 +15,15 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
-import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
+import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.RemoteUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +40,9 @@ public class ReferenceVisitor extends AbstractVisitor {
     protected OpenAPI31Traverser openAPITraverser;
     protected Reference reference;
     protected DereferencerContext context;
+    private PermittedUrlsChecker permittedUrlsChecker;
+    private final LoaderOptions loaderOptions;
+
 
     public ReferenceVisitor(
             Reference reference,
@@ -46,6 +54,8 @@ public class ReferenceVisitor extends AbstractVisitor {
         this.visited = visited;
         this.visitedMap = visitedMap;
         this.context = null;
+        this.loaderOptions = DeserializationUtils.buildLoaderOptions();
+
     }
 
     public ReferenceVisitor(
@@ -59,6 +69,9 @@ public class ReferenceVisitor extends AbstractVisitor {
         this.visited = visited;
         this.visitedMap = visitedMap;
         this.context = context;
+        this.permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getRemoteRefAllowList(),
+                context.getParseOptions().getRemoteRefBlockList());
+        this.loaderOptions = DeserializationUtils.buildLoaderOptions();
     }
 
     public String toBaseURI(String uri) throws Exception{
@@ -83,7 +96,7 @@ public class ReferenceVisitor extends AbstractVisitor {
         return ref;
     }
 
-    public Reference toSchemaReference(String baseUri, JsonNode node) throws Exception{
+    public Reference toSchemaReference(String baseUri, JsonNode node) {
         Map<String, Reference> referenceSet = this.reference.getReferenceSet();
         if (referenceSet.containsKey(baseUri)) {
             return referenceSet.get(baseUri);
@@ -193,20 +206,21 @@ public class ReferenceVisitor extends AbstractVisitor {
     }
 
     @Override
-    public String readHttp(String uri, List<AuthorizationValue> auths) throws Exception {
+    public String readHttp(String uri, List<AuthorizationValue> auths, PermittedUrlsChecker permittedUrlsChecker) throws Exception {
         if(context.getParseOptions().isSafelyResolveURL()){
-            checkUrlIsPermitted(uri);
+            permittedUrlsChecker.verify(uri);
+            return RemoteUrl.urlToString(uri, auths, permittedUrlsChecker);
         }
         return RemoteUrl.urlToString(uri, auths);
     }
 
     public<T> T resolveRef(T visiting, String ref, Class<T> clazz, BiFunction<T, ReferenceVisitor, T> traverseFunction){
         try {
-            Reference reference = toReference(ref);
+            Reference referenceObject = toReference(ref);
             String fragment = ReferenceUtils.getFragment(ref);
-            JsonNode node = ReferenceUtils.jsonPointerEvaluate(fragment, reference.getJsonNode(), ref);
-            T resolved = openAPITraverser.deserializeFragment(node, clazz, ref, fragment, reference.getMessages());
-            ReferenceVisitor visitor = new ReferenceVisitor(reference, openAPITraverser, this.visited, this.visitedMap, context);
+            JsonNode node = ReferenceUtils.jsonPointerEvaluate(fragment, referenceObject.getJsonNode(), ref);
+            T resolved = openAPITraverser.deserializeFragment(node, clazz, ref, fragment, referenceObject.getMessages());
+            ReferenceVisitor visitor = new ReferenceVisitor(referenceObject, openAPITraverser, this.visited, this.visitedMap, context);
             return traverseFunction.apply(resolved, visitor);
 
         } catch (Exception e) {
@@ -226,13 +240,13 @@ public class ReferenceVisitor extends AbstractVisitor {
             }
             baseURI = ReferenceUtils.resolve(ref, baseURI);
             baseURI = ReferenceUtils.toBaseURI(baseURI);
-            Reference reference = null;
+            Reference referenceObject;
             boolean isAnchor = false;
             if (this.reference.getReferenceSet().containsKey(baseURI)) {
-                reference = this.reference.getReferenceSet().get(baseURI);
+                referenceObject = this.reference.getReferenceSet().get(baseURI);
             }
             else {
-                JsonNode node = null;
+                JsonNode node;
                 try {
                     node = parse(baseURI, this.reference.getAuths());
                 } catch (Exception e) {
@@ -240,25 +254,25 @@ public class ReferenceVisitor extends AbstractVisitor {
                     baseURI = toBaseURI(ref);
                     node = parse(baseURI, this.reference.getAuths());
                 }
-                reference = toSchemaReference(baseURI, node);
+                referenceObject = toSchemaReference(baseURI, node);
             }
             String fragment = ReferenceUtils.getFragment(ref);
-            JsonNode evaluatedNode = null;
+            JsonNode evaluatedNode;
             try {
-                evaluatedNode = ReferenceUtils.jsonPointerEvaluate(fragment, reference.getJsonNode(), ref);
+                evaluatedNode = ReferenceUtils.jsonPointerEvaluate(fragment, referenceObject.getJsonNode(), ref);
             } catch (RuntimeException e) {
                 // maybe anchor
-                evaluatedNode = findAnchor(reference.getJsonNode(), fragment);
+                evaluatedNode = findAnchor(referenceObject.getJsonNode(), fragment);
                 if (evaluatedNode == null) {
                     throw new RuntimeException("Could not find " + fragment + " in contents of " + ref);
                 }
                 isAnchor = true;
             }
-            Schema resolved = openAPITraverser.deserializeFragment(evaluatedNode, Schema.class, ref, fragment, reference.getMessages());
+            Schema resolved = openAPITraverser.deserializeFragment(evaluatedNode, Schema.class, ref, fragment, referenceObject.getMessages());
             if (isAnchor) {
                 resolved.$anchor(null);
             }
-            ReferenceVisitor visitor = new ReferenceVisitor(reference, openAPITraverser, this.visited, this.visitedMap, context);
+            ReferenceVisitor visitor = new ReferenceVisitor(referenceObject, openAPITraverser, this.visited, this.visitedMap, context);
             return openAPITraverser.traverseSchema(resolved, visitor, inheritedIds);
         } catch (Exception e) {
             LOGGER.error("Error resolving schema " + ref, e);
@@ -298,17 +312,37 @@ public class ReferenceVisitor extends AbstractVisitor {
 
     public JsonNode deserializeIntoTree(String content) throws Exception {
         boolean isJson = content.trim().startsWith("{");
-        return isJson ? Json31.mapper().readTree(content) : Yaml31.mapper().readTree(content);
+        if (isJson) {
+            return Json31.mapper().readTree(content);
+        }
+        Yaml yaml = getYaml();
+
+        Object yamlObject = yaml.load(content);
+        return Yaml31.mapper().valueToTree(yamlObject);
+    }
+
+    private Yaml getYaml() {
+        String yamlCodePoints = System.getProperty("maxYamlCodePoints");
+        if (yamlCodePoints != null && !yamlCodePoints.isEmpty() && StringUtils.isNumeric(yamlCodePoints)) {
+            LoaderOptions opts = new LoaderOptions();
+            opts.setCodePointLimit(Integer.parseInt(yamlCodePoints));
+            return new Yaml(new SafeConstructor(opts), new Representer(new DumperOptions()), new DumperOptions(), opts);
+        }
+        return new Yaml(new SafeConstructor(new LoaderOptions()));
     }
 
     public JsonNode parse(String absoluteUri, List<AuthorizationValue> auths) throws Exception {
-        return deserializeIntoTree(readURI(absoluteUri, auths));
-    }
+        // check if the URL is defined as $id in current document
+        if (context.getIdsCache().containsKey(absoluteUri)) {
+            return deserializeIntoTree(context.getIdsCache().get(absoluteUri));
+        } else {
+            Traverser idsTraverser = new IdsTraverser(context);
+            idsTraverser.traverse(context.getOpenApi(), null);
+            if (context.getIdsCache().containsKey(absoluteUri)) {
+                return deserializeIntoTree(context.getIdsCache().get(absoluteUri));
+            }
+        }
 
-    protected void checkUrlIsPermitted(String refSet) throws HostDeniedException {
-        PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker(context.getParseOptions().getRemoteRefAllowList(),
-                context.getParseOptions().getRemoteRefBlockList());
-
-        permittedUrlsChecker.verify(refSet);
+        return deserializeIntoTree(readURI(absoluteUri, auths, permittedUrlsChecker));
     }
 }

@@ -182,7 +182,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ExtendedErrorModel'
+            $ref: "#/components/schemas/ExtendedErrorModel"
       examples:
         cat:
           summary: An example of a cat

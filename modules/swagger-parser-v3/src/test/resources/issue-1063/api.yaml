@@ -8,8 +8,8 @@ paths:
     get:
       operationId: getValues
       parameters:
-        - $ref: '#/components/parameters/IdParam'
-        - $ref: '#/components/parameters/NameParam'
+        - $ref: "#/components/parameters/IdParam"
+        - $ref: "#/components/parameters/NameParam"
       responses:
         200:
           description: Successful response

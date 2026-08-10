@@ -10,6 +10,6 @@ components:
       type: object
       properties:
         fDesc:
-          $ref: '#/components/schemas/FlowDescription'
+          $ref: "#/components/schemas/FlowDescription"
         fDir:
           $ref: 'spec1.yaml#/components/schemas/FlowDirection'

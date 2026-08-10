@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: Mutual Recursion Test
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaA'
+components:
+  schemas:
+    SchemaA:
+      type: object
+      properties:
+        name:
+          type: string
+        b:
+          $ref: '#/components/schemas/SchemaB'
+    SchemaB:
+      type: object
+      properties:
+        value:
+          type: integer
+        a:
+          $ref: '#/components/schemas/SchemaA'

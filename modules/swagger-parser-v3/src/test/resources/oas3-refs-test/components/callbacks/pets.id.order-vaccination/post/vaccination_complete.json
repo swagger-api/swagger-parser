@@ -1,0 +1,110 @@
+{
+  "{$request.body#/callback_url}/pets/{$request.path.id}/vaccinations": {
+    "put": {
+      "summary": "Vaccination record sent on completion",
+      "description": "New vaccination record for a pet sent after vaccination order is complete.",
+      "x-slo": {
+        "response_time_95th_percentile": 100,
+        "error_rate": 0.001
+      },
+      "x-visibility": {
+        "extent": "INTERNAL"
+      },
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../../../schemas/vaccination_record.json"
+            },
+            "examples": {
+              "vaccination": {
+                "summary": "Vaccination with ID",
+                "description": "Vaccination record for pet with vaccination id.",
+                "value": {
+                  "id": "8ce1edf4-3014-4b5c-b50d-9ed697768ead",
+                  "vaccine_name": "Feline Viral Rhinotracheitis",
+                  "administration_date": "2023-12-20"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "204": {
+          "description": "Your server implementation should return this HTTP status code if the data was received successfully."
+        },
+        "400": {
+          "description": "Your server should return this HTTP status code if the request is malformed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../../../schemas/error.json"
+              },
+              "examples": {
+                "bad_vaccine_name": {
+                  "summary": "Vaccine name is invalid.",
+                  "value": {
+                    "name": "INVALID_REQUEST",
+                    "debug_id": "b1d1f06c7246c",
+                    "message": "Request is not well-formed, syntactically incorrect, or violates schema.",
+                    "details": [
+                      {
+                        "field": "/vaccine_name",
+                        "location": "body",
+                        "value": "#bad-value#",
+                        "issue": "INVALID_PARAMETER_SYNTAX",
+                        "description": "The value of a field does not conform to the expected format."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Your server should return this HTTP status code if the pet id is not found.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../../../schemas/error.json"
+              },
+              "examples": {
+                "generic": {
+                  "summary": "Pet 'Not Found' error.",
+                  "value": {
+                    "name": "RESOURCE_NOT_FOUND",
+                    "debug_id": "b1d1f06c7246c",
+                    "message": "The specified resource does not exist."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Your server should return this HTTP status code if there is an internal error processing the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../../../schemas/error.json"
+              },
+              "examples": {
+                "generic": {
+                  "summary": "Generic internal server error.",
+                  "value": {
+                    "name": "INTERNAL_SERVER_ERROR",
+                    "debug_id": "b1d1f06c7246c",
+                    "message": "An internal server error has occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

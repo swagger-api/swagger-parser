@@ -13,7 +13,7 @@ components:
     RemoteComponent:
       properties:
         nestedProperty:
-          $ref: '#/components/schemas/NestedProperty'
+          $ref: "#/components/schemas/NestedProperty"
     NestedProperty:
       properties:
         name:
@@ -25,4 +25,4 @@ components:
       content:
         "*/*":
           schema:
-            $ref: '#/components/schemas/ErrorModel'
+            $ref: "#/components/schemas/ErrorModel"

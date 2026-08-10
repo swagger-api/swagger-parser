@@ -173,7 +173,8 @@ public class OpenAPIDeserializer {
             "default", "discriminator", "readOnly", "writeOnly", "xml", "externalDocs", "example", "deprecated",
 			"const", "examples", "$id", "$comment", "if", "then", "else", "unevaluatedProperties","unevaluatedItems", "prefixItems",
             "contains","contentEncoding","contentMediaType","$anchor","$schema","contentSchema","propertyNames",
-            "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties", "$vocabulary", "$dynamicAnchor"));
+            "dependentSchemas","dependentRequired","minContains","maxContains","patternProperties", "$vocabulary",
+            "$dynamicAnchor", "$dynamicRef"));
 	protected static Set<String> EXAMPLE_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "summary", "description",
 			"value", "externalValue"));
 	protected static Set<String> HEADER_KEYS_31 = new LinkedHashSet<>(Arrays.asList("$ref", "name", "in", "description",
@@ -305,6 +306,7 @@ public class OpenAPIDeserializer {
             rootParse.setInferSchemaType(options.isInferSchemaType());
             rootParse.setAllowEmptyStrings(options.isAllowEmptyString());
             rootParse.setValidateInternalRefs(options.isValidateInternalRefs());
+            rootParse.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
             OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.openapi31(rootParse.isOpenapi31());
             result.setOpenAPI(api);
@@ -1151,26 +1153,31 @@ public class OpenAPIDeserializer {
 
 	public String getString(String key, ObjectNode node, boolean required, String location, ParseResult
 			result, Set<String> uniqueValues, boolean noInvalidError) {
-		String value = null;
-		JsonNode v = node.get(key);
-		if (node == null || v == null) {
-			if (required) {
-				result.missing(location, key);
-				result.invalid();
-			}
-		} else if (!v.isValueNode()) {
-			if (!noInvalidError) {
-				result.invalidType(location, key, "string", node);
-			}
-        } else if (!v.isNull()) {
-			value = v.asText();
-			if (uniqueValues != null && !uniqueValues.add(value)) {
-				result.unique(location, "operationId");
-				result.invalid();
-			}
-		}
-		return value;
+		return getString(key, node, required, location, result, uniqueValues, noInvalidError, false);
 	}
+
+    public String getString(String key, ObjectNode node, boolean required, String location, ParseResult
+            result, Set<String> uniqueValues, boolean noInvalidError, boolean missingForNullNode) {
+        String value = null;
+        JsonNode v = node.get(key);
+        if (node == null || v == null || (v.isNull() && missingForNullNode)) {
+            if (required) {
+                result.missing(location, key);
+                result.invalid();
+            }
+        } else if (!v.isValueNode()) {
+            if (!noInvalidError) {
+                result.invalidType(location, key, "string", node);
+            }
+        } else if (!v.isNull()) {
+            value = v.asText();
+            if (uniqueValues != null && !uniqueValues.add(value)) {
+                result.unique(location, "operationId");
+                result.invalid();
+            }
+        }
+        return value;
+    }
 
 	public String getString(String key, ObjectNode node, boolean required, String location, ParseResult
 			result, Set<String> uniqueValues) {
@@ -1287,7 +1294,7 @@ public class OpenAPIDeserializer {
 			info.setLicense(license);
 		}
 
-		value = getString("version", node, true, location, result);
+		value = getString("version", node, true, location, result, null, false, true);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			info.setVersion(value);
 		}
@@ -1520,7 +1527,9 @@ public class OpenAPIDeserializer {
 		value = getString("style", node, false, location, result);
 
 		if (StringUtils.isBlank(value)) {
-			encoding.setStyle(Encoding.StyleEnum.FORM);
+            if (result.isExplicitStyleAndExplode()) {
+                encoding.setStyle(Encoding.StyleEnum.FORM);
+            }
 		} else {
 			if (value.equals(Encoding.StyleEnum.FORM.toString())) {
 				encoding.setStyle(Encoding.StyleEnum.FORM);
@@ -1876,7 +1885,6 @@ public class OpenAPIDeserializer {
 		return value;
 	}
 
-
 	public Integer getInteger(String key, ObjectNode node, boolean required, String location, ParseResult result) {
 		Integer value = null;
 		JsonNode v = node.get(key);
@@ -2131,9 +2139,9 @@ public class OpenAPIDeserializer {
             Boolean explode = getBoolean("explode", obj, false, location, result);
             if (explode != null) {
                 parameter.setExplode(explode);
-            } else if (StyleEnum.FORM.equals(parameter.getStyle())) {
+            } else if (StyleEnum.FORM.equals(parameter.getStyle()) && result.isExplicitStyleAndExplode()) {
                 parameter.setExplode(Boolean.TRUE);
-            } else {
+            } else if (result.isExplicitStyleAndExplode()){
                 parameter.setExplode(Boolean.FALSE);
             }
         }
@@ -2237,14 +2245,25 @@ public class OpenAPIDeserializer {
 			header.setDeprecated(deprecated);
 		}
 
+        String style = getString("style", headerNode, false, location, result);
+        if (StringUtils.isBlank(style)) {
+            if (result.isExplicitStyleAndExplode()) {
+                header.setStyle(Header.StyleEnum.SIMPLE);
+            }
+        } else {
+            if (style.equals(Header.StyleEnum.SIMPLE.toString())) {
+                header.setStyle(Header.StyleEnum.SIMPLE);
+            } else {
+                result.invalidType(location, "style", "simple", headerNode);
+            }
+        }
+
 		Boolean explode = getBoolean("explode", headerNode, false, location, result);
 		if (explode != null) {
 			header.setExplode(explode);
-		} else {
+		} else if (result.isExplicitStyleAndExplode()){
 			header.setExplode(Boolean.FALSE);
 		}
-
-		header.setStyle(Header.StyleEnum.SIMPLE);
 
 		ObjectNode headerObject = getObject("schema", headerNode, false, location, result);
 		if (headerObject != null) {
@@ -2733,7 +2752,7 @@ public class OpenAPIDeserializer {
 				}
 			}
 			schema = items;
-		}else if (itemsNode != null){
+		} else if (itemsNode != null) {
 			Schema items = new Schema();
 			if (itemsNode.getNodeType().equals(JsonNodeType.OBJECT)) {
 				items.setItems(getSchema(itemsNode, location, result));
@@ -2891,7 +2910,7 @@ public class OpenAPIDeserializer {
 
 		Map<String, Schema> properties = new LinkedHashMap<>();
 		ObjectNode propertiesObj = getObject("properties", node, false, location, result);
-		Schema property = null;
+		Schema property;
 
 		Set<String> keys = getKeys(propertiesObj);
 		for (String name : keys) {
@@ -2911,10 +2930,24 @@ public class OpenAPIDeserializer {
 			schema.setProperties(properties);
 		}
 
+        bool = getBoolean("nullable", node, false, location, result);
+        if (bool != null) {
+            schema.setNullable(bool);
+        }
+
 		//sets default value according to the schema type
 		if (node.get("default") != null && result.isInferSchemaType()) {
+            boolean nullable = schema.getNullable() == null || schema.getNullable();
+            boolean isDefaultNodeTypeNull = node.get("default") != null && node.get("default").isNull();
             if (!StringUtils.isBlank(schema.getType())) {
-                if (schema.getType().equals("array")) {
+                if (isDefaultNodeTypeNull) {
+                    if (nullable) {
+                        schema.setDefault(null);
+                    } else {
+                        String expectedType = String.format("non-null %s", schema.getType());
+                        result.invalidType(location, "default", expectedType, node);
+                    }
+                } else if (schema.getType().equals("array")) {
                     ArrayNode array = getArray("default", node, false, location, result);
                     if (array != null) {
                         schema.setDefault(array);
@@ -2961,13 +2994,6 @@ public class OpenAPIDeserializer {
             if (defaultObject != null) {
                 schema.setDefault(defaultObject);
             }
-		}else{
-			schema.setDefault(null);
-		}
-
-		bool = getBoolean("nullable", node, false, location, result);
-		if (bool != null) {
-			schema.setNullable(bool);
 		}
 
 		Map<String, Object> extensions = getExtensions(node);
@@ -3369,11 +3395,13 @@ public class OpenAPIDeserializer {
 
 	public void setStyle(String value, Parameter parameter, String location, ObjectNode obj, ParseResult result) {
 		if (StringUtils.isBlank(value)) {
-			if (QUERY_PARAMETER.equals(parameter.getIn()) || COOKIE_PARAMETER.equals(parameter.getIn())) {
-				parameter.setStyle(StyleEnum.FORM);
-			} else if (PATH_PARAMETER.equals(parameter.getIn()) || HEADER_PARAMETER.equals(parameter.getIn())) {
-				parameter.setStyle(StyleEnum.SIMPLE);
-			}
+            if (result.isExplicitStyleAndExplode()) {
+                if (QUERY_PARAMETER.equals(parameter.getIn()) || COOKIE_PARAMETER.equals(parameter.getIn())) {
+                    parameter.setStyle(StyleEnum.FORM);
+                } else if (PATH_PARAMETER.equals(parameter.getIn()) || HEADER_PARAMETER.equals(parameter.getIn())) {
+                    parameter.setStyle(StyleEnum.SIMPLE);
+                }
+            }
 		} else {
 			if (value.equals(StyleEnum.FORM.toString())) {
 				parameter.setStyle(StyleEnum.FORM);
@@ -4096,9 +4124,7 @@ public class OpenAPIDeserializer {
 							dependentRequired.add(n.textValue());
 						}
 					}
-					if (dependentRequired != null) {
-						dependentRequiredList.put(name, dependentRequired);
-					}
+                    dependentRequiredList.put(name, dependentRequired);
 				}
 			}
 		}
@@ -4119,14 +4145,12 @@ public class OpenAPIDeserializer {
                     dependentSchemasList.put(name, dependentSchemas);
                 }
             }
-            if (dependentSchemasObj != null) {
-                schema.setDependentSchemas(dependentSchemasList);
-            }
+            schema.setDependentSchemas(dependentSchemasList);
         }
 
 		//prefixItems
 		ArrayNode prefixItemsArray = getArray("prefixItems", node, false, location, result);
-		if(prefixItemsArray != null) {
+		if (prefixItemsArray != null) {
 			Schema prefixItems = new JsonSchema();
 
 			List<Schema> prefixItemsList = new ArrayList<>();
@@ -4156,11 +4180,9 @@ public class OpenAPIDeserializer {
 		Set<String> keys = getKeys(propertiesObj);
 		for (String name : keys) {
 			JsonNode propertyValue = propertiesObj.get(name);
-            if (propertiesObj != null) {
-                property = getJsonSchema(propertyValue, location, result);
-                if (property != null) {
-                    properties.put(name, property);
-                }
+            property = getJsonSchema(propertyValue, location, result);
+            if (property != null) {
+                properties.put(name, property);
             }
 		}
 		if (propertiesObj != null) {
@@ -4226,6 +4248,11 @@ public class OpenAPIDeserializer {
             schema.set$dynamicAnchor(value);
         }
 
+        value = getString("$dynamicRef", node, false, location, result);
+        if (value != null) {
+            schema.set$dynamicRef(value);
+        }
+
 		value = getString("$id", node, false, location, result);
 		if (value != null) {
 			schema.set$id(value);
@@ -4274,6 +4301,8 @@ public class OpenAPIDeserializer {
         private boolean inferSchemaType = true;
 		private boolean openapi31 = false;
 		private boolean oaiAuthor = false;
+
+        private boolean explicitStyleAndExplode = true;
 
 		public boolean isInferSchemaType() {
 			return inferSchemaType;
@@ -4369,6 +4398,19 @@ public class OpenAPIDeserializer {
 			this.oaiAuthor = oaiAuthor;
 			return this;
 		}
+
+        public boolean isExplicitStyleAndExplode() {
+            return explicitStyleAndExplode;
+        }
+
+        public void setExplicitStyleAndExplode(boolean explicitStyleAndExplode) {
+            this.explicitStyleAndExplode = explicitStyleAndExplode;
+        }
+
+        public ParseResult explicitStyleAndExplode(boolean explicitStyleAndExplode) {
+            this.explicitStyleAndExplode = explicitStyleAndExplode;
+            return this;
+        }
 
 		public List<String> getMessages() {
 			List<String> messages = new ArrayList<String>();

@@ -1,0 +1,38 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Swagger 2.0 Shared Response Test
+  description: Test case for verifying x-nullable is preserved when multiple endpoints share the same response definition
+
+responses:
+  SharedResponse:
+    description: A shared response with nullable field
+    schema:
+      type: object
+      properties:
+        data:
+          type: string
+          description: Required field
+        optional_field:
+          type: integer
+          description: Optional nullable field
+          x-nullable: true
+      required:
+        - data
+
+paths:
+  /endpoint1:
+    get:
+      operationId: endpoint1
+      summary: First endpoint using shared response
+      responses:
+        '200':
+          $ref: '#/responses/SharedResponse'
+
+  /endpoint2:
+    get:
+      operationId: endpoint2
+      summary: Second endpoint using shared response
+      responses:
+        '200':
+          $ref: '#/responses/SharedResponse'

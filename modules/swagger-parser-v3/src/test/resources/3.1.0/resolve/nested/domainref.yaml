@@ -5,7 +5,7 @@ info:
 components:
   schemas:
     NestedParse:
-      $ref: '#/components/schemas/NestedParseEnum'
+      $ref: "#/components/schemas/NestedParseEnum"
       description: Overwritten description
     NestedParseEnum:
       title: Parse It

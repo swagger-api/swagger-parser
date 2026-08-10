@@ -1,0 +1,9 @@
+{
+    "title": "Vaccine ID",
+    "description": "Unique ID of a vaccine as defined by the external partner's system.",
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 5000,
+    "pattern": "^.*$",
+    "x-redacted": false
+}

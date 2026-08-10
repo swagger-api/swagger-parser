@@ -15,11 +15,13 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.models.RefFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -38,7 +40,7 @@ public class ResolverFully {
 
     private boolean aggregateCombinators;
 
-
+    private ParseOptions parseOptions = new ParseOptions();
 
     public ResolverFully() {
         this(true);
@@ -48,14 +50,25 @@ public class ResolverFully {
         this.aggregateCombinators = aggregateCombinators;
     }
 
+    public ResolverFully(ParseOptions options) {
+        if (options != null) {
+            this.aggregateCombinators = options.isResolveCombinators();
+        } else {
+            this.aggregateCombinators = true;
+        }
+        this.parseOptions = options;
+    }
+
     private Map<String, Schema> schemas;
     private Map<String, Schema> resolvedModels = new HashMap<>();
     private Map<String, Example> examples;
     private Map<String, Parameter> parameters;
+    private Map<String, ApiResponse> responses;
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
     private Map<String, Link> links;
-    private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
+    private Map<Schema, Schema> resolvedSchemas = new IdentityHashMap<>();
+    private Set<Schema> schemasInProgress = Collections.newSetFromMap(new IdentityHashMap<>());
     private Map<String, Callback> callbacks;
 
     public void resolveFully(OpenAPI openAPI) {
@@ -71,6 +84,13 @@ public class ResolverFully {
             schemas = components.getSchemas();
             if (schemas == null) {
                 schemas = new HashMap<>();
+            }
+        }
+
+        if (components != null && components.getResponses() != null) {
+            responses = components.getResponses();
+            if (responses == null) {
+                responses = new HashMap<>();
             }
         }
 
@@ -178,8 +198,10 @@ public class ResolverFully {
             // responses
             ApiResponses responses = op.getResponses();
             if(responses != null) {
+                ApiResponses resolvedResponses = new ApiResponses();
                 for(String code : responses.keySet()) {
                     ApiResponse response = responses.get(code);
+                    response = response.get$ref() != null ? resolveResponse(response) : response;
                     if (response.getContent() != null) {
                         Map<String, MediaType> content = response.getContent();
                         for(String mediaType: content.keySet()){
@@ -205,7 +227,9 @@ public class ResolverFully {
                             link.setValue(resolvedValue);
                         }
                     }
+                    resolvedResponses.addApiResponse(code, response);
                 }
+                op.setResponses(resolvedResponses);
             }
         }
     }
@@ -274,6 +298,18 @@ public class ResolverFully {
         return requestBody;
     }
 
+    public ApiResponse resolveResponse(ApiResponse apiResponse){
+        RefFormat refFormat = computeRefFormat(apiResponse.get$ref());
+        String $ref = apiResponse.get$ref();
+        if (!isAnExternalRefFormat(refFormat)){
+            if (responses != null && !responses.isEmpty()) {
+                String referenceKey = computeDefinitionName($ref);
+                return responses.getOrDefault(referenceKey, apiResponse);
+            }
+        }
+        return apiResponse;
+    }
+
     public Callback resolveCallback(Callback callback){
         RefFormat refFormat = computeRefFormat(callback.get$ref());
         String $ref = callback.get$ref();
@@ -302,6 +338,28 @@ public class ResolverFully {
         if (schema == null) {
             return null;
         }
+        Schema cached = resolvedSchemas.get(schema);
+        if (cached != null) {
+            return cached;
+        }
+        if (schemasInProgress.contains(schema)) {
+            return schema;
+        }
+        return resolveAndCache(schema);
+    }
+
+    private Schema resolveAndCache(Schema schema) {
+        schemasInProgress.add(schema);
+        try {
+            Schema resolved = resolveSchemaImpl(schema);
+            resolvedSchemas.put(schema, resolved);
+            return resolved;
+        } finally {
+            schemasInProgress.remove(schema);
+        }
+    }
+
+    private Schema resolveSchemaImpl(Schema schema) {
 
         if(schema.get$ref() != null) {
             String ref= schema.get$ref();
@@ -360,7 +418,7 @@ public class ResolverFully {
                     Schema innerProperty = obj.getProperties().get(propertyName);
                     // reference check
                     if(schema != innerProperty) {
-                        updated.put(propertyName, resolveSchemaProperty(propertyName, innerProperty));
+                        updated.put(propertyName, resolveSchema(innerProperty));
                     }
                 }
                 obj.setProperties(updated);
@@ -403,7 +461,10 @@ public class ResolverFully {
                     aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples, defaultValues);
                 }
                 if (defaultValues.size() == 1) {
-                    combinedModel.setDefault(defaultValues.iterator().next());
+                    Object defaultValue = defaultValues.iterator().next();
+                    if (defaultValue != null) {
+                        combinedModel.setDefault(defaultValue);
+                    }
                 }
 
                 if (schema.getExample() != null) {
@@ -462,14 +523,14 @@ public class ResolverFully {
             Map<String, Schema> properties = model.getProperties();
             for (String propertyName : properties.keySet()) {
                 Schema property = (Schema) model.getProperties().get(propertyName);
-                updated.put(propertyName, resolveSchemaProperty(propertyName, property));
+                updated.put(propertyName, resolveSchema(property));
             }
 
             for (String key : updated.keySet()) {
                 Schema property = updated.get(key);
 
                 if (property.getProperties() != model.getProperties()) {
-                    if (!hasSchemaType(property)) {
+                    if (!hasSchemaType(property) && parseOptions.isExplicitObjectSchema()) {
                         if (SpecVersion.V30.equals(property.getSpecVersion())) {
                             property.setType("object");
                         } else {
@@ -536,7 +597,7 @@ public class ResolverFully {
             if (resolved.getProperties() != null) {
                 for (String key : properties.keySet()) {
                     Schema prop = (Schema) resolved.getProperties().get(key);
-                    targetSchema.addProperties(key, resolveSchemaProperty(key, prop));
+                    targetSchema.addProperties(key, resolveSchema(prop));
                 }
 
                 if (resolved.getRequired() != null) {
@@ -566,10 +627,11 @@ public class ResolverFully {
             if (resolved.getExample() != null) {
                 examples.add(resolved.getExample());
             }
-            if (sourceSchema.getDefault() != null && resolved.getDefault() == null)
-                defaultValues.add(sourceSchema.getDefault());
-            else
+            if (resolved.getDefault() != null) {
                 defaultValues.add(resolved.getDefault());
+            } else if (sourceSchema.getDefault() != null) {
+                defaultValues.add(sourceSchema.getDefault());
+            }
 
             if (resolved.getExtensions() != null) {
                 Map<String, Object> extensions = resolved.getExtensions();
@@ -658,17 +720,6 @@ public class ResolverFully {
             }
             required.addAll(requiredProperties);
             targetSchema.setRequired(required);
-        }
-    }
-
-    private Schema resolveSchemaProperty(String propertyName, Schema innerProperty) {
-        if (resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != innerProperty) {
-            LOGGER.debug("avoiding infinite loop");
-            Schema resolved = resolveSchema(innerProperty);
-            resolvedProperties.put(propertyName, resolved);
-            return resolved;
-        } else {
-            return resolvedProperties.get(propertyName);
         }
     }
 }

@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Recursive Array Items Test
+  version: 1.0.0
+paths:
+  /tree:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreeNode'
+components:
+  schemas:
+    TreeNode:
+      type: object
+      properties:
+        value:
+          type: integer
+        left:
+          $ref: '#/components/schemas/TreeNode'
+        right:
+          $ref: '#/components/schemas/TreeNode'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreeNode'

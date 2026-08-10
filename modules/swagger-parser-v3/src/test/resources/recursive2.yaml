@@ -11,7 +11,7 @@ paths:
         '200':
           description: Ok
       requestBody:
-        $ref: '#/components/requestBodies/MyRequestBody'
+        $ref: "#/components/requestBodies/MyRequestBody"
 
   /bar:
     put:
@@ -19,7 +19,7 @@ paths:
         '200':
           description: Ok
       requestBody:
-        $ref: '#/components/requestBodies/MyRequestBody'
+        $ref: "#/components/requestBodies/MyRequestBody"
 
 components:
   schemas:
@@ -27,18 +27,18 @@ components:
       type: object
       properties:
         prop:
-          $ref: '#/components/schemas/Schema2'
+          $ref: "#/components/schemas/Schema2"
     Schema2:
       type: object
       properties:
         prop1:
-          $ref: '#/components/schemas/Schema1'
+          $ref: "#/components/schemas/Schema1"
         prop2:
-          $ref: '#/components/schemas/Schema1'
+          $ref: "#/components/schemas/Schema1"
 
   requestBodies:
     MyRequestBody:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Schema2'
+            $ref: "#/components/schemas/Schema2"

@@ -1,0 +1,31 @@
+openapi: 3.1.0
+info:
+  title: Test external OAI schema with $id and $defs resolution
+  version: 1.0.0
+paths:
+  /hello:
+    get:
+      operationId: hello
+      responses:
+        "200":
+          description: A successful response
+          $ref: '#/components/responses/Data'
+components:
+  responses:
+    Data:
+      description: Description of the response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - items
+            properties:
+              items:
+                message:
+                  type: string
+              schema:
+                $ref: "#/components/schemas/OpenApiSchema"
+  schemas:
+    OpenApiSchema:
+      $ref: "http://localhost:${dynamicPort}/oai-v3.1-schema.yaml"

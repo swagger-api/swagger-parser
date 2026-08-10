@@ -26,7 +26,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/InventoryItem'
+                  $ref: "#/components/schemas/InventoryItem"
         '400':
           description: bad input parameter
 

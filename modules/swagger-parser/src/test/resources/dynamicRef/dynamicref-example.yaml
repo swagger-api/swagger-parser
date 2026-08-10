@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  title: Test DynamicRef
+  version: 1.0.0
+paths:
+  /tree:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Node"
+
+components:
+  schemas:
+    Node:
+      $id: "https://example.com/schemas/node"
+      $dynamicAnchor: "node"
+      type: object
+      properties:
+        name:
+          type: string
+        children:
+          type: array
+          items:
+            $dynamicRef: "#node"

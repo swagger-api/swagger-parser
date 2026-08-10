@@ -608,8 +608,8 @@ public class OAI31DeserializationTest {
                 "        type: object\n" +
                 "    PatientPerson:\n" +
                 "      allOf:\n" +
-                "        - $ref: '#/components/schemas/Person'\n" +
-                "        - $ref: '#/components/schemas/Patient'\n" +
+                "        - $ref: \"#/components/schemas/Person\"\n" +
+                "        - $ref: \"#/components/schemas/Patient\"\n" +
                 "      unevaluatedProperties: false\n" +
                 "      $ref: ./ex.json#patient-person";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents( refSibling , null, options);
@@ -883,11 +883,11 @@ public class OAI31DeserializationTest {
                     "      type: object\n" +
                     "      properties:\n" +
                     "        any_value:\n" +
-                    "          $ref: '#/components/schemas/AnyValue'\n" +
+                    "          $ref: \"#/components/schemas/AnyValue\"\n" +
                     "        any_value_with_desc:\n" +
-                    "          $ref: '#/components/schemas/AnyValueWithDesc'\n" +
+                    "          $ref: \"#/components/schemas/AnyValueWithDesc\"\n" +
                     "        any_value_nullable:\n" +
-                    "          $ref: '#/components/schemas/AnyValueNullable'\n" +
+                    "          $ref: \"#/components/schemas/AnyValueNullable\"\n" +
                     "    AnyValueModelInline:\n" +
                     "      description: test any value inline\n" +
                     "      type: object\n" +

@@ -9,7 +9,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExamplePost'
+              $ref: "#/components/schemas/ExamplePost"
       responses:
         204:
           description: No content

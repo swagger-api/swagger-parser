@@ -1,0 +1,9 @@
+{
+    "title": "Vaccine Name",
+    "description": "Name of the vaccine.",
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 1000,
+    "pattern": "^[A-Za-z0-9 ]+$",
+    "x-redacted": true
+}

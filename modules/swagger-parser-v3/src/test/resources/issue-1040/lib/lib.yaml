@@ -10,4 +10,4 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/ValueId'
+          $ref: "#/components/schemas/ValueId"

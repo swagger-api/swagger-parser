@@ -14,9 +14,9 @@ paths:
         "200":
           description: OK
   /internalref:
-    $ref: '#/components/pathItems/InternalRef'
+    $ref: "#/components/pathItems/InternalRef"
   /internalreftoexternal:
-    $ref: '#/components/pathItems/InternalRefToExternal'
+    $ref: "#/components/pathItems/InternalRefToExternal"
   /internal:
     get:
       description: Internal PathItem
@@ -41,12 +41,12 @@ components:
   parameters:
     userId:
       description: userId root
-      $ref: '#/components/parameters/indirection1'
+      $ref: "#/components/parameters/indirection1"
     indirection1:
-      $ref: '#/components/parameters/userIdRef'
+      $ref: "#/components/parameters/userIdRef"
     indirection2:
       description: indirection2 root
-      $ref: '#/components/parameters/userIdRef'
+      $ref: "#/components/parameters/userIdRef"
     userIdRef:
       name: userId
       in: query
@@ -63,7 +63,7 @@ components:
       explode: true
     externalRefIndirectPointer:
       description: externalRefIndirectPointer root
-      $ref: '#/components/parameters/externalRefIndirect3'
+      $ref: "#/components/parameters/externalRefIndirect3"
     externalRefIndirect3:
       name: externalParameter3
       in: query

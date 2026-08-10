@@ -15,12 +15,14 @@ public class ParseOptions {
     private boolean validateInternalRefs = true;
     private boolean legacyYamlDeserialization = false;
     private boolean resolveRequestBody = false;
-
+    private boolean resolveResponses = false;
     private boolean oaiAuthor;
     private boolean inferSchemaType = true;
     private boolean safelyResolveURL;
     private List<String> remoteRefAllowList;
     private List<String> remoteRefBlockList;
+    private boolean explicitStyleAndExplode = true;
+    private boolean explicitObjectSchema = true;
 
 
     public boolean isResolve() {
@@ -161,4 +163,29 @@ public class ParseOptions {
     public void setRemoteRefBlockList(List<String> remoteRefBlockList) {
         this.remoteRefBlockList = remoteRefBlockList;
     }
+
+    public boolean isResolveResponses() {
+        return resolveResponses;
+    }
+
+    public void setResolveResponses(boolean resolveResponses) {
+        this.resolveResponses = resolveResponses;
+    }
+
+    public boolean isExplicitStyleAndExplode() {
+        return explicitStyleAndExplode;
+    }
+
+    public void setExplicitStyleAndExplode(boolean explicitStyleAndExplode) {
+        this.explicitStyleAndExplode = explicitStyleAndExplode;
+    }
+
+    public boolean isExplicitObjectSchema() {
+        return explicitObjectSchema;
+    }
+
+    public void setExplicitObjectSchema(boolean explicitObjectSchema) {
+        this.explicitObjectSchema = explicitObjectSchema;
+    }
+
 }

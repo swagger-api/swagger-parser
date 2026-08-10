@@ -50,7 +50,7 @@ components:
             content:
               application/vnd.common.v3+json:
                 schema:
-                  $ref: '#/components/schemas/GetDealResponse'
+                  $ref: "#/components/schemas/GetDealResponse"
           '401':
             description: Unauthorized
           '403':
@@ -60,7 +60,7 @@ components:
             content:
               application/vnd.common.v3+json:
                 schema:
-                  $ref: '#/components/schemas/inlineResponse4041'
+                  $ref: "#/components/schemas/inlineResponse4041"
           '503':
             description: Server Error
   schemas:
@@ -101,7 +101,7 @@ components:
             uniqueItems: true
             type: array
             items:
-              $ref: '#/components/schemas/ReferenceKeyModel'
+              $ref: "#/components/schemas/ReferenceKeyModel"
           description: Gets or sets the reference keys.
           nullable: true
         createdDate:

@@ -31,13 +31,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/three_d_secure'
+                $ref: "#/components/schemas/three_d_secure"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -115,13 +115,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/three_d_secure'
+                $ref: "#/components/schemas/three_d_secure"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/account:
     delete:
       description: >-
@@ -140,13 +140,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -193,13 +193,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates an account by setting the values of the parameters passed.
@@ -218,15 +218,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload'
+        $ref: "#/components/requestBodies/payload"
   /v1/account/bank_accounts:
     post:
       description: ''
@@ -238,15 +238,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload2'
+        $ref: "#/components/requestBodies/payload2"
   '/v1/account/bank_accounts/{id}':
     delete:
       description: ''
@@ -264,15 +264,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveAccountExternalAccount
@@ -295,13 +295,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the metadata of a bank account belonging to a <a
@@ -322,15 +322,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload4'
+        $ref: "#/components/requestBodies/payload4"
   /v1/account/external_accounts:
     get:
       description: ''
@@ -383,7 +383,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/bank_account'
+                          $ref: "#/components/schemas/bank_account"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -424,7 +424,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateAccountExternalAccount
@@ -435,15 +435,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload2'
+        $ref: "#/components/requestBodies/payload2"
   '/v1/account/external_accounts/{id}':
     delete:
       description: ''
@@ -461,15 +461,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveAccountExternalAccount
@@ -492,13 +492,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the metadata of a bank account belonging to a <a
@@ -519,15 +519,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload4'
+        $ref: "#/components/requestBodies/payload4"
   /v1/account/login_links:
     post:
       description: ''
@@ -539,13 +539,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/login_link'
+                $ref: "#/components/schemas/login_link"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -633,7 +633,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/account'
+                          $ref: "#/components/schemas/account"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -674,7 +674,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: AccountCreate
@@ -685,13 +685,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account_with_keys'
+                $ref: "#/components/schemas/account_with_keys"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -902,15 +902,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: <p>Retrieves the details of the account.</p>
       operationId: AccountRetrieve
@@ -935,13 +935,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates an account by setting the values of the parameters passed.
@@ -960,15 +960,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload'
+        $ref: "#/components/requestBodies/payload"
   '/v1/accounts/{account}/bank_accounts':
     post:
       description: ''
@@ -980,15 +980,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload2'
+        $ref: "#/components/requestBodies/payload2"
   '/v1/accounts/{account}/bank_accounts/{id}':
     delete:
       description: ''
@@ -1006,15 +1006,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveAccountExternalAccount
@@ -1037,13 +1037,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the metadata of a bank account belonging to a <a
@@ -1064,15 +1064,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload4'
+        $ref: "#/components/requestBodies/payload4"
   '/v1/accounts/{account}/external_accounts':
     get:
       description: ''
@@ -1125,7 +1125,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/bank_account'
+                          $ref: "#/components/schemas/bank_account"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -1166,7 +1166,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateAccountExternalAccount
@@ -1177,15 +1177,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload2'
+        $ref: "#/components/requestBodies/payload2"
   '/v1/accounts/{account}/external_accounts/{id}':
     delete:
       description: ''
@@ -1203,15 +1203,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveAccountExternalAccount
@@ -1234,13 +1234,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the metadata of a bank account belonging to a <a
@@ -1261,15 +1261,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/external_account_source'
+                $ref: "#/components/schemas/external_account_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload4'
+        $ref: "#/components/requestBodies/payload4"
   '/v1/accounts/{account}/login_links':
     post:
       description: ''
@@ -1287,13 +1287,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/login_link'
+                $ref: "#/components/schemas/login_link"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1340,13 +1340,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1429,7 +1429,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/apple_pay_domain'
+                          $ref: "#/components/schemas/apple_pay_domain"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -1471,7 +1471,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateApplePayDomain
@@ -1482,13 +1482,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/apple_pay_domain'
+                $ref: "#/components/schemas/apple_pay_domain"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1528,15 +1528,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/apple_pay_domain'
+                $ref: "#/components/schemas/apple_pay_domain"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveApplePayDomain
@@ -1559,13 +1559,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/apple_pay_domain'
+                $ref: "#/components/schemas/apple_pay_domain"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/application_fees:
     get:
       description: >-
@@ -1635,7 +1635,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/platform_earning'
+                          $ref: "#/components/schemas/platform_earning"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -1676,7 +1676,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/application_fees/{fee}/refunds/{id}':
     get:
       description: >-
@@ -1709,13 +1709,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fee_refund'
+                $ref: "#/components/schemas/fee_refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specified application fee refund by setting the values of
@@ -1729,13 +1729,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fee_refund'
+                $ref: "#/components/schemas/fee_refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1786,13 +1786,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/platform_earning'
+                $ref: "#/components/schemas/platform_earning"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/application_fees/{id}/refund':
     post:
       description: ''
@@ -1810,13 +1810,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/platform_earning'
+                $ref: "#/components/schemas/platform_earning"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1906,7 +1906,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/fee_refund'
+                          $ref: "#/components/schemas/fee_refund"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -1946,7 +1946,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreatePlatformEarningRefund
@@ -1963,13 +1963,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fee_refund'
+                $ref: "#/components/schemas/fee_refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2019,13 +2019,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/balance'
+                $ref: "#/components/schemas/balance"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/balance/history:
     get:
       description: >-
@@ -2123,7 +2123,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/balance_transaction'
+                          $ref: "#/components/schemas/balance_transaction"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -2165,7 +2165,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/balance/history/{id}':
     get:
       description: <p>Retrieves the balance transaction with the given ID.</p>
@@ -2191,13 +2191,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/balance_transaction'
+                $ref: "#/components/schemas/balance_transaction"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/bitcoin/payments:
     get:
       description: ''
@@ -2256,7 +2256,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/charge'
+                          $ref: "#/components/schemas/charge"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -2297,7 +2297,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreatePayment
@@ -2308,15 +2308,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload5'
+        $ref: "#/components/requestBodies/payload5"
   '/v1/bitcoin/payments/{charge}/refund':
     post:
       description: ''
@@ -2334,15 +2334,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload6'
+        $ref: "#/components/requestBodies/payload6"
   '/v1/bitcoin/payments/{id}':
     get:
       description: ''
@@ -2366,13 +2366,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/bitcoin/receivers:
     get:
       description: >-
@@ -2446,7 +2446,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/bitcoin_receiver'
+                          $ref: "#/components/schemas/bitcoin_receiver"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -2487,7 +2487,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Creates a Bitcoin receiver object that can be used to accept bitcoin
@@ -2502,13 +2502,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bitcoin_receiver'
+                $ref: "#/components/schemas/bitcoin_receiver"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2585,15 +2585,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bitcoin_receiver'
+                $ref: "#/components/schemas/bitcoin_receiver"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: <p>Retrieves the Bitcoin receiver with the given ID.</p>
       operationId: RetrieveReceiver
@@ -2616,13 +2616,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bitcoin_receiver'
+                $ref: "#/components/schemas/bitcoin_receiver"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateReceiver
@@ -2639,13 +2639,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bitcoin_receiver'
+                $ref: "#/components/schemas/bitcoin_receiver"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2698,13 +2698,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bitcoin_receiver'
+                $ref: "#/components/schemas/bitcoin_receiver"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2795,7 +2795,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/bitcoin_transaction'
+                          $ref: "#/components/schemas/bitcoin_transaction"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -2835,7 +2835,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/bitcoin/transactions:
     get:
       description: ''
@@ -2904,7 +2904,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/bitcoin_transaction'
+                          $ref: "#/components/schemas/bitcoin_transaction"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -2944,7 +2944,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/bitcoin/transactions/{id}':
     get:
       description: ''
@@ -2968,13 +2968,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bitcoin_transaction'
+                $ref: "#/components/schemas/bitcoin_transaction"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/charges:
     get:
       description: >-
@@ -3054,7 +3054,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/charge'
+                          $ref: "#/components/schemas/charge"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -3095,7 +3095,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateCharge
@@ -3106,13 +3106,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3295,13 +3295,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specified charge by setting the values of the parameters
@@ -3317,13 +3317,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3420,13 +3420,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3513,13 +3513,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dispute'
+                $ref: "#/components/schemas/dispute"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateChargeDispute
@@ -3536,15 +3536,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dispute'
+                $ref: "#/components/schemas/dispute"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload7'
+        $ref: "#/components/requestBodies/payload7"
   '/v1/charges/{charge}/dispute/close':
     post:
       description: ''
@@ -3562,15 +3562,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dispute'
+                $ref: "#/components/schemas/dispute"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
   '/v1/charges/{charge}/refund':
     post:
       description: ''
@@ -3588,15 +3588,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload6'
+        $ref: "#/components/requestBodies/payload6"
   '/v1/charges/{charge}/refunds':
     get:
       description: >-
@@ -3660,7 +3660,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/refund'
+                          $ref: "#/components/schemas/refund"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -3700,7 +3700,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateChargeRefund
@@ -3717,13 +3717,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refund'
+                $ref: "#/components/schemas/refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3798,13 +3798,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refund'
+                $ref: "#/components/schemas/refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateChargeRefund
@@ -3821,15 +3821,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refund'
+                $ref: "#/components/schemas/refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload8'
+        $ref: "#/components/requestBodies/payload8"
   /v1/country_specs:
     get:
       description: <p>Lists all Country Spec objects available in the API.</p>
@@ -3882,7 +3882,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/country_spec'
+                          $ref: "#/components/schemas/country_spec"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -3923,7 +3923,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/country_specs/{country}':
     get:
       description: <p>Returns a Country Spec for a given Country code.</p>
@@ -3950,13 +3950,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/country_spec'
+                $ref: "#/components/schemas/country_spec"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/coupons:
     get:
       description: <p>Returns a list of your coupons.</p>
@@ -4018,7 +4018,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/coupon'
+                          $ref: "#/components/schemas/coupon"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -4059,7 +4059,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>You can create coupons easily via the <a
@@ -4083,13 +4083,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/coupon'
+                $ref: "#/components/schemas/coupon"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -4205,15 +4205,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/coupon'
+                $ref: "#/components/schemas/coupon"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: <p>Retrieves the coupon with the given ID.</p>
       operationId: RetrieveCoupon
@@ -4236,13 +4236,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/coupon'
+                $ref: "#/components/schemas/coupon"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the metadata of a coupon. Other coupon details (currency,
@@ -4261,13 +4261,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/coupon'
+                $ref: "#/components/schemas/coupon"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -4351,7 +4351,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/customer'
+                          $ref: "#/components/schemas/customer"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -4392,7 +4392,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: <p>Creates a new customer object.</p>
       operationId: CustomerCreateWithPlan
@@ -4403,15 +4403,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer'
+                $ref: "#/components/schemas/customer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload9'
+        $ref: "#/components/requestBodies/payload9"
   '/v1/customers/{customer}':
     delete:
       description: >-
@@ -4431,15 +4431,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer'
+                $ref: "#/components/schemas/customer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: >-
         <p>Retrieves the details of an existing customer. You need only supply
@@ -4465,13 +4465,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer'
+                $ref: "#/components/schemas/customer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CustomerUpdateWithPlan
@@ -4488,15 +4488,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer'
+                $ref: "#/components/schemas/customer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload9'
+        $ref: "#/components/requestBodies/payload9"
   '/v1/customers/{customer}/alipay_accounts':
     get:
       description: ''
@@ -4555,7 +4555,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/alipay_account'
+                          $ref: "#/components/schemas/alipay_account"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -4595,7 +4595,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateCustomerSource
@@ -4606,15 +4606,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload10'
+        $ref: "#/components/requestBodies/payload10"
   '/v1/customers/{customer}/alipay_accounts/{id}':
     delete:
       description: ''
@@ -4632,15 +4632,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveCustomerAlipayAccount
@@ -4663,13 +4663,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/alipay_account'
+                $ref: "#/components/schemas/alipay_account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/customers/{customer}/bank_accounts':
     get:
       description: >-
@@ -4733,7 +4733,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/bank_account'
+                          $ref: "#/components/schemas/bank_account"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -4773,7 +4773,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateCustomerSource
@@ -4784,15 +4784,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload10'
+        $ref: "#/components/requestBodies/payload10"
   '/v1/customers/{customer}/bank_accounts/{id}':
     delete:
       description: ''
@@ -4810,15 +4810,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: >-
         <p>By default, you can see the 10 most recent sources stored on a
@@ -4850,13 +4850,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bank_account'
+                $ref: "#/components/schemas/bank_account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateCustomerCard
@@ -4873,15 +4873,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload11'
+        $ref: "#/components/requestBodies/payload11"
   '/v1/customers/{customer}/bank_accounts/{id}/verify':
     post:
       description: ''
@@ -4905,15 +4905,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bank_account'
+                $ref: "#/components/schemas/bank_account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload12'
+        $ref: "#/components/requestBodies/payload12"
   '/v1/customers/{customer}/cards':
     get:
       description: ''
@@ -4972,7 +4972,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/card'
+                          $ref: "#/components/schemas/card"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -5012,7 +5012,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateCustomerSource
@@ -5023,15 +5023,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload10'
+        $ref: "#/components/requestBodies/payload10"
   '/v1/customers/{customer}/cards/{id}':
     delete:
       description: ''
@@ -5049,15 +5049,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveCustomerCard
@@ -5080,13 +5080,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateCustomerCard
@@ -5103,15 +5103,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload11'
+        $ref: "#/components/requestBodies/payload11"
   '/v1/customers/{customer}/discount':
     delete:
       description: <p>Removes the currently applied discount on a customer.</p>
@@ -5123,15 +5123,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/discount'
+                $ref: "#/components/schemas/discount"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveCustomerDiscount
@@ -5154,13 +5154,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/discount'
+                $ref: "#/components/schemas/discount"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/customers/{customer}/sources':
     get:
       description: ''
@@ -5225,7 +5225,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/account_debit_account'
+                          $ref: "#/components/schemas/account_debit_account"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -5266,7 +5266,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateCustomerSource
@@ -5277,15 +5277,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload10'
+        $ref: "#/components/requestBodies/payload10"
   '/v1/customers/{customer}/sources/{id}':
     delete:
       description: ''
@@ -5303,15 +5303,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveCustomerSource
@@ -5334,13 +5334,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/customer_source'
+                $ref: "#/components/schemas/customer_source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateCustomerCard
@@ -5357,15 +5357,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload11'
+        $ref: "#/components/requestBodies/payload11"
   '/v1/customers/{customer}/sources/{id}/verify':
     post:
       description: ''
@@ -5389,15 +5389,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bank_account'
+                $ref: "#/components/schemas/bank_account"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload12'
+        $ref: "#/components/requestBodies/payload12"
   '/v1/customers/{customer}/subscriptions':
     get:
       description: >-
@@ -5461,7 +5461,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/subscription'
+                          $ref: "#/components/schemas/subscription"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -5501,7 +5501,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: <p>Creates a new subscription on an existing customer.</p>
       operationId: CreateCustomerSubscription
@@ -5518,13 +5518,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -5678,15 +5678,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload13'
+        $ref: "#/components/requestBodies/payload13"
     get:
       description: <p>Retrieves the subscription with the given ID.</p>
       operationId: RetrieveCustomerSubscription
@@ -5703,13 +5703,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates an existing subscription on a customer to match the specified
@@ -5725,15 +5725,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload14'
+        $ref: "#/components/requestBodies/payload14"
   '/v1/customers/{customer}/subscriptions/{subscription_exposed_id}/discount':
     delete:
       description: <p>Removes the currently applied discount on a customer.</p>
@@ -5745,15 +5745,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/discount'
+                $ref: "#/components/schemas/discount"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveCustomerDiscount
@@ -5776,13 +5776,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/discount'
+                $ref: "#/components/schemas/discount"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/disputes:
     get:
       description: <p>Returns a list of your disputes.</p>
@@ -5841,7 +5841,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/dispute'
+                          $ref: "#/components/schemas/dispute"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -5882,7 +5882,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/disputes/{dispute}':
     get:
       description: <p>Retrieves the dispute with the given ID.</p>
@@ -5906,13 +5906,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dispute'
+                $ref: "#/components/schemas/dispute"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>When you get a dispute, contacting your customer is always the best
@@ -5939,15 +5939,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dispute'
+                $ref: "#/components/schemas/dispute"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload7'
+        $ref: "#/components/requestBodies/payload7"
   '/v1/disputes/{dispute}/close':
     post:
       description: >-
@@ -5970,15 +5970,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dispute'
+                $ref: "#/components/schemas/dispute"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
   /v1/events:
     get:
       description: '<p>List events, going back up to 30 days.</p>'
@@ -6055,7 +6055,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/event'
+                          $ref: "#/components/schemas/event"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -6096,7 +6096,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/events/{id}':
     get:
       description: >-
@@ -6122,13 +6122,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/event'
+                $ref: "#/components/schemas/event"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/events/{id}/retry':
     post:
       description: <p>Resend an event. This only works in testmode</p>
@@ -6146,15 +6146,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/event'
+                $ref: "#/components/schemas/event"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
   /v1/invoiceitems:
     get:
       description: >-
@@ -6224,7 +6224,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/invoice_item'
+                          $ref: "#/components/schemas/invoice_item"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -6265,7 +6265,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Adds an arbitrary charge or credit to the customer’s upcoming
@@ -6278,13 +6278,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice_item'
+                $ref: "#/components/schemas/invoice_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -6395,15 +6395,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice_item'
+                $ref: "#/components/schemas/invoice_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: <p>Retrieves the invoice item with the given ID.</p>
       operationId: RetrieveInvoiceItem
@@ -6426,13 +6426,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice_item'
+                $ref: "#/components/schemas/invoice_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the amount or description of an invoice item on an upcoming
@@ -6446,13 +6446,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice_item'
+                $ref: "#/components/schemas/invoice_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -6576,7 +6576,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/invoice'
+                          $ref: "#/components/schemas/invoice"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -6617,7 +6617,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>If you need to invoice your customer outside the regular billing
@@ -6634,13 +6634,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice'
+                $ref: "#/components/schemas/invoice"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -6843,13 +6843,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/upcoming_invoice'
+                $ref: "#/components/schemas/upcoming_invoice"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/invoices/{invoice}':
     get:
       description: <p>Retrieves the invoice with the given ID.</p>
@@ -6873,13 +6873,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice'
+                $ref: "#/components/schemas/invoice"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Until an invoice is paid, it is marked as open (closed=false). If
@@ -6894,13 +6894,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice'
+                $ref: "#/components/schemas/invoice"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -7125,7 +7125,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/invoice_line_item'
+                          $ref: "#/components/schemas/invoice_line_item"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -7165,7 +7165,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/invoices/{invoice}/pay':
     post:
       description: >-
@@ -7189,15 +7189,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice'
+                $ref: "#/components/schemas/invoice"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
   /v1/order_returns:
     get:
       description: >-
@@ -7265,7 +7265,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/order_return'
+                          $ref: "#/components/schemas/order_return"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -7306,7 +7306,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   '/v1/order_returns/{id}':
     get:
       description: >-
@@ -7334,13 +7334,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order_return'
+                $ref: "#/components/schemas/order_return"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/orders:
     get:
       description: >-
@@ -7436,7 +7436,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/order'
+                          $ref: "#/components/schemas/order"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -7477,7 +7477,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateOrder
@@ -7488,13 +7488,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: "#/components/schemas/order"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -7591,13 +7591,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: "#/components/schemas/order"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specific order by setting the values of the parameters
@@ -7618,13 +7618,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: "#/components/schemas/order"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -7696,13 +7696,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: "#/components/schemas/order"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -7789,13 +7789,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order_return'
+                $ref: "#/components/schemas/order_return"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -7880,7 +7880,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/charge'
+                          $ref: "#/components/schemas/charge"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -7921,7 +7921,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreatePayment
@@ -7932,15 +7932,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload5'
+        $ref: "#/components/requestBodies/payload5"
   '/v1/payments/{payment}':
     get:
       description: ''
@@ -7964,13 +7964,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charge'
+                $ref: "#/components/schemas/charge"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/payouts:
     get:
       description: >-
@@ -8054,7 +8054,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/payout'
+                          $ref: "#/components/schemas/payout"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -8096,7 +8096,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>To send funds to your own bank account, you create a new payout
@@ -8116,13 +8116,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/payout'
+                $ref: "#/components/schemas/payout"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -8227,13 +8227,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/payout'
+                $ref: "#/components/schemas/payout"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specified payout by setting the values of the parameters
@@ -8253,13 +8253,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/payout'
+                $ref: "#/components/schemas/payout"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -8304,15 +8304,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/payout'
+                $ref: "#/components/schemas/payout"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
   /v1/plans:
     get:
       description: <p>Returns a list of your plans.</p>
@@ -8374,7 +8374,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/plan'
+                          $ref: "#/components/schemas/plan"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -8415,7 +8415,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>You can create plans easily via the <a
@@ -8430,13 +8430,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/plan'
+                $ref: "#/components/schemas/plan"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -8561,15 +8561,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/plan'
+                $ref: "#/components/schemas/plan"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: <p>Retrieves the plan with the given ID.</p>
       operationId: RetrievePlan
@@ -8592,13 +8592,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/plan'
+                $ref: "#/components/schemas/plan"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the name of a plan. Other plan details (price, interval,
@@ -8617,13 +8617,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/plan'
+                $ref: "#/components/schemas/plan"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -8762,7 +8762,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/product'
+                          $ref: "#/components/schemas/product"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -8803,7 +8803,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: <p>Creates a new product object.</p>
       operationId: CreateProduct
@@ -8814,13 +8814,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: "#/components/schemas/product"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -8939,15 +8939,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: "#/components/schemas/product"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: >-
         <p>Retrieves the details of an existing product. Supply the unique
@@ -8973,13 +8973,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: "#/components/schemas/product"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specific product by setting the values of the parameters
@@ -8995,13 +8995,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: "#/components/schemas/product"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9170,7 +9170,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/transfer_recipient'
+                          $ref: "#/components/schemas/transfer_recipient"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -9211,7 +9211,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: TransferRecipientCreate
@@ -9222,13 +9222,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer_recipient'
+                $ref: "#/components/schemas/transfer_recipient"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9306,15 +9306,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer_recipient'
+                $ref: "#/components/schemas/transfer_recipient"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: >-
         <p>Retrieves the details of an existing recipient. You need only supply
@@ -9340,13 +9340,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer_recipient'
+                $ref: "#/components/schemas/transfer_recipient"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: TransferRecipientUpdate
@@ -9363,13 +9363,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer_recipient'
+                $ref: "#/components/schemas/transfer_recipient"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9490,7 +9490,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/card'
+                          $ref: "#/components/schemas/card"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -9530,7 +9530,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateTransferRecipientCard
@@ -9541,13 +9541,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9599,15 +9599,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: ''
       operationId: RetrieveTransferRecipientCard
@@ -9636,13 +9636,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateTransferRecipientCard
@@ -9653,13 +9653,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/card'
+                $ref: "#/components/schemas/card"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9782,7 +9782,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/refund'
+                          $ref: "#/components/schemas/refund"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -9823,7 +9823,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateChargeRefund
@@ -9834,13 +9834,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refund'
+                $ref: "#/components/schemas/refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9916,13 +9916,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refund'
+                $ref: "#/components/schemas/refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specified refund by setting the values of the parameters
@@ -9936,15 +9936,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refund'
+                $ref: "#/components/schemas/refund"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload8'
+        $ref: "#/components/requestBodies/payload8"
   /v1/skus:
     get:
       description: >-
@@ -10040,7 +10040,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/sku'
+                          $ref: "#/components/schemas/sku"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -10081,7 +10081,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: <p>Creates a new SKU associated with a product.</p>
       operationId: CreateSKU
@@ -10092,13 +10092,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sku'
+                $ref: "#/components/schemas/sku"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -10210,15 +10210,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sku'
+                $ref: "#/components/schemas/sku"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
     get:
       description: >-
         <p>Retrieves the details of an existing SKU. Supply the unique SKU
@@ -10244,13 +10244,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sku'
+                $ref: "#/components/schemas/sku"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specific SKU by setting the values of the parameters
@@ -10266,13 +10266,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sku'
+                $ref: "#/components/schemas/sku"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -10365,13 +10365,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/source'
+                $ref: "#/components/schemas/source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -10494,13 +10494,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/source'
+                $ref: "#/components/schemas/source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specified source by setting the values of the parameters
@@ -10515,13 +10515,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/source'
+                $ref: "#/components/schemas/source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -10569,13 +10569,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/source'
+                $ref: "#/components/schemas/source"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -10658,7 +10658,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/subscription_item'
+                          $ref: "#/components/schemas/subscription_item"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -10699,7 +10699,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Adds a new item to an existing subscription. No existing items will
@@ -10712,13 +10712,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription_item'
+                $ref: "#/components/schemas/subscription_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -10790,13 +10790,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription_item'
+                $ref: "#/components/schemas/subscription_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -10851,13 +10851,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription_item'
+                $ref: "#/components/schemas/subscription_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the plan or quantity of an item on a current
@@ -10876,13 +10876,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription_item'
+                $ref: "#/components/schemas/subscription_item"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -11011,7 +11011,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/subscription'
+                          $ref: "#/components/schemas/subscription"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -11052,7 +11052,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: <p>Creates a new subscription on an existing customer.</p>
       operationId: CreateSubscription
@@ -11063,13 +11063,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -11230,15 +11230,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload13'
+        $ref: "#/components/requestBodies/payload13"
     get:
       description: <p>Retrieves the subscription with the given ID.</p>
       operationId: RetrieveCustomerSubscription
@@ -11255,13 +11255,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates an existing subscription on a customer to match the specified
@@ -11277,15 +11277,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/subscription'
+                $ref: "#/components/schemas/subscription"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload14'
+        $ref: "#/components/requestBodies/payload14"
   '/v1/subscriptions/{subscription_exposed_id}/discount':
     delete:
       description: <p>Removes the currently applied discount on a customer.</p>
@@ -11297,15 +11297,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/discount'
+                $ref: "#/components/schemas/discount"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
   /v1/tokens:
     post:
       description: ''
@@ -11317,13 +11317,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/token'
+                $ref: "#/components/schemas/token"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -11378,13 +11378,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/token'
+                $ref: "#/components/schemas/token"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
   /v1/transfers:
     get:
       description: >-
@@ -11460,7 +11460,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/transfer'
+                          $ref: "#/components/schemas/transfer"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -11502,7 +11502,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateTransfer
@@ -11513,13 +11513,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer'
+                $ref: "#/components/schemas/transfer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -11600,13 +11600,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer'
+                $ref: "#/components/schemas/transfer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: UpdateTransfer
@@ -11623,13 +11623,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer'
+                $ref: "#/components/schemas/transfer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -11667,15 +11667,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/legacy_transfer'
+                $ref: "#/components/schemas/legacy_transfer"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
-        $ref: '#/components/requestBodies/payload3'
+        $ref: "#/components/requestBodies/payload3"
   '/v1/transfers/{id}/reversals':
     get:
       description: >-
@@ -11739,7 +11739,7 @@ paths:
                     oneOf:
                       - type: array
                         items:
-                          $ref: '#/components/schemas/transfer_reversal'
+                          $ref: "#/components/schemas/transfer_reversal"
                   has_more:
                     description: >-
                       True if this list has another page of items after this one
@@ -11779,7 +11779,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: ''
       operationId: CreateStripeAccountTransferReversal
@@ -11796,13 +11796,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer_reversal'
+                $ref: "#/components/schemas/transfer_reversal"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -11870,13 +11870,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer_reversal'
+                $ref: "#/components/schemas/transfer_reversal"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
     post:
       description: >-
         <p>Updates the specified reversal by setting the values of the
@@ -11903,13 +11903,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/transfer_reversal'
+                $ref: "#/components/schemas/transfer_reversal"
         default:
           description: Error response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -11960,7 +11960,7 @@ components:
           oneOf:
             - type: boolean
         decline_charge_on:
-          $ref: '#/components/schemas/account_decline_charge_on'
+          $ref: "#/components/schemas/account_decline_charge_on"
         default_currency:
           description: The currency this account has chosen to use as the default.
           oneOf:
@@ -11987,7 +11987,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/bank_account'
+                    $ref: "#/components/schemas/bank_account"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -12028,7 +12028,7 @@ components:
           oneOf:
             - type: string
         legal_entity:
-          $ref: '#/components/schemas/legal_entity'
+          $ref: "#/components/schemas/legal_entity"
         managed:
           description: >-
             Whether or not the account is
@@ -12050,7 +12050,7 @@ components:
           oneOf:
             - type: string
         payout_schedule:
-          $ref: '#/components/schemas/transfer_schedule'
+          $ref: "#/components/schemas/transfer_schedule"
         payout_statement_descriptor:
           description: >-
             The text that will appear on the account's bank account statement
@@ -12094,9 +12094,9 @@ components:
           oneOf:
             - type: string
         tos_acceptance:
-          $ref: '#/components/schemas/account_tos_acceptance'
+          $ref: "#/components/schemas/account_tos_acceptance"
         verification:
-          $ref: '#/components/schemas/account_verification'
+          $ref: "#/components/schemas/account_verification"
       required:
         - charges_enabled
         - country
@@ -12241,7 +12241,7 @@ components:
           oneOf:
             - type: boolean
         decline_charge_on:
-          $ref: '#/components/schemas/account_decline_charge_on'
+          $ref: "#/components/schemas/account_decline_charge_on"
         default_currency:
           description: The currency this account has chosen to use as the default.
           oneOf:
@@ -12268,7 +12268,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/bank_account'
+                    $ref: "#/components/schemas/bank_account"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -12313,7 +12313,7 @@ components:
           oneOf:
             - type: object
         legal_entity:
-          $ref: '#/components/schemas/legal_entity'
+          $ref: "#/components/schemas/legal_entity"
         managed:
           description: >-
             Whether or not the account is
@@ -12335,7 +12335,7 @@ components:
           oneOf:
             - type: string
         payout_schedule:
-          $ref: '#/components/schemas/transfer_schedule'
+          $ref: "#/components/schemas/transfer_schedule"
         payout_statement_descriptor:
           description: >-
             The text that will appear on the account's bank account statement
@@ -12379,9 +12379,9 @@ components:
           oneOf:
             - type: string
         tos_acceptance:
-          $ref: '#/components/schemas/account_tos_acceptance'
+          $ref: "#/components/schemas/account_tos_acceptance"
         verification:
-          $ref: '#/components/schemas/account_verification'
+          $ref: "#/components/schemas/account_verification"
       required:
         - charges_enabled
         - country
@@ -12447,7 +12447,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         fingerprint:
@@ -12591,12 +12591,12 @@ components:
           oneOf:
             - type: array
               items:
-                $ref: '#/components/schemas/balance_transaction'
+                $ref: "#/components/schemas/balance_transaction"
         card:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/issued_card'
+              - $ref: "#/components/schemas/issued_card"
           oneOf:
             - type: string
         currency:
@@ -12620,7 +12620,7 @@ components:
           oneOf:
             - type: string
         merchant_data:
-          $ref: '#/components/schemas/merchant_data'
+          $ref: "#/components/schemas/merchant_data"
         metadata:
           description: >-
             Set of key/value pairs that you can attach to an object. It can be
@@ -12657,7 +12657,7 @@ components:
           description: ID of the Stripe account this fee was taken from.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         amount:
@@ -12674,7 +12674,7 @@ components:
           description: ID of the Connect application that earned the fee.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/application'
+              - $ref: "#/components/schemas/application"
           oneOf:
             - type: string
         balance_transaction:
@@ -12683,14 +12683,14 @@ components:
             application fee on your account balance (not including refunds).
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         charge:
           description: ID of the charge that the application fee was taken from.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         created:
@@ -12727,8 +12727,8 @@ components:
             was the result of a charge using the `destination` parameter.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
-              - $ref: '#/components/schemas/transfer'
+              - $ref: "#/components/schemas/charge"
+              - $ref: "#/components/schemas/transfer"
           oneOf:
             - type: string
         refunded:
@@ -12743,7 +12743,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/fee_refund'
+                    $ref: "#/components/schemas/fee_refund"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -12886,7 +12886,7 @@ components:
           oneOf:
             - type: array
               items:
-                $ref: '#/components/schemas/fee'
+                $ref: "#/components/schemas/fee"
         id:
           description: Unique identifier for the object.
           oneOf:
@@ -12905,20 +12905,20 @@ components:
           description: The Stripe object this transaction is related to.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/bitcoin_transaction'
-              - $ref: '#/components/schemas/charge'
-              - $ref: '#/components/schemas/dispute'
-              - $ref: '#/components/schemas/fee_refund'
-              - $ref: '#/components/schemas/authorization'
-              - $ref: '#/components/schemas/transaction'
-              - $ref: '#/components/schemas/legacy_transfer'
-              - $ref: '#/components/schemas/payout'
-              - $ref: '#/components/schemas/platform_fee'
-              - $ref: '#/components/schemas/refund'
-              - $ref: '#/components/schemas/reserve_transaction'
-              - $ref: '#/components/schemas/transfer'
-              - $ref: '#/components/schemas/transfer_recipient_transfer'
-              - $ref: '#/components/schemas/transfer_reversal'
+              - $ref: "#/components/schemas/bitcoin_transaction"
+              - $ref: "#/components/schemas/charge"
+              - $ref: "#/components/schemas/dispute"
+              - $ref: "#/components/schemas/fee_refund"
+              - $ref: "#/components/schemas/authorization"
+              - $ref: "#/components/schemas/transaction"
+              - $ref: "#/components/schemas/legacy_transfer"
+              - $ref: "#/components/schemas/payout"
+              - $ref: "#/components/schemas/platform_fee"
+              - $ref: "#/components/schemas/refund"
+              - $ref: "#/components/schemas/reserve_transaction"
+              - $ref: "#/components/schemas/transfer"
+              - $ref: "#/components/schemas/transfer_recipient_transfer"
+              - $ref: "#/components/schemas/transfer_reversal"
           oneOf:
             - type: string
         status:
@@ -12960,7 +12960,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         account_holder_name:
@@ -12996,7 +12996,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         default_for_currency:
@@ -13181,7 +13181,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/bitcoin_transaction'
+                    $ref: "#/components/schemas/bitcoin_transaction"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -13308,7 +13308,7 @@ components:
             card object if the card belongs to a customer or recipient instead.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         address_city:
@@ -13382,7 +13382,7 @@ components:
             instead.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         cvc_check:
@@ -13457,7 +13457,7 @@ components:
             instead.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/transfer_recipient'
+              - $ref: "#/components/schemas/transfer_recipient"
           oneOf:
             - type: string
         tokenization_method:
@@ -13505,7 +13505,7 @@ components:
           description: ID of the Connect application that created the charge.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/application'
+              - $ref: "#/components/schemas/application"
           oneOf:
             - type: string
         application_fee:
@@ -13515,8 +13515,8 @@ components:
             details.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/backwards_compatible_platform_earning'
-              - $ref: '#/components/schemas/platform_fee'
+              - $ref: "#/components/schemas/backwards_compatible_platform_earning"
+              - $ref: "#/components/schemas/platform_fee"
           oneOf:
             - type: string
         balance_transaction:
@@ -13525,7 +13525,7 @@ components:
             charge on your account balance (not including refunds or disputes).
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         captured:
@@ -13552,7 +13552,7 @@ components:
           description: ID of the customer this charge is for if one exists.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         description:
@@ -13568,14 +13568,14 @@ components:
             documentation](/docs/connect/destination-charges) for details.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         dispute:
           description: Details about the dispute if the charge has been disputed.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/dispute'
+              - $ref: "#/components/schemas/dispute"
           oneOf:
             - type: string
         failure_code:
@@ -13606,7 +13606,7 @@ components:
           description: ID of the invoice this charge is for if one exists.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/invoice'
+              - $ref: "#/components/schemas/invoice"
           oneOf:
             - type: string
         livemode:
@@ -13633,18 +13633,18 @@ components:
             documentation](/docs/connect/charges-transfers) for details.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         order:
           description: ID of the order this charge is for if one exists.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/order'
+              - $ref: "#/components/schemas/order"
           oneOf:
             - type: string
         outcome:
-          $ref: '#/components/schemas/charge_outcome'
+          $ref: "#/components/schemas/charge_outcome"
         paid:
           description: >-
             `true` if the charge succeeded, or was successfully authorized for
@@ -13675,7 +13675,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/refund'
+                    $ref: "#/components/schemas/refund"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -13714,11 +13714,11 @@ components:
           description: ID of the review associated with this charge if one exists.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/review'
+              - $ref: "#/components/schemas/review"
           oneOf:
             - type: string
         shipping:
-          $ref: '#/components/schemas/shipping'
+          $ref: "#/components/schemas/shipping"
         source_transfer:
           description: >-
             The transfer ID which created this charge. Only present if the
@@ -13726,7 +13726,7 @@ components:
             documentation](/docs/connect/destination-charges) for details.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/transfer'
+              - $ref: "#/components/schemas/transfer"
           oneOf:
             - type: string
         statement_descriptor:
@@ -13747,7 +13747,7 @@ components:
             the charge was created using the `destination` parameter).
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/transfer'
+              - $ref: "#/components/schemas/transfer"
           oneOf:
             - type: string
         transfer_group:
@@ -13821,7 +13821,7 @@ components:
           description: The ID of the Radar rule that matched the payment.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/rule'
+              - $ref: "#/components/schemas/rule"
           oneOf:
             - type: string
         seller_message:
@@ -14040,12 +14040,12 @@ components:
           description: ID of the default source attached to this customer.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account_debit_account'
-              - $ref: '#/components/schemas/alipay_account'
-              - $ref: '#/components/schemas/bank_account'
-              - $ref: '#/components/schemas/bitcoin_receiver'
-              - $ref: '#/components/schemas/card'
-              - $ref: '#/components/schemas/source'
+              - $ref: "#/components/schemas/account_debit_account"
+              - $ref: "#/components/schemas/alipay_account"
+              - $ref: "#/components/schemas/bank_account"
+              - $ref: "#/components/schemas/bitcoin_receiver"
+              - $ref: "#/components/schemas/card"
+              - $ref: "#/components/schemas/source"
           oneOf:
             - type: string
         delinquent:
@@ -14061,7 +14061,7 @@ components:
           oneOf:
             - type: string
         discount:
-          $ref: '#/components/schemas/discount'
+          $ref: "#/components/schemas/discount"
         email:
           description: The customer's email address.
           oneOf:
@@ -14088,14 +14088,14 @@ components:
           oneOf:
             - type: string
         shipping:
-          $ref: '#/components/schemas/customer_shipping'
+          $ref: "#/components/schemas/customer_shipping"
         sources:
           properties:
             data:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/account_debit_account'
+                    $ref: "#/components/schemas/account_debit_account"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -14137,7 +14137,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/subscription'
+                    $ref: "#/components/schemas/subscription"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -14190,7 +14190,7 @@ components:
     customer_shipping:
       properties:
         address:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         name:
           description: Customer name.
           oneOf:
@@ -14213,7 +14213,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         id:
@@ -14241,11 +14241,11 @@ components:
         - customer
       x-polymorphicResources:
         oneOf:
-          - $ref: '#/components/schemas/alipay_account'
-          - $ref: '#/components/schemas/bank_account'
-          - $ref: '#/components/schemas/bitcoin_receiver'
-          - $ref: '#/components/schemas/card'
-          - $ref: '#/components/schemas/source'
+          - $ref: "#/components/schemas/alipay_account"
+          - $ref: "#/components/schemas/bank_account"
+          - $ref: "#/components/schemas/bitcoin_receiver"
+          - $ref: "#/components/schemas/card"
+          - $ref: "#/components/schemas/source"
       x-resourceId: customer_source
       oneOf:
         - type: object
@@ -14283,12 +14283,12 @@ components:
     discount:
       properties:
         coupon:
-          $ref: '#/components/schemas/coupon'
+          $ref: "#/components/schemas/coupon"
         customer:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         end:
@@ -14337,12 +14337,12 @@ components:
           oneOf:
             - type: array
               items:
-                $ref: '#/components/schemas/balance_transaction'
+                $ref: "#/components/schemas/balance_transaction"
         charge:
           description: ID of the charge that was disputed.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         created:
@@ -14500,7 +14500,7 @@ components:
           oneOf:
             - type: integer
         data:
-          $ref: '#/components/schemas/event_data'
+          $ref: "#/components/schemas/event_data"
         id:
           description: Unique identifier for the object.
           oneOf:
@@ -14578,7 +14578,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         country:
@@ -14598,7 +14598,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         default_for_currency:
@@ -14646,8 +14646,8 @@ components:
         - customer
       x-polymorphicResources:
         oneOf:
-          - $ref: '#/components/schemas/bank_account'
-          - $ref: '#/components/schemas/card'
+          - $ref: "#/components/schemas/bank_account"
+          - $ref: "#/components/schemas/card"
       x-resourceId: external_account_source
       oneOf:
         - type: object
@@ -14700,7 +14700,7 @@ components:
             balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         created:
@@ -14721,7 +14721,7 @@ components:
           description: ID of the application fee that was refunded.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/platform_fee'
+              - $ref: "#/components/schemas/platform_fee"
           oneOf:
             - type: string
         id:
@@ -14880,7 +14880,7 @@ components:
           description: 'ID of the latest charge generated for this invoice, if any.'
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         closed:
@@ -14902,7 +14902,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         date:
@@ -14918,7 +14918,7 @@ components:
           oneOf:
             - type: string
         discount:
-          $ref: '#/components/schemas/discount'
+          $ref: "#/components/schemas/discount"
         ending_balance:
           description: >-
             Ending customer balance after attempting to pay invoice. If the
@@ -14943,7 +14943,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/invoice_line_item'
+                    $ref: "#/components/schemas/invoice_line_item"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -15041,7 +15041,7 @@ components:
           description: 'The subscription that this invoice was prepared for, if any.'
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/subscription'
+              - $ref: "#/components/schemas/subscription"
           oneOf:
             - type: string
         subscription_proration_date:
@@ -15132,7 +15132,7 @@ components:
             billed.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         date:
@@ -15159,7 +15159,7 @@ components:
           description: The ID of the invoice this invoice item belongs to.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/invoice'
+              - $ref: "#/components/schemas/invoice"
           oneOf:
             - type: string
         livemode:
@@ -15184,7 +15184,7 @@ components:
           oneOf:
             - type: object
         plan:
-          $ref: '#/components/schemas/plan'
+          $ref: "#/components/schemas/plan"
         proration:
           description: >-
             Whether or not the invoice item was created automatically as a
@@ -15203,7 +15203,7 @@ components:
             any.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/subscription'
+              - $ref: "#/components/schemas/subscription"
           oneOf:
             - type: string
         subscription_item:
@@ -15287,7 +15287,7 @@ components:
           oneOf:
             - type: object
         plan:
-          $ref: '#/components/schemas/plan'
+          $ref: "#/components/schemas/plan"
         proration:
           description: Whether or not this is a proration.
           oneOf:
@@ -15341,7 +15341,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/card'
+              - $ref: "#/components/schemas/card"
           oneOf:
             - type: string
         currency:
@@ -15395,7 +15395,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/backwards_compatible_platform_earning'
+              - $ref: "#/components/schemas/backwards_compatible_platform_earning"
           oneOf:
             - type: string
         balance_transaction:
@@ -15404,7 +15404,7 @@ components:
             your account balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         created:
@@ -15437,9 +15437,9 @@ components:
             sent to.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
-              - $ref: '#/components/schemas/bank_account'
-              - $ref: '#/components/schemas/card'
+              - $ref: "#/components/schemas/account"
+              - $ref: "#/components/schemas/bank_account"
+              - $ref: "#/components/schemas/card"
           oneOf:
             - type: string
         destination_payment:
@@ -15448,7 +15448,7 @@ components:
             payment that the destination account received for the transfer.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         failure_code:
@@ -15500,7 +15500,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/transfer_reversal'
+                    $ref: "#/components/schemas/transfer_reversal"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -15548,9 +15548,9 @@ components:
             balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
-              - $ref: '#/components/schemas/platform_fee'
-              - $ref: '#/components/schemas/transfer_reversal'
+              - $ref: "#/components/schemas/charge"
+              - $ref: "#/components/schemas/platform_fee"
+              - $ref: "#/components/schemas/transfer_reversal"
           oneOf:
             - type: string
         source_type:
@@ -15617,13 +15617,13 @@ components:
           oneOf:
             - type: array
               items:
-                $ref: '#/components/schemas/legal_entity_additional_owner'
+                $ref: "#/components/schemas/legal_entity_additional_owner"
         address:
-          $ref: '#/components/schemas/legal_entity_address'
+          $ref: "#/components/schemas/legal_entity_address"
         address_kana:
-          $ref: '#/components/schemas/legal_entity_japan_address'
+          $ref: "#/components/schemas/legal_entity_japan_address"
         address_kanji:
-          $ref: '#/components/schemas/legal_entity_japan_address'
+          $ref: "#/components/schemas/legal_entity_japan_address"
         business_name:
           description: The legal name of the company.
           oneOf:
@@ -15649,7 +15649,7 @@ components:
           oneOf:
             - type: boolean
         dob:
-          $ref: '#/components/schemas/legal_entity_dob'
+          $ref: "#/components/schemas/legal_entity_dob"
         first_name:
           description: The first name of the individual responsible for the account.
           oneOf:
@@ -15693,11 +15693,11 @@ components:
           oneOf:
             - type: string
         personal_address:
-          $ref: '#/components/schemas/legal_entity_address'
+          $ref: "#/components/schemas/legal_entity_address"
         personal_address_kana:
-          $ref: '#/components/schemas/legal_entity_japan_address'
+          $ref: "#/components/schemas/legal_entity_japan_address"
         personal_address_kanji:
-          $ref: '#/components/schemas/legal_entity_japan_address'
+          $ref: "#/components/schemas/legal_entity_japan_address"
         personal_id_number_provided:
           description: >-
             Whether the personal id number of the individual responsible for the
@@ -15721,7 +15721,7 @@ components:
           oneOf:
             - type: string
         verification:
-          $ref: '#/components/schemas/legal_entity_verification'
+          $ref: "#/components/schemas/legal_entity_verification"
       required:
         - address
         - business_tax_id_provided
@@ -15739,9 +15739,9 @@ components:
     legal_entity_additional_owner:
       properties:
         address:
-          $ref: '#/components/schemas/legal_entity_address'
+          $ref: "#/components/schemas/legal_entity_address"
         dob:
-          $ref: '#/components/schemas/legal_entity_dob'
+          $ref: "#/components/schemas/legal_entity_dob"
         first_name:
           description: The first name of this additional owner.
           oneOf:
@@ -15751,7 +15751,7 @@ components:
           oneOf:
             - type: string
         verification:
-          $ref: '#/components/schemas/legal_entity_verification'
+          $ref: "#/components/schemas/legal_entity_verification"
       required:
         - address
         - dob
@@ -15873,7 +15873,7 @@ components:
             or local ID card.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/file'
+              - $ref: "#/components/schemas/file"
           oneOf:
             - type: string
         status:
@@ -15973,7 +15973,7 @@ components:
             order status is `paid`, `fulfilled`, or `refunded`.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         created:
@@ -15994,7 +15994,7 @@ components:
           description: The customer used for the order.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         email:
@@ -16010,7 +16010,7 @@ components:
           oneOf:
             - type: string
         items:
-          $ref: '#/components/schemas/order_item'
+          $ref: "#/components/schemas/order_item"
         livemode:
           description: Flag indicating whether the object exists in live mode or test mode.
           oneOf:
@@ -16034,7 +16034,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/order_return'
+                    $ref: "#/components/schemas/order_return"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -16079,9 +16079,9 @@ components:
           oneOf:
             - type: string
         shipping:
-          $ref: '#/components/schemas/shipping'
+          $ref: "#/components/schemas/shipping"
         shipping_methods:
-          $ref: '#/components/schemas/shipping_method'
+          $ref: "#/components/schemas/shipping_method"
         status:
           description: >-
             Current order status. One of `created`, `paid`, `canceled`,
@@ -16090,7 +16090,7 @@ components:
           oneOf:
             - type: string
         status_transitions:
-          $ref: '#/components/schemas/status_transitions'
+          $ref: "#/components/schemas/status_transitions"
         updated:
           description: ''
           oneOf:
@@ -16151,8 +16151,8 @@ components:
             not null (e.g., expandable to a SKU).
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/discount'
-              - $ref: '#/components/schemas/sku'
+              - $ref: "#/components/schemas/discount"
+              - $ref: "#/components/schemas/sku"
           oneOf:
             - type: string
         quantity:
@@ -16208,7 +16208,7 @@ components:
           oneOf:
             - type: string
         items:
-          $ref: '#/components/schemas/order_item'
+          $ref: "#/components/schemas/order_item"
         livemode:
           description: Flag indicating whether the object exists in live mode or test mode.
           oneOf:
@@ -16223,14 +16223,14 @@ components:
           description: The order that this return includes items from.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/order'
+              - $ref: "#/components/schemas/order"
           oneOf:
             - type: string
         refund:
           description: The ID of the refund issued for this return.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/refund'
+              - $ref: "#/components/schemas/refund"
           oneOf:
             - type: string
       required:
@@ -16294,7 +16294,7 @@ components:
             payout on your account balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         created:
@@ -16315,8 +16315,8 @@ components:
           description: ID of the bank account or card the payout was sent to.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/bank_account'
-              - $ref: '#/components/schemas/card'
+              - $ref: "#/components/schemas/bank_account"
+              - $ref: "#/components/schemas/card"
           oneOf:
             - type: string
         failure_balance_transaction:
@@ -16326,7 +16326,7 @@ components:
             and puts the funds from the failed payout back in your balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         failure_code:
@@ -16512,7 +16512,7 @@ components:
           description: ID of the Stripe account this fee was taken from.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         amount:
@@ -16529,7 +16529,7 @@ components:
           description: ID of the Connect application that earned the fee.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/application'
+              - $ref: "#/components/schemas/application"
           oneOf:
             - type: string
         balance_transaction:
@@ -16538,14 +16538,14 @@ components:
             application fee on your account balance (not including refunds).
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         charge:
           description: ID of the charge that the application fee was taken from.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         created:
@@ -16582,8 +16582,8 @@ components:
             was the result of a charge using the `destination` parameter.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
-              - $ref: '#/components/schemas/transfer'
+              - $ref: "#/components/schemas/charge"
+              - $ref: "#/components/schemas/transfer"
           oneOf:
             - type: string
         refunded:
@@ -16598,7 +16598,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/fee_refund'
+                    $ref: "#/components/schemas/fee_refund"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -16663,7 +16663,7 @@ components:
           description: ID of the Stripe account this fee was taken from.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         amount:
@@ -16678,7 +16678,7 @@ components:
           description: ID of the Connect Application that earned the fee.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/application'
+              - $ref: "#/components/schemas/application"
           oneOf:
             - type: string
         balance_transaction:
@@ -16687,14 +16687,14 @@ components:
             application fee on your account balance (not including refunds).
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         charge:
           description: ID of the charge that the application fee was taken from.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         created:
@@ -16731,8 +16731,8 @@ components:
             was the result of a charge using the `destination` parameter.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
-              - $ref: '#/components/schemas/transfer'
+              - $ref: "#/components/schemas/charge"
+              - $ref: "#/components/schemas/transfer"
           oneOf:
             - type: string
         refunded:
@@ -16747,7 +16747,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/fee_refund'
+                    $ref: "#/components/schemas/fee_refund"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -16872,7 +16872,7 @@ components:
           oneOf:
             - type: string
         package_dimensions:
-          $ref: '#/components/schemas/package_dimensions'
+          $ref: "#/components/schemas/package_dimensions"
         shippable:
           description: Whether this product is a shipped good.
           oneOf:
@@ -16883,7 +16883,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/sku'
+                    $ref: "#/components/schemas/sku"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -16955,14 +16955,14 @@ components:
             balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         charge:
           description: ID of the charge that was refunded.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         created:
@@ -17081,7 +17081,7 @@ components:
           description: The charge associated with this review.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         created:
@@ -17157,7 +17157,7 @@ components:
     shipping:
       properties:
         address:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         carrier:
           description: >-
             The delivery service that shipped a physical product, such as Fedex,
@@ -17205,7 +17205,7 @@ components:
           oneOf:
             - type: string
         delivery_estimate:
-          $ref: '#/components/schemas/delivery_estimate'
+          $ref: "#/components/schemas/delivery_estimate"
         description:
           description: >-
             An arbitrary string attached to the object. Often useful for
@@ -17265,7 +17265,7 @@ components:
           oneOf:
             - type: string
         inventory:
-          $ref: '#/components/schemas/inventory'
+          $ref: "#/components/schemas/inventory"
         livemode:
           description: Flag indicating whether the object exists in live mode or test mode.
           oneOf:
@@ -17284,7 +17284,7 @@ components:
           oneOf:
             - type: string
         package_dimensions:
-          $ref: '#/components/schemas/package_dimensions'
+          $ref: "#/components/schemas/package_dimensions"
         price:
           description: >-
             The cost of the item as a positive integer in the smallest currency
@@ -17298,7 +17298,7 @@ components:
             be currently active.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/product'
+              - $ref: "#/components/schemas/product"
           oneOf:
             - type: string
         updated:
@@ -17340,7 +17340,7 @@ components:
           oneOf:
             - type: string
         code_verification:
-          $ref: '#/components/schemas/source_code_verification_flow'
+          $ref: "#/components/schemas/source_code_verification_flow"
         created:
           description: >-
             Time at which the object was created. Measured in seconds since the
@@ -17384,11 +17384,11 @@ components:
           oneOf:
             - type: string
         owner:
-          $ref: '#/components/schemas/source_owner'
+          $ref: "#/components/schemas/source_owner"
         receiver:
-          $ref: '#/components/schemas/source_receiver_flow'
+          $ref: "#/components/schemas/source_receiver_flow"
         redirect:
-          $ref: '#/components/schemas/source_redirect_flow'
+          $ref: "#/components/schemas/source_redirect_flow"
         status:
           description: >-
             The status of the charge, one of `canceled`, `chargeable`,
@@ -17450,7 +17450,7 @@ components:
     source_owner:
       properties:
         address:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         email:
           description: Owner's email address.
           oneOf:
@@ -17464,7 +17464,7 @@ components:
           oneOf:
             - type: string
         verified_address:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         verified_email:
           description: Verified owner's email address.
           oneOf:
@@ -17621,11 +17621,11 @@ components:
           description: ID of the customer who owns the subscription.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         discount:
-          $ref: '#/components/schemas/discount'
+          $ref: "#/components/schemas/discount"
         ended_at:
           description: >-
             If the subscription has ended (either because it was canceled or
@@ -17643,7 +17643,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/subscription_item'
+                    $ref: "#/components/schemas/subscription_item"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -17696,7 +17696,7 @@ components:
           oneOf:
             - type: string
         plan:
-          $ref: '#/components/schemas/plan'
+          $ref: "#/components/schemas/plan"
         quantity:
           description: >-
             The quantity of the plan to which the customer should be subscribed.
@@ -17775,7 +17775,7 @@ components:
           oneOf:
             - type: string
         plan:
-          $ref: '#/components/schemas/plan'
+          $ref: "#/components/schemas/plan"
         quantity:
           description: >-
             The [quantity](/docs/subscriptions/quantities) of the plan to which
@@ -17806,7 +17806,7 @@ components:
           oneOf:
             - type: boolean
         card:
-          $ref: '#/components/schemas/card'
+          $ref: "#/components/schemas/card"
         created:
           description: >-
             Time at which the object was created. Measured in seconds since the
@@ -17872,9 +17872,9 @@ components:
     token:
       properties:
         bank_account:
-          $ref: '#/components/schemas/token_bank_account'
+          $ref: "#/components/schemas/token_bank_account"
         card:
-          $ref: '#/components/schemas/token_card'
+          $ref: "#/components/schemas/token_card"
         client_ip:
           description: IP address of the client that generated the token.
           oneOf:
@@ -18151,21 +18151,21 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/authorization'
+              - $ref: "#/components/schemas/authorization"
           oneOf:
             - type: string
         balance_transaction:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         card:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/issued_card'
+              - $ref: "#/components/schemas/issued_card"
           oneOf:
             - type: string
         currency:
@@ -18181,7 +18181,7 @@ components:
           oneOf:
             - type: string
         merchant_data:
-          $ref: '#/components/schemas/merchant_data'
+          $ref: "#/components/schemas/merchant_data"
         object:
           description: >-
             String representing the object's type. Objects of the same type
@@ -18227,7 +18227,7 @@ components:
             your account balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         created:
@@ -18246,7 +18246,7 @@ components:
           description: ID of the Stripe account the transfer was sent to.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         destination_payment:
@@ -18255,7 +18255,7 @@ components:
             payment that the destination account received for the transfer.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         id:
@@ -18285,7 +18285,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/transfer_reversal'
+                    $ref: "#/components/schemas/transfer_reversal"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -18332,7 +18332,7 @@ components:
             null, the transfer was funded from the available balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         source_type:
@@ -18370,14 +18370,14 @@ components:
     transfer_recipient:
       properties:
         active_account:
-          $ref: '#/components/schemas/bank_account'
+          $ref: "#/components/schemas/bank_account"
         cards:
           properties:
             data:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/card'
+                    $ref: "#/components/schemas/card"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -18422,7 +18422,7 @@ components:
           description: The default card to use for creating transfers to this recipient.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/card'
+              - $ref: "#/components/schemas/card"
           oneOf:
             - type: string
         description:
@@ -18458,7 +18458,7 @@ components:
             instead.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
+              - $ref: "#/components/schemas/account"
           oneOf:
             - type: string
         name:
@@ -18505,7 +18505,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/backwards_compatible_platform_earning'
+              - $ref: "#/components/schemas/backwards_compatible_platform_earning"
           oneOf:
             - type: string
         balance_transaction:
@@ -18514,7 +18514,7 @@ components:
             your account balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         created:
@@ -18547,9 +18547,9 @@ components:
             sent to.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/account'
-              - $ref: '#/components/schemas/bank_account'
-              - $ref: '#/components/schemas/card'
+              - $ref: "#/components/schemas/account"
+              - $ref: "#/components/schemas/bank_account"
+              - $ref: "#/components/schemas/card"
           oneOf:
             - type: string
         destination_payment:
@@ -18558,7 +18558,7 @@ components:
             payment that the destination account received for the transfer.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         failure_code:
@@ -18610,7 +18610,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/transfer_reversal'
+                    $ref: "#/components/schemas/transfer_reversal"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -18658,9 +18658,9 @@ components:
             balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
-              - $ref: '#/components/schemas/platform_fee'
-              - $ref: '#/components/schemas/transfer_reversal'
+              - $ref: "#/components/schemas/charge"
+              - $ref: "#/components/schemas/platform_fee"
+              - $ref: "#/components/schemas/transfer_reversal"
           oneOf:
             - type: string
         source_type:
@@ -18733,7 +18733,7 @@ components:
             balance.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/balance_transaction'
+              - $ref: "#/components/schemas/balance_transaction"
           oneOf:
             - type: string
         created:
@@ -18771,8 +18771,8 @@ components:
           description: ID of the transfer that was reversed.
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/legacy_transfer'
-              - $ref: '#/components/schemas/transfer'
+              - $ref: "#/components/schemas/legacy_transfer"
+              - $ref: "#/components/schemas/transfer"
           oneOf:
             - type: string
       required:
@@ -18864,7 +18864,7 @@ components:
           description: 'ID of the latest charge generated for this invoice, if any.'
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/charge'
+              - $ref: "#/components/schemas/charge"
           oneOf:
             - type: string
         closed:
@@ -18886,7 +18886,7 @@ components:
           description: ''
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/customer'
+              - $ref: "#/components/schemas/customer"
           oneOf:
             - type: string
         date:
@@ -18902,7 +18902,7 @@ components:
           oneOf:
             - type: string
         discount:
-          $ref: '#/components/schemas/discount'
+          $ref: "#/components/schemas/discount"
         ending_balance:
           description: >-
             Ending customer balance after attempting to pay invoice. If the
@@ -18923,7 +18923,7 @@ components:
               oneOf:
                 - type: array
                   items:
-                    $ref: '#/components/schemas/invoice_line_item'
+                    $ref: "#/components/schemas/invoice_line_item"
             has_more:
               description: >-
                 True if this list has another page of items after this one that
@@ -19021,7 +19021,7 @@ components:
           description: 'The subscription that this invoice was prepared for, if any.'
           x-expansionResources:
             oneOf:
-              - $ref: '#/components/schemas/subscription'
+              - $ref: "#/components/schemas/subscription"
           oneOf:
             - type: string
         subscription_proration_date:

@@ -53,7 +53,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/InventoryItem'
+                  $ref: "#/components/schemas/InventoryItem"
         '400':
           description: bad input parameter
     post:
@@ -73,7 +73,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InventoryItem'
+              $ref: "#/components/schemas/InventoryItem"
         description: Inventory item to add
 components:
   schemas:
@@ -97,7 +97,7 @@ components:
           format: date-time
           example: '2016-08-29T09:12:33.001Z'
         manufacturer:
-          $ref: '#/components/schemas/Manufacturer'
+          $ref: "#/components/schemas/Manufacturer"
     Manufacturer:
       required:
       - name

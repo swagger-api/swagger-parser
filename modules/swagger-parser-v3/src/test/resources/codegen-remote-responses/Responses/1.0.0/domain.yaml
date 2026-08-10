@@ -70,12 +70,12 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorModel'
+            $ref: "#/components/schemas/ErrorModel"
       headers:
         X-RateLimit-Limit:
-          $ref: '#/components/headers/X-RateLimit-Limit'
+          $ref: "#/components/headers/X-RateLimit-Limit"
         X-RateLimit-Remaining:
-          $ref: '#/components/headers/X-RateLimit-Remaining'
+          $ref: "#/components/headers/X-RateLimit-Remaining"
 
   #########################
   # Common headers
@@ -102,17 +102,17 @@ components:
         summary: Get all items
         description: This operation supports pagination
         parameters:
-          - $ref: '#/components/parameters/offsetParam'
-          - $ref: '#/components/parameters/limitParam'
+          - $ref: "#/components/parameters/offsetParam"
+          - $ref: "#/components/parameters/limitParam"
         responses:
           '200':
             description: A list of items
           default:
-            $ref: '#/components/responses/GeneralError'
+            $ref: "#/components/responses/GeneralError"
       post:
         summary: Add a new item
         requestBody:
-          $ref: '#/components/requestBodies/NewItem'
+          $ref: "#/components/requestBodies/NewItem"
         responses:
           '201':
             description: Created

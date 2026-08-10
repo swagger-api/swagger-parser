@@ -6,7 +6,7 @@ paths:
   /:
     post:
       requestBody:
-        $ref: '#/components/requestBodies/RefRequestBody'
+        $ref: "#/components/requestBodies/RefRequestBody"
       responses:
         default:
           description: "Error"

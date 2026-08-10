@@ -176,7 +176,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             SwaggerParseResult result;
             if (options != null) {
                 result = parseJsonNode(location, rootNode, options);
-            }else {
+            } else {
                 result = parseJsonNode(location, rootNode);
             }
             if (result.getOpenAPI() != null) {
@@ -207,6 +207,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
 
     private SwaggerParseResult resolve(SwaggerParseResult result, List<AuthorizationValue> auth, ParseOptions options,
             String location) {
+        if (location != null) {
+            location = location.replace('\\', '/');
+        }
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
@@ -227,7 +230,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                                 dereferencer.dereference(dereferencerContext, dereferencers.iterator());
                             }
                             if (options.isResolveFully()) {
-                                new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                                new ResolverFully(options).resolveFully(result.getOpenAPI());
                             }
                         } else {
                             String msg = "Resolution of OAS 3.1 spec disabled by 'disableOas31Resolve' env variable";
@@ -239,7 +242,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
                                 location, null, options);
                         resolver.resolve(result);
                         if (options.isResolveFully()) {
-                            new ResolverFully(options.isResolveCombinators()).resolveFully(result.getOpenAPI());
+                            new ResolverFully(options).resolveFully(result.getOpenAPI());
                         }
                     }
 
@@ -284,7 +287,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
     }
 
     private String readContentFromLocation(String location, List<AuthorizationValue> auth) {
-        final String adjustedLocation = location.replaceAll("\\\\", "/");
+        final String adjustedLocation = location.replace('\\', '/');
         try {
             if (adjustedLocation.toLowerCase().startsWith("http")) {
                 return RemoteUrl.urlToString(adjustedLocation, auth);

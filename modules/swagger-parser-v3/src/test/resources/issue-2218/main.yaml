@@ -1,0 +1,16 @@
+openapi: 3.0.3
+info:
+  description: A service with remote models
+  version: 1.0.o
+  title: A service
+paths:
+  /foo:
+    get:
+      description: Get Flag of flags
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: './model.yaml#/components/schemas/FlagsOfFlags'

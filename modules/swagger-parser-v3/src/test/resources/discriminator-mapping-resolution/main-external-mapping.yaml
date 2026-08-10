@@ -49,7 +49,7 @@ paths:
                   pets:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Pet'
+                      $ref: "#/components/schemas/Pet"
         '400':
           description: Invalid status value
 components:

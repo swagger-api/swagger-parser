@@ -34,7 +34,7 @@ paths:
               description: header sibling description
           links:
             userRepository:
-              $ref: '#/components/links/userRepository'
+              $ref: "#/components/links/userRepository"
               description: link sibling description
       requestBody:
         $ref: "#/components/requestBodies/Pets"

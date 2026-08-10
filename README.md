@@ -114,7 +114,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.1.22</version>
+  <version>2.1.46</version>
 </dependency>
 ```
 
@@ -165,7 +165,7 @@ working inside a firewall or really know what you're doing, well, there's your r
 
 #### Dealing with Let's Encrypt
 Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_ by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
-JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
+JVM.  Also note that 1.8u101 may _not_ be sufficient on its own.  Some users have reported that certain operating systems are 
 not accepting Let's Encrypt signed certificates.
 
 Your options include:
@@ -654,6 +654,21 @@ components:
           type: string
           example: "94022"
 ```
+#### 5. explicitObjectSchema:
+
+```java
+ParseOptions parseOptions = new ParseOptions();
+parseOptions.setResolve(true); // implicit
+parseOptions.setResolveFully(true);
+parseOptions.setResolveCombinators(false);
+parseOptions.setExplicitObjectSchema(false); // default is true
+final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions);
+```
+
+This option allows you to customize the processing of schema properties when the type is not specified. By default it is set to `true`.
+- `true` : when the type is not defined for property, ‘object’ is set.
+- `false` : the property remains undefined when no type is specified
+It's only applied when `resolveFully` is set to `true`.
 
 ### Extensions
 This project has a core artifact--`swagger-parser`, which uses Java Service Provider Interface (SPI) so additional extensions can be added. 

@@ -5,7 +5,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Foo'
+            $ref: "#/components/schemas/Foo"
 
   schemas:
     Foo:

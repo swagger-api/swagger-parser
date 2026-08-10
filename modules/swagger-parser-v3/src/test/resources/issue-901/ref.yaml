@@ -14,7 +14,7 @@ components:
         stuff:
           type: array
           items:
-            $ref: '#/components/schemas/TESTTHING'
+            $ref: "#/components/schemas/TESTTHING"
     TESTTHING:
       type: object
       properties:
@@ -31,4 +31,4 @@ pathitems:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Test.Definition'
+                $ref: "#/components/schemas/Test.Definition"

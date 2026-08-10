@@ -1,0 +1,5 @@
+openapi: 3.0.3
+info:
+  title: Example API with Style and Explode
+  version: 
+paths: {}

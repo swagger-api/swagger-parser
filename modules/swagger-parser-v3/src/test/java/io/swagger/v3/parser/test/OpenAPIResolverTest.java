@@ -45,6 +45,7 @@ import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -578,7 +579,7 @@ public class OpenAPIResolverTest {
                 "        content:\n" +
                 "         'application/json':\n" +
                 "             schema:\n" +
-                "                $ref: '#/components/schemas/SchemaB'\n" +
+                "                $ref: \"#/components/schemas/SchemaB\"\n" +
                 "components:\n" +
                 "  schemas:\n" +
                 "    SchemaA:\n" +
@@ -586,18 +587,18 @@ public class OpenAPIResolverTest {
                 "        name:\n" +
                 "          type: string\n" +
                 "        modelB:\n" +
-                "          $ref: '#/components/schemas/SchemaB'\n" +
+                "          $ref: \"#/components/schemas/SchemaB\"\n" +
                 "    SchemaB:\n" +
                 "      properties:\n" +
                 "        modelB:\n" +
-                "          $ref: '#/components/schemas/SchemaB'";
+                "          $ref: \"#/components/schemas/SchemaB\"";
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
-        ResolverFully resolverUtil = new ResolverFully();
+        ResolverFully resolverUtil = new ResolverFully(options);
         resolverUtil.resolveFully(openAPI);
 
 
@@ -620,7 +621,7 @@ public class OpenAPIResolverTest {
                         "          name: \"body\"\n" +
                         "          required: false\n" +
                         "          schema: \n" +
-                        "            $ref: '#/components/Schemas/StructureA'\n" +
+                        "            $ref: \"#/components/Schemas/StructureA\"\n" +
                         "components: \n" +
                         "   schemas:\n" +
                         "       StructureA: \n" +
@@ -631,7 +632,7 @@ public class OpenAPIResolverTest {
                         "               arrayOfOtherType: \n" +
                         "                   type: array\n" +
                         "                   items: \n" +
-                        "                       $ref: '#/definitions/StructureB'\n" +
+                        "                       $ref: \"#/definitions/StructureB\"\n" +
                         "       StructureB: \n" +
                         "           type: object\n" +
                         "           properties: \n" +
@@ -643,7 +644,7 @@ public class OpenAPIResolverTest {
         options.setResolveFully(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(yaml,auths,options).getOpenAPI();
-        ResolverFully resolverUtil = new ResolverFully();
+        ResolverFully resolverUtil = new ResolverFully(options);
         resolverUtil.resolveFully(openAPI);
         Parameter param = openAPI.getPaths().get("/test/method").getPost().getParameters().get(0);
 
@@ -766,8 +767,9 @@ public class OpenAPIResolverTest {
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        // Added this parseOption to make requestBody inline in the operation resolve processing flow.
+        // Added this parseOption to make requestBody/response inline in the operation resolve processing flow.
         options.setResolveRequestBody(true);
+        options.setResolveResponses(true);
 
         OpenAPI openAPI = new OpenAPIV3Parser().readLocation(path, null, options).getOpenAPI();
 
@@ -776,7 +778,7 @@ public class OpenAPIResolverTest {
         assertTrue(openAPI.getPaths().get("/resource").getPost().getRequestBody().getContent() != null);
         assertTrue(openAPI.getPaths().get("/resource").getPost().getRequestBody().getContent().get("application/json").getSchema() instanceof ObjectSchema);
 
-        // Responses are already by default made inline in case referenced.
+        // Responses should be inline
         assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").get$ref() == null);
         assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").getContent() != null);
         assertTrue(openAPI.getPaths().get("/resource").getPost().getResponses().get("200").getContent().get("application/json").getSchema() instanceof ObjectSchema);
@@ -795,7 +797,7 @@ public class OpenAPIResolverTest {
                 "        content:\n" +
                 "          application/json:\n" +
                 "            schema:\n" +
-                "              $ref: '#/components/schemas/ModelA'\n" +
+                "              $ref: \"#/components/schemas/ModelA\"\n" +
                 "      responses:\n" +
                 "        default:\n" +
                 "          description: Default response\n" +
@@ -805,7 +807,7 @@ public class OpenAPIResolverTest {
                 "        content:\n" +
                 "          application/json:\n" +
                 "            schema:\n" +
-                "              $ref: '#/components/schemas/ModelB'\n" +
+                "              $ref: \"#/components/schemas/ModelB\"\n" +
                 "      responses:\n" +
                 "        default:\n" +
                 "          description: Default response\n" +
@@ -815,7 +817,7 @@ public class OpenAPIResolverTest {
                 "        content:\n" +
                 "          application/json:\n" +
                 "            schema:\n" +
-                "              $ref: '#/components/schemas/ModelC'\n" +
+                "              $ref: \"#/components/schemas/ModelC\"\n" +
                 "      responses:\n" +
                 "        default:\n" +
                 "          description: Default response\n" +
@@ -827,7 +829,7 @@ public class OpenAPIResolverTest {
                 "          content:\n" +
                 "            '*/*':\n" +
                 "              schema:\n" +
-                "                $ref: '#/components/schemas/ModelA'\n" +
+                "                $ref: \"#/components/schemas/ModelA\"\n" +
                 "  /selfRefE:\n" +
                 "    get:\n" +
                 "      responses:\n" +
@@ -838,7 +840,7 @@ public class OpenAPIResolverTest {
                 "              schema:\n" +
                 "                type: array\n" +
                 "                items:\n" +
-                "                  $ref: '#/components/schemas/ModelA'\n" +
+                "                  $ref: \"#/components/schemas/ModelA\"\n" +
                 "info:\n" +
                 "  version: ''\n" +
                 "  title: ''\n" +
@@ -847,15 +849,15 @@ public class OpenAPIResolverTest {
                 "    ModelA:\n" +
                 "      properties:\n" +
                 "        modelB:\n" +
-                "          $ref: '#/components/schemas/ModelB'\n" +
+                "          $ref: \"#/components/schemas/ModelB\"\n" +
                 "    ModelB:\n" +
                 "      properties:\n" +
                 "        modelB:\n" +
-                "          $ref: '#/components/schemas/ModelB'\n" +
+                "          $ref: \"#/components/schemas/ModelB\"\n" +
                 "    ModelC:\n" +
                 "      properties:\n" +
                 "        modelA:\n" +
-                "          $ref: '#/components/schemas/ModelA'";
+                "          $ref: \"#/components/schemas/ModelA\"";
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -1285,6 +1287,8 @@ public class OpenAPIResolverTest {
     @Test(description = "resolve top-level responses")
     public void testSharedResponses() {
         final OpenAPI swagger = new OpenAPI();
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveResponses(true);
         List<Parameter> parameters = new ArrayList<>();
         parameters.add(0,new Parameter().$ref("username"));
         swagger.path("/fun", new PathItem()
@@ -1294,7 +1298,7 @@ public class OpenAPIResolverTest {
 
         swagger.components(new Components().addResponses("foo", new ApiResponse().description("ok!")));
 
-        final OpenAPI resolved = new OpenAPIResolver(swagger, null).resolve();
+        final OpenAPI resolved = new OpenAPIResolver(swagger, null, null, null, parseOptions).resolve();
         ApiResponse response = resolved.getPaths().get("/fun").getGet().getResponses().get("200");
         assertTrue(response.getDescription().equals("ok!"));
         assertTrue(response instanceof ApiResponse);
@@ -1312,7 +1316,7 @@ public class OpenAPIResolverTest {
                 "    get:\n" +
                 "      description: test get\n" +
                 "      parameters:\n" +
-                "        - $ref: '#/components/parameters/testParam'\n" +
+                "        - $ref: \"#/components/parameters/testParam\"\n" +
                 "      responses:\n" +
                 "        default:\n" +
                 "          description: test response\n" +
@@ -1429,6 +1433,66 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void recursiveResolvingIssue1751() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_1751.yaml", null, parseOptions);
+        assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+        assertNotNull(openAPI.getComponents().getSchemas().get("NestedObject"), "NestedObject schema should be present");
+        try {
+            String serialized = Json.mapper().writeValueAsString(openAPI);
+            assertNotNull(serialized, "Serialized output should not be null");
+        }
+        catch (Exception e) {
+            fail("Recursive loop found: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void recursiveResolvingIssue1751MutualRecursion() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_1751_mutual_recursion.yaml", null, parseOptions);
+        assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+        assertNotNull(openAPI.getComponents(), "Components should not be null");
+        assertNotNull(openAPI.getComponents().getSchemas().get("SchemaA"), "SchemaA should be present");
+        assertNotNull(openAPI.getComponents().getSchemas().get("SchemaB"), "SchemaB should be present");
+        assertEquals(openAPI.getComponents().getSchemas().get("SchemaA").getType(), "object", "SchemaA should be object type");
+        assertEquals(openAPI.getComponents().getSchemas().get("SchemaB").getType(), "object", "SchemaB should be object type");
+        try {
+            String serialized = Json.mapper().writeValueAsString(openAPI);
+            assertNotNull(serialized, "Serialized output should not be null");
+        }
+        catch (Exception e) {
+            fail("Recursive loop found: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void recursiveResolvingIssue1751RecursiveArrayItems() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_1751_recursive_array.yaml", null, parseOptions);
+        assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+        Schema treeNode = openAPI.getComponents().getSchemas().get("TreeNode");
+        assertNotNull(treeNode, "TreeNode schema should be present");
+        assertEquals(treeNode.getType(), "object", "TreeNode should be object type");
+        Schema valueProperty = (Schema) treeNode.getProperties().get("value");
+        assertNotNull(valueProperty, "TreeNode should have a value property");
+        assertEquals(valueProperty.getType(), "integer", "value property should be integer type");
+        try {
+            String serialized = Json.mapper().writeValueAsString(openAPI);
+            assertNotNull(serialized, "Serialized output should not be null");
+        }
+        catch (Exception e) {
+            fail("Recursive loop found: " + e.getMessage());
+        }
+    }
+
+    @Test
     public void recursiveIssue984() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
@@ -1471,6 +1535,30 @@ public class OpenAPIResolverTest {
         final String actualLocation = "C:/Users/ggregory/git/r/api-gateway/ais-swagger-test-fixtures/src/test/resources/APIs-guru/openapi-directory-master/APIs/clearblade.com/3.0/swagger.yaml";
         final OpenAPI output = new OpenAPIV3Parser().read(actualLocation, null, options);
         new OpenAPIResolver(output, null, actualLocation).resolve();
+    }
+
+    @Test(dataProvider = "explicitObjectSchemaProvider")
+    public void testIssue2113(boolean explicitObjectSchema) {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setExplicitObjectSchema(explicitObjectSchema);
+
+        OpenAPI openAPI = new OpenAPIV3Parser().readLocation("issue_2113.yaml", auths, options).getOpenAPI();
+        ObjectSchema schema = (ObjectSchema) openAPI.getPaths().get("/foo").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        if (explicitObjectSchema) {
+            assertEquals(schema.getProperties().get("goo").getType(), "object");
+        } else {
+            assertNull(schema.getProperties().get("goo").getType());
+        }
+    }
+
+    @DataProvider(name = "explicitObjectSchemaProvider")
+    public Object[][] explicitObjectSchemaProvider() {
+        return new Object[][] {
+                { true },
+                { false }
+        };
     }
     
 }

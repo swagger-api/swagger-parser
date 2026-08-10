@@ -11,7 +11,7 @@ paths:
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/InventoryItem'
+                $ref: "#/components/schemas/InventoryItem"
 components:
   schemas:
     InventoryItem:
@@ -20,7 +20,7 @@ components:
         suppliersArray:
           type: array
           items:
-            $ref: '#/components/schemas/Supplier'
+            $ref: "#/components/schemas/Supplier"
       xml:
         name: inventoryItem
     Manufacturer:
@@ -33,7 +33,7 @@ components:
         name: manufacturer
     Supplier:
       allOf:
-        - $ref: '#/components/schemas/Manufacturer'
+        - $ref: "#/components/schemas/Manufacturer"
         - type: object
           properties:
             supplierRef:

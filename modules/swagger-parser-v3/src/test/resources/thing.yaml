@@ -21,13 +21,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ThingSummary'
+                  $ref: "#/components/schemas/ThingSummary"
       description: |
         Search for a Thing given the parameters included in the query string.
   '/things/{id}':
     x-handler: things
     parameters:
-      - $ref: '#/components/parameters/PathId'
+      - $ref: "#/components/parameters/PathId"
     get:
       operationId: getById
       summary: Get Existing Thing
@@ -38,9 +38,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Thing'
+                $ref: "#/components/schemas/Thing"
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
       description: |
         Get details of a particular Thing given the Thing `id`. 
 components:
@@ -61,7 +61,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: "#/components/schemas/ApiError"
   schemas:
     Address:
       required:
@@ -104,7 +104,7 @@ components:
           description: A type name for the error.
     Thing:
       allOf:
-        - $ref: '#/components/schemas/ThingSummary'
+        - $ref: "#/components/schemas/ThingSummary"
         - type: object
           properties:
             stuff:
@@ -125,4 +125,4 @@ components:
           type: string
           description: The unique identifier of this Thing.
         address:
-          $ref: '#/components/schemas/Address'
+          $ref: "#/components/schemas/Address"

@@ -8,13 +8,13 @@ components:
     BreedsList:
       type: array
       items:
-        $ref: '#/components/schemas/BreedsListItems'
+        $ref: "#/components/schemas/BreedsListItems"
 
     BreedsListItems:
       type: object
       properties:
         breed:
-          $ref: '#/components/schemas/Breed'
+          $ref: "#/components/schemas/Breed"
 
     Breed:
       type: object
@@ -32,15 +32,15 @@ components:
           petType:
             type: string
           colouring:
-            $ref: '#/components/schemas/Colouring'
+            $ref: "#/components/schemas/Colouring"
 
     Colouring:
       type: object
       properties:
         primary:
-          $ref: '#/components/schemas/Colour'
+          $ref: "#/components/schemas/Colour"
         secondary:
-          $ref: '#/components/schemas/Colour'
+          $ref: "#/components/schemas/Colour"
 
     Colour:
       type: string

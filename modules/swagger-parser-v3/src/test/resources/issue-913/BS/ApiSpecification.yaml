@@ -21,7 +21,7 @@ paths:
                             schema:
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/accessProfileBO'
+                                    $ref: "#/components/schemas/accessProfileBO"
 servers:
 - url: 'https://api.com/{access}/accessProfileAPI'
   variables:

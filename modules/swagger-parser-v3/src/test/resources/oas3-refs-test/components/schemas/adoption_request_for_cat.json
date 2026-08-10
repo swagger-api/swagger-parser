@@ -1,0 +1,24 @@
+{
+    "allOf": [
+        {
+            "$ref": "./adoption_request.json"
+        },
+        {
+            "title": "Adoption Request for Cat",
+            "description": "A cat adoption request.",
+            "type": "object",
+            "properties": {
+                "have_litter_box": {
+                    "description": "Indicates if the adopter has a litter box.",
+                    "type": "boolean",
+                    "x-redacted": true
+                },
+                "have_scratching_post": {
+                    "description": "Indicates if the adopter has a scratching post.",
+                    "type": "boolean",
+                    "x-redacted": true
+                }
+            }
+        }
+    ]
+}

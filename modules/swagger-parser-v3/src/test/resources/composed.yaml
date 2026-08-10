@@ -32,7 +32,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/ExtendedAddress'
+                $ref: "#/components/schemas/ExtendedAddress"
         required: false
       responses:
         '200':
@@ -43,7 +43,7 @@ components:
       type: object
       x-swagger-router-model: io.swagger.oas.test.models.ExtendedAddress
       allOf:
-        - $ref: '#/components/schemas/Address'
+        - $ref: "#/components/schemas/Address"
         - type: object
           required:
           - gps
