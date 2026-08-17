@@ -59,6 +59,15 @@ public final class ExternalRefProcessor {
         String tryName =
             iteration == 0 ? possiblyConflictingDefinitionName : possiblyConflictingDefinitionName + "_" + iteration;
         Schema existingModel = schemas.get(tryName);
+        if (existingModel == null) {
+            for (String name : schemas.keySet()) {
+                if (name.equalsIgnoreCase(tryName)) {
+                    existingModel = schemas.get(name);
+                    tryName = name;
+                    break;
+                }
+            }
+        }
         if (existingModel != null) {
             if (existingModel.get$ref() != null) {
                 if (incomingRef != null && !cache.refsAreEquivalent(existingModel.get$ref(), incomingRef)) {
@@ -73,17 +82,6 @@ public final class ExternalRefProcessor {
                 }
                 LOGGER.debug("A model for " + existingModel + " already exists");
                 return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration, incomingRef);
-            }
-        }else{
-            // validate the name
-            if(existingModel == null){
-                for(String name: schemas.keySet()){
-                    if(name.toLowerCase().equals(tryName.toLowerCase())){
-                        existingModel = schemas.get(name);
-                        tryName = name;
-                        break;
-                    }
-                }
             }
         }
         return tryName;

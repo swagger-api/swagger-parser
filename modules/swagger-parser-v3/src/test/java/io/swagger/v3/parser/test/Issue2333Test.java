@@ -60,6 +60,19 @@ public class Issue2333Test {
         assertSchemaHasOnlyProperty(resolve(schemas, schemas.get("PetAlias")), "id");
     }
 
+    @Test
+    public void caseInsensitiveNameCollisionPreservesDistinctTargets() {
+        Map<String, Schema> schemas = parse("case-insensitive.yaml");
+
+        assertEquals(schemas.size(), 3);
+        assertTrue(schemas.keySet().containsAll(Arrays.asList("SomeItem", "pet", "Pet_1")));
+        assertFalse(schemas.containsKey("Pet"));
+        assertSchemaHasOnlyProperty(resolve(schemas, schemas.get("pet")), "id");
+        assertSchemaHasOnlyProperty(schemas.get("Pet_1"), "name");
+        assertSame(schemas.get("SomeItem"), schemas.get("Pet_1"));
+        assertSchemaHasOnlyProperty(resolve(schemas, schemas.get("SomeItem")), "name");
+    }
+
     private Map<String, Schema> parse(String fixture) {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -69,6 +82,7 @@ public class Issue2333Test {
                 .readLocation("./src/test/resources/issue-2333/" + fixture, null, options);
 
         assertNotNull(result.getOpenAPI());
+        assertTrue(result.getMessages().isEmpty(), "Unexpected parser messages: " + result.getMessages());
         assertNotNull(result.getOpenAPI().getComponents());
         assertNotNull(result.getOpenAPI().getComponents().getSchemas());
         return result.getOpenAPI().getComponents().getSchemas();
