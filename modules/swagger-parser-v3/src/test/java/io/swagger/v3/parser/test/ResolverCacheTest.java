@@ -284,10 +284,21 @@ public class ResolverCacheTest {
         Schema second = cache.loadRef(canonicalRef, RefFormat.URL, Schema.class);
 
         assertSame(first, second);
-        assertEquals(cache.getExternalFileCache().size(), 1);
-        assertEquals(cache.getResolutionCache().size(), 1);
+        assertEquals(cache.getExternalFileCache().size(), 2);
+        assertEquals(
+                cache.getExternalFileCache().get(
+                        "http://my.company.com/schemas/../schemas/file.yaml"),
+                contents);
+        assertEquals(
+                cache.getExternalFileCache().get("http://my.company.com/schemas/file.yaml"),
+                contents);
+        assertEquals(cache.getResolutionCache().size(), 2);
+        assertSame(cache.getResolutionCache().get(refWithDotSegments), first);
+        assertSame(cache.getResolutionCache().get(canonicalRef), first);
         cache.putRenamedRef(refWithDotSegments, "Foo");
         assertEquals(cache.getRenamedRef(canonicalRef), "Foo");
+        assertEquals(cache.getRenameCache().get(refWithDotSegments), "Foo");
+        assertNull(cache.getRenameCache().get(canonicalRef));
     }
 
     @Test
@@ -316,8 +327,10 @@ public class ResolverCacheTest {
 
         assertSame(first, second);
         assertEquals(first.getDescription(), "Error response");
-        assertEquals(cache.getExternalFileCache().size(), 1);
-        assertEquals(cache.getResolutionCache().size(), 1);
+        assertEquals(cache.getExternalFileCache().size(), 2);
+        assertEquals(cache.getResolutionCache().size(), 2);
+        assertSame(cache.getResolutionCache().get(refWithDotSegments), first);
+        assertSame(cache.getResolutionCache().get(canonicalRef), first);
     }
 
     @Test
@@ -330,6 +343,8 @@ public class ResolverCacheTest {
 
         assertEquals(cache.getRenamedRef(equivalentRef), "A");
         assertEquals(cache.getRenameCache().size(), 1);
+        assertEquals(cache.getRenameCache().get(refWithRedundantDotSegment), "A");
+        assertNull(cache.getRenameCache().get(equivalentRef));
     }
 
     @Test
@@ -348,14 +363,16 @@ public class ResolverCacheTest {
                 "my schemas/../Foo.yaml#/components/schemas/Foo", "UnencodedSpace");
 
         assertEquals(
-                cache.getRenameCache().get("file:/tmp/Foo.yaml#/components/schemas/Foo"),
+                cache.getRenameCache().get(
+                        "file:///tmp/schemas/../Foo.yaml#/components/schemas/Foo"),
                 "FileFoo");
         assertEquals(
-                cache.getRenameCache().get("/tmp/Foo.yaml#/components/schemas/Foo"),
+                cache.getRenameCache().get(
+                        "/tmp/schemas/../Foo.yaml#/components/schemas/Foo"),
                 "AbsoluteFoo");
         assertEquals(
                 cache.getRenameCache().get(
-                        "https://example.com/Foo.yaml?version=1#/components/schemas/Foo"),
+                        "https://example.com/a/../Foo.yaml?version=1#/components/schemas/Foo"),
                 "HttpFoo");
         assertEquals(cache.getRenameCache().get("#/components/schemas/Foo"), "InternalFoo");
         assertEquals(cache.getRenameCache().get("C:\\schemas\\Foo.yaml"), "WindowsPath");
@@ -363,5 +380,15 @@ public class ResolverCacheTest {
                 cache.getRenameCache().get(
                         "my schemas/../Foo.yaml#/components/schemas/Foo"),
                 "UnencodedSpace");
+        assertEquals(
+                cache.getRenamedRef("file:/tmp/Foo.yaml#/components/schemas/Foo"),
+                "FileFoo");
+        assertEquals(
+                cache.getRenamedRef("/tmp/Foo.yaml#/components/schemas/Foo"),
+                "AbsoluteFoo");
+        assertEquals(
+                cache.getRenamedRef(
+                        "https://example.com/Foo.yaml?version=1#/components/schemas/Foo"),
+                "HttpFoo");
     }
 }
