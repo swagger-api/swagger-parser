@@ -529,7 +529,11 @@ public class ResolverFully {
             for (String key : updated.keySet()) {
                 Schema property = updated.get(key);
 
-                if (property.getProperties() != model.getProperties()) {
+                if (schemasInProgress.contains(property) || property.getProperties() == model.getProperties()) {
+                    LOGGER.debug("not adding recursive properties, using generic object");
+                    ObjectSchema newSchema = new ObjectSchema();
+                    model.addProperties(key, newSchema);
+                } else {
                     if (!hasSchemaType(property) && parseOptions.isExplicitObjectSchema()) {
                         if (SpecVersion.V30.equals(property.getSpecVersion())) {
                             property.setType("object");
@@ -538,10 +542,6 @@ public class ResolverFully {
                         }
                     }
                     model.addProperties(key, property);
-                } else {
-                    LOGGER.debug("not adding recursive properties, using generic object");
-                    ObjectSchema newSchema = new ObjectSchema();
-                    model.addProperties(key, newSchema);
                 }
 
             }
