@@ -1,0 +1,11 @@
+openapi: 3.0.3
+info:
+  title: Pet Store API
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    SomeItem:
+      $ref: "inventory.yaml#/components/schemas/Pet"
+    Pet:
+      $ref: "pets.yaml#/components/schemas/Pet"
