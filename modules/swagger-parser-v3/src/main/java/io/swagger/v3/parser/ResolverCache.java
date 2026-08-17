@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -420,6 +421,10 @@ public class ResolverCache {
     public void putRenamedRef(String originalRef, String newRef) {
         renameCache.put(originalRef, newRef);
         canonicalRenameCache.put(canonicalize(originalRef), newRef);
+    }
+
+    public boolean refsAreEquivalent(String first, String second) {
+        return Objects.equals(canonicalize(first), canonicalize(second));
     }
 
     private static String canonicalize(String ref) {

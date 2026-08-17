@@ -27,9 +27,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 public class ResolverCacheTest {
 
@@ -345,6 +347,18 @@ public class ResolverCacheTest {
         assertEquals(cache.getRenameCache().size(), 1);
         assertEquals(cache.getRenameCache().get(refWithRedundantDotSegment), "A");
         assertNull(cache.getRenameCache().get(equivalentRef));
+    }
+
+    @Test
+    public void testRefEquivalenceUsesNormalizedCacheIdentity() {
+        ResolverCache cache = new ResolverCache(openAPI, auths, null);
+
+        assertTrue(cache.refsAreEquivalent(
+                "./components/schemas/Thing.yaml#/components/schemas/Thing",
+                "components/foo/../schemas/Thing.yaml#/components/schemas/Thing"));
+        assertFalse(cache.refsAreEquivalent(
+                "inventory.yaml#/components/schemas/Pet",
+                "pets.yaml#/components/schemas/Pet"));
     }
 
     @Test

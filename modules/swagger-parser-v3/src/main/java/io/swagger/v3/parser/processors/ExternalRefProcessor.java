@@ -55,22 +55,13 @@ public final class ExternalRefProcessor {
     }
 
     private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newSchema,
-        int iteration) {
-        return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, iteration, null);
-    }
-
-    private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newSchema,
         int iteration, String incomingRef) {
         String tryName =
             iteration == 0 ? possiblyConflictingDefinitionName : possiblyConflictingDefinitionName + "_" + iteration;
         Schema existingModel = schemas.get(tryName);
         if (existingModel != null) {
             if (existingModel.get$ref() != null) {
-                // The name is currently held by a not-yet-resolved external $ref placeholder. It is only safe to
-                // reuse the name when that placeholder targets the same reference we are resolving; otherwise the
-                // placeholder is a distinct schema that would be silently overwritten (see issue #2333).
-                if (incomingRef != null && existingModel.get$ref() != null
-                        && !existingModel.get$ref().equals(incomingRef)) {
+                if (incomingRef != null && !cache.refsAreEquivalent(existingModel.get$ref(), incomingRef)) {
                     LOGGER.debug("A different external $ref already claims the name " + tryName);
                     return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration, incomingRef);
                 }
