@@ -35,6 +35,19 @@ public class Issue2333Test {
     }
 
     @Test
+    public void identicalModelsWithSameNameFromDifferentFilesReuseSingleComponent() {
+        Map<String, Schema> schemas = parse("identical-models-different-files.yaml");
+
+        assertEquals(schemas.size(), 3);
+        assertTrue(schemas.keySet().containsAll(Arrays.asList("FirstPet", "SecondPet", "Pet")));
+        assertFalse(schemas.containsKey("Pet_1"));
+        assertSame(schemas.get("FirstPet"), schemas.get("Pet"));
+        assertSame(schemas.get("SecondPet"), schemas.get("Pet"));
+        assertSchemaHasOnlyProperty(resolve(schemas, schemas.get("FirstPet")), "id");
+        assertSchemaHasOnlyProperty(resolve(schemas, schemas.get("SecondPet")), "id");
+    }
+
+    @Test
     public void equivalentRefsWithDifferentSpellingReuseThePlaceholderName() {
         Map<String, Schema> schemas = parse("equivalent-refs.yaml");
 
