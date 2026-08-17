@@ -1,0 +1,16 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Distinct equal definitions",
+    "version": "1"
+  },
+  "paths": {},
+  "definitions": {
+    "First": {
+      "$ref": "./distinct-a.json#/definitions/Thing"
+    },
+    "Second": {
+      "$ref": "./distinct-b.json#/definitions/Thing"
+    }
+  }
+}

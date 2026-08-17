@@ -43,6 +43,7 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.parser.util.TestUtils;
 import io.swagger.util.Json;
@@ -1610,6 +1611,145 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue1422EquivalentDefinitionReferencedThroughRootFileIsNotDuplicated() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/issue-1422/File1.json");
+
+        assertNotNull(swagger);
+        assertEquals(3, swagger.getDefinitions().size());
+        assertNotNull(swagger.getDefinitions().get("File1_parent_definition"));
+        assertNotNull(swagger.getDefinitions().get("File1_referenced_definition"));
+        assertNotNull(swagger.getDefinitions().get("File2_referenced_definition"));
+        assertNull(swagger.getDefinitions().get("File1_referenced_definition_2"));
+
+        RefProperty file1Reference = (RefProperty) swagger.getDefinitions()
+                .get("File2_referenced_definition")
+                .getProperties()
+                .get("File1_reference_property");
+        assertEquals("#/definitions/File1_referenced_definition", file1Reference.get$ref());
+    }
+
+    @Test
+    public void testIssue1422YamlDefinitionReferencedThroughRootFileIsNotDuplicated() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/issue-1422/File1.yaml");
+
+        assertNotNull(swagger);
+        assertEquals(3, swagger.getDefinitions().size());
+        assertNull(swagger.getDefinitions().get("File1_referenced_definition_2"));
+
+        RefProperty file1Reference = (RefProperty) swagger.getDefinitions()
+                .get("File2_referenced_definition")
+                .getProperties()
+                .get("File1_reference_property");
+        assertEquals("#/definitions/File1_referenced_definition", file1Reference.get$ref());
+    }
+
+    @Test
+    public void testDistinctEqualDefinitionsWithTheSameNameRemainDistinct() {
+        Swagger swagger = new SwaggerParser().read("src/test/resources/issue-1422/distinct-root.json");
+
+        assertNotNull(swagger);
+        assertNotNull(swagger.getDefinitions().get("Thing"));
+        assertNotNull(swagger.getDefinitions().get("Thing_2"));
+        assertTrue(swagger.getDefinitions().get("First") == swagger.getDefinitions().get("Thing"));
+        assertTrue(swagger.getDefinitions().get("Second") == swagger.getDefinitions().get("Thing_2"));
+    }
+
+    @Test
+    public void testEquivalentRelativeRefsShareCacheIdentity() {
+        ResolverCache cache = new ResolverCache(
+                new Swagger(), null, "src/test/resources/issue-1422/File1.json");
+        String refWithDotSegments =
+                "./nested/../File2.json#/definitions/File2_referenced_definition";
+        String canonicalRef = "File2.json#/definitions/File2_referenced_definition";
+
+        Model firstResult = cache.loadRef(refWithDotSegments, RefFormat.RELATIVE, Model.class);
+        Model secondResult = cache.loadRef(canonicalRef, RefFormat.RELATIVE, Model.class);
+
+        assertTrue(firstResult == secondResult);
+        assertEquals(2, cache.getExternalFileCache().size());
+        assertEquals(2, cache.getResolutionCache().size());
+        assertEquals(
+                cache.getExternalFileCache().get("./nested/../File2.json"),
+                cache.getExternalFileCache().get("File2.json"));
+        assertTrue(cache.getResolutionCache().get(refWithDotSegments) == firstResult);
+        assertTrue(cache.getResolutionCache().get(canonicalRef) == firstResult);
+
+        cache.putRenamedRef(refWithDotSegments, "File2_referenced_definition");
+        assertEquals("File2_referenced_definition", cache.getRenamedRef(canonicalRef));
+        assertEquals(1, cache.getRenameCache().size());
+        assertEquals(
+                "File2_referenced_definition",
+                cache.getRenameCache().get(refWithDotSegments));
+        assertNull(cache.getRenameCache().get(canonicalRef));
+    }
+
+    @Test
+    public void testEquivalentNonSchemaRefsShareCacheIdentityAndPreservePublicKeys() {
+        ResolverCache cache = new ResolverCache(
+                new Swagger(), null, "src/test/resources/issue-1422/File1.json");
+        String refWithDotSegments = "./nested/../responses.json#/responses/Error";
+        String canonicalRef = "responses.json#/responses/Error";
+
+        Response firstResult = cache.loadRef(refWithDotSegments, RefFormat.RELATIVE, Response.class);
+        Response secondResult = cache.loadRef(canonicalRef, RefFormat.RELATIVE, Response.class);
+
+        assertTrue(firstResult == secondResult);
+        assertEquals("Error response", firstResult.getDescription());
+        assertEquals(2, cache.getExternalFileCache().size());
+        assertEquals(2, cache.getResolutionCache().size());
+        assertTrue(cache.getResolutionCache().get(refWithDotSegments) == firstResult);
+        assertTrue(cache.getResolutionCache().get(canonicalRef) == firstResult);
+    }
+
+    @Test
+    public void testCanonicalRenameLookupPreservesOriginalUriKeys() {
+        ResolverCache cache = new ResolverCache(new Swagger(), null, null);
+
+        String fileRef = "file:///tmp/schemas/../Foo.yaml#/definitions/Foo";
+        String urlRef = "https://example.com/a/../Foo.yaml?version=1#/definitions/Foo";
+        String invalidRef = "my schemas/../Foo.yaml#/definitions/Foo";
+        String windowsRef = "C:\\schemas\\Foo.yaml#/definitions/Foo";
+        cache.putRenamedRef(fileRef, "FileFoo");
+        cache.putRenamedRef(urlRef, "UrlFoo");
+        cache.putRenamedRef(invalidRef, "InvalidFoo");
+        cache.putRenamedRef(windowsRef, "WindowsFoo");
+
+        assertEquals("FileFoo", cache.getRenamedRef("file:/tmp/Foo.yaml#/definitions/Foo"));
+        assertEquals(
+                "UrlFoo",
+                cache.getRenamedRef("https://example.com/Foo.yaml?version=1#/definitions/Foo"));
+        assertEquals("InvalidFoo", cache.getRenamedRef(invalidRef));
+        assertEquals("WindowsFoo", cache.getRenamedRef(windowsRef));
+        assertEquals("FileFoo", cache.getRenameCache().get(fileRef));
+        assertEquals("UrlFoo", cache.getRenameCache().get(urlRef));
+        assertNull(cache.getRenameCache().get("file:/tmp/Foo.yaml#/definitions/Foo"));
+        assertNull(cache.getRenameCache().get("https://example.com/Foo.yaml?version=1#/definitions/Foo"));
+    }
+
+    @Test
+    public void testPercentEncodedReservedPathDoesNotShareCacheIdentity() {
+        ResolverCache cache = new ResolverCache(
+                new Swagger(), null, "src/test/resources/issue-1422/File1.json");
+        String encodedDelimiterRef =
+                "percent%2Fencoded.json#/definitions/Thing";
+        String pathDelimiterRef =
+                "percent/encoded.json#/definitions/Thing";
+
+        Model encodedDelimiterModel =
+                cache.loadRef(encodedDelimiterRef, RefFormat.RELATIVE, Model.class);
+        Model pathDelimiterModel =
+                cache.loadRef(pathDelimiterRef, RefFormat.RELATIVE, Model.class);
+
+        assertTrue(encodedDelimiterModel != pathDelimiterModel);
+        assertEquals("percent-encoded delimiter", encodedDelimiterModel.getTitle());
+        assertEquals("path delimiter", pathDelimiterModel.getTitle());
+        assertEquals(2, cache.getExternalFileCache().size());
+        assertEquals(2, cache.getResolutionCache().size());
+        assertTrue(cache.getResolutionCache().get(encodedDelimiterRef) == encodedDelimiterModel);
+        assertTrue(cache.getResolutionCache().get(pathDelimiterRef) == pathDelimiterModel);
+    }
+
+    @Test
     public void testRefAdditionalProperties() throws Exception {
         Swagger swagger = new SwaggerParser().read("src/test/resources/additionalProperties.yaml");
 
@@ -1670,9 +1810,10 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("y"));
         assertTrue(definitions.containsKey("z"));
         assertTrue(definitions.containsKey("referencedByLocalElement"));
-        assertEquals("#/definitions/k_2", ((RefModel) definitions.get("i")).get$ref());
+        // a.yaml#/definitions/j points back to this root document's k definition.
+        assertEquals("#/definitions/k", ((RefModel) definitions.get("i")).get$ref());
         assertEquals("k-definition", definitions.get("k").getTitle());
-        assertEquals("k-definition", definitions.get("k_2").getTitle());
+        assertNull(definitions.get("k_2"));
         assertEquals(((RefModel) definitions.get("l")).get$ref(), "#/definitions/referencedByLocalElement"); //issue #434
     }
 

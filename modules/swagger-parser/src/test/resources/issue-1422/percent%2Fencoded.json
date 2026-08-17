@@ -1,0 +1,14 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Percent-encoded delimiter",
+    "version": "1"
+  },
+  "paths": {},
+  "definitions": {
+    "Thing": {
+      "title": "percent-encoded delimiter",
+      "type": "object"
+    }
+  }
+}

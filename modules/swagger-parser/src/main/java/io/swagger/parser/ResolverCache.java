@@ -20,8 +20,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,15 +56,19 @@ public class ResolverCache {
     private final Path parentDirectory;
     private final String parentUrl;
     private final String rootPath;
+    private final String canonicalRootFile;
     private final ParseOptions parseOptions;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
+    private Map<String, Object> canonicalResolutionCache = new HashMap<>();
+    private Map<String, String> canonicalExternalFileCache = new HashMap<>();
     private Set<String> referencedModelKeys = new HashSet<>();
 
     /*
     a map that stores original external references, and their associated renamed references
      */
     private Map<String, String> renameCache = new ConcurrentHashMap<>();
+    private Map<String, String> canonicalRenameCache = new ConcurrentHashMap<>();
 
     public ResolverCache(Swagger swagger, List<AuthorizationValue> auths, String parentFileLocation) {
         this(swagger, auths, parentFileLocation, new ParseOptions());
@@ -83,6 +91,8 @@ public class ResolverCache {
             parentDirectory = file.toPath();
         }
         parentUrl = parentFileLocation;
+        canonicalRootFile = canonicalizeRootFile(parentFileLocation);
+        registerRootReferences();
 
     }
 
@@ -107,35 +117,32 @@ public class ResolverCache {
 
         final String file = refParts[0];
         final String definitionPath = refParts.length == 2 ? refParts[1] : null;
+        final String canonicalRef = canonicalize(ref);
+        final String canonicalFile = canonicalize(file);
 
-        //we might have already resolved this ref, so check the resolutionCache
-        Object previouslyResolvedEntity = resolutionCache.get(ref);
+        //we might have already resolved an equivalent ref, so check the canonical cache
+        Object previouslyResolvedEntity = canonicalResolutionCache.get(canonicalRef);
 
         if (previouslyResolvedEntity != null) {
+            resolutionCache.putIfAbsent(ref, previouslyResolvedEntity);
+            cacheExternalFile(file, canonicalFile, refFormat);
             return expectedType.cast(previouslyResolvedEntity);
         }
 
         //we have not resolved this particular ref
         //but we may have already loaded the file or url in question
-        String contents = externalFileCache.get(file);
+        String contents = canonicalExternalFileCache.get(canonicalFile);
 
         if (contents == null) {
-            if(parseOptions.isSafelyResolveURL()){
-                checkUrlIsPermitted(file);
-            }
-
-            if(parentDirectory != null) {
-                contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
-            }
-            else if(rootPath != null) {
-                contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath);
-            }
-            externalFileCache.put(file, contents);
+            contents = readExternalFile(file, refFormat);
+            canonicalExternalFileCache.put(canonicalFile, contents);
         }
+        externalFileCache.putIfAbsent(file, contents);
 
         if (definitionPath == null) {
             T result = DeserializationUtils.deserialize(contents, file, expectedType);
             resolutionCache.put(ref, result);
+            canonicalResolutionCache.put(canonicalRef, result);
             return result;
         }
 
@@ -162,6 +169,7 @@ public class ResolverCache {
         updateLocalRefs(file, result);
 
         resolutionCache.put(ref, result);
+        canonicalResolutionCache.put(canonicalRef, result);
         
         if (result instanceof BodyParameter) {
         	loadRef(ref, refFormat, (BodyParameter) result);
@@ -323,11 +331,130 @@ public class ResolverCache {
     }
 
     public String getRenamedRef(String originalRef) {
-        return renameCache.get(originalRef);
+        if (originalRef == null) {
+            return null;
+        }
+        if (originalRef.startsWith("#/")) {
+            return renameCache.get(originalRef);
+        }
+        return canonicalRenameCache.get(canonicalize(originalRef));
     }
 
     public void putRenamedRef(String originalRef, String newRef) {
         renameCache.put(originalRef, newRef);
+        canonicalRenameCache.put(canonicalize(originalRef), newRef);
+    }
+
+    private String readExternalFile(String file, RefFormat refFormat) {
+        if(parseOptions.isSafelyResolveURL()){
+            checkUrlIsPermitted(file);
+        }
+
+        if(parentDirectory != null) {
+            return RefUtils.readExternalRef(file, refFormat, auths, parentDirectory);
+        }
+        if(rootPath != null) {
+            return RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath);
+        }
+        return null;
+    }
+
+    private void cacheExternalFile(String file, String canonicalFile, RefFormat refFormat) {
+        String contents = canonicalExternalFileCache.get(canonicalFile);
+        if (contents == null) {
+            contents = readExternalFile(file, refFormat);
+            canonicalExternalFileCache.put(canonicalFile, contents);
+        }
+        externalFileCache.putIfAbsent(file, contents);
+    }
+
+    private String canonicalize(String ref) {
+        if (ref == null || ref.isEmpty()) {
+            return ref;
+        }
+        try {
+            URI uri = new URI(ref);
+            if (uri.isAbsolute()) {
+                return uri.normalize().toString();
+            }
+            if (rootPath != null && (rootPath.startsWith("http://") || rootPath.startsWith("https://"))) {
+                return new URI(rootPath).resolve(uri).normalize().toString();
+            }
+            if ((uri.getPath() == null || uri.getPath().isEmpty()) && canonicalRootFile != null) {
+                return appendQueryAndFragment(canonicalRootFile, uri);
+            }
+            if (parentDirectory != null && uri.getRawPath() != null) {
+                URI resolvedFile = parentDirectory.resolve(uri.getRawPath()).normalize().toUri();
+                return appendQueryAndFragment(resolvedFile.toString(), uri);
+            }
+            return uri.normalize().toString();
+        } catch (URISyntaxException ignored) {
+            return ref;
+        }
+    }
+
+    private String appendQueryAndFragment(String resource, URI reference) throws URISyntaxException {
+        URI resourceUri = new URI(resource);
+        return new URI(
+                resourceUri.getScheme(),
+                resourceUri.getAuthority(),
+                resourceUri.getPath(),
+                reference.getQuery(),
+                reference.getFragment()).normalize().toString();
+    }
+
+    private String canonicalizeRootFile(String parentFileLocation) {
+        if (parentFileLocation == null || parentFileLocation.isEmpty()) {
+            return null;
+        }
+        try {
+            URI rootUri = new URI(parentFileLocation);
+            if (rootUri.isAbsolute() && !"file".equalsIgnoreCase(rootUri.getScheme())) {
+                return rootUri.normalize().toString();
+            }
+
+            Path rootFile;
+            if ("file".equalsIgnoreCase(rootUri.getScheme())) {
+                rootFile = Paths.get(rootUri);
+            } else {
+                rootFile = Paths.get(parentFileLocation.replace('\\', '/'));
+                if (!Files.exists(rootFile) && parentDirectory != null && rootFile.getFileName() != null) {
+                    rootFile = parentDirectory.resolve(rootFile.getFileName());
+                }
+            }
+            URI rootFileUri = rootFile.toAbsolutePath().normalize().toUri();
+            return new URI(
+                    rootFileUri.getScheme(),
+                    rootFileUri.getAuthority(),
+                    rootFileUri.getPath(),
+                    null,
+                    null).toString();
+        } catch (Exception ignored) {
+            return parentFileLocation;
+        }
+    }
+
+    private void registerRootReferences() {
+        if (canonicalRootFile == null || swagger == null) {
+            return;
+        }
+        registerRootReferences("definitions", swagger.getDefinitions());
+        registerRootReferences("responses", swagger.getResponses());
+    }
+
+    private void registerRootReferences(String section, Map<String, ?> entries) {
+        if (entries == null) {
+            return;
+        }
+        for (Map.Entry<String, ?> entry : entries.entrySet()) {
+            String pointer = "#/" + section + "/" + escapePointer(entry.getKey());
+            String canonicalRef = canonicalize(canonicalRootFile + pointer);
+            canonicalResolutionCache.put(canonicalRef, entry.getValue());
+        }
+    }
+
+    private String escapePointer(String value) {
+        return value.replace("~", "~0").replace("/", "~1");
     }
 
     public Map<String, Object> getResolutionCache() {

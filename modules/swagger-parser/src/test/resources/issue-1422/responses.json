@@ -1,0 +1,13 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Responses",
+    "version": "1"
+  },
+  "paths": {},
+  "responses": {
+    "Error": {
+      "description": "Error response"
+    }
+  }
+}

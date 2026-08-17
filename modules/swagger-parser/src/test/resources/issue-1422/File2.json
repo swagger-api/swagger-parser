@@ -1,0 +1,18 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "File2",
+    "version": "01"
+  },
+  "paths": {},
+  "definitions": {
+    "File2_referenced_definition": {
+      "type": "object",
+      "properties": {
+        "File1_reference_property": {
+          "$ref": "./File1.json#/definitions/File1_referenced_definition"
+        }
+      }
+    }
+  }
+}

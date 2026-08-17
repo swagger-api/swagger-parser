@@ -1,0 +1,16 @@
+swagger: "2.0"
+info:
+  title: File1
+  version: "01"
+paths: {}
+definitions:
+  File1_referenced_definition:
+    type: object
+    properties:
+      name:
+        type: string
+  File1_parent_definition:
+    type: object
+    properties:
+      properties:
+        $ref: "./File2.yaml#/definitions/File2_referenced_definition"

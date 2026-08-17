@@ -11,7 +11,6 @@ import io.swagger.models.properties.StringProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
@@ -62,32 +61,13 @@ public final class ExternalRefProcessor {
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
 
-        String tryName = null;
-        Model existingModel = definitions.get(possiblyConflictingDefinitionName);
-
-        if (existingModel != null) {
-            LOGGER.debug("A model for " + existingModel + " already exists");
-            if(existingModel instanceof RefModel) {
-                // use the new model
-                existingModel = null;
-            }else{
-                //We add a number at the end of the definition name
-                int i = 2;
-                for (String name : definitions.keySet()) {
-                    if (name.equals(possiblyConflictingDefinitionName)) {
-                        tryName = possiblyConflictingDefinitionName + "_" + i;
-                        existingModel = definitions.get(tryName);
-                        i++;
-                    }
-                }
-            }
-        }
-        if (StringUtils.isNotBlank(tryName)){
-            newRef = tryName;
-        }else{
-            newRef = possiblyConflictingDefinitionName;
-        }
+        newRef = findDefinitionName(definitions, possiblyConflictingDefinitionName, model);
         cache.putRenamedRef($ref, newRef);
+        Model existingModel = definitions.get(newRef);
+        if (existingModel instanceof RefModel) {
+            // use the new model
+            existingModel = null;
+        }
         if(existingModel == null) {
             // don't overwrite existing model reference
             swagger.addDefinition(newRef, model);
@@ -154,6 +134,24 @@ public final class ExternalRefProcessor {
         }
 
         return newRef;
+    }
+
+    private String findDefinitionName(Map<String, Model> definitions, String definitionName, Model model) {
+        Model existingModel = definitions.get(definitionName);
+        if (existingModel == null || existingModel instanceof RefModel || existingModel == model) {
+            return definitionName;
+        }
+
+        LOGGER.debug("A different model named " + definitionName + " already exists");
+        int suffix = 2;
+        while (true) {
+            String candidate = definitionName + "_" + suffix;
+            existingModel = definitions.get(candidate);
+            if (existingModel == null || existingModel instanceof RefModel || existingModel == model) {
+                return candidate;
+            }
+            suffix++;
+        }
     }
 
 
