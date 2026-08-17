@@ -34,7 +34,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -65,7 +64,7 @@ public final class ExternalRefProcessor {
                 // use the new model
                 existingModel = null;
             } else if (!newSchema.equals(existingModel)) {
-                if(cache.getResolutionCache().get(newSchema.get$ref())!= null){
+                if (cache.getRenamedRef(newSchema.get$ref()) != null) {
                     return tryName;
                 }
                 LOGGER.debug("A model for " + existingModel + " already exists");

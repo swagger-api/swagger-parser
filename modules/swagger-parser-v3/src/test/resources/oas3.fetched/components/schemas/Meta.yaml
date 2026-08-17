@@ -1,0 +1,18 @@
+properties:
+  first:
+    $ref: './Href.yaml'
+  last:
+    $ref: './Href.yaml'
+  next:
+    $ref: './Href.yaml'
+  previous:
+    $ref: './Href.yaml'
+  self:
+    $ref: './Href.yaml'
+  total:
+    type: integer
+  current_page:
+    type: integer
+  last_page:
+    type: integer
+type: object

@@ -29,6 +29,7 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 
 public class ResolverCacheTest {
 
@@ -257,5 +258,137 @@ public class ResolverCacheTest {
         assertNull(cache.getRenamedRef("foo"));
         cache.putRenamedRef("foo", "bar");
         assertEquals(cache.getRenamedRef("foo"), "bar");
+    }
+
+    @Test
+    public void testEquivalentUriRefsShareCacheIdentity() {
+        final String refWithDotSegments =
+                "http://my.company.com/schemas/../schemas/file.yaml#/components/schemas/Foo";
+        final String canonicalRef =
+                "http://my.company.com/schemas/file.yaml#/components/schemas/Foo";
+        final String contents = "components:\n  schemas:\n    Foo:\n      type: string\n";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(
+                    "http://my.company.com/schemas/../schemas/file.yaml",
+                    RefFormat.URL,
+                    auths,
+                    "http://my.company.com/root.yaml",
+                    (PermittedUrlsChecker) any);
+            times = 1;
+            result = contents;
+        }};
+
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/root.yaml");
+        Schema first = cache.loadRef(refWithDotSegments, RefFormat.URL, Schema.class);
+        Schema second = cache.loadRef(canonicalRef, RefFormat.URL, Schema.class);
+
+        assertSame(first, second);
+        assertEquals(cache.getExternalFileCache().size(), 2);
+        assertEquals(
+                cache.getExternalFileCache().get(
+                        "http://my.company.com/schemas/../schemas/file.yaml"),
+                contents);
+        assertEquals(
+                cache.getExternalFileCache().get("http://my.company.com/schemas/file.yaml"),
+                contents);
+        assertEquals(cache.getResolutionCache().size(), 2);
+        assertSame(cache.getResolutionCache().get(refWithDotSegments), first);
+        assertSame(cache.getResolutionCache().get(canonicalRef), first);
+        cache.putRenamedRef(refWithDotSegments, "Foo");
+        assertEquals(cache.getRenamedRef(canonicalRef), "Foo");
+        assertEquals(cache.getRenameCache().get(refWithDotSegments), "Foo");
+        assertNull(cache.getRenameCache().get(canonicalRef));
+    }
+
+    @Test
+    public void testEquivalentApiResponseRefsShareCacheIdentity() {
+        final String refWithDotSegments =
+                "http://my.company.com/responses/../responses/common.yaml#/components/responses/Error";
+        final String canonicalRef =
+                "http://my.company.com/responses/common.yaml#/components/responses/Error";
+        final String contents =
+                "components:\n  responses:\n    Error:\n      description: Error response\n";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(
+                    "http://my.company.com/responses/../responses/common.yaml",
+                    RefFormat.URL,
+                    auths,
+                    "http://my.company.com/root.yaml",
+                    (PermittedUrlsChecker) any);
+            times = 1;
+            result = contents;
+        }};
+
+        ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/root.yaml");
+        ApiResponse first = cache.loadRef(refWithDotSegments, RefFormat.URL, ApiResponse.class);
+        ApiResponse second = cache.loadRef(canonicalRef, RefFormat.URL, ApiResponse.class);
+
+        assertSame(first, second);
+        assertEquals(first.getDescription(), "Error response");
+        assertEquals(cache.getExternalFileCache().size(), 2);
+        assertEquals(cache.getResolutionCache().size(), 2);
+        assertSame(cache.getResolutionCache().get(refWithDotSegments), first);
+        assertSame(cache.getResolutionCache().get(canonicalRef), first);
+    }
+
+    @Test
+    public void testIssue2016EquivalentRelativeRefsShareRenameCacheIdentity() {
+        ResolverCache cache = new ResolverCache(openAPI, auths, null);
+        String refWithRedundantDotSegment = "./../A.yaml#/components/schemas/A";
+        String equivalentRef = "../A.yaml#/components/schemas/A";
+
+        cache.putRenamedRef(refWithRedundantDotSegment, "A");
+
+        assertEquals(cache.getRenamedRef(equivalentRef), "A");
+        assertEquals(cache.getRenameCache().size(), 1);
+        assertEquals(cache.getRenameCache().get(refWithRedundantDotSegment), "A");
+        assertNull(cache.getRenameCache().get(equivalentRef));
+    }
+
+    @Test
+    public void testCanonicalRenameCacheKeysPreserveUriParts() {
+        ResolverCache cache = new ResolverCache(openAPI, auths, null);
+
+        cache.putRenamedRef(
+                "file:///tmp/schemas/../Foo.yaml#/components/schemas/Foo", "FileFoo");
+        cache.putRenamedRef(
+                "/tmp/schemas/../Foo.yaml#/components/schemas/Foo", "AbsoluteFoo");
+        cache.putRenamedRef(
+                "https://example.com/a/../Foo.yaml?version=1#/components/schemas/Foo", "HttpFoo");
+        cache.putRenamedRef("#/components/schemas/Foo", "InternalFoo");
+        cache.putRenamedRef("C:\\schemas\\Foo.yaml", "WindowsPath");
+        cache.putRenamedRef(
+                "my schemas/../Foo.yaml#/components/schemas/Foo", "UnencodedSpace");
+
+        assertEquals(
+                cache.getRenameCache().get(
+                        "file:///tmp/schemas/../Foo.yaml#/components/schemas/Foo"),
+                "FileFoo");
+        assertEquals(
+                cache.getRenameCache().get(
+                        "/tmp/schemas/../Foo.yaml#/components/schemas/Foo"),
+                "AbsoluteFoo");
+        assertEquals(
+                cache.getRenameCache().get(
+                        "https://example.com/a/../Foo.yaml?version=1#/components/schemas/Foo"),
+                "HttpFoo");
+        assertEquals(cache.getRenameCache().get("#/components/schemas/Foo"), "InternalFoo");
+        assertEquals(cache.getRenameCache().get("C:\\schemas\\Foo.yaml"), "WindowsPath");
+        assertEquals(
+                cache.getRenameCache().get(
+                        "my schemas/../Foo.yaml#/components/schemas/Foo"),
+                "UnencodedSpace");
+        assertEquals(
+                cache.getRenamedRef("file:/tmp/Foo.yaml#/components/schemas/Foo"),
+                "FileFoo");
+        assertEquals(
+                cache.getRenamedRef("/tmp/Foo.yaml#/components/schemas/Foo"),
+                "AbsoluteFoo");
+        assertEquals(
+                cache.getRenamedRef(
+                        "https://example.com/Foo.yaml?version=1#/components/schemas/Foo"),
+                "HttpFoo");
     }
 }

@@ -28,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -68,6 +70,8 @@ public class ResolverCache {
     private final String rootPath;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
+    private Map<String, Object> canonicalResolutionCache = new HashMap<>();
+    private Map<String, String> canonicalExternalFileCache = new HashMap<>();
     private List<String> referencedModelKeys = new ArrayList<>();
     private Set<String> resolveValidationMessages;
     private final ParseOptions parseOptions;
@@ -79,6 +83,7 @@ public class ResolverCache {
      * references
      */
     private Map<String, String> renameCache = new HashMap<>();
+    private Map<String, String> canonicalRenameCache = new HashMap<>();
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation) {
         this(openApi, auths, parentFileLocation, new HashSet<>());
@@ -131,11 +136,15 @@ public class ResolverCache {
 
         final String file = refParts[0];
         final String definitionPath = refParts.length == 2 ? refParts[1] : null;
+        final String canonicalRef = canonicalize(ref);
+        final String canonicalFile = canonicalize(file);
 
-        //we might have already resolved this ref, so check the resolutionCache
-        Object previouslyResolvedEntity = resolutionCache.get(ref);
+        //we might have already resolved an equivalent ref, so check the canonical cache
+        Object previouslyResolvedEntity = canonicalResolutionCache.get(canonicalRef);
 
         if (previouslyResolvedEntity != null) {
+            resolutionCache.putIfAbsent(ref, previouslyResolvedEntity);
+            externalFileCache.putIfAbsent(file, canonicalExternalFileCache.get(canonicalFile));
             if(expectedType.equals(Header.class)){
                 if (expectedType.getClass().equals(previouslyResolvedEntity.getClass())) {
                     return expectedType.cast(previouslyResolvedEntity);
@@ -147,7 +156,7 @@ public class ResolverCache {
 
         //we have not resolved this particular ref
         //but we may have already loaded the file or url in question
-        String contents = externalFileCache.get(file);
+        String contents = canonicalExternalFileCache.get(canonicalFile);
 
         if (contents == null) {
             if(parseOptions.isSafelyResolveURL()){
@@ -164,8 +173,9 @@ public class ResolverCache {
                 contents = RefUtils.readExternalClasspathRef(file, refFormat, auths, rootPath, permittedUrlsChecker);
 
             }
-            externalFileCache.put(file, contents);
+            canonicalExternalFileCache.put(canonicalFile, contents);
         }
+        externalFileCache.putIfAbsent(file, contents);
         SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
         JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
 
@@ -177,6 +187,7 @@ public class ResolverCache {
                 result = DeserializationUtils.deserialize(contents, file, expectedType, openapi31);
             }
             resolutionCache.put(ref, result);
+            canonicalResolutionCache.put(canonicalRef, result);
             if (deserializationUtilResult.getMessages() != null) {
                 if (this.resolveValidationMessages != null) {
                     this.resolveValidationMessages.addAll(deserializationUtilResult.getMessages());
@@ -216,6 +227,7 @@ public class ResolverCache {
         }
         updateLocalRefs(file, result);
         resolutionCache.put(ref, result);
+        canonicalResolutionCache.put(canonicalRef, result);
         if (deserializationUtilResult.getMessages() != null) {
             if (this.resolveValidationMessages != null) {
                 this.resolveValidationMessages.addAll(deserializationUtilResult.getMessages());
@@ -402,11 +414,23 @@ public class ResolverCache {
     }
 
     public String getRenamedRef(String originalRef) {
-        return renameCache.get(originalRef);
+        return canonicalRenameCache.get(canonicalize(originalRef));
     }
 
     public void putRenamedRef(String originalRef, String newRef) {
         renameCache.put(originalRef, newRef);
+        canonicalRenameCache.put(canonicalize(originalRef), newRef);
+    }
+
+    private static String canonicalize(String ref) {
+        if (ref == null || ref.isEmpty()) {
+            return ref;
+        }
+        try {
+            return new URI(ref).normalize().toString();
+        } catch (URISyntaxException ignored) {
+            return ref;
+        }
     }
 
     public Map<String, Object> getResolutionCache() {
