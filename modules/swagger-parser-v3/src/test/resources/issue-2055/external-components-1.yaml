@@ -1,0 +1,45 @@
+sharedRequest:
+  description: request from file one
+  content:
+    text/plain:
+      schema:
+        type: string
+sharedResponse:
+  description: response from file one
+  headers:
+    X-Shared:
+      $ref: '#/sharedHeader'
+  links:
+    next:
+      $ref: '#/sharedLink'
+  content:
+    text/plain:
+      schema:
+        type: string
+      examples:
+        distinct:
+          $ref: '#/sharedExample'
+        equal:
+          $ref: '#/equalExample'
+sharedHeader:
+  description: header from file one
+  schema:
+    type: string
+sharedLink:
+  operationId: firstOperation
+sharedExample:
+  summary: example from file one
+  value: one
+equalExample:
+  summary: equal example
+  value: equal
+sharedCallback:
+  '{$request.body#/callbackUrl}':
+    post:
+      responses:
+        '204':
+          description: callback from file one
+sharedAuth:
+  type: apiKey
+  in: header
+  name: X-API-Key

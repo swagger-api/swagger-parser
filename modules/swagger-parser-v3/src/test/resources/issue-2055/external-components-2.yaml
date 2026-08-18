@@ -1,0 +1,44 @@
+sharedRequest:
+  description: request from file two
+  content:
+    application/json:
+      schema:
+        type: object
+sharedResponse:
+  description: response from file two
+  headers:
+    X-Shared:
+      $ref: '#/sharedHeader'
+  links:
+    next:
+      $ref: '#/sharedLink'
+  content:
+    application/json:
+      schema:
+        type: object
+      examples:
+        distinct:
+          $ref: '#/sharedExample'
+        equal:
+          $ref: '#/equalExample'
+sharedHeader:
+  description: header from file two
+  schema:
+    type: integer
+sharedLink:
+  operationId: secondOperation
+sharedExample:
+  summary: example from file two
+  value: two
+equalExample:
+  summary: equal example
+  value: equal
+sharedCallback:
+  '{$request.body#/callbackUrl}':
+    post:
+      responses:
+        '204':
+          description: callback from file two
+sharedAuth:
+  type: http
+  scheme: bearer
