@@ -1,0 +1,11 @@
+openapi: 3.0.3
+info:
+  title: Case-insensitive collision
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    SomeItem:
+      $ref: "inventory.yaml#/components/schemas/Pet"
+    pet:
+      $ref: "pets.yaml#/components/schemas/Pet"

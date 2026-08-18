@@ -600,6 +600,9 @@ public class OpenAPIV3ParserTest {
         OpenAPI openAPI = result.getOpenAPI();
         assertEquals(((Schema) openAPI.getComponents().getSchemas().get("Analemmata").getProperties().get("tashotSipe")).get$ref(), "#/components/schemas/TashotSipe");
         assertNull(openAPI.getComponents().getSchemas().get("analemmata"));
+        assertNull(openAPI.getComponents().getSchemas().get("TashotSipe_1"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("Stunts"));
+        assertNull(openAPI.getComponents().getSchemas().get("Stunts_1"));
     }
 
     @Test
@@ -2014,6 +2017,20 @@ public class OpenAPIV3ParserTest {
         Assert.assertEquals(readResult.getOpenAPI().getPaths().get("/pet/findByTags").getGet().getResponses().get("default").getContent().get("application/json").getSchema().get$ref(), "#/components/schemas/ErrorModel");
     }
 
+    @Test
+    public void testIssue2105EquivalentExternalRefsUseSingleComponent() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/oas3.fetched/openapi3.yaml", null, options);
+
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSchemas().get("Event"));
+        assertNotNull(openAPI.getComponents().getSchemas().get("EventList"));
+        assertNull(openAPI.getComponents().getSchemas().get("Event_1"));
+        assertNull(openAPI.getComponents().getSchemas().get("EventList_1"));
+    }
+
     private OpenAPI doRelativeFileTest(String location) {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -3342,9 +3359,11 @@ public class OpenAPIV3ParserTest {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
         SwaggerParseResult parseResult = openApiParser.readLocation("issue-1886/openapi.yaml", null, options);
         OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI.getComponents().getSchemas().get("Enum1"));
+        assertNull(openAPI.getComponents().getSchemas().get("Enum1_1"));
         assertEqualsNoOrder(
             openAPI.getComponents().getSchemas().keySet(),
-            Arrays.asList("ArrayPojo", "Enum1", "Enum1_1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
+            Arrays.asList("ArrayPojo", "Enum1", "Enum2", "Enum3", "MapPojo", "SetPojo", "SimplePojo",
                 "TransactionsPatchRequestBody", "additional-properties", "array-pojo", "locale-translation-item",
                 "map-pojo", "set-pojo", "simple-pojo", "translation-item")
         );

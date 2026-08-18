@@ -1,0 +1,11 @@
+openapi: 3.0.3
+info:
+  title: Identical models in different files
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    FirstPet:
+      $ref: "identical-pet-a.yaml#/components/schemas/Pet"
+    SecondPet:
+      $ref: "identical-pet-b.yaml#/components/schemas/Pet"

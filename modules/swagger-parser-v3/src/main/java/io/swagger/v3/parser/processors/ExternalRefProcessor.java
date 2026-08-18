@@ -34,7 +34,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.models.RefType;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -56,31 +55,33 @@ public final class ExternalRefProcessor {
     }
 
     private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newSchema,
-        int iteration) {
+        int iteration, String incomingRef) {
         String tryName =
             iteration == 0 ? possiblyConflictingDefinitionName : possiblyConflictingDefinitionName + "_" + iteration;
         Schema existingModel = schemas.get(tryName);
+        if (existingModel == null) {
+            for (String name : schemas.keySet()) {
+                if (name.equalsIgnoreCase(tryName)) {
+                    existingModel = schemas.get(name);
+                    tryName = name;
+                    break;
+                }
+            }
+        }
         if (existingModel != null) {
             if (existingModel.get$ref() != null) {
+                if (incomingRef != null && !cache.refsAreEquivalent(existingModel.get$ref(), incomingRef)) {
+                    LOGGER.debug("A different external $ref already claims the name " + tryName);
+                    return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration, incomingRef);
+                }
                 // use the new model
                 existingModel = null;
             } else if (!newSchema.equals(existingModel)) {
-                if(cache.getResolutionCache().get(newSchema.get$ref())!= null){
+                if (cache.getRenamedRef(newSchema.get$ref()) != null) {
                     return tryName;
                 }
                 LOGGER.debug("A model for " + existingModel + " already exists");
-                return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration);
-            }
-        }else{
-            // validate the name
-            if(existingModel == null){
-                for(String name: schemas.keySet()){
-                    if(name.toLowerCase().equals(tryName.toLowerCase())){
-                        existingModel = schemas.get(name);
-                        tryName = name;
-                        break;
-                    }
-                }
+                return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration, incomingRef);
             }
         }
         return tryName;
@@ -111,7 +112,7 @@ public final class ExternalRefProcessor {
         }
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-        newRef = finalNameRec(schemas, possiblyConflictingDefinitionName, schema, 0);
+        newRef = finalNameRec(schemas, possiblyConflictingDefinitionName, schema, 0, $ref);
         cache.putRenamedRef($ref, newRef);
         Schema existingModel = schemas.get(newRef);
        if(existingModel != null && existingModel.get$ref() != null) {
