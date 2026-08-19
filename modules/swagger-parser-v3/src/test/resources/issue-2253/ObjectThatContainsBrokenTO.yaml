@@ -1,0 +1,6 @@
+type: object
+properties:
+  parameterinquestion:
+    type: array
+    items:
+      $ref: folder/folder2/BrokenTO.yaml

@@ -188,6 +188,29 @@ public class OpenAPIV3ParserTest {
         assertNotNull(id.getPattern());
     }
 
+    @Test(description = "Issue 2253: equivalent relative references reuse one schema component")
+    public void testIssue2253EquivalentRelativeReferencesDoNotCreateDuplicateComponents() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser()
+                .readLocation("src/test/resources/issue-2253/openapi.yaml", null, options);
+
+        assertNotNull(result.getOpenAPI());
+        assertTrue(result.getMessages().isEmpty(), "Unexpected parser messages: " + result.getMessages());
+
+        Map<String, Schema> schemas = result.getOpenAPI().getComponents().getSchemas();
+        assertNotNull(schemas.get("BrokenTO"));
+        assertNull(schemas.get("BrokenTO_1"));
+
+        Schema nested = schemas.get("ObjectThatContainsBrokenTO");
+        assertNotNull(nested);
+        Schema nestedItem = ((ArraySchema) nested.getProperties().get("parameterinquestion")).getItems();
+        assertEquals(nestedItem.get$ref(), "#/components/schemas/BrokenTO");
+        Schema direct = result.getOpenAPI().getPaths().get("/direct").getGet()
+                .getResponses().get("200").getContent().get("application/json").getSchema();
+        assertEquals(direct.get$ref(), "#/components/schemas/BrokenTO");
+    }
+
     @Test
     public void testIssue1802() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();

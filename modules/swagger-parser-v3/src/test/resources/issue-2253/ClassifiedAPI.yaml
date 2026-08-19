@@ -1,0 +1,10 @@
+post:
+  operationId: nested
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ./ObjectThatContainsBrokenTO.yaml
+  responses:
+    '200':
+      description: OK

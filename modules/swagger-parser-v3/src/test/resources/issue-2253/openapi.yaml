@@ -1,0 +1,9 @@
+openapi: 3.0.3
+info:
+  title: Issue 2253
+  version: 1.0.0
+paths:
+  /nested:
+    $ref: ./ClassifiedAPI.yaml
+  /direct:
+    $ref: ./Classified2API.yaml
