@@ -1,0 +1,12 @@
+openapi: 3.0.1
+info:
+  title: '#TestCase.v1.TestCase'
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    TestCase_v1_TestCase:
+      type: object
+      properties:
+        Foo:
+          $ref: ./TestCase.yaml#/components/schemas/TestCase_Foo
