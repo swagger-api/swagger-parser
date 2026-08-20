@@ -69,6 +69,7 @@ public class ResolverCache {
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
     private final String rootPath;
+    private final URI rootDocumentUri;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
     private Map<String, Object> canonicalResolutionCache = new HashMap<>();
@@ -99,13 +100,17 @@ public class ResolverCache {
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
+        this.rootDocumentUri = PathUtils.rootDocumentUri(parentFileLocation);
         this.resolveValidationMessages = resolveValidationMessages;
         this.parseOptions = parseOptions;
         this.permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(), parseOptions.getRemoteRefBlockList());
 
         if(parentFileLocation != null) {
-            if(parentFileLocation.startsWith("http") || parentFileLocation.startsWith("jar")) {
+            if(PathUtils.isHttpUri(rootDocumentUri) || parentFileLocation.startsWith("jar")) {
                 parentDirectory = null;
+            } else if (rootDocumentUri != null
+                    && "file".equalsIgnoreCase(rootDocumentUri.getScheme())) {
+                parentDirectory = PathUtils.parentDirectoryOfUri(rootDocumentUri);
             } else {
                 parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
             }
@@ -159,15 +164,20 @@ public class ResolverCache {
         //but we may have already loaded the file or url in question
         String contents = canonicalExternalFileCache.get(canonicalFile);
 
-        if (contents == null) {
-            if(parseOptions.isSafelyResolveURL()){
-                checkUrlIsPermitted(file);
-            }
+        if (contents == null && parseOptions.isSafelyResolveURL()) {
+            checkUrlIsPermitted(file);
+        }
 
+        T rootTarget = resolveRootReference(file, definitionPath, ref, canonicalRef, expectedType);
+        if (rootTarget != null) {
+            return rootTarget;
+        }
+
+        if (contents == null) {
             if(parentDirectory != null) {
                 contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory, permittedUrlsChecker);
             }
-            else if(rootPath != null && rootPath.startsWith("http")) {
+            else if(rootPath != null && (PathUtils.isHttpUri(rootDocumentUri) || rootPath.startsWith("http"))) {
                 contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath, permittedUrlsChecker);
             }
             else if (rootPath != null) {
@@ -177,6 +187,7 @@ public class ResolverCache {
             canonicalExternalFileCache.put(canonicalFile, contents);
         }
         externalFileCache.putIfAbsent(file, contents);
+
         SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
         JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
 
@@ -235,6 +246,40 @@ public class ResolverCache {
             }
         }
         return result;
+    }
+
+    private <T> T resolveRootReference(String file, String definitionPath, String ref,
+                                       String canonicalRef, Class<T> expectedType) {
+        if (definitionPath == null || !isRootDocument(file)) {
+            return null;
+        }
+
+        Object rootTarget = loadInternalRef("#/" + definitionPath);
+        if (!expectedType.isInstance(rootTarget)) {
+            return null;
+        }
+
+        T result = expectedType.cast(rootTarget);
+        resolutionCache.put(ref, result);
+        canonicalResolutionCache.putIfAbsent(canonicalRef, result);
+        return result;
+    }
+
+    private boolean isRootDocument(String file) {
+        if (rootDocumentUri == null || file == null || file.isEmpty()) {
+            return false;
+        }
+
+        try {
+            URI target = rootDocumentUri.resolve(new URI(file)).normalize();
+            if (target.isOpaque()) {
+                return false;
+            }
+            target = PathUtils.withoutFragment(target);
+            return target != null && rootDocumentUri.equals(target);
+        } catch (IllegalArgumentException | URISyntaxException ignored) {
+            return false;
+        }
     }
 
     private <T> T deserializeFragment(JsonNode node, Class<T> expectedType, String file, String definitionPath) {
