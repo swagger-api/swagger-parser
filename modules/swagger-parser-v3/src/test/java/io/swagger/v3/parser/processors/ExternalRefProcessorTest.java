@@ -5,6 +5,8 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
@@ -27,6 +29,7 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 
 
 public class ExternalRefProcessorTest {
@@ -65,6 +68,182 @@ public class ExternalRefProcessorTest {
         assertEquals(newRef, "bar");
     }
 
+    @Test
+    public void testSecuritySchemesWithSameExternalNameReceiveDistinctKeys() {
+        final String firstRef = "https://example.test/first.yaml#/sharedAuth";
+        final String secondRef = "https://example.test/second.yaml#/sharedAuth";
+        SecurityScheme first = new SecurityScheme().type(SecurityScheme.Type.APIKEY).name("X-API-Key")
+                .in(SecurityScheme.In.HEADER);
+        SecurityScheme second = new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer");
+        OpenAPI testedOpenAPI = new OpenAPI().components(new Components());
+
+        new Expectations() {{
+            cache.loadRef(firstRef, RefFormat.URL, SecurityScheme.class);
+            result = first;
+            cache.loadRef(secondRef, RefFormat.URL, SecurityScheme.class);
+            result = second;
+        }};
+
+        ExternalRefProcessor processor = new ExternalRefProcessor(cache, testedOpenAPI);
+        assertEquals(processor.processRefToExternalSecurityScheme(firstRef, RefFormat.URL), "sharedAuth");
+        assertEquals(processor.processRefToExternalSecurityScheme(secondRef, RefFormat.URL), "sharedAuth_1");
+        assertEquals(testedOpenAPI.getComponents().getSecuritySchemes().get("sharedAuth"), first);
+        assertEquals(testedOpenAPI.getComponents().getSecuritySchemes().get("sharedAuth_1"), second);
+    }
+
+    @Test
+    public void testResponseAllocatorExaminesOccupiedSuffixesWithoutOverwritingPlaceholder() {
+        final String ref = "https://example.test/incoming.yaml#/sharedResponse";
+        ApiResponse placeholder = new ApiResponse().$ref("https://example.test/other.yaml#/sharedResponse");
+        ApiResponse firstSuffix = new ApiResponse().description("first suffix");
+        ApiResponse secondSuffix = new ApiResponse().description("second suffix");
+        ApiResponse incoming = new ApiResponse().description("incoming");
+        Components components = new Components()
+                .addResponses("sharedResponse", placeholder)
+                .addResponses("sharedResponse_1", firstSuffix)
+                .addResponses("sharedResponse_2", secondSuffix);
+        OpenAPI testedOpenAPI = new OpenAPI().components(components);
+
+        new Expectations() {{
+            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
+            result = incoming;
+        }};
+
+        String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalResponse(ref, RefFormat.URL);
+
+        assertEquals(assignedName, "sharedResponse_3");
+        assertSame(testedOpenAPI.getComponents().getResponses().get("sharedResponse"), placeholder);
+        assertEquals(placeholder.get$ref(), "https://example.test/other.yaml#/sharedResponse");
+        assertSame(testedOpenAPI.getComponents().getResponses().get("sharedResponse_3"), incoming);
+    }
+
+    @Test
+    public void testEqualResolvedResponsesReuseOneKey() {
+        final String ref = "https://example.test/incoming.yaml#/sharedResponse";
+        ApiResponse existing = new ApiResponse().description("same response");
+        ApiResponse incoming = new ApiResponse().description("same response");
+        OpenAPI testedOpenAPI = new OpenAPI().components(
+                new Components().addResponses("sharedResponse", existing));
+
+        new Expectations() {{
+            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
+            result = incoming;
+        }};
+
+        String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalResponse(ref, RefFormat.URL);
+
+        assertEquals(assignedName, "sharedResponse");
+        assertEquals(testedOpenAPI.getComponents().getResponses().size(), 1);
+        assertSame(testedOpenAPI.getComponents().getResponses().get("sharedResponse"), existing);
+    }
+
+    @Test
+    public void testEquivalentResponsePlaceholderUsesCanonicalReferenceIdentity() {
+        final String ref = "https://example.test/responses/common.yaml#/sharedResponse";
+        final String equivalentRef = "https://example.test/responses/../responses/common.yaml#/sharedResponse";
+        ApiResponse placeholder = new ApiResponse().$ref(equivalentRef);
+        ApiResponse incoming = new ApiResponse().description("resolved response");
+        OpenAPI testedOpenAPI = new OpenAPI().components(
+                new Components().addResponses("sharedResponse", placeholder));
+
+        new Expectations() {{
+            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
+            result = incoming;
+            cache.refsAreEquivalent(equivalentRef, ref);
+            result = true;
+        }};
+
+        String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalResponse(ref, RefFormat.URL);
+
+        assertEquals(assignedName, "sharedResponse");
+        assertEquals(testedOpenAPI.getComponents().getResponses().size(), 1);
+        assertSame(testedOpenAPI.getComponents().getResponses().get("sharedResponse"), incoming);
+    }
+
+    @Test
+    public void testNonSchemaComponentNamesRemainCaseSensitive() {
+        final String ref = "https://example.test/responses.yaml#/SharedResponse";
+        ApiResponse lowerCase = new ApiResponse().description("lower case key");
+        ApiResponse incoming = new ApiResponse().description("upper case key");
+        OpenAPI testedOpenAPI = new OpenAPI().components(
+                new Components().addResponses("sharedResponse", lowerCase));
+
+        new Expectations() {{
+            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
+            result = incoming;
+        }};
+
+        String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalResponse(ref, RefFormat.URL);
+
+        assertEquals(assignedName, "SharedResponse");
+        assertEquals(testedOpenAPI.getComponents().getResponses().size(), 2);
+        assertSame(testedOpenAPI.getComponents().getResponses().get("sharedResponse"), lowerCase);
+        assertSame(testedOpenAPI.getComponents().getResponses().get("SharedResponse"), incoming);
+    }
+
+    @Test
+    public void testFailedResponseLoadReturnsOriginalRef() {
+        final String ref = "https://example.test/missing.yaml#/MissingResponse";
+        OpenAPI testedOpenAPI = new OpenAPI();
+
+        new Expectations() {{
+            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
+            result = null;
+        }};
+
+        assertEquals(new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalResponse(ref, RefFormat.URL), ref);
+    }
+
+    @Test
+    public void testRecursiveExternalSchemaReusesRenameCacheEntry() {
+        final String ref = "schemas.yaml#/Recursive";
+        Schema recursive = new Schema().$ref(ref);
+        OpenAPI testedOpenAPI = new OpenAPI().components(new Components());
+
+        new Expectations() {{
+            cache.getRenamedRef(ref);
+            returns(null, "Recursive");
+            cache.loadRef(ref, RefFormat.RELATIVE, Schema.class);
+            result = recursive;
+        }};
+
+        String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalSchema(ref, RefFormat.RELATIVE);
+
+        assertEquals(assignedName, "Recursive");
+        assertEquals(testedOpenAPI.getComponents().getSchemas().size(), 1);
+        assertSame(testedOpenAPI.getComponents().getSchemas().get("Recursive"), recursive);
+        assertEquals(recursive.get$ref(), "#/components/schemas/Recursive");
+    }
+
+    @Test
+    public void testSchemaLookupPrefersExactKeyBeforeCaseInsensitiveFallback() {
+        final String ref = "https://example.test/schemas.yaml#/Pet";
+        Schema lowerCaseSchema = new Schema().addProperties("lower", new StringSchema());
+        Schema exactSchema = new Schema().addProperties("exact", new StringSchema());
+        Schema incoming = new Schema().addProperties("exact", new StringSchema());
+        OpenAPI testedOpenAPI = new OpenAPI().components(new Components()
+                .addSchemas("pet", lowerCaseSchema)
+                .addSchemas("Pet", exactSchema));
+
+        new Expectations() {{
+            cache.loadRef(ref, RefFormat.URL, Schema.class);
+            result = incoming;
+        }};
+
+        String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalSchema(ref, RefFormat.URL);
+
+        assertEquals(assignedName, "Pet");
+        assertEquals(testedOpenAPI.getComponents().getSchemas().size(), 2);
+        assertSame(testedOpenAPI.getComponents().getSchemas().get("Pet"), exactSchema);
+        assertSame(testedOpenAPI.getComponents().getSchemas().get("pet"), lowerCaseSchema);
+    }
 
     @Test
     public void testNestedExternalRefs() {

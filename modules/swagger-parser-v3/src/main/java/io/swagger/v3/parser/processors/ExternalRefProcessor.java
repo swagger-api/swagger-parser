@@ -48,43 +48,24 @@ public final class ExternalRefProcessor {
 
     private final ResolverCache cache;
     private final OpenAPI openAPI;
+    private final ComponentNameAllocator nameAllocator;
 
     public ExternalRefProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
         this.openAPI = openAPI;
+        this.nameAllocator = new ComponentNameAllocator(LOGGER, cache);
     }
 
-    private String finalNameRec(Map<String, Schema> schemas, String possiblyConflictingDefinitionName, Schema newSchema,
-        int iteration, String incomingRef) {
-        String tryName =
-            iteration == 0 ? possiblyConflictingDefinitionName : possiblyConflictingDefinitionName + "_" + iteration;
-        Schema existingModel = schemas.get(tryName);
-        if (existingModel == null) {
-            for (String name : schemas.keySet()) {
-                if (name.equalsIgnoreCase(tryName)) {
-                    existingModel = schemas.get(name);
-                    tryName = name;
-                    break;
-                }
-            }
-        }
-        if (existingModel != null) {
-            if (existingModel.get$ref() != null) {
-                if (incomingRef != null && !cache.refsAreEquivalent(existingModel.get$ref(), incomingRef)) {
-                    LOGGER.debug("A different external $ref already claims the name " + tryName);
-                    return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration, incomingRef);
-                }
-                // use the new model
-                existingModel = null;
-            } else if (!newSchema.equals(existingModel)) {
-                if (cache.getRenamedRef(newSchema.get$ref()) != null) {
-                    return tryName;
-                }
-                LOGGER.debug("A model for " + existingModel + " already exists");
-                return finalNameRec(schemas, possiblyConflictingDefinitionName, newSchema, ++iteration, incomingRef);
-            }
-        }
-        return tryName;
+    private void warnUnableToLoadReference(String ref) {
+        LOGGER.warn("unable to load model reference from `{}`.  It may not be available or the reference isn't a valid model schema", ref);
+    }
+
+    private String allocateSchemaName(Map<String, Schema> schemas, String baseName,
+            Schema incoming, String incomingRef) {
+        return nameAllocator.allocate(schemas, baseName, incoming, incomingRef,
+                Schema::get$ref,
+                ComponentNameAllocator.caseInsensitiveKey(schemas),
+                (existing, inc) -> cache.getRenamedRef(inc.get$ref()) != null);
     }
 
     public String processRefToExternalSchema(String $ref, RefFormat refFormat) {
@@ -97,7 +78,7 @@ public final class ExternalRefProcessor {
 
         if(schema == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `{}`.  It may not be available or the reference isn't a valid model schema", $ref);
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -112,7 +93,7 @@ public final class ExternalRefProcessor {
         }
 
         final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-        newRef = finalNameRec(schemas, possiblyConflictingDefinitionName, schema, 0, $ref);
+        newRef = allocateSchemaName(schemas, possiblyConflictingDefinitionName, schema, $ref);
         cache.putRenamedRef($ref, newRef);
         Schema existingModel = schemas.get(newRef);
        if(existingModel != null && existingModel.get$ref() != null) {
@@ -416,6 +397,12 @@ public final class ExternalRefProcessor {
         }
         final ApiResponse response = cache.loadRef($ref, refFormat, ApiResponse.class);
 
+        if(response == null) {
+            // stop!  There's a problem.  retain the original ref
+            warnUnableToLoadReference($ref);
+            return $ref;
+        }
+
         String newRef;
 
         if (openAPI.getComponents() == null) {
@@ -427,21 +414,11 @@ public final class ExternalRefProcessor {
             responses = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        ApiResponse existingResponse = responses.get(possiblyConflictingDefinitionName);
-
-        if (existingResponse != null) {
-            LOGGER.debug("A model for " + existingResponse + " already exists");
-            if(existingResponse.get$ref() != null) {
-                // use the new model
-                existingResponse = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(responses, computeDefinitionName($ref), response, $ref, ApiResponse::get$ref);
         cache.putRenamedRef($ref, newRef);
+        ApiResponse existingResponse = responses.get(newRef);
 
-        if(existingResponse == null) {
+        if(existingResponse == null || existingResponse.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addResponses(newRef, response);
             cache.addReferencedKey(newRef);
@@ -498,8 +475,7 @@ public final class ExternalRefProcessor {
 
         if(body == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -513,21 +489,11 @@ public final class ExternalRefProcessor {
             bodies = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        RequestBody existingBody= bodies.get(possiblyConflictingDefinitionName);
-
-        if (existingBody != null) {
-            LOGGER.debug("A model for " + existingBody + " already exists");
-            if(existingBody.get$ref() != null) {
-                // use the new model
-                existingBody = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(bodies, computeDefinitionName($ref), body, $ref, RequestBody::get$ref);
         cache.putRenamedRef($ref, newRef);
+        RequestBody existingBody = bodies.get(newRef);
 
-        if(existingBody == null) {
+        if(existingBody == null || existingBody.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addRequestBodies(newRef, body);
             cache.addReferencedKey(newRef);
@@ -558,8 +524,7 @@ public final class ExternalRefProcessor {
 
         if(header == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -573,21 +538,11 @@ public final class ExternalRefProcessor {
             headers = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        Header existingHeader = headers.get(possiblyConflictingDefinitionName);
-
-        if (existingHeader != null) {
-            LOGGER.debug("A model for " + existingHeader + " already exists");
-            if(existingHeader.get$ref() != null) {
-                // use the new model
-                existingHeader = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(headers, computeDefinitionName($ref), header, $ref, Header::get$ref);
         cache.putRenamedRef($ref, newRef);
+        Header existingHeader = headers.get(newRef);
 
-        if(existingHeader == null) {
+        if(existingHeader == null || existingHeader.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addHeaders(newRef, header);
             cache.addReferencedKey(newRef);
@@ -625,8 +580,7 @@ public final class ExternalRefProcessor {
 
         if(securityScheme == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -640,21 +594,12 @@ public final class ExternalRefProcessor {
             securitySchemeMap = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        SecurityScheme existingSecurityScheme = securitySchemeMap.get(possiblyConflictingDefinitionName);
-
-        if (existingSecurityScheme != null) {
-            LOGGER.debug("A model for " + existingSecurityScheme + " already exists");
-            if(existingSecurityScheme.get$ref() != null) {
-                // use the new model
-                existingSecurityScheme = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(securitySchemeMap, computeDefinitionName($ref), securityScheme, $ref,
+                SecurityScheme::get$ref);
         cache.putRenamedRef($ref, newRef);
+        SecurityScheme existingSecurityScheme = securitySchemeMap.get(newRef);
 
-        if(existingSecurityScheme == null) {
+        if(existingSecurityScheme == null || existingSecurityScheme.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addSecuritySchemes(newRef, securityScheme);
             cache.addReferencedKey(newRef);
@@ -683,8 +628,7 @@ public final class ExternalRefProcessor {
 
         if(link == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -698,21 +642,11 @@ public final class ExternalRefProcessor {
             links = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        Link existingLink = links.get(possiblyConflictingDefinitionName);
-
-        if (existingLink != null) {
-            LOGGER.debug("A model for " + existingLink + " already exists");
-            if(existingLink.get$ref() != null) {
-                // use the new model
-                existingLink = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(links, computeDefinitionName($ref), link, $ref, Link::get$ref);
         cache.putRenamedRef($ref, newRef);
+        Link existingLink = links.get(newRef);
 
-        if(existingLink == null) {
+        if(existingLink == null || existingLink.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addLinks(newRef, link);
             cache.addReferencedKey(newRef);
@@ -741,8 +675,7 @@ public final class ExternalRefProcessor {
 
         if(example == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -756,21 +689,11 @@ public final class ExternalRefProcessor {
             examples = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        Example existingExample = examples.get(possiblyConflictingDefinitionName);
-
-        if (existingExample != null) {
-            LOGGER.debug("A model for " + existingExample + " already exists");
-            if(existingExample.get$ref() != null) {
-                // use the new model
-                existingExample = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(examples, computeDefinitionName($ref), example, $ref, Example::get$ref);
         cache.putRenamedRef($ref, newRef);
+        Example existingExample = examples.get(newRef);
 
-        if(existingExample == null) {
+        if(existingExample == null || existingExample.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addExamples(newRef, example);
             cache.addReferencedKey(newRef);
@@ -798,8 +721,7 @@ public final class ExternalRefProcessor {
 
         if(parameter == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -813,21 +735,11 @@ public final class ExternalRefProcessor {
             parameters = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        Parameter existingParameters = parameters.get(possiblyConflictingDefinitionName);
-
-        if (existingParameters != null) {
-            LOGGER.debug("A model for " + existingParameters + " already exists");
-            if(existingParameters.get$ref() != null) {
-                // use the new model
-                existingParameters = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(parameters, computeDefinitionName($ref), parameter, $ref, Parameter::get$ref);
         cache.putRenamedRef($ref, newRef);
+        Parameter existingParameters = parameters.get(newRef);
 
-        if(existingParameters == null) {
+        if(existingParameters == null || existingParameters.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addParameters(newRef, parameter);
             cache.addReferencedKey(newRef);
@@ -883,8 +795,7 @@ public final class ExternalRefProcessor {
 
         if(callback == null) {
             // stop!  There's a problem.  retain the original ref
-            LOGGER.warn("unable to load model reference from `" + $ref + "`.  It may not be available " +
-                    "or the reference isn't a valid model schema");
+            warnUnableToLoadReference($ref);
             return $ref;
         }
         String newRef;
@@ -898,21 +809,11 @@ public final class ExternalRefProcessor {
             callbacks = new LinkedHashMap<>();
         }
 
-        final String possiblyConflictingDefinitionName = computeDefinitionName($ref);
-
-        Callback existingCallback = callbacks.get(possiblyConflictingDefinitionName);
-
-        if (existingCallback != null) {
-            LOGGER.debug("A model for " + existingCallback + " already exists");
-            if(existingCallback.get$ref() != null) {
-                // use the new model
-                existingCallback = null;
-            }
-        }
-        newRef = possiblyConflictingDefinitionName;
+        newRef = nameAllocator.allocate(callbacks, computeDefinitionName($ref), callback, $ref, Callback::get$ref);
         cache.putRenamedRef($ref, newRef);
+        Callback existingCallback = callbacks.get(newRef);
 
-        if(existingCallback == null) {
+        if(existingCallback == null || existingCallback.get$ref() != null) {
             // don't overwrite existing model reference
             openAPI.getComponents().addCallbacks(newRef, callback);
             cache.addReferencedKey(newRef);

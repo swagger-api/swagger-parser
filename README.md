@@ -198,6 +198,10 @@ final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions)
 
 This applies to schemas, parameters, responses, pretty much everything containing a ref.
 
+For OpenAPI 3.0 documents, the `OpenAPIResolver` and `ExternalRefProcessor` path adds numeric suffixes such as `Name_1` for name collisions.
+This behavior prevents data loss. It can change generated component keys, local `$ref` values, and component counts for documents with name collisions.
+OpenAPI 3.1 uses a separate dereferencer. This numeric-suffix change does not modify OpenAPI 3.1 resolution.
+
 #### 2. resolveFully:
 
 ```java
