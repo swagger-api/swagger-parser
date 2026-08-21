@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -22,13 +23,19 @@ import mockit.Mocked;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -254,12 +261,226 @@ public class ResolverCacheTest {
     }
 
     @Test
+    public void testRootDocumentUriIsEstablishedOnceForSupportedRoots() throws Exception {
+        Path rootFile = Files.createTempFile("resolver-cache-root", ".yaml");
+        ResolverCache filesystemCache = new ResolverCache(openAPI, auths, rootFile.toString());
+        URI filesystemUri = getRootDocumentUri(filesystemCache);
+        Files.delete(rootFile);
+
+        assertEquals(filesystemUri, rootFile.toAbsolutePath().normalize().toUri());
+        assertEquals(getRootDocumentUri(filesystemCache), filesystemUri);
+
+        ResolverCache fileCache = new ResolverCache(
+                openAPI, auths, "file:///tmp/schemas/../root.yaml?v=1#section");
+        assertEquals(getRootDocumentUri(fileCache), new URI("file:/tmp/root.yaml?v=1"));
+
+        ResolverCache httpCache = new ResolverCache(
+                openAPI, auths, "https://example.com/api/../root.yaml?v=1#section");
+        assertEquals(getRootDocumentUri(httpCache),
+                new URI("https://example.com/root.yaml?v=1"));
+    }
+
+    @Test
+    public void testUnsupportedAndAmbiguousRootsDisableRootIdentity() throws Exception {
+        String[] roots = {
+                "classpath:/root.yaml",
+                "jar:file:/tmp/specs.jar!/root.yaml",
+                "urn:swagger:root",
+                "http://example.com/%zz",
+                "missing-relative-root.yaml"
+        };
+
+        for (String root : roots) {
+            assertNull(getRootDocumentUri(new ResolverCache(openAPI, auths, root)), root);
+        }
+    }
+
+    @Test
+    public void testClasspathRootKeepsExistingExternalLoadingPath() {
+        Schema rootSchema = new Schema().type("object");
+        openAPI.components(new Components().addSchemas("Foo", rootSchema));
+        final String root = "classpath:/root.yaml";
+        final String file = "external.yaml";
+        final String contents = "components:\n  schemas:\n    Foo:\n      type: string\n";
+
+        new Expectations() {{
+            RefUtils.readExternalClasspathRef(file, RefFormat.RELATIVE, auths, root,
+                    (PermittedUrlsChecker) any);
+            times = 1;
+            result = contents;
+        }};
+
+        Schema result = new ResolverCache(openAPI, auths, root).loadRef(
+                file + "#/components/schemas/Foo", RefFormat.RELATIVE, Schema.class);
+
+        assertNotSame(result, rootSchema);
+        assertEquals(result.getType(), "string");
+    }
+
+    @Test
+    public void testDotSegmentHttpReferenceReusesRootWithoutLoading() {
+        Schema rootSchema = new Schema().type("object");
+        openAPI.components(new Components().addSchemas("Foo", rootSchema));
+        final String root = "https://example.com/api/root.yaml";
+        final String file = "https://example.com/api/nested/../root.yaml";
+        final String ref = file + "#/components/schemas/Foo";
+        final List<AuthorizationValue> rootAuths = new ArrayList<>();
+        rootAuths.add(new AuthorizationValue("Authorization", "token", "header"));
+        ParseOptions options = new ParseOptions();
+        options.setSafelyResolveURL(true);
+
+        final int[] permissionChecks = {0};
+        ResolverCache cache = new ResolverCache(openAPI, rootAuths, root, new HashSet<>(), options) {
+            @Override
+            protected void checkUrlIsPermitted(String refSet) {
+                permissionChecks[0]++;
+                super.checkUrlIsPermitted(refSet);
+            }
+        };
+
+        Schema result = cache.loadRef(ref, RefFormat.URL, Schema.class);
+
+        assertSame(result, rootSchema);
+        assertEquals(permissionChecks[0], 1);
+        assertFalse(cache.getExternalFileCache().containsKey(file));
+        assertSame(cache.getResolutionCache().get(ref), rootSchema);
+    }
+
+    @Test
+    public void testRootReferenceUsesObjectPresentAtCacheConstruction() {
+        Schema originalRootSchema = new Schema().type("object");
+        openAPI.components(new Components().addSchemas("Foo", originalRootSchema));
+        final String root = "https://example.com/api/root.yaml";
+        ResolverCache cache = new ResolverCache(openAPI, auths, root);
+
+        openAPI.getComponents().getSchemas().put("Foo", new Schema().type("string"));
+
+        Schema result = cache.loadRef(
+                root + "#/components/schemas/Foo", RefFormat.URL, Schema.class);
+
+        assertSame(result, originalRootSchema);
+    }
+
+    @Test
+    public void testSameFilenameInDifferentDirectoryDoesNotReuseRoot() {
+        Schema rootSchema = new Schema().type("object");
+        openAPI.components(new Components().addSchemas("Foo", rootSchema));
+        final String root = "https://example.com/api/root.yaml";
+        final String file = "https://example.com/api/sub/root.yaml";
+        final String contents = "components:\n  schemas:\n    Foo:\n      type: string\n";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(file, RefFormat.URL, auths, root,
+                    (PermittedUrlsChecker) any);
+            times = 1;
+            result = contents;
+        }};
+
+        Schema result = new ResolverCache(openAPI, auths, root).loadRef(
+                file + "#/components/schemas/Foo", RefFormat.URL, Schema.class);
+
+        assertNotSame(result, rootSchema);
+        assertEquals(result.getType(), "string");
+    }
+
+    @Test
+    public void testHttpQueryIsPartOfRootIdentity() {
+        Schema rootSchema = new Schema().type("object");
+        openAPI.components(new Components().addSchemas("Foo", rootSchema));
+        final String root = "https://example.com/api/root.yaml?v=1";
+        final String file = "https://example.com/api/root.yaml?v=2";
+        final String contents = "components:\n  schemas:\n    Foo:\n      type: integer\n";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(file, RefFormat.URL, auths, root,
+                    (PermittedUrlsChecker) any);
+            times = 1;
+            result = contents;
+        }};
+
+        Schema result = new ResolverCache(openAPI, auths, root).loadRef(
+                file + "#/components/schemas/Foo", RefFormat.URL, Schema.class);
+
+        assertNotSame(result, rootSchema);
+        assertEquals(result.getType(), "integer");
+    }
+
+    @Test
+    public void testUnsupportedAbsentAndWrongTypePointersUseExternalDocument() {
+        Schema rootSchema = new Schema().type("object");
+        openAPI.components(new Components().addSchemas("Foo", rootSchema));
+        final String root = "https://example.com/api/root.yaml";
+        final String contents =
+                "components:\n" +
+                "  schemas:\n" +
+                "    External:\n" +
+                "      type: string\n" +
+                "    Foo:\n" +
+                "      name: id\n" +
+                "      in: query\n" +
+                "      properties:\n" +
+                "        value:\n" +
+                "          type: integer\n";
+
+        new Expectations() {{
+            RefUtils.readExternalUrlRef(root, RefFormat.URL, auths, root,
+                    (PermittedUrlsChecker) any);
+            times = 1;
+            result = contents;
+        }};
+
+        ResolverCache cache = new ResolverCache(openAPI, auths, root);
+        Schema absent = cache.loadRef(
+                root + "#/components/schemas/External", RefFormat.URL, Schema.class);
+        Schema deeper = cache.loadRef(
+                root + "#/components/schemas/Foo/properties/value", RefFormat.URL, Schema.class);
+        Parameter wrongType = cache.loadRef(
+                root + "#/components/schemas/Foo", RefFormat.URL, Parameter.class);
+
+        assertEquals(absent.getType(), "string");
+        assertEquals(deeper.getType(), "integer");
+        assertNotNull(wrongType);
+        assertEquals(wrongType.getName(), "id");
+    }
+
+    @Test
+    public void testRootReuseDoesNotReplaceExistingCanonicalEntry() throws Exception {
+        Header rootHeader = new Header().description("root");
+        openAPI.components(new Components().addHeaders("Root", rootHeader));
+        final String root = "https://example.com/api/root.yaml";
+        final String ref = root + "#/components/headers/Root";
+        ResolverCache cache = new ResolverCache(openAPI, auths, root);
+        Schema existingCanonicalObject = new Schema().type("string");
+        Map<String, Object> canonicalCache = getCanonicalResolutionCache(cache);
+        canonicalCache.put(ref, existingCanonicalObject);
+
+        Header result = cache.loadRef(ref, RefFormat.URL, Header.class);
+
+        assertSame(result, rootHeader);
+        assertSame(cache.getResolutionCache().get(ref), rootHeader);
+        assertSame(canonicalCache.get(ref), existingCanonicalObject);
+    }
+
+    @Test
     public void testRenameCache() {
         ResolverCache cache = new ResolverCache(openAPI, auths, null);
 
         assertNull(cache.getRenamedRef("foo"));
         cache.putRenamedRef("foo", "bar");
         assertEquals(cache.getRenamedRef("foo"), "bar");
+    }
+
+    private URI getRootDocumentUri(ResolverCache cache) throws Exception {
+        Field field = ResolverCache.class.getDeclaredField("rootDocumentUri");
+        field.setAccessible(true);
+        return (URI) field.get(cache);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getCanonicalResolutionCache(ResolverCache cache) throws Exception {
+        Field field = ResolverCache.class.getDeclaredField("canonicalResolutionCache");
+        field.setAccessible(true);
+        return (Map<String, Object>) field.get(cache);
     }
 
     @Test
