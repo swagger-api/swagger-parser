@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -35,7 +36,7 @@ import static org.testng.AssertJUnit.*;
 public class InlineModelResolverTest {
 
     @Test
-    public void testIssueUnexpectedNullValues() throws Exception {
+    public void testIssueUnexpectedNullValues() {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setFlatten(true);
@@ -49,7 +50,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void testIssue1018() throws Exception {
+    public void testIssue1018()  {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.json",null, options);
@@ -60,7 +61,7 @@ public class InlineModelResolverTest {
 
 
     @Test
-    public void testIssue705() throws Exception {
+    public void testIssue705() {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("issue-705.yaml",null, options);
@@ -71,7 +72,7 @@ public class InlineModelResolverTest {
 
 
     @Test
-    public void resolveInlineModelTestWithoutTitle() throws Exception {
+    public void resolveInlineModelTestWithoutTitle() {
         OpenAPI openAPI = new OpenAPI();
         openAPI.setComponents(new Components());
 
@@ -110,7 +111,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineModelTestWithTitle() throws Exception {
+    public void resolveInlineModelTestWithTitle() {
         OpenAPI openAPI = new OpenAPI();
         openAPI.setComponents(new Components());
 
@@ -151,7 +152,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineModel2EqualInnerModels() throws Exception {
+    public void resolveInlineModel2EqualInnerModels() {
         OpenAPI openAPI = new OpenAPI();
         openAPI.setComponents(new Components());
 
@@ -215,7 +216,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineModel2DifferentInnerModelsWIthSameTitle() throws Exception {
+    public void resolveInlineModel2DifferentInnerModelsWIthSameTitle() {
         OpenAPI openAPI = new OpenAPI();
         openAPI.setComponents(new Components());
 
@@ -285,7 +286,7 @@ public class InlineModelResolverTest {
 
 
     @Test
-    public void testInlineResponseModel() throws Exception {
+    public void testInlineResponseModel() {
         OpenAPI openAPI = new OpenAPI();
 
 
@@ -364,7 +365,7 @@ public class InlineModelResolverTest {
 
 
     @Test
-    public void testInlineResponseModelWithTitle() throws Exception {
+    public void testInlineResponseModelWithTitle() {
         OpenAPI openAPI = new OpenAPI();
 
         String responseTitle = "GetBarResponse";
@@ -439,6 +440,276 @@ public class InlineModelResolverTest {
         assertTrue(model.getProperties().size() == 1);
         assertNotNull(model.getProperties().get("name"));
         assertTrue(model.getProperties().get("name") instanceof StringSchema);
+    }
+
+    @Test
+    public void testFlattenSchemaTitleWithDot() {
+        String title = "admin.user";
+        OpenAPI openAPI = openAPIWithInlineResponseSchema(title);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        // A dot is valid in a component key and must not make the generated $ref path-like or external.
+        assertFlattenedResponseSchema(openAPI, title, "#/components/schemas/admin.user");
+    }
+
+    @Test
+    public void testFlattenSchemaTitleWithSimpleName() {
+        String title = "User";
+        OpenAPI openAPI = openAPIWithInlineResponseSchema(title);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertFlattenedResponseSchema(openAPI, title, "#/components/schemas/User");
+    }
+
+    private OpenAPI openAPIWithInlineResponseSchema(String title) {
+        Schema inlineSchema = new ObjectSchema()
+                .title(title)
+                .addProperty("name", new StringSchema());
+        ApiResponse response = new ApiResponse()
+                .description("OK")
+                .content(new Content().addMediaType("application/json", new MediaType().schema(inlineSchema)));
+        Operation operation = new Operation()
+                .responses(new ApiResponses().addApiResponse("200", response));
+
+        return new OpenAPI().path("/admin.user", new PathItem().get(operation));
+    }
+
+    private void assertFlattenedResponseSchema(OpenAPI openAPI, String expectedName, String expectedRef) {
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertTrue(openAPI.getComponents().getSchemas().containsKey(expectedName));
+
+        Schema resolvedSchema = openAPI.getPaths().get("/admin.user").getGet().getResponses().get("200")
+                .getContent().get("application/json").getSchema();
+        assertEquals(expectedRef, resolvedSchema.get$ref());
+        assertTrue(expectedRef.startsWith("#/components/schemas/"));
+        assertTrue(openAPI.getComponents().getSchemas()
+                .containsKey(expectedRef.substring("#/components/schemas/".length())));
+    }
+
+    @Test
+    public void testDottedRequestBodyObjectUsesLocalSchemaRef() {
+        ObjectSchema schema = dottedObjectSchema("admin.request");
+        OpenAPI openAPI = new OpenAPI().path("/request", new PathItem().post(new Operation()
+                .requestBody(requestBody(schema))));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.request", openAPI.getPaths().get("/request").getPost()
+                .getRequestBody().getContent().get("application/json").getSchema());
+    }
+
+    @Test
+    public void testDottedRequestBodyArrayItemUsesLocalSchemaRefWhenReused() {
+        ObjectSchema item = dottedObjectSchema("admin.item");
+        OpenAPI openAPI = new OpenAPI()
+                .path("/first", new PathItem().post(new Operation().requestBody(requestBody(new ArraySchema().items(item)))))
+                .path("/second", new PathItem().post(new Operation().requestBody(requestBody(new ArraySchema().items(item)))));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.item", ((ArraySchema) openAPI.getPaths().get("/first").getPost()
+                .getRequestBody().getContent().get("application/json").getSchema()).getItems());
+        assertLocalSchemaRef(openAPI, "admin.item", ((ArraySchema) openAPI.getPaths().get("/second").getPost()
+                .getRequestBody().getContent().get("application/json").getSchema()).getItems());
+    }
+
+    @Test
+    public void testDottedParameterObjectUsesLocalSchemaRef() {
+        Parameter parameter = new Parameter().name("filter").schema(dottedObjectSchema("admin.parameter"));
+        OpenAPI openAPI = openAPIWithParameter(parameter);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.parameter", openAPI.getPaths().get("/parameter").getGet()
+                .getParameters().get(0).getSchema());
+    }
+
+    @Test
+    public void testDottedParameterComposedSchemaUsesLocalSchemaRef() {
+        ComposedSchema schema = new ComposedSchema();
+        schema.setTitle("admin.parameter.composed");
+        schema.addOneOfItem(new StringSchema());
+        OpenAPI openAPI = openAPIWithParameter(new Parameter().name("filter").schema(schema));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.parameter.composed", openAPI.getPaths().get("/parameter").getGet()
+                .getParameters().get(0).getSchema());
+    }
+
+    @Test
+    public void testDottedParameterArrayItemUsesLocalSchemaRef() {
+        Parameter parameter = new Parameter().name("filter")
+                .schema(new ArraySchema().items(dottedObjectSchema("admin.parameter.item")));
+        OpenAPI openAPI = openAPIWithParameter(parameter);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.parameter.item", ((ArraySchema) openAPI.getPaths().get("/parameter")
+                .getGet().getParameters().get(0).getSchema()).getItems());
+    }
+
+    @Test
+    public void testDottedParameterArrayItemUsesExistingLocalSchemaRef() {
+        ObjectSchema item = dottedObjectSchema("admin.parameter.item");
+        Parameter parameter = new Parameter().name("filter").schema(new ArraySchema().items(item));
+        Operation operation = new Operation()
+                .requestBody(requestBody(new ArraySchema().items(item)))
+                .addParametersItem(parameter);
+        OpenAPI openAPI = new OpenAPI().path("/parameter-array", new PathItem().post(operation));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.parameter.item", ((ArraySchema) operation.getRequestBody()
+                .getContent().get("application/json").getSchema()).getItems());
+        assertLocalSchemaRef(openAPI, "admin.parameter.item", ((ArraySchema) parameter.getSchema()).getItems());
+    }
+
+    @Test
+    public void testDottedResponseArrayItemUsesLocalSchemaRef() {
+        ObjectSchema item = dottedObjectSchema("admin.response.item");
+        ApiResponses responses = new ApiResponses()
+                .addApiResponse("200", response(new ArraySchema().items(item)))
+                .addApiResponse("201", response(new ArraySchema().items(item)));
+        OpenAPI openAPI = new OpenAPI().path("/response", new PathItem().get(new Operation().responses(responses)));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.response.item", ((ArraySchema) responses.get("200")
+                .getContent().get("application/json").getSchema()).getItems());
+        assertLocalSchemaRef(openAPI, "admin.response.item", ((ArraySchema) responses.get("201")
+                .getContent().get("application/json").getSchema()).getItems());
+    }
+
+    @Test
+    public void testDottedResponseObjectUsesExistingLocalSchemaRef() {
+        ObjectSchema schema = dottedObjectSchema("admin.response");
+        ApiResponses responses = new ApiResponses()
+                .addApiResponse("200", response(schema))
+                .addApiResponse("201", response(schema));
+        OpenAPI openAPI = new OpenAPI().path("/response", new PathItem().get(new Operation().responses(responses)));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.response",
+                responses.get("200").getContent().get("application/json").getSchema());
+        assertLocalSchemaRef(openAPI, "admin.response",
+                responses.get("201").getContent().get("application/json").getSchema());
+    }
+
+    @Test
+    public void testDottedResponseMapUsesLocalSchemaRef() {
+        ObjectSchema map = new ObjectSchema();
+        map.setAdditionalProperties(dottedObjectSchema("admin.value"));
+        OpenAPI openAPI = openAPIWithResponseSchema(map);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Schema flattenedMap = openAPI.getPaths().get("/response").getGet().getResponses().get("200")
+                .getContent().get("application/json").getSchema();
+        assertLocalSchemaRef(openAPI, "admin.value", (Schema) flattenedMap.getAdditionalProperties());
+    }
+
+    @Test
+    public void testDottedResponseMapUsesExistingLocalSchemaRef() {
+        ObjectSchema value = dottedObjectSchema("admin.value");
+        ObjectSchema map = new ObjectSchema();
+        map.setAdditionalProperties(value);
+        Operation operation = new Operation()
+                .requestBody(requestBody(value))
+                .responses(new ApiResponses().addApiResponse("200", response(map)));
+        OpenAPI openAPI = new OpenAPI().path("/response-map", new PathItem().post(operation));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        Schema flattenedMap = operation.getResponses().get("200").getContent().get("application/json").getSchema();
+        assertLocalSchemaRef(openAPI, "admin.value", (Schema) flattenedMap.getAdditionalProperties());
+    }
+
+    @Test
+    public void testDottedComponentArrayItemUsesLocalSchemaRefWhenReused() {
+        ObjectSchema item = dottedObjectSchema("admin.component.item");
+        Components components = new Components()
+                .addSchemas("FirstArray", new ArraySchema().items(item))
+                .addSchemas("SecondArray", new ArraySchema().items(item));
+        OpenAPI openAPI = new OpenAPI().components(components);
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.component.item",
+                ((ArraySchema) components.getSchemas().get("FirstArray")).getItems());
+        assertLocalSchemaRef(openAPI, "admin.component.item",
+                ((ArraySchema) components.getSchemas().get("SecondArray")).getItems());
+    }
+
+    @Test
+    public void testDottedComponentComposedChildUsesLocalSchemaRef() {
+        ObjectSchema child = dottedObjectSchema("admin.composed");
+        ComposedSchema composed = new ComposedSchema();
+        composed.addAllOfItem(child);
+        OpenAPI openAPI = new OpenAPI().components(new Components().addSchemas("Wrapper", composed));
+
+        new InlineModelResolver(true, false).flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.composed", composed.getAllOf().get(0));
+    }
+
+    @Test
+    public void testDottedRequestComposedChildUsesLocalSchemaRef() {
+        ObjectSchema child = dottedObjectSchema("admin.request.composed");
+        ComposedSchema composed = new ComposedSchema();
+        composed.setTitle("RequestWrapper");
+        composed.addAnyOfItem(child);
+        OpenAPI openAPI = new OpenAPI().path("/request-composed", new PathItem().post(new Operation()
+                .requestBody(requestBody(composed))));
+
+        new InlineModelResolver(true, false).flatten(openAPI);
+
+        assertLocalSchemaRef(openAPI, "admin.request.composed", composed.getAnyOf().get(0));
+    }
+
+    @Test
+    public void testExternalRequestBodyRefIsNotRewritten() {
+        Schema external = new Schema().$ref("./models/Product.yaml");
+        OpenAPI openAPI = new OpenAPI().path("/external", new PathItem().post(new Operation()
+                .requestBody(requestBody(external))));
+
+        new InlineModelResolver().flatten(openAPI);
+
+        assertEquals("./models/Product.yaml", openAPI.getPaths().get("/external").getPost().getRequestBody()
+                .getContent().get("application/json").getSchema().get$ref());
+    }
+
+    private ObjectSchema dottedObjectSchema(String title) {
+        return (ObjectSchema) new ObjectSchema().title(title).addProperty("name", new StringSchema());
+    }
+
+    private RequestBody requestBody(Schema schema) {
+        return new RequestBody().content(new Content().addMediaType("application/json", new MediaType().schema(schema)));
+    }
+
+    private ApiResponse response(Schema schema) {
+        return new ApiResponse().description("OK")
+                .content(new Content().addMediaType("application/json", new MediaType().schema(schema)));
+    }
+
+    private OpenAPI openAPIWithResponseSchema(Schema schema) {
+        return new OpenAPI().path("/response", new PathItem().get(new Operation()
+                .responses(new ApiResponses().addApiResponse("200", response(schema)))));
+    }
+
+    private OpenAPI openAPIWithParameter(Parameter parameter) {
+        return new OpenAPI().path("/parameter", new PathItem().get(new Operation().addParametersItem(parameter)));
+    }
+
+    private void assertLocalSchemaRef(OpenAPI openAPI, String modelName, Schema reference) {
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSchemas());
+        assertTrue(openAPI.getComponents().getSchemas().containsKey(modelName));
+        assertEquals("#/components/schemas/" + modelName, reference.get$ref());
     }
 
     @Test
@@ -546,7 +817,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineArrayModelWithTitle() throws Exception {
+    public void resolveInlineArrayModelWithTitle() {
         OpenAPI openAPI = new OpenAPI();
         openAPI.setComponents(new Components());
 
@@ -580,7 +851,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineArrayModelWithoutTitle() throws Exception {
+    public void resolveInlineArrayModelWithoutTitle() {
         OpenAPI openAPI = new OpenAPI();
         openAPI.setComponents(new Components());
 
@@ -615,7 +886,7 @@ public class InlineModelResolverTest {
 
 
     @Test
-    public void resolveInlineRequestBody() throws Exception {
+    public void resolveInlineRequestBody() {
         OpenAPI openAPI = new OpenAPI();
 
 
@@ -655,7 +926,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineRequestBody_maxTwoPathParts() throws Exception {
+    public void resolveInlineRequestBody_maxTwoPathParts() {
         OpenAPI openAPI = new OpenAPI();
 
         ObjectSchema objectSchema = new ObjectSchema();
@@ -694,7 +965,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineRequestBody_stripsDotsFromPath() throws Exception {
+    public void resolveInlineRequestBody_stripsDotsFromPath() {
         OpenAPI openAPI = new OpenAPI();
 
         ObjectSchema objectSchema = new ObjectSchema();
@@ -735,7 +1006,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineParameter() throws Exception {
+    public void resolveInlineParameter() {
         OpenAPI openAPI = new OpenAPI();
 
 
@@ -776,7 +1047,7 @@ public class InlineModelResolverTest {
     }
 
    @Test
-    public void resolveInlineRequestBodyWithTitle() throws Exception {
+    public void resolveInlineRequestBodyWithTitle() {
         OpenAPI openAPI = new OpenAPI();
 
         ObjectSchema objectSchema = new ObjectSchema();
@@ -806,7 +1077,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void notResolveNonModelRequestBody() throws Exception {
+    public void notResolveNonModelRequestBody() {
         OpenAPI openAPI = new OpenAPI();
 
         openAPI.path("/hello", new PathItem()
@@ -827,7 +1098,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineArrayRequestBody() throws Exception {
+    public void resolveInlineArrayRequestBody() {
         OpenAPI openAPI = new OpenAPI();
 
         ObjectSchema addressSchema = new ObjectSchema();
@@ -878,7 +1149,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineArrayResponse() throws Exception {
+    public void resolveInlineArrayResponse() {
         OpenAPI openAPI = new OpenAPI();
 
         ObjectSchema items = new ObjectSchema();
@@ -932,7 +1203,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void resolveInlineArrayResponseWithTitle() throws Exception {
+    public void resolveInlineArrayResponseWithTitle() {
         OpenAPI openAPI = new OpenAPI();
 
         ApiResponse apiResponse  = new ApiResponse();
@@ -978,7 +1249,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void testInlineMapResponse() throws Exception {
+    public void testInlineMapResponse() {
         OpenAPI openAPI = new OpenAPI();
 
         Schema schema = new Schema();
@@ -1017,7 +1288,7 @@ public class InlineModelResolverTest {
     }
 
     @Test
-    public void testInlineMapResponseWithObjectSchema() throws Exception {
+    public void testInlineMapResponseWithObjectSchema() {
         OpenAPI openAPI = new OpenAPI();
 
         Schema schema = new Schema();
@@ -1429,7 +1700,7 @@ public class InlineModelResolverTest {
 
 
     @Test(description = "https://github.com/swagger-api/swagger-parser/issues/1527")
-    public void testInlineItemsSchema() throws Exception {
+    public void testInlineItemsSchema() {
         ParseOptions options = new ParseOptions();
         options.setFlatten(true);
         OpenAPI openAPI = new OpenAPIV3Parser().read("flatten.json",null, options);
