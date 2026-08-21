@@ -2,6 +2,7 @@ package io.swagger.v3.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,6 +72,7 @@ public class ResolverCache {
     private final Path parentDirectory;
     private final String rootPath;
     private final URI rootDocumentUri;
+    private final Map<Pattern, Map<String, ?>> rootReferenceSnapshot;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
     private Map<String, Object> canonicalResolutionCache = new HashMap<>();
@@ -101,6 +104,7 @@ public class ResolverCache {
         this.auths = auths;
         this.rootPath = parentFileLocation;
         this.rootDocumentUri = PathUtils.rootDocumentUri(parentFileLocation);
+        this.rootReferenceSnapshot = snapshotRootReferences(openApi);
         this.resolveValidationMessages = resolveValidationMessages;
         this.parseOptions = parseOptions;
         this.permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(), parseOptions.getRemoteRefBlockList());
@@ -254,7 +258,7 @@ public class ResolverCache {
             return null;
         }
 
-        Object rootTarget = loadInternalRef("#/" + definitionPath);
+        Object rootTarget = loadRootReference("#/" + definitionPath);
         if (!expectedType.isInstance(rootTarget)) {
             return null;
         }
@@ -280,6 +284,47 @@ public class ResolverCache {
         } catch (IllegalArgumentException | URISyntaxException ignored) {
             return false;
         }
+    }
+
+    private Map<Pattern, Map<String, ?>> snapshotRootReferences(OpenAPI rootOpenApi) {
+        Map<Pattern, Map<String, ?>> snapshot = new LinkedHashMap<>();
+        if (rootOpenApi == null) {
+            return Collections.emptyMap();
+        }
+
+        addRootReferences(snapshot, PATHS_PATTERN, rootOpenApi.getPaths());
+
+        Components components = rootOpenApi.getComponents();
+        if (components != null) {
+            addRootReferences(snapshot, SCHEMAS_PATTERN, components.getSchemas());
+            addRootReferences(snapshot, RESPONSES_PATTERN, components.getResponses());
+            addRootReferences(snapshot, PARAMETERS_PATTERN, components.getParameters());
+            addRootReferences(snapshot, REQUEST_BODIES_PATTERN, components.getRequestBodies());
+            addRootReferences(snapshot, EXAMPLES_PATTERN, components.getExamples());
+            addRootReferences(snapshot, LINKS_PATTERN, components.getLinks());
+            addRootReferences(snapshot, CALLBACKS_PATTERN, components.getCallbacks());
+            addRootReferences(snapshot, HEADERS_PATTERN, components.getHeaders());
+            addRootReferences(snapshot, SECURITY_SCHEMES, components.getSecuritySchemes());
+        }
+
+        return Collections.unmodifiableMap(snapshot);
+    }
+
+    private void addRootReferences(Map<Pattern, Map<String, ?>> snapshot, Pattern pattern,
+                                   Map<String, ?> references) {
+        if (references != null && !references.isEmpty()) {
+            snapshot.put(pattern, Collections.unmodifiableMap(new LinkedHashMap<>(references)));
+        }
+    }
+
+    private Object loadRootReference(String ref) {
+        for (Map.Entry<Pattern, Map<String, ?>> entry : rootReferenceSnapshot.entrySet()) {
+            Object result = getFromMap(ref, entry.getValue(), entry.getKey());
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     private <T> T deserializeFragment(JsonNode node, Class<T> expectedType, String file, String definitionPath) {
@@ -427,7 +472,7 @@ public class ResolverCache {
         return jsonPathElement.replaceAll("~0", "~");
     }
 
-    private Object getFromMap(String ref, Map map, Pattern pattern) {
+    private Object getFromMap(String ref, Map<?, ?> map, Pattern pattern) {
         final Matcher parameterMatcher = pattern.matcher(ref);
 
         if (parameterMatcher.matches()) {

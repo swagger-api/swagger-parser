@@ -347,6 +347,21 @@ public class ResolverCacheTest {
     }
 
     @Test
+    public void testRootReferenceUsesObjectPresentAtCacheConstruction() {
+        Schema originalRootSchema = new Schema().type("object");
+        openAPI.components(new Components().addSchemas("Foo", originalRootSchema));
+        final String root = "https://example.com/api/root.yaml";
+        ResolverCache cache = new ResolverCache(openAPI, auths, root);
+
+        openAPI.getComponents().getSchemas().put("Foo", new Schema().type("string"));
+
+        Schema result = cache.loadRef(
+                root + "#/components/schemas/Foo", RefFormat.URL, Schema.class);
+
+        assertSame(result, originalRootSchema);
+    }
+
+    @Test
     public void testSameFilenameInDifferentDirectoryDoesNotReuseRoot() {
         Schema rootSchema = new Schema().type("object");
         openAPI.components(new Components().addSchemas("Foo", rootSchema));
