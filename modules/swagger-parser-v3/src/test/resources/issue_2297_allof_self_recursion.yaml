@@ -1,0 +1,26 @@
+openapi: 3.1.0
+info:
+  title: allOf self recursion regression
+  version: 1.0.0
+paths:
+  /node:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+components:
+  schemas:
+    Node:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            value:
+              type: number
+      properties:
+        child:
+          $ref: '#/components/schemas/Node'
