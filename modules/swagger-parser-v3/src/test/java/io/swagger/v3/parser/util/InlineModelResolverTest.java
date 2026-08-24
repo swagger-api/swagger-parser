@@ -1510,4 +1510,16 @@ public class InlineModelResolverTest {
 
     }
 
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/2118")
+    public void testInlineSchemaWithEmptyTitle() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue2118/issue2118.yaml", null, options);
+
+        assertNotNull(openAPI);
+        assertNotNull(openAPI.getComponents().getSchemas().get("MegaPet_creator"));
+        assertNull(openAPI.getComponents().getSchemas().get(""));
+    }
+
 }
