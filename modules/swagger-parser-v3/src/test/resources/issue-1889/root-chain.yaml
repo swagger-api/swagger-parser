@@ -1,0 +1,9 @@
+openapi: 3.0.0
+info:
+  title: test
+  version: 1.0.0
+
+components:
+  schemas:
+    GetProductResponse:
+      $ref: './common/models/GetProductResponseChain.yaml'

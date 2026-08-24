@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -892,6 +894,8 @@ public final class ExternalRefProcessor {
         if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
             $ref = join(externalFile, example.get$ref());
             example.set$ref($ref);
+            resolveWholeDocumentRef($ref, this::processRefToExternalExample, example::set$ref,
+                    RefType.COMPONENTS.getInternalPrefix() + "examples/");
         }else {
             processRefToExternalExample($ref, format);
         }
@@ -955,6 +959,8 @@ public final class ExternalRefProcessor {
         if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
             $ref = constructRef(subRef, externalFile);
             subRef.set$ref($ref);
+            resolveWholeDocumentRef($ref, this::processRefToExternalSchema, subRef::set$ref,
+                    RefType.SCHEMAS.getInternalPrefix());
         }else {
             processRefToExternalSchema($ref, format);
         }
@@ -980,6 +986,8 @@ public final class ExternalRefProcessor {
         if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
             $ref = join(externalFile, subRef.get$ref());
             subRef.set$ref($ref);
+            resolveWholeDocumentRef($ref, this::processRefToExternalHeader, subRef::set$ref,
+                    RefType.COMPONENTS.getInternalPrefix() + "headers/");
         }else {
             processRefToExternalHeader($ref, format);
         }
@@ -999,11 +1007,31 @@ public final class ExternalRefProcessor {
         if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
             $ref = join(externalFile, subRef.get$ref());
             subRef.set$ref($ref);
+            resolveWholeDocumentRef($ref, this::processRefToExternalLink, subRef::set$ref,
+                    RefType.COMPONENTS.getInternalPrefix() + "links/");
         }else {
             processRefToExternalLink($ref, format);
         }
     }
 
+
+    private static boolean isWholeDocumentRef(String ref) {
+        return !ref.contains("#");
+    }
+
+    private void resolveWholeDocumentRef(String ref, BiFunction<String, RefFormat, String> processor,
+                                         Consumer<String> setRef, String internalPrefix) {
+        if (!isWholeDocumentRef(ref)) {
+            return;
+        }
+
+        RefFormat format = computeRefFormat(ref);
+        processor.apply(ref, format);
+        String renamedRef = cache.getRenamedRef(ref);
+        if (renamedRef != null) {
+            setRef.accept(internalPrefix + renamedRef);
+        }
+    }
 
     // visible for testing
     public static String join(String source, String fragment) {

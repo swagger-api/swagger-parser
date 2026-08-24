@@ -1,0 +1,8 @@
+description: Products response
+headers:
+  X-Rate-Limit:
+    $ref: '../headers/RateLimitHeader.yaml'
+content:
+  application/json:
+    schema:
+      type: object

@@ -1,0 +1,5 @@
+Product:
+  type: object
+  properties:
+    id:
+      type: string
