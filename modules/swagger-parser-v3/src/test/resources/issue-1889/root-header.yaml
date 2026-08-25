@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  title: test
+  version: 1.0.0
+
+paths:
+  /products:
+    get:
+      responses:
+        '200':
+          $ref: './common/responses/ProductsResponse.yaml'

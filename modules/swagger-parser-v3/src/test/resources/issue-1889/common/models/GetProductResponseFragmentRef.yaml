@@ -1,0 +1,6 @@
+type: object
+properties:
+  products:
+    type: array
+    items:
+      $ref: './schemas.yaml#/Product'
