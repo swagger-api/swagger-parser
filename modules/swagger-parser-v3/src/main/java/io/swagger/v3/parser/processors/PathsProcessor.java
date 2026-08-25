@@ -18,6 +18,8 @@ import io.swagger.v3.parser.OpenAPIResolver;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -191,7 +193,7 @@ public class PathsProcessor {
 
     protected void updateRefs(Example example, String pathRef) {
         if(example.get$ref() != null) {
-        	example.set$ref(computeRef(example.get$ref(), pathRef));
+            example.set$ref(computePreprocessedRef(example.get$ref(), pathRef));
         }
     }
 
@@ -239,7 +241,7 @@ public class PathsProcessor {
 
     protected void updateRefs(Schema model, String pathRef) {
         if(model.get$ref() != null) {
-        	model.set$ref(computeRef(model.get$ref(), pathRef));
+            model.set$ref(computePreprocessedRef(model.get$ref(), pathRef));
         }
         else if(model.getProperties() != null) {
             // process properties
@@ -297,42 +299,55 @@ public class PathsProcessor {
 
 
     protected boolean isLocalRef(String ref) {
-        if(ref.startsWith("#")) {
-            return true;
-        }
-        return false;
+        return ref.startsWith("#");
     }
 
     protected boolean isAbsoluteRef(String ref) {
-    	if(!ref.startsWith(".")) {
-             return true;
+        try {
+            URI uri = new URI(ref);
+            return uri.isAbsolute();
+        } catch (URISyntaxException e) {
+            return true;
         }
-         return false;
     }
 
     private boolean isInternalSchemaRef(String $ref) {
-        if($ref.startsWith("#/components/schemas")) {
-            return true;
-        }
-        return false;
+        return $ref.startsWith("#/components/schemas");
     }
 
     protected String computeRef(String ref, String prefix) {
         if(isLocalRef(ref)&& !isInternalSchemaRef(ref)) return computeLocalRef(ref, prefix);
+        if (ref.isEmpty()) return ref;
         if(isAbsoluteRef(ref)) return ref;
         if(isInternalSchemaRef(ref)) return ref;
         return computeRelativeRef(ref, prefix);
     }
 
     protected String computeRelativeRef(String ref, String prefix) {
-         if(ref.startsWith("./")) {
+        try {
+            URI resolved = new URI(prefix).resolve(new URI(ref)).normalize();
+            String resolvedRef = resolved.toString();
+            if (prefix.startsWith("./") && !resolved.isAbsolute() && !resolvedRef.startsWith(".") && !resolvedRef.startsWith("/")) {
+                return "./" + resolvedRef;
+            }
+            return resolvedRef;
+        } catch (URISyntaxException e) {
             return ref;
         }
-    	int iIdxOfSlash = prefix.lastIndexOf('/');
-    	if(iIdxOfSlash != -1) {
-    		return prefix.substring(0, iIdxOfSlash+1) + ref;
-    	}
-    	return prefix + ref;
+    }
+
+    private String computePreprocessedRef(String ref, String prefix) {
+        if (isLocalRef(ref) && !isInternalSchemaRef(ref)) {
+            return computeLocalRef(ref, prefix);
+        }
+        if (!ref.startsWith(".") || ref.startsWith("./") || isInternalSchemaRef(ref)) {
+            return ref;
+        }
+        int lastSlash = prefix.lastIndexOf('/');
+        if (lastSlash != -1) {
+            return prefix.substring(0, lastSlash + 1) + ref;
+        }
+        return prefix + ref;
     }
 
     protected String computeLocalRef(String ref, String prefix) {
