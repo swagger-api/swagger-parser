@@ -1,0 +1,10 @@
+# "Payload" exists only in this file. The nested $ref points back to the root
+# document at a name the root does not define on disk. The parser must report
+# the invalid reference even though resolution promotes a schema named Payload.
+components:
+  schemas:
+    Payload:
+      type: object
+      properties:
+        x:
+          $ref: ./root.yaml#/components/schemas/Payload
