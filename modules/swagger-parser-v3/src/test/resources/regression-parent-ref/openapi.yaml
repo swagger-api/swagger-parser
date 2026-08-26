@@ -1,0 +1,7 @@
+openapi: 3.0.0
+info:
+  title: Parent ref with URI-illegal characters
+  version: 1.0.0
+paths:
+  /products/{param1}:
+    $ref: 'a/b/product-api.yaml#/paths/~1products~1{param1}'

@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info:
+  title: Product API
+  version: 1.0.0
+paths:
+  /products/{param1}:
+    get:
+      parameters:
+        - $ref: '../../shared params/product-components.yaml#/components/parameters/param1'
+      responses:
+        '200':
+          description: Success
