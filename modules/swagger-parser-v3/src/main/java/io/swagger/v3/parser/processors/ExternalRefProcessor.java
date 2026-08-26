@@ -869,7 +869,7 @@ public final class ExternalRefProcessor {
             if (example.get$ref() != null) {
                 RefFormat ref = computeRefFormat(example.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    processRefExample(example, $ref);
+                    processRefExample(example, file);
                 } else {
                     processRefToExternalExample(file + example.get$ref(), RefFormat.RELATIVE);
                 }
@@ -916,7 +916,7 @@ public final class ExternalRefProcessor {
             if (header.get$ref() != null) {
                 RefFormat ref = computeRefFormat(header.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    processRefHeader(header, $ref);
+                    processRefHeader(header, file);
                 } else {
                     processRefToExternalHeader(file + header.get$ref(), RefFormat.RELATIVE);
                 }
@@ -930,7 +930,7 @@ public final class ExternalRefProcessor {
             if (link.get$ref() != null) {
                 RefFormat ref = computeRefFormat(link.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    processRefLink(link, $ref);
+                    processRefLink(link, file);
                 } else {
                     processRefToExternalLink(file + link.get$ref(), RefFormat.RELATIVE);
                 }
