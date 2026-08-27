@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Root-level path item with a space
+  version: 1.0.0
+paths:
+  /root-prefix:
+    get:
+      parameters:
+        - $ref: 'root-parameter.yaml'
+      responses:
+        '200':
+          description: Success

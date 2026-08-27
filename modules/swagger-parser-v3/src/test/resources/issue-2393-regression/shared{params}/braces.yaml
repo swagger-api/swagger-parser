@@ -1,0 +1,4 @@
+name: braces
+in: query
+schema:
+  type: string

@@ -18,8 +18,6 @@ import io.swagger.v3.parser.OpenAPIResolver;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -303,12 +301,7 @@ public class PathsProcessor {
     }
 
     protected boolean isAbsoluteRef(String ref) {
-        try {
-            URI uri = new URI(ref);
-            return uri.isAbsolute();
-        } catch (URISyntaxException e) {
-            return true;
-        }
+        return ReferencePathUtils.isAbsolute(ref);
     }
 
     private boolean isInternalSchemaRef(String $ref) {
@@ -324,16 +317,7 @@ public class PathsProcessor {
     }
 
     protected String computeRelativeRef(String ref, String prefix) {
-        try {
-            URI resolved = new URI(prefix).resolve(new URI(ref)).normalize();
-            String resolvedRef = resolved.toString();
-            if (prefix.startsWith("./") && !resolved.isAbsolute() && !resolvedRef.startsWith(".") && !resolvedRef.startsWith("/")) {
-                return "./" + resolvedRef;
-            }
-            return resolvedRef;
-        } catch (URISyntaxException e) {
-            return ref;
-        }
+        return ReferencePathUtils.resolve(prefix, ref);
     }
 
     private String computePreprocessedRef(String ref, String prefix) {
@@ -343,11 +327,7 @@ public class PathsProcessor {
         if (!ref.startsWith(".") || ref.startsWith("./") || isInternalSchemaRef(ref)) {
             return ref;
         }
-        int lastSlash = prefix.lastIndexOf('/');
-        if (lastSlash != -1) {
-            return prefix.substring(0, lastSlash + 1) + ref;
-        }
-        return prefix + ref;
+        return ReferencePathUtils.resolve(prefix, ref);
     }
 
     protected String computeLocalRef(String ref, String prefix) {
