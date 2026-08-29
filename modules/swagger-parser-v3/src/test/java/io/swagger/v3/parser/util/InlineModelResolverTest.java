@@ -1709,6 +1709,31 @@ public class InlineModelResolverTest {
         assertNotNull(openAPI.getComponents().getSchemas().get("inline_response_200"));
     }
 
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/2386")
+    public void testUniqueNameSkipsEmptyTokensFromLeadingSeparators() {
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
+        InlineModelResolver resolver = new InlineModelResolver(false, true);
+        resolver.flatten(openAPI);
+
+        assertEquals("MyModel", resolver.uniqueName(" my model"));
+        assertEquals("Foo", resolver.uniqueName("-foo"));
+        assertEquals("Foo", resolver.uniqueName("_foo"));
+        assertEquals("FooBar", resolver.uniqueName("foo--bar"));
+        assertEquals("inline_object", resolver.uniqueName(""));
+        assertEquals("inline_object", resolver.uniqueName("---"));
+    }
+
+    @Test(description = "https://github.com/swagger-api/swagger-parser/issues/2386")
+    public void testFlattenSchemaTitleWithLeadingSeparator() {
+        String title = " my model";
+        OpenAPI openAPI = openAPIWithInlineResponseSchema(title);
+
+        new InlineModelResolver(false, true).flatten(openAPI);
+
+        assertFlattenedResponseSchema(openAPI, "MyModel", "#/components/schemas/MyModel");
+    }
+
     @Test(description = "https://github.com/swagger-api/swagger-parser/issues/1200")
     public void testSchemaPropertiesBeingPassedToFlattenedModel() {
         OpenAPI openAPI = new OpenAPI();
