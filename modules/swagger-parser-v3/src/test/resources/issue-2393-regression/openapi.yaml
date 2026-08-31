@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Issue 2393 URI character regression
+  version: 1.0.0
+paths:
+  /space:
+    $ref: 'nested/space-api.yaml#/paths/~1space'
+  /braces:
+    $ref: 'nested/braces-api.yaml#/paths/~1braces'
+  /percent:
+    $ref: 'nested/percent-api.yaml#/paths/~1percent'
+  /prefix-space:
+    $ref: 'nested space/prefix-api.yaml#/paths/~1prefix-space'
+  /root-prefix:
+    $ref: 'root path-item.yaml#/paths/~1root-prefix'

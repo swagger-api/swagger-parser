@@ -1,0 +1,2 @@
+operationId: getSpace
+description: Resolved link from a path containing a space

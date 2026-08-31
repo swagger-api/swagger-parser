@@ -1,0 +1,14 @@
+{
+  "parameters": [
+    {
+      "$ref": "./sub-dir2/pagination_params_1.json"
+    }
+  ],
+  "get": {
+    "responses": {
+      "200": {
+        "description": "Success"
+      }
+    }
+  }
+}

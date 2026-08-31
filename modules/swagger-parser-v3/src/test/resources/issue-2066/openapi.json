@@ -1,0 +1,12 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Issue 2066",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/params": {
+      "$ref": "./sub-dir/params.json"
+    }
+  }
+}

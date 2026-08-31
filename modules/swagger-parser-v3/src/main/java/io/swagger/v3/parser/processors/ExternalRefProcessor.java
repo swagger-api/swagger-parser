@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.processors;
 
 
-import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -1007,32 +1006,7 @@ public final class ExternalRefProcessor {
 
     // visible for testing
     public static String join(String source, String fragment) {
-        try {
-            boolean isRelative = false;
-            if(source.startsWith("/") || source.startsWith(".")) {
-                isRelative = true;
-            }
-            URI uri = new URI(source);
-
-            if(!source.endsWith("/") && (fragment.startsWith("./") && "".equals(uri.getPath()))) {
-                uri = new URI(source + "/");
-            }
-            else if("".equals(uri.getPath()) && !fragment.startsWith("/")) {
-                uri = new URI(source + "/");
-            }
-            URI f = new URI(fragment);
-
-            URI resolved = uri.resolve(f);
-
-            URI normalized = resolved.normalize();
-            if(Character.isAlphabetic(normalized.toString().charAt(0)) && isRelative) {
-                return "./" + normalized.toString();
-            }
-            return normalized.toString();
-        }
-        catch(Exception e) {
-            return source;
-        }
+        return ReferencePathUtils.resolve(source, fragment);
     }
 
 

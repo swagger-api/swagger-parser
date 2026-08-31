@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Percent path item
+  version: 1.0.0
+paths:
+  /percent:
+    get:
+      parameters:
+        - $ref: '../shared%params/percent.yaml'
+      responses:
+        '200':
+          description: Success
