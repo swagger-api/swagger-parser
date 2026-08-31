@@ -438,14 +438,18 @@ public class InlineModelResolver {
         int count = 0;
         boolean done = false;
         if (camelCaseFlattenNaming) {
-            String uniqueKey;
             String concatenated = "";
-            for (int i = 0; i < key.split("[-|\\s|_]").length; i++) {
-                uniqueKey = key.split("[-|\\s|_]")[i];
+            for (String uniqueKey : key.split("[-|\\s|_]")) {
+                if (uniqueKey.isEmpty()) {
+                    continue;
+                }
                 uniqueKey = uniqueKey.substring(0, 1).toUpperCase() + uniqueKey.substring(1);
                 concatenated = concatenated.concat(uniqueKey);
             }
             key = concatenated.replaceAll("[^a-z_\\.A-Z0-9 ]", ""); // FIXME: a parameter
+            if (key.isEmpty()) {
+                key = "inline_object";
+            }
         }else {
             key = key.replaceAll("[^a-z_\\.A-Z0-9 ]", ""); // FIXME: a parameter
         }
