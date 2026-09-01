@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import mockit.*;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 
@@ -109,10 +110,16 @@ public class ParameterProcessorTest {
 
         final String ref = "#/components/parameters/foo";
         Parameter refParameter = new Parameter().$ref(ref);
+        refParameter.setName("foo");
+        refParameter.setIn("header");
 
         expectLoadingRefFromCache(ref, RefFormat.INTERNAL, resolvedHeaderParam);
         new Expectations() {
             {
+                resolvedHeaderParam.getName();
+                result = "foo";
+                resolvedHeaderParam.getIn();
+                result = "header";
                 resolvedHeaderParam.getSchema();
                 result = null;
                 resolvedHeaderParam.getContent();

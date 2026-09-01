@@ -39,6 +39,7 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.reference.DereferencerContext;
 import io.swagger.v3.parser.reference.DereferencersFactory;
 import io.swagger.v3.parser.reference.OpenAPIDereferencer;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import io.swagger.v3.parser.util.ResolverFully;
 import org.apache.commons.io.FileUtils;
@@ -563,7 +564,11 @@ public class OpenAPIResolverTest {
         assertEquals(id.get$ref(),"#/components/schemas/Pet");
 
         //internal parameter url
-        assertEquals(openAPI.getPaths().get("/store/inventory").getGet().getParameters().get(0), openAPI.getComponents().getParameters().get("limitParam"));
+        Parameter inventoryParam = openAPI.getPaths().get("/store/inventory").getGet().getParameters().get(0);
+        String refName = ReferenceUtils.getRefName(inventoryParam.get$ref());
+        assertEquals(refName, "limitParam");
+        Components components = openAPI.getComponents();
+        assertEquals(components.getParameters().get(refName).getName(), "limit");
     }
 
     @Test
@@ -655,6 +660,275 @@ public class OpenAPIResolverTest {
         assertNotNull(am);
         Schema prop = am.getItems();
         assertTrue(prop instanceof Schema);
+    }
+
+    @Test
+    void testIssue2211() {
+        // given
+        String yaml =
+                "        openapi: 3.0.3\n" +
+                "        info:\n" +
+                "          title: technical-definitions\n" +
+                "          description: Commons technical definitions\n" +
+                "          version: 1.0.0\n" +
+                "        paths:\n" +
+                "          /components/parameter:\n" +
+                "            get:\n" +
+                "              tags:\n" +
+                "                - example\n" +
+                "              operationId: getExampleById4\n" +
+                "              parameters:\n" +
+                "                - $ref: '#/components/parameters/Parameter'\n" +
+                "              responses:\n" +
+                "                '200':\n" +
+                "                  description: Successful response\n" +
+                "                  content:\n" +
+                "                    application/json:\n" +
+                "                      schema:\n" +
+                "                        type: object\n" +
+                "                        properties:\n" +
+                "                          message:\n" +
+                "                            type: string\n" +
+                "                            example: Success\n" +
+                "        components:\n" +
+                "          parameters:\n" +
+                "            Parameter:\n" +
+                "              name: id\n" +
+                "              in: query\n" +
+                "              description: The ID of the example to retrieve\n" +
+                "              required: true\n" +
+                "              style: form\n" +
+                "              explode: true\n" +
+                "              schema:\n" +
+                "                type: string\n" +
+                "\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        // when
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(yaml, auths, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+
+        // then
+        assertNotNull(openAPI);
+        assertEquals(openAPI.getPaths().get("/components/parameter").getGet().getParameters().get(0).get$ref(), "#/components/parameters/Parameter");
+    }
+
+    @Test
+    public void testIssue2216ExternalParameterRefInlinedOnResolveFully() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue_2216/openapi.yaml", null, options);
+
+        assertNotNull(result);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        Parameter param = openAPI.getPaths().get("/items").getGet().getParameters().get(0);
+        assertNotNull(param);
+        assertNull(param.get$ref(), "resolveFully=true must inline the external parameter, removing $ref");
+        assertEquals(param.getName(), "limit");
+        assertEquals(param.getIn(), "query");
+        assertNotNull(param.getSchema());
+        assertEquals(param.getSchema().getType(), "integer");
+    }
+
+    @Test
+    public void testPathItemParameterRefPreservedOnResolve() {
+        String yaml =
+                "openapi: 3.0.3\n" +
+                "info:\n" +
+                "  title: Test\n" +
+                "  version: 1.0.0\n" +
+                "paths:\n" +
+                "  /items/{id}:\n" +
+                "    parameters:\n" +
+                "      - $ref: '#/components/parameters/ItemId'\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "components:\n" +
+                "  parameters:\n" +
+                "    ItemId:\n" +
+                "      name: id\n" +
+                "      in: path\n" +
+                "      required: true\n" +
+                "      schema:\n" +
+                "        type: string\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, auths, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        List<Parameter> opParams = openAPI.getPaths().get("/items/{id}").getGet().getParameters();
+        assertNotNull(opParams, "GET operation should have inherited the PathItem parameter");
+        assertEquals(opParams.size(), 1);
+        Parameter param = opParams.get(0);
+        assertNotNull(param.get$ref(), "Inherited PathItem parameter must remain a $ref after resolve=true");
+        assertEquals(param.get$ref(), "#/components/parameters/ItemId");
+        assertNull(param.getName(), "Inlined name must not appear on a $ref-only parameter");
+        assertNull(param.getIn(), "Inlined 'in' must not appear on a $ref-only parameter");
+    }
+
+    @Test
+    public void testCallbackOperationParameterRefPreservedOnResolve() {
+        String yaml =
+                "openapi: 3.0.3\n" +
+                "info:\n" +
+                "  title: Test\n" +
+                "  version: 1.0.0\n" +
+                "paths:\n" +
+                "  /subscribe:\n" +
+                "    post:\n" +
+                "      requestBody:\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              type: object\n" +
+                "              properties:\n" +
+                "                callbackUrl:\n" +
+                "                  type: string\n" +
+                "      callbacks:\n" +
+                "        myCallback:\n" +
+                "          '{$request.body#/callbackUrl}':\n" +
+                "            post:\n" +
+                "              parameters:\n" +
+                "                - $ref: '#/components/parameters/CallbackParam'\n" +
+                "              responses:\n" +
+                "                '200':\n" +
+                "                  description: ok\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "components:\n" +
+                "  parameters:\n" +
+                "    CallbackParam:\n" +
+                "      name: id\n" +
+                "      in: query\n" +
+                "      required: false\n" +
+                "      schema:\n" +
+                "        type: string\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, auths, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        Callback callback = openAPI.getPaths().get("/subscribe").getPost()
+                .getCallbacks().get("myCallback");
+        assertNotNull(callback);
+        PathItem callbackPath = callback.get("{$request.body#/callbackUrl}");
+        assertNotNull(callbackPath);
+        List<Parameter> callbackParams = callbackPath.getPost().getParameters();
+        assertNotNull(callbackParams, "Callback operation should have its parameter");
+        assertEquals(callbackParams.size(), 1);
+        Parameter param = callbackParams.get(0);
+        assertNotNull(param.get$ref(), "Callback operation parameter $ref must be preserved after resolve=true");
+        assertEquals(param.get$ref(), "#/components/parameters/CallbackParam");
+        assertNull(param.getName(), "Inlined name must not appear on a $ref-only callback parameter");
+    }
+
+    @Test
+    public void testCallbackOperationParameterInlinedOnResolveFully() {
+        String yaml =
+                "openapi: 3.0.3\n" +
+                "info:\n" +
+                "  title: Test\n" +
+                "  version: 1.0.0\n" +
+                "paths:\n" +
+                "  /subscribe:\n" +
+                "    post:\n" +
+                "      requestBody:\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              type: object\n" +
+                "              properties:\n" +
+                "                callbackUrl:\n" +
+                "                  type: string\n" +
+                "      callbacks:\n" +
+                "        myCallback:\n" +
+                "          '{$request.body#/callbackUrl}':\n" +
+                "            post:\n" +
+                "              parameters:\n" +
+                "                - $ref: '#/components/parameters/CallbackParam'\n" +
+                "              responses:\n" +
+                "                '200':\n" +
+                "                  description: ok\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "components:\n" +
+                "  parameters:\n" +
+                "    CallbackParam:\n" +
+                "      name: id\n" +
+                "      in: query\n" +
+                "      required: false\n" +
+                "      schema:\n" +
+                "        type: string\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, auths, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+
+        Callback callback = openAPI.getPaths().get("/subscribe").getPost()
+                .getCallbacks().get("myCallback");
+        assertNotNull(callback);
+        PathItem callbackPath = callback.get("{$request.body#/callbackUrl}");
+        assertNotNull(callbackPath);
+        List<Parameter> callbackParams = callbackPath.getPost().getParameters();
+        assertNotNull(callbackParams);
+        assertEquals(callbackParams.size(), 1);
+        Parameter param = callbackParams.get(0);
+        assertNull(param.get$ref(), "resolveFully=true must inline callback parameter, removing $ref");
+        assertEquals(param.getName(), "id");
+        assertEquals(param.getIn(), "query");
+    }
+
+    @Test
+    public void testMissingParameterRefProducesNoNPE() {
+        String yaml =
+                "openapi: 3.0.3\n" +
+                "info:\n" +
+                "  title: Test\n" +
+                "  version: 1.0.0\n" +
+                "paths:\n" +
+                "  /test:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - $ref: '#/components/parameters/NonExistent'\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n";
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, auths, options);
+
+        assertNotNull(result, "Parser must return a result even for an unresolvable $ref");
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        List<Parameter> params = openAPI.getPaths().get("/test").getGet().getParameters();
+        assertNotNull(params);
+        assertEquals(params.size(), 1);
+        assertNotNull(params.get(0).get$ref(),
+                "Unresolvable parameter $ref wrapper should remain in the list");
+        assertEquals(params.get(0).get$ref(), "#/components/parameters/NonExistent");
     }
 
     @Test
@@ -1178,7 +1452,9 @@ public class OpenAPIResolverTest {
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final Parameter param = params.get(0);
-        assertEquals(param.getName(), "skip");
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = swagger.getComponents();
+        assertEquals(components.getParameters().get(refName).getName(), "skip");
     }
 
 
@@ -1203,7 +1479,9 @@ public class OpenAPIResolverTest {
         final List<Parameter> params = swagger.getPaths().get("/fun").getGet().getParameters();
         assertEquals(params.size(), 1);
         final Parameter param =  params.get(0);
-        assertEquals(param.getName(), "skip");
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = swagger.getComponents();
+        assertEquals(components.getParameters().get(refName).getName(), "skip");
     }
 
     private void testResponseRemoteRefs(String remoteRef) {
@@ -1338,8 +1616,10 @@ public class OpenAPIResolverTest {
 
 
         Parameter param = resolved.getPaths().get("/test").getGet().getParameters().get(0);
-        QueryParameter qp = (QueryParameter) param;
-        //assertEquals(qp.getCollectionFormat(), "csv");
+        String refName = ReferenceUtils.getRefName(param.get$ref());
+        Components components = resolved.getComponents();
+        QueryParameter refParameter = (QueryParameter) components.getParameters().get(refName);
+        assertEquals(refParameter.getName(), "test");
     }
 
     @Test
@@ -1560,5 +1840,5 @@ public class OpenAPIResolverTest {
                 { false }
         };
     }
-    
+
 }
