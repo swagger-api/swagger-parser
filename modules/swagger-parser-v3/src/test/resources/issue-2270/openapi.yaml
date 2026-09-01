@@ -1,0 +1,19 @@
+openapi: 3.0.1
+info:
+  title: issue-2270
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    SObject:
+      type: object
+      properties:
+        id:
+          type: string
+    Contact:
+      allOf:
+        - $ref: '#/components/schemas/SObject'
+        - type: object
+          properties:
+            name:
+              type: string
