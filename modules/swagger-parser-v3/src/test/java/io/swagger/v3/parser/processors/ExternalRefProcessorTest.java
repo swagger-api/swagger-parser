@@ -119,6 +119,32 @@ public class ExternalRefProcessorTest {
     }
 
     @Test
+    public void testResponseReusesRootComponentNameDiscoveredDuringLoad() {
+        final String ref = "https://example.test/api.yaml#/components/responses/Order-response";
+        ApiResponse rootSnapshotResponse = new ApiResponse().$ref("./responses/orderResponse.json");
+        ApiResponse currentResponse = new ApiResponse().description("resolved response");
+        OpenAPI testedOpenAPI = new OpenAPI().components(
+                new Components().addResponses("Order-response", currentResponse));
+
+        new Expectations() {{
+            cache.getRenamedRef(ref);
+            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
+            result = rootSnapshotResponse;
+            cache.getRootReferenceName(ref);
+            result = "Order-response";
+            cache.putRenamedRef(ref, "Order-response");
+        }};
+
+        String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
+                .processRefToExternalResponse(ref, RefFormat.URL);
+
+        assertEquals(assignedName, "Order-response");
+        assertEquals(testedOpenAPI.getComponents().getResponses().size(), 1);
+        assertSame(testedOpenAPI.getComponents().getResponses().get("Order-response"), currentResponse);
+        assertEquals(rootSnapshotResponse.get$ref(), "./responses/orderResponse.json");
+    }
+
+    @Test
     public void testEqualResolvedResponsesReuseOneKey() {
         final String ref = "https://example.test/incoming.yaml#/sharedResponse";
         ApiResponse existing = new ApiResponse().description("same response");
