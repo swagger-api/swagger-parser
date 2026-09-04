@@ -77,6 +77,7 @@ public class ResolverCache {
     private Map<String, String> externalFileCache = new HashMap<>();
     private Map<String, Object> canonicalResolutionCache = new HashMap<>();
     private Map<String, String> canonicalExternalFileCache = new HashMap<>();
+    private Map<String, String> rootReferenceNameCache = new HashMap<>();
     private List<String> referencedModelKeys = new ArrayList<>();
     private Set<String> resolveValidationMessages;
     private final ParseOptions parseOptions;
@@ -266,6 +267,8 @@ public class ResolverCache {
         T result = expectedType.cast(rootTarget);
         resolutionCache.put(ref, result);
         canonicalResolutionCache.putIfAbsent(canonicalRef, result);
+        String definitionName = definitionPath.substring(definitionPath.lastIndexOf('/') + 1);
+        rootReferenceNameCache.putIfAbsent(canonicalRef, unescapePointer(definitionName));
         return result;
     }
 
@@ -506,6 +509,17 @@ public class ResolverCache {
 
     public String getRenamedRef(String originalRef) {
         return canonicalRenameCache.get(canonicalize(originalRef));
+    }
+
+    /**
+     * Returns the declared name of a reference resolved from the root document snapshot.
+     *
+     * @param ref reference to look up
+     * @return the declared root reference name, or {@code null} if the reference was not
+     *         resolved from the root document snapshot
+     */
+    public String getRootReferenceName(String ref) {
+        return rootReferenceNameCache.get(canonicalize(ref));
     }
 
     public void putRenamedRef(String originalRef, String newRef) {

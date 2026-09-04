@@ -61,6 +61,14 @@ public final class ExternalRefProcessor {
         LOGGER.warn("unable to load model reference from `{}`.  It may not be available or the reference isn't a valid model schema", ref);
     }
 
+    private String getRootReferenceName(String ref) {
+        String rootReferenceName = cache.getRootReferenceName(ref);
+        if (rootReferenceName != null) {
+            cache.putRenamedRef(ref, rootReferenceName);
+        }
+        return rootReferenceName;
+    }
+
     private String allocateSchemaName(Map<String, Schema> schemas, String baseName,
             Schema incoming, String incomingRef) {
         return nameAllocator.allocate(schemas, baseName, incoming, incomingRef,
@@ -81,6 +89,11 @@ public final class ExternalRefProcessor {
             // stop!  There's a problem.  retain the original ref
             warnUnableToLoadReference($ref);
             return $ref;
+        }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            cache.addReferencedKey(rootReferenceName);
+            return rootReferenceName;
         }
         String newRef;
 
@@ -403,6 +416,10 @@ public final class ExternalRefProcessor {
             warnUnableToLoadReference($ref);
             return $ref;
         }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
+        }
 
         String newRef;
 
@@ -479,6 +496,10 @@ public final class ExternalRefProcessor {
             warnUnableToLoadReference($ref);
             return $ref;
         }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
+        }
         String newRef;
 
         if (openAPI.getComponents() == null) {
@@ -527,6 +548,10 @@ public final class ExternalRefProcessor {
             // stop!  There's a problem.  retain the original ref
             warnUnableToLoadReference($ref);
             return $ref;
+        }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
         }
         String newRef;
 
@@ -584,6 +609,10 @@ public final class ExternalRefProcessor {
             warnUnableToLoadReference($ref);
             return $ref;
         }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
+        }
         String newRef;
 
         if (openAPI.getComponents() == null) {
@@ -632,6 +661,10 @@ public final class ExternalRefProcessor {
             warnUnableToLoadReference($ref);
             return $ref;
         }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
+        }
         String newRef;
 
         if (openAPI.getComponents() == null) {
@@ -679,6 +712,10 @@ public final class ExternalRefProcessor {
             warnUnableToLoadReference($ref);
             return $ref;
         }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
+        }
         String newRef;
 
         if (openAPI.getComponents() == null) {
@@ -724,6 +761,10 @@ public final class ExternalRefProcessor {
             // stop!  There's a problem.  retain the original ref
             warnUnableToLoadReference($ref);
             return $ref;
+        }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
         }
         String newRef;
 
@@ -798,6 +839,10 @@ public final class ExternalRefProcessor {
             // stop!  There's a problem.  retain the original ref
             warnUnableToLoadReference($ref);
             return $ref;
+        }
+        String rootReferenceName = getRootReferenceName($ref);
+        if (rootReferenceName != null) {
+            return rootReferenceName;
         }
         String newRef;
 
