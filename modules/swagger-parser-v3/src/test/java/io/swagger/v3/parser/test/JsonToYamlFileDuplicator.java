@@ -1,7 +1,7 @@
 package io.swagger.v3.parser.test;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import org.apache.commons.io.FileUtils;

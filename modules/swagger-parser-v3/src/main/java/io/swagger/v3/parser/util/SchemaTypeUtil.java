@@ -1,7 +1,7 @@
 package io.swagger.v3.parser.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.media.BinarySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ByteArraySchema;
@@ -127,7 +127,7 @@ public class SchemaTypeUtil {
         if(jsonNode == null) {
             return null;
         }
-        return jsonNode.textValue();
+        return jsonNode.stringValue(null);
     }
 
 }

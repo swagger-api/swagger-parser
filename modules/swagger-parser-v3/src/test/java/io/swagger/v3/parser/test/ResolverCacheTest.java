@@ -1,7 +1,7 @@
 package io.swagger.v3.parser.test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -68,7 +68,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testMock() throws JsonProcessingException {
+    public void testMock() throws JacksonException {
 
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/file.json";
@@ -97,7 +97,7 @@ public class ResolverCacheTest {
     }
 
     @Test
-    public void testLoadExternalRef_NoDefinitionPath() throws JsonProcessingException {
+    public void testLoadExternalRef_NoDefinitionPath() throws JacksonException {
 
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/file.json";

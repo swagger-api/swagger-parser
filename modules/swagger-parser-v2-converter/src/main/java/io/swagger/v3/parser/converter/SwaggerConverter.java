@@ -66,6 +66,19 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
     private static final Set<String> STRIPPED_EXTENSION_KEYS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("x-example", "x-examples", "x-nullable")));
 
+
+    /**
+     * The v2 (legacy) model chain still uses Jackson 2; values such as examples can be
+     * Jackson 2 JsonNode instances which Jackson 3 would serialize via bean introspection.
+     * Normalize them to plain Java collections/scalars before storing in v3 models.
+     */
+    private static Object normalizeJackson2Value(Object value) {
+        if (value instanceof com.fasterxml.jackson.databind.JsonNode) {
+            return io.swagger.util.Json.mapper().convertValue(value, Object.class);
+        }
+        return value;
+    }
+
     private List<String> globalConsumes = new ArrayList<>();
     private List<String> globalProduces = new ArrayList<>();
     private Components components = new Components();
@@ -949,6 +962,9 @@ public class SwaggerConverter implements SwaggerParserExtension {
             result.set$ref(ref.get$ref());
         } else if (schema instanceof ArrayProperty) {
             ArraySchema arraySchema = Json.mapper().convertValue(schema, ArraySchema.class);
+            if (schema.getExample() != null) {
+                arraySchema.setExample(normalizeJackson2Value(schema.getExample()));
+            }
 
             Property items = ((ArrayProperty) schema).getItems();
             Schema itemsSchema = convert(items);
@@ -973,7 +989,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
 
             result = Json.mapper().convertValue(schema, Schema.class);
             if (schema.getExample() != null) {
-                result.setExample(schema.getExample());
+                result.setExample(normalizeJackson2Value(schema.getExample()));
             }
 
             if ("object".equals(schema.getType()) && (result.getProperties() != null) && (result.getProperties().size() > 0)) {
@@ -1200,7 +1216,7 @@ public class SwaggerConverter implements SwaggerParserExtension {
             ComposedSchema composed = new ComposedSchema();
             composed.setDescription(composedModel.getDescription());
             if(composedModel.getExample()!= null) {
-                composed.setExample(composedModel.getExample());
+                composed.setExample(normalizeJackson2Value(composedModel.getExample()));
             }
             if (composedModel.getExternalDocs() != null) {
                 composed.setExternalDocs(convert(composedModel.getExternalDocs()));

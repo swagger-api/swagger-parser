@@ -1,9 +1,9 @@
 package io.swagger.v3.parser.test;
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -244,10 +244,11 @@ public class OpenAPIV31ParserSchemaTest {
     }
 
     public void compare(String dir, SwaggerParseResult result) throws Exception {
-        ObjectMapper mapper = Json31.mapper().copy();
-        mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
-        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
-        String actual = mapper.writer(new DefaultPrettyPrinter()).writeValueAsString(result.getOpenAPI());
+        ObjectMapper mapper = Json31.mapper().rebuild()
+                .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .build();
+        String actual = mapper.writer().with(new DefaultPrettyPrinter()).writeValueAsString(result.getOpenAPI());
         org.testng.Assert.assertEquals(actual,
                 FileUtils.readFileToString(new File("src/test/resources/3.1.0/dereference/schema/" + dir + "/dereferenced.json")));
     }

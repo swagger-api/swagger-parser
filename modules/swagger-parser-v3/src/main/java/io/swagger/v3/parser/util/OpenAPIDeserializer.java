@@ -1,12 +1,12 @@
 package io.swagger.v3.parser.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -983,21 +983,20 @@ public class OpenAPIDeserializer {
 
 	public PathItem getPathItem(ObjectNode obj, String location, ParseResult result) {
 
-
 		PathItem pathItem = new PathItem();
 
 		if (obj.get("$ref") != null) {
 			JsonNode ref = obj.get("$ref");
 
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					pathItem.set$ref(mungedRef);
 				} else {
-					pathItem.set$ref(ref.textValue());
+					pathItem.set$ref(ref.stringValue(null));
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/pathItems"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type PathItem");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/pathItems"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type PathItem");
                 }
 				if(result.isOpenapi31()){
 					String value = getString("summary", obj, false, location, result);
@@ -1194,7 +1193,7 @@ public class OpenAPIDeserializer {
 			return keys;
 		}
 
-		Iterator<String> it = node.fieldNames();
+		Iterator<String> it = node.propertyNames().iterator();
 		while (it.hasNext()) {
 			keys.add(it.next());
 		}
@@ -1236,7 +1235,7 @@ public class OpenAPIDeserializer {
         if (value.getNodeType().equals(JsonNodeType.BOOLEAN)) {
             boolValue = value.asBoolean();
         } else if (value.getNodeType().equals(JsonNodeType.STRING)) {
-            String stringValue = value.textValue();
+            String stringValue = value.stringValue(null);
             if ("true".equalsIgnoreCase(stringValue) || "false".equalsIgnoreCase(stringValue)) {
                 boolValue = Boolean.parseBoolean(stringValue);
             } else {
@@ -1618,14 +1617,14 @@ public class OpenAPIDeserializer {
 		JsonNode ref = linkNode.get("$ref");
 		if (ref != null) {
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					link.set$ref(mungedRef);
 				} else {
-					link.set$ref(ref.textValue());
+					link.set$ref(ref.stringValue(null));
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/links"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Link");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/links"))) {
+                    result.warning(location, "$ref target " + ref.stringValue(null) + " is not of expected type Link");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", linkNode, false, location, result);
@@ -1745,14 +1744,14 @@ public class OpenAPIDeserializer {
 				JsonNode ref = node.get("$ref");
 				if (ref != null) {
 					if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-						String mungedRef = mungedRef(ref.textValue());
+						String mungedRef = mungedRef(ref.stringValue(null));
 						if (mungedRef != null) {
 							callback.set$ref(mungedRef);
 						} else {
-							callback.set$ref(ref.textValue());
+							callback.set$ref(ref.stringValue(null));
 						}
-                        if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/callbacks"))) {
-                            result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Callback");
+                        if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/callbacks"))) {
+                            result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type Callback");
                         }
 						return callback;
 					} else {
@@ -1861,7 +1860,7 @@ public class OpenAPIDeserializer {
 			if (v.getNodeType().equals(JsonNodeType.BOOLEAN)) {
 				value = v.asBoolean();
 			} else if (v.getNodeType().equals(JsonNodeType.STRING)) {
-				String stringValue = v.textValue();
+				String stringValue = v.stringValue(null);
 				return Boolean.parseBoolean(stringValue);
 			}
 		}
@@ -1997,14 +1996,14 @@ public class OpenAPIDeserializer {
 		if (ref != null) {
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
 				parameter = new Parameter();
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
                     parameter.set$ref(mungedRef);
-                }else {
-                    parameter.set$ref(ref.textValue());
+                } else {
+                    parameter.set$ref(ref.stringValue(null));
                 }
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Parameter/Header");
+                if (ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/parameters") || ref.stringValue(null).startsWith("#/components/headers"))) {
+                    result.warning(location, "$ref target " + ref.stringValue(null) + " is not of expected type Parameter/Header");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", obj, false, location, result);
@@ -2206,14 +2205,14 @@ public class OpenAPIDeserializer {
 		JsonNode ref = headerNode.get("$ref");
 		if (ref != null) {
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					header.set$ref(mungedRef);
 				} else {
-					header.set$ref(ref.textValue());
+					header.set$ref(ref.stringValue(null));
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/parameters") || ref.textValue().startsWith("#/components/headers"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Header/Parameter");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/parameters") || ref.stringValue(null).startsWith("#/components/headers"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type Header/Parameter");
                 }
 
 				if (result.isOpenapi31()) {
@@ -2383,14 +2382,14 @@ public class OpenAPIDeserializer {
 		JsonNode ref = node.get("$ref");
 		if (ref != null) {
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					securityScheme.set$ref(mungedRef);
 				} else {
-					securityScheme.set$ref(ref.textValue());
+					securityScheme.set$ref(ref.stringValue(null));
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/securitySchemes"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type securitySchemes");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/securitySchemes"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type securitySchemes");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", node, false, location, result);
@@ -2820,7 +2819,7 @@ public class OpenAPIDeserializer {
 					}
 				}
 
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					schema.set$ref(mungedRef);
 				} else {
@@ -2834,8 +2833,8 @@ public class OpenAPIDeserializer {
                     String refName  = schema.get$ref().substring(schema.get$ref().lastIndexOf("/")+1);
                     localSchemaRefs.put(refName,location);
                 }
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Schema");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/schemas"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type Schema");
                 }
 				return schema;
 			} else {
@@ -2869,12 +2868,12 @@ public class OpenAPIDeserializer {
 					schema.addEnumItemObject(n.booleanValue());
 				} else if (n.isValueNode()) {
 					try {
-						schema.addEnumItemObject(getDecodedObject(schema, n.asText(null)));
+						schema.addEnumItemObject(getDecodedObject(schema, n.isNull() ? null : n.asText(null)));
 					} catch (ParseException e) {
 						result.invalidType(location, String.format("enum=`%s`", e.getMessage()),
 								schema.getFormat(), n);
 					}
-				} else if (n.isContainerNode()) {
+				} else if (n.isContainer()) {
 					schema.addEnumItemObject(n.isNull() ? null : n);
 				} else {
 					result.invalidType(location, "enum", "value", n);
@@ -3085,7 +3084,7 @@ public class OpenAPIDeserializer {
             List<String> requiredList = new ArrayList<>();
             for (JsonNode n : required) {
                 if (n.getNodeType().equals(JsonNodeType.STRING)) {
-                    requiredList.add(((TextNode) n).textValue());
+                    requiredList.add(((StringNode) n).stringValue(null));
                 } else {
                     result.invalidType(location, "required", "string", n);
                 }
@@ -3288,7 +3287,7 @@ public class OpenAPIDeserializer {
 			if (!validNodeTypes.contains(exampleValue.getNodeType())) {
 				result.invalidType(location, exampleName, "object", exampleValue);
 			} else if (exampleValue.getNodeType().equals(JsonNodeType.STRING)) {
-                TextNode stringExample = (TextNode) exampleValue;
+                StringNode stringExample = (StringNode) exampleValue;
                 if (stringExample != null) {
                     Example exampleObj = getTextExample(stringExample);
                     if (exampleObj != null) {
@@ -3309,10 +3308,10 @@ public class OpenAPIDeserializer {
 		return examples;
 	}
 
-    private Example getTextExample(TextNode textNode) {
+    private Example getTextExample(StringNode textNode) {
         if (textNode == null) return null;
         Example example = new Example();
-        example.setValue(textNode.textValue());
+        example.setValue(textNode.stringValue(null));
         return example;
     }
 
@@ -3325,14 +3324,14 @@ public class OpenAPIDeserializer {
 		JsonNode ref = node.get("$ref");
 		if (ref != null) {
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					example.set$ref(mungedRef);
 				} else {
-					example.set$ref(ref.textValue());
+					example.set$ref(ref.stringValue(null));
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/examples"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Examples");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/examples"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type Examples");
                 }
                 if(result.isOpenapi31()){
                     String value = getString("summary", node, false, location, result);
@@ -3469,14 +3468,14 @@ public class OpenAPIDeserializer {
 		JsonNode ref = node.get("$ref");
 		if (ref != null) {
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					apiResponse.set$ref(mungedRef);
 				} else {
-					apiResponse.set$ref(ref.textValue());
+					apiResponse.set$ref(ref.stringValue(null));
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/responses"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Response");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/responses"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type Response");
                 }
 				if(result.isOpenapi31()){
 					String value = getString("description", node, false, location, result);
@@ -3544,7 +3543,7 @@ public class OpenAPIDeserializer {
 
 		for (JsonNode node : nodes) {
 			if (node.getNodeType().equals(JsonNodeType.STRING)) {
-				tags.add(node.textValue());
+				tags.add(node.stringValue(null));
 			}
 		}
 		return tags;
@@ -3662,7 +3661,7 @@ public class OpenAPIDeserializer {
 							if (key != null && JsonNodeType.ARRAY.equals(value.getNodeType())) {
 								ArrayNode arrayNode = (ArrayNode) value;
 								List<String> scopes = Stream
-										.generate(arrayNode.elements()::next)
+										.generate(arrayNode.values().iterator()::next)
 										.map((n) -> n.asText())
 										.limit(arrayNode.size())
 										.collect(Collectors.toList());
@@ -3722,14 +3721,14 @@ public class OpenAPIDeserializer {
 		JsonNode ref = node.get("$ref");
 		if (ref != null) {
 			if (ref.getNodeType().equals(JsonNodeType.STRING)) {
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					body.set$ref(mungedRef);
 				} else {
-					body.set$ref(ref.textValue());
+					body.set$ref(ref.stringValue(null));
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/requestBodies"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type RequestBody");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/requestBodies"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type RequestBody");
                 }
 				if (result.isOpenapi31()) {
 					String desc = getString("description", node, false, location, result);
@@ -3857,7 +3856,7 @@ public class OpenAPIDeserializer {
         if (jsonNode.getNodeType().equals(JsonNodeType.BOOLEAN)) {
             boolValue = jsonNode.asBoolean();
         } else if (jsonNode.getNodeType().equals(JsonNodeType.STRING)) {
-            String stringValue = jsonNode.textValue();
+            String stringValue = jsonNode.stringValue(null);
             if ("true".equalsIgnoreCase(stringValue) || "false".equalsIgnoreCase(stringValue)) {
                 boolValue = Boolean.parseBoolean(stringValue);
             } else {
@@ -3958,14 +3957,14 @@ public class OpenAPIDeserializer {
 					}
 				}
 
-				String mungedRef = mungedRef(ref.textValue());
+				String mungedRef = mungedRef(ref.stringValue(null));
 				if (mungedRef != null) {
 					schema.set$ref(mungedRef);
 				} else {
 					schema.set$ref(ref.asText());
 				}
-                if(ref.textValue().startsWith("#/components") && !(ref.textValue().startsWith("#/components/schemas"))) {
-                    result.warning(location, "$ref target "+ref.textValue() +" is not of expected type Schema");
+                if(ref.stringValue(null).startsWith("#/components") && !(ref.stringValue(null).startsWith("#/components/schemas"))) {
+                    result.warning(location, "$ref target "+ref.stringValue(null) +" is not of expected type Schema");
                 }
 			} else {
 				result.invalidType(location, "$ref", "string", node);
@@ -4038,12 +4037,12 @@ public class OpenAPIDeserializer {
 					schema.addEnumItemObject(n.booleanValue());
 				} else if (n.isValueNode()) {
 					try {
-						schema.addEnumItemObject(getDecodedObject31(schema, n.asText(null)));
+						schema.addEnumItemObject(getDecodedObject31(schema, n.isNull() ? null : n.asText(null)));
 					} catch (ParseException e) {
 						result.invalidType(location, String.format("enum=`%s`", e.getMessage()),
 								schema.getFormat(), n);
 					}
-				} else if (n.isContainerNode()) {
+				} else if (n.isContainer()) {
 					schema.addEnumItemObject(n.isNull() ? null : n);
 				} else {
 					result.invalidType(location, "enum", "value", n);
@@ -4121,7 +4120,7 @@ public class OpenAPIDeserializer {
 				if (dependentRequiredObj != null) {
 					for (JsonNode n : dependentRequiredValue){
 						if (n.getNodeType().equals(JsonNodeType.STRING)) {
-							dependentRequired.add(n.textValue());
+							dependentRequired.add(n.stringValue(null));
 						}
 					}
                     dependentRequiredList.put(name, dependentRequired);

@@ -1,11 +1,11 @@
 package io.swagger.v3.parser.util;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml31;
@@ -27,7 +27,6 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -85,7 +84,7 @@ public class DeserializationUtils {
         public void setMaxYamlCodePoints(Integer maxYamlCodePoints) {
             this.maxYamlCodePoints = maxYamlCodePoints;
         }
-        
+
         public Integer getMaxYamlAliasesForCollections() {
             return maxYamlAliasesForCollections;
         }
@@ -111,7 +110,13 @@ public class DeserializationUtils {
         return options;
     }
 
-    private static final ObjectMapper JSON_MAPPER_FOR_YAML = new ObjectMapper();
+    private static final ObjectMapper JSON_MAPPER_FOR_YAML = JsonMapper.builder()
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .configure(tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .configure(tools.jackson.databind.cfg.EnumFeature.WRITE_ENUMS_USING_TO_STRING, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(tools.jackson.core.StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN, true)
+            .build();
 
     private static ObjectMapper yaml30Mapper = Yaml.mapper();
 
@@ -148,15 +153,6 @@ public class DeserializationUtils {
         }
     }
 
-    static {
-        JSON_MAPPER_FOR_YAML.registerModule(new JavaTimeModule());
-        JSON_MAPPER_FOR_YAML.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        JSON_MAPPER_FOR_YAML.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        JSON_MAPPER_FOR_YAML.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
-        JSON_MAPPER_FOR_YAML.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JSON_MAPPER_FOR_YAML.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
-    }
-
     public static JsonNode deserializeIntoTree(String contents, String fileOrHost) {
         return deserializeIntoTree(contents, fileOrHost, null, new SwaggerParseResult());
     }
@@ -170,7 +166,7 @@ public class DeserializationUtils {
             } else {
                 result = readYamlTree(contents, parseOptions, deserializationUtilsResult);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("An exception was thrown while trying to deserialize the contents of " + uri + " into a JsonNode tree", e);
         }
 

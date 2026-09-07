@@ -1,14 +1,15 @@
 package io.swagger.v3.parser;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonFactoryBuilder;
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 public class ObjectMapperFactory {
     public static ObjectMapper createJson() {
@@ -16,7 +17,7 @@ public class ObjectMapperFactory {
     }
 
     protected static ObjectMapper createJson(boolean includePathDeserializer, boolean includeResponseDeserializer) {
-        return create(createJsonFactory(), includePathDeserializer, includeResponseDeserializer);
+        return configure(JsonMapper.builder(createJsonFactory())).build();
     }
 
     public static ObjectMapper createYaml() {
@@ -24,28 +25,26 @@ public class ObjectMapperFactory {
     }
 
     protected static ObjectMapper createYaml(boolean includePathDeserializer, boolean includeResponseDeserializer) {
-        return create(createYamlFactory(), includePathDeserializer, includeResponseDeserializer);
+        return configure(YAMLMapper.builder(createYamlFactory())).build();
     }
 
-    private static ObjectMapper create(JsonFactory jsonFactory, boolean includePathDeserializer, boolean includeResponseDeserializer) {
-        ObjectMapper mapper = new ObjectMapper(jsonFactory);
-        mapper.registerModule(new JavaTimeModule());
-
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        return mapper;
+    private static <M extends ObjectMapper, B extends MapperBuilder<M, B>> B configure(B builder) {
+        return builder
+          .changeDefaultPropertyInclusion(incl -> incl
+            .withValueInclusion(JsonInclude.Include.NON_NULL)
+            .withContentInclusion(JsonInclude.Include.NON_NULL))
+          .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+          .configure(tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     private static JsonFactory createJsonFactory() {
-        return new JsonFactoryBuilder()
+        return JsonFactory.builder()
           .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
           .build();
     }
 
-    private static JsonFactory createYamlFactory() {
+    private static YAMLFactory createYamlFactory() {
         return YAMLFactory.builder()
           .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
           .build();

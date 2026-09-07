@@ -1,6 +1,6 @@
 package io.swagger.v3.parser.reference;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -642,7 +642,7 @@ public class IdsTraverser implements Traverser {
     public <T> T deepcopy(T entity, Class<T> clazz) {
         try {
             return (T)Json31.mapper().readValue(Json31.mapper().writeValueAsString(entity), clazz);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
