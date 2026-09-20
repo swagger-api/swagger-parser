@@ -99,7 +99,7 @@ public class ResolverCache {
     }
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation, Set<String> resolveValidationMessages, ParseOptions parseOptions) {
-        this.openapi31 = openApi != null && openApi.getOpenapi() != null && openApi.getOpenapi().startsWith("3.1");
+        this.openapi31 = openApi != null && openApi.getOpenapi() != null && (openApi.getOpenapi().startsWith("3.1") || openApi.getOpenapi().startsWith("3.2"));
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
