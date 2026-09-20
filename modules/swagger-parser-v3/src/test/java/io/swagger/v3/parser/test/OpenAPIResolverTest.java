@@ -1493,6 +1493,28 @@ public class OpenAPIResolverTest {
     }
 
     @Test
+    public void recursiveResolvingAllOfSelfRecursionOas31() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        OpenAPI openAPI = new OpenAPIV3Parser().read("issue_2297_allof_self_recursion.yaml", null, parseOptions);
+        assertNotNull(openAPI, "OpenAPI should be parsed successfully");
+        assertNotNull(openAPI.getComponents(), "Components should not be null");
+        Schema node = openAPI.getComponents().getSchemas().get("Node");
+        assertNotNull(node, "Node schema should be present");
+        assertNotNull(node.getProperties(), "Node should have properties");
+        assertNotNull(node.getProperties().get("child"),
+                "Node should contain the self-referencing property");
+        try {
+            String serialized = Json.mapper().writeValueAsString(openAPI);
+            assertNotNull(serialized, "Serialized output should not be null");
+        }
+        catch (Exception e) {
+            fail("Recursive loop found for self-reference combined with allOf: " + e.getMessage());
+        }
+    }
+
+    @Test
     public void recursiveIssue984() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
