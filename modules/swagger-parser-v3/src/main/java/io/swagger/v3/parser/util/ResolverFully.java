@@ -396,7 +396,8 @@ public class ResolverFully {
             }
         }
 
-        if(schema instanceof ArraySchema) {
+        // These subclass checks cover OAS 3.0 deserialization; OAS 3.1 uses JsonSchema.
+        if (schema instanceof ArraySchema) {
             ArraySchema arrayModel = (ArraySchema) schema;
             arrayModel.setItems(resolveSchema(arrayModel.getItems()));
             return arrayModel;
@@ -426,39 +427,48 @@ public class ResolverFully {
             return obj;
         }
 
+        if (SpecVersion.V31.equals(schema.getSpecVersion())) {
+            // OAS 3.1 schemas can combine keywords, so resolve these fields without returning early.
+            resolveOas31SchemaFields(schema);
+        }
+
+        if (schema.getNot() != null) {
+            schema.setNot(resolveSchema(schema.getNot()));
+        }
 
         Schema result = schema;
 
-        if (schema instanceof ComposedSchema) {
-            ComposedSchema composedSchema = (ComposedSchema) schema;
+        boolean hasAllOf = schema.getAllOf() != null;
+        boolean hasAnyOf = schema.getAnyOf() != null;
+        boolean hasOneOf = schema.getOneOf() != null;
 
-            boolean hasAllOf = composedSchema.getAllOf() != null;
-            boolean hasAnyOf = composedSchema.getAnyOf() != null;
-            boolean hasOneOf = composedSchema.getOneOf() != null;
+        if (hasAllOf || hasAnyOf || hasOneOf) {
             boolean adjacent = (hasAllOf && hasAnyOf) || (hasAllOf && hasOneOf) || (hasAnyOf && hasOneOf);
 
             if (aggregateCombinators && (hasAllOf || adjacent)) {
+                // TODO: Aggregating into a new schema can drop sibling keywords from the source OAS 3.1
+                // schema (for example, items); preserve them by intersecting the source and aggregated schemas.
+                // For example: schema: {items: {type: string}, allOf: [{type: object}]}.
                 Schema combinedModel = null;
-                if (SpecVersion.V30.equals(composedSchema.getSpecVersion())) {
-                    combinedModel = SchemaTypeUtil.createSchema(getSchemaType(composedSchema), composedSchema.getFormat());
+                if (SpecVersion.V30.equals(schema.getSpecVersion())) {
+                    combinedModel = SchemaTypeUtil.createSchema(getSchemaType(schema), schema.getFormat());
                 } else {
                     combinedModel = new JsonSchema();
-                    combinedModel.setFormat(composedSchema.getFormat());
-                    combinedModel.setTypes(composedSchema.getTypes());
+                    combinedModel.setFormat(schema.getFormat());
+                    combinedModel.setTypes(schema.getTypes());
                 }
 
-//                combinedModel.setDefault(composedSchema.getDefault());
                 Set<Object> examples = new HashSet<>();
                 Set<Object> defaultValues = new HashSet<>();
 
                 if (hasAllOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAllOf(), examples, defaultValues);
+                    aggregateSchemaCombinators(schema, combinedModel, schema.getAllOf(), examples, defaultValues);
                 }
                 if (hasOneOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getOneOf(), examples, defaultValues);
+                    aggregateSchemaCombinators(schema, combinedModel, schema.getOneOf(), examples, defaultValues);
                 }
                 if (hasAnyOf) {
-                    aggregateSchemaCombinators(composedSchema, combinedModel, composedSchema.getAnyOf(), examples, defaultValues);
+                    aggregateSchemaCombinators(schema, combinedModel, schema.getAnyOf(), examples, defaultValues);
                 }
                 if (defaultValues.size() == 1) {
                     Object defaultValue = defaultValues.iterator().next();
@@ -506,13 +516,16 @@ public class ResolverFully {
             } else {
                 // User doesn't need or want to aggregate composed schema, we only solve refs
                 if (hasAllOf) {
-                    composedSchema.allOf(composedSchema.getAllOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
+                    List<Schema> allOf = schema.getAllOf();
+                    schema.allOf(allOf.stream().map(this::resolveSchema).collect(Collectors.toList()));
                 }
                 if (hasOneOf) {
-                    composedSchema.oneOf(composedSchema.getOneOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
+                    List<Schema> oneOf = schema.getOneOf();
+                    schema.oneOf(oneOf.stream().map(this::resolveSchema).collect(Collectors.toList()));
                 }
                 if (hasAnyOf) {
-                    composedSchema.anyOf(composedSchema.getAnyOf().stream().map(this::resolveSchema).collect(Collectors.toList()));
+                    List<Schema> anyOf = schema.getAnyOf();
+                    schema.anyOf(anyOf.stream().map(this::resolveSchema).collect(Collectors.toList()));
                 }
             }
         }
@@ -551,6 +564,63 @@ public class ResolverFully {
         return result;
     }
 
+    private void resolveOas31SchemaFields(Schema schema) {
+        if (schema.getItems() != null) {
+            schema.setItems(resolveSchema(schema.getItems()));
+        }
+        if (schema.getPrefixItems() != null) {
+            List<Schema> prefixItems = schema.getPrefixItems();
+            schema.setPrefixItems(prefixItems.stream().map(this::resolveSchema).collect(Collectors.toList()));
+        }
+        if (schema.getUnevaluatedItems() != null) {
+            schema.setUnevaluatedItems(resolveSchema(schema.getUnevaluatedItems()));
+        }
+        // additionalItems is retained as an extension by OpenAPIDeserializer.
+
+        if (schema.getAdditionalProperties() instanceof Schema) {
+            schema.setAdditionalProperties(resolveSchema((Schema) schema.getAdditionalProperties()));
+        }
+        if (schema.getPatternProperties() != null) {
+            Map<String, Schema> patternProperties = schema.getPatternProperties();
+            Map<String, Schema> resolved = new LinkedHashMap<>();
+            for (Map.Entry<String, Schema> entry : patternProperties.entrySet()) {
+                resolved.put(entry.getKey(), resolveSchema(entry.getValue()));
+            }
+            schema.setPatternProperties(resolved);
+        }
+        if (schema.getPropertyNames() != null) {
+            schema.setPropertyNames(resolveSchema(schema.getPropertyNames()));
+        }
+        if (schema.getUnevaluatedProperties() != null) {
+            schema.setUnevaluatedProperties(resolveSchema(schema.getUnevaluatedProperties()));
+        }
+
+        if (schema.getIf() != null) {
+            schema.setIf(resolveSchema(schema.getIf()));
+        }
+        if (schema.getThen() != null) {
+            schema.setThen(resolveSchema(schema.getThen()));
+        }
+        if (schema.getElse() != null) {
+            schema.setElse(resolveSchema(schema.getElse()));
+        }
+
+        if (schema.getContains() != null) {
+            schema.setContains(resolveSchema(schema.getContains()));
+        }
+        if (schema.getContentSchema() != null) {
+            schema.setContentSchema(resolveSchema(schema.getContentSchema()));
+        }
+        if (schema.getDependentSchemas() != null) {
+            Map<String, Schema> dependentSchemas = schema.getDependentSchemas();
+            Map<String, Schema> resolved = new LinkedHashMap<>();
+            for (Map.Entry<String, Schema> entry : dependentSchemas.entrySet()) {
+                resolved.put(entry.getKey(), resolveSchema(entry.getValue()));
+            }
+            schema.setDependentSchemas(resolved);
+        }
+    }
+
     protected String getSchemaType(Schema schema) {
         if (SpecVersion.V30.equals(schema.getSpecVersion())) {
             return schema.getType();
@@ -587,7 +657,7 @@ public class ResolverFully {
 
     }
 
-    private void aggregateSchemaCombinators(ComposedSchema sourceSchema, Schema targetSchema,
+    private void aggregateSchemaCombinators(Schema sourceSchema, Schema targetSchema,
                                             List<Schema> schemasToAggregate, Set<Object> examples, Set<Object> defaultValues) {
 
         Set<String> requiredProperties = new HashSet<>();
