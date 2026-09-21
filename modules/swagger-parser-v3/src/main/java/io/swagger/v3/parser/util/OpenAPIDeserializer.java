@@ -46,6 +46,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.Parameter.StyleEnum;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.QueryStringParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -194,6 +195,30 @@ public class OpenAPIDeserializer {
 	protected static Set<String> ENCODING_KEYS_31 = new LinkedHashSet<>(Arrays.asList("contentType", "headers", "style",
 			"explode", "allowReserved"));
 
+	// OpenAPI 3.2 fixed-field additions over 3.1
+	protected static Set<String> ROOT_KEYS_32 = keys32(ROOT_KEYS_31, "$self");
+	protected static Set<String> TAG_KEYS_32 = keys32(TAG_KEYS_31, "summary", "parent", "kind");
+	protected static Set<String> RESPONSE_KEYS_32 = keys32(RESPONSE_KEYS_31, "summary");
+	protected static Set<String> SERVER_KEYS_32 = keys32(SERVER_KEYS_31, "name");
+	protected static Set<String> PATHITEM_KEYS_32 = keys32(PATHITEM_KEYS_31, "query", "additionalOperations");
+	protected static Set<String> COMPONENTS_KEYS_32 = keys32(COMPONENTS_KEYS_31, "mediaTypes");
+	protected static Set<String> MEDIATYPE_KEYS_32 = keys32(MEDIATYPE_KEYS_31, "$ref", "itemSchema",
+			"prefixEncoding", "itemEncoding");
+	protected static Set<String> EXAMPLE_KEYS_32 = keys32(EXAMPLE_KEYS_31, "dataValue", "serializedValue");
+	protected static Set<String> SECURITY_SCHEME_KEYS_32 = keys32(SECURITY_SCHEME_KEYS_31, "deprecated",
+			"oauth2MetadataUrl");
+	protected static Set<String> XML_KEYS_32 = keys32(XML_KEYS_31, "nodeType");
+	protected static Set<String> OAUTHFLOW_KEYS_32 = keys32(OAUTHFLOW_KEYS_31, "deviceAuthorizationUrl");
+	protected static Set<String> OAUTHFLOWS_KEYS_32 = keys32(OAUTHFLOWS_KEYS_31, "deviceAuthorization");
+	protected static Set<String> ENCODING_KEYS_32 = keys32(ENCODING_KEYS_31, "encoding", "prefixEncoding",
+			"itemEncoding");
+
+	private static Set<String> keys32(Set<String> keys31, String... additions) {
+		Set<String> keys = new LinkedHashSet<>(keys31);
+		keys.addAll(Arrays.asList(additions));
+		return keys;
+	}
+
 	protected static Map<String, Map<String, Set<String>>> KEYS = new LinkedHashMap<>();
 
     protected static Set<JsonNodeType> validNodeTypes =  new LinkedHashSet<>(
@@ -255,10 +280,38 @@ public class OpenAPIDeserializer {
 		KEYS.put("openapi30", keys30);
 		KEYS.put("openapi31", keys31);
 
+		Map<String, Set<String>> keys32 = new LinkedHashMap<>();
+		// unchanged categories are inherited from 3.1
+		keys31.forEach(keys32::putIfAbsent);
+		keys32.put("ROOT_KEYS", ROOT_KEYS_32);
+		keys32.put("TAG_KEYS", TAG_KEYS_32);
+		keys32.put("RESPONSE_KEYS", RESPONSE_KEYS_32);
+		keys32.put("SERVER_KEYS", SERVER_KEYS_32);
+		keys32.put("PATHITEM_KEYS", PATHITEM_KEYS_32);
+		keys32.put("COMPONENTS_KEYS", COMPONENTS_KEYS_32);
+		keys32.put("MEDIATYPE_KEYS", MEDIATYPE_KEYS_32);
+		keys32.put("EXAMPLE_KEYS", EXAMPLE_KEYS_32);
+		keys32.put("SECURITY_SCHEME_KEYS", SECURITY_SCHEME_KEYS_32);
+		keys32.put("XML_KEYS", XML_KEYS_32);
+		keys32.put("OAUTHFLOW_KEYS", OAUTHFLOW_KEYS_32);
+		keys32.put("OAUTHFLOWS_KEYS", OAUTHFLOWS_KEYS_32);
+		keys32.put("ENCODING_KEYS", ENCODING_KEYS_32);
+		KEYS.put("openapi32", keys32);
+
+	}
+
+	private static Map<String, Set<String>> getSpecKeys(ParseResult result) {
+		if (result.isOpenapi32()) {
+			return KEYS.get("openapi32");
+		}
+		return KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
 	}
 
 	private static final String QUERY_PARAMETER = "query";
+	private static final String QUERYSTRING_PARAMETER = "querystring";
 	private static final String COOKIE_PARAMETER = "cookie";
+	private static final Set<String> FIXED_PATH_METHODS = new LinkedHashSet<>(Arrays.asList(
+			"get", "put", "post", "delete", "head", "patch", "options", "trace", "query"));
 	private static final String PATH_PARAMETER = "path";
 	private static final String HEADER_PARAMETER = "header";
 	private static final Pattern RFC3339_DATE_TIME_PATTERN = Pattern.compile("^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):" +
@@ -309,6 +362,7 @@ public class OpenAPIDeserializer {
             rootParse.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
             OpenAPI api = parseRoot(rootNode, rootParse, path);
             result.openapi31(rootParse.isOpenapi31());
+            result.openapi32(rootParse.isOpenapi32());
             result.setOpenAPI(api);
             result.setMessages(rootParse.getMessages());
         } catch (Exception e) {
@@ -335,12 +389,24 @@ public class OpenAPIDeserializer {
 				return null;
 			} else if (value.startsWith("3.1") || value.startsWith("3.2")) {
 				result.openapi31(true);
-                openAPI.setSpecVersion(SpecVersion.V31);
+				if (value.startsWith("3.2")) {
+					result.openapi32(true);
+					openAPI.setSpecVersion(SpecVersion.V32);
+				} else {
+					openAPI.setSpecVersion(SpecVersion.V31);
+				}
 			}
             if (!value.startsWith("3.0.") && !value.startsWith("3.1.") && !value.startsWith("3.2.")){
                 result.warning(location, "The provided definition does not specify a valid version field");
             }
             openAPI.setOpenapi(value);
+
+			if (result.isOpenapi32()) {
+				String self = getString("$self", rootNode, false, location, result);
+				if (StringUtils.isNotBlank(self)) {
+					openAPI.set$self(self);
+				}
+			}
 
 
 			ObjectNode obj = getObject("info", rootNode, true, location, result);
@@ -442,7 +508,7 @@ public class OpenAPIDeserializer {
 			}
 
 			Set<String> keys = getKeys(rootNode);
-			Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+			Map<String, Set<String>> specKeys = getSpecKeys(result);
 			for (String key : keys) {
 				if (!specKeys.get("ROOT_KEYS").contains(key) && !key.startsWith("x-")) {
 					result.extra(location, key, node.get(key));
@@ -586,6 +652,26 @@ public class OpenAPIDeserializer {
 			components.setCallbacks(getCallbacks(node, String.format("%s.%s", location, "callbacks"), result,
 					true));
 		}
+
+		if (result.isOpenapi32()) {
+			node = getObject("mediaTypes", obj, false, location, result);
+			if (node != null) {
+				Map<String, MediaType> mediaTypes = new LinkedHashMap<>();
+				for (String name : getKeys(node)) {
+					JsonNode mediaTypeNode = node.get(name);
+					if (mediaTypeNode == null || !mediaTypeNode.isObject()) {
+						result.invalidType(location, "mediaTypes." + name, "object", mediaTypeNode);
+						continue;
+					}
+					MediaType mediaType = getMediaType((ObjectNode) mediaTypeNode,
+							String.format("%s.%s.%s", location, "mediaTypes", name), result);
+					if (mediaType != null) {
+						mediaTypes.put(name, mediaType);
+					}
+				}
+				components.setMediaTypes(mediaTypes);
+			}
+		}
 		components.setExtensions(new LinkedHashMap<>());
 
 		Map<String, Object> extensions = getExtensions(obj);
@@ -594,7 +680,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(obj);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("COMPONENTS_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
@@ -645,6 +731,21 @@ public class OpenAPIDeserializer {
 			tag.setDescription(value);
 		}
 
+		if (result.isOpenapi32()) {
+			value = getString("summary", obj, false, location, result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				tag.setSummary(value);
+			}
+			value = getString("parent", obj, false, location, result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				tag.setParent(value);
+			}
+			value = getString("kind", obj, false, location, result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				tag.setKind(value);
+			}
+		}
+
 		ObjectNode docs = getObject("externalDocs", obj, false, location, result);
 		ExternalDocumentation externalDocs = getExternalDocs(docs, String.format("%s.%s", location,
 				"externalDocs"), result);
@@ -658,7 +759,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(obj);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("TAG_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
@@ -745,13 +846,20 @@ public class OpenAPIDeserializer {
 			server.setDescription(value);
 		}
 
+		if (result.isOpenapi32()) {
+			value = getString("name", obj, false, location, result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				server.setName(value);
+			}
+		}
+
 		Map<String, Object> extensions = getExtensions(obj);
 		if (extensions != null && extensions.size() > 0) {
 			server.setExtensions(extensions);
 		}
 
 		Set<String> keys = getKeys(obj);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("SERVER_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
@@ -830,7 +938,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(obj);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("SERVER_VARIABLE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
@@ -1098,6 +1206,34 @@ public class OpenAPIDeserializer {
 				pathItem.setTrace(operation);
 			}
 		}
+		if (result.isOpenapi32()) {
+			node = getObject("query", obj, false, location, result);
+			if (node != null) {
+				Operation operation = getOperation(node, location + "(query)", result);
+				if (operation != null) {
+					pathItem.setQuery(operation);
+				}
+			}
+			node = getObject("additionalOperations", obj, false, location, result);
+			if (node != null) {
+				for (String method : getKeys(node)) {
+					if (FIXED_PATH_METHODS.contains(method.toLowerCase(Locale.ROOT))) {
+						result.warning(location, "additionalOperations key '" + method +
+								"' duplicates a fixed Path Item method name");
+					}
+					JsonNode operationNode = node.get(method);
+					if (operationNode == null || !operationNode.isObject()) {
+						result.invalidType(location, "additionalOperations." + method, "object", operationNode);
+						continue;
+					}
+					Operation operation = getOperation((ObjectNode) operationNode,
+							location + "(additionalOperations." + method + ")", result);
+					if (operation != null) {
+						pathItem.addAdditionalOperation(method, operation);
+					}
+				}
+			}
+		}
 
 		Map<String, Object> extensions = getExtensions(obj);
 		if (extensions != null && extensions.size() > 0) {
@@ -1105,12 +1241,43 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(obj);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("PATHITEM_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
 			}
 			validateReservedKeywords(specKeys, key, location, result);
+		}
+
+		// OpenAPI 3.2: an in: querystring parameter must not coexist with in: query
+		// parameters (or a second querystring parameter) in the effective operation,
+		// which includes path-item level parameters
+		if (result.isOpenapi32() && pathItem.getParameters() != null) {
+			long pathQuerystring = pathItem.getParameters().stream()
+					.map(this::getParameterDefinition)
+					.filter(p -> QUERYSTRING_PARAMETER.equals(p.getIn())).count();
+			boolean pathQuery = pathItem.getParameters().stream()
+					.map(this::getParameterDefinition)
+					.anyMatch(p -> QUERY_PARAMETER.equals(p.getIn()));
+			for (Operation op : pathItem.readOperations()) {
+				if (op == null || op.getParameters() == null) {
+					continue;
+				}
+				long opQuerystring = op.getParameters().stream()
+						.map(this::getParameterDefinition)
+						.filter(p -> QUERYSTRING_PARAMETER.equals(p.getIn())).count();
+				boolean opQuery = op.getParameters().stream()
+						.map(this::getParameterDefinition)
+						.anyMatch(p -> QUERY_PARAMETER.equals(p.getIn()));
+				if (pathQuerystring > 0 && opQuerystring > 0) {
+					result.warning(location,
+							"There can be only one in: querystring parameter per operation");
+				}
+				if ((pathQuerystring > 0 && opQuery) || (opQuerystring > 0 && pathQuery)) {
+					result.warning(location,
+							"in: querystring parameter cannot be combined with in: query parameters");
+				}
+			}
 		}
 
 		return pathItem;
@@ -1139,7 +1306,7 @@ public class OpenAPIDeserializer {
 			}
 
 			Set<String> keys = getKeys(node);
-			Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+			Map<String, Set<String>> specKeys = getSpecKeys(result);
 			for (String key : keys) {
 				if (!specKeys.get("EXTERNAL_DOCS_KEYS").contains(key) && !key.startsWith("x-")) {
 					result.extra(location, key, node.get(key));
@@ -1305,7 +1472,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("INFO_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -1359,7 +1526,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("LICENSE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -1402,7 +1569,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("CONTACT_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -1436,6 +1603,24 @@ public class OpenAPIDeserializer {
 			return null;
 		}
 		MediaType mediaType = new MediaType();
+
+		if (result.isOpenapi32()) {
+			JsonNode ref = contentNode.get("$ref");
+			if (ref != null) {
+				if (ref.getNodeType().equals(JsonNodeType.STRING)) {
+					String mungedRef = mungedRef(ref.textValue());
+					mediaType.set$ref(mungedRef != null ? mungedRef : ref.textValue());
+					if (ref.textValue().startsWith("#/components")
+							&& !ref.textValue().startsWith("#/components/mediaTypes")) {
+						result.warning(location, "$ref target " + ref.textValue()
+								+ " is not of expected type MediaType");
+					}
+					return mediaType;
+				}
+				result.invalidType(location, "$ref", "string", contentNode);
+				return null;
+			}
+		}
 
 		ObjectNode schemaObject = getObject("schema", contentNode, false, location, result);
 		if (schemaObject != null) {
@@ -1484,9 +1669,38 @@ public class OpenAPIDeserializer {
 			}
 		}
 
+		if (result.isOpenapi32()) {
+			JsonNode itemSchemaNode = getObjectOrBoolean("itemSchema", contentNode, false, location, result);
+			if (itemSchemaNode != null) {
+				mediaType.setItemSchema(getSchema(itemSchemaNode,
+						String.format("%s.%s", location, "itemSchema"), result));
+			}
+			ArrayNode prefixEncodingArray = getArray("prefixEncoding", contentNode, false, location, result);
+			if (prefixEncodingArray != null) {
+				List<Encoding> prefixEncoding = new ArrayList<>();
+				for (JsonNode item : prefixEncodingArray) {
+					if (item.isObject()) {
+						Encoding encoding = getEncoding((ObjectNode) item,
+								String.format("%s.%s", location, "prefixEncoding"), result);
+						if (encoding != null) {
+							prefixEncoding.add(encoding);
+						}
+					} else {
+						result.invalidType(location, "prefixEncoding", "object", item);
+					}
+				}
+				mediaType.setPrefixEncoding(prefixEncoding);
+			}
+			ObjectNode itemEncodingObject = getObject("itemEncoding", contentNode, false, location, result);
+			if (itemEncodingObject != null) {
+				mediaType.setItemEncoding(getEncoding(itemEncodingObject,
+						String.format("%s.%s", location, "itemEncoding"), result));
+			}
+		}
+
 
 		Set<String> keys = getKeys(contentNode);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("MEDIATYPE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, contentNode.get(key));
@@ -1558,13 +1772,42 @@ public class OpenAPIDeserializer {
 			encoding.setHeaders(getHeaders(headersObject, location, result, false));
 		}
 
+		if (result.isOpenapi32()) {
+			ObjectNode nestedEncoding = getObject("encoding", node, false, location, result);
+			if (nestedEncoding != null) {
+				encoding.setEncoding(getEncodingMap(nestedEncoding,
+						String.format("%s.%s", location, "encoding"), result));
+			}
+			ArrayNode prefixEncodingArray = getArray("prefixEncoding", node, false, location, result);
+			if (prefixEncodingArray != null) {
+				List<Encoding> prefixEncoding = new ArrayList<>();
+				for (JsonNode item : prefixEncodingArray) {
+					if (item.isObject()) {
+						Encoding nested = getEncoding((ObjectNode) item,
+								String.format("%s.%s", location, "prefixEncoding"), result);
+						if (nested != null) {
+							prefixEncoding.add(nested);
+						}
+					} else {
+						result.invalidType(location, "prefixEncoding", "object", item);
+					}
+				}
+				encoding.setPrefixEncoding(prefixEncoding);
+			}
+			ObjectNode itemEncodingObject = getObject("itemEncoding", node, false, location, result);
+			if (itemEncodingObject != null) {
+				encoding.setItemEncoding(getEncoding(itemEncodingObject,
+						String.format("%s.%s", location, "itemEncoding"), result));
+			}
+		}
+
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
 			encoding.setExtensions(extensions);
 		}
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("ENCODING_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -1681,7 +1924,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(linkNode);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("LINK_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, linkNode.get(key));
@@ -1807,6 +2050,17 @@ public class OpenAPIDeserializer {
 			xml.setWrapped(wrapped);
 		}
 
+		if (result.isOpenapi32()) {
+			value = getString("nodeType", node, false, String.format("%s.%s", location, "nodeType"), result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				xml.setNodeType(value);
+			}
+			if (value != null && (attribute != null || wrapped != null)) {
+				result.warning(location,
+						"nodeType cannot be used together with attribute/wrapped");
+			}
+		}
+
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
 			xml.setExtensions(extensions);
@@ -1814,7 +2068,7 @@ public class OpenAPIDeserializer {
 
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("XML_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -1971,6 +2225,21 @@ public class OpenAPIDeserializer {
 				}
 			}
 		});
+		if (result.isOpenapi32()) {
+			long queryStringParams = parameters.stream()
+					.map(this::getParameterDefinition)
+					.filter(p -> QUERYSTRING_PARAMETER.equals(p.getIn()))
+					.count();
+			if (queryStringParams > 1) {
+				result.warning(location, "There can be only one in: querystring parameter per location");
+			}
+			if (queryStringParams > 0 && parameters.stream()
+					.map(this::getParameterDefinition)
+					.anyMatch(p -> QUERY_PARAMETER.equals(p.getIn()))) {
+				result.warning(location,
+						"in: querystring parameter cannot be combined with in: query parameters");
+			}
+		}
 		return parameters;
 	}
 
@@ -2042,10 +2311,14 @@ public class OpenAPIDeserializer {
 			parameter = new PathParameter();
 		} else if (COOKIE_PARAMETER.equals(value)) {
 			parameter = new CookieParameter();
+		} else if (QUERYSTRING_PARAMETER.equals(value) && result.isOpenapi32()) {
+			parameter = new QueryStringParameter();
 		}
 
 		if (parameter == null) {
-			result.invalidType(location, "in", "[query|header|path|cookie]", obj);
+			result.invalidType(location, "in", result.isOpenapi32()
+					? "[query|header|path|cookie|querystring]"
+					: "[query|header|path|cookie]", obj);
 			return null;
 		}
 
@@ -2132,6 +2405,27 @@ public class OpenAPIDeserializer {
             result.missing(location,"content");
         }
 
+        if (QUERYSTRING_PARAMETER.equals(parameter.getIn())) {
+            // OpenAPI 3.2: a querystring parameter describes the whole query
+            // string through content; schema/style/explode/allowReserved/
+            // allowEmptyValue/example(s) are not applicable
+            if (parameter.getSchema() != null) {
+                result.warning(location, "in: querystring parameter must not define schema");
+            }
+            // when schema is absent the generic branch above already reports
+            // missing content; report it here only when it was suppressed
+            if (parameter.getContent() == null && parameter.getSchema() != null) {
+                result.missing(location, "content");
+            }
+            for (String forbidden : Arrays.asList("style", "explode", "allowReserved",
+                    "allowEmptyValue")) {
+                if (obj.get(forbidden) != null) {
+                    result.warning(location,
+                            "in: querystring parameter must not define " + forbidden);
+                }
+            }
+        }
+
         value = getString("style", obj, false, location, result);
         if (parameter.getContent() == null) {
             setStyle(value, parameter, location, obj, result);
@@ -2139,7 +2433,8 @@ public class OpenAPIDeserializer {
             Boolean explode = getBoolean("explode", obj, false, location, result);
             if (explode != null) {
                 parameter.setExplode(explode);
-            } else if (StyleEnum.FORM.equals(parameter.getStyle()) && result.isExplicitStyleAndExplode()) {
+            } else if ((StyleEnum.FORM.equals(parameter.getStyle())
+                    || StyleEnum.COOKIE.equals(parameter.getStyle())) && result.isExplicitStyleAndExplode()) {
                 parameter.setExplode(Boolean.TRUE);
             } else if (result.isExplicitStyleAndExplode()){
                 parameter.setExplode(Boolean.FALSE);
@@ -2152,7 +2447,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(obj);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("PARAMETER_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
@@ -2295,7 +2590,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> oAuthFlowKeys = getKeys(headerNode);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : oAuthFlowKeys) {
 			if (!specKeys.get("HEADER_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, headerNode.get(key));
@@ -2471,13 +2766,24 @@ public class OpenAPIDeserializer {
 			securityScheme.setOpenIdConnectUrl(value);
 		}
 
+		if (result.isOpenapi32()) {
+			Boolean deprecatedFlag = getBoolean("deprecated", node, false, location, result);
+			if (deprecatedFlag != null) {
+				securityScheme.setDeprecated(deprecatedFlag);
+			}
+			value = getString("oauth2MetadataUrl", node, false, location, result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				securityScheme.setOauth2MetadataUrl(value);
+			}
+		}
+
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
 			securityScheme.setExtensions(extensions);
 		}
 
 		Set<String> securitySchemeKeys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : securitySchemeKeys) {
 			if (!specKeys.get("SECURITY_SCHEME_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -2514,13 +2820,20 @@ public class OpenAPIDeserializer {
 			oAuthFlows.setAuthorizationCode(getOAuthFlow("authorizationCode", objectNode, location, result));
 		}
 
+		if (result.isOpenapi32()) {
+			objectNode = getObject("deviceAuthorization", node, false, location, result);
+			if (objectNode != null) {
+				oAuthFlows.setDeviceAuthorization(getOAuthFlow("deviceAuthorization", objectNode, location, result));
+			}
+		}
+
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
 			oAuthFlows.setExtensions(extensions);
 		}
 
 		Set<String> oAuthFlowKeys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : oAuthFlowKeys) {
 			if (!specKeys.get("OAUTHFLOWS_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -2538,8 +2851,9 @@ public class OpenAPIDeserializer {
 
 		OAuthFlow oAuthFlow = new OAuthFlow();
 
-		boolean authorizationUrlRequired, tokenUrlRequired, refreshUrlRequired, scopesRequired;
-		authorizationUrlRequired = tokenUrlRequired = refreshUrlRequired = false;
+		boolean authorizationUrlRequired, tokenUrlRequired, refreshUrlRequired, scopesRequired,
+				deviceAuthorizationUrlRequired;
+		authorizationUrlRequired = tokenUrlRequired = refreshUrlRequired = deviceAuthorizationUrlRequired = false;
 		scopesRequired = true;
 		switch (oAuthFlowType) {
 			case "implicit":
@@ -2554,9 +2868,21 @@ public class OpenAPIDeserializer {
 			case "authorizationCode":
 				authorizationUrlRequired = tokenUrlRequired = true;
 				break;
+			case "deviceAuthorization":
+				// OpenAPI 3.2
+				deviceAuthorizationUrlRequired = tokenUrlRequired = true;
+				break;
 		}
 
-		String value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
+		String value = null;
+		if (result.isOpenapi32()) {
+			value = getString("deviceAuthorizationUrl", node, deviceAuthorizationUrlRequired, location, result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				oAuthFlow.setDeviceAuthorizationUrl(value);
+			}
+		}
+
+		value = getString("authorizationUrl", node, authorizationUrlRequired, location, result);
 		if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
 			oAuthFlow.setAuthorizationUrl(value);
 		}
@@ -2589,7 +2915,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> oAuthFlowKeys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : oAuthFlowKeys) {
 			if (!specKeys.get("OAUTHFLOW_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -2646,6 +2972,13 @@ public class OpenAPIDeserializer {
 				mapping.put(key, mappingNode.get(key).asText());
 			}
 			discriminator.setMapping(mapping);
+		}
+
+		if (result.isOpenapi32()) {
+			String defaultMapping = getString("defaultMapping", node, false, location, result);
+			if (StringUtils.isNotBlank(defaultMapping)) {
+				discriminator.setDefaultMapping(defaultMapping);
+			}
 		}
 
 		if(result.isOpenapi31()) {
@@ -3375,13 +3708,27 @@ public class OpenAPIDeserializer {
 			result.warning(location, " value and externalValue are both present");
 		}
 
+		if (result.isOpenapi32()) {
+			Object dataValue = getAnyType("dataValue", node, location, result);
+			if (dataValue != null) {
+				example.setDataValue(dataValue instanceof NullNode ? null : dataValue);
+				example.setDataValueSetFlag(true);
+			}
+
+			String serializedValue = getString("serializedValue", node, false, location, result);
+			if ((result.isAllowEmptyStrings() && serializedValue != null)
+					|| (!result.isAllowEmptyStrings() && !StringUtils.isBlank(serializedValue))) {
+				example.setSerializedValue(serializedValue);
+			}
+		}
+
 		Map<String, Object> extensions = getExtensions(node);
 		if (extensions != null && extensions.size() > 0) {
 			example.setExtensions(extensions);
 		}
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("EXAMPLE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -3417,6 +3764,13 @@ public class OpenAPIDeserializer {
 				parameter.setStyle(StyleEnum.SIMPLE);
 			} else if (value.equals(StyleEnum.SPACEDELIMITED.toString())) {
 				parameter.setStyle(StyleEnum.SPACEDELIMITED);
+			} else if (value.equals(StyleEnum.COOKIE.toString()) && result.isOpenapi32()) {
+				// OpenAPI 3.2: 'cookie' style is defined for in: cookie parameters
+				parameter.setStyle(StyleEnum.COOKIE);
+				if (!COOKIE_PARAMETER.equals(parameter.getIn())) {
+					result.warning(location,
+							"style: cookie is only defined for in: cookie parameters");
+				}
 			} else {
 				result.invalidType(location, "style", "StyleEnum", obj);
 			}
@@ -3496,6 +3850,13 @@ public class OpenAPIDeserializer {
 			apiResponse.description(value);
 		}
 
+		if (result.isOpenapi32()) {
+			value = getString("summary", node, false, location, result);
+			if ((result.isAllowEmptyStrings() && value != null) || (!result.isAllowEmptyStrings() && !StringUtils.isBlank(value))) {
+				apiResponse.setSummary(value);
+			}
+		}
+
 
 		ObjectNode headerObject = getObject("headers", node, false, location, result);
 		if (headerObject != null) {
@@ -3524,7 +3885,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("RESPONSE_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -3632,7 +3993,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(obj);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("OPERATION_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, obj.get(key));
@@ -3771,7 +4132,7 @@ public class OpenAPIDeserializer {
 		}
 
 		Set<String> keys = getKeys(node);
-		Map<String, Set<String>> specKeys = KEYS.get(result.isOpenapi31() ? "openapi31" : "openapi30");
+		Map<String, Set<String>> specKeys = getSpecKeys(result);
 		for (String key : keys) {
 			if (!specKeys.get("REQUEST_BODY_KEYS").contains(key) && !key.startsWith("x-")) {
 				result.extra(location, key, node.get(key));
@@ -4300,6 +4661,7 @@ public class OpenAPIDeserializer {
 
         private boolean inferSchemaType = true;
 		private boolean openapi31 = false;
+		private boolean openapi32 = false;
 		private boolean oaiAuthor = false;
 
         private boolean explicitStyleAndExplode = true;
@@ -4384,6 +4746,18 @@ public class OpenAPIDeserializer {
 		}
 		public boolean isOpenapi31() {
 			return this.openapi31;
+		}
+
+		public void setOpenapi32(boolean openapi32) {
+			this.openapi32 = openapi32;
+		}
+
+		public ParseResult openapi32(boolean openapi32) {
+			this.openapi32 = openapi32;
+			return this;
+		}
+		public boolean isOpenapi32() {
+			return this.openapi32;
 		}
 
 		public boolean isOaiAuthor() {

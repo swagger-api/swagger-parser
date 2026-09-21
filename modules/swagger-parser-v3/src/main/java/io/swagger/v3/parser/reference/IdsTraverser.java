@@ -2,6 +2,7 @@ package io.swagger.v3.parser.reference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Json32;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -520,7 +521,8 @@ public class IdsTraverser implements Traverser {
                     resolvedURI = ReferenceUtils.resolve(urlWithoutHash, resolvedURI);
                     resolvedURI = ReferenceUtils.toBaseURI(resolvedURI);
                 }
-                context.getIdsCache().put(resolvedURI, Json31.pretty(schema));
+                context.getIdsCache().put(resolvedURI,
+                        isOpenapi32() ? Json32.pretty(schema) : Json31.pretty(schema));
             } catch (Exception e) {
                 //
             }
@@ -639,9 +641,18 @@ public class IdsTraverser implements Traverser {
 
     }
 
+    private boolean isOpenapi32() {
+        return context != null && context.getSwaggerParseResult() != null
+                && context.getSwaggerParseResult().isOpenapi32();
+    }
+
+    private com.fasterxml.jackson.databind.ObjectMapper modelMapper() {
+        return isOpenapi32() ? Json32.mapper() : Json31.mapper();
+    }
+
     public <T> T deepcopy(T entity, Class<T> clazz) {
         try {
-            return (T)Json31.mapper().readValue(Json31.mapper().writeValueAsString(entity), clazz);
+            return (T)modelMapper().readValue(modelMapper().writeValueAsString(entity), clazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

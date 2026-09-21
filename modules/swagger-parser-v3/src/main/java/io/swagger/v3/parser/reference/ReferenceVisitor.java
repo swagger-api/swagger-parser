@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.links.Link;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -203,6 +204,15 @@ public class ReferenceVisitor extends AbstractVisitor {
         }
 
         return resolveRef(header, header.get$ref(), Header.class, openAPITraverser::traverseHeader);
+    }
+
+    @Override
+    public MediaType visitMediaType(MediaType mediaType){
+        if (StringUtils.isBlank(mediaType.get$ref())) {
+            return null;
+        }
+
+        return resolveRef(mediaType, mediaType.get$ref(), MediaType.class, openAPITraverser::traverseMediaType);
     }
 
     @Override

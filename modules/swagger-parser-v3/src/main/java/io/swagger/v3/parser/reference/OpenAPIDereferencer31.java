@@ -2,6 +2,7 @@ package io.swagger.v3.parser.reference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Json32;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +51,8 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
                     .referenceSet(refSet)
                     .uri(context.getCurrentUri())
                     .messages(msgs)
-                    .jsonNode(Json31.mapper().convertValue(openAPI, JsonNode.class))
+                    .jsonNode((result != null && result.isOpenapi32() ? Json32.mapper() : Json31.mapper())
+                            .convertValue(openAPI, JsonNode.class))
                     .auths(context.getAuths());
 
             refSet.put("local", localReference);
