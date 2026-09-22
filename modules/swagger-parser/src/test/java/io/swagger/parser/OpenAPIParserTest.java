@@ -795,7 +795,8 @@ public class OpenAPIParserTest {
                 "                  type: string\n" +
                 "              additionalProperties: false\n" +
                 "  x-original-swagger-version: \"2.0\"\n" +
-                "openapi31: false\n");
+                "openapi31: false\n" +
+                "openapi32: false\n");
     }
 
 }

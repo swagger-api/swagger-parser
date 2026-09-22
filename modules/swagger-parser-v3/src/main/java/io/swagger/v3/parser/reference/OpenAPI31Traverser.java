@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Json32;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -70,7 +71,8 @@ public class OpenAPI31Traverser implements Traverser {
     public <T> T deserializeFragment(JsonNode node, Class<T> expectedType, String uri, String fragment, Set<String> validationMessages) {
 
         String sanitizedFragment = fragment == null ? "" : fragment;
-        OpenAPIDeserializer.ParseResult parseResult = new OpenAPIDeserializer.ParseResult().openapi31(true);
+        OpenAPIDeserializer.ParseResult parseResult = new OpenAPIDeserializer.ParseResult()
+                .openapi31(true).openapi32(isOpenapi32());
         T result = null;
         if (expectedType.equals(Schema.class)) {
             result = (T) deserializer.getSchema((ObjectNode) node, sanitizedFragment.replace("/", "."), parseResult);
@@ -92,6 +94,8 @@ public class OpenAPI31Traverser implements Traverser {
             result = (T) deserializer.getSecurityScheme((ObjectNode) node, sanitizedFragment.replace("/", "."), parseResult);
         }else if (expectedType.equals(PathItem.class)) {
             result = (T) deserializer.getPathItem((ObjectNode) node, sanitizedFragment.replace("/", "."), parseResult);
+        }else if (expectedType.equals(MediaType.class)) {
+            result = (T) deserializer.getMediaType((ObjectNode) node, sanitizedFragment.replace("/", "."), parseResult);
         }
         parseResult.getMessages().forEach((m) -> {
             validationMessages.add(m + " (" + uri + ")");
@@ -170,6 +174,7 @@ public class OpenAPI31Traverser implements Traverser {
         traverseMap(resolved.getHeaders(), visitor, this::traverseHeader);
         traverseMap(resolved.getLinks(), visitor, this::traverseLink);
         traverseMap(resolved.getResponses(), visitor, this::traverseResponse);
+        traverseMap(resolved.getMediaTypes(), visitor, this::traverseMediaType);
 
         traverseMap(resolved.getExamples(), visitor, this::traverseExample);
         visitedMap.put(components, resolved);
@@ -430,6 +435,12 @@ public class OpenAPI31Traverser implements Traverser {
         if (resolvedOperation != null) {
             resolved.setTrace(resolvedOperation);
         }
+        Operation queryOp = resolved.getQuery();
+        resolvedOperation = traverseOperation(queryOp, visitor);
+        if (resolvedOperation != null) {
+            resolved.setQuery(resolvedOperation);
+        }
+        traverseMap(resolved.getAdditionalOperations(), visitor, this::traverseOperation);
 
         if (resolved.getParameters() != null) {
             for (int i = 0; i < resolved.getParameters().size(); i++) {
@@ -461,6 +472,15 @@ public class OpenAPI31Traverser implements Traverser {
         }
         if (pathItem.getSummary() != null) {
             resolved.summary(pathItem.getSummary());
+        }
+        if (pathItem.getQuery() != null) {
+            resolved.setQuery(pathItem.getQuery());
+        }
+        if (pathItem.getAdditionalOperations() != null) {
+            if (resolved.getAdditionalOperations() == null) {
+                resolved.setAdditionalOperations(new LinkedHashMap<>());
+            }
+            resolved.getAdditionalOperations().putAll(pathItem.getAdditionalOperations());
         }
         // TODO additional undefined merge if other props are defined
 
@@ -595,8 +615,12 @@ public class OpenAPI31Traverser implements Traverser {
         visiting.add(mediaType);
         MediaType resolved = visitor.visitMediaType(mediaType);
 
+        boolean resolvedNotNull = false;
+
         if (resolved == null) {
             resolved = mediaType;
+        } else {
+            resolvedNotNull = true;
         }
 
         if (resolved.getSchema() != null) {
@@ -605,9 +629,33 @@ public class OpenAPI31Traverser implements Traverser {
                 resolved.setSchema(schema);
             }
         }
+        if (resolved.getItemSchema() != null) {
+            Schema itemSchema = traverseSchema(resolved.getItemSchema(), visitor, new ArrayList<>());
+            if (itemSchema != null) {
+                resolved.setItemSchema(itemSchema);
+            }
+        }
         traverseMap(resolved.getEncoding(), visitor, this::traverseEncoding);
+        if (resolved.getPrefixEncoding() != null) {
+            for (int i = 0; i < resolved.getPrefixEncoding().size(); i++) {
+                Encoding prefixEncoding = traverseEncoding(resolved.getPrefixEncoding().get(i), visitor);
+                if (prefixEncoding != null) {
+                    resolved.getPrefixEncoding().set(i, prefixEncoding);
+                }
+            }
+        }
+        traverseEncoding(resolved.getItemEncoding(), visitor);
         traverseMap(resolved.getExamples(), visitor, this::traverseExample);
-        visitedMap.put(mediaType, resolved);
+
+        // only if this is root and local ref
+        if (shouldHandleRootLocalRefs(resolvedNotNull, mediaType.get$ref(), visitor)) {
+            ensureComponents(context.getOpenApi());
+            if (context.getOpenApi().getComponents().getMediaTypes() == null) context.getOpenApi().getComponents().mediaTypes(new LinkedHashMap<>());
+            visitedMap.put(mediaType, deepcopy(mediaType, MediaType.class));
+            visiting.remove(mediaType);
+            return handleRootLocalRefs(mediaType.get$ref(), resolved, context.getOpenApi().getComponents().getMediaTypes());
+        }
+        visitedMap.put(mediaType, deepcopy(resolved, MediaType.class));
         visiting.remove(mediaType);
         return resolved;
     }
@@ -630,6 +678,16 @@ public class OpenAPI31Traverser implements Traverser {
             resolved = encoding;
         }
         traverseMap(resolved.getHeaders(), visitor, this::traverseHeader);
+        traverseMap(resolved.getEncoding(), visitor, this::traverseEncoding);
+        if (resolved.getPrefixEncoding() != null) {
+            for (int i = 0; i < resolved.getPrefixEncoding().size(); i++) {
+                Encoding prefixEncoding = traverseEncoding(resolved.getPrefixEncoding().get(i), visitor);
+                if (prefixEncoding != null) {
+                    resolved.getPrefixEncoding().set(i, prefixEncoding);
+                }
+            }
+        }
+        traverseEncoding(resolved.getItemEncoding(), visitor);
         visitedMap.put(encoding, resolved);
         visiting.remove(encoding);
         return resolved;
@@ -793,7 +851,8 @@ public class OpenAPI31Traverser implements Traverser {
                     resolvedURI = ReferenceUtils.resolve(urlWithoutHash, resolvedURI);
                     resolvedURI = ReferenceUtils.toBaseURI(resolvedURI);
                 }
-                context.getIdsCache().put(resolvedURI, Json31.pretty(schema));
+                context.getIdsCache().put(resolvedURI,
+                        isOpenapi32() ? Json32.pretty(schema) : Json31.pretty(schema));
                 if (!visitor.reference.getReferenceSet().containsKey(resolvedURI)) {
                     visitor.reference.getReferenceSet().put(resolvedURI, visitor.reference);
                 }
@@ -937,9 +996,18 @@ public class OpenAPI31Traverser implements Traverser {
 
     }
 
+    private boolean isOpenapi32() {
+        return context != null && context.getSwaggerParseResult() != null
+                && context.getSwaggerParseResult().isOpenapi32();
+    }
+
+    private com.fasterxml.jackson.databind.ObjectMapper modelMapper() {
+        return isOpenapi32() ? Json32.mapper() : Json31.mapper();
+    }
+
     public <T> T deepcopy(T entity, Class<T> clazz) {
         try {
-            return (T)Json31.mapper().readValue(Json31.mapper().writeValueAsString(entity), clazz);
+            return (T)modelMapper().readValue(modelMapper().writeValueAsString(entity), clazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

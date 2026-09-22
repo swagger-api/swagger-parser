@@ -2,6 +2,7 @@ package io.swagger.v3.parser.reference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Json32;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -110,6 +111,7 @@ public class IdsTraverser implements Traverser {
         traverseMap(resolved.getHeaders(), visitor, this::traverseHeader);
         traverseMap(resolved.getLinks(), visitor, this::traverseLink);
         traverseMap(resolved.getResponses(), visitor, this::traverseResponse);
+        traverseMap(resolved.getMediaTypes(), visitor, this::traverseMediaType);
 
         traverseMap(resolved.getExamples(), visitor, this::traverseExample);
         visitedMap.put(components, resolved);
@@ -308,6 +310,12 @@ public class IdsTraverser implements Traverser {
         if (resolvedOperation != null) {
             resolved.setTrace(resolvedOperation);
         }
+        Operation queryOp = resolved.getQuery();
+        resolvedOperation = traverseOperation(queryOp, visitor);
+        if (resolvedOperation != null) {
+            resolved.setQuery(resolvedOperation);
+        }
+        traverseMap(resolved.getAdditionalOperations(), visitor, this::traverseOperation);
 
         if (resolved.getParameters() != null) {
             for (int i = 0; i < resolved.getParameters().size(); i++) {
@@ -409,7 +417,15 @@ public class IdsTraverser implements Traverser {
         if (resolved.getSchema() != null) {
             traverseSchema(resolved.getSchema(), visitor, new ArrayList<>());
         }
+        if (resolved.getItemSchema() != null) {
+            traverseSchema(resolved.getItemSchema(), visitor, new ArrayList<>());
+        }
         traverseMap(resolved.getEncoding(), visitor, this::traverseEncoding);
+        traverseEncodingList(resolved.getPrefixEncoding(), visitor);
+        Encoding itemEncoding = traverseEncoding(resolved.getItemEncoding(), visitor);
+        if (itemEncoding != null) {
+            resolved.setItemEncoding(itemEncoding);
+        }
         traverseMap(resolved.getExamples(), visitor, this::traverseExample);
         visitedMap.put(mediaType, resolved);
         visiting.remove(mediaType);
@@ -431,10 +447,28 @@ public class IdsTraverser implements Traverser {
         Encoding resolved = encoding;
 
         traverseMap(resolved.getHeaders(), visitor, this::traverseHeader);
+        traverseMap(resolved.getEncoding(), visitor, this::traverseEncoding);
+        traverseEncodingList(resolved.getPrefixEncoding(), visitor);
+        Encoding itemEncoding = traverseEncoding(resolved.getItemEncoding(), visitor);
+        if (itemEncoding != null) {
+            resolved.setItemEncoding(itemEncoding);
+        }
         visitedMap.put(encoding, resolved);
         visiting.remove(encoding);
         return resolved;
 
+    }
+
+    private void traverseEncodingList(List<Encoding> encodings, Visitor visitor) {
+        if (encodings == null) {
+            return;
+        }
+        for (int i = 0; i < encodings.size(); i++) {
+            Encoding resolved = traverseEncoding(encodings.get(i), visitor);
+            if (resolved != null) {
+                encodings.set(i, resolved);
+            }
+        }
     }
 
     public Header traverseHeader(Header header, Visitor visitor) {
@@ -520,7 +554,8 @@ public class IdsTraverser implements Traverser {
                     resolvedURI = ReferenceUtils.resolve(urlWithoutHash, resolvedURI);
                     resolvedURI = ReferenceUtils.toBaseURI(resolvedURI);
                 }
-                context.getIdsCache().put(resolvedURI, Json31.pretty(schema));
+                context.getIdsCache().put(resolvedURI,
+                        isOpenapi32() ? Json32.pretty(schema) : Json31.pretty(schema));
             } catch (Exception e) {
                 //
             }
@@ -639,9 +674,18 @@ public class IdsTraverser implements Traverser {
 
     }
 
+    private boolean isOpenapi32() {
+        return context != null && context.getSwaggerParseResult() != null
+                && context.getSwaggerParseResult().isOpenapi32();
+    }
+
+    private com.fasterxml.jackson.databind.ObjectMapper modelMapper() {
+        return isOpenapi32() ? Json32.mapper() : Json31.mapper();
+    }
+
     public <T> T deepcopy(T entity, Class<T> clazz) {
         try {
-            return (T)Json31.mapper().readValue(Json31.mapper().writeValueAsString(entity), clazz);
+            return (T)modelMapper().readValue(modelMapper().writeValueAsString(entity), clazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

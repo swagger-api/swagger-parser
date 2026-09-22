@@ -11,6 +11,7 @@ public class SwaggerParseResult {
     private List<String> messages = null;
     private OpenAPI openAPI;
     private boolean openapi31;
+    private boolean openapi32;
 
     public SwaggerParseResult messages(List<String> messages) {
         this.messages = messages;
@@ -68,16 +69,29 @@ public class SwaggerParseResult {
         return this.openapi31;
     }
 
+    public void setOpenapi32(boolean openapi32) {
+        this.openapi32 = openapi32;
+    }
+
+    public SwaggerParseResult openapi32(boolean openapi32) {
+        this.openapi32 = openapi32;
+        return this;
+    }
+
+    public boolean isOpenapi32() {
+        return this.openapi32;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SwaggerParseResult result = (SwaggerParseResult) o;
-        return openapi31 == result.openapi31 && Objects.equals(messages, result.messages) && Objects.equals(openAPI, result.openAPI);
+        return openapi31 == result.openapi31 && openapi32 == result.openapi32 && Objects.equals(messages, result.messages) && Objects.equals(openAPI, result.openAPI);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messages, openAPI, openapi31);
+        return Objects.hash(messages, openAPI, openapi31, openapi32);
     }
 }
