@@ -597,6 +597,10 @@ public class OpenAPIDeserializer {
 			return null;
 		}
 		Components components = new Components();
+		// expose the in-progress components so that nested parsing (e.g.
+		// components.pathItems operations referencing components.parameters)
+		// can resolve local refs while this object is still being built
+		this.components = components;
 
 		ObjectNode node = getObject("schemas", obj, false, location, result);
 		if (node != null) {
@@ -608,13 +612,6 @@ public class OpenAPIDeserializer {
 			components.setResponses(getResponses(node, String.format("%s.%s", location, "responses"), result,
 					true));
 		}
-		if(result.isOpenapi31()){
-			node = getObject("pathItems", obj, false, location, result);
-			if (node != null) {
-				components.setPathItems(getPathItems(node, String.format("%s.%s", location, "pathItems"), result, true));
-			}
-		}
-
 		node = getObject("parameters", obj, false, location, result);
 		if (node != null) {
 			components.setParameters(getParameters(node, String.format("%s.%s", location, "parameters"), result,
@@ -670,6 +667,14 @@ public class OpenAPIDeserializer {
 					}
 				}
 				components.setMediaTypes(mediaTypes);
+			}
+		}
+		// pathItems are parsed last so that operations inside components.pathItems
+		// can resolve refs to parameters/schemas/etc defined in this components
+		if(result.isOpenapi31()){
+			node = getObject("pathItems", obj, false, location, result);
+			if (node != null) {
+				components.setPathItems(getPathItems(node, String.format("%s.%s", location, "pathItems"), result, true));
 			}
 		}
 		components.setExtensions(new LinkedHashMap<>());
@@ -1069,24 +1074,10 @@ public class OpenAPIDeserializer {
 		return true;
 	}
 
-	private void addToOperationsList(List<Operation> operationsList, Operation operation) {
-		if (operation == null) {
-			return;
-		}
-		operationsList.add(operation);
-	}
-
 	public List<Operation> getAllOperationsInAPath(PathItem pathObj) {
-		List<Operation> operations = new ArrayList<>();
-		addToOperationsList(operations, pathObj.getGet());
-		addToOperationsList(operations, pathObj.getPut());
-		addToOperationsList(operations, pathObj.getPost());
-		addToOperationsList(operations, pathObj.getPatch());
-		addToOperationsList(operations, pathObj.getDelete());
-		addToOperationsList(operations, pathObj.getTrace());
-		addToOperationsList(operations, pathObj.getOptions());
-		addToOperationsList(operations, pathObj.getHead());
-		return operations;
+		// readOperations() covers the fixed methods plus query and
+		// additionalOperations entries
+		return pathObj.readOperations();
 	}
 
 	public PathItem getPathItem(ObjectNode obj, String location, ParseResult result) {
@@ -1251,29 +1242,31 @@ public class OpenAPIDeserializer {
 
 		// OpenAPI 3.2: an in: querystring parameter must not coexist with in: query
 		// parameters (or a second querystring parameter) in the effective operation,
-		// which includes path-item level parameters
+		// which includes path-item level parameters. Operation parameters override
+		// path-item parameters sharing the same name+in, so the check runs on the
+		// effective parameter set rather than the raw union.
 		if (result.isOpenapi32() && pathItem.getParameters() != null) {
-			long pathQuerystring = pathItem.getParameters().stream()
-					.map(this::getParameterDefinition)
-					.filter(p -> QUERYSTRING_PARAMETER.equals(p.getIn())).count();
-			boolean pathQuery = pathItem.getParameters().stream()
-					.map(this::getParameterDefinition)
-					.anyMatch(p -> QUERY_PARAMETER.equals(p.getIn()));
 			for (Operation op : pathItem.readOperations()) {
 				if (op == null || op.getParameters() == null) {
 					continue;
 				}
-				long opQuerystring = op.getParameters().stream()
+				Map<String, Parameter> effective = new LinkedHashMap<>();
+				pathItem.getParameters().stream()
 						.map(this::getParameterDefinition)
+						.filter(p -> p.getIn() != null)
+						.forEach(p -> effective.put(p.getName() + "#" + p.getIn(), p));
+				op.getParameters().stream()
+						.map(this::getParameterDefinition)
+						.filter(p -> p.getIn() != null)
+						.forEach(p -> effective.put(p.getName() + "#" + p.getIn(), p));
+				long querystringCount = effective.values().stream()
 						.filter(p -> QUERYSTRING_PARAMETER.equals(p.getIn())).count();
-				boolean opQuery = op.getParameters().stream()
-						.map(this::getParameterDefinition)
-						.anyMatch(p -> QUERY_PARAMETER.equals(p.getIn()));
-				if (pathQuerystring > 0 && opQuerystring > 0) {
+				if (querystringCount > 1) {
 					result.warning(location,
 							"There can be only one in: querystring parameter per operation");
 				}
-				if ((pathQuerystring > 0 && opQuery) || (opQuerystring > 0 && pathQuery)) {
+				if (querystringCount > 0 && effective.values().stream()
+						.anyMatch(p -> QUERY_PARAMETER.equals(p.getIn()))) {
 					result.warning(location,
 							"in: querystring parameter cannot be combined with in: query parameters");
 				}
@@ -2244,7 +2237,10 @@ public class OpenAPIDeserializer {
 	}
 
 	private Parameter getParameterDefinition(Parameter parameter) {
-		if (parameter.get$ref() == null) {
+		if (parameter.get$ref() == null || !parameter.get$ref().startsWith("#/")) {
+			// non-local refs are not resolvable here; an external ref like
+			// "external.yaml#/components/parameters/q" must not be compared
+			// against an unrelated local parameter that happens to share the name
 			return parameter;
 		}
 		Object parameterSchemaName = extractSimpleName(parameter.get$ref()).getLeft();

@@ -929,11 +929,237 @@ public class OAI32DeserializationTest {
         assertEquals(pets.getQuery().getOperationId(), "queryPets");
         assertNotNull(pets.getAdditionalOperations());
         assertEquals(pets.getAdditionalOperations().get("PURGE").getOperationId(), "purgePets");
-        // media type reference resolved
+        // media type root-local ref is preserved like every other component type
+        // (resolved value is stored under components.mediaTypes)
         io.swagger.v3.oas.models.media.MediaType mt = pets.getQuery().getResponses().get("200")
                 .getContent().get("application/json");
         assertNotNull(mt);
+        assertEquals(mt.get$ref(), "#/components/mediaTypes/PetMedia");
+        assertNotNull(openAPI.getComponents().getMediaTypes());
+        assertNotNull(openAPI.getComponents().getMediaTypes().get("PetMedia").getSchema());
+    }
+
+    @Test(description = "resolveFully inlines mediaType refs")
+    public void testResolveFullyInlinesMediaTypeRef() {
+        String yaml = "openapi: 3.2.0\n" +
+                "info:\n" +
+                "  title: t\n" +
+                "  version: '1'\n" +
+                "paths:\n" +
+                "  /pets:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              $ref: '#/components/mediaTypes/PetMedia'\n" +
+                "components:\n" +
+                "  mediaTypes:\n" +
+                "    PetMedia:\n" +
+                "      schema:\n" +
+                "        type: object\n";
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, options);
+        io.swagger.v3.oas.models.media.MediaType mt = result.getOpenAPI().getPaths().get("/pets")
+                .getGet().getResponses().get("200").getContent().get("application/json");
+        assertNotNull(mt);
         assertNull(mt.get$ref());
         assertNotNull(mt.getSchema());
+    }
+
+    @Test(description = "forward $id refs resolve when the $id target lives in 3.2 containers")
+    public void testForwardIdRefsIn32Containers() {
+        // $id target nested inside components.mediaTypes schema
+        String yaml = "openapi: 3.2.0\n" +
+                "info:\n" +
+                "  title: t\n" +
+                "  version: '1'\n" +
+                "paths:\n" +
+                "  /pets:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema:\n" +
+                "                $ref: 'https://example.com/schemas/pet'\n" +
+                "components:\n" +
+                "  mediaTypes:\n" +
+                "    PetMedia:\n" +
+                "      schema:\n" +
+                "        $id: https://example.com/schemas/pet\n" +
+                "        type: object\n" +
+                "        properties:\n" +
+                "          name:\n" +
+                "            type: string\n";
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, options);
+        Schema schema = result.getOpenAPI().getPaths().get("/pets").getGet()
+                .getResponses().get("200").getContent().get("application/json").getSchema();
+        assertNotNull(schema);
+        assertNull(schema.get$ref());
+        assertTrue(schema.getTypes().contains("object"));
+
+        // $id target inside a query operation of components.pathItems
+        String yaml2 = "openapi: 3.2.0\n" +
+                "info:\n" +
+                "  title: t\n" +
+                "  version: '1'\n" +
+                "paths:\n" +
+                "  /pets:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema:\n" +
+                "                $ref: 'https://example.com/schemas/pet2'\n" +
+                "components:\n" +
+                "  pathItems:\n" +
+                "    petPath:\n" +
+                "      query:\n" +
+                "        responses:\n" +
+                "          '200':\n" +
+                "            description: ok\n" +
+                "            content:\n" +
+                "              application/json:\n" +
+                "                schema:\n" +
+                "                  $id: https://example.com/schemas/pet2\n" +
+                "                  type: object\n";
+        SwaggerParseResult result2 = new OpenAPIV3Parser().readContents(yaml2, null, options);
+        Schema schema2 = result2.getOpenAPI().getPaths().get("/pets").getGet()
+                .getResponses().get("200").getContent().get("application/json").getSchema();
+        assertNotNull(schema2);
+        assertNull(schema2.get$ref());
+        assertTrue(schema2.getTypes().contains("object"));
+    }
+
+    @Test(description = "querystring conflict detection works inside components.pathItems")
+    public void testQuerystringConflictInComponentsPathItems() {
+        String yaml = "openapi: 3.2.0\n" +
+                "info:\n" +
+                "  title: t\n" +
+                "  version: '1'\n" +
+                "components:\n" +
+                "  parameters:\n" +
+                "    q:\n" +
+                "      name: q\n" +
+                "      in: query\n" +
+                "      schema:\n" +
+                "        type: string\n" +
+                "  pathItems:\n" +
+                "    petsPath:\n" +
+                "      get:\n" +
+                "        parameters:\n" +
+                "          - $ref: '#/components/parameters/q'\n" +
+                "          - name: qs\n" +
+                "            in: querystring\n" +
+                "            content:\n" +
+                "              application/json:\n" +
+                "                schema:\n" +
+                "                  type: object\n" +
+                "        responses:\n" +
+                "          '200':\n" +
+                "            description: ok\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, null);
+        assertTrue(result.getMessages().stream()
+                .anyMatch(m -> m.contains("cannot be combined with in: query")));
+    }
+
+    @Test(description = "a same-name querystring parameter on the operation is a legal override")
+    public void testQuerystringOverrideNotDuplicate() {
+        String base = "openapi: 3.2.0\n" +
+                "info:\n" +
+                "  title: t\n" +
+                "  version: '1'\n" +
+                "paths:\n" +
+                "  /pets:\n" +
+                "    parameters:\n" +
+                "      - name: qs\n" +
+                "        in: querystring\n" +
+                "        content:\n" +
+                "          application/json:\n" +
+                "            schema:\n" +
+                "              type: object\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - name: %s\n" +
+                "          in: querystring\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema:\n" +
+                "                type: object\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n";
+        // same name: operation-level param overrides the path-level one
+        SwaggerParseResult ok = new OpenAPIV3Parser().readContents(String.format(base, "qs"), null, null);
+        assertFalse(ok.getMessages().stream()
+                .anyMatch(m -> m.contains("querystring")));
+        // different name: two distinct querystring params in the effective set
+        SwaggerParseResult dup = new OpenAPIV3Parser().readContents(String.format(base, "other"), null, null);
+        assertTrue(dup.getMessages().stream()
+                .anyMatch(m -> m.contains("only one in: querystring parameter per operation")));
+    }
+
+    @Test(description = "external parameter refs are not compared against unrelated local parameters")
+    public void testExternalRefNotMiscompared() {
+        String yaml = "openapi: 3.2.0\n" +
+                "info:\n" +
+                "  title: t\n" +
+                "  version: '1'\n" +
+                "paths:\n" +
+                "  /pets:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - $ref: 'external.yaml#/components/parameters/q'\n" +
+                "        - name: qs\n" +
+                "          in: querystring\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema:\n" +
+                "                type: object\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "components:\n" +
+                "  parameters:\n" +
+                "    q:\n" +
+                "      name: q\n" +
+                "      in: query\n" +
+                "      schema:\n" +
+                "        type: string\n";
+        // the local in:query parameter "q" must not be confused with the
+        // unresolved external ref that happens to end with the same name
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, null);
+        assertFalse(result.getMessages().stream()
+                .anyMatch(m -> m.contains("cannot be combined with in: query")));
+    }
+
+    @Test(description = "path template params are validated inside query and additionalOperations")
+    public void testPathTemplateValidationCoversQueryAndAdditional() {
+        String yaml = "openapi: 3.2.0\n" +
+                "info:\n" +
+                "  title: t\n" +
+                "  version: '1'\n" +
+                "paths:\n" +
+                "  /pets/{petId}:\n" +
+                "    query:\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: ok\n" +
+                "    additionalOperations:\n" +
+                "      PURGE:\n" +
+                "        responses:\n" +
+                "          '204':\n" +
+                "            description: done\n";
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, null);
+        assertEquals(result.getMessages().stream()
+                .filter(m -> m.contains("needs to be defined")).count(), 2);
     }
 }

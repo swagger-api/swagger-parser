@@ -111,6 +111,7 @@ public class IdsTraverser implements Traverser {
         traverseMap(resolved.getHeaders(), visitor, this::traverseHeader);
         traverseMap(resolved.getLinks(), visitor, this::traverseLink);
         traverseMap(resolved.getResponses(), visitor, this::traverseResponse);
+        traverseMap(resolved.getMediaTypes(), visitor, this::traverseMediaType);
 
         traverseMap(resolved.getExamples(), visitor, this::traverseExample);
         visitedMap.put(components, resolved);
@@ -309,6 +310,12 @@ public class IdsTraverser implements Traverser {
         if (resolvedOperation != null) {
             resolved.setTrace(resolvedOperation);
         }
+        Operation queryOp = resolved.getQuery();
+        resolvedOperation = traverseOperation(queryOp, visitor);
+        if (resolvedOperation != null) {
+            resolved.setQuery(resolvedOperation);
+        }
+        traverseMap(resolved.getAdditionalOperations(), visitor, this::traverseOperation);
 
         if (resolved.getParameters() != null) {
             for (int i = 0; i < resolved.getParameters().size(); i++) {
@@ -410,7 +417,15 @@ public class IdsTraverser implements Traverser {
         if (resolved.getSchema() != null) {
             traverseSchema(resolved.getSchema(), visitor, new ArrayList<>());
         }
+        if (resolved.getItemSchema() != null) {
+            traverseSchema(resolved.getItemSchema(), visitor, new ArrayList<>());
+        }
         traverseMap(resolved.getEncoding(), visitor, this::traverseEncoding);
+        traverseEncodingList(resolved.getPrefixEncoding(), visitor);
+        Encoding itemEncoding = traverseEncoding(resolved.getItemEncoding(), visitor);
+        if (itemEncoding != null) {
+            resolved.setItemEncoding(itemEncoding);
+        }
         traverseMap(resolved.getExamples(), visitor, this::traverseExample);
         visitedMap.put(mediaType, resolved);
         visiting.remove(mediaType);
@@ -432,10 +447,28 @@ public class IdsTraverser implements Traverser {
         Encoding resolved = encoding;
 
         traverseMap(resolved.getHeaders(), visitor, this::traverseHeader);
+        traverseMap(resolved.getEncoding(), visitor, this::traverseEncoding);
+        traverseEncodingList(resolved.getPrefixEncoding(), visitor);
+        Encoding itemEncoding = traverseEncoding(resolved.getItemEncoding(), visitor);
+        if (itemEncoding != null) {
+            resolved.setItemEncoding(itemEncoding);
+        }
         visitedMap.put(encoding, resolved);
         visiting.remove(encoding);
         return resolved;
 
+    }
+
+    private void traverseEncodingList(List<Encoding> encodings, Visitor visitor) {
+        if (encodings == null) {
+            return;
+        }
+        for (int i = 0; i < encodings.size(); i++) {
+            Encoding resolved = traverseEncoding(encodings.get(i), visitor);
+            if (resolved != null) {
+                encodings.set(i, resolved);
+            }
+        }
     }
 
     public Header traverseHeader(Header header, Visitor visitor) {

@@ -615,8 +615,12 @@ public class OpenAPI31Traverser implements Traverser {
         visiting.add(mediaType);
         MediaType resolved = visitor.visitMediaType(mediaType);
 
+        boolean resolvedNotNull = false;
+
         if (resolved == null) {
             resolved = mediaType;
+        } else {
+            resolvedNotNull = true;
         }
 
         if (resolved.getSchema() != null) {
@@ -642,7 +646,16 @@ public class OpenAPI31Traverser implements Traverser {
         }
         traverseEncoding(resolved.getItemEncoding(), visitor);
         traverseMap(resolved.getExamples(), visitor, this::traverseExample);
-        visitedMap.put(mediaType, resolved);
+
+        // only if this is root and local ref
+        if (shouldHandleRootLocalRefs(resolvedNotNull, mediaType.get$ref(), visitor)) {
+            ensureComponents(context.getOpenApi());
+            if (context.getOpenApi().getComponents().getMediaTypes() == null) context.getOpenApi().getComponents().mediaTypes(new LinkedHashMap<>());
+            visitedMap.put(mediaType, deepcopy(mediaType, MediaType.class));
+            visiting.remove(mediaType);
+            return handleRootLocalRefs(mediaType.get$ref(), resolved, context.getOpenApi().getComponents().getMediaTypes());
+        }
+        visitedMap.put(mediaType, deepcopy(resolved, MediaType.class));
         visiting.remove(mediaType);
         return resolved;
     }
