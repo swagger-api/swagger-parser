@@ -1,0 +1,4 @@
+name: percent
+in: query
+schema:
+  type: string

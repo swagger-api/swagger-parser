@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Prefix space path item
+  version: 1.0.0
+paths:
+  /prefix-space:
+    get:
+      parameters:
+        - $ref: '../safe/prefix-space.yaml'
+      responses:
+        '200':
+          description: Success

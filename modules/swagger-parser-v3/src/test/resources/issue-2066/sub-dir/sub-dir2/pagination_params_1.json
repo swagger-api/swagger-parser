@@ -1,0 +1,7 @@
+{
+  "name": "limit",
+  "in": "query",
+  "schema": {
+    "$ref": "../sub-dir3/an-int.json"
+  }
+}

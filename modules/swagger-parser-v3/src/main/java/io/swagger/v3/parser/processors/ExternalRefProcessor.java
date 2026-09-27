@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.processors;
 
 
-import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -870,7 +871,7 @@ public final class ExternalRefProcessor {
             if (example.get$ref() != null) {
                 RefFormat ref = computeRefFormat(example.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    processRefExample(example, $ref);
+                    processRefExample(example, file);
                 } else {
                     processRefToExternalExample(file + example.get$ref(), RefFormat.RELATIVE);
                 }
@@ -879,22 +880,8 @@ public final class ExternalRefProcessor {
     }
 
     private void processRefExample(Example example, String externalFile) {
-        RefFormat format = computeRefFormat(example.get$ref());
-
-        if (!isAnExternalRefFormat(format)) {
-            example.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + example.get$ref(), RefFormat.RELATIVE));
-            return;
-        }
-        String $ref = example.get$ref();
-        String subRefExternalPath = getExternalPath(example.get$ref())
-                .orElse(null);
-
-        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
-            $ref = join(externalFile, example.get$ref());
-            example.set$ref($ref);
-        }else {
-            processRefToExternalExample($ref, format);
-        }
+        processRef(example.get$ref(), externalFile, example::set$ref, this::processRefToExternalExample,
+                ref -> join(externalFile, ref));
     }
 
     private void processRefSchemaObject(Schema schema, String $ref) {
@@ -917,7 +904,7 @@ public final class ExternalRefProcessor {
             if (header.get$ref() != null) {
                 RefFormat ref = computeRefFormat(header.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    processRefHeader(header, $ref);
+                    processRefHeader(header, file);
                 } else {
                     processRefToExternalHeader(file + header.get$ref(), RefFormat.RELATIVE);
                 }
@@ -931,7 +918,7 @@ public final class ExternalRefProcessor {
             if (link.get$ref() != null) {
                 RefFormat ref = computeRefFormat(link.get$ref());
                 if (isAnExternalRefFormat(ref)) {
-                    processRefLink(link, $ref);
+                    processRefLink(link, file);
                 } else {
                     processRefToExternalLink(file + link.get$ref(), RefFormat.RELATIVE);
                 }
@@ -942,24 +929,9 @@ public final class ExternalRefProcessor {
 
 
     private void processRefSchema(Schema subRef, String externalFile) {
-        RefFormat format = computeRefFormat(subRef.get$ref());
-
-        if (!isAnExternalRefFormat(format)) {
-            subRef.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
-            return;
-        }
-        String $ref = subRef.get$ref();
-        String subRefExternalPath = getExternalPath(subRef.get$ref())
-            .orElse(null);
-
-        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
-            $ref = constructRef(subRef, externalFile);
-            subRef.set$ref($ref);
-        }else {
-            processRefToExternalSchema($ref, format);
-        }
+        processRef(subRef.get$ref(), externalFile, subRef::set$ref, this::processRefToExternalSchema,
+                ref -> constructRef(subRef, externalFile));
     }
-
 
     protected String constructRef(Schema refProperty, String rootLocation) {
         String ref = refProperty.get$ref();
@@ -967,72 +939,38 @@ public final class ExternalRefProcessor {
     }
 
     private void processRefHeader(Header subRef, String externalFile) {
-        RefFormat format = computeRefFormat(subRef.get$ref());
-
-        if (!isAnExternalRefFormat(format)) {
-            subRef.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
-            return;
-        }
-        String $ref = subRef.get$ref();
-        String subRefExternalPath = getExternalPath(subRef.get$ref())
-                .orElse(null);
-
-        if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
-            $ref = join(externalFile, subRef.get$ref());
-            subRef.set$ref($ref);
-        }else {
-            processRefToExternalHeader($ref, format);
-        }
+        processRef(subRef.get$ref(), externalFile, subRef::set$ref, this::processRefToExternalHeader,
+                ref -> join(externalFile, ref));
     }
 
     private void processRefLink(Link subRef, String externalFile) {
-        RefFormat format = computeRefFormat(subRef.get$ref());
+        processRef(subRef.get$ref(), externalFile, subRef::set$ref, this::processRefToExternalLink,
+                ref -> join(externalFile, ref));
+    }
+
+    private void processRef(String ref, String externalFile, Consumer<String> refSetter,
+                            BiConsumer<String, RefFormat> externalRefProcessor,
+                            Function<String, String> relativeRefResolver) {
+        RefFormat format = computeRefFormat(ref);
 
         if (!isAnExternalRefFormat(format)) {
-            subRef.set$ref(RefType.SCHEMAS.getInternalPrefix()+ processRefToExternalSchema(externalFile + subRef.get$ref(), RefFormat.RELATIVE));
+            refSetter.accept(RefType.SCHEMAS.getInternalPrefix()
+                    + processRefToExternalSchema(externalFile + ref, RefFormat.RELATIVE));
             return;
         }
-        String $ref = subRef.get$ref();
-        String subRefExternalPath = getExternalPath(subRef.get$ref())
-                .orElse(null);
+        String subRefExternalPath = getExternalPath(ref).orElse(null);
 
         if (format.equals(RefFormat.RELATIVE) && !Objects.equals(subRefExternalPath, externalFile)) {
-            $ref = join(externalFile, subRef.get$ref());
-            subRef.set$ref($ref);
-        }else {
-            processRefToExternalLink($ref, format);
+            refSetter.accept(relativeRefResolver.apply(ref));
+        } else {
+            externalRefProcessor.accept(ref, format);
         }
     }
 
 
     // visible for testing
     public static String join(String source, String fragment) {
-        try {
-            boolean isRelative = false;
-            if(source.startsWith("/") || source.startsWith(".")) {
-                isRelative = true;
-            }
-            URI uri = new URI(source);
-
-            if(!source.endsWith("/") && (fragment.startsWith("./") && "".equals(uri.getPath()))) {
-                uri = new URI(source + "/");
-            }
-            else if("".equals(uri.getPath()) && !fragment.startsWith("/")) {
-                uri = new URI(source + "/");
-            }
-            URI f = new URI(fragment);
-
-            URI resolved = uri.resolve(f);
-
-            URI normalized = resolved.normalize();
-            if(Character.isAlphabetic(normalized.toString().charAt(0)) && isRelative) {
-                return "./" + normalized.toString();
-            }
-            return normalized.toString();
-        }
-        catch(Exception e) {
-            return source;
-        }
+        return ReferencePathUtils.resolve(source, fragment);
     }
 
 

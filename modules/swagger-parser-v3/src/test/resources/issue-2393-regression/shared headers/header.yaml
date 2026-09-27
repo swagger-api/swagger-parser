@@ -1,0 +1,3 @@
+description: Test header
+schema:
+  type: string

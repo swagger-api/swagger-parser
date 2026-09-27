@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: Space path item
+  version: 1.0.0
+paths:
+  /space:
+    get:
+      parameters:
+        - $ref: '../shared params/space.yaml'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Test:
+              $ref: '../shared headers/header.yaml'
+          links:
+            next:
+              $ref: '../shared links/link.yaml'
+          content:
+            application/json:
+              schema:
+                $ref: '../shared schemas/product.yaml'
+              examples:
+                product:
+                  $ref: '../shared examples/example.yaml'

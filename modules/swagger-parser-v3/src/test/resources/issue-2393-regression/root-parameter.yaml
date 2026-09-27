@@ -1,0 +1,4 @@
+name: root-prefix
+in: query
+schema:
+  type: string
