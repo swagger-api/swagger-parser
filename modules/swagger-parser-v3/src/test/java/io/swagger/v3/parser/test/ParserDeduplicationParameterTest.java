@@ -1,9 +1,11 @@
 package io.swagger.v3.parser.test;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -45,8 +47,19 @@ public class ParserDeduplicationParameterTest {
         options.setFlatten(true);
         OpenAPI openAPI = openApiParser.read("issue-2102/openapi30.json", null, options);
 
-        assertEquals(openAPI.getPaths().get("/myoperation").getGet().getParameters().size(), 2);
-        assertEquals((int) openAPI.getPaths().get("/myoperation").getGet().getParameters().stream().filter(param -> param.getName().equals("myParam")).count(), 2);
+        List<Parameter> parameters = openAPI.getPaths().get("/myoperation").getGet().getParameters();
+        assertEquals(parameters.size(), 2);
+
+        long namedParameterCount = parameters.stream()
+                .map(param -> {
+                    String refName = ReferenceUtils.getRefName(param.get$ref());
+                    Components components = openAPI.getComponents();
+                    return components.getParameters().get(refName);
+                })
+                .filter(param -> param.getName().equals("myParam"))
+                .count();
+
+        assertEquals((int)namedParameterCount, 2);
     }
 
     @Test(description = "Duplicated parameter name with different locations")
