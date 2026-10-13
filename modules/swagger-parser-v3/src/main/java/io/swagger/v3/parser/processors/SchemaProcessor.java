@@ -183,20 +183,18 @@ public class SchemaProcessor {
             String oldName = RefUtils.computeDefinitionName(oldRef);
             String newName = RefUtils.computeDefinitionName(newRef);
 
-            String mappingName = null;
+            // several discriminator values may map to the same schema: update all of them
+            boolean mapped = false;
             if (discriminator.getMapping() != null) {
-                for (String name : discriminator.getMapping().keySet()) {
-                    if (oldRef.equals(discriminator.getMapping().get(name))) {
-                        mappingName = name;
-                        break;
+                for (Map.Entry<String, String> entry : discriminator.getMapping().entrySet()) {
+                    if (oldRef.equals(entry.getValue())) {
+                        entry.setValue(newRef);
+                        mapped = true;
                     }
-                }
-                if (mappingName != null) {
-                    discriminator.getMapping().put(mappingName, newRef);
                 }
             }
 
-            if (mappingName == null && !oldName.equals(newName)) {
+            if (!mapped && !oldName.equals(newName)) {
                 if (discriminator.getMapping() == null) {
                     discriminator.setMapping(new HashMap());
                 }
