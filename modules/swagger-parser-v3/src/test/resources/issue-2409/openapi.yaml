@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: Array items $ref repro
+  version: "1"
+paths:
+  /broken:
+    get:
+      operationId: getBroken
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Broken"
+  /working:
+    get:
+      operationId: getWorking
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Working"
+  /renamed:
+    get:
+      operationId: getRenamed
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Renamed"
+components:
+  schemas:
+    Item:
+      $ref: "./schemas/Item.yaml"
+    Broken:
+      $ref: "./schemas/Broken.yaml"
+    Working:
+      $ref: "./schemas/Working.yaml"
+    Renamed:
+      $ref: "./schemas/Renamed.yaml"

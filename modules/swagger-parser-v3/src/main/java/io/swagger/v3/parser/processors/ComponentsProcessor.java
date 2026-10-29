@@ -13,9 +13,15 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ResolverCache;
 
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static io.swagger.v3.parser.util.RefUtils.computeRefFormat;
+import static io.swagger.v3.parser.util.RefUtils.isAnExternalRefFormat;
 
 
 /**
@@ -249,18 +255,56 @@ public class ComponentsProcessor {
                 }
             }
         }
-        //process schemas again to check properties that hasn't been solved
+        //process schemas again to check refs that haven't been solved, including nested ones such as array items
         for (String modelName : schemaKeys) {
             final Schema model = schemas.get(modelName);
-            Map<String, Schema> properties = model.getProperties();
-            if (properties != null) {
-                for (Map.Entry<String, Schema> propertyEntry : properties.entrySet()) {
-                    Schema property = propertyEntry.getValue();
-                    if(property.get$ref() != null) {
-                        schemaProcessor.processSchema(model);
-                    }
+            if (model != null && model.getProperties() != null
+                    && hasUnresolvedExternalRef(model, Collections.newSetFromMap(new IdentityHashMap<>()))) {
+                schemaProcessor.processSchema(model);
+            }
+        }
+    }
+
+    private boolean hasUnresolvedExternalRef(Schema schema, Set<Schema> visited) {
+        if (schema == null || !visited.add(schema)) {
+            return false;
+        }
+        if (schema.get$ref() != null) {
+            return isAnExternalRefFormat(computeRefFormat(schema.get$ref()));
+        }
+        if (schema.getProperties() != null) {
+            for (Object property : schema.getProperties().values()) {
+                if (hasUnresolvedExternalRef((Schema) property, visited)) {
+                    return true;
                 }
             }
         }
+        if (schema.getAdditionalProperties() instanceof Schema
+                && hasUnresolvedExternalRef((Schema) schema.getAdditionalProperties(), visited)) {
+            return true;
+        }
+        if (schema.getDiscriminator() != null && schema.getDiscriminator().getMapping() != null) {
+            for (String mappingRef : schema.getDiscriminator().getMapping().values()) {
+                if (isAnExternalRefFormat(computeRefFormat(mappingRef))) {
+                    return true;
+                }
+            }
+        }
+        return hasUnresolvedExternalRef(schema.getItems(), visited)
+                || hasUnresolvedExternalRef(schema.getNot(), visited)
+                || anyHasUnresolvedExternalRef(schema.getAllOf(), visited)
+                || anyHasUnresolvedExternalRef(schema.getAnyOf(), visited)
+                || anyHasUnresolvedExternalRef(schema.getOneOf(), visited);
+    }
+
+    private boolean anyHasUnresolvedExternalRef(List<Schema> schemas, Set<Schema> visited) {
+        if (schemas != null) {
+            for (Schema schema : schemas) {
+                if (hasUnresolvedExternalRef(schema, visited)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
