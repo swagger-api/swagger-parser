@@ -1,0 +1,31 @@
+openapi: 3.1.0
+info:
+  title: Issue 2159
+  version: 1.0.0
+paths:
+  /v1/test/{tid}:
+    get:
+      parameters:
+        - name: tid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+  /v2/test/{tid}:
+    $ref: '#/paths/~1v1~1test~1{tid}'
+  /v1/items/{id}:
+    $ref: './paths.yaml#/paths/~1items~1{id}'
+components:
+  schemas:
+    Test:
+      $ref: '#/paths/~1v1~1test~1{tid}/get/responses/200/content/application~1json/schema'
