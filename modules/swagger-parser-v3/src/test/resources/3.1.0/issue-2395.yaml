@@ -1,0 +1,21 @@
+openapi: "3.1.0"
+info:
+  title: Test
+  version: "1.0"
+paths: {}
+components:
+  schemas:
+    MySchema:
+      type: object
+      properties:
+        msg:
+          type: string
+          const: null          # scalar const: null on individual field (issue-2395)
+        code:
+          type: integer
+          const: 0
+        plain:
+          type: string         # no const
+      const:
+        code: 0
+        msg: null              # null inside object const (already worked)
