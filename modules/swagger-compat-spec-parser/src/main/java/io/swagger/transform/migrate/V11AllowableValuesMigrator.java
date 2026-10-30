@@ -2,9 +2,9 @@ package io.swagger.transform.migrate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jackson.JacksonUtils;
-import com.github.fge.jackson.jsonpointer.JsonPointer;
-import com.github.fge.jsonpatch.JsonPatch;
+import com.fasterxml.jackson.core.JsonPointer;
+import io.swagger.transform.util.JacksonSupport;
+import io.swagger.transform.util.JsonPatch;
 import io.swagger.transform.util.SwaggerMigrationException;
 import io.swagger.transform.util.SwaggerMigrators;
 
@@ -41,7 +41,8 @@ import java.util.Objects;
  */
 public final class V11AllowableValuesMigrator
         implements SwaggerMigrator {
-    private static final ObjectMapper MAPPER = JacksonUtils.newMapper();
+    private static final ObjectMapper MAPPER = JacksonSupport.newMapper();
+    private static final JsonPointer VALUE_TYPE = JsonPointer.compile("/allowableValues/valueType");
     private static final JsonPatch PATCH;
 
     @Nonnull
@@ -52,8 +53,7 @@ public final class V11AllowableValuesMigrator
         if (!input.has("allowableValues")) {
             return input;
         }
-        final String valueType = JsonPointer.of("allowableValues", "valueType")
-                .get(input).textValue();
+        final String valueType = input.at(VALUE_TYPE).textValue();
         if ("LIST".equals(valueType)) {
             return SwaggerMigrators.fromPatch(PATCH).migrate(input);
         }

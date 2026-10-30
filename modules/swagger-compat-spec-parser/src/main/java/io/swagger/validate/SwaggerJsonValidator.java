@@ -2,20 +2,17 @@ package io.swagger.validate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.github.fge.jackson.JacksonUtils;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.core.report.LogLevel;
-import com.github.fge.jsonschema.core.report.ProcessingMessage;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.networknt.schema.Error;
+import com.networknt.schema.SchemaException;
 import io.swagger.report.Message;
 import io.swagger.report.MessageBuilder;
 import io.swagger.report.Severity;
+import io.swagger.transform.util.JacksonSupport;
 
-import java.util.EnumMap;
+import java.util.List;
 
 public abstract class SwaggerJsonValidator {
-    private static final EnumMap<LogLevel, Severity> LEVEL_MAP
-            = new EnumMap<>(LogLevel.class);
     private final SwaggerSchemaValidator validator;
 
 
@@ -23,41 +20,34 @@ public abstract class SwaggerJsonValidator {
         this.validator = validator;
     }
 
-    private static boolean fillMessages(final ProcessingReport report,
+    private static boolean fillMessages(final List<Error> errors,
                                         final MessageBuilder builder) {
-        final Severity severity = LEVEL_MAP.get(report.getLogLevel());
-        final ArrayNode node = JacksonUtils.nodeFactory().arrayNode();
+        final Severity severity = errors.isEmpty() ? Severity.OPTIONAL : Severity.ERROR;
+        final ArrayNode node = JacksonSupport.nodeFactory().arrayNode();
 
-        for (final ProcessingMessage processingMessage : report) {
-            node.add(processingMessage.asJson());
+        for (final Error error : errors) {
+            final ObjectNode errorNode = node.addObject();
+            errorNode.put("keyword", error.getKeyword());
+            errorNode.put("instance", String.valueOf(error.getInstanceLocation()));
+            errorNode.put("schema", String.valueOf(error.getSchemaLocation()));
+            errorNode.put("message", error.getMessage());
         }
 
-        final String reportAsString = JacksonUtils.prettyPrint(node);
+        final String reportAsString = JacksonSupport.prettyPrint(node);
         final Message message = new Message("", reportAsString, severity);
         builder.append(message);
-        return report.isSuccess();
+        return errors.isEmpty();
     }
 
     public final void validate(final MessageBuilder builder,
                                final JsonNode input) {
-        final ProcessingReport report;
         try {
-            report = validator.validate(input);
-            if (!fillMessages(report, builder)) {
+            if (!fillMessages(validator.validate(input), builder)) {
                 builder.append(new Message("", "JSON Schema validation failed",
                         Severity.ERROR));
             }
-        } catch (ProcessingException e) {
+        } catch (SchemaException e) {
             builder.append(new Message("", e.getMessage(), Severity.ERROR));
         }
-    }
-
-    static {
-        LEVEL_MAP.put(LogLevel.DEBUG, Severity.OPTIONAL);
-        LEVEL_MAP.put(LogLevel.INFO, Severity.OPTIONAL);
-        LEVEL_MAP.put(LogLevel.ERROR, Severity.ERROR);
-        LEVEL_MAP.put(LogLevel.FATAL, Severity.ERROR);
-        LEVEL_MAP.put(LogLevel.WARNING, Severity.WARNING);
-        LEVEL_MAP.put(LogLevel.NONE, Severity.OPTIONAL);
     }
 }

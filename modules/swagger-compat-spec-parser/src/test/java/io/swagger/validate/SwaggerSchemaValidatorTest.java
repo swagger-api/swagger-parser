@@ -1,24 +1,20 @@
 package io.swagger.validate;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.main.JsonSchema;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.networknt.schema.Schema;
+import io.swagger.transform.util.JacksonSupport;
 import io.swagger.transform.util.SwaggerJsonSchemaFactory;
 
 import java.io.IOException;
 
 public abstract class SwaggerSchemaValidatorTest {
-    protected final JsonSchema schema;
+    protected final Schema schema;
     protected final JsonNode instance;
-    private final JsonSchemaFactory FACTORY
-            = SwaggerJsonSchemaFactory.getInstance().getFactory();
 
-    protected SwaggerSchemaValidatorTest(final String schemaURI,
+    protected SwaggerSchemaValidatorTest(final String schemaPath,
                                          final String instancePath)
-            throws IOException, ProcessingException {
-        schema = FACTORY.getJsonSchema(schemaURI);
-        instance = JsonLoader.fromResource("/validate/" + instancePath);
+            throws IOException {
+        schema = SwaggerJsonSchemaFactory.getInstance().getSchema(schemaPath);
+        instance = JacksonSupport.fromResource("/validate/" + instancePath);
     }
 }
