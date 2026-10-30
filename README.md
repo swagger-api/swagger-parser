@@ -2,6 +2,8 @@
 
 **NOTE:** If you're looking for `swagger-parser` 1.X and OpenAPI 2.0, please refer to [v1 branch](https://github.com/swagger-api/swagger-parser/tree/v1)
 
+**NOTE:** Swagger Parser 3.0 uses Jackson 3 and needs Java 17 or later. See the [migration guide](MIGRATION.md). Jackson 2 and Jackson 3 are both on the classpath of `swagger-parser` and `swagger-parser-v2-converter`, and this can cause a [known issue](#jackson-2-and-jackson-3).
+
 **NOTE:** Since version 2.1.0 Swagger Parser supports OpenAPI 3.1; see [this page](https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---OpenAPI-3.1) for details
 
 ![Build Master - Java 11, 14 and 17](https://github.com/swagger-api/swagger-parser/workflows/Build%20Test%20Deploy%20master/badge.svg?branch=master)
@@ -13,6 +15,7 @@
   - [Usage](#usage)
   - [Adding to your project](#adding-to-your-project)
     - [Prerequisites](#prerequisites)
+    - [Jackson 2 and Jackson 3](#jackson-2-and-jackson-3)
   - [Authentication](#authentication)  
   - [Options](#options)
     - [Resolve](#1-resolve)
@@ -121,7 +124,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 #### Prerequisites
 You need the following installed and available in your $PATH:
 
-* Java 11
+* Java 17
 * [Apache maven 3.x](http://maven.apache.org/)
 
 After cloning the project, you can build it from source with this command:
@@ -129,6 +132,24 @@ After cloning the project, you can build it from source with this command:
 ```
 mvn package
 ```
+
+#### Jackson 2 and Jackson 3
+
+Version 3.0 uses Jackson 3 (`tools.jackson`). `jackson-annotations` stays on `com.fasterxml.jackson.core`, because Jackson 3 still uses these annotations.
+The module `swagger-parser-v2-converter` converts OpenAPI 2.0 files with the old `swagger-parser` 1.x library, and this library uses Jackson 2.
+Because `swagger-parser` depends on the converter, Jackson 2 and Jackson 3 are both on your classpath.
+
+| Module | Jackson 3 | Jackson 2 |
+|---|---|---|
+| `swagger-parser-core` | - | `jackson-annotations` only |
+| `swagger-parser-v3` | compile | `jackson-annotations` only |
+| `swagger-parser-v2-converter` | compile | through the old 1.x library |
+| `swagger-parser` | through `swagger-parser-v3` | through `swagger-parser-v2-converter` |
+| `swagger-parser-cli` | compile | `jackson-annotations` only |
+| `swagger-parser-safe-url-resolver` | - | - |
+
+**Known issue:** Jackson 2 tree nodes (for example, examples that are not scalar values) can be serialized in a wrong way when they pass through the converter, and no error is reported.
+This must be fixed before the 3.0.0 release. If you do not need OpenAPI 2.0 conversion, use `swagger-parser-v3` only.
 
 ### Authentication
 

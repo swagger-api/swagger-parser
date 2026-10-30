@@ -9,41 +9,38 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.util.RefUtils;
-import mockit.Expectations;
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.Mocked;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 public class OperationProcessorTest {
 
-    @Injectable
-    ResolverCache cache;
+    ResolverCache cache = mock(ResolverCache.class);
 
-    @Injectable
-    OpenAPI openAPI;
+    OpenAPI openAPI = mock(OpenAPI.class);
 
-    @Injectable
-    boolean openapi31;
-
-    @Mocked
-    ParameterProcessor parameterProcessor;
-
-
-    @Mocked
-    ResponseProcessor responseProcessor;
+    boolean openapi31 = false;
 
     @Test (enabled = false)
     // TODO OAS3.1 - reenable failing on operation.getParameters()
-    public void testProcessOperation(@Injectable final List<Parameter> inputParameterList,
-                                     @Injectable final List<Parameter> outputParameterList,
-                                     @Injectable final Parameter inputParameter,
-                                     @Injectable final ApiResponse incomingResponse,
-                                     @Injectable final ApiResponse resolvedResponse) throws Exception {
+    @SuppressWarnings("unchecked")
+    public void testProcessOperation() throws Exception {
+        final List<Parameter> inputParameterList = mock(List.class);
+        final List<Parameter> outputParameterList = mock(List.class);
+        final Parameter inputParameter = mock(Parameter.class);
+        final ApiResponse incomingResponse = mock(ApiResponse.class);
+        final ApiResponse resolvedResponse = mock(ApiResponse.class);
+        when(inputParameterList.get(0)).thenReturn(inputParameter);
 
         Operation operation = new Operation();
         operation.setParameters(inputParameterList);
@@ -54,52 +51,29 @@ public class OperationProcessorTest {
         operation.responses(new ApiResponses().addApiResponse("200", refResponse));
         operation.getResponses().addApiResponse("400", incomingResponse);
 
+        when(cache.loadRef(ref, RefFormat.URL, ApiResponse.class)).thenReturn(resolvedResponse);
 
-        new Expectations() {{
-            new ParameterProcessor(cache, openAPI, openapi31);
-            times = 1;
-            result = parameterProcessor;
+        try (MockedConstruction<ParameterProcessor> parameterProcessors = Mockito.mockConstruction(ParameterProcessor.class,
+                     (mock, context) -> when(mock.processParameters(inputParameterList)).thenReturn(outputParameterList));
+             MockedConstruction<ResponseProcessor> responseProcessors = Mockito.mockConstruction(ResponseProcessor.class);
+             MockedStatic<RefUtils> refUtils = Mockito.mockStatic(RefUtils.class, Mockito.CALLS_REAL_METHODS)) {
 
-            new ResponseProcessor(cache, openAPI, openapi31);
-            times = 1;
-            result = responseProcessor;
+            new OperationProcessor(cache, openAPI, openapi31).processOperation(operation);
 
-            parameterProcessor.processParameter(inputParameterList.get(0));
-            times = 1;
+            assertEquals(parameterProcessors.constructed().size(), 1);
+            assertEquals(responseProcessors.constructed().size(), 1);
+            ParameterProcessor parameterProcessor = parameterProcessors.constructed().get(0);
+            ResponseProcessor responseProcessor = responseProcessors.constructed().get(0);
 
-            parameterProcessor.processParameters(inputParameterList);
-            times = 1;
-            result = outputParameterList;
-
-            responseProcessor.processResponse(refResponse);
-            times = 1;
-
-            RefUtils.computeRefFormat(ref);
-            times = 1;
-
-            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
-            times = 1;
-            result = resolvedResponse;
-
-            RefUtils.computeRefFormat(ref);
-            times = 1;
-
-            incomingResponse.get$ref();
-            times = 1;
-
-            responseProcessor.processResponse(incomingResponse);
-            times = 1;
-            responseProcessor.processResponse(resolvedResponse);
-            times = 1;
-
-        }};
-
-
-
-        new OperationProcessor(cache, openAPI, openapi31).processOperation(operation);
-
-
-        new FullVerifications() {{}};
+            verify(parameterProcessor, times(1)).processParameter(inputParameter);
+            verify(parameterProcessor, times(1)).processParameters(inputParameterList);
+            verify(responseProcessor, times(1)).processResponse(refResponse);
+            verify(responseProcessor, times(1)).processResponse(incomingResponse);
+            verify(responseProcessor, times(1)).processResponse(resolvedResponse);
+            refUtils.verify(() -> RefUtils.computeRefFormat(ref), atLeastOnce());
+            verify(cache, times(1)).loadRef(ref, RefFormat.URL, ApiResponse.class);
+            verify(incomingResponse, times(1)).get$ref();
+        }
 
         assertEquals(operation.getResponses().get("200"), resolvedResponse);
         assertEquals(operation.getParameters(), outputParameterList);
