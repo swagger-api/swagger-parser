@@ -3,7 +3,6 @@ package io.swagger.transform.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.github.fge.jackson.JacksonUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -17,7 +16,7 @@ import java.nio.file.StandardOpenOption;
 
 public final class APIFileDownload {
     private static final Path RESOURCE_PATH;
-    private static final ObjectMapper MAPPER = JacksonUtils.newMapper();
+    private static final ObjectMapper MAPPER = JacksonSupport.newMapper();
     private static final ObjectWriter JSONWRITER
             = MAPPER.writerWithDefaultPrettyPrinter();
 

@@ -1,28 +1,20 @@
 package io.swagger.validate;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchema;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.networknt.schema.Error;
+import com.networknt.schema.Schema;
 import io.swagger.transform.util.SwaggerJsonSchemaFactory;
 
-public abstract class SwaggerSchemaValidator {
-    protected static final JsonSchemaFactory FACTORY
-            = SwaggerJsonSchemaFactory.getInstance().getFactory();
+import java.util.List;
 
-    private final JsonSchema schema;
+public abstract class SwaggerSchemaValidator {
+    private final Schema schema;
 
     protected SwaggerSchemaValidator(final String schemaPath) {
-        try {
-            schema = FACTORY.getJsonSchema(schemaPath);
-        } catch (ProcessingException e) {
-            throw new RuntimeException("Unhandled exception", e);
-        }
+        schema = SwaggerJsonSchemaFactory.getInstance().getSchema(schemaPath);
     }
 
-    public final ProcessingReport validate(final JsonNode input)
-            throws ProcessingException {
-        return schema.validate(input, true);
+    public final List<Error> validate(final JsonNode input) {
+        return schema.validate(input);
     }
 }

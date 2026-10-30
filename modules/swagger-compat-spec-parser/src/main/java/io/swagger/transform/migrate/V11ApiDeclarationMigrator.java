@@ -1,7 +1,7 @@
 package io.swagger.transform.migrate;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.jsonpointer.JsonPointer;
 import io.swagger.transform.util.MutableJsonTree;
 import io.swagger.transform.util.SwaggerMigrationException;
 
@@ -27,7 +27,7 @@ public final class V11ApiDeclarationMigrator
         tree.applyMigrator(patchFromResource("/patches/v1.1/versionChange" +
                 ".json"));
 
-        tree.setPointer(JsonPointer.of("apis"));
+        tree.setPointer(JsonPointer.compile("/apis"));
         tree.applyMigratorToElements(migrator);
 
         return tree.getBaseNode();
