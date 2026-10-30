@@ -1,6 +1,6 @@
 package io.swagger.v3.parser.reference;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.testng.annotations.Test;
 import org.yaml.snakeyaml.error.YAMLException;
 

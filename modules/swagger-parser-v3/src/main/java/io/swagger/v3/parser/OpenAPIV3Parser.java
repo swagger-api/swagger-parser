@@ -1,8 +1,10 @@
 package io.swagger.v3.parser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
@@ -189,9 +191,9 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             }
             return result;
 
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOGGER.warn("Exception while parsing:", e);
-            final String message = getParseErrorMessage(e.getOriginalMessage(), location);
+            final String message = getParseErrorMessage(toLegacyMessage(e.getOriginalMessage()), location);
             return SwaggerParseResult.ofError(message);
         } catch (Exception e) {
             LOGGER.warn("Exception while parsing:", e);
@@ -263,6 +265,20 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             // result.setMessages(Collections.singletonList(e.getMessage()));
         }
         return result;
+    }
+
+    private static final Pattern JACKSON3_DUPLICATE_PROPERTY = Pattern.compile("^Duplicate Object property \"(.*)\"$", Pattern.DOTALL);
+
+    /**
+     * Jackson 2 reported a duplicate key as {@code Duplicate field 'x'}. Jackson 3 says
+     * {@code Duplicate Object property "x"}. Keep the old text, because users and tests match on it.
+     */
+    static String toLegacyMessage(String originalMessage) {
+        if (originalMessage == null) {
+            return null;
+        }
+        Matcher m = JACKSON3_DUPLICATE_PROPERTY.matcher(originalMessage);
+        return m.matches() ? "Duplicate field '" + m.group(1) + "'" : originalMessage;
     }
 
     private String getParseErrorMessage(String originalMessage, String location) {

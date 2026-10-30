@@ -8,8 +8,10 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.RemoteUrl;
-import mockit.Expectations;
-import mockit.Mocked;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,13 +19,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.times;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 
 public class RelativeReferenceTest {
-    @Mocked
-    RemoteUrl remoteUrl;
+    private MockedStatic<RemoteUrl> remoteUrl;
+
+    @BeforeMethod
+    public void mockRemoteUrl() {
+        remoteUrl = Mockito.mockStatic(RemoteUrl.class);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void closeRemoteUrl() {
+        remoteUrl.close();
+    }
 
     private static final String SPEC =
             "openapi: 3.0.0\n" +
@@ -58,28 +72,18 @@ public class RelativeReferenceTest {
 
     @Test
     public void testIssueServerUrlValidation() throws Exception {
-        new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList());
-            times = 1;
-            result = SPEC;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList())).thenReturn(SPEC);
 
         SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation("http://foo.bar.com/swagger.json", null, new ParseOptions());
         assertNotNull(swaggerParseResult.getOpenAPI());
         assertTrue(swaggerParseResult.getMessages().isEmpty());
+        remoteUrl.verify(() -> RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList()), times(1));
     }
 
     @Test
     public void testIssue213() throws Exception {
-        new Expectations() {{
-            RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList());
-            times = 1;
-            result = SPEC;
-
-            RemoteUrl.urlToString("http://foo.bar.com/path/samplePath.yaml", Collections.emptyList(), (PermittedUrlsChecker) any);
-            times = 1;
-            result = SAMPLE_PATH;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList())).thenReturn(SPEC);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://foo.bar.com/path/samplePath.yaml"), eq(Collections.emptyList()), nullable(PermittedUrlsChecker.class))).thenReturn(SAMPLE_PATH);
 
 
         OpenAPI swagger = new OpenAPIV3Parser().read("http://foo.bar.com/swagger.json");
@@ -90,6 +94,8 @@ public class RelativeReferenceTest {
         assertNotNull(swagger.getPaths().get("/samplePath").getGet().getRequestBody());
         RequestBody body = swagger.getPaths().get("/samplePath").getGet().getRequestBody();
         assertNotNull(body.getContent().get("application/json").getSchema());
+        remoteUrl.verify(() -> RemoteUrl.urlToString("http://foo.bar.com/swagger.json", Collections.emptyList()), times(1));
+        remoteUrl.verify(() -> RemoteUrl.urlToString(eq("http://foo.bar.com/path/samplePath.yaml"), eq(Collections.emptyList()), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test

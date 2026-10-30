@@ -15,10 +15,11 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.RemoteUrl;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -27,6 +28,12 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
@@ -34,14 +41,23 @@ import static org.testng.Assert.assertSame;
 
 public class ExternalRefProcessorTest {
 
-    @Injectable
-    ResolverCache cache;
+    ResolverCache cache = mock(ResolverCache.class);
 
-    @Injectable
-    OpenAPI openAPI;
+    OpenAPI openAPI = mock(OpenAPI.class);
 
-    @Injectable
-    Schema mockedModel;
+    Schema mockedModel = mock(Schema.class);
+
+    private MockedStatic<RemoteUrl> remoteUrl;
+
+    @BeforeMethod
+    public void mockRemoteUrl() {
+        remoteUrl = Mockito.mockStatic(RemoteUrl.class);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void closeRemoteUrl() {
+        remoteUrl.close();
+    }
 
     @Test
     public void testProcessRefToExternalDefinition_NoNameConflict() {
@@ -49,23 +65,20 @@ public class ExternalRefProcessorTest {
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final RefFormat refFormat = RefFormat.URL;
 
-        new Expectations() {{
-            times = 1;
-
-            cache.getRenamedRef(ref);
-
-            cache.loadRef(ref, refFormat, Schema.class);
-            result = mockedModel;
-
-
-            cache.putRenamedRef(ref, "bar");
-            openAPI.getComponents().addSchemas("bar", mockedModel);
-
-            cache.addReferencedKey("bar");
-        }};
+        // like a cascaded mock: openAPI.getComponents() returns a mock whose maps are empty
+        Components components = mock(Components.class);
+        when(openAPI.getComponents()).thenReturn(components);
+        when(cache.loadRef(ref, refFormat, Schema.class)).thenReturn(mockedModel);
 
         String newRef = new ExternalRefProcessor(cache, openAPI).processRefToExternalSchema(ref, refFormat);
         assertEquals(newRef, "bar");
+
+        // the original expectations: each of these calls must have happened
+        verify(cache).getRenamedRef(ref);
+        verify(cache).loadRef(ref, refFormat, Schema.class);
+        verify(cache).putRenamedRef(ref, "bar");
+        verify(components).addSchemas("bar", mockedModel);
+        verify(cache).addReferencedKey("bar");
     }
 
     @Test
@@ -77,12 +90,8 @@ public class ExternalRefProcessorTest {
         SecurityScheme second = new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer");
         OpenAPI testedOpenAPI = new OpenAPI().components(new Components());
 
-        new Expectations() {{
-            cache.loadRef(firstRef, RefFormat.URL, SecurityScheme.class);
-            result = first;
-            cache.loadRef(secondRef, RefFormat.URL, SecurityScheme.class);
-            result = second;
-        }};
+        when(cache.loadRef(firstRef, RefFormat.URL, SecurityScheme.class)).thenReturn(first);
+        when(cache.loadRef(secondRef, RefFormat.URL, SecurityScheme.class)).thenReturn(second);
 
         ExternalRefProcessor processor = new ExternalRefProcessor(cache, testedOpenAPI);
         assertEquals(processor.processRefToExternalSecurityScheme(firstRef, RefFormat.URL), "sharedAuth");
@@ -104,10 +113,7 @@ public class ExternalRefProcessorTest {
                 .addResponses("sharedResponse_2", secondSuffix);
         OpenAPI testedOpenAPI = new OpenAPI().components(components);
 
-        new Expectations() {{
-            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
-            result = incoming;
-        }};
+        when(cache.loadRef(ref, RefFormat.URL, ApiResponse.class)).thenReturn(incoming);
 
         String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
                 .processRefToExternalResponse(ref, RefFormat.URL);
@@ -126,10 +132,7 @@ public class ExternalRefProcessorTest {
         OpenAPI testedOpenAPI = new OpenAPI().components(
                 new Components().addResponses("sharedResponse", existing));
 
-        new Expectations() {{
-            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
-            result = incoming;
-        }};
+        when(cache.loadRef(ref, RefFormat.URL, ApiResponse.class)).thenReturn(incoming);
 
         String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
                 .processRefToExternalResponse(ref, RefFormat.URL);
@@ -148,12 +151,8 @@ public class ExternalRefProcessorTest {
         OpenAPI testedOpenAPI = new OpenAPI().components(
                 new Components().addResponses("sharedResponse", placeholder));
 
-        new Expectations() {{
-            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
-            result = incoming;
-            cache.refsAreEquivalent(equivalentRef, ref);
-            result = true;
-        }};
+        when(cache.loadRef(ref, RefFormat.URL, ApiResponse.class)).thenReturn(incoming);
+        when(cache.refsAreEquivalent(equivalentRef, ref)).thenReturn(true);
 
         String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
                 .processRefToExternalResponse(ref, RefFormat.URL);
@@ -171,10 +170,7 @@ public class ExternalRefProcessorTest {
         OpenAPI testedOpenAPI = new OpenAPI().components(
                 new Components().addResponses("sharedResponse", lowerCase));
 
-        new Expectations() {{
-            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
-            result = incoming;
-        }};
+        when(cache.loadRef(ref, RefFormat.URL, ApiResponse.class)).thenReturn(incoming);
 
         String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
                 .processRefToExternalResponse(ref, RefFormat.URL);
@@ -190,10 +186,7 @@ public class ExternalRefProcessorTest {
         final String ref = "https://example.test/missing.yaml#/MissingResponse";
         OpenAPI testedOpenAPI = new OpenAPI();
 
-        new Expectations() {{
-            cache.loadRef(ref, RefFormat.URL, ApiResponse.class);
-            result = null;
-        }};
+        when(cache.loadRef(ref, RefFormat.URL, ApiResponse.class)).thenReturn(null);
 
         assertEquals(new ExternalRefProcessor(cache, testedOpenAPI)
                 .processRefToExternalResponse(ref, RefFormat.URL), ref);
@@ -205,12 +198,8 @@ public class ExternalRefProcessorTest {
         Schema recursive = new Schema().$ref(ref);
         OpenAPI testedOpenAPI = new OpenAPI().components(new Components());
 
-        new Expectations() {{
-            cache.getRenamedRef(ref);
-            returns(null, "Recursive");
-            cache.loadRef(ref, RefFormat.RELATIVE, Schema.class);
-            result = recursive;
-        }};
+        when(cache.getRenamedRef(ref)).thenReturn(null, "Recursive");
+        when(cache.loadRef(ref, RefFormat.RELATIVE, Schema.class)).thenReturn(recursive);
 
         String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
                 .processRefToExternalSchema(ref, RefFormat.RELATIVE);
@@ -231,10 +220,7 @@ public class ExternalRefProcessorTest {
                 .addSchemas("pet", lowerCaseSchema)
                 .addSchemas("Pet", exactSchema));
 
-        new Expectations() {{
-            cache.loadRef(ref, RefFormat.URL, Schema.class);
-            result = incoming;
-        }};
+        when(cache.loadRef(ref, RefFormat.URL, Schema.class)).thenReturn(incoming);
 
         String assignedName = new ExternalRefProcessor(cache, testedOpenAPI)
                 .processRefToExternalSchema(ref, RefFormat.URL);
@@ -296,28 +282,18 @@ public class ExternalRefProcessorTest {
         contactProps.put("PhoneNumber", contactProp);
         contactModel.setProperties(contactProps);
 
-        new Expectations() {{
-            cache.loadRef(customerURL, refFormat, Schema.class);
-            result = customerModel;
-            times = 1;
-
-            cache.loadRef(addressURL, refFormat, Schema.class);
-            result = addressModel;
-
-            cache.loadRef(contactURL, refFormat, Schema.class);
-            result = contactModel;
-        }};
+        when(cache.loadRef(customerURL, refFormat, Schema.class)).thenReturn(customerModel);
+        when(cache.loadRef(addressURL, refFormat, Schema.class)).thenReturn(addressModel);
+        when(cache.loadRef(contactURL, refFormat, Schema.class)).thenReturn(contactModel);
 
         new ExternalRefProcessor(cache, testedOpenAPI).processRefToExternalSchema(customerURL, refFormat);
+
+        verify(cache, times(1)).loadRef(customerURL, refFormat, Schema.class);
 
         assertNotNull(testedOpenAPI.getComponents().getSchemas().get("Customer"));
         assertNotNull(testedOpenAPI.getComponents().getSchemas().get("Contact"));
         assertNotNull(testedOpenAPI.getComponents().getSchemas().get("Address"));
     }
-
-
-    @Mocked
-    RemoteUrl remoteUrl;
 
 
     @Test
@@ -349,11 +325,7 @@ public class ExternalRefProcessorTest {
                 "        _links:\n" +
                 "          \"$ref\": \"#/components/schemas/link-object\"\n";
 
-        new Expectations() {{
-            RemoteUrl.urlToString(url, null, (PermittedUrlsChecker) any);
-            times = 1;
-            result = expectedResult;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq(url), eq(null), nullable(PermittedUrlsChecker.class))).thenReturn(expectedResult);
 
         OpenAPI mockedOpenAPI = new OpenAPI();
         mockedOpenAPI.setComponents(new Components());
@@ -367,6 +339,7 @@ public class ExternalRefProcessorTest {
                 "https://my.example.remote.url.com/globals.yaml#/components/schemas/link-object");
         assertTrue(mockedOpenAPI.getComponents().getSchemas().containsKey("link-object"));
         assertTrue(mockedOpenAPI.getComponents().getSchemas().containsKey("rel-data"));
+        remoteUrl.verify(() -> RemoteUrl.urlToString(eq(url), eq(null), nullable(PermittedUrlsChecker.class)), times(1));
         // assert that ref is relative ref is resolved. and the file path is from root yaml file.
         assertEquals(((Schema) mockedOpenAPI.getComponents().getSchemas().get("relative-with-url").getProperties().get("Bar")).get$ref(),
                 "./relative-with-url/relative-with-local.yaml#/relative-same-file");

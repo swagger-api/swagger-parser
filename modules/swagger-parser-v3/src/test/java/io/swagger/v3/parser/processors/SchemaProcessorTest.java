@@ -6,25 +6,64 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
-import mockit.*;
-import org.testng.Assert;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.testng.Assert.assertEquals;
 
 
 public class SchemaProcessorTest {
 
-    @Injectable
-    ResolverCache cache;
+    ResolverCache cache = mock(ResolverCache.class);
 
-    @Injectable
-    OpenAPI openAPI;
+    OpenAPI openAPI = mock(OpenAPI.class);
 
-    @Mocked
-    ExternalRefProcessor externalRefProcessor;
+    // Every ExternalRefProcessor created by a SchemaProcessor is a mock.
+    // It answers processRefToExternalSchema(ref, format) from this map (null when not listed).
+    private final Map<String, String> externalSchemaNames = new HashMap<>();
+    private MockedConstruction<ExternalRefProcessor> externalRefProcessors;
+
+    @BeforeMethod
+    public void mockExternalRefProcessor() {
+        externalSchemaNames.clear();
+        externalRefProcessors = Mockito.mockConstruction(ExternalRefProcessor.class, (mock, context) ->
+                Mockito.when(mock.processRefToExternalSchema(Mockito.anyString(), Mockito.any(RefFormat.class)))
+                        .thenAnswer(invocation -> externalSchemaNames.get(invocation.<String>getArgument(0))));
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void closeExternalRefProcessor() {
+        externalRefProcessors.close();
+    }
+
+    /** Verifies the number of processRefToExternalSchema(ref, URL) calls over all mocked ExternalRefProcessor instances. */
+    private void verifyExternalSchemaCalls(String ref, RefFormat format, int expected) {
+        int actual = 0;
+        for (ExternalRefProcessor processor : externalRefProcessors.constructed()) {
+            actual += Mockito.mockingDetails(processor).getInvocations().stream()
+                    .filter(i -> i.getMethod().getName().equals("processRefToExternalSchema")
+                            && ref.equals(i.getArguments()[0]) && format == i.getArguments()[1])
+                    .count();
+        }
+        assertEquals(actual, expected);
+    }
+
+    /** Equivalent of a full verification: nothing else was called on any mock. */
+    private void verifyNothingElseHappened() {
+        verifyNoInteractions(cache, openAPI);
+        for (ExternalRefProcessor processor : externalRefProcessors.constructed()) {
+            Mockito.mockingDetails(processor).getInvocations().forEach(i ->
+                    assertEquals(i.getMethod().getName(), "processRefToExternalSchema"));
+        }
+    }
 
     @Test
     public void testProcessRefSchema_ExternalRef() throws Exception {
@@ -32,18 +71,13 @@ public class SchemaProcessorTest {
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final String newRef = "bar";
 
-        new Expectations() {{
-
-            externalRefProcessor.processRefToExternalSchema(ref, RefFormat.URL);
-            times = 1;
-            result = newRef;
-
-        }};
+        externalSchemaNames.put(ref, newRef);
 
         Schema refSchema = new Schema().$ref(ref);
 
         new SchemaProcessor(cache, openAPI).processSchema(refSchema);
 
+        verifyExternalSchemaCalls(ref, RefFormat.URL, 1);
         assertEquals(refSchema.get$ref(), "#/components/schemas/bar");
     }
 
@@ -87,17 +121,9 @@ public class SchemaProcessorTest {
 
         SchemaProcessor modelProcessor = new SchemaProcessor(cache, openAPI);
 
-        new Expectations() {{
-            externalRefProcessor.processRefToExternalSchema(ref1, RefFormat.URL);
-            times = 1;
-            result = "bar";
-            externalRefProcessor.processRefToExternalSchema(ref2, RefFormat.URL);
-            times = 1;
-            result = "that";
-            externalRefProcessor.processRefToExternalSchema(ref3, RefFormat.URL);
-            times = 1;
-            result = "world";
-        }};
+        externalSchemaNames.put(ref1, "bar");
+        externalSchemaNames.put(ref2, "that");
+        externalSchemaNames.put(ref3, "world");
 
         ComposedSchema composedModel = new ComposedSchema();
 
@@ -108,14 +134,10 @@ public class SchemaProcessorTest {
 
         modelProcessor.processSchema(composedModel);
 
-        new FullVerifications() {{
-            externalRefProcessor.processRefToExternalSchema(ref1, RefFormat.URL);
-            times = 1;
-            externalRefProcessor.processRefToExternalSchema(ref2, RefFormat.URL);
-            times = 1;
-            externalRefProcessor.processRefToExternalSchema(ref3, RefFormat.URL);
-            times = 1;
-        }};
+        verifyExternalSchemaCalls(ref1, RefFormat.URL, 1);
+        verifyExternalSchemaCalls(ref2, RefFormat.URL, 1);
+        verifyExternalSchemaCalls(ref3, RefFormat.URL, 1);
+        verifyNothingElseHappened();
 
         assertEquals(composedModel.getAllOf().get(0).get$ref(),"#/components/schemas/bar");//child
         assertEquals(composedModel.getAllOf().get(1).get$ref(), "#/components/schemas/that"); //parent
@@ -147,72 +169,47 @@ public class SchemaProcessorTest {
     @Test
     public void testProcessRefProperty_ExternalRef() throws Exception {
 
-        final ExternalRefProcessor[] externalRefProcessor1 = {new ExternalRefProcessor(cache, openAPI)};
-        new Expectations() {{
-            externalRefProcessor1[0] = new ExternalRefProcessor(cache, openAPI);
-            times = 1;
-        }};
-
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final Schema refProperty = new Schema().$ref(ref);
 
-        new Expectations() {{
-            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL );
-            times = 1;
-            result = "bar";
-        }};
+        externalSchemaNames.put(ref, "bar");
 
         new SchemaProcessor(cache, openAPI).processSchema(refProperty);
 
-        new FullVerifications() {{
-            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL);
-            times = 1;
-        }};
+        assertEquals(externalRefProcessors.constructed().size(), 1);
+        verifyExternalSchemaCalls(ref, RefFormat.URL, 1);
+        verifyNothingElseHappened();
 
         assertEquals(refProperty.get$ref(), "#/components/schemas/bar");
     }
 
     @Test
     public void testProcessRefProperty_InternalRef() throws Exception {
-        new Expectations() {{
-            new ExternalRefProcessor(cache, openAPI);
-            times = 1;
-        }};
-
         final String expectedRef = "#/components/schemas/foo";
         final Schema property = new Schema().$ref(expectedRef);
         new SchemaProcessor(cache, openAPI).processSchema(property);
 
-        new FullVerifications() {{
-        }};
+        assertEquals(externalRefProcessors.constructed().size(), 1);
+        verifyNoInteractions(externalRefProcessors.constructed().get(0));
+        verifyNothingElseHappened();
 
         assertEquals(property.get$ref(), expectedRef);
     }
 
     @Test
     public void testProcessArrayProperty_ItemsIsRefProperty() throws Exception {
-        final ExternalRefProcessor[] externalRefProcessor1 = {new ExternalRefProcessor(cache, openAPI)};
-        new Expectations() {{
-            externalRefProcessor1[0] = new ExternalRefProcessor(cache, openAPI);
-            times = 1;
-        }};
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final Schema refProperty = new Schema().$ref(ref);
 
         ArraySchema arrayProperty = new ArraySchema();
         arrayProperty.setItems(refProperty);
-        new Expectations() {{
-            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL );
-            times = 1;
-            result = "bar";
-        }};
+        externalSchemaNames.put(ref, "bar");
 
         new SchemaProcessor(cache, openAPI).processSchema(arrayProperty);
 
-        new FullVerifications() {{
-            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL);
-            times = 1;
-        }};
+        assertEquals(externalRefProcessors.constructed().size(), 1);
+        verifyExternalSchemaCalls(ref, RefFormat.URL, 1);
+        verifyNothingElseHappened();
 
         assertEquals((arrayProperty.getItems()).get$ref(), "#/components/schemas/bar");
 
@@ -220,28 +217,17 @@ public class SchemaProcessorTest {
 
     @Test
     public void testProcessMapProperty_AdditionalPropertiesIsRefProperty() throws Exception {
-        final ExternalRefProcessor[] externalRefProcessor1 = {new ExternalRefProcessor(cache, openAPI)};
-        new Expectations() {{
-            externalRefProcessor1[0] = new ExternalRefProcessor(cache, openAPI);
-            times = 1;
-        }};
         final String ref = "http://my.company.com/path/to/file.json#/foo/bar";
         final Schema refProperty = new Schema().$ref(ref);
 
         refProperty.setAdditionalProperties(refProperty);
-
-        new Expectations() {{
-            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL );
-            times = 1;
-            result = "bar";
-        }};
+        externalSchemaNames.put(ref, "bar");
 
         new SchemaProcessor(cache, openAPI).processSchema(refProperty);
 
-        new FullVerifications() {{
-            externalRefProcessor1[0].processRefToExternalSchema(ref, RefFormat.URL);
-            times = 1;
-        }};
+        assertEquals(externalRefProcessors.constructed().size(), 1);
+        verifyExternalSchemaCalls(ref, RefFormat.URL, 1);
+        verifyNothingElseHappened();
 
         assertEquals((((Schema)refProperty.getAdditionalProperties()).get$ref()), "#/components/schemas/bar");
     }

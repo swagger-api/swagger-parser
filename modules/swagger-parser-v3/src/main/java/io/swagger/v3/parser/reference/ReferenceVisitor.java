@@ -1,7 +1,8 @@
 package io.swagger.v3.parser.reference;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import io.swagger.v3.parser.util.NodeTextUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.models.PathItem;
@@ -284,10 +285,10 @@ public class ReferenceVisitor extends AbstractVisitor {
     public JsonNode findAnchor(JsonNode root, String anchor) {
         if(root.isObject()){
             JsonNode anchorNode = root.get("$anchor");
-            if (anchorNode != null && anchorNode.isValueNode() && anchor.equals(anchorNode.asText())) {
+            if (anchorNode != null && anchorNode.isValueNode() && anchor.equals(NodeTextUtils.asText(anchorNode))) {
                 return root;
             }
-            Iterator<String> fieldNames = root.fieldNames();
+            Iterator<String> fieldNames = root.propertyNames().iterator();
             while(fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);

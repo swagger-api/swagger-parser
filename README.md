@@ -13,6 +13,7 @@
   - [Usage](#usage)
   - [Adding to your project](#adding-to-your-project)
     - [Prerequisites](#prerequisites)
+  - [Jackson 2 and Jackson 3](#jackson-2-and-jackson-3)
   - [Authentication](#authentication)  
   - [Options](#options)
     - [Resolve](#1-resolve)
@@ -121,7 +122,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 #### Prerequisites
 You need the following installed and available in your $PATH:
 
-* Java 11
+* Java 17 or later (the 3.0.0 line is built and tested on Java 17 and 21)
 * [Apache maven 3.x](http://maven.apache.org/)
 
 After cloning the project, you can build it from source with this command:
@@ -129,6 +130,34 @@ After cloning the project, you can build it from source with this command:
 ```
 mvn package
 ```
+
+### Jackson 2 and Jackson 3
+
+Version 3.0.0 uses Jackson 3 (`tools.jackson`, version 3.2.4). It needs swagger-core 3.0.0.
+The annotations stay in Jackson 2 (`com.fasterxml.jackson.core:jackson-annotations` 2.22). Jackson 3 uses them too.
+
+The module `swagger-parser-v2-converter` still reads OpenAPI 2.0 with the old `io.swagger:swagger-core` 1.6.x. That library needs Jackson 2.
+So in this module, and in `swagger-parser` (which includes it), Jackson 2 and Jackson 3 are both on the classpath.
+They have different package names. They do not clash.
+
+| Module | Jackson 2 | Jackson 3 |
+|---|---|---|
+| swagger-parser-core | jackson-annotations (compile, from swagger-models) | none |
+| swagger-parser-safe-url-resolver | none | none |
+| swagger-parser-v3 | jackson-annotations (compile) | jackson-databind, jackson-dataformat-yaml (compile) |
+| swagger-parser-cli | jackson-annotations (compile) | same as v3 (compile) |
+| swagger-parser-v2-converter | annotations, databind, dataformat-yaml 2.22.1 (provided; also used by swagger-core 1.6.x) | same as v3 (compile) |
+| swagger-parser | same as the converter (compile through the converter) | jackson-databind and yaml (provided) |
+
+All Jackson 2 artifacts in one module have the same version. See `.claude/dependency-report.md` for the full detail.
+
+**Known issue.** The converter can mix Jackson 2 tree nodes into the OpenAPI model. One example is a non-scalar `example` value.
+Jackson 3 can serialize such a node incorrectly, and it gives no error.
+This affects `swagger-parser-v2-converter` and `swagger-parser`.
+A follow-up task fixes this. It must be done before the 3.0.0 release.
+
+**YAML.** Two YAML libraries are present. The classic `snakeyaml` is used by the parser and by swagger-core 1.6.x.
+`snakeyaml-engine` is used by Jackson 3 YAML. The choice of one stack is a follow-up task.
 
 ### Authentication
 

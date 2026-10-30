@@ -13,88 +13,85 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.models.RefFormat;
-import mockit.*;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 
 public class ParameterProcessorTest {
 
 
-    @Injectable
-    ResolverCache cache;
+    ResolverCache cache = mock(ResolverCache.class);
 
-    @Injectable
-    OpenAPI openAPI;
+    OpenAPI openAPI = mock(OpenAPI.class);
 
-    @Mocked
-    SchemaProcessor modelProcessor;
+    // Every SchemaProcessor created inside ParameterProcessor / RequestBodyProcessor is a mock.
+    private MockedConstruction<SchemaProcessor> modelProcessor;
 
-    @Injectable
-    boolean openapi31;
+    boolean openapi31 = false;
 
-    @Injectable
-    HeaderParameter headerParameter;
+    HeaderParameter headerParameter = mock(HeaderParameter.class);
 
-    @Injectable
-    QueryParameter queryParameter;
+    QueryParameter queryParameter = mock(QueryParameter.class);
 
-    @Injectable
-    CookieParameter cookieParameter;
+    CookieParameter cookieParameter = mock(CookieParameter.class);
 
-    @Injectable
-    PathParameter pathParameter;
+    PathParameter pathParameter = mock(PathParameter.class);
 
-    @Injectable
-    HeaderParameter resolvedHeaderParam;
+    HeaderParameter resolvedHeaderParam = mock(HeaderParameter.class);
 
-    @Injectable
-    Schema bodyParamSchema;
+    Schema bodyParamSchema = mock(Schema.class);
+
+    @BeforeMethod
+    public void mockSchemaProcessor() {
+        modelProcessor = Mockito.mockConstruction(SchemaProcessor.class);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void closeSchemaProcessor() {
+        modelProcessor.close();
+    }
 
     @Test
     public void testProcessParameters_TypesThatAreNotRefOrBody() throws Exception {
-        expectedModelProcessorCreation();
-        new Expectations() {
-            {
-                headerParameter.getSchema();
-                result = null;
-                headerParameter.getContent();
-                result = null;
-                queryParameter.getSchema();
-                result = null;
-                queryParameter.getContent();
-                result = null;
-                cookieParameter.getSchema();
-                result = null;
-                cookieParameter.getContent();
-                result = null;
-                pathParameter.getSchema();
-                result = null;
-                pathParameter.getContent();
-                result = null;
-            }
-        };
+        when(headerParameter.getSchema()).thenReturn(null);
+        when(headerParameter.getContent()).thenReturn(null);
+        when(queryParameter.getSchema()).thenReturn(null);
+        when(queryParameter.getContent()).thenReturn(null);
+        when(cookieParameter.getSchema()).thenReturn(null);
+        when(cookieParameter.getContent()).thenReturn(null);
+        when(pathParameter.getSchema()).thenReturn(null);
+        when(pathParameter.getContent()).thenReturn(null);
+
         final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31)
                 .processParameters(Arrays.asList(headerParameter,
                         queryParameter,
                         cookieParameter,
                         pathParameter));
 
-        new FullVerifications() {{
-            headerParameter.get$ref();
-            times = 1;
-            queryParameter.get$ref();
-            times = 1;
-            cookieParameter.get$ref();
-            times = 1;
-            pathParameter.get$ref();
-            times = 1;
-        }};
+        expectedModelProcessorCreation();
+
+        // full verification: only these calls happened on the parameters
+        for (Parameter parameter : Arrays.asList(headerParameter, queryParameter, cookieParameter, pathParameter)) {
+            verify(parameter, times(1)).get$ref();
+            verify(parameter, Mockito.atLeastOnce()).getSchema();
+            verify(parameter, Mockito.atLeastOnce()).getContent();
+            verifyNoMoreInteractions(parameter);
+        }
 
         assertEquals(processedParameters.size(), 4);
         assertEquals(processedParameters.get(0), headerParameter);
@@ -105,24 +102,22 @@ public class ParameterProcessorTest {
 
     @Test
     public void testProcessParameters_RefToHeader() throws Exception {
-        expectedModelProcessorCreation();
-
         final String ref = "#/components/parameters/foo";
         Parameter refParameter = new Parameter().$ref(ref);
 
         expectLoadingRefFromCache(ref, RefFormat.INTERNAL, resolvedHeaderParam);
-        new Expectations() {
-            {
-                resolvedHeaderParam.getSchema();
-                result = null;
-                resolvedHeaderParam.getContent();
-                result = null;
-            }
-        };
+        when(resolvedHeaderParam.getSchema()).thenReturn(null);
+        when(resolvedHeaderParam.getContent()).thenReturn(null);
 
         final List<Parameter> processedParameters = new ParameterProcessor(cache, openAPI, openapi31).processParameters(Arrays.asList(refParameter));
 
-        new FullVerifications(){{}};
+        expectedModelProcessorCreation();
+        verify(cache, times(1)).loadRef(ref, RefFormat.INTERNAL, Parameter.class);
+        verifyNoMoreInteractions(cache);
+        verifyNoInteractions(openAPI);
+        verify(resolvedHeaderParam, Mockito.atLeastOnce()).getSchema();
+        verify(resolvedHeaderParam, Mockito.atLeastOnce()).getContent();
+        verifyNoMoreInteractions(resolvedHeaderParam);
 
         assertEquals(processedParameters.size(), 1);
         assertEquals(processedParameters.get(0), resolvedHeaderParam);
@@ -130,37 +125,24 @@ public class ParameterProcessorTest {
 
     private void expectLoadingRefFromCache(final String ref, final RefFormat refFormat,
                                            final Parameter resolvedParam) {
-        new Expectations() {{
-            cache.loadRef(ref, refFormat, Parameter.class);
-            times = 1;
-            result = resolvedParam;
-        }};
+        when(cache.loadRef(ref, refFormat, Parameter.class)).thenReturn(resolvedParam);
     }
 
     @Test
     public void testProcessParameters_BodyParameter() throws Exception {
-        final SchemaProcessor[] schemaProcessor1 = {new SchemaProcessor(cache, openAPI, openapi31)};
-        new Expectations() {{
-            schemaProcessor1[0] = new SchemaProcessor(cache, openAPI, openapi31);
-            times = 1;
-
-        }};
-
         RequestBody bodyParameter = new RequestBody().content(new Content().addMediaType("*/*",new MediaType().schema(bodyParamSchema)));
-
-        new Expectations(){{
-            schemaProcessor1[0].processSchema(bodyParamSchema); times=1;
-        }};
 
         new RequestBodyProcessor(cache, openAPI, openapi31).processRequestBody(bodyParameter);
 
-        new FullVerifications(){{}};
+        // RequestBodyProcessor creates exactly one SchemaProcessor, and it processes the body schema once
+        expectedModelProcessorCreation();
+        SchemaProcessor schemaProcessor = modelProcessor.constructed().get(0);
+        verify(schemaProcessor, times(1)).processSchema(bodyParamSchema);
+        verifyNoMoreInteractions(schemaProcessor);
+        verifyNoInteractions(cache, openAPI);
     }
 
     private void expectedModelProcessorCreation() {
-        new Expectations() {{
-            new SchemaProcessor(cache, openAPI, openapi31);
-            times = 1;
-        }};
+        assertEquals(modelProcessor.constructed().size(), 1);
     }
 }

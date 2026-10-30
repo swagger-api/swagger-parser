@@ -13,8 +13,10 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.RemoteUrl;
-import mockit.Expectations;
-import mockit.Mocked;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
@@ -24,13 +26,24 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class NetworkReferenceTest {
-    @Mocked
-    public RemoteUrl remoteUrl;
+    private MockedStatic<RemoteUrl> remoteUrl;
+
+    @BeforeMethod
+    public void mockRemoteUrl() {
+        remoteUrl = Mockito.mockStatic(RemoteUrl.class);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void closeRemoteUrl() {
+        remoteUrl.close();
+    }
 
     private static String issue_323_yaml, issue_323_events_yaml, issue_323_paging_yaml, issue_323_bar_yaml;
     private static String issue_328_yaml, issue_328_events_yaml, issue_328_paging_yaml, issue_328_bar_yaml;
@@ -80,14 +93,8 @@ public class NetworkReferenceTest {
         options.setValidateExternalRefs(true);
         options.setResolve(true);
 
-        new Expectations() {
-            {
-                RemoteUrl.urlToString("http://localhost:8080/swos-443/root.yaml", new ArrayList<>());
-                result = issue_443_yaml;
-                RemoteUrl.urlToString("http://localhost:8080/swos-443/ref.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-                result = issue_443_ref_yaml;
-            }
-        };
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://localhost:8080/swos-443/root.yaml", new ArrayList<>())).thenReturn(issue_443_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://localhost:8080/swos-443/ref.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_443_ref_yaml);
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation("http://localhost:8080/swos-443/root.yaml", null, options);
         OpenAPI openAPI = result.getOpenAPI();
 
@@ -118,19 +125,10 @@ public class NetworkReferenceTest {
 
     @Test
     public void testIssue323() throws Exception {
-        new Expectations() {{
-            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/issue-323.yaml", new ArrayList<>());
-            result = issue_323_yaml;
-
-            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/eventsCase9.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_323_events_yaml;
-
-            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/common/pagingWithFolderRef.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_323_paging_yaml;
-
-            RemoteUrl.urlToString("http://localhost:8080/nested-file-references/common/common2/bar.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_323_bar_yaml;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://localhost:8080/nested-file-references/issue-323.yaml", new ArrayList<>())).thenReturn(issue_323_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://localhost:8080/nested-file-references/eventsCase9.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_323_events_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://localhost:8080/nested-file-references/common/pagingWithFolderRef.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_323_paging_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://localhost:8080/nested-file-references/common/common2/bar.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_323_bar_yaml);
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -148,19 +146,10 @@ public class NetworkReferenceTest {
 
     @Test
     public void testIssue328() throws Exception {
-        new Expectations() {{
-            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328.yaml", new ArrayList<>());
-            result = issue_328_yaml;
-
-            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328-events.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_328_events_yaml;
-
-            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/common/issue-328-paging.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_328_paging_yaml;
-
-            RemoteUrl.urlToString("http://localhost:8080/resources/swagger/common/common2/issue-328-bar.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_328_bar_yaml;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://localhost:8080/resources/swagger/issue-328.yaml", new ArrayList<>())).thenReturn(issue_328_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://localhost:8080/resources/swagger/issue-328-events.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_328_events_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://localhost:8080/resources/swagger/common/issue-328-paging.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_328_paging_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://localhost:8080/resources/swagger/common/common2/issue-328-bar.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_328_bar_yaml);
 
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
@@ -177,19 +166,10 @@ public class NetworkReferenceTest {
 
     @Test
     public void testIssue330() throws Exception {
-        new Expectations() {{
-            RemoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<>());
-            result = issue_330_yaml;
-
-            RemoteUrl.urlToString("http://server1/resources/common/paging.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_330_paging_yaml;
-
-            RemoteUrl.urlToString("http://server1/resources/common/users.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_330_users_yaml;
-
-            RemoteUrl.urlToString("http://server2/resources/common/entities.yaml", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_330_entities_yaml;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://server1/resources/swagger.yaml", new ArrayList<>())).thenReturn(issue_330_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://server1/resources/common/paging.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_330_paging_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://server1/resources/common/users.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_330_users_yaml);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://server2/resources/common/entities.yaml"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_330_entities_yaml);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
 
@@ -207,13 +187,8 @@ public class NetworkReferenceTest {
 
     @Test
     public void testIssue335() throws Exception {
-        new Expectations() {{
-            RemoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<>());
-            result = issue_335_json;
-
-            RemoteUrl.urlToString("http://server1/resources/Bar.json", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_335_bar_json;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://server1/resources/swagger.json", new ArrayList<>())).thenReturn(issue_335_json);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://server1/resources/Bar.json"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_335_bar_json);
 
 
         ParseOptions options = new ParseOptions();
@@ -230,11 +205,7 @@ public class NetworkReferenceTest {
 
     @Test
     public void testPathReference() throws Exception {
-        new Expectations() {{
-            RemoteUrl.urlToString("http://petstore.swagger.io/v2/swagger.json", new ArrayList<>(), (PermittedUrlsChecker) any);
-            result = issue_407_json;
-
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://petstore.swagger.io/v2/swagger.json"), eq(new ArrayList<>()), nullable(PermittedUrlsChecker.class))).thenReturn(issue_407_json);
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         String yaml = "openapi: 3.0.0\n" +
@@ -261,13 +232,8 @@ public class NetworkReferenceTest {
         AuthorizationValue auth = new AuthorizationValue("Authorization", "OMG_SO_SEKR3T", "header");
         auths.add(auth);
 
-        new Expectations() {{
-            RemoteUrl.urlToString("http://remote1/resources/swagger.yaml", auths);
-            result = issue_411_server;
-
-            RemoteUrl.urlToString("http://remote2/resources/foo", auths, (PermittedUrlsChecker) any);
-            result = issue_411_components;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://remote1/resources/swagger.yaml", auths)).thenReturn(issue_411_server);
+        remoteUrl.when(() -> RemoteUrl.urlToString(eq("http://remote2/resources/foo"), eq(auths), nullable(PermittedUrlsChecker.class))).thenReturn(issue_411_components);
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
@@ -309,10 +275,7 @@ public class NetworkReferenceTest {
     public void testIssue742() throws Exception {
         final List<AuthorizationValue> auths = new ArrayList<>();
 
-        new Expectations() {{
-            RemoteUrl.urlToString("http://www.example.io/one/two/swagger.json", auths);
-            result = issue_742_json;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString("http://www.example.io/one/two/swagger.json", auths)).thenReturn(issue_742_json);
 
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();

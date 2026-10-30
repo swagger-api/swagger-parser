@@ -128,7 +128,7 @@ public class SwaggerParser {
         try {
             if(result != null) {
                 OutputStream out = Files.newOutputStream(Paths.get(args.getString(o)));
-                byte[] specBytes = result.getBytes();
+                byte[] specBytes = result.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                 out.write(specBytes);
                 out.close();
             }

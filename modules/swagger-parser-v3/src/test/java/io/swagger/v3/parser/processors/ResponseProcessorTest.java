@@ -9,70 +9,49 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.ResolverCache;
-import io.swagger.v3.parser.models.RefFormat;
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Expectations;
-import org.testng.annotations.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.testng.Assert.assertEquals;
 
 
 
 
 public class ResponseProcessorTest {
 
-    @Injectable
-    ResolverCache cache;
+    ResolverCache cache = mock(ResolverCache.class);
 
-    @Injectable
-    OpenAPI swagger;
+    OpenAPI swagger = mock(OpenAPI.class);
 
-    @Mocked
-    SchemaProcessor propertyProcessor;
+    boolean openapi31 = false;
 
-    @Mocked
-    HeaderProcessor headerProcessor;
-
-    @Mocked
-    LinkProcessor linkProcessor;
-
-    @Injectable
-    boolean openapi31;
-
-    @Injectable
-    Schema responseSchema;
-    @Injectable
-    Header responseHeader;
+    Schema responseSchema = mock(Schema.class);
+    Header responseHeader = mock(Header.class);
 
     //@Test
     public void testProcessResponse() throws Exception {
 
-        new Expectations(){{
-            new SchemaProcessor(cache, swagger, openapi31);
-            times=1;
+        try (MockedConstruction<SchemaProcessor> propertyProcessor = Mockito.mockConstruction(SchemaProcessor.class);
+             MockedConstruction<HeaderProcessor> headerProcessor = Mockito.mockConstruction(HeaderProcessor.class);
+             MockedConstruction<LinkProcessor> linkProcessor = Mockito.mockConstruction(LinkProcessor.class)) {
 
-            new HeaderProcessor(cache,swagger, openapi31);
-            times = 1;
+            ApiResponse response = new ApiResponse();
+            response.content(new Content().addMediaType("*/*", new MediaType().schema(responseSchema)));
+            response.addHeaderObject("foo", responseHeader);
 
-            new LinkProcessor(cache,swagger, openapi31);
-            times = 1;
+            new ResponseProcessor(cache, swagger, openapi31).processResponse(response);
 
-            propertyProcessor.processSchema(responseSchema);
-            times=1;
-        }};
+            assertEquals(propertyProcessor.constructed().size(), 1);
+            assertEquals(headerProcessor.constructed().size(), 1);
+            assertEquals(linkProcessor.constructed().size(), 1);
 
-        ApiResponse response = new ApiResponse();
-        response.content(new Content().addMediaType("*/*", new MediaType().schema(responseSchema)));
-        response.addHeaderObject("foo", responseHeader);
-
-        new ResponseProcessor(cache, swagger, openapi31).processResponse(response);
-
-
-        new FullVerifications(){{
-            propertyProcessor.processSchema(responseSchema);
-            times = 1;
-            headerProcessor.processHeader(responseHeader);
-            times = 1;
-        }};
+            verify(propertyProcessor.constructed().get(0), times(1)).processSchema(responseSchema);
+            verify(headerProcessor.constructed().get(0), times(1)).processHeader(responseHeader);
+            verifyNoMoreInteractions(propertyProcessor.constructed().get(0), headerProcessor.constructed().get(0));
+        }
     }
 }

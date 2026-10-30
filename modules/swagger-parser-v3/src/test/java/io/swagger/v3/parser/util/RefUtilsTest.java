@@ -1,36 +1,36 @@
 package io.swagger.v3.parser.util;
 
 
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.processors.ExternalRefProcessor;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Expectations;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.MockedStatic;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -40,10 +40,8 @@ public class RefUtilsTest {
 
     List<AuthorizationValue> auths;
 
-    @Injectable
-    AuthorizationValue auth1;
-    @Injectable
-    AuthorizationValue auth2;
+    AuthorizationValue auth1 = mock(AuthorizationValue.class);
+    AuthorizationValue auth2 = mock(AuthorizationValue.class);
 
     private PermittedUrlsChecker permittedUrlsChecker = new PermittedUrlsChecker();
 
@@ -112,8 +110,26 @@ public class RefUtilsTest {
     }
 
 
-    @Mocked
-    RemoteUrl remoteUrl;
+    private MockedStatic<RemoteUrl> remoteUrl;
+    private MockedStatic<IOUtils> ioUtils;
+    private MockedStatic<Files> files;
+    private MockedStatic<ClasspathHelper> classpathHelper;
+
+    @Before
+    public void setUpStaticMocks() {
+        remoteUrl = mockStatic(RemoteUrl.class);
+        ioUtils = mockStatic(IOUtils.class);
+        files = mockStatic(Files.class);
+        classpathHelper = mockStatic(ClasspathHelper.class);
+    }
+
+    @After
+    public void closeStaticMocks() {
+        classpathHelper.close();
+        files.close();
+        ioUtils.close();
+        remoteUrl.close();
+    }
 
     @Test
     public void testReadExternalRef_UrlFormat() throws Exception {
@@ -121,14 +137,11 @@ public class RefUtilsTest {
         final String url = "http://my.company.com/path/to/file.json";
         final String expectedResult = "really good json";
 
-        new Expectations() {{
-            RemoteUrl.urlToString(url, auths, permittedUrlsChecker);
-            times = 1;
-            result = expectedResult;
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString(url, auths, permittedUrlsChecker)).thenReturn(expectedResult);
 
         String actualResult = RefUtils.readExternalRef(url, RefFormat.URL, auths, null, permittedUrlsChecker);
         assertEquals(actualResult, expectedResult);
+        remoteUrl.verify(() -> RemoteUrl.urlToString(url, auths, permittedUrlsChecker), times(1));
     }
 
     @Rule
@@ -139,19 +152,17 @@ public class RefUtilsTest {
 
         final String url = "http://my.company.com/path/to/file.json";
 
-        new Expectations() {{
-            RemoteUrl.urlToString(url, auths, permittedUrlsChecker);
-            times = 1;
-            result = new Exception();
-        }};
+        remoteUrl.when(() -> RemoteUrl.urlToString(url, auths, permittedUrlsChecker)).thenThrow(new Exception());
         thrown.expect(RuntimeException.class);
-        RefUtils.readExternalRef(url, RefFormat.URL, auths, null, permittedUrlsChecker);
+        try {
+            RefUtils.readExternalRef(url, RefFormat.URL, auths, null, permittedUrlsChecker);
+        } finally {
+            remoteUrl.verify(() -> RemoteUrl.urlToString(url, auths, permittedUrlsChecker), times(1));
+        }
     }
 
-    @Mocked IOUtils ioUtils;
-    @Mocked Files files;
-    @Injectable Path parentDirectory;
-    @Injectable Path pathToUse;
+    Path parentDirectory = mock(Path.class);
+    Path pathToUse = mock(Path.class);
 
     public File tempFile(String name) throws Exception{
         String tmpDir = System.getProperty("java.io.tmpdir");
@@ -169,33 +180,28 @@ public class RefUtilsTest {
 
         setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
-        new Expectations() {{
-            IOUtils.toString((FileInputStream) any, UTF_8);
-            times = 1;
-            result = expectedResult;
-
-        }};
+        ioUtils.when(() -> IOUtils.toString(any(InputStream.class), eq(UTF_8))).thenReturn(expectedResult);
 
         String actualResult = RefUtils.readExternalRef(filePath, RefFormat.RELATIVE, auths, parentDirectory, permittedUrlsChecker);
         assertEquals(actualResult, expectedResult);
+        ioUtils.verify(() -> IOUtils.toString(any(InputStream.class), eq(UTF_8)), times(1));
+        verifyRelativeFileLookup();
 
     }
 
-    @Injectable File file;
-    @Injectable String filePath;
+    File file = mock(File.class);
+    String filePath = "file.json";
 
-    private void setupRelativeFileExpectations(@Injectable final Path parentDirectory, @Injectable final Path pathToUse, @Injectable final File file, final String filePath) throws Exception {
-        new Expectations() {{
+    private void setupRelativeFileExpectations(final Path parentDirectory, final Path pathToUse, final File file, final String filePath) throws Exception {
+        Path resolved = mock(Path.class);
+        when(parentDirectory.resolve(filePath)).thenReturn(resolved);
+        when(resolved.normalize()).thenReturn(pathToUse);
+        files.when(() -> Files.exists(pathToUse)).thenReturn(true);
+        files.when(() -> Files.newInputStream(pathToUse)).thenReturn(mock(InputStream.class));
+    }
 
-            parentDirectory.resolve(filePath).normalize();
-            times = 1;
-            result = pathToUse;
-
-            Files.exists(pathToUse);
-            times = 1;
-            result = true;
-
-        }};
+    private void verifyRelativeFileLookup() {
+        files.verify(() -> Files.exists(pathToUse), times(1));
     }
 
 
@@ -206,11 +212,7 @@ public class RefUtilsTest {
 
         setupRelativeFileExpectations(parentDirectory, pathToUse, file, filePath);
 
-        new Expectations() {{
-            IOUtils.toString((FileInputStream) any, UTF_8);
-            times = 1;
-            result = new IOException();
-        }};
+        ioUtils.when(() -> IOUtils.toString(any(InputStream.class), eq(UTF_8))).thenThrow(new IOException());
 
         thrown.expect(new BaseMatcher<IOException>() {
             @Override
@@ -236,10 +238,9 @@ public class RefUtilsTest {
         }
     }
 
-    @Mocked ClasspathHelper classpathHelper;
-    @Injectable Path pathToUse2;
+    Path pathToUse2 = mock(Path.class);
 
-    @Injectable Path parentDirectory2;
+    Path parentDirectory2 = mock(Path.class);
 
     @Test
     public void testPathJoin1() {

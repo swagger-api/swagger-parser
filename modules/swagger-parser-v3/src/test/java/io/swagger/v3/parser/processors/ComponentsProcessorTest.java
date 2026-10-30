@@ -5,56 +5,71 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.ResolverCache;
-import mockit.*;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.testng.Assert.assertEquals;
 
 
 public class ComponentsProcessorTest {
 
+    // Every processor created inside ComponentsProcessor is a mock.
+    private final List<MockedConstruction<?>> constructions = new ArrayList<>();
+    private MockedConstruction<SchemaProcessor> schemaProcessor;
+    private MockedConstruction<ResponseProcessor> responseProcessor;
+    private MockedConstruction<RequestBodyProcessor> requestBodyProcessor;
+    private MockedConstruction<ParameterProcessor> parameterProcessor;
+    private MockedConstruction<HeaderProcessor> headerProcessor;
+    private MockedConstruction<ExampleProcessor> exampleProcessor;
+    private MockedConstruction<LinkProcessor> linkProcessor;
+    private MockedConstruction<CallbackProcessor> callbackProcessor;
+    private MockedConstruction<SecuritySchemeProcessor> securitySchemeProcessor;
 
-    @Mocked
-    SchemaProcessor schemaProcessor;
+    Schema model1 = mock(Schema.class);
 
-    @Mocked
-    ResponseProcessor responseProcessor;
+    Schema model2 = mock(Schema.class);
 
-    @Mocked
-    RequestBodyProcessor requestBodyProcessor;
+    ResolverCache cache = mock(ResolverCache.class);
 
-    @Mocked
-    ParameterProcessor parameterProcessor;
+    boolean openapi31 = false;
 
-    @Mocked
-    HeaderProcessor headerProcessor;
+    OpenAPI openAPI = mock(OpenAPI.class);
 
-    @Mocked
-    ExampleProcessor exampleProcessor;
+    private <T> MockedConstruction<T> track(MockedConstruction<T> construction) {
+        constructions.add(construction);
+        return construction;
+    }
 
-    @Mocked
-    LinkProcessor linkProcessor;
+    @BeforeMethod
+    public void mockProcessors() {
+        schemaProcessor = track(Mockito.mockConstruction(SchemaProcessor.class));
+        responseProcessor = track(Mockito.mockConstruction(ResponseProcessor.class));
+        requestBodyProcessor = track(Mockito.mockConstruction(RequestBodyProcessor.class));
+        parameterProcessor = track(Mockito.mockConstruction(ParameterProcessor.class));
+        headerProcessor = track(Mockito.mockConstruction(HeaderProcessor.class));
+        exampleProcessor = track(Mockito.mockConstruction(ExampleProcessor.class));
+        linkProcessor = track(Mockito.mockConstruction(LinkProcessor.class));
+        callbackProcessor = track(Mockito.mockConstruction(CallbackProcessor.class));
+        securitySchemeProcessor = track(Mockito.mockConstruction(SecuritySchemeProcessor.class));
+    }
 
-    @Mocked
-    CallbackProcessor callbackProcessor;
-
-    @Mocked
-    SecuritySchemeProcessor securitySchemeProcessor;
-
-    @Injectable
-    Schema model1;
-
-    @Injectable
-    Schema model2;
-
-    @Injectable
-    ResolverCache cache;
-
-    @Injectable
-    boolean openapi31;
-
-    @Injectable  OpenAPI openAPI;
-
-
+    @AfterMethod(alwaysRun = true)
+    public void closeMocks() {
+        constructions.forEach(MockedConstruction::close);
+        constructions.clear();
+    }
 
     @Test
     public void testComponentsSchemasProcessor() throws Exception {
@@ -62,62 +77,37 @@ public class ComponentsProcessorTest {
         openAPI.components(new Components().addSchemas("foo", model1));
         openAPI.getComponents().addSchemas("bar", model2);
 
-
-        new Expectations() {{
-
-            schemaProcessor.processSchema((Schema) any);
-            times = 2;
-        }};
-
         new ComponentsProcessor(openAPI,cache, openapi31).processComponents();
 
-        new Verifications() {{
-            schemaProcessor.processSchema(model1);
-            schemaProcessor.processSchema(model2);
-        }};
+        assertEquals(schemaProcessor.constructed().size(), 1);
+        SchemaProcessor processor = schemaProcessor.constructed().get(0);
+        verify(processor, times(2)).processSchema(any(Schema.class));
+        verify(processor).processSchema(model1);
+        verify(processor).processSchema(model2);
     }
 
     @Test
     public void testNoComponentsDefined() throws Exception {
 
-        new Expectations() {{
-            new SchemaProcessor(cache, openAPI, openapi31);
-            times = 1;
-
-            new ResponseProcessor(cache, openAPI, openapi31);
-            times = 1;
-
-            new RequestBodyProcessor(cache, openAPI, openapi31);
-            times = 1;
-
-            new ParameterProcessor( cache, openAPI, openapi31);
-            times = 1;
-
-            new HeaderProcessor(cache, openAPI, openapi31);
-            times = 1;
-
-            new ExampleProcessor(cache, openAPI);
-            times = 1;
-
-            new LinkProcessor(cache, openAPI, openapi31);
-            times = 1;
-
-            new CallbackProcessor(cache, openAPI, openapi31);
-            times = 1;
-
-            new SecuritySchemeProcessor(cache, openAPI);
-            times = 1;
-
-            openAPI.getComponents();
-            times = 1;
-            result = null;
-
-
-        }};
-
         new ComponentsProcessor(openAPI,cache, openapi31).processComponents();
 
-        new FullVerifications() {{
-        }};
+        // each processor is created exactly once
+        assertEquals(schemaProcessor.constructed().size(), 1);
+        assertEquals(responseProcessor.constructed().size(), 1);
+        assertEquals(requestBodyProcessor.constructed().size(), 1);
+        assertEquals(parameterProcessor.constructed().size(), 1);
+        assertEquals(headerProcessor.constructed().size(), 1);
+        assertEquals(exampleProcessor.constructed().size(), 1);
+        assertEquals(linkProcessor.constructed().size(), 1);
+        assertEquals(callbackProcessor.constructed().size(), 1);
+        assertEquals(securitySchemeProcessor.constructed().size(), 1);
+
+        // full verification: only openAPI.getComponents() was called, once, and nothing else
+        verify(openAPI, times(1)).getComponents();
+        verifyNoMoreInteractions(openAPI);
+        verifyNoInteractions(cache);
+        for (MockedConstruction<?> construction : constructions) {
+            construction.constructed().forEach(processor -> verifyNoInteractions(processor));
+        }
     }
 }

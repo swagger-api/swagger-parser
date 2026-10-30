@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger.parser.v3</groupId>
     <artifactId>swagger-parser-project</artifactId>
-    <version>2.1.49-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>swagger-parser-project</name>
     <description>swagger-parser-project</description>
@@ -58,7 +58,7 @@
                 </dependencies>
                 <configuration>
                     <testNGArtifactName>none:none</testNGArtifactName>
-                    <argLine>-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar --add-opens java.base/java.lang=ALL-UNNAMED -Djdk.attach.allowAttachSelf</argLine>
+                    <argLine>@{argLine}</argLine>
                     <systemPropertyVariables>
                         <io.swagger.v3.parser.util.RemoteUrl.trustAll>true</io.swagger.v3.parser.util.RemoteUrl.trustAll>
                     </systemPropertyVariables>
@@ -119,11 +119,11 @@
                 <version>3.12.0</version>
                 <configuration>
                     <aggregate>true</aggregate>
-                    <source>1.8</source>
+                    <source>17</source>
                     <encoding>UTF-8</encoding>
                     <maxmemory>1g</maxmemory>
                     <links>
-                        <link>http://docs.oracle.com/javase/8/docs/api</link>
+                        <link>https://docs.oracle.com/en/java/javase/17/docs/api</link>
                     </links>
                 </configuration>
                 <executions>
@@ -195,6 +195,9 @@
                         </goals>
                         <configuration>
                             <rules>
+                                <requireJavaVersion>
+                                    <version>[17,)</version>
+                                </requireJavaVersion>
                                 <requireReleaseDeps>
                                     <message>No Snapshots Allowed!</message>
                                     <onlyWhenRelease>true</onlyWhenRelease>
@@ -302,6 +305,13 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson3-bom-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-core</artifactId>
                 <version>${swagger-core-version}</version>
@@ -329,9 +339,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.jmockit</groupId>
-                <artifactId>jmockit</artifactId>
-                <version>${jmockit-version}</version>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito-version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -357,20 +367,23 @@
         <module>modules/swagger-parser-safe-url-resolver</module>
     </modules>
     <properties>
-        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <snakeyaml-version>2.6</snakeyaml-version>
         <swagger-parser-v2-version>1.0.76</swagger-parser-v2-version>
         <commons-io-version>2.22.0</commons-io-version>
         <slf4j-version>2.0.18</slf4j-version>
-        <swagger-core-version>2.2.53</swagger-core-version>
+        <swagger-core-version>3.0.0</swagger-core-version>
         <swagger-core-v2-version>1.6.16</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>7.12.0</testng-version>
-        <jmockit-version>1.49</jmockit-version>
+        <mockito-version>5.24.0</mockito-version>
+        <!-- default for surefire @{argLine}; JaCoCo prepare-agent prepends its agent here -->
+        <argLine></argLine>
         <wiremock-version>2.35.2</wiremock-version>
         <surefire-version>3.5.6</surefire-version>
         <commons-lang-version>3.20.0</commons-lang-version>
         <jackson-bom-version>2.22.1</jackson-bom-version>
+        <jackson3-bom-version>3.2.4</jackson3-bom-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 </project>
