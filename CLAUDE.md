@@ -2,106 +2,40 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Build & Test Commands
+## Branch context
+
+This is the **v1.x line** (Swagger 2.0 / OpenAPI 2, `io.swagger:*`, swagger-core 1.6.x, Java 8 source/target). OpenAPI 3.x and `swagger-parser-v3` / `v2-converter` belong to the 2.x line on `master` — do not add 2.x material here (a 2.x-flavoured CLAUDE.md and fixtures were previously committed by accident and removed). Directories like `modules/swagger-parser-v3`, `-cli`, `-core`, `-v2-converter` may exist locally with only `target/` leftovers; they are not in the root `pom.xml` `<modules>`.
+
+## Commands
 
 ```bash
-# Build and run all tests
-mvn package
-
-# Skip tests
-mvn package -DskipTests
-
-# Run tests for a single module
-mvn test -pl modules/swagger-parser-v3
-
-# Run a single test class
-mvn test -pl modules/swagger-parser-v3 -Dtest=OpenAPIResolverTest
-
-# Run a single test method
-mvn test -pl modules/swagger-parser-v3 -Dtest=OpenAPIResolverTest#testMethod
-
-# Build one module plus the modules it depends on (e.g. v3 needs core)
-mvn test -pl modules/swagger-parser-v3 -am
-
-# Install all modules to local repo (needed for cross-module development)
-mvn install -DskipTests
+mvn -B verify                                  # full build + tests (what CI runs; see .github/workflows/maven-v1.yml)
+mvn -B verify -Dsurefire.forkCount=4 -DargLine="-XX:-OmitStackTraceInFastThrow"   # CI flags
+mvn -pl modules/swagger-parser -am test        # one module (+ upstream deps)
+mvn -pl modules/swagger-compat-spec-parser test -Dtest=JsonPatchTest              # single test class
+mvn -pl modules/swagger-parser test -Dtest=SwaggerParserTest#methodName           # single test method
 ```
 
-## Branches
+Tests mix TestNG (6.9.6), JUnit 4, JMockit and WireMock. CI builds on JDK 8 (Temurin) only.
 
-- `master` is the PR target and the main branch (snapshot versions auto-deploy from it).
-- `v1` is the 1.x line (currently `1.0.x-SNAPSHOT`). Check `git branch --show-current` before assuming which line you are on; feature branches may be cut from either.
+## Modules (root `pom.xml`)
 
-Tests use **TestNG** (not JUnit) with **JMockit** for mocking. The surefire plugin is configured with a JMockit javaagent — do not remove it or tests will fail.
+- `swagger-parser-safe-url-resolver` — SSRF-protection layer for fetching remote `$ref`s/specs (allow/deny host matchers). Built first; `swagger-parser` depends on it.
+- `swagger-parser` — reads Swagger 2.0 JSON/YAML into swagger-core `Swagger` POJOs and resolves `$ref`s.
+- `swagger-compat-spec-parser` — reads legacy Swagger 1.1/1.2 (resource listing + API declarations) and migrates them to 2.0.
 
-## Module Structure
+## Architecture
 
-The project is a multi-module Maven build (`groupId: io.swagger.parser.v3`, current version tracked in root `pom.xml`):
+**Extension-based entry point.** `SwaggerParser` (`io.swagger.parser`) is a facade: it discovers `SwaggerParserExtension` implementations via `ServiceLoader` (`META-INF/services/io.swagger.parser.SwaggerParserExtension`) and tries each in order until one returns a non-null result. `Swagger20Parser` is the built-in 2.0 implementation; `SwaggerCompatConverter` (compat module, registered in its own `META-INF/services` file) plugs in the same way, which is why adding the compat jar enables 1.x input with no code change.
 
-| Module | Artifact | Role |
-|---|---|---|
-| `swagger-parser-core` | `swagger-parser-core` | Interfaces & models only: `SwaggerParserExtension`, `ParseOptions`, `SwaggerParseResult`, `AuthorizationValue` |
-| `swagger-parser-v3` | `swagger-parser-v3` | Core implementation — parses OAS 3.0 and 3.1, resolves refs |
-| `swagger-parser-v2-converter` | `swagger-parser-v2-converter` | Converts Swagger/OAS 2.0 docs into OAS 3.0 POJOs |
-| `swagger-parser` | `swagger-parser` | Thin aggregator; `OpenAPIParser` is the recommended user-facing entry point |
-| `swagger-parser-cli` | `swagger-parser-cli` | CLI wrapper |
-| `swagger-parser-safe-url-resolver` | `swagger-parser-safe-url-resolver` | URL allowlist/blocklist enforcement (`PermittedUrlsChecker`) |
-| `swagger-compat-spec-parser` | `swagger-compat-spec-parser` | Legacy compatibility reader classes (`io.swagger.reader.SwaggerReader`, `SwaggerReaderFactory`, etc.) |
+**Parse → resolve pipeline (swagger-parser).** `Swagger20Parser` deserializes via `SwaggerDeserializer` (hand-written tree walker that collects validation messages into `SwaggerDeserializationResult` rather than throwing). If `ParseOptions.resolve` is set, `SwaggerResolver` runs the `processors/*` (Definitions/Paths/Operation/Parameter/Response/Model/Property/ExternalRefProcessor) over the model, using `ResolverCache` to load and cache external refs (file, classpath, remote via `RemoteUrl`, with auth headers from `AuthorizationValue`). `InlineModelResolver` optionally flattens inline schemas into `definitions`.
 
-## Architecture: Parsing & Resolution Pipeline
+**Legacy migration (compat module).** `SwaggerCompatConverter` downloads/reads 1.x docs (`APIFileDownload`), then `transform/migrate/*` migrators (`V11*`, `ApiObjectMigrator`, …) rewrite the JSON tree to 1.2 shape using JSON patches in `src/main/resources/patches`, validated against JSON schemas in `resources/schemas`, before mapping to `Swagger`.
 
-### Entry Points
+**java-json-tools was removed** (security fix, branch `remove-java-json-tools`). Its replacement lives in `io.swagger.transform.util`: `JsonPatch` (own RFC-6902 impl), `JacksonSupport`, `MutableJsonTree`, `SwaggerJsonSchemaFactory`. Don't reintroduce `com.github.fge.*` imports. When comparing `JsonNode`s in TestNG use `equals()`/`assertTrue`, not `assertEquals` (it picks the `Iterable` overload and ignores object member names).
 
-- **`OpenAPIParser`** (`swagger-parser`) — recommended entry point; iterates all registered `SwaggerParserExtension` implementations via Java SPI and returns the first successful result.
-- **`OpenAPIV3Parser`** (`swagger-parser-v3`) — the main `SwaggerParserExtension` implementation, handles both OAS 3.0 and 3.1.
+## Release / CI
 
-### Parse Flow (inside `OpenAPIV3Parser`)
+Releases are scripted via GitHub workflows (`prepare-release-v1.yml`, `release-v1.yml`, `next-snapshot-v1.yml`) calling `CI/*.sh|py`; see `CI/CI.md`. Don't hand-edit versions for releases.
 
-1. **Load content** from URL/file/classpath via `readContentFromLocation`.
-2. **Deserialize** JSON/YAML string into a `JsonNode` tree using `DeserializationUtils` (handles YAML anchors safely) or falls back to a plain Jackson `ObjectMapper`.
-3. **Deserialize POJO** — `OpenAPIDeserializer.deserialize()` maps the tree to an `OpenAPI` POJO.
-4. **Resolve refs** (if `ParseOptions.resolve` or `resolveFully` is set):
-   - **OAS 3.1**: `OpenAPIDereferencer` chain (in the `reference/` package). `DereferencersFactory` loads implementations via SPI. The default implementation is `OpenAPIDereferencer31`.
-   - **OAS 3.0**: `OpenAPIResolver` coordinates a set of Processors (one per OpenAPI component type: paths, parameters, schemas, responses, etc.) plus a `ResolverCache` that memoises remote/file fetches.
-5. **`ResolverFully`** — if `resolveFully` is set, inlines all remaining local `$ref`s by replacing them with copied schema content.
-6. **`InlineModelResolver`** — if `flatten` is set, hoists inline schemas up into `components/schemas` and replaces them with `$ref`s (opposite of resolveFully).
-
-### Key Classes
-
-- **`ResolverCache`** — caches loaded external files/URLs and extracted sub-nodes to avoid repeated I/O. Handles `RefFormat` (internal, relative, absolute, URL).
-- **`ExternalRefProcessor`** — resolves an external `$ref`, fetches the target, and registers it under `components/`.
-- **`OpenAPIDeserializer`** — large hand-written deserializer (not generated); produces validation messages alongside the POJO.
-- **`RefUtils`** / **`PathUtils`** — low-level helpers for ref string parsing, relative path computation, definition name extraction.
-- **`RemoteUrl`** — HTTP fetching, respects `AuthorizationValue` headers/query params and the `TRUST_ALL` system property for SSL.
-
-### Extension Points
-
-Custom parser extensions must:
-1. Implement `io.swagger.v3.parser.core.extensions.SwaggerParserExtension`.
-2. Register in `META-INF/services/io.swagger.v3.parser.core.extensions.SwaggerParserExtension`.
-
-`OpenAPIV3Parser.getExtensions()` loads them via `ServiceLoader` from both the thread context classloader and this class's classloader (for OSGi compatibility).
-
-### OAS 3.1 vs 3.0 Resolution
-
-The codebase has two distinct resolution paths that must be kept in sync when fixing ref-resolution bugs:
-
-- **OAS 3.0** → `OpenAPIResolver` + processors in `processors/` package
-- **OAS 3.1** → `OpenAPIDereferencer` chain in `reference/` package; the traversal uses a Visitor pattern (`Traverser`, `Visitor`, `AbstractVisitor`)
-
-OAS 3.1 resolution can be disabled entirely via the `disableOas31Resolve` environment variable.
-
-## Test Conventions
-
-- Test resources (YAML/JSON fixtures) live in `modules/swagger-parser-v3/src/test/resources/`.
-- Issue-specific tests are typically named `Issue<number>Test.java` or placed in the main `OpenAPIResolverTest.java`.
-- JMockit `@Injectable` is used to mock `List<AuthorizationValue>` parameters in many tests.
-- WireMock (`wiremock-jre8`) is used in `NetworkReferenceTest` for tests that simulate remote refs.
-
-## Release Process
-
-Two-phase semi-automated release via GitHub Actions:
-1. Run `Prepare Release` workflow → creates a PR with bumped versions and draft release.
-2. After merging that PR, run `Release` workflow → publishes to Maven Central and creates the GitHub release.
-
-Snapshot versions are auto-deployed on pushes to `master`. Release builds enforce no-snapshot dependencies (`maven-enforcer-plugin`).
+`TRUST_ALL=true` env var disables SSL cert validation for remote fetches (documented in README).

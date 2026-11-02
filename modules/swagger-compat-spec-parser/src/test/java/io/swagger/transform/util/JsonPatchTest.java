@@ -28,7 +28,10 @@ public class JsonPatchTest {
     }
 
     private static void assertJson(final JsonNode actual, final String expected) throws IOException {
-        assertEquals(actual, json(expected));
+        // assertEquals() would pick the Iterable overload and ignore object member names
+        final JsonNode expectedNode = json(expected);
+        assertTrue(actual.equals(expectedNode), "produced:\n" + JacksonSupport.prettyPrint(actual)
+                + "\nexpected:\n" + JacksonSupport.prettyPrint(expectedNode));
     }
 
     private static List<String> fieldNames(final JsonNode node) {
