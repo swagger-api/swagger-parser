@@ -4,11 +4,13 @@ package io.swagger.v3.parser.processors;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -50,6 +52,10 @@ public final class ExternalRefProcessor {
     private final ResolverCache cache;
     private final OpenAPI openAPI;
     private final ComponentNameAllocator nameAllocator;
+    // Schemas and examples whose relative $ref processRef already rebased onto the root document. PathsProcessor
+    // rebases the refs of an external path item after this class has processed it, and skips these: rebasing a ref
+    // twice resolves it against the path item's directory again, which breaks once the result starts with "../".
+    private final Set<Object> rebasedRefOwners = Collections.newSetFromMap(new IdentityHashMap<>());
 
     public ExternalRefProcessor(ResolverCache cache, OpenAPI openAPI) {
         this.cache = cache;
@@ -881,7 +887,7 @@ public final class ExternalRefProcessor {
 
     private void processRefExample(Example example, String externalFile) {
         processRef(example.get$ref(), externalFile, example::set$ref, this::processRefToExternalExample,
-                ref -> join(externalFile, ref));
+                ref -> markRebased(example, join(externalFile, ref)));
     }
 
     private void processRefSchemaObject(Schema schema, String $ref) {
@@ -930,7 +936,16 @@ public final class ExternalRefProcessor {
 
     private void processRefSchema(Schema subRef, String externalFile) {
         processRef(subRef.get$ref(), externalFile, subRef::set$ref, this::processRefToExternalSchema,
-                ref -> constructRef(subRef, externalFile));
+                ref -> markRebased(subRef, constructRef(subRef, externalFile)));
+    }
+
+    private String markRebased(Object refOwner, String rebasedRef) {
+        rebasedRefOwners.add(refOwner);
+        return rebasedRef;
+    }
+
+    boolean isRebasedOntoRootDocument(Object refOwner) {
+        return rebasedRefOwners.contains(refOwner);
     }
 
     protected String constructRef(Schema refProperty, String rootLocation) {

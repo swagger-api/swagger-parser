@@ -1,0 +1,7 @@
+openapi: 3.0.3
+info:
+  title: Root document in a subdirectory
+  version: 1.0.0
+paths:
+  /other-directory:
+    $ref: '../domain/sub/paths.yaml#/paths/~1other-directory'

@@ -1,0 +1,114 @@
+paths:
+  /items/{id}:
+    post:
+      operationId: sameDirectory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '../../domain/sub/schemas.yaml#/components/schemas/ItemRequest'
+      responses:
+        '200':
+          description: ok
+  /dot-slash:
+    post:
+      operationId: dotSlash
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './schemas.yaml#/components/schemas/ItemRequest'
+      responses:
+        '200':
+          description: ok
+  /bare:
+    post:
+      operationId: bare
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'schemas.yaml#/components/schemas/ItemRequest'
+      responses:
+        '200':
+          description: ok
+  /other-directory:
+    post:
+      operationId: otherDirectory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '../../shared/schemas.yaml#/components/schemas/Money'
+      responses:
+        '200':
+          description: ok
+  /nested-property:
+    post:
+      operationId: nestedProperty
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price:
+                  $ref: '../../shared/schemas.yaml#/components/schemas/Money'
+      responses:
+        '200':
+          description: ok
+  /response-example:
+    get:
+      operationId: responseExample
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                created:
+                  $ref: '../../domain/sub/examples.yaml#/components/examples/ItemCreated'
+  /parameter-schema:
+    get:
+      operationId: parameterSchema
+      parameters:
+        - name: currency
+          in: query
+          schema:
+            $ref: '../../shared/schemas.yaml#/components/schemas/Currency'
+      responses:
+        '200':
+          description: ok
+  /path-level-parameter:
+    parameters:
+      - name: currency
+        in: query
+        schema:
+          $ref: '../../shared/schemas.yaml#/components/schemas/Currency'
+    get:
+      operationId: pathLevelParameter
+      responses:
+        '200':
+          description: ok
+  /request-example:
+    post:
+      operationId: requestExample
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              draft:
+                $ref: '../../domain/sub/examples.yaml#/components/examples/ItemDraft'
+      responses:
+        '200':
+          description: ok
