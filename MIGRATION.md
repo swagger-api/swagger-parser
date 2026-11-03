@@ -92,32 +92,7 @@ Swagger Core 3.0 does not bring these libraries any more. `swagger-parser-v3` no
 and it did not declare them, add them to your build. Jackson 3 YAML uses `snakeyaml-engine`.
 See the Swagger Core guide.
 
-### JMockit is removed from the build
-
-**Impact:** None for users
-
-The tests use Mockito 5. Projects that copy the test setup of this project must remove the JMockit `-javaagent` argument.
-
 ## Behavior differences
-
-### Error message for duplicate keys
-
-Swagger Parser keeps the Jackson 2 text for a duplicate key in JSON: ``Duplicate field 'x' in `location` ``.
-Jackson 3 reports `Duplicate Object property "x"`, and the parser changes it back to the old text.
-The message for a duplicate key in YAML is not changed.
-
-### Text of non-string values
-
-The parser keeps the Jackson 2 `asText()` result where it reads a value as text (for example enum entries of a server variable,
-link parameters, discriminator mapping, security scopes and OpenAPI 3.1 types). The result is the same as in Swagger Parser 2.x:
-
-| Node | Text |
-|---|---|
-| string, number, boolean | The value as text |
-| `null` | `"null"` |
-| object or array | `""` |
-
-Jackson 3 `asString()` gives `""` for `null` and throws for an object or an array. Use the same guard in your own code if you need the 2.x result.
 
 ### Jackson 3 defaults
 
