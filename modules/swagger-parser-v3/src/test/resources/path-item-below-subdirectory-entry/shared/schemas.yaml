@@ -1,0 +1,9 @@
+components:
+  schemas:
+    Money:
+      type: object
+      properties:
+        amount:
+          type: string
+    Currency:
+      type: string

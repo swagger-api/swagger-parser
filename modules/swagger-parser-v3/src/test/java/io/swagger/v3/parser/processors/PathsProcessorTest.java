@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -15,6 +16,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
@@ -373,6 +375,64 @@ public class PathsProcessorTest {
         assertNotNull(example);
         assertEquals(example.getSummary(), "Product example");
         assertNoRelativeRefLoadFailure(result);
+    }
+
+    // One root document per case: the first ref that fails to load stops the resolution of every later one.
+    @DataProvider
+    public Object[][] refsInPathItemBelowSubdirectoryEntry() {
+        return new Object[][]{
+                {"same-directory.yaml", "/items/{id}", requestBodySchemaRef(), "#/components/schemas/ItemRequest"},
+                {"dot-slash.yaml", "/dot-slash", requestBodySchemaRef(), "#/components/schemas/ItemRequest"},
+                {"bare.yaml", "/bare", requestBodySchemaRef(), "#/components/schemas/ItemRequest"},
+                {"other-directory.yaml", "/other-directory", requestBodySchemaRef(), "#/components/schemas/Money"},
+                {"nested-property.yaml", "/nested-property", requestBodyPropertyRef("price"),
+                        "#/components/schemas/Money"},
+                {"response-example.yaml", "/response-example", responseExampleRef("created"),
+                        "#/components/examples/ItemCreated"},
+                {"parameter-schema.yaml", "/parameter-schema", operationParameterSchemaRef(),
+                        "#/components/schemas/Currency"},
+                // Refs only PathsProcessor rebases, still rebased exactly once.
+                // processPaths copies a path-level parameter into each operation.
+                {"path-level-parameter.yaml", "/path-level-parameter", operationParameterSchemaRef(),
+                        "#/components/schemas/Currency"},
+                {"request-example.yaml", "/request-example", requestBodyExampleRef("draft"),
+                        "#/components/examples/ItemDraft"},
+        };
+    }
+
+    @Test(dataProvider = "refsInPathItemBelowSubdirectoryEntry")
+    public void testRefInPathItemBelowSubdirectoryEntryIsRebasedOnce(String entry, String path,
+                                                                     Function<PathItem, String> ref, String expected) {
+        SwaggerParseResult result = parse("path-item-below-subdirectory-entry/api/" + entry);
+
+        assertEquals(ref.apply(result.getOpenAPI().getPaths().get(path)), expected);
+        assertNoRelativeRefLoadFailure(result);
+    }
+
+    private static Function<PathItem, String> requestBodySchemaRef() {
+        return pathItem -> requestBodyMediaType(pathItem).getSchema().get$ref();
+    }
+
+    private static Function<PathItem, String> requestBodyPropertyRef(String property) {
+        return pathItem -> ((Schema) requestBodyMediaType(pathItem).getSchema().getProperties().get(property))
+                .get$ref();
+    }
+
+    private static Function<PathItem, String> requestBodyExampleRef(String example) {
+        return pathItem -> requestBodyMediaType(pathItem).getExamples().get(example).get$ref();
+    }
+
+    private static MediaType requestBodyMediaType(PathItem pathItem) {
+        return pathItem.getPost().getRequestBody().getContent().get("application/json");
+    }
+
+    private static Function<PathItem, String> responseExampleRef(String example) {
+        return pathItem -> pathItem.getGet().getResponses().get("200").getContent().get("application/json")
+                .getExamples().get(example).get$ref();
+    }
+
+    private static Function<PathItem, String> operationParameterSchemaRef() {
+        return pathItem -> pathItem.getGet().getParameters().get(0).getSchema().get$ref();
     }
 
     @Test
