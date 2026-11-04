@@ -1,7 +1,7 @@
 package io.swagger.v3.parser.test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -17,9 +17,9 @@ import io.swagger.v3.parser.models.RefFormat;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.RefUtils;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,6 +32,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -42,33 +46,36 @@ import static org.testng.Assert.assertTrue;
 
 public class ResolverCacheTest {
 
-    @Mocked
-    RefUtils refUtils;
+    private MockedStatic<RefUtils> refUtils;
 
-    @Injectable
+    // Partial mock: real methods run unless a call is stubbed.
+    private MockedStatic<DeserializationUtils> deserializationUtils;
+
     OpenAPI openAPI;
 
     List<AuthorizationValue> auths = new ArrayList<>();
 
-    @Injectable
-    Parameter mockedParameter;
+    Parameter mockedParameter = mock(Parameter.class);
 
-    @Injectable
-    Schema mockedModel;
+    Schema mockedModel = mock(Schema.class);
 
-    @Injectable
-    ApiResponse mockedResponse;
-
-    @Injectable
-    DeserializationUtils deserializationUtils;
+    ApiResponse mockedResponse = mock(ApiResponse.class);
 
     @BeforeMethod
     public void init() {
         openAPI = new OpenAPI();
+        refUtils = Mockito.mockStatic(RefUtils.class);
+        deserializationUtils = Mockito.mockStatic(DeserializationUtils.class, Mockito.CALLS_REAL_METHODS);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() {
+        deserializationUtils.close();
+        refUtils.close();
     }
 
     @Test
-    public void testMock() throws JsonProcessingException {
+    public void testMock() throws JacksonException {
 
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/file.json";
@@ -78,26 +85,20 @@ public class ResolverCacheTest {
         parseOptions.setResolve(true);
         parseOptions.setValidateExternalRefs(true);
 
-        new Expectations(deserializationUtils) {{
-            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json", (PermittedUrlsChecker) any);
-            times = 1;
-            result = contentsOfExternalFile;
-
-            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, ref, parseOptions, (SwaggerParseResult) any);
-            times = 1;
-            result = new ObjectMapper().readTree("{\"type\":  \"string\"}");
-
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class))).thenReturn(contentsOfExternalFile);
+        deserializationUtils.when(() -> DeserializationUtils.deserializeIntoTree(eq(contentsOfExternalFile), eq(ref), eq(parseOptions), nullable(SwaggerParseResult.class))).thenReturn(new ObjectMapper().readTree("{\"type\":  \"string\"}"));
         ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new HashSet<>(), parseOptions);
 
         Schema firstActualResult = cache.loadRef(ref, RefFormat.URL, Schema.class);
 
 
         assertEquals(firstActualResult.getType(), "string");
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class)), times(1));
+        deserializationUtils.verify(() -> DeserializationUtils.deserializeIntoTree(eq(contentsOfExternalFile), eq(ref), eq(parseOptions), nullable(SwaggerParseResult.class)), times(1));
     }
 
     @Test
-    public void testLoadExternalRef_NoDefinitionPath() throws JsonProcessingException {
+    public void testLoadExternalRef_NoDefinitionPath() throws JacksonException {
 
         final RefFormat format = RefFormat.URL;
         final String ref = "http://my.company.com/path/to/file.json";
@@ -107,15 +108,8 @@ public class ResolverCacheTest {
         parseOptions.setResolve(true);
         parseOptions.setValidateExternalRefs(true);
 
-        new Expectations(deserializationUtils) {{
-            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json", (PermittedUrlsChecker) any);
-            times = 1;
-            result = contentsOfExternalFile;
-
-            DeserializationUtils.deserializeIntoTree(contentsOfExternalFile, ref, parseOptions, (SwaggerParseResult) any);
-            times = 1;
-            result = new ObjectMapper().readTree("{\"type\":  \"string\"}");
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class))).thenReturn(contentsOfExternalFile);
+        deserializationUtils.when(() -> DeserializationUtils.deserializeIntoTree(eq(contentsOfExternalFile), eq(ref), eq(parseOptions), nullable(SwaggerParseResult.class))).thenReturn(new ObjectMapper().readTree("{\"type\":  \"string\"}"));
 
         ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json", new HashSet<>(), parseOptions);
 
@@ -129,6 +123,8 @@ public class ResolverCacheTest {
         Schema secondActualResult = cache.loadRef(ref, format, Schema.class);
         assertEquals(secondActualResult.getType(), "string");
 
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class)), times(1));
+        deserializationUtils.verify(() -> DeserializationUtils.deserializeIntoTree(eq(contentsOfExternalFile), eq(ref), eq(parseOptions), nullable(SwaggerParseResult.class)), times(1));
     }
 
     @Test
@@ -148,16 +144,13 @@ public class ResolverCacheTest {
                 "        200:\n" +
                 "          description: \"Request successful\"\n";
 
-        new Expectations() {{
-            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json", (PermittedUrlsChecker) any);
-            times = 1;
-            result = contentsOfExternalFile;
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class))).thenReturn(contentsOfExternalFile);
 
         ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json");
 
         PathItem path = cache.loadRef(ref + "#/paths/~1foo~0bar~01", RefFormat.URL, PathItem.class);
         assertNotNull(path);
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
@@ -175,11 +168,7 @@ public class ResolverCacheTest {
                 "    200:\n" +
                 "      description: Success\n";
 
-        new Expectations() {{
-            RefUtils.readExternalUrlRef(ref, format, auths, "http://my.company.com/path/parent.json", (PermittedUrlsChecker) any);
-            times = 1;
-            result = contentsOfExternalFile;
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class))).thenReturn(contentsOfExternalFile);
 
         ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/path/parent.json");
 
@@ -187,6 +176,7 @@ public class ResolverCacheTest {
         assertNotNull(response);
         assertEquals(response.getDescription(), "Success");
         assertNull(response.getContent());
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq(ref), eq(format), eq(auths), eq("http://my.company.com/path/parent.json"), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
@@ -303,18 +293,14 @@ public class ResolverCacheTest {
         final String file = "external.yaml";
         final String contents = "components:\n  schemas:\n    Foo:\n      type: string\n";
 
-        new Expectations() {{
-            RefUtils.readExternalClasspathRef(file, RefFormat.RELATIVE, auths, root,
-                    (PermittedUrlsChecker) any);
-            times = 1;
-            result = contents;
-        }};
+        refUtils.when(() -> RefUtils.readExternalClasspathRef(eq(file), eq(RefFormat.RELATIVE), eq(auths), eq(root), nullable(PermittedUrlsChecker.class))).thenReturn(contents);
 
         Schema result = new ResolverCache(openAPI, auths, root).loadRef(
                 file + "#/components/schemas/Foo", RefFormat.RELATIVE, Schema.class);
 
         assertNotSame(result, rootSchema);
         assertEquals(result.getType(), "string");
+        refUtils.verify(() -> RefUtils.readExternalClasspathRef(eq(file), eq(RefFormat.RELATIVE), eq(auths), eq(root), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
@@ -369,18 +355,14 @@ public class ResolverCacheTest {
         final String file = "https://example.com/api/sub/root.yaml";
         final String contents = "components:\n  schemas:\n    Foo:\n      type: string\n";
 
-        new Expectations() {{
-            RefUtils.readExternalUrlRef(file, RefFormat.URL, auths, root,
-                    (PermittedUrlsChecker) any);
-            times = 1;
-            result = contents;
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq(file), eq(RefFormat.URL), eq(auths), eq(root), nullable(PermittedUrlsChecker.class))).thenReturn(contents);
 
         Schema result = new ResolverCache(openAPI, auths, root).loadRef(
                 file + "#/components/schemas/Foo", RefFormat.URL, Schema.class);
 
         assertNotSame(result, rootSchema);
         assertEquals(result.getType(), "string");
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq(file), eq(RefFormat.URL), eq(auths), eq(root), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
@@ -391,18 +373,14 @@ public class ResolverCacheTest {
         final String file = "https://example.com/api/root.yaml?v=2";
         final String contents = "components:\n  schemas:\n    Foo:\n      type: integer\n";
 
-        new Expectations() {{
-            RefUtils.readExternalUrlRef(file, RefFormat.URL, auths, root,
-                    (PermittedUrlsChecker) any);
-            times = 1;
-            result = contents;
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq(file), eq(RefFormat.URL), eq(auths), eq(root), nullable(PermittedUrlsChecker.class))).thenReturn(contents);
 
         Schema result = new ResolverCache(openAPI, auths, root).loadRef(
                 file + "#/components/schemas/Foo", RefFormat.URL, Schema.class);
 
         assertNotSame(result, rootSchema);
         assertEquals(result.getType(), "integer");
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq(file), eq(RefFormat.URL), eq(auths), eq(root), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
@@ -422,12 +400,7 @@ public class ResolverCacheTest {
                 "        value:\n" +
                 "          type: integer\n";
 
-        new Expectations() {{
-            RefUtils.readExternalUrlRef(root, RefFormat.URL, auths, root,
-                    (PermittedUrlsChecker) any);
-            times = 1;
-            result = contents;
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq(root), eq(RefFormat.URL), eq(auths), eq(root), nullable(PermittedUrlsChecker.class))).thenReturn(contents);
 
         ResolverCache cache = new ResolverCache(openAPI, auths, root);
         Schema absent = cache.loadRef(
@@ -441,6 +414,7 @@ public class ResolverCacheTest {
         assertEquals(deeper.getType(), "integer");
         assertNotNull(wrongType);
         assertEquals(wrongType.getName(), "id");
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq(root), eq(RefFormat.URL), eq(auths), eq(root), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
@@ -491,16 +465,7 @@ public class ResolverCacheTest {
                 "http://my.company.com/schemas/file.yaml#/components/schemas/Foo";
         final String contents = "components:\n  schemas:\n    Foo:\n      type: string\n";
 
-        new Expectations() {{
-            RefUtils.readExternalUrlRef(
-                    "http://my.company.com/schemas/../schemas/file.yaml",
-                    RefFormat.URL,
-                    auths,
-                    "http://my.company.com/root.yaml",
-                    (PermittedUrlsChecker) any);
-            times = 1;
-            result = contents;
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq("http://my.company.com/schemas/../schemas/file.yaml"), eq(RefFormat.URL), eq(auths), eq("http://my.company.com/root.yaml"), nullable(PermittedUrlsChecker.class))).thenReturn(contents);
 
         ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/root.yaml");
         Schema first = cache.loadRef(refWithDotSegments, RefFormat.URL, Schema.class);
@@ -522,6 +487,7 @@ public class ResolverCacheTest {
         assertEquals(cache.getRenamedRef(canonicalRef), "Foo");
         assertEquals(cache.getRenameCache().get(refWithDotSegments), "Foo");
         assertNull(cache.getRenameCache().get(canonicalRef));
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq("http://my.company.com/schemas/../schemas/file.yaml"), eq(RefFormat.URL), eq(auths), eq("http://my.company.com/root.yaml"), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
@@ -533,16 +499,7 @@ public class ResolverCacheTest {
         final String contents =
                 "components:\n  responses:\n    Error:\n      description: Error response\n";
 
-        new Expectations() {{
-            RefUtils.readExternalUrlRef(
-                    "http://my.company.com/responses/../responses/common.yaml",
-                    RefFormat.URL,
-                    auths,
-                    "http://my.company.com/root.yaml",
-                    (PermittedUrlsChecker) any);
-            times = 1;
-            result = contents;
-        }};
+        refUtils.when(() -> RefUtils.readExternalUrlRef(eq("http://my.company.com/responses/../responses/common.yaml"), eq(RefFormat.URL), eq(auths), eq("http://my.company.com/root.yaml"), nullable(PermittedUrlsChecker.class))).thenReturn(contents);
 
         ResolverCache cache = new ResolverCache(openAPI, auths, "http://my.company.com/root.yaml");
         ApiResponse first = cache.loadRef(refWithDotSegments, RefFormat.URL, ApiResponse.class);
@@ -554,6 +511,7 @@ public class ResolverCacheTest {
         assertEquals(cache.getResolutionCache().size(), 2);
         assertSame(cache.getResolutionCache().get(refWithDotSegments), first);
         assertSame(cache.getResolutionCache().get(canonicalRef), first);
+        refUtils.verify(() -> RefUtils.readExternalUrlRef(eq("http://my.company.com/responses/../responses/common.yaml"), eq(RefFormat.URL), eq(auths), eq("http://my.company.com/root.yaml"), nullable(PermittedUrlsChecker.class)), times(1));
     }
 
     @Test
