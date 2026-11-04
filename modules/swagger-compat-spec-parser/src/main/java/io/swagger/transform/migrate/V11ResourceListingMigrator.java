@@ -1,8 +1,8 @@
 package io.swagger.transform.migrate;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.net.InternetDomainName;
@@ -107,7 +107,7 @@ public final class V11ResourceListingMigrator
             }
 
             migrator = new PathAppenderMigrator(basePath);
-            tree.setPointer(JsonPointer.of("apis"));
+            tree.setPointer(JsonPointer.compile("/apis"));
             tree.applyMigratorToElements(migrator);
         }
 

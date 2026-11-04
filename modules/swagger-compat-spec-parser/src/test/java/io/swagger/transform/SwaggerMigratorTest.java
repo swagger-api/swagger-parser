@@ -3,11 +3,11 @@ package io.swagger.transform;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jackson.JacksonUtils;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.swagger.transform.migrate.SwaggerMigrator;
+import io.swagger.transform.util.JacksonSupport;
 import io.swagger.transform.util.SwaggerMigrationException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -24,7 +24,7 @@ import static org.testng.Assert.fail;
 
 @Test
 public abstract class SwaggerMigratorTest {
-    private static final ObjectMapper MAPPER = JacksonUtils.newMapper();
+    private static final ObjectMapper MAPPER = JacksonSupport.newMapper();
     private static final TypeReference<List<MigrationTestData>> TESTDATA_TYPEREF
             = new TypeReference<List<MigrationTestData>>() {
     };
@@ -60,9 +60,9 @@ public abstract class SwaggerMigratorTest {
     private static String errmsg(final JsonNode actual, final JsonNode expected) {
         return new StringBuilder("migrator did not produce expected results!")
                 .append("\nproduced:\n")
-                .append(JacksonUtils.prettyPrint(actual))
+                .append(JacksonSupport.prettyPrint(actual))
                 .append("\nexpected:\n")
-                .append(JacksonUtils.prettyPrint(expected))
+                .append(JacksonSupport.prettyPrint(expected))
                 .toString();
     }
 

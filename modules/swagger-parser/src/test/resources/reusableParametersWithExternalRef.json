@@ -17,7 +17,7 @@
         "summary": "Find pets by ID",
         "operationId": "getPetsById",
         "parameters": [
-          { "$ref": "http://docs.baikalplatform.com/common/v2.0/common.json#/parameters/x-correlator" }
+          { "$ref": "http://github.com/swagger-api/swagger-parser/raw/3e801d90d925900133e26e61bcba80180e838b6a/modules/swagger-parser/src/test/resources/issue-684.json#/parameters/ParamDef1" }
         ],
         "responses": {
           "200": {

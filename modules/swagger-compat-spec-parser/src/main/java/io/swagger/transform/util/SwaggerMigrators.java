@@ -3,10 +3,6 @@ package io.swagger.transform.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.fge.jackson.JacksonUtils;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import com.google.common.collect.ImmutableSet;
 import io.swagger.transform.migrate.SwaggerMigrator;
 
@@ -21,7 +17,7 @@ import java.util.Set;
  */
 @ParametersAreNonnullByDefault
 public final class SwaggerMigrators {
-    private static final ObjectMapper MAPPER = JacksonUtils.newMapper();
+    private static final ObjectMapper MAPPER = JacksonSupport.newMapper();
 
     /**
      * Return a migrator converting object member values to JSON Strings
@@ -58,11 +54,7 @@ public final class SwaggerMigrators {
             public JsonNode migrate(@Nonnull final JsonNode input)
                     throws SwaggerMigrationException {
                 Objects.requireNonNull(input);
-                try {
-                    return patch.apply(input);
-                } catch (JsonPatchException e) {
-                    throw new SwaggerMigrationException(e);
-                }
+                return patch.apply(input);
             }
         };
     }
@@ -118,7 +110,7 @@ public final class SwaggerMigrators {
         final JsonPatch patch;
 
         try {
-            node = JsonLoader.fromResource(resourcePath);
+            node = JacksonSupport.fromResource(resourcePath);
             patch = MAPPER.readValue(node.traverse(), JsonPatch.class);
         } catch (IOException e) {
             throw new RuntimeException("cannot load resource", e);

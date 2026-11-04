@@ -1,12 +1,10 @@
 package io.swagger.transform.util;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.fge.jackson.jsonpointer.JsonPointer;
-import com.github.fge.jsonpatch.JsonPatch;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import io.swagger.transform.migrate.SwaggerMigrator;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -77,7 +75,7 @@ public final class MutableJsonTree {
 
     private void doSetPointer(final JsonPointer pointer) {
         currentPointer = pointer;
-        currentNode = currentPointer.path(baseNode);
+        currentNode = baseNode.at(currentPointer);
         Preconditions.checkArgument(!currentNode.isMissingNode(),
                 "base node has no element at pointer " + currentPointer);
     }
@@ -130,22 +128,24 @@ public final class MutableJsonTree {
      */
     public void applyMigrator(final SwaggerMigrator migrator)
             throws SwaggerMigrationException {
-        final JsonPointer parent = currentPointer.parent();
-        if (!parent.get(baseNode).isObject()) {
-            throw new SwaggerMigrationException();
-        }
-        final ObjectNode parentNode = (ObjectNode) parent.get(baseNode);
-
-        final JsonNode patched = migrator.migrate(currentNode);
-
-        if (currentPointer.isEmpty()) {
-            baseNode = currentNode = patched;
+        if (currentPointer.matches()) {
+            if (!baseNode.isObject()) {
+                throw new SwaggerMigrationException();
+            }
+            baseNode = currentNode = migrator.migrate(currentNode);
             return;
         }
 
-        final String memberName = Iterables.getLast(currentPointer)
-                .getToken().getRaw();
-        parentNode.put(memberName, patched);
+        final JsonNode parent = baseNode.at(currentPointer.head());
+        if (!parent.isObject()) {
+            throw new SwaggerMigrationException();
+        }
+        final ObjectNode parentNode = (ObjectNode) parent;
+
+        final JsonNode patched = migrator.migrate(currentNode);
+
+        final String memberName = currentPointer.last().getMatchingProperty();
+        parentNode.set(memberName, patched);
 
     }
 

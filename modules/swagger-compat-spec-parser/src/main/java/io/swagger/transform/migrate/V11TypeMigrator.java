@@ -3,11 +3,9 @@ package io.swagger.transform.migrate;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jackson.JacksonUtils;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import com.google.common.base.Optional;
+import io.swagger.transform.util.JacksonSupport;
+import io.swagger.transform.util.JsonPatch;
 import io.swagger.transform.util.SwaggerMigrationException;
 import io.swagger.transform.util.SwaggerMigrators;
 
@@ -32,7 +30,7 @@ import java.util.Objects;
  */
 public final class V11TypeMigrator
         implements SwaggerMigrator {
-    private static final ObjectMapper MAPPER = JacksonUtils.newMapper();
+    private static final ObjectMapper MAPPER = JacksonSupport.newMapper();
     private static final TypeReference<Map<String, JsonPatch>> TYPE_REF
             = new TypeReference<Map<String, JsonPatch>>() {
     };
@@ -43,10 +41,10 @@ public final class V11TypeMigrator
         try {
             JsonNode node;
 
-            node = JsonLoader.fromResource("/patches/v1.1/dataType.json");
+            node = JacksonSupport.fromResource("/patches/v1.1/dataType.json");
             patches = MAPPER.readValue(node.traverse(), TYPE_REF);
 
-            node = JsonLoader.fromResource("/patches/other/fileTypePatch.json");
+            node = JacksonSupport.fromResource("/patches/other/fileTypePatch.json");
             fileTypePatch = MAPPER.readValue(node.traverse(), JsonPatch.class);
         } catch (IOException e) {
             throw new RuntimeException("failed to load the necessary file", e);
@@ -83,11 +81,7 @@ public final class V11TypeMigrator
         if (!"File".equals(typeNode.textValue())) {
             return input;
         }
-        try {
-            return fileTypePatch.apply(input);
-        } catch (JsonPatchException e) {
-            throw new SwaggerMigrationException(e);
-        }
+        return fileTypePatch.apply(input);
     }
 
     static {

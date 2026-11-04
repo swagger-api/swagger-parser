@@ -1,9 +1,9 @@
 package io.swagger.transform.migrate;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.fge.jackson.jsonpointer.JsonPointer;
 import io.swagger.transform.util.MutableJsonTree;
 import io.swagger.transform.util.SwaggerMigrationException;
 import io.swagger.util.Json;
@@ -69,9 +69,9 @@ public final class ApiObjectMigrator
         /*
          * Migrate response messages, if any
          */
-        JsonPointer ptr = JsonPointer.of("responseMessages");
+        JsonPointer ptr = JsonPointer.compile("/responseMessages");
 
-        if (!ptr.path(tree.getBaseNode()).isMissingNode()) {
+        if (!tree.getBaseNode().at(ptr).isMissingNode()) {
             tree.setPointer(ptr);
             tree.applyMigratorToElements(renameMember("reason", "message"));
         }
@@ -79,7 +79,7 @@ public final class ApiObjectMigrator
         /*
          * Migrate parameters
          */
-        ptr = JsonPointer.of("parameters");
+        ptr = JsonPointer.compile("/parameters");
         tree.setPointer(ptr);
         tree.applyMigratorToElements(parametersMigrator);
 
