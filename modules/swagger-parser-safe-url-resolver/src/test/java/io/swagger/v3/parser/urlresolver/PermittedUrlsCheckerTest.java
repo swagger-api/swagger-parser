@@ -3,8 +3,10 @@ package io.swagger.v3.parser.urlresolver;
 import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
 import io.swagger.v3.parser.urlresolver.models.ResolvedUrl;
 import io.swagger.v3.parser.urlresolver.utils.NetUtils;
-import mockit.*;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -14,18 +16,26 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+
 public class PermittedUrlsCheckerTest {
 
     private final List<String> emptyAllowlist = Collections.emptyList();
     private final List<String> emptyDenylist = Collections.emptyList();
-    @Mocked
-    private NetUtils netUtils;
+    private MockedStatic<NetUtils> netUtils;
 
     private PermittedUrlsChecker checker;
 
     @BeforeMethod
     void beforeMethod() {
+        this.netUtils = Mockito.mockStatic(NetUtils.class);
         this.checker = new PermittedUrlsChecker(Collections.emptyList(), Collections.emptyList());
+    }
+
+    @AfterMethod(alwaysRun = true)
+    void afterMethod() {
+        netUtils.close();
     }
 
     @Test(expectedExceptions = HostDeniedException.class, expectedExceptionsMessageRegExp = ".*IP is restricted.*")
@@ -33,13 +43,17 @@ public class PermittedUrlsCheckerTest {
         String url = "https://[0:0:0:0:0:ffff:10.1.33.147]:8000/v1/operation?theThing=something";
         String expectedIp = "10.1.33.147";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedIp;
-            NetUtils.getHostByName(expectedIp); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = url;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedIp);
+        netUtils.when(() -> NetUtils.getHostByName(expectedIp)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(url);
 
-        checker.verify(url);
+        try {
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedIp), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @Test
@@ -49,16 +63,20 @@ public class PermittedUrlsCheckerTest {
         String expectedUrl = "https://1.2.3.4:8000/v1/operation?theThing=something";
         String expectedHostHeader = "0:0:0:0:0:ffff:1.2.3.4";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHostHeader;
-            NetUtils.getHostByName(expectedHostHeader); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = expectedUrl;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHostHeader);
+        netUtils.when(() -> NetUtils.getHostByName(expectedHostHeader)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(expectedUrl);
 
-        ResolvedUrl result = checker.verify(url);
+        try {
+            ResolvedUrl result = checker.verify(url);
 
-        Assert.assertEquals(result.getUrl(), expectedUrl);
-        Assert.assertEquals(result.getHostHeader(), expectedHostHeader);
+            Assert.assertEquals(result.getUrl(), expectedUrl);
+            Assert.assertEquals(result.getHostHeader(), expectedHostHeader);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedHostHeader), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @Test(expectedExceptions = HostDeniedException.class, expectedExceptionsMessageRegExp = ".*IP is restricted.*")
@@ -66,13 +84,17 @@ public class PermittedUrlsCheckerTest {
         String url = "https://[0:0:0:0:0:ffff:a01:219]:8000/v1/operation?theThing=something";
         String expectedIp = "10.1.2.25";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedIp;
-            NetUtils.getHostByName(expectedIp); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = url;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedIp);
+        netUtils.when(() -> NetUtils.getHostByName(expectedIp)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(url);
 
-        checker.verify(url);
+        try {
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedIp), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @Test(expectedExceptions = HostDeniedException.class, expectedExceptionsMessageRegExp = ".*IP is restricted.*")
@@ -80,14 +102,19 @@ public class PermittedUrlsCheckerTest {
         String url = "https://[64:ff9b::]:8000/v1/operation?theThing=something";
         String expectedIp = "64:ff9b:0:0:0:0:0:0";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedIp;
-            NetUtils.getHostByName(expectedIp); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = url;
-            NetUtils.isNAT64Address(withInstanceOf(InetAddress.class)); times = 1; result = true;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedIp);
+        netUtils.when(() -> NetUtils.getHostByName(expectedIp)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(url);
+        netUtils.when(() -> NetUtils.isNAT64Address(any(InetAddress.class))).thenReturn(true);
 
-        checker.verify(url);
+        try {
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedIp), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+            netUtils.verify(() -> NetUtils.isNAT64Address(any(InetAddress.class)), times(1));
+        }
     }
 
     @Test(expectedExceptions = HostDeniedException.class, expectedExceptionsMessageRegExp = ".*IP is restricted.*")
@@ -95,13 +122,17 @@ public class PermittedUrlsCheckerTest {
         String url = "https://3232235778:8000/api/v3/pet/findByStatus?status=available";
         String expectedIp = "192.168.1.2";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedIp;
-            NetUtils.getHostByName(expectedIp); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = url;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedIp);
+        netUtils.when(() -> NetUtils.getHostByName(expectedIp)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(url);
 
-        checker.verify(url);
+        try {
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedIp), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @Test
@@ -111,14 +142,16 @@ public class PermittedUrlsCheckerTest {
         List<String> allowlist = Collections.singletonList("localhost");
         this.checker = new PermittedUrlsChecker(allowlist, emptyDenylist);
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHostname;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHostname);
 
-        ResolvedUrl result = checker.verify(url);
+        try {
+            ResolvedUrl result = checker.verify(url);
 
-        Assert.assertEquals(result.getUrl(), "https://localhost:3000/1");
-        Assert.assertEquals(result.getHostHeader(), "localhost");
+            Assert.assertEquals(result.getUrl(), "https://localhost:3000/1");
+            Assert.assertEquals(result.getHostHeader(), "localhost");
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+        }
     }
 
     @Test
@@ -128,17 +161,21 @@ public class PermittedUrlsCheckerTest {
         String expectedHost = "smartbear.com";
         String expectedIp = "1.2.3.4";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHost;
-            NetUtils.getHostByName(expectedHost); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = expectedUrl;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHost);
+        netUtils.when(() -> NetUtils.getHostByName(expectedHost)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(expectedUrl);
 
-        this.checker = new PermittedUrlsChecker(emptyAllowlist, emptyDenylist);
-        ResolvedUrl result = checker.verify(url);
+        try {
+            this.checker = new PermittedUrlsChecker(emptyAllowlist, emptyDenylist);
+            ResolvedUrl result = checker.verify(url);
 
-        Assert.assertEquals(result.getUrl(), expectedUrl);
-        Assert.assertEquals(result.getHostHeader(), expectedHost);
+            Assert.assertEquals(result.getUrl(), expectedUrl);
+            Assert.assertEquals(result.getHostHeader(), expectedHost);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedHost), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @Test
@@ -146,17 +183,21 @@ public class PermittedUrlsCheckerTest {
         String url = "https://1.2.3.4:3000/1";
         String expectedHost = "1.2.3.4";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHost;
-            NetUtils.getHostByName(expectedHost); times = 1; result = InetAddress.getByName(expectedHost);
-            NetUtils.setHost(url, expectedHost); times = 1; result = url;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHost);
+        netUtils.when(() -> NetUtils.getHostByName(expectedHost)).thenReturn(InetAddress.getByName(expectedHost));
+        netUtils.when(() -> NetUtils.setHost(url, expectedHost)).thenReturn(url);
 
-        this.checker = new PermittedUrlsChecker(emptyAllowlist, emptyDenylist);
-        ResolvedUrl result = checker.verify(url);
+        try {
+            this.checker = new PermittedUrlsChecker(emptyAllowlist, emptyDenylist);
+            ResolvedUrl result = checker.verify(url);
 
-        Assert.assertEquals(result.getUrl(), url);
-        Assert.assertEquals(result.getHostHeader(), expectedHost);
+            Assert.assertEquals(result.getUrl(), url);
+            Assert.assertEquals(result.getHostHeader(), expectedHost);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedHost), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedHost), times(1));
+        }
     }
 
     @Test(
@@ -165,13 +206,17 @@ public class PermittedUrlsCheckerTest {
             expectedExceptionsMessageRegExp = ".*IP is restricted.*"
     )
     public void shouldBlockIPv4Localhost(String url, String expectedIp) throws Exception {
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedIp;
-            NetUtils.getHostByName(expectedIp); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = url;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedIp);
+        netUtils.when(() -> NetUtils.getHostByName(expectedIp)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(url);
 
-        checker.verify(url);
+        try {
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedIp), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @DataProvider(name = "shouldBlockRestrictedIPv4sByDefault")
@@ -190,14 +235,18 @@ public class PermittedUrlsCheckerTest {
             expectedExceptionsMessageRegExp = ".*IP is restricted.*"
     )
     public void shouldBlockIPv6Localhost(String url, String expectedIp) throws Exception {
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedIp;
-            NetUtils.getHostByName(expectedIp); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = url;
-            NetUtils.isUniqueLocalAddress(withInstanceOf(InetAddress.class)); result = true;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedIp);
+        netUtils.when(() -> NetUtils.getHostByName(expectedIp)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(url);
+        netUtils.when(() -> NetUtils.isUniqueLocalAddress(any(InetAddress.class))).thenReturn(true);
 
-        checker.verify(url);
+        try {
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedIp), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @DataProvider(name = "shouldBlockRestrictedIPv6sByDefault")
@@ -215,14 +264,18 @@ public class PermittedUrlsCheckerTest {
         String expectedHost = "evil.com";
         String expectedIp = "192.168.1.1";
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHost;
-            NetUtils.getHostByName(expectedHost); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = expectedUrl;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHost);
+        netUtils.when(() -> NetUtils.getHostByName(expectedHost)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(expectedUrl);
 
-        this.checker = new PermittedUrlsChecker(emptyAllowlist, emptyDenylist);
-        checker.verify(url);
+        try {
+            this.checker = new PermittedUrlsChecker(emptyAllowlist, emptyDenylist);
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedHost), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @Test(expectedExceptions = HostDeniedException.class, expectedExceptionsMessageRegExp = ".*URL is part of the explicit denylist.*")
@@ -242,14 +295,18 @@ public class PermittedUrlsCheckerTest {
         String expectedIp = "1.2.3.4";
         List<String> denylist = Collections.singletonList("1.2.3.4");
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHost;
-            NetUtils.getHostByName(expectedHost); times = 1; result = InetAddress.getByName(expectedIp);
-            NetUtils.setHost(url, expectedIp); times = 1; result = expectedUrl;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHost);
+        netUtils.when(() -> NetUtils.getHostByName(expectedHost)).thenReturn(InetAddress.getByName(expectedIp));
+        netUtils.when(() -> NetUtils.setHost(url, expectedIp)).thenReturn(expectedUrl);
 
-        this.checker = new PermittedUrlsChecker(emptyAllowlist, denylist);
-        checker.verify(url);
+        try {
+            this.checker = new PermittedUrlsChecker(emptyAllowlist, denylist);
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+            netUtils.verify(() -> NetUtils.getHostByName(expectedHost), times(1));
+            netUtils.verify(() -> NetUtils.setHost(url, expectedIp), times(1));
+        }
     }
 
     @Test(expectedExceptions = HostDeniedException.class, expectedExceptionsMessageRegExp = ".*URL is part of the explicit denylist.*")
@@ -258,12 +315,14 @@ public class PermittedUrlsCheckerTest {
         String expectedHost = "foo.example.com";
         List<String> denylist = Collections.singletonList("f*.example.com");
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHost;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHost);
 
-        this.checker = new PermittedUrlsChecker(emptyAllowlist, denylist);
-        checker.verify(url);
+        try {
+            this.checker = new PermittedUrlsChecker(emptyAllowlist, denylist);
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+        }
     }
 
     @Test
@@ -272,12 +331,14 @@ public class PermittedUrlsCheckerTest {
         String expectedHost = "foo.example.com";
         List<String> allowlist = Collections.singletonList("f*.example.com");
 
-        new Expectations() {{
-            NetUtils.getHostFromUrl(url); times = 1; result = expectedHost;
-        }};
+        netUtils.when(() -> NetUtils.getHostFromUrl(url)).thenReturn(expectedHost);
 
-        this.checker = new PermittedUrlsChecker(allowlist, emptyDenylist);
-        checker.verify(url);
+        try {
+            this.checker = new PermittedUrlsChecker(allowlist, emptyDenylist);
+            checker.verify(url);
+        } finally {
+            netUtils.verify(() -> NetUtils.getHostFromUrl(url), times(1));
+        }
     }
 
 }

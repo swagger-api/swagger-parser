@@ -468,6 +468,6 @@ public class NullHandlingTest {
         assertNotNull(extended);
         assertNotNull(extended.getDefault(), "Default should be preserved");
         // Default is stored as a JsonNode internally
-        assertTrue(extended.getDefault() instanceof com.fasterxml.jackson.databind.node.ObjectNode);
+        assertTrue(extended.getDefault() instanceof tools.jackson.databind.node.ObjectNode);
     }
 }

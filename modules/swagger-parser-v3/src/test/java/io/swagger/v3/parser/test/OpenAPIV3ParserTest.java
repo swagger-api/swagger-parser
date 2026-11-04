@@ -1,8 +1,8 @@
 package io.swagger.v3.parser.test;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.*;
@@ -204,17 +204,18 @@ public class OpenAPIV3ParserTest {
     public void testIssue1780() {
         ParseOptions options = new ParseOptions();
         options.setInferSchemaType(false);
-        String defaultSchemaType = "---\n" +
-                "openapi: '3.0'\n" +
-                "info:\n" +
-                "  description: This is a credit card account service tier 3 microservice\n" +
-                "  title: SC-CCS-CCSRV_AC Credit Card Account Service\n" +
-                "  version: 1.0.0\n" +
-                "tags:\n" +
-                "- name: creditCardAccount\n" +
-                "  description: Credit Card Accounts\n" +
-                "paths: {}\n" +
-                "x-ibm-configuration: {}";
+        String defaultSchemaType = """
+                ---
+                openapi: '3.0'
+                info:
+                  description: This is a credit card account service tier 3 microservice
+                  title: SC-CCS-CCSRV_AC Credit Card Account Service
+                  version: 1.0.0
+                tags:
+                - name: creditCardAccount
+                  description: Credit Card Accounts
+                paths: {}
+                x-ibm-configuration: {}""";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(defaultSchemaType, null, options);
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
@@ -259,49 +260,50 @@ public class OpenAPIV3ParserTest {
     public void testNotDefaultSchemaType() {
         ParseOptions options = new ParseOptions();
         options.setInferSchemaType(false);
-        String defaultSchemaType = "openapi: 3.0.0\n" +
-                "info:\n" +
-                "  title: ping test\n" +
-                "  version: '1.0'\n" +
-                "servers:\n" +
-                "  - url: 'http://localhost:8000/'\n" +
-                "paths:\n" +
-                "  /ping:\n" +
-                "    get:\n" +
-                "      operationId: pingGet\n" +
-                "      responses:\n" +
-                "        '201':\n" +
-                "          description: OK\n" +
-                "components:\n" +
-                "  schemas:\n" +
-                "    AnyValueModelInline:\n" +
-                "      description: test any value inline\n" +
-                "      type: object\n" +
-                "      properties:\n" +
-                "        array_any_value:\n" +
-                "          items: {}\n" +
-                "        map_any_value:\n" +
-                "         additionalProperties: {}\n" +
-                "        any_value: {}\n" +
-                "        any_value_with_desc:\n" +
-                "          description: inline any value\n" +
-                "        any_value_nullable:\n" +
-                "          nullable: true\n" +
-                "          description: inline any value nullable\n" +
-                "        map_any_value_with_desc:\n" +
-                "          additionalProperties: \n" +
-                "            description: inline any value\n" +
-                "        map_any_value_nullable:\n" +
-                "          additionalProperties:\n" +
-                "            nullable: true\n" +
-                "            description: inline any value nullable\n" +
-                "        array_any_value_with_desc:\n" +
-                "          items: \n" +
-                "            description: inline any value\n" +
-                "        array_any_value_nullable:\n" +
-                "          items:\n" +
-                "            nullable: true\n" +
-                "            description: inline any value nullable";
+        String defaultSchemaType = """
+                openapi: 3.0.0
+                info:
+                  title: ping test
+                  version: '1.0'
+                servers:
+                  - url: 'http://localhost:8000/'
+                paths:
+                  /ping:
+                    get:
+                      operationId: pingGet
+                      responses:
+                        '201':
+                          description: OK
+                components:
+                  schemas:
+                    AnyValueModelInline:
+                      description: test any value inline
+                      type: object
+                      properties:
+                        array_any_value:
+                          items: {}
+                        map_any_value:
+                         additionalProperties: {}
+                        any_value: {}
+                        any_value_with_desc:
+                          description: inline any value
+                        any_value_nullable:
+                          nullable: true
+                          description: inline any value nullable
+                        map_any_value_with_desc:
+                          additionalProperties:\s
+                            description: inline any value
+                        map_any_value_nullable:
+                          additionalProperties:
+                            nullable: true
+                            description: inline any value nullable
+                        array_any_value_with_desc:
+                          items:\s
+                            description: inline any value
+                        array_any_value_nullable:
+                          items:
+                            nullable: true
+                            description: inline any value nullable""";
         SwaggerParseResult result = new OpenAPIV3Parser().readContents(defaultSchemaType, null, options);
         OpenAPI openAPI = result.getOpenAPI();
         assertNotNull(openAPI);
@@ -1234,7 +1236,7 @@ public class OpenAPIV3ParserTest {
 
         Map<String, Example> examples = content.get("application/json").getExamples();
         Assert.assertEquals(examples.size(), 3);
-        Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asText(), "plain");
+        Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asString(), "plain");
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
     }
@@ -1251,7 +1253,7 @@ public class OpenAPIV3ParserTest {
 
         Map<String, Example> examples = content.get("application/json").getExamples();
         Assert.assertEquals(examples.size(), 3);
-        Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asText(), "plain");
+        Assert.assertEquals(((ObjectNode) examples.get("plain").getValue()).get("test").asString(), "plain");
         Assert.assertEquals(examples.get("local").get$ref(), "#/components/examples/LocalRef");
         Assert.assertEquals(examples.get("external").get$ref(), "#/components/examples/ExternalRef");
 

@@ -1,8 +1,8 @@
 package io.swagger.v3.parser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.extensions.SwaggerParserExtension;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
@@ -189,7 +189,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             }
             return result;
 
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOGGER.warn("Exception while parsing:", e);
             final String message = getParseErrorMessage(e.getOriginalMessage(), location);
             return SwaggerParseResult.ofError(message);
@@ -269,8 +269,10 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         if (Objects.isNull(originalMessage)) {
             return String.format("Unable to parse `%s`", location);
         }
-        if (originalMessage.startsWith("Duplicate field")) {
-            return String.format("%s in `%s`", originalMessage, location);
+        if (originalMessage.startsWith("Duplicate")) {
+            // Jackson 3 reports `Duplicate Object property "x"`; keep the 2.x text `Duplicate field 'x'`
+            final String message = originalMessage.replaceFirst("^Duplicate Object property \"(.*)\"", "Duplicate field '$1'");
+            return String.format("%s in `%s`", message, location);
         }
         return originalMessage;
     }
