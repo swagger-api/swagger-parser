@@ -1,8 +1,8 @@
-name: Build Test Deploy 3.0.0
+name: Build Test Deploy v3
 
 on:
   push:
-    branches: [ "3.0.0" ]
+    branches: [ "v3" ]
 
 jobs:
   build:
