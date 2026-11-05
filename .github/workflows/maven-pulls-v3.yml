@@ -2,7 +2,7 @@ name: Build Test PR v3
 
 on:
   pull_request:
-    branches: [ "3.0.0" ]
+    branches: [ "v3" ]
 
 jobs:
   build:
