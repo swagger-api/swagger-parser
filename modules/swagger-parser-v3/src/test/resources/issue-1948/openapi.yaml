@@ -1,0 +1,7 @@
+openapi: 3.0.0
+info:
+  title: Issue 1948
+  version: 1.0.0
+paths:
+  /products/{param1}:
+    $ref: 'product/product-api.yaml#/paths/~1products~1{param1}'

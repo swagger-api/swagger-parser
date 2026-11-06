@@ -6,7 +6,6 @@ import io.swagger.v3.parser.processors.ExternalRefProcessor;
 import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
 import org.apache.commons.io.IOUtils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -235,7 +234,7 @@ public class RefUtils {
     }
 
     private static String readAll(Path path) throws IOException {
-        try (InputStream inputStream = new FileInputStream(path.toFile())) {
+        try (InputStream inputStream = Files.newInputStream(path)) {
             return IOUtils.toString(inputStream, UTF_8);
         }
     }

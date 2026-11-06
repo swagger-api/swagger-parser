@@ -1,0 +1,7 @@
+openapi: 3.0.3
+info:
+  title: Issue 2033
+  version: 1.0.0
+paths:
+  /nodes/{uuid}/rights:
+    $ref: "traceability/nodes.yaml#/paths/~1nodes~1{uuid}~1rights"

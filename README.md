@@ -114,7 +114,7 @@ You can include this library from Sonatype OSS for SNAPSHOTS, or Maven central f
 <dependency>
   <groupId>io.swagger.parser.v3</groupId>
   <artifactId>swagger-parser</artifactId>
-  <version>2.1.39</version>
+  <version>2.1.48</version>
 </dependency>
 ```
 
@@ -165,7 +165,7 @@ working inside a firewall or really know what you're doing, well, there's your r
 
 #### Dealing with Let's Encrypt
 Depending on the version of Java that you use, certificates signed by the [Let's Encrypt](https://letsencrypt.org) certificate authority _may not work_ by default.  If you are using any version of Java prior to 1.8u101, you most likely _must_ install an additional CA in your
-JVM.  Also note that 1.8u101 may _not_ be sufficient on it's own.  Some users have reported that certain operating systems are 
+JVM.  Also note that 1.8u101 may _not_ be sufficient on its own.  Some users have reported that certain operating systems are 
 not accepting Let's Encrypt signed certificates.
 
 Your options include:
@@ -197,6 +197,10 @@ final OpenAPI openAPI = new OpenAPIV3Parser().read("a.yaml", null, parseOptions)
 1. replace the remote/relative reference with a local reference,  e.g. : `#/components/schemas/NameOfRemoteSchema`. 
 
 This applies to schemas, parameters, responses, pretty much everything containing a ref.
+
+For OpenAPI 3.0 documents, the `OpenAPIResolver` and `ExternalRefProcessor` path adds numeric suffixes such as `Name_1` for name collisions.
+This behavior prevents data loss. It can change generated component keys, local `$ref` values, and component counts for documents with name collisions.
+OpenAPI 3.1 uses a separate dereferencer. This numeric-suffix change does not modify OpenAPI 3.1 resolution.
 
 #### 2. resolveFully:
 

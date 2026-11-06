@@ -1,0 +1,41 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Issue 2269 - x-nullable preservation for shared $ref responses
+
+responses:
+  SharedResponse:
+    description: A shared response with multiple fields using x-nullable
+    schema:
+      type: object
+      properties:
+        data:
+          type: string
+          description: Required field
+        nullable_field:
+          type: integer
+          x-nullable: true
+          x-internal-note: abc
+        non_nullable_field:
+          type: integer
+          x-nullable: false
+          x-internal-note: def
+      required:
+        - data
+
+paths:
+  /endpoint1:
+    get:
+      operationId: endpoint1
+      summary: First endpoint using shared response
+      responses:
+        '200':
+          $ref: '#/responses/SharedResponse'
+
+  /endpoint2:
+    get:
+      operationId: endpoint2
+      summary: Second endpoint using shared response
+      responses:
+        '200':
+          $ref: '#/responses/SharedResponse'

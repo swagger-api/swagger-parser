@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  title: Nodes
+  version: 1.0.0
+paths:
+  /nodes/{uuid}/rights:
+    get:
+      operationId: listNodeRights
+      responses:
+        "206":
+          description: Partial
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                contentRange:
+                  $ref: "../common-spec-openapi.yaml#/components/examples/ContentRangeExample"
+          headers:
+            Content-Range:
+              $ref: "../common-spec-openapi.yaml#/components/headers/Content-Range"
+          links:
+            nextPage:
+              $ref: "../common-spec-openapi.yaml#/components/links/NextPage"

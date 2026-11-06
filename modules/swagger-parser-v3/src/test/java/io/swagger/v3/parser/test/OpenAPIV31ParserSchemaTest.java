@@ -153,6 +153,14 @@ public class OpenAPIV31ParserSchemaTest {
                         .withBody(pathFile
                                 .getBytes(StandardCharsets.UTF_8))));
 
+        pathFile = FileUtils.readFileToString(new File("src/test/resources/3.1.0/dereference/schema/external-oas-with-id-defs/oas.yaml"), StandardCharsets.UTF_8);
+
+        WireMock.stubFor(get(urlPathMatching("/oai-v3.1-schema.yaml"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-type", "application/yaml")
+                        .withBody(pathFile.getBytes(StandardCharsets.UTF_8))));
+
     }
 
     @AfterClass
@@ -214,6 +222,25 @@ public class OpenAPIV31ParserSchemaTest {
         p.setResolve(true);
         SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(new File("src/test/resources/3.1.0/dereference/schema/$anchor-not-found/root.json").getAbsolutePath(), null, p);
         compare("$anchor-not-found", swaggerParseResult);
+    }
+
+    @Test
+    public void testExternalSchemaWithIdAndDefsResolution_issue2271() throws IOException {
+        String rootYaml = FileUtils.readFileToString(
+                new File("src/test/resources/3.1.0/dereference/schema/external-oas-with-id-defs/root.yaml"),
+                StandardCharsets.UTF_8);
+        rootYaml = rootYaml.replace("${dynamicPort}", String.valueOf(this.serverPort));
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(rootYaml, null, options);
+
+        org.testng.Assert.assertNotNull(result.getOpenAPI());
+        org.testng.Assert.assertTrue(
+                result.getMessages() == null
+                        || result.getMessages().stream().noneMatch(m -> m.contains("Could not find /$defs")),
+                "Expected no $defs resolution errors when resolving external schema with $id, but got: "
+                        + result.getMessages());
     }
 
     public void compare(String dir, SwaggerParseResult result) throws Exception {

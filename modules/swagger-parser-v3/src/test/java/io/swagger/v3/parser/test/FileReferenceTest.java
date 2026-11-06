@@ -1,7 +1,6 @@
 package io.swagger.v3.parser.test;
 
 
-
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;

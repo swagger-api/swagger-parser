@@ -59,15 +59,13 @@ import org.apache.commons.lang3.StringUtils;
 
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SwaggerConverter implements SwaggerParserExtension {
+
+    private static final Set<String> STRIPPED_EXTENSION_KEYS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("x-example", "x-examples", "x-nullable")));
+
     private List<String> globalConsumes = new ArrayList<>();
     private List<String> globalProduces = new ArrayList<>();
     private Components components = new Components();
@@ -654,14 +652,17 @@ public class SwaggerConverter implements SwaggerParserExtension {
     }
 
     private Map<String, Object> convert(Map<String, Object> vendorExtensions) {
-        if (vendorExtensions != null && vendorExtensions.size() > 0) {
-            vendorExtensions.entrySet().removeIf(extension -> (
-                    extension.getKey().equals("x-example")) ||
-                    extension.getKey().equals("x-examples") ||
-                    extension.getKey().equals("x-nullable"));
+        if (vendorExtensions == null || vendorExtensions.isEmpty()) {
+            return vendorExtensions;
         }
 
-        return vendorExtensions;
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : vendorExtensions.entrySet()) {
+            if (!STRIPPED_EXTENSION_KEYS.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 
     private Schema convertFormDataToSchema(io.swagger.models.parameters.Parameter formParam) {

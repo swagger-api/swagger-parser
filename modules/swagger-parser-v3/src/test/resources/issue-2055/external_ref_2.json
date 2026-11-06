@@ -1,0 +1,60 @@
+{
+  "limit": {
+    "name": "limit",
+    "description": "There can be only 2",
+    "in": "query",
+    "schema": {
+      "type": "integer",
+      "maximum": 2,
+      "minimum": 0
+    }
+  },
+  "pathParam": {
+    "name": "pathParam",
+    "description": "path parameter from file two",
+    "in": "path",
+    "required": true,
+    "schema": { "type": "integer" }
+  },
+  "queryParam": {
+    "name": "queryParam",
+    "description": "query parameter from file two",
+    "in": "query",
+    "schema": { "type": "integer" }
+  },
+  "headerParam": {
+    "name": "X-Header-Param",
+    "description": "header parameter from file two",
+    "in": "header",
+    "schema": { "type": "integer" }
+  },
+  "cookieParam": {
+    "name": "cookieParam",
+    "description": "cookie parameter from file two",
+    "in": "cookie",
+    "schema": { "type": "integer" }
+  },
+  "a-request": {
+    "required": true,
+    "description": "A JSON request",
+    "content": {
+      "application/json": {
+        "schema": { "$ref": "#/an-object" }
+      }
+    }
+  },
+  "a-response": {
+    "description": "A JSON response",
+    "content": {
+      "application/json": {
+        "schema": { "$ref": "#/an-object" }
+      }
+    }
+  },
+  "an-object": {
+    "type": "object",
+    "properties": {
+      "a-prop": { "type": "string" }
+    }
+  }
+}

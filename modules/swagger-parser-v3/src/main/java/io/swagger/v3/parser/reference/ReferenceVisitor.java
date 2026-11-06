@@ -19,8 +19,11 @@ import io.swagger.v3.parser.util.DeserializationUtils;
 import io.swagger.v3.parser.util.RemoteUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -319,15 +322,13 @@ public class ReferenceVisitor extends AbstractVisitor {
     }
 
     private Yaml getYaml() {
-        Yaml yaml;
         String yamlCodePoints = System.getProperty("maxYamlCodePoints");
         if (yamlCodePoints != null && !yamlCodePoints.isEmpty() && StringUtils.isNumeric(yamlCodePoints)) {
-            loaderOptions.setCodePointLimit(Integer.parseInt(yamlCodePoints));
-            yaml = new Yaml(loaderOptions);
-        } else {
-            yaml = new Yaml();
+            LoaderOptions opts = new LoaderOptions();
+            opts.setCodePointLimit(Integer.parseInt(yamlCodePoints));
+            return new Yaml(new SafeConstructor(opts), new Representer(new DumperOptions()), new DumperOptions(), opts);
         }
-        return yaml;
+        return new Yaml(new SafeConstructor(new LoaderOptions()));
     }
 
     public JsonNode parse(String absoluteUri, List<AuthorizationValue> auths) throws Exception {

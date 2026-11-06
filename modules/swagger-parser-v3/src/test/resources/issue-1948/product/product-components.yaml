@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: Product components
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        productCode:
+          type: string
+  parameters:
+    param1:
+      name: param1
+      in: path
+      required: true
+      schema:
+        type: string

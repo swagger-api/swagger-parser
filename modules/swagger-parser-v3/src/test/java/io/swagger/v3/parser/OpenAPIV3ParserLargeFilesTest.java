@@ -3,8 +3,9 @@ package io.swagger.v3.parser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.util.DeserializationUtils;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertFalse;
@@ -12,14 +13,16 @@ import static org.testng.Assert.assertNotNull;
 
 public class OpenAPIV3ParserLargeFilesTest {
 
-    @BeforeSuite
+    @BeforeClass
     public static void init() {
         System.setProperty("maxYamlCodePoints", "10000000");
+        DeserializationUtils.getOptions().setMaxYamlCodePoints(10000000);
     }
 
     @AfterClass
-    public void cleanUpAfterAllTests() {
+    public static void cleanUpAfterAllTests() {
         System.clearProperty("maxYamlCodePoints");
+        DeserializationUtils.getOptions().setMaxYamlCodePoints(3 * 1024 * 1024);
     }
 
     @Test

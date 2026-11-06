@@ -1,6 +1,5 @@
 package io.swagger.v3.parser.test;
 
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.OpenAPIV3Parser;

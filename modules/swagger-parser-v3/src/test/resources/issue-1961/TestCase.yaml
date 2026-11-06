@@ -1,0 +1,22 @@
+openapi: 3.0.1
+info:
+  title: '#TestCase.TestCase'
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    TestCase_TestCase:
+      anyOf:
+        - $ref: ./TestCase.v1.yaml#/components/schemas/TestCase_v1_TestCase
+    TestCase_Foo:
+      type: object
+      properties:
+        FooTypes:
+          type: array
+          items:
+            $ref: ./TestCase.yaml#/components/schemas/TestCase_FooType
+    TestCase_FooType:
+      type: string
+      enum:
+        - All
+        - OEM

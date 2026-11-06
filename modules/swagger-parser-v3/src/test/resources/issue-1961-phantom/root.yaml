@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: phantom-back-ref
+  version: 1.0.0
+paths:
+  /a:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: ./ext.yaml#/components/schemas/Payload
+components:
+  schemas:
+    Local:
+      type: object

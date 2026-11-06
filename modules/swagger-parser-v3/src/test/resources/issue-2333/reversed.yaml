@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Reversed collision order
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Pet:
+      $ref: "pets.yaml#/components/schemas/Pet"
+    SomeItem:
+      $ref: "inventory.yaml#/components/schemas/Pet"
+    PetAlias:
+      $ref: "./components/../pets.yaml#/components/schemas/Pet"

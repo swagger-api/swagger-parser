@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: External component collisions
+  version: 1.0.0
+paths:
+  /first:
+    post:
+      operationId: firstOperation
+      requestBody:
+        $ref: './external-components-1.yaml#/sharedRequest'
+      callbacks:
+        event:
+          $ref: './external-components-1.yaml#/sharedCallback'
+      responses:
+        '200':
+          $ref: './external-components-1.yaml#/sharedResponse'
+  /second:
+    post:
+      operationId: secondOperation
+      requestBody:
+        $ref: 'external-components-2.yaml#/sharedRequest'
+      callbacks:
+        event:
+          $ref: 'external-components-2.yaml#/sharedCallback'
+      responses:
+        '200':
+          $ref: 'external-components-2.yaml#/sharedResponse'
+  /equivalent:
+    post:
+      operationId: equivalentReference
+      callbacks:
+        event:
+          $ref: 'external-components-1.yaml#/sharedCallback'
+      responses:
+        default:
+          description: default
+          headers:
+            X-Shared:
+              $ref: 'external-components-1.yaml#/sharedHeader'
+components:
+  headers:
+    sharedHeader:
+      description: occupied base name
+      schema:
+        type: boolean
+    sharedHeader_1:
+      description: occupied first suffix
+      schema:
+        type: number
+    sharedHeader_2:
+      description: occupied second suffix
+      schema:
+        type: string
+  securitySchemes:
+    firstAuth:
+      $ref: './external-components-1.yaml#/sharedAuth'
+    secondAuth:
+      $ref: './external-components-2.yaml#/sharedAuth'

@@ -1,0 +1,71 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.0.0",
+    "title": "OpenAPI Service"
+  },
+  "paths": {
+    "/a-path": {
+      "post": {
+        "operationId": "ignoredRefPost",
+        "parameters": [
+          { "$ref": "./external_ref_1.json#/limit" }
+        ],
+        "requestBody": { "$ref": "external_ref_1.json#/a-request" },
+        "responses": {
+          "200": { "$ref": "external_ref_1.json#/a-response" },
+          "default": { "$ref": "#/components/responses/default-string" }
+        }
+      },
+      "put": {
+        "operationId": "ignoredRefPut",
+        "parameters": [
+          { "$ref": "./external_ref_2.json#/limit" }
+        ],
+        "requestBody": { "$ref": "external_ref_2.json#/a-request" },
+        "responses": {
+          "200": { "$ref": "external_ref_2.json#/a-response" },
+          "default": { "$ref": "#/components/responses/default-string" }
+        }
+      }
+    },
+    "/parameter-types/{pathParam}": {
+      "post": {
+        "operationId": "parameterTypesFromFirstFile",
+        "parameters": [
+          { "$ref": "./external_ref_1.json#/pathParam" },
+          { "$ref": "./external_ref_1.json#/queryParam" },
+          { "$ref": "./external_ref_1.json#/headerParam" },
+          { "$ref": "./external_ref_1.json#/cookieParam" }
+        ],
+        "responses": {
+          "204": { "description": "No content" }
+        }
+      },
+      "put": {
+        "operationId": "parameterTypesFromSecondFile",
+        "parameters": [
+          { "$ref": "./external_ref_2.json#/pathParam" },
+          { "$ref": "./external_ref_2.json#/queryParam" },
+          { "$ref": "./external_ref_2.json#/headerParam" },
+          { "$ref": "./external_ref_2.json#/cookieParam" }
+        ],
+        "responses": {
+          "204": { "description": "No content" }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "default-string": {
+        "description": "Default response",
+        "content": {
+          "text/plain": {
+            "schema": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@ package io.swagger.v3.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.callbacks.Callback;
@@ -28,14 +29,18 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,8 +71,12 @@ public class ResolverCache {
     private final List<AuthorizationValue> auths;
     private final Path parentDirectory;
     private final String rootPath;
+    private final URI rootDocumentUri;
+    private final Map<Pattern, Map<String, ?>> rootReferenceSnapshot;
     private Map<String, Object> resolutionCache = new HashMap<>();
     private Map<String, String> externalFileCache = new HashMap<>();
+    private Map<String, Object> canonicalResolutionCache = new HashMap<>();
+    private Map<String, String> canonicalExternalFileCache = new HashMap<>();
     private List<String> referencedModelKeys = new ArrayList<>();
     private Set<String> resolveValidationMessages;
     private final ParseOptions parseOptions;
@@ -79,6 +88,7 @@ public class ResolverCache {
      * references
      */
     private Map<String, String> renameCache = new HashMap<>();
+    private Map<String, String> canonicalRenameCache = new HashMap<>();
 
     public ResolverCache(OpenAPI openApi, List<AuthorizationValue> auths, String parentFileLocation) {
         this(openApi, auths, parentFileLocation, new HashSet<>());
@@ -93,13 +103,18 @@ public class ResolverCache {
         this.openApi = openApi;
         this.auths = auths;
         this.rootPath = parentFileLocation;
+        this.rootDocumentUri = PathUtils.rootDocumentUri(parentFileLocation);
+        this.rootReferenceSnapshot = snapshotRootReferences(openApi);
         this.resolveValidationMessages = resolveValidationMessages;
         this.parseOptions = parseOptions;
         this.permittedUrlsChecker = new PermittedUrlsChecker(parseOptions.getRemoteRefAllowList(), parseOptions.getRemoteRefBlockList());
 
         if(parentFileLocation != null) {
-            if(parentFileLocation.startsWith("http") || parentFileLocation.startsWith("jar")) {
+            if(PathUtils.isHttpUri(rootDocumentUri) || parentFileLocation.startsWith("jar")) {
                 parentDirectory = null;
+            } else if (rootDocumentUri != null
+                    && "file".equalsIgnoreCase(rootDocumentUri.getScheme())) {
+                parentDirectory = PathUtils.parentDirectoryOfUri(rootDocumentUri);
             } else {
                 parentDirectory = PathUtils.getParentDirectoryOfFile(parentFileLocation);
             }
@@ -131,11 +146,15 @@ public class ResolverCache {
 
         final String file = refParts[0];
         final String definitionPath = refParts.length == 2 ? refParts[1] : null;
+        final String canonicalRef = canonicalize(ref);
+        final String canonicalFile = canonicalize(file);
 
-        //we might have already resolved this ref, so check the resolutionCache
-        Object previouslyResolvedEntity = resolutionCache.get(ref);
+        //we might have already resolved an equivalent ref, so check the canonical cache
+        Object previouslyResolvedEntity = canonicalResolutionCache.get(canonicalRef);
 
         if (previouslyResolvedEntity != null) {
+            resolutionCache.putIfAbsent(ref, previouslyResolvedEntity);
+            externalFileCache.putIfAbsent(file, canonicalExternalFileCache.get(canonicalFile));
             if(expectedType.equals(Header.class)){
                 if (expectedType.getClass().equals(previouslyResolvedEntity.getClass())) {
                     return expectedType.cast(previouslyResolvedEntity);
@@ -147,25 +166,32 @@ public class ResolverCache {
 
         //we have not resolved this particular ref
         //but we may have already loaded the file or url in question
-        String contents = externalFileCache.get(file);
+        String contents = canonicalExternalFileCache.get(canonicalFile);
+
+        if (contents == null && parseOptions.isSafelyResolveURL()) {
+            checkUrlIsPermitted(file);
+        }
+
+        T rootTarget = resolveRootReference(file, definitionPath, ref, canonicalRef, expectedType);
+        if (rootTarget != null) {
+            return rootTarget;
+        }
 
         if (contents == null) {
-            if(parseOptions.isSafelyResolveURL()){
-                checkUrlIsPermitted(file);
-            }
-
             if(parentDirectory != null) {
                 contents = RefUtils.readExternalRef(file, refFormat, auths, parentDirectory, permittedUrlsChecker);
             }
-            else if(rootPath != null && rootPath.startsWith("http")) {
+            else if(rootPath != null && (PathUtils.isHttpUri(rootDocumentUri) || rootPath.startsWith("http"))) {
                 contents = RefUtils.readExternalUrlRef(file, refFormat, auths, rootPath, permittedUrlsChecker);
             }
             else if (rootPath != null) {
                 contents = RefUtils.readExternalClasspathRef(file, refFormat, auths, rootPath, permittedUrlsChecker);
 
             }
-            externalFileCache.put(file, contents);
+            canonicalExternalFileCache.put(canonicalFile, contents);
         }
+        externalFileCache.putIfAbsent(file, contents);
+
         SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
         JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
 
@@ -177,6 +203,7 @@ public class ResolverCache {
                 result = DeserializationUtils.deserialize(contents, file, expectedType, openapi31);
             }
             resolutionCache.put(ref, result);
+            canonicalResolutionCache.put(canonicalRef, result);
             if (deserializationUtilResult.getMessages() != null) {
                 if (this.resolveValidationMessages != null) {
                     this.resolveValidationMessages.addAll(deserializationUtilResult.getMessages());
@@ -216,12 +243,88 @@ public class ResolverCache {
         }
         updateLocalRefs(file, result);
         resolutionCache.put(ref, result);
+        canonicalResolutionCache.put(canonicalRef, result);
         if (deserializationUtilResult.getMessages() != null) {
             if (this.resolveValidationMessages != null) {
                 this.resolveValidationMessages.addAll(deserializationUtilResult.getMessages());
             }
         }
         return result;
+    }
+
+    private <T> T resolveRootReference(String file, String definitionPath, String ref,
+                                       String canonicalRef, Class<T> expectedType) {
+        if (definitionPath == null || !isRootDocument(file)) {
+            return null;
+        }
+
+        Object rootTarget = loadRootReference("#/" + definitionPath);
+        if (!expectedType.isInstance(rootTarget)) {
+            return null;
+        }
+
+        T result = expectedType.cast(rootTarget);
+        resolutionCache.put(ref, result);
+        canonicalResolutionCache.putIfAbsent(canonicalRef, result);
+        return result;
+    }
+
+    private boolean isRootDocument(String file) {
+        if (rootDocumentUri == null || file == null || file.isEmpty()) {
+            return false;
+        }
+
+        try {
+            URI target = rootDocumentUri.resolve(new URI(file)).normalize();
+            if (target.isOpaque()) {
+                return false;
+            }
+            target = PathUtils.withoutFragment(target);
+            return target != null && rootDocumentUri.equals(target);
+        } catch (IllegalArgumentException | URISyntaxException ignored) {
+            return false;
+        }
+    }
+
+    private Map<Pattern, Map<String, ?>> snapshotRootReferences(OpenAPI rootOpenApi) {
+        Map<Pattern, Map<String, ?>> snapshot = new LinkedHashMap<>();
+        if (rootOpenApi == null) {
+            return Collections.emptyMap();
+        }
+
+        addRootReferences(snapshot, PATHS_PATTERN, rootOpenApi.getPaths());
+
+        Components components = rootOpenApi.getComponents();
+        if (components != null) {
+            addRootReferences(snapshot, SCHEMAS_PATTERN, components.getSchemas());
+            addRootReferences(snapshot, RESPONSES_PATTERN, components.getResponses());
+            addRootReferences(snapshot, PARAMETERS_PATTERN, components.getParameters());
+            addRootReferences(snapshot, REQUEST_BODIES_PATTERN, components.getRequestBodies());
+            addRootReferences(snapshot, EXAMPLES_PATTERN, components.getExamples());
+            addRootReferences(snapshot, LINKS_PATTERN, components.getLinks());
+            addRootReferences(snapshot, CALLBACKS_PATTERN, components.getCallbacks());
+            addRootReferences(snapshot, HEADERS_PATTERN, components.getHeaders());
+            addRootReferences(snapshot, SECURITY_SCHEMES, components.getSecuritySchemes());
+        }
+
+        return Collections.unmodifiableMap(snapshot);
+    }
+
+    private void addRootReferences(Map<Pattern, Map<String, ?>> snapshot, Pattern pattern,
+                                   Map<String, ?> references) {
+        if (references != null && !references.isEmpty()) {
+            snapshot.put(pattern, Collections.unmodifiableMap(new LinkedHashMap<>(references)));
+        }
+    }
+
+    private Object loadRootReference(String ref) {
+        for (Map.Entry<Pattern, Map<String, ?>> entry : rootReferenceSnapshot.entrySet()) {
+            Object result = getFromMap(ref, entry.getValue(), entry.getKey());
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     private <T> T deserializeFragment(JsonNode node, Class<T> expectedType, String file, String definitionPath) {
@@ -369,7 +472,7 @@ public class ResolverCache {
         return jsonPathElement.replaceAll("~0", "~");
     }
 
-    private Object getFromMap(String ref, Map map, Pattern pattern) {
+    private Object getFromMap(String ref, Map<?, ?> map, Pattern pattern) {
         final Matcher parameterMatcher = pattern.matcher(ref);
 
         if (parameterMatcher.matches()) {
@@ -402,11 +505,27 @@ public class ResolverCache {
     }
 
     public String getRenamedRef(String originalRef) {
-        return renameCache.get(originalRef);
+        return canonicalRenameCache.get(canonicalize(originalRef));
     }
 
     public void putRenamedRef(String originalRef, String newRef) {
         renameCache.put(originalRef, newRef);
+        canonicalRenameCache.put(canonicalize(originalRef), newRef);
+    }
+
+    public boolean refsAreEquivalent(String first, String second) {
+        return Objects.equals(canonicalize(first), canonicalize(second));
+    }
+
+    private static String canonicalize(String ref) {
+        if (ref == null || ref.isEmpty()) {
+            return ref;
+        }
+        try {
+            return new URI(ref).normalize().toString();
+        } catch (URISyntaxException ignored) {
+            return ref;
+        }
     }
 
     public Map<String, Object> getResolutionCache() {

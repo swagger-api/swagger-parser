@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -66,7 +67,8 @@ public class ResolverFully {
     private Map<String, RequestBody> requestBodies;
     private Map<String, Header> headers;
     private Map<String, Link> links;
-    private Map<String, Schema> resolvedProperties = new IdentityHashMap<>();
+    private Map<Schema, Schema> resolvedSchemas = new IdentityHashMap<>();
+    private Set<Schema> schemasInProgress = Collections.newSetFromMap(new IdentityHashMap<>());
     private Map<String, Callback> callbacks;
 
     public void resolveFully(OpenAPI openAPI) {
@@ -336,6 +338,28 @@ public class ResolverFully {
         if (schema == null) {
             return null;
         }
+        Schema cached = resolvedSchemas.get(schema);
+        if (cached != null) {
+            return cached;
+        }
+        if (schemasInProgress.contains(schema)) {
+            return schema;
+        }
+        return resolveAndCache(schema);
+    }
+
+    private Schema resolveAndCache(Schema schema) {
+        schemasInProgress.add(schema);
+        try {
+            Schema resolved = resolveSchemaImpl(schema);
+            resolvedSchemas.put(schema, resolved);
+            return resolved;
+        } finally {
+            schemasInProgress.remove(schema);
+        }
+    }
+
+    private Schema resolveSchemaImpl(Schema schema) {
 
         if(schema.get$ref() != null) {
             String ref= schema.get$ref();
@@ -394,7 +418,7 @@ public class ResolverFully {
                     Schema innerProperty = obj.getProperties().get(propertyName);
                     // reference check
                     if(schema != innerProperty) {
-                        updated.put(propertyName, resolveSchemaProperty(propertyName, innerProperty));
+                        updated.put(propertyName, resolveSchema(innerProperty));
                     }
                 }
                 obj.setProperties(updated);
@@ -499,7 +523,7 @@ public class ResolverFully {
             Map<String, Schema> properties = model.getProperties();
             for (String propertyName : properties.keySet()) {
                 Schema property = (Schema) model.getProperties().get(propertyName);
-                updated.put(propertyName, resolveSchemaProperty(propertyName, property));
+                updated.put(propertyName, resolveSchema(property));
             }
 
             for (String key : updated.keySet()) {
@@ -573,7 +597,7 @@ public class ResolverFully {
             if (resolved.getProperties() != null) {
                 for (String key : properties.keySet()) {
                     Schema prop = (Schema) resolved.getProperties().get(key);
-                    targetSchema.addProperties(key, resolveSchemaProperty(key, prop));
+                    targetSchema.addProperties(key, resolveSchema(prop));
                 }
 
                 if (resolved.getRequired() != null) {
@@ -696,17 +720,6 @@ public class ResolverFully {
             }
             required.addAll(requiredProperties);
             targetSchema.setRequired(required);
-        }
-    }
-
-    private Schema resolveSchemaProperty(String propertyName, Schema innerProperty) {
-        if (resolvedProperties.get(propertyName) == null || resolvedProperties.get(propertyName) != innerProperty) {
-            LOGGER.debug("avoiding infinite loop");
-            Schema resolved = resolveSchema(innerProperty);
-            resolvedProperties.put(propertyName, resolved);
-            return resolved;
-        } else {
-            return resolvedProperties.get(propertyName);
         }
     }
 }

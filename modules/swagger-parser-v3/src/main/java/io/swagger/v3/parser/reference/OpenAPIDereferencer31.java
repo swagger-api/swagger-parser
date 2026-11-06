@@ -11,14 +11,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
-
-    protected final Set<String> messages = new HashSet<>();
-
-    private OpenAPI openAPI;
-    private SwaggerParseResult result;
 
     public boolean canDereference(DereferencerContext context) {
         if (context.openApi != null && context.openApi.getOpenapi().startsWith("3.1")) {
@@ -38,8 +32,8 @@ public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
             }
         }
 
-        openAPI = context.openApi;
-        result = context.swaggerParseResult;
+        OpenAPI openAPI = context.openApi;
+        SwaggerParseResult result = context.swaggerParseResult;
 
         if (openAPI == null) {
             return;

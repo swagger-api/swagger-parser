@@ -1,0 +1,17 @@
+openapi: 3.0.3
+info:
+  title: Common components
+  version: 1.0.0
+paths: {}
+components:
+  examples:
+    ContentRangeExample:
+      value: items 0-9/42
+  headers:
+    Content-Range:
+      schema:
+        type: string
+        pattern: '\d+-\d+/\d+'
+  links:
+    NextPage:
+      operationId: listNodeRights

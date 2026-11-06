@@ -1,0 +1,26 @@
+properties:
+  body:
+    type: string
+  created_at:
+    format: date-time
+    type: string
+  href:
+    type: string
+  id:
+    format: uuid
+    type: string
+  interpolated:
+    type: string
+  relationships:
+    items:
+      $ref: './Href.yaml'
+    type: array
+  state:
+    type: string
+  type:
+    type: string
+  modified_by:
+    type: object
+  ip:
+    type: string
+type: object

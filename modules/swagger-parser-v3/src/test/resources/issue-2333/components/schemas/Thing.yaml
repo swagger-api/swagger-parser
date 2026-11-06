@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Thing API
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Thing:
+      type: object
+      properties:
+        value:
+          type: string

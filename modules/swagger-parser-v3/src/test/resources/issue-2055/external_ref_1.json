@@ -1,0 +1,54 @@
+{
+  "limit": {
+    "name": "limit",
+    "description": "There can be only 1",
+    "in": "query",
+    "schema": {
+      "type": "integer",
+      "maximum": 1,
+      "minimum": 0
+    }
+  },
+  "pathParam": {
+    "name": "pathParam",
+    "description": "path parameter from file one",
+    "in": "path",
+    "required": true,
+    "schema": { "type": "string" }
+  },
+  "queryParam": {
+    "name": "queryParam",
+    "description": "query parameter from file one",
+    "in": "query",
+    "schema": { "type": "string" }
+  },
+  "headerParam": {
+    "name": "X-Header-Param",
+    "description": "header parameter from file one",
+    "in": "header",
+    "schema": { "type": "string" }
+  },
+  "cookieParam": {
+    "name": "cookieParam",
+    "description": "cookie parameter from file one",
+    "in": "cookie",
+    "schema": { "type": "string" }
+  },
+  "a-request": {
+    "required": true,
+    "description": "A text request",
+    "content": {
+      "text/plain": {
+        "schema": { "type": "string" }
+      }
+    }
+  },
+  "a-response": {
+    "description": "A text response",
+    "content": {
+      "text/plain": {
+        "schema": { "type": "string" }
+      }
+    }
+  }
+}

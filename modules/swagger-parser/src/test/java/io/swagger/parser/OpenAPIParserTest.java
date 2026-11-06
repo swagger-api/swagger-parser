@@ -686,6 +686,32 @@ public class OpenAPIParserTest {
         assertNotNull(schema.getProperties().get("foo"));
     }
 
+    @Test(description = "Issue 2269: preserve x-nullable in shared responses for swagger 2.0 specs")
+    public void testSwagger2SharedResponseNullable() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+
+        SwaggerParseResult result = new OpenAPIParser().readLocation("issue2269.yaml", null, options);
+
+        assertNotNull(result);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema endpoint1Field = (Schema) openAPI.getPaths().get("/endpoint1").getGet()
+                .getResponses().get("200").getContent().values().iterator().next()
+                .getSchema().getProperties().get("optional_field");
+        assertNotNull(endpoint1Field, "Endpoint 1 should have optional_field");
+        assertEquals(endpoint1Field.getNullable(), Boolean.TRUE, "Endpoint 1 optional_field should be nullable");
+
+        Schema endpoint2Field = (Schema) openAPI.getPaths().get("/endpoint2").getGet()
+                .getResponses().get("200").getContent().values().iterator().next()
+                .getSchema().getProperties().get("optional_field");
+        assertNotNull(endpoint2Field, "Endpoint 2 should have optional_field");
+        assertEquals(endpoint2Field.getNullable(), Boolean.TRUE, "Endpoint 2 optional_field should be nullable");
+
+    }
+
     @org.testng.annotations.Test(description = "convert response schema")
     public void testIssue1552AdditionalProps() throws Exception {
         ParseOptions options = new ParseOptions();

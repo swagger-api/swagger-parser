@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Braces path item
+  version: 1.0.0
+paths:
+  /braces:
+    get:
+      parameters:
+        - $ref: '../shared{params}/braces.yaml'
+      responses:
+        '200':
+          description: Success
