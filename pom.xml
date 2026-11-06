@@ -97,7 +97,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.5.1</version>
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>
@@ -114,7 +114,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.16.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -123,9 +123,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.2</version>
+                <version>3.12.0</version>
                 <configuration>
-                    <aggregate>true</aggregate>
                     <source>1.8</source>
                     <encoding>UTF-8</encoding>
                     <maxmemory>1g</maxmemory>
@@ -146,7 +145,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -160,7 +159,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
+                <version>0.8.16</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -179,7 +178,6 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
-                        <configuration></configuration>
                     </execution>
                 </executions>
                 <configuration>
@@ -193,7 +191,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.7.0</version>
                 <executions>
                     <execution>
                         <id>enforce-no-snapshots</id>
@@ -215,7 +213,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.7.0</version>
+                <version>0.12.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
@@ -242,7 +240,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.4.1</version>
+                    <version>3.7.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -354,9 +352,8 @@
         <module>modules/swagger-compat-spec-parser</module>
     </modules>
     <properties>
-        <!--<maven.compiler.release>8</maven.compiler.release>-->
-        <commons-io-version>2.15.1</commons-io-version>
-        <snakeyaml-version>2.4</snakeyaml-version>
+        <commons-io-version>2.22.0</commons-io-version>
+        <snakeyaml-version>2.7</snakeyaml-version>
         <slf4j-version>2.0.9</slf4j-version>
         <swagger-core-version>1.6.16</swagger-core-version>
         <junit-version>4.13.2</junit-version>
