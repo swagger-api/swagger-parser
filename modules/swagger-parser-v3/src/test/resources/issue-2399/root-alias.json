@@ -1,0 +1,18 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Root alias API",
+    "version": "1.0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Target": {
+        "type": "string"
+      },
+      "Alias": {
+        "$ref": "./root-alias.json#/components/schemas/Target"
+      }
+    }
+  }
+}

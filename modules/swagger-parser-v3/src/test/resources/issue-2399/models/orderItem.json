@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": ["id", "status"],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "status": {
+      "$ref": "../api.json#/components/schemas/Order-status"
+    }
+  }
+}

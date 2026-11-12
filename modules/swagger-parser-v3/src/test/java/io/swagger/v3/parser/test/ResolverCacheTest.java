@@ -359,6 +359,7 @@ public class ResolverCacheTest {
                 root + "#/components/schemas/Foo", RefFormat.URL, Schema.class);
 
         assertSame(result, originalRootSchema);
+        assertEquals(cache.getRootReferenceName(root + "#/components/schemas/Foo"), "Foo");
     }
 
     @Test
@@ -430,17 +431,20 @@ public class ResolverCacheTest {
         }};
 
         ResolverCache cache = new ResolverCache(openAPI, auths, root);
-        Schema absent = cache.loadRef(
-                root + "#/components/schemas/External", RefFormat.URL, Schema.class);
-        Schema deeper = cache.loadRef(
-                root + "#/components/schemas/Foo/properties/value", RefFormat.URL, Schema.class);
-        Parameter wrongType = cache.loadRef(
-                root + "#/components/schemas/Foo", RefFormat.URL, Parameter.class);
+        String absentRef = root + "#/components/schemas/External";
+        String deeperRef = root + "#/components/schemas/Foo/properties/value";
+        String wrongTypeRef = root + "#/components/schemas/Foo";
+        Schema absent = cache.loadRef(absentRef, RefFormat.URL, Schema.class);
+        Schema deeper = cache.loadRef(deeperRef, RefFormat.URL, Schema.class);
+        Parameter wrongType = cache.loadRef(wrongTypeRef, RefFormat.URL, Parameter.class);
 
         assertEquals(absent.getType(), "string");
         assertEquals(deeper.getType(), "integer");
         assertNotNull(wrongType);
         assertEquals(wrongType.getName(), "id");
+        assertNull(cache.getRootReferenceName(absentRef));
+        assertNull(cache.getRootReferenceName(deeperRef));
+        assertNull(cache.getRootReferenceName(wrongTypeRef));
     }
 
     @Test
