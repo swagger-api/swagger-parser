@@ -10,23 +10,36 @@ import java.util.regex.Pattern;
 
 public class ReferenceUtils {
 
+    // The fragment is a JSON Pointer and may hold characters that are illegal in a URI fragment,
+    // like the braces of a path template (#/paths/~1pets~1{id}), so it never goes through java.net.URI.
+
     public static String toBaseURI(String uri) throws Exception
     {
-        URI resolved = new URI(uri);
+        URI resolved = new URI(stripFragment(uri));
         return (resolved.getScheme() != null ? resolved.getScheme() + ":" : "") + resolved.getSchemeSpecificPart();
     }
 
     public static String getFragment(String uri) throws Exception
     {
-        URI resolved = new URI(uri);
-        return resolved.getFragment();
+        int hash = uri.indexOf('#');
+        return hash < 0 ? null : uri.substring(hash + 1);
     }
 
     public static String resolve(String uri, String baseURI) throws Exception {
         if (StringUtils.isBlank(uri)) {
             return baseURI;
         }
-        return new URI(baseURI).resolve(uri).toString();
+        String base = stripFragment(uri);
+        String fragment = uri.substring(base.length());
+        if (base.isEmpty()) {
+            return stripFragment(baseURI) + fragment;
+        }
+        return new URI(baseURI).resolve(base).toString() + fragment;
+    }
+
+    private static String stripFragment(String uri) {
+        int hash = uri.indexOf('#');
+        return hash < 0 ? uri : uri.substring(0, hash);
     }
 
     public static boolean isLocalRef(String ref) {
