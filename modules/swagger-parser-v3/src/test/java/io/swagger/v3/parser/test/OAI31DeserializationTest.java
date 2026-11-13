@@ -101,6 +101,40 @@ public class OAI31DeserializationTest {
         assertEquals(openAPI.getComponents().getSchemas().get("ConstNulCharactersInStrings").getConst(), "hello\0there");
     }
 
+    @Test(description = "Test OAS31 scalar const:null is distinguishable from missing const (issue-2395)")
+    public void testScalarConstNullOAS31() {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/issue-2395.yaml", null, null);
+        assertNotNull(result.getOpenAPI());
+        OpenAPI openAPI = result.getOpenAPI();
+
+        Schema<?> mySchema = openAPI.getComponents().getSchemas().get("MySchema");
+
+        // const: null on a scalar property is kept (NullNode), not silently dropped
+        Object msgConst = ((Schema) mySchema.getProperties().get("msg")).getConst();
+        assertNotNull(msgConst);
+        assertTrue(msgConst instanceof NullNode);
+
+        // a missing const still reads as Java null
+        assertNull(((Schema) mySchema.getProperties().get("plain")).getConst());
+
+        // non-null const behaves as before
+        assertEquals(((Schema) mySchema.getProperties().get("code")).getConst(), 0);
+
+        // object const containing a null property is preserved as before
+        Object outerConst = mySchema.getConst();
+        assertTrue(outerConst instanceof ObjectNode);
+        assertEquals(((ObjectNode) outerConst).get("code").intValue(), 0);
+        assertTrue(((ObjectNode) outerConst).get("msg").isNull());
+
+        // const: null survives a serialize/parse round-trip
+        String serialized = io.swagger.v3.core.util.Json31.pretty(openAPI);
+        SwaggerParseResult reparsed = new OpenAPIV3Parser().readContents(serialized, null, null);
+        assertNotNull(reparsed.getOpenAPI());
+        Schema<?> mySchema2 = reparsed.getOpenAPI().getComponents().getSchemas().get("MySchema");
+        assertTrue(((Schema) mySchema2.getProperties().get("msg")).getConst() instanceof NullNode);
+        assertTrue(((ObjectNode) mySchema2.getConst()).get("msg").isNull());
+    }
+
     @Test(description = "Test basic OAS31 deserialization/validation")
     public void testBasicOAS31() {
         SwaggerParseResult result = new OpenAPIV3Parser().readLocation( "3.1.0/test/basicOAS31.yaml", null, null);
