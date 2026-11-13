@@ -111,14 +111,13 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.15.0</version>
+                <version>3.16.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.12.0</version>
                 <configuration>
-                    <aggregate>true</aggregate>
                     <source>1.8</source>
                     <encoding>UTF-8</encoding>
                     <maxmemory>1g</maxmemory>
@@ -153,7 +152,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.14</version>
+                <version>0.8.16</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -186,7 +185,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>3.7.0</version>
                 <executions>
                     <execution>
                         <id>enforce-no-snapshots</id>
@@ -208,7 +207,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.11.0</version>
+                <version>0.12.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
@@ -223,7 +222,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.6</version>
+                    <version>3.2.8</version>
                     <configuration>
                         <!-- Prevent `gpg` from using pinentry programs -->
                         <gpgArguments>
@@ -235,7 +234,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.3</version>
+                    <version>3.7.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -248,7 +247,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>12.2.2</version>
+                        <version>13.0.0</version>
                         <configuration>
                             <skipSystemScope>true</skipSystemScope>
                         </configuration>
@@ -270,7 +269,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.2.8</version>
                         <configuration>
                             <!-- Prevent `gpg` from using pinentry programs -->
                             <gpgArguments>
@@ -358,19 +357,19 @@
     </modules>
     <properties>
         <maven.compiler.release>8</maven.compiler.release>
-        <snakeyaml-version>2.6</snakeyaml-version>
+        <snakeyaml-version>2.7</snakeyaml-version>
         <swagger-parser-v2-version>1.0.76</swagger-parser-v2-version>
         <commons-io-version>2.22.0</commons-io-version>
-        <slf4j-version>2.0.18</slf4j-version>
-        <swagger-core-version>2.2.53</swagger-core-version>
+        <slf4j-version>2.0.20</slf4j-version>
+        <swagger-core-version>2.2.55</swagger-core-version>
         <swagger-core-v2-version>1.6.16</swagger-core-v2-version>
         <junit-version>4.13.2</junit-version>
         <testng-version>7.12.0</testng-version>
         <jmockit-version>1.49</jmockit-version>
         <wiremock-version>2.35.2</wiremock-version>
         <surefire-version>3.5.6</surefire-version>
-        <commons-lang-version>3.20.0</commons-lang-version>
-        <jackson-bom-version>2.22.1</jackson-bom-version>
+        <commons-lang-version>3.22.0</commons-lang-version>
+        <jackson-bom-version>2.23.0</jackson-bom-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 </project>
