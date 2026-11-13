@@ -1,0 +1,14 @@
+BarEmailModel:
+  type: object
+  properties:
+    title:
+      type: string
+    parentList:
+      type: array
+      items:
+        $ref: "./bar.yaml#/BarParentListItem"
+BarParentListItem:
+  type: object
+  properties:
+    label:
+      type: string

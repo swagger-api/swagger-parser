@@ -1,0 +1,8 @@
+type: object
+properties:
+  items:
+    type: array
+    items:
+      $ref: "./Item.yaml"
+  extra:
+    $ref: "./Item.yaml"
