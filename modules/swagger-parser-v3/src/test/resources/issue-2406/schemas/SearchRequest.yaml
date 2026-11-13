@@ -1,0 +1,15 @@
+type: object
+properties:
+  query:
+    type: array
+    items:
+      oneOf:
+        - $ref: './TypeA.yaml'
+        - $ref: './TypeB.yaml'
+      discriminator:
+        propertyName: kind
+        mapping:
+          a: './TypeA.yaml'
+          b: './TypeB.yaml'
+          # several discriminator values may map to the same schema
+          bLegacy: './TypeB.yaml'
