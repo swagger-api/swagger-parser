@@ -31,6 +31,13 @@ public class Issue2409Test {
     }
 
     @Test
+    public void arrayItemsRefToAnotherSchemaOfTheSameExternalFileIsResolved() {
+        Map<String, Schema> schemas = parse("./src/test/resources/issue-2409/same-file/openapi.yaml", false);
+        assertEquals(itemsRef(schemas, "BarEmailModel", "parentList"), "#/components/schemas/BarParentListItem");
+        assertTrue(schemas.containsKey("BarParentListItem"));
+    }
+
+    @Test
     public void arrayItemsRefIsInlinedWithResolveFully() {
         Schema items = itemsSchema(parse(true), "Broken", "items");
         assertNull(items.get$ref());
@@ -43,12 +50,16 @@ public class Issue2409Test {
     }
 
     private Map<String, Schema> parse(boolean resolveFully) {
+        return parse("./src/test/resources/issue-2409/openapi.yaml", resolveFully);
+    }
+
+    private Map<String, Schema> parse(String location, boolean resolveFully) {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(resolveFully);
 
         SwaggerParseResult result = new OpenAPIV3Parser()
-                .readLocation("./src/test/resources/issue-2409/openapi.yaml", null, options);
+                .readLocation(location, null, options);
 
         assertNotNull(result.getOpenAPI());
         return result.getOpenAPI().getComponents().getSchemas();
