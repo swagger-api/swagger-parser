@@ -190,7 +190,7 @@ public class PathsProcessor {
     }
 
     protected void updateRefs(Example example, String pathRef) {
-        if(example.get$ref() != null) {
+        if(example.get$ref() != null && !externalRefProcessor.isRebasedOntoRootDocument(example)) {
             example.set$ref(computePreprocessedRef(example.get$ref(), pathRef));
         }
     }
@@ -239,7 +239,9 @@ public class PathsProcessor {
 
     protected void updateRefs(Schema model, String pathRef) {
         if(model.get$ref() != null) {
-            model.set$ref(computePreprocessedRef(model.get$ref(), pathRef));
+            if(!externalRefProcessor.isRebasedOntoRootDocument(model)) {
+                model.set$ref(computePreprocessedRef(model.get$ref(), pathRef));
+            }
         }
         else if(model.getProperties() != null) {
             // process properties

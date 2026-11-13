@@ -1,0 +1,10 @@
+components:
+  examples:
+    ItemCreated:
+      summary: Item created
+      value:
+        name: created
+    ItemDraft:
+      summary: Item draft
+      value:
+        name: draft
