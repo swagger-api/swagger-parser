@@ -38,6 +38,24 @@ public class Issue2409Test {
     }
 
     @Test
+    public void itemsRefOfATopLevelArraySchemaIsResolved() {
+        assertEquals(parse().get("ItemList").getItems().get$ref(), "#/components/schemas/Item");
+    }
+
+    @Test
+    public void arrayItemsRefInsideAllOfIsResolved() {
+        Schema part = (Schema) parse().get("Composed").getAllOf().get(0);
+        Schema array = (Schema) part.getProperties().get("items");
+        assertEquals(array.getItems().get$ref(), "#/components/schemas/Item");
+    }
+
+    @Test
+    public void notRefInAnExternalSchemaDoesNotBreakTheResolve() {
+        SwaggerParseResult result = read("./src/test/resources/issue-2409/openapi.yaml", false);
+        assertTrue(result.getMessages().isEmpty(), result.getMessages().toString());
+    }
+
+    @Test
     public void arrayItemsRefIsInlinedWithResolveFully() {
         Schema items = itemsSchema(parse(true), "Broken", "items");
         assertNull(items.get$ref());
@@ -54,15 +72,16 @@ public class Issue2409Test {
     }
 
     private Map<String, Schema> parse(String location, boolean resolveFully) {
+        SwaggerParseResult result = read(location, resolveFully);
+        assertNotNull(result.getOpenAPI());
+        return result.getOpenAPI().getComponents().getSchemas();
+    }
+
+    private SwaggerParseResult read(String location, boolean resolveFully) {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         options.setResolveFully(resolveFully);
-
-        SwaggerParseResult result = new OpenAPIV3Parser()
-                .readLocation(location, null, options);
-
-        assertNotNull(result.getOpenAPI());
-        return result.getOpenAPI().getComponents().getSchemas();
+        return new OpenAPIV3Parser().readLocation(location, null, options);
     }
 
     private String itemsRef(Map<String, Schema> schemas, String schemaName, String property) {

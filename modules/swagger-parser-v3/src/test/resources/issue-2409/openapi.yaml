@@ -43,3 +43,9 @@ components:
       $ref: "./schemas/Working.yaml"
     Renamed:
       $ref: "./schemas/Renamed.yaml"
+    ItemList:
+      $ref: "./schemas/ItemList.yaml"
+    Composed:
+      $ref: "./schemas/Composed.yaml"
+    Negated:
+      $ref: "./schemas/Negated.yaml"

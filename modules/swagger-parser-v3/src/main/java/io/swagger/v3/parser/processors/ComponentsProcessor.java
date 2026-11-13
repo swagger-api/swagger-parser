@@ -258,8 +258,7 @@ public class ComponentsProcessor {
         //process schemas again to check refs that haven't been solved, including nested ones such as array items
         for (String modelName : schemaKeys) {
             final Schema model = schemas.get(modelName);
-            if (model != null && model.getProperties() != null
-                    && hasUnresolvedExternalRef(model, Collections.newSetFromMap(new IdentityHashMap<>()))) {
+            if (model != null && hasUnresolvedExternalRef(model, Collections.newSetFromMap(new IdentityHashMap<>()))) {
                 schemaProcessor.processSchema(model);
             }
         }
@@ -283,15 +282,7 @@ public class ComponentsProcessor {
                 && hasUnresolvedExternalRef((Schema) schema.getAdditionalProperties(), visited)) {
             return true;
         }
-        if (schema.getDiscriminator() != null && schema.getDiscriminator().getMapping() != null) {
-            for (String mappingRef : schema.getDiscriminator().getMapping().values()) {
-                if (isAnExternalRefFormat(computeRefFormat(mappingRef))) {
-                    return true;
-                }
-            }
-        }
         return hasUnresolvedExternalRef(schema.getItems(), visited)
-                || hasUnresolvedExternalRef(schema.getNot(), visited)
                 || anyHasUnresolvedExternalRef(schema.getAllOf(), visited)
                 || anyHasUnresolvedExternalRef(schema.getAnyOf(), visited)
                 || anyHasUnresolvedExternalRef(schema.getOneOf(), visited);

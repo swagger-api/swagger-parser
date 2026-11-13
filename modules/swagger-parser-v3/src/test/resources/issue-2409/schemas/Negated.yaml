@@ -1,0 +1,5 @@
+type: object
+properties:
+  value:
+    not:
+      $ref: "./Item.yaml"
