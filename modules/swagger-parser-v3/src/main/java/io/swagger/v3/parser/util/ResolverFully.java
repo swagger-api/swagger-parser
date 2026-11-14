@@ -133,6 +133,19 @@ public class ResolverFully {
                 resolvePath(pathItem);
             }
         }
+
+        // Resolve component schemas that are not reachable through any path, so that
+        // e.g. a $ref inside an allOf of an otherwise-unreferenced component schema is
+        // still fully resolved. resolveSchema caches its results, so component schemas
+        // already resolved while walking the paths are returned as-is (no double resolution).
+        if (schemas != null) {
+            for (String schemaName : new ArrayList<>(schemas.keySet())) {
+                Schema resolved = resolveSchema(schemas.get(schemaName));
+                if (resolved != null) {
+                    schemas.put(schemaName, resolved);
+                }
+            }
+        }
     }
 
     public void resolvePath(PathItem pathItem){
