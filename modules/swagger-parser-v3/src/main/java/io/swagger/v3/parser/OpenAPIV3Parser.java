@@ -21,6 +21,7 @@ import io.swagger.v3.parser.util.RemoteUrl;
 import io.swagger.v3.parser.util.ResolverFully;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -209,6 +210,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             String location) {
         if (location != null) {
             location = location.replace('\\', '/');
+            location = toUriSafeLocation(location);
         }
         try {
             if (options != null) {
@@ -263,6 +265,29 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
             // result.setMessages(Collections.singletonList(e.getMessage()));
         }
         return result;
+    }
+
+    /**
+     * Normalizes a location that is used as the base URI for reference resolution.
+     * <p>
+     * {@code readLocation} accepts raw local filesystem paths, but reference resolution builds
+     * {@code java.net.URI} instances from that base (e.g. in {@code ReferenceUtils} and {@code Visitor#readURI}).
+     * A raw path containing characters that are illegal in a URI (most commonly a space) makes those
+     * constructions fail with "Illegal character in path", which surfaces as a parse error even for a
+     * self-contained single-file spec. When the location is not already a valid URI, convert it to a proper
+     * {@code file:} URI so the base is URI-safe; valid URIs (including scheme-less relative paths) are left untouched.
+     */
+    private static String toUriSafeLocation(String location) {
+        try {
+            new URI(location);
+            return location;
+        } catch (URISyntaxException e) {
+            try {
+                return Paths.get(location).toUri().toString();
+            } catch (Exception ex) {
+                return location;
+            }
+        }
     }
 
     private String getParseErrorMessage(String originalMessage, String location) {
