@@ -230,10 +230,12 @@ public final class ExternalRefProcessor {
             }
             if (property instanceof ComposedSchema) {
                 ComposedSchema composed = (ComposedSchema) property;
-                final Map<String, String> refMap = Optional.ofNullable(composed.getDiscriminator())
+                // discriminator values grouped by the $ref they map to: several values may map to the same schema
+                final Map<String, List<String>> discriminatorValuesByRef = Optional.ofNullable(composed.getDiscriminator())
                                 .map(Discriminator::getMapping).orElse(Collections.emptyMap()).entrySet()
-                                .stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                Map<String, Schema> refCache = (!refMap.isEmpty() &&
+                                .stream().collect(Collectors.groupingBy(Map.Entry::getValue,
+                                        Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+                Map<String, Schema> refCache = (!discriminatorValuesByRef.isEmpty() &&
                         (composed.getAnyOf() != null || composed.getOneOf() != null)) ? Stream.of(
                                 composed.getAnyOf(), composed.getOneOf()
                         )
@@ -247,12 +249,13 @@ public final class ExternalRefProcessor {
                 processProperties(composed.getAnyOf(), file);
                 processProperties(composed.getOneOf(), file);
 
-                if (!refMap.isEmpty() && !refCache.isEmpty()) {
+                if (!discriminatorValuesByRef.isEmpty() && !refCache.isEmpty()) {
                     refCache.entrySet()
                             .stream().filter(e -> !e.getKey().equals(e.getValue().get$ref()))
                             .forEach(entry -> {
                                 String newRef = entry.getValue().get$ref();
-                                property.getDiscriminator().getMapping().put(refMap.get(entry.getKey()), newRef);
+                                discriminatorValuesByRef.getOrDefault(entry.getKey(), Collections.emptyList())
+                                        .forEach(value -> property.getDiscriminator().getMapping().put(value, newRef));
                             });
                 }
             }

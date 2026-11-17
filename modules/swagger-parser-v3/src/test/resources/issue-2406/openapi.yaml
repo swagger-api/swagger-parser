@@ -1,0 +1,17 @@
+openapi: 3.0.3
+info:
+  title: Discriminator mapping of a oneOf nested in array items with external refs
+  version: 1.0.0
+paths:
+  /search:
+    post:
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/SearchRequest.yaml'
+      responses:
+        '204':
+          description: OK
