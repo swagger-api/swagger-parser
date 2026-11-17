@@ -213,7 +213,7 @@ public class OpenAPIV3Parser implements SwaggerParserExtension {
         try {
             if (options != null) {
                 if (options.isResolve() || options.isResolveFully()) {
-                    if (result.getOpenAPI().getOpenapi() != null && result.getOpenAPI().getOpenapi().startsWith("3.1")) {
+                    if (result.getOpenAPI().getOpenapi() != null && (result.getOpenAPI().getOpenapi().startsWith("3.1") || result.getOpenAPI().getOpenapi().startsWith("3.2"))) {
                         if (StringUtils.isBlank(System.getenv(DISABLE_OAS31_RESOLVE))) {
                             DereferencerContext dereferencerContext = new DereferencerContext(
                                     result,

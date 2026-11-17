@@ -331,13 +331,13 @@ public class OpenAPIDeserializer {
 			String value = getString("openapi", rootNode, true, location, result);
 
 			// we don't even try if the version isn't there
-			if (value == null || (!value.startsWith("3.0") && !value.startsWith("3.1"))) {
+			if (value == null || (!value.startsWith("3.0") && !value.startsWith("3.1") && !value.startsWith("3.2"))) {
 				return null;
-			} else if (value.startsWith("3.1")) {
+			} else if (value.startsWith("3.1") || value.startsWith("3.2")) {
 				result.openapi31(true);
                 openAPI.setSpecVersion(SpecVersion.V31);
 			}
-            if (!value.startsWith("3.0.") && !value.startsWith("3.1.")){
+            if (!value.startsWith("3.0.") && !value.startsWith("3.1.") && !value.startsWith("3.2.")){
                 result.warning(location, "The provided definition does not specify a valid version field");
             }
             openAPI.setOpenapi(value);

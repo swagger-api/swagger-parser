@@ -93,7 +93,9 @@ SwaggerParseResult result = new OpenAPIParser().readContents("./path/to/swagger.
 
 the Swagger/OpenAPI 2.0 document will be first converted into a comparable OpenAPI 3.0 one.
 
-You can also directly use `OpenAPIV3Parser` which only handles OpenAPI 3.0 documents, and provides a convenience method to get directly the parsed `OpenAPI object:
+You can also directly use `OpenAPIV3Parser` which handles OpenAPI 3.x documents, and provides a convenience method to get directly the parsed `OpenAPI` object.
+
+Note: OpenAPI 3.2 documents are currently parsed through the OpenAPI 3.1 model. Elements introduced in 3.2 (e.g. the `query` operation, `additionalOperations`, `$self`, `in: querystring` parameters) are reported as validation messages but are not reproduced in the parsed model, so resolved output can differ from what a fully 3.2-aware parser would produce.
 
 ```java
 import io.swagger.v3.parser.OpenAPIV3Parser;

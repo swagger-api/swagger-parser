@@ -15,7 +15,7 @@ import java.util.LinkedHashSet;
 public class OpenAPIDereferencer31 implements OpenAPIDereferencer {
 
     public boolean canDereference(DereferencerContext context) {
-        if (context.openApi != null && context.openApi.getOpenapi().startsWith("3.1")) {
+        if (context.openApi != null && context.openApi.getOpenapi() != null && (context.openApi.getOpenapi().startsWith("3.1") || context.openApi.getOpenapi().startsWith("3.2"))) {
             return true;
         }
         return false;
