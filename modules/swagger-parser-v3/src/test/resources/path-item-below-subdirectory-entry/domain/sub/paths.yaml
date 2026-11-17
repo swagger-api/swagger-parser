@@ -87,12 +87,61 @@ paths:
       responses:
         '200':
           description: ok
+  /array-items:
+    post:
+      operationId: arrayItems
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../shared/schemas.yaml#/components/schemas/Money'
+      responses:
+        '200':
+          description: ok
+  /all-of:
+    post:
+      operationId: allOf
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../shared/schemas.yaml#/components/schemas/Money'
+      responses:
+        '200':
+          description: ok
+  /any-of:
+    post:
+      operationId: anyOf
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '../../shared/schemas.yaml#/components/schemas/Money'
+      responses:
+        '200':
+          description: ok
+  /one-of:
+    post:
+      operationId: oneOf
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '../../shared/schemas.yaml#/components/schemas/Money'
+      responses:
+        '200':
+          description: ok
   /path-level-parameter:
     parameters:
-      - name: currency
+      - name: item
         in: query
         schema:
-          $ref: '../../shared/schemas.yaml#/components/schemas/Currency'
+          $ref: '../sub/schemas.yaml#/components/schemas/ItemRequest'
     get:
       operationId: pathLevelParameter
       responses:
@@ -108,7 +157,30 @@ paths:
               type: object
             examples:
               draft:
-                $ref: '../../domain/sub/examples.yaml#/components/examples/ItemDraft'
+                $ref: '../sub/examples.yaml#/components/examples/ItemDraft'
+      responses:
+        '200':
+          description: ok
+  /callback:
+    post:
+      operationId: callback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      callbacks:
+        onEvent:
+          '{$request.body#/callbackUrl}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '../sub/schemas.yaml#/components/schemas/ItemRequest'
+              responses:
+                '200':
+                  description: ok
       responses:
         '200':
           description: ok

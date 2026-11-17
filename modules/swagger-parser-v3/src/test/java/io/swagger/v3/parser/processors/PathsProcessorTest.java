@@ -391,12 +391,24 @@ public class PathsProcessorTest {
                         "#/components/examples/ItemCreated"},
                 {"parameter-schema.yaml", "/parameter-schema", operationParameterSchemaRef(),
                         "#/components/schemas/Currency"},
-                // Refs only PathsProcessor rebases, still rebased exactly once.
+                {"array-items.yaml", "/array-items", requestBodySubschemaRef(Schema::getItems),
+                        "#/components/schemas/Money"},
+                {"all-of.yaml", "/all-of", requestBodySubschemaRef(schema -> schema.getAllOf().get(0)),
+                        "#/components/schemas/Money"},
+                {"any-of.yaml", "/any-of", requestBodySubschemaRef(schema -> schema.getAnyOf().get(0)),
+                        "#/components/schemas/Money"},
+                {"one-of.yaml", "/one-of", requestBodySubschemaRef(schema -> schema.getOneOf().get(0)),
+                        "#/components/schemas/Money"},
+                // Refs only PathsProcessor rebases, still rebased exactly once. They go up one directory only:
+                // RefUtils.readExternalRef's ".." fallback would load a "../../" ref even if it were never rebased.
                 // processPaths copies a path-level parameter into each operation.
                 {"path-level-parameter.yaml", "/path-level-parameter", operationParameterSchemaRef(),
-                        "#/components/schemas/Currency"},
+                        "#/components/schemas/ItemRequest"},
                 {"request-example.yaml", "/request-example", requestBodyExampleRef("draft"),
                         "#/components/examples/ItemDraft"},
+                {"callback.yaml", "/callback",
+                        callbackRequestBodySchemaRef("onEvent", "{$request.body#/callbackUrl}"),
+                        "#/components/schemas/ItemRequest"},
         };
     }
 
@@ -416,6 +428,15 @@ public class PathsProcessorTest {
     private static Function<PathItem, String> requestBodyPropertyRef(String property) {
         return pathItem -> ((Schema) requestBodyMediaType(pathItem).getSchema().getProperties().get(property))
                 .get$ref();
+    }
+
+    private static Function<PathItem, String> requestBodySubschemaRef(Function<Schema<?>, Schema<?>> subschema) {
+        return pathItem -> subschema.apply(requestBodyMediaType(pathItem).getSchema()).get$ref();
+    }
+
+    private static Function<PathItem, String> callbackRequestBodySchemaRef(String callback, String expression) {
+        return pathItem -> requestBodySchemaRef()
+                .apply(pathItem.getPost().getCallbacks().get(callback).get(expression));
     }
 
     private static Function<PathItem, String> requestBodyExampleRef(String example) {

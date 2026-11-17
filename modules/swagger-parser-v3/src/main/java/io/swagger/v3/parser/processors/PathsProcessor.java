@@ -239,6 +239,7 @@ public class PathsProcessor {
 
     protected void updateRefs(Schema model, String pathRef) {
         if(model.get$ref() != null) {
+            // Nested, not &&: a schema with a $ref must not fall through to the else-if branches below.
             if(!externalRefProcessor.isRebasedOntoRootDocument(model)) {
                 model.set$ref(computePreprocessedRef(model.get$ref(), pathRef));
             }
