@@ -1,0 +1,7 @@
+components:
+  schemas:
+    ItemRequest:
+      type: object
+      properties:
+        name:
+          type: string
