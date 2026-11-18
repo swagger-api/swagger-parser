@@ -199,10 +199,16 @@ public class PathsProcessor {
         if (param.get$ref() != null){
         	param.set$ref(computeRef(param.get$ref(), pathRef));
         }
-        if(param.getSchema() != null) {
+        if (param.getSchema() != null) {
             updateRefs(param.getSchema(), pathRef);
         }
-        if(param.getContent() != null) {
+        if (param.getExamples() != null) {
+            Map<String, Example> examples = param.getExamples();
+            for (Example example : examples.values()) {
+                updateRefs(example, pathRef);
+            }
+        }
+        if (param.getContent() != null) {
             Map<String, MediaType> content = param.getContent();
             for (String key: content.keySet()) {
                 MediaType mediaType = content.get(key);
