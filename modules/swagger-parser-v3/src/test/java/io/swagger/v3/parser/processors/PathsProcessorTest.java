@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.reference.ReferenceUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -21,6 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class PathsProcessorTest {
 
@@ -158,8 +160,8 @@ public class PathsProcessorTest {
     @Test
     public void testIssue1948BareOperationParameterRefIsRelativeToExternalPathItem() {
         SwaggerParseResult result = parse("issue-1948/openapi.yaml");
-        Parameter parameter = result.getOpenAPI().getPaths().get("/products/{param1}")
-                .getGet().getParameters().get(0);
+        Parameter parameter = componentParameter(result, result.getOpenAPI().getPaths().get("/products/{param1}")
+                .getGet().getParameters().get(0));
 
         assertParameter(parameter, "param1", "path", "string");
         Schema responseSchema = result.getOpenAPI().getPaths().get("/products/{param1}")
@@ -172,8 +174,8 @@ public class PathsProcessorTest {
     @Test
     public void testIssue2066DotSlashPathParameterRefIsRelativeToExternalPathItem() {
         SwaggerParseResult result = parse("issue-2066/openapi.json");
-        Parameter parameter = result.getOpenAPI().getPaths().get("/params")
-                .getGet().getParameters().get(0);
+        Parameter parameter = componentParameter(result, result.getOpenAPI().getPaths().get("/params")
+                .getGet().getParameters().get(0));
 
         assertNotNull(parameter);
         assertEquals(parameter.getName(), "limit");
@@ -430,7 +432,15 @@ public class PathsProcessorTest {
     }
 
     private Parameter parameter(SwaggerParseResult result, String path) {
-        return result.getOpenAPI().getPaths().get(path).getGet().getParameters().get(0);
+        return componentParameter(result, result.getOpenAPI().getPaths().get(path).getGet().getParameters().get(0));
+    }
+
+    private Parameter componentParameter(SwaggerParseResult result, Parameter parameter) {
+        assertNotNull(parameter);
+        String ref = parameter.get$ref();
+        assertNotNull(ref);
+        assertTrue(ReferenceUtils.isLocalRefToComponents(ref), "Expected a local parameter ref: " + ref);
+        return result.getOpenAPI().getComponents().getParameters().get(ReferenceUtils.getRefName(ref));
     }
 
     private void assertParameter(Parameter parameter, String name, String in, String schemaType) {

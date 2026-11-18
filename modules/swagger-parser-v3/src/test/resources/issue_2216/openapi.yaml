@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Issue 2216 - External parameter ref
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      parameters:
+        - $ref: './params.yaml#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: ok

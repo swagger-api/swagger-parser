@@ -35,10 +35,13 @@ public class Issue2055Test {
         Operation post = openAPI.getPaths().get("/a-path").getPost();
         Operation put = openAPI.getPaths().get("/a-path").getPut();
 
-        assertEquals(post.getParameters().get(0).getDescription(), "There can be only 1");
-        assertEquals(put.getParameters().get(0).getDescription(), "There can be only 2");
-
         Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
+        Parameter postParameter = assertLocalRefResolves(post.getParameters().get(0).get$ref(), "parameters", parameters);
+        Parameter putParameter = assertLocalRefResolves(put.getParameters().get(0).get$ref(), "parameters", parameters);
+
+        assertEquals(postParameter.getDescription(), "There can be only 1");
+        assertEquals(putParameter.getDescription(), "There can be only 2");
+
         assertEquals(parameters.size(), 10);
         assertTrue(parameters.keySet().containsAll(Arrays.asList("limit", "limit_1")));
         assertTrue(parameters.values().stream()
@@ -63,15 +66,15 @@ public class Issue2055Test {
         OpenAPI openAPI = parse();
         Operation post = openAPI.getPaths().get("/parameter-types/{pathParam}").getPost();
         Operation put = openAPI.getPaths().get("/parameter-types/{pathParam}").getPut();
-        Parameter first = post.getParameters().get(parameterIndex);
-        Parameter second = put.getParameters().get(parameterIndex);
+        Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
+        Parameter first = assertLocalRefResolves(post.getParameters().get(parameterIndex).get$ref(), "parameters", parameters);
+        Parameter second = assertLocalRefResolves(put.getParameters().get(parameterIndex).get$ref(), "parameters", parameters);
 
         assertEquals(first.getIn(), location);
         assertEquals(second.getIn(), location);
         assertEquals(first.getDescription(), location + " parameter from file one");
         assertEquals(second.getDescription(), location + " parameter from file two");
 
-        Map<String, Parameter> parameters = openAPI.getComponents().getParameters();
         assertTrue(parameters.keySet().containsAll(Arrays.asList(componentBaseName, componentBaseName + "_1")));
         assertTrue(parameters.values().stream()
                 .anyMatch(parameter -> (location + " parameter from file one").equals(parameter.getDescription())));

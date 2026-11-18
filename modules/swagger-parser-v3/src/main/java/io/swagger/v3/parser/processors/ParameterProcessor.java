@@ -99,6 +99,11 @@ public class ParameterProcessor {
             }
 
         }
+
+        if (processedPathLevelParameters.isEmpty()) {
+            processedPathLevelParameters.addAll(refParameters);
+        }
+
         processedPathLevelParameters.forEach(parameter -> {
             if (parameter.getSchema() != null) {
                 schemaProcessor.processSchema(parameter.getSchema());
@@ -140,7 +145,7 @@ public class ParameterProcessor {
                 if (matched) {
                     refParameters.add(resolvedParameter);
                 } else {
-                    processedPathLevelParameters.add(resolvedParameter);
+                    processedPathLevelParameters.add(parameter);
                 }
             } else {
                 processedPathLevelParameters.add(parameter);
