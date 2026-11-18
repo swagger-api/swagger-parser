@@ -1,0 +1,42 @@
+openapi: 3.1.0
+info:
+  title: internal-ref-reuse
+  version: "1.0.0"
+paths:
+  /fees:
+    get:
+      operationId: listFees
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeListResponse"
+  /fees/group/{groupId}:
+    put:
+      operationId: putGroupFees
+      parameters:
+        - { name: groupId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeeValues"
+      responses:
+        "204": { description: ok }
+components:
+  schemas:
+    FeeValues:
+      type: object
+      required: [amount]
+      properties:
+        amount: { type: integer, format: int32 }
+        label: { type: string }
+    FeeListResponse:
+      type: object
+      properties:
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeeValues"
