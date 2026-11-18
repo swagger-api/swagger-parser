@@ -1035,6 +1035,59 @@ public class OAI31DeserializationTest {
         assertEquals(id.getTypes().iterator().next(), "string");
     }
 
+    @Test(description = "Test Issue 1964 with inferSchemaType disabled")
+    public void test31Issue1964InferSchemaTypeDisabled() {
+        ParseOptions options = new ParseOptions();
+        options.setInferSchemaType(false);
+
+        String yaml = "openapi: 3.1.0\n" +
+                "info:\n" +
+                "  version: 1.0.0\n" +
+                "  title: Example\n" +
+                "paths:\n" +
+                "  /somePath:\n" +
+                "    get:\n" +
+                "      operationId: getSomePath\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              schema: {}\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    ArrayContainsValue:\n" +
+                "      type: array\n" +
+                "      contains:\n" +
+                "        enum:\n" +
+                "          - 1\n" +
+                "    AdditionalpropertiesBeingFalseDoesNotAllowOtherProperties:\n" +
+                "      $schema: https://json-schema.org/draft/2020-12/schema\n" +
+                "      properties:\n" +
+                "        foo: {}\n" +
+                "        bar: {}\n" +
+                "      patternProperties:\n" +
+                "        ^v: {}\n" +
+                "      additionalProperties: false\n";
+
+        SwaggerParseResult result = new OpenAPIV3Parser().readContents(yaml, null, options);
+        OpenAPI openAPI = result.getOpenAPI();
+        assertNotNull(openAPI);
+        assertTrue(result.getMessages().isEmpty(), String.valueOf(result.getMessages()));
+
+        Schema arrayContainsValue = openAPI.getComponents().getSchemas().get("ArrayContainsValue");
+        assertNotNull(arrayContainsValue.getContains());
+        assertNull(arrayContainsValue.getContains().getType());
+        assertNull(arrayContainsValue.getContains().getTypes());
+
+        Schema objectWithoutExplicitType = openAPI.getComponents().getSchemas()
+                .get("AdditionalpropertiesBeingFalseDoesNotAllowOtherProperties");
+        assertTrue(objectWithoutExplicitType.getAdditionalProperties() instanceof Schema);
+        assertFalse(((Schema) objectWithoutExplicitType.getAdditionalProperties()).getBooleanSchemaValue());
+        assertNull(objectWithoutExplicitType.getType());
+        assertNull(objectWithoutExplicitType.getTypes());
+    }
+
     @Test(description = "Test safe resolving")
     public void test31SafeURLResolving() {
         ParseOptions parseOptions = new ParseOptions();
