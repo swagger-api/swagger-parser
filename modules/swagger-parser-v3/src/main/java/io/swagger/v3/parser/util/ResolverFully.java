@@ -147,17 +147,7 @@ public class ResolverFully {
                             parameter.setSchema(resolved);
                         }
                     }
-                    if(parameter.getContent() != null){
-                        Map<String,MediaType> content = parameter.getContent();
-                        for (String key: content.keySet()){
-                            if (content.get(key) != null && content.get(key).getSchema() != null ){
-                                Schema resolvedSchema = resolveSchema(content.get(key).getSchema());
-                                if (resolvedSchema != null) {
-                                    content.get(key).setSchema(resolvedSchema);
-                                }
-                            }
-                        }
-                    }
+                    resolveContent(parameter.getContent());
                 }
             }
 
@@ -183,17 +173,7 @@ public class ResolverFully {
             if (refRequestBody != null){
                 RequestBody requestBody = refRequestBody.get$ref() != null ? resolveRequestBody(refRequestBody) : refRequestBody;
                 op.setRequestBody(requestBody);
-                if (requestBody.getContent() != null) {
-                    Map<String, MediaType> content = requestBody.getContent();
-                    for (String key : content.keySet()) {
-                        if (content.get(key) != null && content.get(key).getSchema() != null) {
-                            Schema resolved = resolveSchema(content.get(key).getSchema());
-                            if (resolved != null) {
-                                content.get(key).setSchema(resolved);
-                            }
-                        }
-                    }
-                }
+                resolveContent(requestBody.getContent());
             }
             // responses
             ApiResponses responses = op.getResponses();
@@ -202,20 +182,7 @@ public class ResolverFully {
                 for(String code : responses.keySet()) {
                     ApiResponse response = responses.get(code);
                     response = response.get$ref() != null ? resolveResponse(response) : response;
-                    if (response.getContent() != null) {
-                        Map<String, MediaType> content = response.getContent();
-                        for(String mediaType: content.keySet()){
-                            if(content.get(mediaType).getSchema() != null) {
-                                Schema resolved = resolveSchema(content.get(mediaType).getSchema());
-                                response.getContent().get(mediaType).setSchema(resolved);
-                            }
-                            if(content.get(mediaType).getExamples() != null) {
-                                Map<String,Example> resolved = resolveExample(content.get(mediaType).getExamples());
-                                response.getContent().get(mediaType).setExamples(resolved);
-
-                            }
-                        }
-                    }
+                    resolveContent(response.getContent());
 
                     resolveHeaders(response.getHeaders());
 
@@ -230,6 +197,28 @@ public class ResolverFully {
                     resolvedResponses.addApiResponse(code, response);
                 }
                 op.setResponses(resolvedResponses);
+            }
+        }
+    }
+
+    private void resolveContent(Map<String, MediaType> content) {
+        if (content == null) {
+            return;
+        }
+        for (String key : content.keySet()) {
+            MediaType mediaType = content.get(key);
+            if (mediaType != null) {
+                Schema mediaTypeSchema = mediaType.getSchema();
+                if (mediaTypeSchema != null) {
+                    Schema resolved = resolveSchema(mediaTypeSchema);
+                    if (resolved != null) {
+                        mediaType.setSchema(resolved);
+                    }
+                }
+                Map<String, Example> examples = mediaType.getExamples();
+                if (examples != null) {
+                    mediaType.setExamples(resolveExample(examples));
+                }
             }
         }
     }
