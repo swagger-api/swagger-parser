@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNull;
@@ -39,7 +40,7 @@ public class OpenAPIParserTest {
         SwaggerParseResult swaggerParseResult = openAPIParser.readLocation("issue1685.json", null, options);
         assertNull(swaggerParseResult.getOpenAPI());
         assertNotNull(swaggerParseResult.getMessages());
-        assertTrue(swaggerParseResult.getMessages().size() == 2);
+         assertTrue(swaggerParseResult.getMessages().size() == 2);
         assertEquals(swaggerParseResult.getMessages().get(0), "attribute notswagger is unexpected");
         assertEquals(swaggerParseResult.getMessages().get(1), "attribute swagger is missing");
     }
@@ -798,5 +799,240 @@ public class OpenAPIParserTest {
                 "openapi31: false\n");
     }
 
+
+  @Test
+  public void testIssue2157_AllOf_SingleRefPreservesBoolean() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-single-ref-boolean.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue((Boolean) schema.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_AllOf_RefAndInlineMerge() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-ref-and-inline-merge.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue((Boolean) schema.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_AllOf_PreservesSchemaObject() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-preserves-schema-object.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    RequestBody requestBody = result.getOpenAPI().getPaths().get("/pet").getPut().getRequestBody();
+    assertNotNull(requestBody);
+    Schema schema = requestBody.getContent().get("application/json").getSchema();
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue(schema.getAdditionalProperties() instanceof Schema);
+    Schema additionalPropsSchema = (Schema) schema.getAdditionalProperties();
+    assertEquals(additionalPropsSchema.getType(), "string");
+    assertNotNull(schema.getProperties());
+    assertTrue(schema.getProperties().containsKey("id"));
+    assertTrue(schema.getProperties().containsKey("name"));
+  }
+
+  @Test
+  public void testIssue2157_AllOf_PreservesSchemaWithConstraints() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-preserves-schema-with-constraints.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue(schema.getAdditionalProperties() instanceof Schema);
+    Schema additionalPropsSchema = (Schema) schema.getAdditionalProperties();
+    assertEquals(additionalPropsSchema.getType(), "string");
+    assertEquals(additionalPropsSchema.getMinLength(), Integer.valueOf(1));
+    assertEquals(additionalPropsSchema.getMaxLength(), Integer.valueOf(100));
+    assertNotNull(schema.getProperties());
+    assertTrue(schema.getProperties().containsKey("id"));
+    assertTrue(schema.getProperties().containsKey("name"));
+  }
+
+  @Test
+  public void testIssue2157_AllOf_ConflictLastWinsInline() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-conflict-last-wins-inline.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertFalse((Boolean) schema.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_AllOf_ConflictLastWinsRef() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-conflict-last-wins-ref.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue((Boolean) schema.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_AllOf_NoAggregationPreservesStructure() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    options.setResolveCombinators(false);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-no-aggregation-preserves-structure.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAllOf());
+    assertEquals(schema.getAllOf().size(), 2);
+    Schema firstBranch = (Schema) schema.getAllOf().get(0);
+    assertNotNull(firstBranch.getAdditionalProperties());
+    assertTrue((Boolean) firstBranch.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_AllOf_ConflictSchemaObjects() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/allOf-conflict-schema-objects.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAdditionalProperties());
+    assertTrue(schema.getAdditionalProperties() instanceof Schema);
+    Schema additionalPropsSchema = (Schema) schema.getAdditionalProperties();
+    assertEquals(additionalPropsSchema.getType(), "number");
+    assertNotNull(schema.getProperties());
+    assertTrue(schema.getProperties().containsKey("name"));
+    assertTrue(schema.getProperties().containsKey("id"));
+  }
+
+  @Test
+  public void testIssue2157_OneOf_PreservesBoolean() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/oneOf-preserves-boolean.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getOneOf());
+    assertEquals(schema.getOneOf().size(), 1);
+    Schema oneOfBranch = (Schema) schema.getOneOf().get(0);
+    assertNotNull(oneOfBranch.getAdditionalProperties());
+    assertTrue((Boolean) oneOfBranch.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_OneOf_PreservesSchemaObject() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/oneOf-preserves-schema-object.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getOneOf());
+    assertEquals(schema.getOneOf().size(), 1);
+    Schema oneOfBranch = (Schema) schema.getOneOf().get(0);
+    assertNotNull(oneOfBranch.getAdditionalProperties());
+    assertTrue(oneOfBranch.getAdditionalProperties() instanceof Schema);
+    Schema additionalPropsSchema = (Schema) oneOfBranch.getAdditionalProperties();
+    assertEquals(additionalPropsSchema.getType(), "string");
+    assertEquals(additionalPropsSchema.getMinLength(), Integer.valueOf(1));
+  }
+
+  @Test
+  public void testIssue2157_OneOf_MultipleBranchesIndependent() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/oneOf-multiple-branches-independent.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getOneOf());
+    assertEquals(schema.getOneOf().size(), 2);
+    Schema firstBranch = (Schema) schema.getOneOf().get(0);
+    Schema secondBranch = (Schema) schema.getOneOf().get(1);
+    assertNotNull(firstBranch.getAdditionalProperties());
+    assertTrue((Boolean) firstBranch.getAdditionalProperties());
+    assertNotNull(secondBranch.getAdditionalProperties());
+    assertFalse((Boolean) secondBranch.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_AnyOf_PreservesBoolean() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/anyOf-preserves-boolean.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAnyOf());
+    assertEquals(schema.getAnyOf().size(), 1);
+    Schema anyOfBranch = (Schema) schema.getAnyOf().get(0);
+    assertNotNull(anyOfBranch.getAdditionalProperties());
+    assertTrue((Boolean) anyOfBranch.getAdditionalProperties());
+  }
+
+  @Test
+  public void testIssue2157_AnyOf_PreservesSchemaObject() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/anyOf-preserves-schema-object.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAnyOf());
+    assertEquals(schema.getAnyOf().size(), 1);
+    Schema anyOfBranch = (Schema) schema.getAnyOf().get(0);
+    assertNotNull(anyOfBranch.getAdditionalProperties());
+    assertTrue(anyOfBranch.getAdditionalProperties() instanceof Schema);
+    Schema additionalPropsSchema = (Schema) anyOfBranch.getAdditionalProperties();
+    assertEquals(additionalPropsSchema.getType(), "string");
+    assertEquals(additionalPropsSchema.getMinLength(), Integer.valueOf(1));
+  }
+
+  @Test
+  public void testIssue2157_AnyOf_MultipleBranchesIndependent() {
+    ParseOptions options = new ParseOptions();
+    options.setResolveFully(true);
+    SwaggerParseResult result = new OpenAPIParser().readLocation(
+        "issue-2157/anyOf-multiple-branches-independent.yaml", null, options);
+    assertNotNull(result.getOpenAPI());
+    Schema schema = result.getOpenAPI().getComponents().getSchemas().get("TestSchema");
+    assertNotNull(schema);
+    assertNotNull(schema.getAnyOf());
+    assertEquals(schema.getAnyOf().size(), 2);
+    Schema firstBranch = (Schema) schema.getAnyOf().get(0);
+    Schema secondBranch = (Schema) schema.getAnyOf().get(1);
+    assertNotNull(firstBranch.getAdditionalProperties());
+    assertTrue((Boolean) firstBranch.getAdditionalProperties());
+    assertNotNull(secondBranch.getAdditionalProperties());
+    assertFalse((Boolean) secondBranch.getAdditionalProperties());
+  }
 }
 

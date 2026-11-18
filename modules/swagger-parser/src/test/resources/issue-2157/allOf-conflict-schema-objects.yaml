@@ -1,0 +1,36 @@
+openapi: 3.0.1
+info:
+  title: Test API - Multiple schema-object additionalProperties conflict
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestSchema'
+components:
+  schemas:
+    SchemaWithStringAdditional:
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: string
+        minLength: 1
+    SchemaWithNumberAdditional:
+      type: object
+      properties:
+        id:
+          type: integer
+      additionalProperties:
+        type: number
+        minimum: 0
+    TestSchema:
+      allOf:
+        - $ref: '#/components/schemas/SchemaWithStringAdditional'
+        - $ref: '#/components/schemas/SchemaWithNumberAdditional'

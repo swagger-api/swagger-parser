@@ -1,0 +1,29 @@
+openapi: 3.0.1
+info:
+  title: Test API - resolveCombinators=false preserves structure
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestSchema'
+components:
+  schemas:
+    BaseSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+      additionalProperties: true
+    TestSchema:
+      allOf:
+        - $ref: '#/components/schemas/BaseSchema'
+        - type: object
+          properties:
+            name:
+              type: string
