@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: Discriminator mapping of a oneOf declared in the root document with external refs
+  version: 1.0.0
+paths:
+  /search:
+    post:
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '204':
+          description: OK
+components:
+  schemas:
+    SearchRequest:
+      type: object
+      properties:
+        query:
+          type: array
+          items:
+            oneOf:
+              - $ref: './schemas/TypeA.yaml'
+              - $ref: './schemas/TypeB.yaml'
+            discriminator:
+              propertyName: kind
+              mapping:
+                a: './schemas/TypeA.yaml'
+                b: './schemas/TypeB.yaml'
+                # several discriminator values may map to the same schema
+                bLegacy: './schemas/TypeB.yaml'
