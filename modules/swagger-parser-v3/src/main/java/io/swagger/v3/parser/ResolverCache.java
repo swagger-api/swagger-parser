@@ -77,6 +77,7 @@ public class ResolverCache {
     private Map<String, String> externalFileCache = new HashMap<>();
     private Map<String, Object> canonicalResolutionCache = new HashMap<>();
     private Map<String, String> canonicalExternalFileCache = new HashMap<>();
+    private Map<String, ParsedExternalFile> parsedExternalFileCache = new HashMap<>();
     private List<String> referencedModelKeys = new ArrayList<>();
     private Set<String> resolveValidationMessages;
     private final ParseOptions parseOptions;
@@ -192,13 +193,23 @@ public class ResolverCache {
         }
         externalFileCache.putIfAbsent(file, contents);
 
-        SwaggerParseResult deserializationUtilResult = new SwaggerParseResult();
-        JsonNode tree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, deserializationUtilResult);
+        // Parse each external file into a tree only once. A shared tree must never be handed to the
+        // deserializers, as the resulting model could keep references to its nodes, so every use below
+        // works on a copy of the requested subtree.
+        ParsedExternalFile parsedFile = parsedExternalFileCache.get(file);
+        if (parsedFile == null) {
+            SwaggerParseResult parseResult = new SwaggerParseResult();
+            JsonNode parsedTree = DeserializationUtils.deserializeIntoTree(contents, file, parseOptions, parseResult);
+            parsedFile = new ParsedExternalFile(parsedTree, parseResult);
+            parsedExternalFileCache.put(file, parsedFile);
+        }
+        SwaggerParseResult deserializationUtilResult = parsedFile.parseResult;
+        JsonNode tree = parsedFile.tree;
 
         if (definitionPath == null) {
             T result = null;
             if (parseOptions.isValidateExternalRefs()) {
-                result = deserializeFragment(tree, expectedType, file, "/");
+                result = deserializeFragment(tree == null ? null : tree.deepCopy(), expectedType, file, "/");
             } else {
                 result = DeserializationUtils.deserialize(contents, file, expectedType, openapi31);
             }
@@ -230,6 +241,7 @@ public class ResolverCache {
                 throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
             }
         }
+        tree = tree.deepCopy();
         T result = null;
         if (parseOptions.isValidateExternalRefs()) {
             result = deserializeFragment(tree, expectedType, file, definitionPath);
@@ -250,6 +262,16 @@ public class ResolverCache {
             }
         }
         return result;
+    }
+
+    private static final class ParsedExternalFile {
+        private final JsonNode tree;
+        private final SwaggerParseResult parseResult;
+
+        private ParsedExternalFile(JsonNode tree, SwaggerParseResult parseResult) {
+            this.tree = tree;
+            this.parseResult = parseResult;
+        }
     }
 
     private <T> T resolveRootReference(String file, String definitionPath, String ref,
