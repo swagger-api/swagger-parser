@@ -16,11 +16,28 @@ import static org.junit.Assert.assertFalse;
 
 public class Issue2406Test {
 
+    /**
+     * The oneOf lives in an external file: ExternalRefProcessor rebases the member refs and the mapping
+     * to root-relative paths, then SchemaProcessor resolves them to components.
+     */
     @Test
     public void shouldUpdateDiscriminatorMappingOfOneOfNestedInArrayItemsWithExternalRefs() {
+        assertSearchRequestMappingResolved("issue-2406/openapi.yaml");
+    }
+
+    /**
+     * The oneOf lives in the root document: the member refs are resolved by SchemaProcessor directly, so
+     * SchemaProcessor#changeDiscriminatorMapping has to update every mapping value pointing at a member.
+     */
+    @Test
+    public void shouldUpdateAllDiscriminatorValuesPointingAtTheSameMemberOfARootLevelOneOf() {
+        assertSearchRequestMappingResolved("issue-2406/openapi-root-level-oneOf.yaml");
+    }
+
+    private static void assertSearchRequestMappingResolved(String location) {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIV3Parser().readLocation("issue-2406/openapi.yaml", null, options);
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(location, null, options);
 
         assertEquals(result.getMessages().toString(), 0, result.getMessages().size());
 
